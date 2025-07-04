@@ -16,7 +16,11 @@ import { ibrGridOne, ibrGridThree, ibrPlanColumns } from './columnDefs'
 import { useSelector } from 'react-redux'
 import moment from '../../../node_modules/moment/moment.js'
 import { ibrGridThreeRowsSample, runningDurationRowsSample } from './rowSamples'
-import KendoDataTablesAccordian from './index-accordian.js'
+import KendoDataTablesCracker from './index-cracker.js'
+import { validateFields } from 'utils/validationUtils.js'
+import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
+import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
+import IBRPlanGrid from './IBRPlanGrid.js'
 
 const DecokingConfig = () => {
   const keycloak = useSession()
@@ -276,6 +280,19 @@ const DecokingConfig = () => {
       }
 
       var rawData = Object.values(modifiedCells)
+
+      const requiredFields = ['attributeValue']
+      const validationMessage = validateFields(rawData, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+
       // const data = rawData.filter((row) => row.inEdit)
 
       // if (data.length == 0) {
@@ -690,7 +707,6 @@ const DecokingConfig = () => {
         })
         // setModifiedCells({})
         setLoading(false)
-        fetchData(3)
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = new Array(byteCharacters.length)
@@ -772,8 +788,8 @@ const DecokingConfig = () => {
   const renderIbrPlanTables = () => (
     <>
       <>
-        <Box sx={{ mt: 2 }}>
-          <KendoDataTablesAccordian
+        <Box sx={{ mt: 1 }}>
+          <KendoDataTablesCracker
             columns={ibrGridOne}
             rows={getRows('IBR Plan')[1]}
             setRows={(data) => setRowsForTab('IBR Plan', data, 1)}
@@ -797,8 +813,8 @@ const DecokingConfig = () => {
           />
         </Box>
 
-        <Box sx={{ mt: 2 }}>
-          <KendoDataTablesAccordian
+        <Box sx={{ mt: 1 }}>
+          <KendoDataTablesCracker
             columns={ibrPlanColumns}
             rows={getRows('IBR Plan')[2]}
             setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
@@ -822,8 +838,8 @@ const DecokingConfig = () => {
           />
         </Box>
 
-        <Box sx={{ mt: 2 }}>
-          <KendoDataTablesAccordian
+        <Box sx={{ mt: 1 }}>
+          <KendoDataTablesCracker
             columns={ibrGridThree}
             rows={getRows('IBR Plan')[3]}
             setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
@@ -854,7 +870,7 @@ const DecokingConfig = () => {
   )
 
   // const renderRunningDurationTable = () => (
-  //   <Box sx={{ mt: 2 }}>
+  //   <Box sx={{ mt: 1 }}>
   //     <Typography variant='h6'>Running Duration</Typography>
   //     <KendoDataTables
   //       columns={runningDurationColumns}
@@ -897,7 +913,156 @@ const DecokingConfig = () => {
       {activeTabIndex === 0
         ? renderIbrPlanTables()
         : renderRunningDurationTable()} */}
-      {renderIbrPlanTables()}
+      <>
+        <>
+          <IBRPlanGrid
+            columns={ibrGridOne}
+            rows={getRows('IBR Plan')[1]}
+            setRows={(data) => setRowsForTab('IBR Plan', data, 1)}
+            fetchData={fetchData}
+            handleRemarkCellClick={handleRemarkCellClick}
+            remarkDialogOpen={remarkDialogOpen}
+            currentRemark={currentRemark}
+            setCurrentRemark={setCurrentRemark}
+            currentRowId={currentRowId}
+            snackbarData={snackbarData}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            setSnackbarData={setSnackbarData}
+            modifiedCells={modifiedCells}
+            allMonths={allMonths}
+            setModifiedCells={setModifiedCells}
+            permissions={adjustedPermissions1}
+            saveChanges={saveChanges}
+            setRemarkDialogOpen={setRemarkDialogOpen}
+          />
+
+          <SDTAActivitiesGrid
+            columns={ibrPlanColumns}
+            rows={getRows('IBR Plan')[2]}
+            setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
+            fetchData={fetchData}
+            handleRemarkCellClick={handleRemarkCellClick2}
+            remarkDialogOpen={remarkDialogOpen2}
+            currentRemark={currentRemark2}
+            setCurrentRemark={setCurrentRemark2}
+            currentRowId={currentRowId2}
+            snackbarData={snackbarData}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            setSnackbarData={setSnackbarData}
+            modifiedCells={modifiedCells2}
+            allMonths={allMonths}
+            setModifiedCells={setModifiedCells2}
+            permissions={adjustedPermissions2}
+            saveChanges={saveChanges2}
+            setRemarkDialogOpen={setRemarkDialogOpen2}
+          />
+
+          <FurnaceRunLengthGrid
+            columns={ibrGridThree}
+            rows={getRows('IBR Plan')[3]}
+            setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
+            fetchData={fetchData}
+            handleRemarkCellClick={handleRemarkCellClick3}
+            remarkDialogOpen={remarkDialogOpen3}
+            currentRemark={currentRemark3}
+            setCurrentRemark={setCurrentRemark3}
+            currentRowId={currentRowId3}
+            snackbarData={snackbarData}
+            snackbarOpen={snackbarOpen}
+            setSnackbarOpen={setSnackbarOpen}
+            setSnackbarData={setSnackbarData}
+            modifiedCells={modifiedCells3}
+            allMonths={allMonths}
+            setModifiedCells={setModifiedCells3}
+            permissions={adjustedPermissions3}
+            saveChanges={saveChanges3}
+            setRemarkDialogOpen={setRemarkDialogOpen3}
+            handleExcelUpload={handleExcelUpload}
+            downloadExcelForConfiguration={downloadExcelForConfiguration}
+            handleCalculate={handleCalculate}
+          />
+
+          {/* <Box sx={{ mt: 1 }}>
+            <KendoDataTablesCracker
+              columns={ibrGridOne}
+              rows={getRows('IBR Plan')[1]}
+              setRows={(data) => setRowsForTab('IBR Plan', data, 1)}
+              fetchData={fetchData}
+              handleRemarkCellClick={handleRemarkCellClick}
+              remarkDialogOpen={remarkDialogOpen}
+              currentRemark={currentRemark}
+              setCurrentRemark={setCurrentRemark}
+              currentRowId={currentRowId}
+              snackbarData={snackbarData}
+              snackbarOpen={snackbarOpen}
+              setSnackbarOpen={setSnackbarOpen}
+              setSnackbarData={setSnackbarData}
+              modifiedCells={modifiedCells}
+              allMonths={allMonths}
+              setModifiedCells={setModifiedCells}
+              permissions={adjustedPermissions1}
+              saveChanges={saveChanges}
+              setRemarkDialogOpen={setRemarkDialogOpen}
+              titleName={'IBR Plan'}
+            />
+          </Box> */}
+
+          {/* <Box sx={{ mt: 1 }}>
+            <KendoDataTablesCracker
+              columns={ibrPlanColumns}
+              rows={getRows('IBR Plan')[2]}
+              setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
+              fetchData={fetchData}
+              handleRemarkCellClick={handleRemarkCellClick2}
+              remarkDialogOpen={remarkDialogOpen2}
+              currentRemark={currentRemark2}
+              setCurrentRemark={setCurrentRemark2}
+              currentRowId={currentRowId2}
+              snackbarData={snackbarData}
+              snackbarOpen={snackbarOpen}
+              setSnackbarOpen={setSnackbarOpen}
+              setSnackbarData={setSnackbarData}
+              modifiedCells={modifiedCells2}
+              allMonths={allMonths}
+              setModifiedCells={setModifiedCells2}
+              permissions={adjustedPermissions2}
+              saveChanges={saveChanges2}
+              setRemarkDialogOpen={setRemarkDialogOpen2}
+              titleName={'SD / TA Activities'}
+            />
+          </Box> */}
+          {/* 
+          <Box sx={{ mt: 1 }}>
+            <KendoDataTablesCracker
+              columns={ibrGridThree}
+              rows={getRows('IBR Plan')[3]}
+              setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
+              fetchData={fetchData}
+              handleRemarkCellClick={handleRemarkCellClick3}
+              remarkDialogOpen={remarkDialogOpen3}
+              currentRemark={currentRemark3}
+              setCurrentRemark={setCurrentRemark3}
+              currentRowId={currentRowId3}
+              snackbarData={snackbarData}
+              snackbarOpen={snackbarOpen}
+              setSnackbarOpen={setSnackbarOpen}
+              setSnackbarData={setSnackbarData}
+              modifiedCells={modifiedCells3}
+              allMonths={allMonths}
+              setModifiedCells={setModifiedCells3}
+              permissions={adjustedPermissions3}
+              saveChanges={saveChanges3}
+              setRemarkDialogOpen={setRemarkDialogOpen3}
+              titleName={'Furnace Run length'}
+              handleExcelUpload={handleExcelUpload}
+              downloadExcelForConfiguration={downloadExcelForConfiguration}
+              handleCalculate={handleCalculate}
+            />
+          </Box> */}
+        </>
+      </>
     </Box>
   )
 }

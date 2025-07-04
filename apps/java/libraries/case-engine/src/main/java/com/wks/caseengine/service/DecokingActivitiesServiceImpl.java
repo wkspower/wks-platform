@@ -1,4 +1,5 @@
 package com.wks.caseengine.service;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -74,25 +75,25 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@PersistenceContext
 	private EntityManager entityManager;
-	
+
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
-	
+
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
 
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
-	
+
 	@Autowired
 	private DecokeRunLengthRepository decokeRunLengthRepository;
-	
+
 	private DataSource dataSource;
-	
+
 	// Inject or set your DataSource (e.g., via constructor or setter)
-		public DecokingActivitiesServiceImpl(DataSource dataSource) {
-			this.dataSource = dataSource;
-		}
+	public DecokingActivitiesServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
 	@Override
 	public AOPMessageVM getDecokingActivitiesData(String year, String plantId, String reportType) {
@@ -103,17 +104,17 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-			String procedureName=null;
-			List<Object[]> results=null;
-			if(reportType.equalsIgnoreCase("RunningDuration")) {
-				 procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
-				 results = getData(plantId, procedureName);
-			}else if(reportType.equalsIgnoreCase("ibr")){
-				procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
-				 results = getIBRData(plantId, procedureName);
-			}else if(reportType.equalsIgnoreCase("RunLength")){
-				procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_Decoke_RunLength";
-				 results = getRunLengthData(plantId,year, procedureName);
+			String procedureName = null;
+			List<Object[]> results = null;
+			if (reportType.equalsIgnoreCase("RunningDuration")) {
+				procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
+				results = getData(plantId, procedureName);
+			} else if (reportType.equalsIgnoreCase("ibr")) {
+				procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
+				results = getIBRData(plantId, procedureName);
+			} else if (reportType.equalsIgnoreCase("RunLength")) {
+				procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_RunLength";
+				results = getRunLengthData(plantId, year, procedureName);
 			}
 
 			for (Object[] row : results) {
@@ -125,37 +126,36 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("isEditable", row[13]);
 					map.put("isMonthAdd", row[16]);
 					Object raw = row[0];
-					UUID id=UUID.fromString(raw.toString());
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(id);
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+					UUID id = UUID.fromString(raw.toString());
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(id);
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						map.put("attributeValue", normAttributeTransactions.getAttributeValue());
 						map.put("remarks", normAttributeTransactions.getRemarks());
 						map.put("id", normAttributeTransactions.getId());
 						map.put("month", getMonth(normAttributeTransactions.getAopMonth()));
-					}else {
+					} else {
 						map.put("remarks", "");
 						map.put("id", "");
 					}
-				}
-				else if(reportType.equalsIgnoreCase("ibr")) {
+				} else if (reportType.equalsIgnoreCase("ibr")) {
 					map.put("furnace", row[0] != null ? row[0] : "");
 					map.put("plantId", row[1] != null ? row[1] : "");
 					map.put("ibrSDId", row[2] != null ? row[2] : "");
 					map.put("ibrEDId", row[3] != null ? row[3] : "");
-					map.put("taSDId",  row[4] != null ? row[4] : "");
-					map.put("taEDId",  row[5] != null ? row[5] : "");
-					map.put("sdSDId",  row[6] != null ? row[6] : "");
-					map.put("sdEDId",  row[7] != null ? row[7] : "");
-					map.put("ibrSD",   row[8] != null ? row[8] : "");
-					map.put("ibrED",   row[9] != null ? row[9] : "");
-					map.put("taSD",    row[10] != null ? row[10] : "");
-					map.put("taED",    row[11] != null ? row[11] : "");
-					map.put("sdSD",    row[12] != null ? row[12] : "");
-					map.put("sdED",    row[13] != null ? row[13] : "");
+					map.put("taSDId", row[4] != null ? row[4] : "");
+					map.put("taEDId", row[5] != null ? row[5] : "");
+					map.put("sdSDId", row[6] != null ? row[6] : "");
+					map.put("sdEDId", row[7] != null ? row[7] : "");
+					map.put("ibrSD", row[8] != null ? row[8] : "");
+					map.put("ibrED", row[9] != null ? row[9] : "");
+					map.put("taSD", row[10] != null ? row[10] : "");
+					map.put("taED", row[11] != null ? row[11] : "");
+					map.put("sdSD", row[12] != null ? row[12] : "");
+					map.put("sdED", row[13] != null ? row[13] : "");
 					map.put("remarks", "");
-				}
-				else if(reportType.equalsIgnoreCase("activity")) {
+				} else if (reportType.equalsIgnoreCase("activity")) {
 					map.put("furnace", row[0]);
 					map.put("startDateIBR", row[1]);
 					map.put("endDateIBR", row[2]);
@@ -164,35 +164,35 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("startDateTA", row[5]);
 					map.put("endDateTA", row[6]);
 					map.put("remarks", row[7]);
-				}
-				else if(reportType.equalsIgnoreCase("RunLength")) {
+				} else if (reportType.equalsIgnoreCase("RunLength")) {
 					DecokeRunLengthDTO dto = new DecokeRunLengthDTO();
-					dto.setId(row[0]!= null ? row[0].toString() : "");
-					dto.setDate(row[1]!= null ? row[1].toString() : "");
-					dto.setMonth(row[2]!= null ? row[2].toString() : "");
+					dto.setId(row[0] != null ? row[0].toString() : "");
+					dto.setDate(row[1] != null ? row[1].toString() : "");
+					dto.setMonth(row[2] != null ? row[2].toString() : "");
 					dto.setHTenActual(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0f);
 					dto.setTenProposed(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0f);
-					dto.setElevenProposed(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0f);
-					dto.setHElevenActual(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0f);
-					dto.setTwelveProposed(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0f);
-					dto.setHTwelveActual(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0f);
-					dto.setThirteenProposed(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0f);
-					dto.setHThirteenActual(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0f);
-					dto.setFourteenProposed(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0f);
-					dto.setHFourteenActual(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0f);
-					dto.setDemo(row[13]!= null ? row[13].toString() : "");
+					dto.setElevenProposed(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0f);
+					dto.setHElevenActual(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0f);
+					dto.setTwelveProposed(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0f);
+					dto.setHTwelveActual(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0f);
+					dto.setThirteenProposed(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0f);
+					dto.setHThirteenActual(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0f);
+					dto.setFourteenProposed(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0f);
+					dto.setHFourteenActual(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0f);
+					dto.setDemo(row[13] != null ? row[13].toString() : "");
 					dto.setAopYear(year);
-					dto.setPlantFkId(row[15]!= null ? row[15].toString() : "");
-					dto.setRemarks(row[16]!= null ? row[16].toString() : "");
+					dto.setPlantFkId(row[15] != null ? row[15].toString() : "");
+					dto.setRemarks(row[16] != null ? row[16].toString() : "");
 					runLengthDTOs.add(dto);
 				}
 				decokingActivitiesList.add(map); // Add the map to the list here
 			}
 			Map<String, Object> aopCalculationMap = new HashMap<>();
-			if(reportType.equalsIgnoreCase("RunLength")) {
-				List<AopCalculation> aopCalculation = aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(
-						UUID.fromString(plantId), year, "Furnace-run-length");
-				
+			if (reportType.equalsIgnoreCase("RunLength")) {
+				List<AopCalculation> aopCalculation = aopCalculationRepository
+						.findByPlantIdAndAopYearAndCalculationScreen(
+								UUID.fromString(plantId), year, "Furnace-run-length");
+
 				aopCalculationMap.put("aopCalculation", aopCalculation);
 				aopCalculationMap.put("decokingActivitiesList", runLengthDTOs);
 				aopMessageVM.setCode(200);
@@ -215,7 +215,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	public List<Object[]> getData(String plantId, String aopYear, String reportType, String procedureName) {
 		try {
-			
+
 			String sql = "EXEC " + procedureName
 					+ " @PlantFKId = :plantId, @AuditYear = :aopYear, @ConfigTypeName = :reportType";
 
@@ -232,138 +232,151 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
 	public List<Object[]> getData(String plantId, String viewName) {
-	    try {
-	        
-	        // 2. Construct SQL with dynamic view name
-	        String sql = 
-	            "SELECT * FROM " + viewName + 
-	            " WHERE Plant_FK_Id = :plantId";
+		try {
 
-	        // 3. Create and parameterize the native query
-	        Query query = entityManager.createNativeQuery(sql);
-	        query.setParameter("plantId", plantId);
+			// 2. Construct SQL with dynamic view name
+			String sql = "SELECT * FROM " + viewName +
+					" WHERE Plant_FK_Id = :plantId";
 
-	        // 4. Execute
-	        return query.getResultList();
+			// 3. Create and parameterize the native query
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
 
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
-	    }
-	}
-	
-	public List<Object[]> getRunLengthData(String plantId,String aopYear, String viewName) {
-	    try {
-	        
-	        // 2. Construct SQL with dynamic view name
-	        String sql = 
-	            "SELECT * FROM " + viewName + 
-	            " WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear";
+			// 4. Execute
+			return query.getResultList();
 
-	        // 3. Create and parameterize the native query
-	        Query query = entityManager.createNativeQuery(sql);
-	        query.setParameter("plantId", plantId);
-	        query.setParameter("aopYear", aopYear);
-
-	        // 4. Execute
-	        return query.getResultList();
-
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
-	    }
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+		}
 	}
 
+	public List<Object[]> getRunLengthData(String plantId, String aopYear, String viewName) {
+		try {
+
+			// 2. Construct SQL with dynamic view name
+			String sql = "SELECT * FROM " + viewName +
+					" WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear";
+
+			// 3. Create and parameterize the native query
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			// 4. Execute
+			return query.getResultList();
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+		}
+	}
 
 	public List<Object[]> getIBRData(String plantId, String viewName) {
-	    try {
-	        
-	        // 2. Construct SQL with dynamic view name
-	        String sql = 
-	            "SELECT * FROM " + viewName + 
-	            " WHERE PlantId = :plantId";
+		try {
 
-	        // 3. Create and parameterize the native query
-	        Query query = entityManager.createNativeQuery(sql);
-	        query.setParameter("plantId", plantId);
+			// 2. Construct SQL with dynamic view name
+			String sql = "SELECT * FROM " + viewName +
+					" WHERE PlantId = :plantId";
 
-	        // 4. Execute
-	        return query.getResultList();
+			// 3. Create and parameterize the native query
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
 
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
-	    }
+			// 4. Execute
+			return query.getResultList();
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+		}
 	}
 
 	public static String getMonth(Integer month) {
-	    if (month == null) {
-	        return "Invalid month";
-	    }
-	    switch (month) {
-	        case 1:  return "January";
-	        case 2:  return "February";
-	        case 3:  return "March";
-	        case 4:  return "April";
-	        case 5:  return "May";
-	        case 6:  return "June";
-	        case 7:  return "July";
-	        case 8:  return "August";
-	        case 9:  return "September";
-	        case 10: return "October";
-	        case 11: return "November";
-	        case 12: return "December";
-	        default: return "Invalid month";
-	    }
+		if (month == null) {
+			return "Invalid month";
+		}
+		switch (month) {
+			case 1:
+				return "January";
+			case 2:
+				return "February";
+			case 3:
+				return "March";
+			case 4:
+				return "April";
+			case 5:
+				return "May";
+			case 6:
+				return "June";
+			case 7:
+				return "July";
+			case 8:
+				return "August";
+			case 9:
+				return "September";
+			case 10:
+				return "October";
+			case 11:
+				return "November";
+			case 12:
+				return "December";
+			default:
+				return "Invalid month";
+		}
 	}
 
 	@Override
 	public AOPMessageVM updateDecokingActivitiesData(String year, String plantId, String reportType,
 			List<DecokingActivitiesDTO> decokingActivitiesDTOList) {
-		List<NormAttributeTransactions> normAttributeTransactionsList=new ArrayList<>();
+		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			for(DecokingActivitiesDTO decokingActivitiesDTO:decokingActivitiesDTOList) {
-				if(decokingActivitiesDTO.getId()!=null) {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findById(UUID.fromString(decokingActivitiesDTO.getId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+			for (DecokingActivitiesDTO decokingActivitiesDTO : decokingActivitiesDTOList) {
+				if (decokingActivitiesDTO.getId() != null) {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findById(UUID.fromString(decokingActivitiesDTO.getId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokingActivitiesDTO.getDays());
-						if(decokingActivitiesDTO.getAopMonth()!=null) {
+						if (decokingActivitiesDTO.getAopMonth() != null) {
 							normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
-						}else {
+						} else {
 							normAttributeTransactions.setAopMonth(0);
 						}
-						
+
 						normAttributeTransactions.setRemarks(decokingActivitiesDTO.getRemarks());
-						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+						normAttributeTransactionsList
+								.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
 					}
-				}else {
+				} else {
 					NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 					normAttributeTransactions.setAttributeValue(decokingActivitiesDTO.getDays());
-					if(decokingActivitiesDTO.getAopMonth()!=null) {
+					if (decokingActivitiesDTO.getAopMonth() != null) {
 						normAttributeTransactions.setAopMonth(decokingActivitiesDTO.getAopMonth());
-					}else {
+					} else {
 						normAttributeTransactions.setAopMonth(0);
 					}
 					normAttributeTransactions.setRemarks(decokingActivitiesDTO.getRemarks());
 					normAttributeTransactions.setAuditYear(year);
 					normAttributeTransactions.setCreatedOn(new Date());
 					normAttributeTransactions.setAttributeValueVersion("V1");
-					normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokingActivitiesDTO.getNormParameterId()));
+					normAttributeTransactions
+							.setNormParameterFKId(UUID.fromString(decokingActivitiesDTO.getNormParameterId()));
 					normAttributeTransactions.setUserName("System");
-					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					normAttributeTransactionsList
+							.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
 				}
 			}
 		} catch (Exception ex) {
-	        throw new RuntimeException("Failed to update data");
-	    }
-		
+			throw new RuntimeException("Failed to update data");
+		}
+
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("ibr");
 		for (ScreenMapping screenMapping : screenMappingList) {
 			AopCalculation aopCalculation = new AopCalculation();
@@ -374,7 +387,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 			aopCalculationRepository.save(aopCalculation);
 		}
-		
+
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(normAttributeTransactionsList);
@@ -386,127 +399,139 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			List<DecokePlanningIBRDTO> decokePlanningIBRDTOList) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			for(DecokePlanningIBRDTO decokePlanningIBRDTO:decokePlanningIBRDTOList) {
-				if(decokePlanningIBRDTO.getIbrEDId()!=null && decokePlanningIBRDTO.getIbrEDId()!="") {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+			for (DecokePlanningIBRDTO decokePlanningIBRDTO : decokePlanningIBRDTOList) {
+				if (decokePlanningIBRDTO.getIbrEDId() != null && decokePlanningIBRDTO.getIbrEDId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrED());
 						normAttributeTransactions.setModifiedOn(new Date());
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
-					}else {
-						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrED());
 						normAttributeTransactions.setAttributeValueVersion("V1");
 						normAttributeTransactions.setAuditYear(year);
 						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrEDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
 						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
-				if(decokePlanningIBRDTO.getIbrSDId()!=null && decokePlanningIBRDTO.getIbrSDId()!="") {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+				if (decokePlanningIBRDTO.getIbrSDId() != null && decokePlanningIBRDTO.getIbrSDId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrSD());
 						normAttributeTransactions.setModifiedOn(new Date());
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
-					}else {
-						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIbrSD());
 						normAttributeTransactions.setAttributeValueVersion("V1");
 						normAttributeTransactions.setAuditYear(year);
 						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIbrSDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
 						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
-				if(decokePlanningIBRDTO.getTaSDId()!=null && decokePlanningIBRDTO.getTaSDId()!="") {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+				if (decokePlanningIBRDTO.getTaSDId() != null && decokePlanningIBRDTO.getTaSDId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaSD());
 						normAttributeTransactions.setModifiedOn(new Date());
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
-					}else {
-						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaSD());
 						normAttributeTransactions.setAttributeValueVersion("V1");
 						normAttributeTransactions.setAuditYear(year);
 						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaSDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
 						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
-				if(decokePlanningIBRDTO.getTaEDId()!=null && decokePlanningIBRDTO.getTaEDId()!="") {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+				if (decokePlanningIBRDTO.getTaEDId() != null && decokePlanningIBRDTO.getTaEDId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaED());
 						normAttributeTransactions.setModifiedOn(new Date());
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
-					}else {
-						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getTaED());
 						normAttributeTransactions.setAttributeValueVersion("V1");
 						normAttributeTransactions.setAuditYear(year);
 						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getTaEDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
 						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
-				if(decokePlanningIBRDTO.getSdSDId()!=null && decokePlanningIBRDTO.getSdSDId()!="") {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+				if (decokePlanningIBRDTO.getSdSDId() != null && decokePlanningIBRDTO.getSdSDId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdSD());
 						normAttributeTransactions.setModifiedOn(new Date());
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
-					}else {
-						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdSD());
 						normAttributeTransactions.setAttributeValueVersion("V1");
 						normAttributeTransactions.setAuditYear(year);
 						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdSDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
 						normAttributeTransactions.setAopMonth(0);
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
-				if(decokePlanningIBRDTO.getSdEDId()!=null && decokePlanningIBRDTO.getSdEDId()!="") {
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt=normAttributeTransactionsRepository.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
-					if(normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsopt.get();
+				if (decokePlanningIBRDTO.getSdEDId() != null && decokePlanningIBRDTO.getSdEDId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdED());
 						normAttributeTransactions.setModifiedOn(new Date());
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
-					}else {
-						NormAttributeTransactions normAttributeTransactions=new NormAttributeTransactions();
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
 						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getSdED());
 						normAttributeTransactions.setAttributeValueVersion("V1");
 						normAttributeTransactions.setAuditYear(year);
 						normAttributeTransactions.setCreatedOn(new Date());
-						normAttributeTransactions.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getSdEDId()));
 						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
 						normAttributeTransactions.setUserName("System");
 						normAttributeTransactions.setAopMonth(0);
@@ -515,10 +540,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				}
 
 			}
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update data");
 		}
-		catch (Exception ex) {
-	        throw new RuntimeException("Failed to update data");
-	    }
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("sd-ta-activity");
 		for (ScreenMapping screenMapping : screenMappingList) {
 			AopCalculation aopCalculation = new AopCalculation();
@@ -535,20 +559,16 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		return aopMessageVM;
 	}
 
-
-	public byte[] createExcel(String year, String plantId, String reportType, boolean isAfterSave, List<DecokeRunLengthDTO> decokingActivitiesList){
+	public byte[] createExcel(String year, String plantId, String reportType, boolean isAfterSave,
+			List<DecokeRunLengthDTO> decokingActivitiesList) {
 		try {
 			System.out.println("Started the createExcel");
-			
-			
-			
-			if(!isAfterSave){
-				AOPMessageVM dataVM = getDecokingActivitiesData(year, plantId,reportType);
-				Map<String, Object> aopCalculationMap = (Map<String, Object>)dataVM.getData();
-				decokingActivitiesList = (List<DecokeRunLengthDTO>)aopCalculationMap.get("decokingActivitiesList");
-			}
 
-			 
+			if (!isAfterSave) {
+				AOPMessageVM dataVM = getDecokingActivitiesData(year, plantId, reportType);
+				Map<String, Object> aopCalculationMap = (Map<String, Object>) dataVM.getData();
+				decokingActivitiesList = (List<DecokeRunLengthDTO>) aopCalculationMap.get("decokingActivitiesList");
+			}
 
 			Workbook workbook = new XSSFWorkbook();
 			CellStyle borderStyle = createBorderedStyle(workbook);
@@ -560,33 +580,31 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 
-
-
 			for (DecokeRunLengthDTO dto : decokingActivitiesList) {
-					List<Object> list = new ArrayList<>();
-					list.add(dto.getId());
-					list.add(dto.getMonth());
-					list.add(dto.getDate());
-					list.add(dto.getHTenActual());
-					list.add(dto.getTenProposed());
-					list.add(dto.getHElevenActual());
-					list.add(dto.getElevenProposed());
-					list.add(dto.getHTwelveActual());
-					list.add(dto.getTwelveProposed());
-					list.add(dto.getHThirteenActual());
-					list.add(dto.getThirteenProposed());
-					list.add(dto.getHFourteenActual());
-					list.add(dto.getFourteenProposed());
-					list.add(dto.getDemo());
-					//map.get("aopYear");
-					//map.get("plantId");
-					//map.get("remark");
-					//list.add(map.get("remark"));
-					if(isAfterSave){
-						list.add(dto.getSaveStatus());
-						list.add(dto.getErrDescription());
-					}
-					rows.add(list);
+				List<Object> list = new ArrayList<>();
+				list.add(dto.getId());
+				list.add(dto.getMonth());
+				list.add(dto.getDate());
+				list.add(dto.getHTenActual());
+				list.add(dto.getTenProposed());
+				list.add(dto.getHElevenActual());
+				list.add(dto.getElevenProposed());
+				list.add(dto.getHTwelveActual());
+				list.add(dto.getTwelveProposed());
+				list.add(dto.getHThirteenActual());
+				list.add(dto.getThirteenProposed());
+				list.add(dto.getHFourteenActual());
+				list.add(dto.getFourteenProposed());
+				list.add(dto.getDemo());
+				// map.get("aopYear");
+				// map.get("plantId");
+				// map.get("remark");
+				// list.add(map.get("remark"));
+				if (isAfterSave) {
+					list.add(dto.getSaveStatus());
+					list.add(dto.getErrDescription());
+				}
+				rows.add(list);
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
@@ -604,14 +622,14 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			innerHeaders.add("H14 - Actual run length");
 			innerHeaders.add("H14 - Proposed AOP");
 			innerHeaders.add("DEMO");
-			if(isAfterSave){
+			if (isAfterSave) {
 				innerHeaders.add("Status");
 				innerHeaders.add("Error Description");
 			}
 			CellStyle lockedStyle = workbook.createCellStyle();
-        	lockedStyle.setLocked(true);
+			lockedStyle.setLocked(true);
 			lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
@@ -639,8 +657,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					} else {
 						cell.setCellValue("");
 					}
-					if(col==3 || col==5||col==7||col==9||col==11){
-						cell.setCellStyle(lockedStyle);	
+					if (col == 3 || col == 5 || col == 7 || col == 9 || col == 11) {
+						cell.setCellStyle(lockedStyle);
 					}
 
 				}
@@ -716,40 +734,35 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		return style;
 	}
 
-
 	@Override
 	public AOPMessageVM importExcel(String year, UUID plantFKId, String reportType, MultipartFile file) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
-    		throw new IllegalArgumentException("Invalid or empty Excel file.");
+			throw new IllegalArgumentException("Invalid or empty Excel file.");
 		}
 
-		
 		try {
-			
-			
-			 
+
 			System.out.println("started Read run length in importExcel");
 			List<DecokeRunLengthDTO> data = readExcel(file.getInputStream(), plantFKId, year);
 			System.out.println("Ended Read run length in importExcel");
 			System.out.println("Started Save run length in importExcel");
 			AOPMessageVM vm = updateDecokingActivitiesRunLengthData(year, plantFKId.toString(), reportType, data);
-			List<DecokeRunLengthDTO> failedRecords = (List<DecokeRunLengthDTO>)vm.getData();
+			List<DecokeRunLengthDTO> failedRecords = (List<DecokeRunLengthDTO>) vm.getData();
 			System.out.println("Ended Save run length in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 
-			if(failedRecords!=null &&failedRecords.size()>0 ){
-				byte[] fileByteArray =  createExcel(year, plantFKId.toString(),reportType, true, failedRecords);	
+			if (failedRecords != null && failedRecords.size() > 0) {
+				byte[] fileByteArray = createExcel(year, plantFKId.toString(), reportType, true, failedRecords);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
 				aopMessageVM.setMessage("Partial data has been saved");
-			}else{
-				//aopMessageVM.setData();
+			} else {
+				// aopMessageVM.setData();
 				aopMessageVM.setCode(200);
 				aopMessageVM.setMessage("All data has been saved");
 			}
-			
 
 			return aopMessageVM;
 			// return ResponseEntity.ok(data);
@@ -767,10 +780,10 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			Sheet sheet = workbook.getSheetAt(0);
 			Iterator<Row> rowIterator = sheet.iterator();
 			int firstRow = sheet.getFirstRowNum();
-        	int lastRow = sheet.getLastRowNum();
+			int lastRow = sheet.getLastRowNum();
 
-		System.out.println("firstRow"+firstRow);
-		System.out.println("lastRow"+lastRow);
+			System.out.println("firstRow" + firstRow);
+			System.out.println("lastRow" + lastRow);
 
 			if (rowIterator.hasNext())
 				rowIterator.next(); // Skip header
@@ -779,35 +792,35 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				Row row = rowIterator.next();
 
 				DecokeRunLengthDTO dto = new DecokeRunLengthDTO();
-				
-				try{
-					
-					dto.setId(getStringCellValue(row.getCell(0),dto));
 
-					dto.setMonth(getStringCellValue(row.getCell(1),dto));
-					dto.setDate( getStringCellValue(row.getCell(2),dto));
-					//dto.setDate( null);
-					
-					dto.setHTenActual(getNumericCellValue(row.getCell(3),dto));
-					dto.setTenProposed(getNumericCellValue(row.getCell(4),dto));
-					dto.setHElevenActual(getNumericCellValue(row.getCell(5),dto));
-					dto.setElevenProposed(getNumericCellValue(row.getCell(6),dto));
-					dto.setHTwelveActual(getNumericCellValue(row.getCell(7),dto));
-					dto.setTwelveProposed(getNumericCellValue(row.getCell(8),dto));
-					
-					dto.setHThirteenActual(getNumericCellValue(row.getCell(9),dto));
-					dto.setThirteenProposed(getNumericCellValue(row.getCell(10),dto));
-					dto.setHFourteenActual(getNumericCellValue(row.getCell(11),dto));
-					dto.setFourteenProposed(getNumericCellValue(row.getCell(12),dto));
-					
-					dto.setDemo(getStringCellValue(row.getCell(13),dto));					
-					
-				}catch(Exception e){
-                   e.printStackTrace();
-				   dto.setErrDescription(e.getMessage());
-				   dto.setSaveStatus("Failed");
-				} 
-				
+				try {
+
+					dto.setId(getStringCellValue(row.getCell(0), dto));
+
+					dto.setMonth(getStringCellValue(row.getCell(1), dto));
+					dto.setDate(getStringCellValue(row.getCell(2), dto));
+					// dto.setDate( null);
+
+					dto.setHTenActual(getNumericCellValue(row.getCell(3), dto));
+					dto.setTenProposed(getNumericCellValue(row.getCell(4), dto));
+					dto.setHElevenActual(getNumericCellValue(row.getCell(5), dto));
+					dto.setElevenProposed(getNumericCellValue(row.getCell(6), dto));
+					dto.setHTwelveActual(getNumericCellValue(row.getCell(7), dto));
+					dto.setTwelveProposed(getNumericCellValue(row.getCell(8), dto));
+
+					dto.setHThirteenActual(getNumericCellValue(row.getCell(9), dto));
+					dto.setThirteenProposed(getNumericCellValue(row.getCell(10), dto));
+					dto.setHFourteenActual(getNumericCellValue(row.getCell(11), dto));
+					dto.setFourteenProposed(getNumericCellValue(row.getCell(12), dto));
+
+					dto.setDemo(getStringCellValue(row.getCell(13), dto));
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+
 				runLengthList.add(dto);
 			}
 
@@ -819,18 +832,18 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	private static String getStringCellValue(Cell cell, DecokeRunLengthDTO dto) {
-	try{
-		if (cell == null)
-			return null;
-		cell.setCellType(CellType.STRING);
-		return cell.getStringCellValue().trim();
-	}catch(Exception e){
-		dto.setSaveStatus("Failed");
-		dto.setErrDescription("Please enter correct values");
-		e.printStackTrace();
-	}
-	return null;
-		
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
 	}
 
 	private static Double getNumericCellValue(Cell cell, DecokeRunLengthDTO dto) {
@@ -848,21 +861,23 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		}
 		return null;
 	}
+
 	@Override
 	public AOPMessageVM updateDecokingActivitiesRunLengthData(String year, String plantId, String reportType,
 			List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
-		List<DecokeRunLengthDTO> failedList=new ArrayList<>();
+		List<DecokeRunLengthDTO> failedList = new ArrayList<>();
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			for(DecokeRunLengthDTO decokeRunLengthDTO:decokeRunLengthDTOList) {
+			for (DecokeRunLengthDTO decokeRunLengthDTO : decokeRunLengthDTOList) {
 				if (decokeRunLengthDTO.getSaveStatus() != null
 						&& decokeRunLengthDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
-							failedList.add(decokeRunLengthDTO);
+					failedList.add(decokeRunLengthDTO);
 					continue;
 				}
 
-				Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository.findById(UUID.fromString(decokeRunLengthDTO.getId()));
-				if(decokeRunLengthopt.isPresent()) {
+				Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository
+						.findById(UUID.fromString(decokeRunLengthDTO.getId()));
+				if (decokeRunLengthopt.isPresent()) {
 					DecokeRunLength decokeRunLength = decokeRunLengthopt.get();
 					decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
 					decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
@@ -871,24 +886,24 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
 					decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
 					decokeRunLengthRepository.save(decokeRunLength);
-				}else{
+				} else {
 					decokeRunLengthDTO.setSaveStatus("Failed");
 					decokeRunLengthDTO.setErrDescription("Norm Paramter not found");
 					failedList.add(decokeRunLengthDTO);
 					continue;
-				
+
 				}
 			}
-		}catch (Exception ex) {
-	        throw new RuntimeException("Failed to update data");
-	    }
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update data");
+		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(failedList);
 		return aopMessageVM;
 	}
 
-@Override
+	@Override
 	public AOPMessageVM calculateDecokingActivities(String plantId, String aopYear) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
@@ -899,7 +914,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-			String storedProcedure = vertical.getName()+"_"+site.getName() + "_DecokingPlanning";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
 
 			String callSql = "{call " + storedProcedure + "(?, ?)}";
 
@@ -909,7 +924,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				// Set parameters in the correct order
 				stmt.setString(1, plantId); // @finYear
 				stmt.setString(2, aopYear); // @plantId
-				
 
 				// Execute the stored procedure
 				int rowsAffected = stmt.executeUpdate();

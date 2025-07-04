@@ -56,10 +56,10 @@ import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 export const dateFields = [
   'maintStartDateTime',
   'maintEndDateTime',
-
-  'fromDate',
-  'toDate',
+  'periodTo',
+  'periodFrom',
 ]
+export const dateFields2 = ['fromDate', 'toDate']
 export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
 
 export const hiddenFields = []
@@ -544,6 +544,11 @@ const KendoDataTables = ({
                 </Typography>
               )}
 
+              {permissions?.showT15 && (
+                <Typography component='div' className='grid-title'>
+                  {titleName}
+                </Typography>
+              )}
               {permissions?.showTitleName && (
                 <Typography component='div' className='grid-title'>
                   {titleName}
@@ -798,14 +803,21 @@ const KendoDataTables = ({
                     }}
                     cells={{
                       edit: {
-                        date: ['fromDate', 'toDate'].includes(col.field)
+                        date: [
+                          'fromDate',
+                          'toDate',
+                          'periodTo',
+                          'periodFrom',
+                        ].includes(col.field)
                           ? DateOnlyPicker
                           : DateTimePickerEditor,
                       },
                       data: toolTipRenderer,
                     }}
                     format={
-                      ['fromDate', 'toDate'].includes(col.field)
+                      ['fromDate', 'toDate', 'periodFrom', 'periodTo'].includes(
+                        col.field,
+                      )
                         ? '{0:dd-MM-yyyy}'
                         : '{0:dd-MM-yyyy hh:mm a}'
                     }

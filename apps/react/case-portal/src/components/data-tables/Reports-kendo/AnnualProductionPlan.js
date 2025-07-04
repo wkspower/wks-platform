@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 // import DataGridTable from '../ASDataGrid'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
-import React,  { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import {
@@ -229,15 +229,15 @@ const AnnualProductionPlan = () => {
     },
   ]
 
-//  {
-//                 "durationHours": 720.00000000,
-//                 "rateValue": 18.96000000,
-//                 "periodTo": "30-Jun-25",
-//                 "activity": "Plant running normal",
-//                 "sno": 3,
-//                 "periodFrom": "01-Jun-25",
-//                 "id": "021CD9C0-2074-4A17-BDAE-88A98A5A0CA9"
-//             },
+  //  {
+  //                 "durationHours": 720.00000000,
+  //                 "rateValue": 18.96000000,
+  //                 "periodTo": "30-Jun-25",
+  //                 "activity": "Plant running normal",
+  //                 "sno": 3,
+  //                 "periodFrom": "01-Jun-25",
+  //                 "id": "021CD9C0-2074-4A17-BDAE-88A98A5A0CA9"
+  //             },
   const columnsAverageHourlyRate = [
     {
       field: 'sno',
@@ -439,11 +439,11 @@ const AnnualProductionPlan = () => {
           isEditable: true,
           inEdit: false,
           periodFrom: item?.periodFrom
-                        ? moment(item.periodFrom, 'DD-MMM-YY').toDate()
-                        : null,
-          periodTo:  item?.periodTo
-                        ? moment(item.periodTo, 'DD-MMM-YY').toDate()
-                        : null,
+            ? moment(item.periodFrom, 'DD-MMM-YY').toDate()
+            : null,
+          periodTo: item?.periodTo
+            ? moment(item.periodTo, 'DD-MMM-YY').toDate()
+            : null,
         }))
 
         switch (type) {
@@ -556,7 +556,7 @@ const AnnualProductionPlan = () => {
       const dataList = data.map((row) => ({
         id: row.idFromApi,
         uom: row.uom,
-        sno : row.sno,
+        sno: row.sno,
         activity: row.activity,
         rateValue: row.rateValue,
       }))
@@ -564,12 +564,11 @@ const AnnualProductionPlan = () => {
         {
           plantId,
           year,
-          reportType: 'assumptions', 
+          reportType: 'assumptions',
           dataList,
         },
-        keycloak
+        keycloak,
       )
-
 
       if (res?.code == 200) {
         setSnackbarOpen(true)
@@ -615,7 +614,7 @@ const AnnualProductionPlan = () => {
       const dataList = data.map((row) => ({
         id: row.idFromApi,
         uom: row.uom,
-        sno : row.sno,
+        sno: row.sno,
         activity: row.activity,
         maxHourlyRateValue: row.maxHourlyRateValue,
       }))
@@ -623,12 +622,11 @@ const AnnualProductionPlan = () => {
         {
           plantId,
           year,
-          reportType: 'maxRate', 
+          reportType: 'maxRate',
           dataList,
         },
-        keycloak
+        keycloak,
       )
-
 
       if (res?.code == 200) {
         setSnackbarOpen(true)
@@ -671,9 +669,9 @@ const AnnualProductionPlan = () => {
       }
 
       const dataList = data.map((row) => ({
-       id: row.idFromApi,
+        id: row.idFromApi,
         uom: row.uom,
-        sno : row.sno,
+        sno: row.sno,
         activity: row.activity,
         rateValue: row.rateValue,
       }))
@@ -681,12 +679,11 @@ const AnnualProductionPlan = () => {
         {
           plantId,
           year,
-          reportType: 'OperatingHrs', 
+          reportType: 'OperatingHrs',
           dataList,
         },
-        keycloak
+        keycloak,
       )
-
 
       if (res?.code == 200) {
         setSnackbarOpen(true)
@@ -730,27 +727,34 @@ const AnnualProductionPlan = () => {
 
       const dataList = data.map((row) => ({
         id: row.idFromApi,
-        sno : row.sno,
+        sno: row.sno,
         activity: row.activity,
         rateValue: row.rateValue,
         durationHours: row.durationHours,
         periodFrom: row?.periodFrom
-                        ? moment(row.periodFrom).add(1, 'day').utc().startOf('day').toISOString()
-                        : null,
-        periodTo:  row?.periodTo
-                        ? moment(row.periodTo).add(1, 'day').utc().startOf('day').toISOString()
-                        : null,
+          ? moment(row.periodFrom)
+              .add(1, 'day')
+              .utc()
+              .startOf('day')
+              .toISOString()
+          : null,
+        periodTo: row?.periodTo
+          ? moment(row.periodTo)
+              .add(1, 'day')
+              .utc()
+              .startOf('day')
+              .toISOString()
+          : null,
       }))
       const res = await DataService.saveAnnualProduction(
         {
           plantId,
           year,
-          reportType: 'AverageHourlyrate', 
+          reportType: 'AverageHourlyrate',
           dataList,
         },
-        keycloak
+        keycloak,
       )
-
 
       if (res?.code == 200) {
         setSnackbarOpen(true)
@@ -780,7 +784,6 @@ const AnnualProductionPlan = () => {
     }
   }
 
-
   return (
     <Box sx={{ height: 'auto', width: '100%' }}>
       <Backdrop
@@ -799,7 +802,7 @@ const AnnualProductionPlan = () => {
         setRows={setRowsassumptions}
         columns={columnsAssumptions}
         handleCalculate={handleCalculate}
-        title='Plant Production Plan (T-15) - Assumptions & remarks'
+        titleName='Plant Production Plan (T-15) - Assumptions & remarks'
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         currentRowId={currentRowId}
@@ -812,35 +815,38 @@ const AnnualProductionPlan = () => {
           showCalculate: false,
           showTitle: true,
           saveBtn: true,
-          allAction: true, 
+          allAction: true,
+          showT15: true,
         }}
       />
 
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Max hourly rate achieved{' '}
       </Typography>
-      <KendoDataTables rows={rowsMaxRate} columns={columnsMaxRate} permissions={{saveBtn: true,allAction: true, }}
+      <KendoDataTables
+        rows={rowsMaxRate}
+        columns={columnsMaxRate}
+        permissions={{ saveBtn: true, allAction: true }}
         modifiedCells={modifiedCells2}
         setModifiedCells={setModifiedCells2}
         currentRowId={currentRowId2}
         setCurrentRowId={setCurrentRowId2}
         setRows={setRowsMaxRate}
         saveChanges={saveChanges2}
-       />
+      />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Calculation of Operating hours{' '}
       </Typography>
       <KendoDataTables
         rows={rowsOperatingHrs}
         columns={columnsOperatingHrs}
-        permissions={{saveBtn: true,allAction: true,}}
+        permissions={{ saveBtn: true, allAction: true }}
         modifiedCells={modifiedCells3}
         setModifiedCells={setModifiedCells3}
         currentRowId={currentRowId3}
         setCurrentRowId={setCurrentRowId3}
         setRows={setRowsOperatingHrs}
         saveChanges={saveChanges3}
-        
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Calculation of Average hourly rate{' '}
@@ -848,14 +854,13 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsAverageHourlyRate}
         columns={columnsAverageHourlyRate}
-        permissions={{saveBtn: true,allAction: true,}}
+        permissions={{ saveBtn: true, allAction: true }}
         modifiedCells={modifiedCells4}
         setModifiedCells={setModifiedCells4}
         currentRowId={currentRowId4}
         setCurrentRowId={setCurrentRowId4}
         setRows={setRowsAverageHourlyRate}
         saveChanges={saveChanges4}
-        
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Production performance comparision with last 3 years{' '}
@@ -864,6 +869,7 @@ const AnnualProductionPlan = () => {
         rows={rowsProductionPerformance}
         columns={columnsProductionPerformance}
         columnGroupingModel={columnGroupingModel}
+        setRows={setRowsProductionPerformance}
         permissions={{
           textAlignment: 'center',
         }}
@@ -871,7 +877,7 @@ const AnnualProductionPlan = () => {
         // setModifiedCells={setModifiedCells5}
         // currentRowId={currentRowId5}
         // setCurrentRowId={setCurrentRowId5}
-        // setRows={setRows5} 
+        // setRows={setRows5}
       />
 
       <Notification

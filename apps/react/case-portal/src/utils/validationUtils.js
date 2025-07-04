@@ -12,6 +12,7 @@ export const validateFields = (data, requiredFields) => {
     aopRemarks: 'Remark',
     remarks: 'Remark',
     ThroughputActual: 'Actual Throughput',
+    attributeValue: 'Run Length',
   }
 
   const invalidRows = data.filter((row) => {
