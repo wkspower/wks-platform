@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutDownPlanService;
 
 
@@ -66,5 +67,10 @@ public class ShutDownPlanController {
 		  @GetMapping("/getMonthlyShutdownHours")
 		  public List<MonthWiseDataDTO> getMonthlyShutdownHours(@RequestParam String auditYear,@RequestParam String plantId){
 			  return shutDownPlanService.getMonthlyShutdownHours(auditYear,UUID.fromString(plantId));
+		  }
+		  
+		  @GetMapping("/shutdown/dynamic/columns")
+		  public AOPMessageVM getShutdownDynamicColumns(@RequestParam String year,@RequestParam String plantId){
+			  return shutDownPlanService.getShutdownDynamicColumns(year,UUID.fromString(plantId));
 		  }
 }

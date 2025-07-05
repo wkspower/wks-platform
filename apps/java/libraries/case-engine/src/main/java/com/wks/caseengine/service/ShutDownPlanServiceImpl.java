@@ -17,6 +17,7 @@ import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
@@ -248,13 +249,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						shutDownPlanDTO.setDiscription(description + " Ramp Up");
-						
+						shutDownPlanDTO.setProductId(
+								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO", plantId));
 						list.add(shutDownPlanDTO);
 						slowdownPlanService.saveShutdownData(plantId, list);
 
 						List<ShutDownPlanDTO> list2 = new ArrayList<>();
 						shutDownPlanDTO.setDiscription(description + " Ramp Down");
-						
+						shutDownPlanDTO.setProductId(
+								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EOE", plantId));
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						list2.add(shutDownPlanDTO);
@@ -358,6 +361,28 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM getShutdownDynamicColumns(String auditYear, UUID plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<String> result=null;
+		try {
+			List<String>  descriptionsList=plantMaintenanceTransactionRepository.findDescriptionsByPlantFkId(plantId,auditYear);
+			result = new ArrayList<>(descriptionsList.size() + 1);
+		    result.add("Particulars");
+		    result.addAll(descriptionsList);
+		   
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid data format", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(result);
+		return aopMessageVM;
+		
 	}
 
 }

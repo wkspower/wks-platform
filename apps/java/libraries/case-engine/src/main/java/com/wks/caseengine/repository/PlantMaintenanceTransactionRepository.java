@@ -32,5 +32,14 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 			@Param("normParamId") UUID normParamId,
 			@Param("name") String name);
 
-
+	@Query(value = """
+	        SELECT pmt.Discription
+	        FROM PlantMaintenanceTransaction pmt
+	        JOIN PlantMaintenance pm ON pm.Id = pmt.PlantMaintenance_FK_Id
+	        JOIN MaintenanceTypes mt ON mt.Id = pm.MaintenanceType_FK_Id
+	        JOIN NormParameters np ON np.Id = pmt.NormParameter_FK_Id
+	        WHERE np.Plant_FK_Id = :plantFkId and pmt.AuditYear = :auditYear
+	          AND mt.Name = 'Slowdown'
+	        """, nativeQuery = true)
+	    List<String> findDescriptionsByPlantFkId(@Param("plantFkId") UUID plantFkId,@Param("auditYear") String auditYear);
 }

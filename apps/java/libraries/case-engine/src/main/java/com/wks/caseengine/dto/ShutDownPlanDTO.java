@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.wks.caseengine.entity.Plants;
 
 @Configuration
@@ -17,18 +18,14 @@ import com.wks.caseengine.entity.Plants;
 @AllArgsConstructor
 @Builder
 @Data
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class ShutDownPlanDTO {
 
     private String discription;
     private Date maintStartDateTime;
     private Date maintEndDateTime;
-	// Change from Integer to Long
     private Integer durationInMins; 
-    
-	//FOR ID : pmt.Id
 	private String id; 
-	
-
 	private Double rate;
 	private String remark;
 	private UUID productId;
