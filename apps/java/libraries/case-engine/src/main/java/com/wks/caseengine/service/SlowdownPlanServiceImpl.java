@@ -84,7 +84,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				dto.setRate(result[9] != null ? ((Number) result[9]).doubleValue() : null); // Extract Rate
 				dto.setProductName(result[10] != null ? result[10].toString() : null);
 				dto.setRateEO(result[11] != null ? ((Number) result[11]).doubleValue() : null);
-				dto.setRateEO(result[12] != null ? ((Number) result[12]).doubleValue() : null);
+				dto.setRateEOE(result[12] != null ? ((Number) result[12]).doubleValue() : null);
 				dtoList.add(dto);
 			}
 			// TODO Auto-generated method stub
