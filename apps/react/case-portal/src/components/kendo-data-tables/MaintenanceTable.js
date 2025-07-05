@@ -384,9 +384,9 @@ const MaintenanceTable = () => {
       editButton: false,
       showUnit: false,
       saveWithRemark: false,
-      saveBtn: dataConfig.isCracker,
+      saveBtn: false,
       isOldYear: isOldYear,
-      allAction: dataConfig.isCracker,
+      allAction: false,
     }
   }
 
@@ -400,9 +400,12 @@ const MaintenanceTable = () => {
           editButton: false,
           showUnit: false,
           saveWithRemark: false,
-          saveBtn: dataConfig.isCracker,
+          // saveBtn: dataConfig.isCracker,
+          // allAction: dataConfig.isCracker,
+
+          saveBtn: false,
+          allAction: false,
           showRefresh: false,
-          allAction: dataConfig.isCracker,
         },
         oldYear?.oldYear,
       ),

@@ -85,6 +85,20 @@ export const ibrPlanColumns = [
   { field: 'sdED', title: 'Start Date-SD', editable: true, width: 200 },
   { field: 'sdSD', title: 'Start Date-SD', editable: true, width: 200 },
 
+  {
+    field: 'preCoil',
+    title: 'Pre Coil Replacement',
+    editable: true,
+    width: 200,
+  },
+  {
+    field: 'postCoil',
+    title: 'Post Coil Replacement',
+    editable: true,
+    width: 200,
+  },
+  { field: 'isCoil', title: 'Is Coil Replacement', editable: true, width: 200 },
+
   // { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
 ]
 
@@ -116,7 +130,7 @@ export const ibrGridThree = [
 
   {
     field: 'hTenActual',
-    title: 'H10 – Actual run length',
+    title: 'H10 Actual run length',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -128,7 +142,7 @@ export const ibrGridThree = [
 
   {
     field: 'tenProposed',
-    title: 'H10 – Proposed AOP',
+    title: 'H10 Proposed AOP',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -139,7 +153,7 @@ export const ibrGridThree = [
 
   {
     field: 'hElevenActual',
-    title: 'H11 – Actual run length',
+    title: 'H11 Actual run length',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -151,7 +165,7 @@ export const ibrGridThree = [
 
   {
     field: 'elevenProposed',
-    title: 'H11 – Proposed AOP',
+    title: 'H11 Proposed AOP',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -162,7 +176,7 @@ export const ibrGridThree = [
 
   {
     field: 'hTwelveActual',
-    title: 'H12 – Actual run length',
+    title: 'H12 Actual run length',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -174,7 +188,7 @@ export const ibrGridThree = [
 
   {
     field: 'twelveProposed',
-    title: 'H12 – Proposed AOP',
+    title: 'H12 Proposed AOP',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -185,7 +199,7 @@ export const ibrGridThree = [
 
   {
     field: 'hThirteenActual',
-    title: 'H13 – Actual run length',
+    title: 'H13 Actual run length',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -197,7 +211,7 @@ export const ibrGridThree = [
 
   {
     field: 'thirteenProposed',
-    title: 'H13 – Proposed AOP',
+    title: 'H13 Proposed AOP',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -208,7 +222,7 @@ export const ibrGridThree = [
 
   {
     field: 'hFourteenActual',
-    title: 'H14 – Actual run length',
+    title: 'H14 Actual run length',
     type: 'number',
     format: '{0:n0}',
     width: 120,
@@ -220,7 +234,7 @@ export const ibrGridThree = [
 
   {
     field: 'fourteenProposed',
-    title: 'H14 – Proposed AOP',
+    title: 'H14 Proposed AOP',
     type: 'number',
     format: '{0:n0}',
     width: 120,

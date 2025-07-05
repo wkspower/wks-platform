@@ -149,7 +149,7 @@ const ProductionVolumeDataBasis = () => {
     fetchData('MC', setRowsMC, selectedUnit)
     fetchData('MC Yearwise', setRowsMCYearWise, selectedUnit)
     fetchData('Calculated Data', setRowsCalculatedData, selectedUnit)
-    fetchData('RowData', setRowsRowData)
+    fetchData('RowData', setRowsRowData, selectedUnit)
   }, [
     sitePlantChange,
     oldYear,
