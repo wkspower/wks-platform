@@ -43,4 +43,6 @@ public class ShutDownPlanDTO {
 	private Date createdOn;
 	private String plantMaintenanceTransactionName;
 	private String productName;
+	private Double rateEO;
+	private Double rateEOE;
 }

@@ -83,7 +83,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null);
 				dto.setRate(result[9] != null ? ((Number) result[9]).doubleValue() : null); // Extract Rate
 				dto.setProductName(result[10] != null ? result[10].toString() : null);
-
+				dto.setRateEO(result[11] != null ? ((Number) result[11]).doubleValue() : null);
+				dto.setRateEO(result[12] != null ? ((Number) result[12]).doubleValue() : null);
 				dtoList.add(dto);
 			}
 			// TODO Auto-generated method stub
@@ -139,6 +140,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					System.out.println("shutDownPlanDTO.getCreatedOn()" + shutDownPlanDTO.getCreatedOn());
 
 					plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+					plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
+					plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
 					plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 					// plantMaintenanceTransaction.setName("Default Name");
 					plantMaintenanceTransaction.setVersion("V1");
@@ -187,6 +190,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 					plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 					plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+					plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
+					plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
 					plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 
 					if (shutDownPlanDTO.getProductId() != null) {
