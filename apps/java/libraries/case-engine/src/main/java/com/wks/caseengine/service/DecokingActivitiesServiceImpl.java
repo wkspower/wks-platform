@@ -143,12 +143,19 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("taEDId", row[5] != null ? row[5] : "");
 					map.put("sdSDId", row[6] != null ? row[6] : "");
 					map.put("sdEDId", row[7] != null ? row[7] : "");
-					map.put("ibrSD", row[8] != null ? row[8] : "");
-					map.put("ibrED", row[9] != null ? row[9] : "");
-					map.put("taSD", row[10] != null ? row[10] : "");
-					map.put("taED", row[11] != null ? row[11] : "");
-					map.put("sdSD", row[12] != null ? row[12] : "");
-					map.put("sdED", row[13] != null ? row[13] : "");
+					map.put("preCoilId", row[8] != null ? row[8] : "");
+					map.put("postCoilId", row[9] != null ? row[9] : "");
+					map.put("isCoilId", row[10] != null ? row[10] : "");
+					
+					map.put("ibrSD", row[11] != null ? row[11] : "");
+					map.put("ibrED", row[12] != null ? row[12] : "");
+					map.put("taSD", row[13] != null ? row[13] : "");
+					map.put("taED", row[14] != null ? row[14] : "");
+					map.put("sdSD", row[15] != null ? row[15] : "");
+					map.put("sdED", row[16] != null ? row[16] : "");
+					map.put("preCoil", row[17] != null ? row[17] : "");
+					map.put("postCoil", row[18] != null ? row[18] : "");
+					map.put("isCoil", row[19] != null ? row[19] : "");
 					map.put("remarks", "");
 				} else if (reportType.equalsIgnoreCase("activity")) {
 					map.put("furnace", row[0]);
@@ -533,6 +540,76 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						normAttributeTransactionsRepository.save(normAttributeTransactions);
 					}
 				}
+				if (decokePlanningIBRDTO.getPreCoilId() != null && decokePlanningIBRDTO.getPreCoilId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getPreCoilId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getPreCoil());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getPreCoil());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getPreCoilId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if (decokePlanningIBRDTO.getPostCoilId() != null && decokePlanningIBRDTO.getPostCoilId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getPostCoilId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getPostCoil());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getPostCoil());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getPostCoilId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+				if (decokePlanningIBRDTO.getIsCoilId() != null && decokePlanningIBRDTO.getIsCoilId() != "") {
+					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
+							.findByNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIsCoilId()));
+					if (normAttributeTransactionsopt.isPresent()) {
+						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIsCoil());
+						normAttributeTransactions.setModifiedOn(new Date());
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					} else {
+						NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
+						normAttributeTransactions.setAttributeValue(decokePlanningIBRDTO.getIsCoil());
+						normAttributeTransactions.setAttributeValueVersion("V1");
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions
+								.setNormParameterFKId(UUID.fromString(decokePlanningIBRDTO.getIsCoilId()));
+						normAttributeTransactions.setRemarks(decokePlanningIBRDTO.getRemarks());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactions.setAopMonth(0);
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}
+
 
 			}
 		} catch (Exception ex) {

@@ -31,4 +31,10 @@ public class DecokePlanningIBRDTO {
     private String sdSD;
     private String sdED;
     private String remarks;
+    private String preCoilId;
+    private String postCoilId;
+    private String isCoilId;
+    private String preCoil;
+    private String postCoil;
+    private String isCoil;
 }
