@@ -248,38 +248,17 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						shutDownPlanDTO.setDiscription(description + " Ramp Up");
-						shutDownPlanDTO.setProductId(
-								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO", plantId));
+						
 						list.add(shutDownPlanDTO);
 						slowdownPlanService.saveShutdownData(plantId, list);
 
 						List<ShutDownPlanDTO> list2 = new ArrayList<>();
 						shutDownPlanDTO.setDiscription(description + " Ramp Down");
-						shutDownPlanDTO.setProductId(
-								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO", plantId));
+						
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						list2.add(shutDownPlanDTO);
 						slowdownPlanService.saveShutdownData(plantId, list2);
-
-						List<ShutDownPlanDTO> list3 = new ArrayList<>();
-						shutDownPlanDTO.setDiscription(description + " Ramp Down");
-						shutDownPlanDTO.setProductId(
-								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EOE", plantId));
-						shutDownPlanDTO.setDurationInHrs(0.00);
-						shutDownPlanDTO.setDurationInMins(0);
-						list3.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list3);
-
-						List<ShutDownPlanDTO> list4 = new ArrayList<>();
-						shutDownPlanDTO.setDiscription(description + " Ramp Up");
-						shutDownPlanDTO.setProductId(
-								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EOE", plantId));
-						shutDownPlanDTO.setDurationInHrs(0.00);
-						shutDownPlanDTO.setDurationInMins(0);
-						list4.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list4);
-
 					}
 				} else {
 					// Updating an existing record
