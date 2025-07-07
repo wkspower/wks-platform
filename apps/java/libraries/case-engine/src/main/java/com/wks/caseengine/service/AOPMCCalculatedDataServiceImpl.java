@@ -1,9 +1,12 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
+
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -131,17 +134,40 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
-			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList) {
+			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel) {
 		try {
 			String finYear = "";
 			UUID plantId = null;
+			List<AOPMCCalculatedDataDTO> failedList = new ArrayList<>();
 
 			for (AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO : aOPMCCalculatedDataDTOList) {
+				if (aOPMCCalculatedDataDTO.getSaveStatus() != null
+						&& aOPMCCalculatedDataDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(aOPMCCalculatedDataDTO);
+					continue;
+				}
 				AOPMCCalculatedData aOPMCCalculatedData = new AOPMCCalculatedData();
 				if (aOPMCCalculatedDataDTO.getId() == null || aOPMCCalculatedDataDTO.getId().contains("#")) {
 					aOPMCCalculatedData.setId(null);
+					if (isFromExcel) {
+						failedList.add(aOPMCCalculatedDataDTO);
+						continue;
+					}
+
 				} else {
+					Optional<AOPMCCalculatedData> aOPMCCalculatedDataOptional = aOPMCCalculatedDataRepository
+							.findById(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
+
+					if (!aOPMCCalculatedDataOptional.isPresent()) {
+						aOPMCCalculatedDataDTO.setSaveStatus("Failed");
+						aOPMCCalculatedDataDTO.setErrDescription("Record not found");
+						failedList.add(aOPMCCalculatedDataDTO);
+						continue;
+					}
+					aOPMCCalculatedData = aOPMCCalculatedDataOptional.get();
+
 					aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
+
 				}
 				aOPMCCalculatedData.setPlantFKId(UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId()));
 				plantId = UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId());
@@ -166,9 +192,10 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				finYear = aOPMCCalculatedDataDTO.getFinancialYear();
 				aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
 
-				AOPMCCalculatedData saved =aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
+				AOPMCCalculatedData saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
 				if (saved.getId() == null) {
-					aOPMCCalculatedDataDTO.setErrDescription("No record found with this id" +aOPMCCalculatedDataDTO.getId());
+					aOPMCCalculatedDataDTO
+							.setErrDescription("No record found with this id" + aOPMCCalculatedDataDTO.getId());
 					aOPMCCalculatedDataDTO.setSaveStatus("Failed");
 				}
 			}
@@ -260,7 +287,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		}
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave,List<AOPMCCalculatedDataDTO> dtoList) {
+	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<AOPMCCalculatedDataDTO> dtoList) {
 		try {
 			Workbook workbook = new XSSFWorkbook();
 			Sheet sheet = workbook.createSheet("Sheet1");
@@ -296,8 +323,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					list.add(row[22] != null ? row[22].toString() : null);
 					rows.add(list);
 				}
-			}else {
-				for(AOPMCCalculatedDataDTO aopMCCalculatedDataDTO : dtoList) {
+			} else {
+				for (AOPMCCalculatedDataDTO aopMCCalculatedDataDTO : dtoList) {
 					List<Object> list = new ArrayList<>();
 					list.add(aopMCCalculatedDataDTO.getProductName());
 					list.add(aopMCCalculatedDataDTO.getApril());
@@ -323,9 +350,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					list.add(aopMCCalculatedDataDTO.getErrDescription());
 				}
 			}
-			
+
 			// Data rows
-			
+
 			List<String> innerHeaders = new ArrayList<>();
 			innerHeaders.add("Particulars");
 			List<String> monthsList = getAcademicYearMonths(year);
@@ -337,7 +364,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			innerHeaders.add("MaterialFKId");
 			innerHeaders.add("FinancialYear");
 			innerHeaders.add("VerticalFKId");
-			if(isAfterSave){
+			if (isAfterSave) {
 				innerHeaders.add("Status");
 				innerHeaders.add("Error Description");
 			}
@@ -419,14 +446,28 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	}
 
 	@Override
-	public byte[] importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
 		// TODO Auto-generated method stub
 		try {
 			List<AOPMCCalculatedDataDTO> data = readData(file.getInputStream(), plantFKId, year);
 
-			List<AOPMCCalculatedDataDTO> savedData =editAOPMCCalculatedData(data);
-			return createExcel(year, plantFKId, true, savedData);
-			
+			List<AOPMCCalculatedDataDTO> failedRecords = editAOPMCCalculatedData(data, true);
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (failedRecords != null && failedRecords.size() > 0) {
+				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+
 			// return ResponseEntity.ok(data);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -57,7 +57,7 @@ public class NormalOperationNormsController {
         @RequestParam(required = false) String gradeId,
 			@RequestBody List<MCUNormsValueDTO> mCUNormsValueDTOList) {
 		try {
-			return normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList,UUID.fromString(plantId),year, gradeId);
+			return normalOperationNormsService.saveNormalOperationNormsData(mCUNormsValueDTOList,UUID.fromString(plantId),year, gradeId,false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -96,23 +96,13 @@ public class NormalOperationNormsController {
 
 
 	@PostMapping(value = "/norms-import-excel", consumes = "multipart/form-data")
-	public ResponseEntity<byte[]> importExcel(
+	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
             @RequestParam(required = false) String gradeId,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			byte[] excelBytes =	 normalOperationNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
-			
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.parseMediaType(
-	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-	        headers.setContentDisposition(ContentDisposition.builder("attachment")
-	                .filename("Normal_Op_Norms.xlsx")
-	                .build());
-	        headers.setContentLength(excelBytes.length);
-
-	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+			return	normalOperationNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
 	}
 	
 }

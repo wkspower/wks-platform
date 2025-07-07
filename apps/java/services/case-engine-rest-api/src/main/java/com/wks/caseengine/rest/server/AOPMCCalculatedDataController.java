@@ -37,7 +37,7 @@ public class AOPMCCalculatedDataController {
 	@PutMapping(value = "/editAOPMCCalculatedData")
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
 			@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO) {
-		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO);
+		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO,false);
 
 	}
 
@@ -71,17 +71,10 @@ public class AOPMCCalculatedDataController {
 	}
 
 	@PostMapping(value = "/production-volume-data/import/excel", consumes = "multipart/form-data")
-	public ResponseEntity<byte[]> importExcel(@RequestParam("plantId") String plantId,
+	public AOPMessageVM importExcel(@RequestParam("plantId") String plantId,
 			@RequestParam("year") String year, @RequestParam("file") MultipartFile file) {
-		byte[] excelBytes = aOPMCCalculatedDataService.importExcel(year, UUID.fromString(plantId), file);
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(
-				MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-		headers.setContentDisposition(
-				ContentDisposition.builder("attachment").filename("Production Vol Data.xlsx").build());
-		headers.setContentLength(excelBytes.length);
-
-		return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+		return aOPMCCalculatedDataService.importExcel(year, UUID.fromString(plantId), file);
+		
 	}
 
 }
