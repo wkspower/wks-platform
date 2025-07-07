@@ -2,10 +2,11 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -366,12 +367,41 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Override
 	public AOPMessageVM getShutdownDynamicColumns(String auditYear, UUID plantId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<String> result=null;
+		List<Map<String, String>> listOfMaps = new ArrayList<>();
+		Map<String, String> map = new HashMap<>();
+		String result=null;
 		try {
-			List<String>  descriptionsList=plantMaintenanceTransactionRepository.findDescriptionsByPlantFkId("Slowdown",plantId.toString(),auditYear);
-			result = new ArrayList<>(descriptionsList.size() + 1);
-		    result.add("Particulars");
-		    result.addAll(descriptionsList);
+			List<Object[]> data = plantMaintenanceTransactionRepository.findDescriptionsByPlantFkId("Slowdown", plantId.toString(), auditYear);
+
+			map.put("field", "particulars");
+			map.put("title", "Particulars");
+			listOfMaps.add(map);
+
+			// Iterate over data
+			for (Object[] row : data) {
+			    map = new HashMap<>();
+
+			    // Safely extract row[0] and row[1]
+			    String field = row[0] != null ? row[0].toString() : "";
+			    String monthStr = row[1] != null ? row[1].toString() : null;
+
+			     
+			    if (monthStr != null && !monthStr.isEmpty()) {
+			        try {
+			            Integer monthNumber = Integer.parseInt(monthStr);
+			            result = field + " (" + getMonth(monthNumber) + ")";
+			        } catch (NumberFormatException e) {
+			            result = field + " (Invalid Month)";
+			        }
+			    } else {
+			        result = field; // No month info available
+			    }
+
+			    map.put("field", field);
+			    map.put("title", result);
+			    listOfMaps.add(map);
+			}
+
 		   
 		}catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid data format", e);
@@ -380,9 +410,43 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data fetched successfully");
-		aopMessageVM.setData(result);
+		aopMessageVM.setData(listOfMaps);
 		return aopMessageVM;
-		
 	}
+	
+	public static String getMonth(Integer month) {
+		if (month == null) {
+			return "Invalid month";
+		}
+		switch (month) {
+			case 1:
+				return "January";
+			case 2:
+				return "February";
+			case 3:
+				return "March";
+			case 4:
+				return "April";
+			case 5:
+				return "May";
+			case 6:
+				return "June";
+			case 7:
+				return "July";
+			case 8:
+				return "August";
+			case 9:
+				return "September";
+			case 10:
+				return "October";
+			case 11:
+				return "November";
+			case 12:
+				return "December";
+			default:
+				return "0";
+		}
+	}
+
 
 }

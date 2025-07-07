@@ -33,7 +33,8 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 			@Param("name") String name);
 	
 	@Query(value = "SELECT " +
-            "pm.Discription " +
+            "pm.Discription, " +
+            "pm.MaintForMonth " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
@@ -41,9 +42,9 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
             "LEFT JOIN NormParameterType NPT ON NPT.Id=np.NormParameterType_FK_Id "+
             "WHERE mt.Name = :maintenanceTypeName "  +
             "and pmt.Plant_FK_Id = :plantId " +
-			"and AuditYear = :year order by np.DisplayOrder,pm.CreatedOn desc",
+			"and AuditYear = :year order by pm.MaintForMonth",
             nativeQuery = true)
-	List<String> findDescriptionsByPlantFkId( 
+	List<Object[]> findDescriptionsByPlantFkId( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
 }
