@@ -32,10 +32,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.wks.caseengine.dto.CrackerConfigurationDTO;
 import com.wks.caseengine.dto.DecokePlanningIBRDTO;
 import com.wks.caseengine.dto.DecokeRunLengthDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.CrackerConfiguration;
 import com.wks.caseengine.entity.DecokeRunLength;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
@@ -45,6 +48,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.CrackerConfigurationRepository;
 import com.wks.caseengine.repository.DecokeRunLengthRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -82,6 +86,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@Autowired
 	private DecokeRunLengthRepository decokeRunLengthRepository;
+	
+	@Autowired
+	private CrackerConfigurationRepository crackerConfigurationRepository;
 
 	private DataSource dataSource;
 
@@ -1022,6 +1029,41 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			e.printStackTrace();
 			return aopMessageVM;
 		}
+	}
+
+	@Override
+	public AOPMessageVM getDecokingActivitiesIBRData(String year, String plantId, String reportType) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<CrackerConfigurationDTO> crackerConfigurationDTOList = new ArrayList<>();
+		try {
+			List<CrackerConfiguration> crackerConfigurationList= crackerConfigurationRepository.findByPlantFkIdAndAopYear(UUID.fromString(plantId), year);
+			for(CrackerConfiguration crackerConfiguration:crackerConfigurationList) {
+				CrackerConfigurationDTO crackerConfigurationDTO = new CrackerConfigurationDTO();
+				crackerConfigurationDTO.setDisplayName(crackerConfiguration.getDisplayName());
+				crackerConfigurationDTO.setDisplaySeq(crackerConfiguration.getDisplaySeq());
+				crackerConfigurationDTO.setIbrEndDate(crackerConfiguration.getIbrEndDate());
+				crackerConfigurationDTO.setIbrStartDate(crackerConfiguration.getIbrStartDate());
+				crackerConfigurationDTO.setId(crackerConfiguration.getId());
+				crackerConfigurationDTO.setIsCr(crackerConfiguration.getIsCr());
+				crackerConfigurationDTO.setName(crackerConfiguration.getName());
+				crackerConfigurationDTO.setPostCrDays(crackerConfiguration.getPostCrDays());
+				crackerConfigurationDTO.setPreCrDays(crackerConfiguration.getPreCrDays());
+				crackerConfigurationDTO.setRemarks(crackerConfiguration.getRemarks());
+				crackerConfigurationDTO.setShutDownEndDate(crackerConfiguration.getShutDownEndDate());
+				crackerConfigurationDTO.setShutDownStartDate(crackerConfiguration.getShutDownStartDate());
+				crackerConfigurationDTO.setTaEndDate(crackerConfiguration.getTaEndDate());
+				crackerConfigurationDTO.setTaStartDate(crackerConfiguration.getTaStartDate());
+				crackerConfigurationDTO.setAopYear(crackerConfiguration.getAopYear());
+				crackerConfigurationDTO.setPlantFkId(crackerConfiguration.getPlantFkId());
+				crackerConfigurationDTOList.add(crackerConfigurationDTO);
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update data");
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(crackerConfigurationDTOList);
+		return aopMessageVM;
 	}
 
 }

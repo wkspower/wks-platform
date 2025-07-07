@@ -36,6 +36,11 @@ public class DecokingActivitiesController {
 		return decokingActivitiesService.getDecokingActivitiesData(year,plantId,reportType);
 	}
 	
+	@GetMapping(value="/decoking-activities/ibr")
+	public AOPMessageVM getDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType) {
+		return decokingActivitiesService.getDecokingActivitiesIBRData(year,plantId,reportType);
+	}
+	
 	@PostMapping(value="/decoking-activities")
 	public AOPMessageVM updateDecokingActivitiesData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokingActivitiesDTO> decokingActivitiesDTOList) {
 		return decokingActivitiesService.updateDecokingActivitiesData(year,plantId,reportType,decokingActivitiesDTOList);
