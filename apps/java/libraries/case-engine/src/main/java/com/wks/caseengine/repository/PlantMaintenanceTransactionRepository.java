@@ -31,15 +31,19 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	int deleteRampActivitiesByNormAndDate(
 			@Param("normParamId") UUID normParamId,
 			@Param("name") String name);
+	
+	@Query(value = "SELECT " +
+            "pm.Discription " +
+            "FROM PlantMaintenanceTransaction pm " +
+            "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
+            "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +
+            "LEFT JOIN NormParameters np ON pm.NormParameter_FK_Id = np.Id " +
+            "LEFT JOIN NormParameterType NPT ON NPT.Id=np.NormParameterType_FK_Id "+
+            "WHERE mt.Name = :maintenanceTypeName "  +
+            "and pmt.Plant_FK_Id = :plantId " +
+			"and AuditYear = :year order by np.DisplayOrder,pm.CreatedOn desc",
+            nativeQuery = true)
+	List<String> findDescriptionsByPlantFkId( 
+        @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
-	@Query(value = """
-	        SELECT pmt.Discription
-	        FROM PlantMaintenanceTransaction pmt
-	        JOIN PlantMaintenance pm ON pm.Id = pmt.PlantMaintenance_FK_Id
-	        JOIN MaintenanceTypes mt ON mt.Id = pm.MaintenanceType_FK_Id
-	        JOIN NormParameters np ON np.Id = pmt.NormParameter_FK_Id
-	        WHERE np.Plant_FK_Id = :plantFkId and pmt.AuditYear = :auditYear
-	          AND mt.Name = 'Slowdown'
-	        """, nativeQuery = true)
-	    List<String> findDescriptionsByPlantFkId(@Param("plantFkId") UUID plantFkId,@Param("auditYear") String auditYear);
 }

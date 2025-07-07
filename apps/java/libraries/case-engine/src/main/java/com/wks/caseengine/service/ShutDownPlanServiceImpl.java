@@ -368,7 +368,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<String> result=null;
 		try {
-			List<String>  descriptionsList=plantMaintenanceTransactionRepository.findDescriptionsByPlantFkId(plantId,auditYear);
+			List<String>  descriptionsList=plantMaintenanceTransactionRepository.findDescriptionsByPlantFkId("Slowdown",plantId.toString(),auditYear);
 			result = new ArrayList<>(descriptionsList.size() + 1);
 		    result.add("Particulars");
 		    result.addAll(descriptionsList);
