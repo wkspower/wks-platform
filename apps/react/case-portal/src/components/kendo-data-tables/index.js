@@ -189,7 +189,7 @@ const KendoDataTables = ({
 
       setIsRowEdited(true)
 
-      console.log(e)
+      // console.log(e)
 
       const { dataItem, field, value } = e
       const itemId = dataItem.id

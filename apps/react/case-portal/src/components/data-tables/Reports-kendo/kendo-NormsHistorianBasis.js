@@ -17,7 +17,7 @@ import {
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
 
-import KendoDataGrid, { UOMDropdown } from 'components/Kendo-Report-DataGrid/index'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import { Button } from '../../../../node_modules/@mui/material/index'
 
@@ -51,7 +51,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
-  const [uom, setUom] = useState('TPH')
+
   const [rowsHistorianValues, setHistorianValues] = useState([])
   const [rowsMcuAndNormGrid, setMcuAndNormGrid] = useState([])
   const [rowsProductionVolumeData, setProductionVolumeData] = useState([])
@@ -69,11 +69,11 @@ const NormsHistorianBasis = () => {
     return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
   }
 
-  const fetchData = async (reportType, setState, uom) => {
+  const fetchData = async (reportType, setState) => {
     try {
       setLoading(true)
       var data = []
-      data = await DataService.getNormsHistorianBasis(keycloak, reportType, uom)
+      data = await DataService.getNormsHistorianBasis(keycloak, reportType)
 
       if (data?.code === 200) {
         const rowsWithId = data?.data?.normHistoricBasisData?.map(
@@ -115,10 +115,10 @@ const NormsHistorianBasis = () => {
   })
 
   useEffect(() => {
-    fetchData('HistorianValues', setHistorianValues, uom)
-    fetchData('McuAndNormGrid', setMcuAndNormGrid, uom)
-    fetchData('ProductionVolumeData', setProductionVolumeData, uom)
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName, uom])
+    fetchData('HistorianValues', setHistorianValues)
+    fetchData('McuAndNormGrid', setMcuAndNormGrid)
+    fetchData('ProductionVolumeData', setProductionVolumeData)
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
@@ -193,11 +193,6 @@ const NormsHistorianBasis = () => {
       </div>
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
-        <UOMDropdown
-          value={uom}
-          onChange={(e) => setUom(e.target.value)}
-          options={['TPH', 'TPD']}
-        />
         <Button
           variant='contained'
           onClick={exportAllGrids}
