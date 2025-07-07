@@ -155,6 +155,7 @@ const PlantsProductionSummary = () => {
           width: 100,
           editable: false,
           format: '{0:#.###}',
+          type:'number'
         },
       ],
     },

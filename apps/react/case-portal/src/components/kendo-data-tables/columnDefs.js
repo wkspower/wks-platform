@@ -113,7 +113,7 @@ export const ibrPlanColumns = [
     editable: true,
     width: 200,
   },
-  { field: 'isCoil', title: 'Is Coil Replacement', editable: true, width: 200 },
+  { field: 'isCoil', title: 'Is Coil Replacement', editable: true,type: 'switch',width: 200 },
 
   // { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
 ]
