@@ -17,7 +17,7 @@ const DateOnlyPicker = ({ dataItem, field, onChange }) => {
     <td>
       <DatePicker
         value={currentDate}
-        format='yyyy-MM-dd'
+        format='dd-MM-yyyy'
         onChange={handleChange}
         width='100%'
         size='small'

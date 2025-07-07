@@ -111,8 +111,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-			String procedureName = "vwScrn"+vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
-			List<Object[]> results = getData(plantId, year,procedureName);
+			String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
+			List<Object[]> results = getData(plantId, year, procedureName);
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
@@ -136,7 +136,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 				map.put("plantId", row[16]);
 				String remarks = row[17] == null ? "" : row[17].toString();
 				map.put("remarks", remarks);
-				   
+
 				data.add(map); // Add the map to the list here
 			}
 
@@ -153,44 +153,43 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	}
 
-	public List<Object[]> getData(String plantId,String aopYear, String viewName) {
-	    try {
-	        
-	        // 2. Construct SQL with dynamic view name
-	    	String sql = 
-	    		    "SELECT * FROM " + viewName + 
-	    		    " WHERE PlantId = :plantId AND AOPYear = :aopYear " +
-	    		    "ORDER BY CASE MonthName " +
-	    		    "    WHEN 'January' THEN 1 " +
-	    		    "    WHEN 'February' THEN 2 " +
-	    		    "    WHEN 'March' THEN 3 " +
-	    		    "    WHEN 'April' THEN 4 " +
-	    		    "    WHEN 'May' THEN 5 " +
-	    		    "    WHEN 'June' THEN 6 " +
-	    		    "    WHEN 'July' THEN 7 " +
-	    		    "    WHEN 'August' THEN 8 " +
-	    		    "    WHEN 'September' THEN 9 " +
-	    		    "    WHEN 'October' THEN 10 " +
-	    		    "    WHEN 'November' THEN 11 " +
-	    		    "    WHEN 'December' THEN 12 " +
-	    		    "    ELSE 13 " +
-	    		    "END";
+	public List<Object[]> getData(String plantId, String aopYear, String viewName) {
+		try {
 
-	        // 3. Create and parameterize the native query
-	        Query query = entityManager.createNativeQuery(sql);
-	        query.setParameter("plantId", plantId);
-	        query.setParameter("aopYear", aopYear);
+			// 2. Construct SQL with dynamic view name
+			String sql = "SELECT * FROM " + viewName +
+					" WHERE PlantId = :plantId AND AOPYear = :aopYear " +
+					"ORDER BY CASE MonthName " +
+					"    WHEN 'April' THEN 1 " +
+					"    WHEN 'May' THEN 2 " +
+					"    WHEN 'June' THEN 3 " +
+					"    WHEN 'July' THEN 4 " +
+					"    WHEN 'August' THEN 5 " +
+					"    WHEN 'September' THEN 6 " +
+					"    WHEN 'October' THEN 7 " +
+					"    WHEN 'November' THEN 8 " +
+					"    WHEN 'December' THEN 9 " +
+					"    WHEN 'January' THEN 10 " +
+					"    WHEN 'February' THEN 11 " +
+					"    WHEN 'March' THEN 12 " +
+					"    ELSE 13 " +
+					"END";
 
-	        // 4. Execute
-	        return query.getResultList();
+			// 3. Create and parameterize the native query
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
 
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
-	    }
+			// 4. Execute
+			return query.getResultList();
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid argument: " + e.getMessage(), e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
+		}
 	}
-	
+
 	@Override
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
 			List<DecokePlanningDTO> decokePlanningDTOList) {

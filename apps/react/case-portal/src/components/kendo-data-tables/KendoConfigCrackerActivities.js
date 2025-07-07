@@ -109,9 +109,14 @@ const DecokingConfig = () => {
                 taED: toDateObject(item.taED),
                 sdSD: toDateObject(item.sdSD),
                 sdED: toDateObject(item.sdED),
-                isCoil: true,
-                postCoil: 155,
-                preCoil: 511,
+
+                isCoil: item?.isCoil || '',
+                preCoil: item?.preCoil || '',
+                postCoil: item?.postCoil || '',
+
+                isCoilId: item?.isCoilId || '',
+                postCoilId: item?.postCoilId || '',
+                preCoilId: item?.preCoilId || '',
               }))
               setRowsForTab(currentTab, processedData, 2)
             } else {
@@ -121,8 +126,8 @@ const DecokingConfig = () => {
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
             const data3 = await DataService.getIbrScreen3(keycloak)
-            // const toDateObject = (value) =>
-            //   value ? moment(value, 'DD/MM/YYYY').toDate() : null
+            const toDateObject = (value) =>
+              value ? moment(value, 'DD/MM/YYYY').toDate() : null
             if (data3?.code === 200) {
               setCalculationObject(data3?.data?.aopCalculation)
               const processedData = data3.data?.decokingActivitiesList.map(
@@ -132,6 +137,7 @@ const DecokingConfig = () => {
                   idFromApi: item?.id,
                   id: index,
                   remarks: item?.remarks || '',
+                  date: toDateObject(item.date),
                 }),
               )
               setRowsForTab(currentTab, processedData, 3)
@@ -156,7 +162,7 @@ const DecokingConfig = () => {
   useEffect(() => {
     fetchData()
   }, [plantID, oldYear, yearChanged, keycloak, fetchData])
-  0
+
   const saveChanges2 = React.useCallback(async () => {
     // setLoading(true)
     try {
@@ -250,6 +256,14 @@ const DecokingConfig = () => {
         taSD: formatIfDate(row?.taSD),
         taSDId: row?.taSDId || '',
         remarks: row?.remarks || '',
+
+        postCoil: row?.postCoil || '',
+        preCoil: row?.preCoil || '',
+        isCoil: row?.isCoil || '',
+
+        preCoilId: row?.preCoilId || '',
+        postCoilId: row?.postCoilId || '',
+        isCoilId: row?.isCoilId || '',
       }))
       const response = await DataService.saveCracker2(
         plantId,

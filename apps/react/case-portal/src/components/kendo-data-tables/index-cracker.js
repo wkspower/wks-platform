@@ -74,7 +74,15 @@ export const dateFields = [
   'fromDate',
   'toDate',
 ]
-export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
+export const dateFields1 = [
+  'ibrSD',
+  'ibrED',
+  'taSD',
+  'taED',
+  'sdED',
+  'sdSD',
+  'date',
+]
 export const hiddenFields = []
 export const monthMap = {
   january: 1,
@@ -371,38 +379,16 @@ const KendoDataTablesCracker = ({
               key={col.field}
               field={col.field}
               title={col.title || col.headerName}
-              filter='date'
-              filterable={{
-                cell: {
-                  operator: 'gte',
-                  showOperators: true,
-                },
-              }}
               cells={{
                 edit: {
-                  date: [
-                    'ibrSD',
-                    'ibrED',
-                    'taSD',
-                    'taED',
-                    'sdED',
-                    'sdSD',
-                  ].includes(col.field)
-                    ? DateOnlyPicker
-                    : DateOnlyPicker,
+                  date: DateOnlyPicker,
                 },
                 data: toolTipRenderer,
               }}
-              format={
-                ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD'].includes(
-                  col.field,
-                )
-                  ? '{0:dd-MM-yyyy}'
-                  : '{0:dd-MM-yyyy}'
-              }
+              format='{0:dd-MM-yyyy}'
               editor='date'
               hidden={col.hidden}
-              columnMenu={DateColumnMenu}
+              sortable={false}
             />
           )
         }
@@ -472,7 +458,6 @@ const KendoDataTablesCracker = ({
               key={col.field}
               field={col.field}
               title={col.title || col.headerName}
-              // width={col.width}
               hidden={col.hidden}
               className={
                 col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
@@ -483,9 +468,9 @@ const KendoDataTablesCracker = ({
                 edit: { text: NoSpinnerNumericEditor },
                 data: toolTipRenderer,
               }}
-              columnMenu={ColumnMenuCheckboxFilter}
               filter='numeric'
               format={col.format}
+              sortable={false}
             />
           )
         }

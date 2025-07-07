@@ -123,6 +123,8 @@ const SlowDown = ({ permissions }) => {
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
+        rateEO: row.rateEO,
+        rateEOE: row.rateEOE,
       }))
       const slowDownDetailsElastomer = newRow.map((row) => ({
         discription: row.discription,
@@ -138,6 +140,8 @@ const SlowDown = ({ permissions }) => {
         rate: row.rate,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
+        rateEO: null,
+        rateEOE: null,
       }))
       const response = await DataService.saveSlowdownData(
         plantId,
@@ -173,54 +177,52 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(modifiedCells)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        const requiredFields = [
-          'maintStartDateTime',
-          'maintEndDateTime',
-          'discription',
-          'remark',
-          'rate',
-          // 'durationInHrs',
-          'productName1',
-        ]
-        const requiredFieldsForElastomer = [
-          'maintStartDateTime',
-          'maintEndDateTime',
-          'discription',
-          'remark',
-          'rate',
-        ]
-        const validationMessage = validateFields(
-          data,
-          lowerVertName === 'elastomer'
-            ? requiredFieldsForElastomer
-            : requiredFields,
-        )
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
-
-        saveSlowDownData(data)
-      } catch (error) {
-        // setIsSaving(false);
+    try {
+      var data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 400)
+
+      const requiredFields = [
+        'maintStartDateTime',
+        'maintEndDateTime',
+        'discription',
+        'remark',
+        // 'rate',
+        // 'durationInHrs',
+        'productName1',
+      ]
+      const requiredFieldsForElastomer = [
+        'maintStartDateTime',
+        'maintEndDateTime',
+        'discription',
+        'remark',
+        'rate',
+      ]
+      const validationMessage = validateFields(
+        data,
+        lowerVertName === 'elastomer'
+          ? requiredFieldsForElastomer
+          : requiredFields,
+      )
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveSlowDownData(data)
+    } catch (error) {
+      // setIsSaving(false);
+    }
   }, [modifiedCells])
 
   const updateSlowdownData = async (newRow) => {
@@ -349,7 +351,8 @@ const SlowDown = ({ permissions }) => {
       field: 'productName1',
       title: 'Particulars',
       editable: true,
-      hidden: lowerVertName === 'elastomer' ? true : false,
+      hidden:
+        lowerVertName === 'elastomer' || lowerVertName === 'meg' ? true : false,
     },
 
     {
@@ -377,6 +380,22 @@ const SlowDown = ({ permissions }) => {
       title: 'Rate (TPH)',
       editable: true,
       type: 'number',
+      hidden: lowerVertName === 'meg' ? true : false,
+    },
+
+    {
+      field: 'rateEOE',
+      title: 'Rate (EOE)',
+      editable: true,
+      type: 'number',
+      hidden: lowerVertName === 'meg' ? false : true,
+    },
+    {
+      field: 'rateEO',
+      title: 'Rate (EO)',
+      editable: true,
+      type: 'number',
+      hidden: lowerVertName === 'meg' ? false : true,
     },
 
     {

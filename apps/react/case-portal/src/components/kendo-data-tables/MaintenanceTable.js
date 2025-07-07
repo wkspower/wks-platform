@@ -1,13 +1,12 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import { DataService } from 'services/DataService'
-import { useSession } from 'SessionStoreContext'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useSelector } from 'react-redux'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import KendoDataTables from './index'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
-import { validateFields } from 'utils/validationUtils'
+import KendoDataTables from './index'
 
 const MaintenanceTable = () => {
   const keycloak = useSession()
@@ -96,15 +95,12 @@ const MaintenanceTable = () => {
   const saveCrackerMaintenanceData = async (newRows) => {
     setLoading(true)
     try {
-      // console.log('Original newRows:', newRows)
-
       let plantId = ''
       let year = ''
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) plantId = JSON.parse(storedPlant)?.id
       year = localStorage.getItem('year') || ''
 
-      //  Map newRows to DecokePlanningDTO format
       const decokePlanningDTOList = newRows.map((row) => ({
         id: row?.idFromApi,
         monthName: row.monthName ?? null,
@@ -125,8 +121,6 @@ const MaintenanceTable = () => {
         plantId: plantId,
         remarks: row.remarks ?? row.remark ?? '',
       }))
-
-      // console.log('Mapped DTOs:', decokePlanningDTOList)
 
       const response = await DataService.saveCrackerMaintenance(
         {
@@ -213,21 +207,6 @@ const MaintenanceTable = () => {
   useEffect(() => {
     fetchData()
   }, [fetchData, oldYear, yearChanged, plantID])
-
-  const monthNames = [
-    'April',
-    'May',
-    'June',
-    'July',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-    'Jan',
-    'Feb',
-    'Mar',
-  ]
 
   const productionColumns = [
     {
@@ -365,11 +344,6 @@ const MaintenanceTable = () => {
       hidden: true,
     },
   ]
-
-  // const basecols = useMemo(
-  //   () => (dataConfig.isCracker ? crackercolumns : productionColumns),
-  //   [dataConfig.isCracker, productionColumns],
-  // )
 
   const basecols =
     lowerVertName == 'cracker' ? crackercolumns : productionColumns

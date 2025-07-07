@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Grid, GridColumn } from '@progress/kendo-react-grid'
-import { filterBy } from '@progress/kendo-data-query'
-import '@progress/kendo-theme-default/dist/all.css'
 import '@progress/kendo-font-icons/dist/index.css'
-import '../../kendo-data-grid.css'
+import { Grid, GridColumn } from '@progress/kendo-react-grid'
+import '@progress/kendo-theme-default/dist/all.css'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Box,
   Button,
@@ -17,41 +15,35 @@ import {
   TextField,
   Typography,
 } from '../../../node_modules/@mui/material/index'
-import { GridEditCell } from '@progress/kendo-react-grid'
-import { getDefaultColumnMenu } from '@progress/kendo-react-grid'
+import '../../kendo-data-grid.css'
 
 import DownloadIcon from '@mui/icons-material/Download'
 import UploadIcon from '@mui/icons-material/Upload'
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
 import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/index'
-import { truncateRemarks } from 'utils/remarksUtils'
-import { process } from '@progress/kendo-data-query'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
-import ProductCell from './Utilities-Kendo/ProductCell'
 import MonthCell from './Utilities-Kendo/MonthCell'
-import { ColumnMenu } from 'components/@extended/columnMenu'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
+import ProductCell from './Utilities-Kendo/ProductCell'
 import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
 import {
-  GridColumnMenuFilter,
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
 } from '../../../node_modules/@progress/kendo-react-grid/index'
-import { DurationEditor } from './Utilities-Kendo/numericViewCells'
+import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import {
   recalcDuration,
   recalcEndDate,
 } from './Utilities-Kendo/durationHelpers'
-import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
-import * as XLSX from 'xlsx'
+import { DurationEditor } from './Utilities-Kendo/numericViewCells'
 // import DateTimePickerr from './Utilities-Kendo/DatePicker'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 // import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
-import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
+import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -124,8 +116,6 @@ const KendoDataTables = ({
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
-  // const [group, setGroup] = useState([])
-  // const [expandedState, setExpandedState] = useState({})
   const [selectedUnit, setSelectedUnit] = useState()
   const [selectedGrade, setSelectedGrade] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
@@ -136,9 +126,6 @@ const KendoDataTables = ({
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
-  // const initialGroup = groupBy ? [{ field: groupBy }] : []
-
-  // console.log('grades', grades)
 
   const initialGroup = groupBy
     ? [
@@ -164,14 +151,10 @@ const KendoDataTables = ({
     setRows(
       rows.map((r) => ({
         ...r,
-        inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
+        inEdit: r.id === e.dataItem.id,
       })),
     )
   }
-
-  // console.log('modifiedCells', modifiedCells)
-
-  const [editedCellMap, setEditedCellMap] = useState({})
 
   const itemChange = useCallback(
     (e) => {
@@ -205,6 +188,8 @@ const KendoDataTables = ({
       // setEditedValue(changedField)
 
       setIsRowEdited(true)
+
+      console.log(e)
 
       const { dataItem, field, value } = e
       const itemId = dataItem.id
@@ -773,7 +758,6 @@ const KendoDataTables = ({
             sortable={{
               mode: 'multiple',
             }}
-            // filterable={columns.some((col) => dateFields.includes(col.field))}
             allRedCell={allRedCell}
             size='small'
             pageable={
@@ -1024,7 +1008,7 @@ const KendoDataTables = ({
                       data: (cellProps, allRedCell) => (
                         <RemarkCell
                           {...cellProps}
-                          allRedCell={allRedCell} // pass your extra flag
+                          allRedCell={allRedCell}
                           onRemarkClick={handleRemarkCellClick}
                         />
                       ),
@@ -1058,6 +1042,29 @@ const KendoDataTables = ({
                 )
               }
 
+              if (col.hideFilter && col.hideSort) {
+                return (
+                  <GridColumn
+                    key={col.field}
+                    field={col.field}
+                    title={col.title || col.headerName}
+                    hidden={col.hidden}
+                    className={
+                      col?.isDisabled
+                        ? 'k-number-right-disabled'
+                        : 'k-number-right'
+                    }
+                    editable={col?.editable ? true : false}
+                    headerClassName={isActive ? 'active-column' : ''}
+                    cells={{
+                      edit: { text: NoSpinnerNumericEditor },
+                      data: toolTipRenderer,
+                    }}
+                    format={col.format}
+                    sortable={false}
+                  />
+                )
+              }
               if (col.type === 'number') {
                 return (
                   <GridColumn

@@ -17,7 +17,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "mnt",
@@ -25,7 +27,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "shutdown",
@@ -33,7 +37,10 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "sad",
@@ -41,7 +48,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "bud",
@@ -49,7 +58,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "demoHHS",
@@ -57,7 +68,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "demoBBU",
@@ -65,7 +78,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "demoSAD",
@@ -73,7 +88,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "fourFD",
@@ -81,7 +98,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "fourF",
@@ -89,7 +108,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "fourFHours",
@@ -97,7 +118,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "fiveF",
@@ -105,7 +128,9 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   },
   {
     "field": "total",
@@ -113,6 +138,8 @@
     "editable": true,
     "type": "number",
     "format": "{0:#.###}",
-    "hidden": false
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true
   }
 ]

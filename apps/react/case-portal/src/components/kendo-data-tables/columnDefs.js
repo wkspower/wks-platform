@@ -76,14 +76,30 @@ export const ibrPlanColumns = [
     title: 'taSDId',
     hidden: true,
   },
+  {
+    field: 'isCoilId',
+    title: 'isCoilId',
+    hidden: true,
+  },
+  {
+    field: 'postCoilId',
+    title: 'postCoilId',
+    hidden: true,
+  },
+  {
+    field: 'preCoilId',
+    title: 'preCoilId',
+    hidden: true,
+  },
+
   { field: 'furnace', title: 'Furnace', editable: false, width: 200 },
 
   { field: 'ibrSD', title: 'Start Date-IBR', editable: true, width: 200 },
   { field: 'ibrED', title: 'End Date-IBR', editable: true, width: 200 },
   { field: 'taSD', title: 'Start Date-TA', editable: true, width: 200 },
   { field: 'taED', title: 'End Date-TA', editable: true, width: 200 },
-  { field: 'sdED', title: 'Start Date-SD', editable: true, width: 200 },
   { field: 'sdSD', title: 'Start Date-SD', editable: true, width: 200 },
+  { field: 'sdED', title: 'End Date-SD', editable: true, width: 200 },
 
   {
     field: 'preCoil',
