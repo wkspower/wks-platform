@@ -62,6 +62,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -71,6 +72,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -79,6 +81,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -87,6 +90,7 @@ const MonthwiseRawMaterial = () => {
       editable: false,
       align: 'right',
       headerAlign: 'left',
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -95,78 +99,79 @@ const MonthwiseRawMaterial = () => {
       editable: false,
       align: 'right',
       headerAlign: 'left',
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'aug',
       headerName: headerMap[8],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'sep',
       headerName: headerMap[9],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'oct',
       headerName: headerMap[10],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'nov',
       headerName: headerMap[11],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'dec',
       headerName: headerMap[12],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'jan',
       headerName: headerMap[1],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'feb',
       headerName: headerMap[2],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
       field: 'march',
       headerName: headerMap[3],
-
       align: 'right',
       headerAlign: 'left',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -174,6 +179,7 @@ const MonthwiseRawMaterial = () => {
       headerName: 'Total',
       align: 'right',
       editable: false,
+      format: '{0:#.#####}',
       type:'number'
     },
   ]
@@ -183,7 +189,7 @@ const MonthwiseRawMaterial = () => {
       field: 'material',
       headerName: 'Parameters',
       editable: false,
-      flex: 2,
+      flex: 2, 
       type:'number'
     },
     {
@@ -192,8 +198,8 @@ const MonthwiseRawMaterial = () => {
       editable: false,
       align: 'right',
       headerAlign: 'left',
-
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -203,6 +209,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -212,6 +219,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -221,6 +229,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -230,7 +239,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
-
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -240,6 +249,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -249,6 +259,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -258,6 +269,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -267,6 +279,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -276,6 +289,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -285,6 +299,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     {
@@ -294,6 +309,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
+      format: '{0:#.#####}',
       type:'number'
     },
     // {
