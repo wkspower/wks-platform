@@ -14,7 +14,7 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import KendoDataGrid, { UOMDropdown } from 'components/Kendo-Report-DataGrid/index'
 import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
 import {
   ExcelExport,
@@ -57,9 +57,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
-  const units = ['TPH', 'TPD']
-  const [selectedUnit, setSelectedUnit] = useState('TPH')
-
+  const [uom, setUom] = useState('TPH') 
   const [rowsMC, setRowsMC] = useState([])
   const [rowsMCYearWise, setRowsMCYearWise] = useState([])
   const [rowsCalculatedData, setRowsCalculatedData] = useState([])
@@ -79,16 +77,11 @@ const ProductionVolumeDataBasis = () => {
     return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
   }
 
-  const fetchData = async (reportType, setState, selectedUnit) => {
-    if (!selectedUnit) return
+  const fetchData = async (reportType, setState) => {
     try {
       setLoading(true)
       var data = []
-      data = await DataService.getProductionVolDataBasis(
-        keycloak,
-        reportType,
-        selectedUnit,
-      )
+      data = await DataService.getProductionVolDataBasis(keycloak, reportType)
 
       if (data?.code === 200) {
         const rowsWithId = data?.data?.map((item, index) => ({
@@ -118,10 +111,6 @@ const ProductionVolumeDataBasis = () => {
     }
   }
 
-  const handleUnitChange = (unit) => {
-    setSelectedUnit(unit)
-  }
-
   const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
 
@@ -146,18 +135,12 @@ const ProductionVolumeDataBasis = () => {
   })
 
   useEffect(() => {
-    fetchData('MC', setRowsMC, selectedUnit)
-    fetchData('MC Yearwise', setRowsMCYearWise, selectedUnit)
-    fetchData('Calculated Data', setRowsCalculatedData, selectedUnit)
-    fetchData('RowData', setRowsRowData, selectedUnit)
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    lowerVertName,
-    selectedUnit,
-  ])
+    fetchData('MC', setRowsMC, uom)
+    fetchData('MC Yearwise', setRowsMCYearWise, uom)
+    fetchData('Calculated Data', setRowsCalculatedData, uom)
+    fetchData('RowData', setRowsRowData, uom)
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName, uom])
+
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
   const exportRef3 = useRef(null)
@@ -241,42 +224,28 @@ const ProductionVolumeDataBasis = () => {
         </ExcelExport>
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      <Box 
+        display='flex' 
+        justifyContent='flex-end'
+        mb='2px' 
+        alignItems="center" 
+        gap={1}
+      >
+        <UOMDropdown
+          value={uom}
+          onChange={(e) => setUom(e.target.value)}
+          options={['TPH', 'TPD']}
+        />
         <Button
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
+          sx={{ minWidth: 100 }}
         >
           Export
         </Button>
-
-        <TextField
-          select
-          value={selectedUnit || 'TPH'}
-          onChange={(e) => {
-            setSelectedUnit(e.target.value)
-            handleUnitChange(e.target.value)
-          }}
-          sx={{
-            width: '150px',
-            backgroundColor: '#FFFFFF',
-            marginLeft: '12px',
-          }}
-          variant='outlined'
-          label='Select UOM'
-        >
-          <MenuItem value='' disabled>
-            Select UOM
-          </MenuItem>
-
-          {units.map((unit) => (
-            <MenuItem key={unit} value={unit}>
-              {unit}
-            </MenuItem>
-          ))}
-        </TextField>
+    
       </Box>
-
       <Box display='flex' flexDirection='column' gap={2}>
         <div>
           <CustomAccordion defaultExpanded disableGutters>

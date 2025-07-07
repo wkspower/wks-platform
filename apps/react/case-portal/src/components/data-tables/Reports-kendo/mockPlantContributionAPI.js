@@ -40,6 +40,7 @@ export const MockReportService = {
                   editable: false,
                   align: 'right',
                   width: 120,
+                  type:'number'
                 },
               ],
             },
@@ -62,6 +63,7 @@ export const MockReportService = {
                       editable: false,
                       align: 'right',
                       width: 120,
+                      type:'number'
                     },
                   ],
                 },
@@ -74,6 +76,7 @@ export const MockReportService = {
                       editable: false,
                       align: 'right',
                       width: 120,
+                      type:'number'
                     },
                   ],
                 },
@@ -115,6 +118,7 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
+                  type:'number'
                 },
               ],
             },
@@ -130,6 +134,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearNormActual',
@@ -137,6 +142,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -149,6 +155,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -166,6 +173,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearCostActual',
@@ -173,6 +181,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -185,6 +194,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -226,6 +236,7 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
+                  type:'number'
                 },
               ],
             },
@@ -241,6 +252,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearNormActual',
@@ -248,6 +260,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -260,6 +273,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -277,6 +291,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearCostActual',
@@ -284,6 +299,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -296,6 +312,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -337,6 +354,7 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
+                  type:'number'
                 },
               ],
             },
@@ -352,6 +370,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearNormActual',
@@ -359,6 +378,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+              
+                      type:'number'
                     },
                   ],
                 },
@@ -371,6 +392,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -388,6 +410,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearCostActual',
@@ -395,6 +418,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -407,6 +431,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -448,6 +473,7 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
+                  type:'number'
                 },
               ],
             },
@@ -463,6 +489,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearNormActual',
@@ -482,6 +509,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -499,6 +527,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                     {
                       field: 'PrevYearCostActual',
@@ -506,6 +535,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -518,6 +548,7 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
+                      type:'number'
                     },
                   ],
                 },
@@ -562,6 +593,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: true,
+                  type:'number'
                 },
                 {
                   field: 'PrevYearActual',
@@ -569,6 +601,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: true,
+                  type:'number'
                 },
               ],
             },
@@ -581,6 +614,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: true,
+                  type:'number'
                 },
               ],
             },
@@ -614,6 +648,8 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: false,
+
+                  type:'number'
                 },
                 {
                   field: 'PrevYearActual',
@@ -621,6 +657,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: false,
+                  type:'number'
                 },
               ],
             },
@@ -633,6 +670,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: false,
+                  type:'number'
                 },
               ],
             },

@@ -40,7 +40,7 @@ import {
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
-
+import { Switch } from '@progress/kendo-react-inputs';
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -520,6 +520,52 @@ const KendoDataTablesCracker = ({
             />
           )
         }
+  //--
+  if (col.type === 'switch') {
+  const handleSwitchChange = (props, value) => {
+    itemChange({
+      dataItem: props.dataItem,
+      field: props.field,
+      value: value,
+    });
+  };
+
+  return (
+    <GridColumn
+      key={col.field} // Fixed typo: was col.fieldf
+      field={col.field}
+      title={col.title || col.headerName}
+      width={col.width || 150}
+      hidden={col.hidden}
+      editable={true}
+      headerClassName={isColumnActive(col?.field, filter, sort) ? 'active-column' : ''}
+      columnMenu={ColumnMenuCheckboxFilter}
+      cells={{
+        edit: {
+          text: (props) => (
+            <td style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
+              <Switch
+              className="custom-switch"
+                checked={!!props.dataItem[props.field]}
+                onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
+              />
+            </td>
+          ),
+        },
+        data: (props) => (
+          <td style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Switch
+            className="custom-switch"
+              checked={!!props.dataItem[props.field]}
+              onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
+            />
+          </td>
+        ),
+      }}
+    />
+  )
+}
+//---
         return (
           <GridColumn
             key={col.field}

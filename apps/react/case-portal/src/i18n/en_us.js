@@ -41,7 +41,7 @@ const defs = {
     catalystSelectivity: 'Configuration',
     productDemand: 'Business Demand',
     shutdownPlan: 'Shutdown/TA Activities',
-    shutdownNorms: 'Shutdown Norms',
+    shutdownNorms: 'Shutdown Consumption',
     slowdownNorms: 'Slowdown Norms',
     normalOpNorms: 'Normal Operation Norms',
     slowdownPlan: 'Slowdown Activities',
@@ -55,10 +55,10 @@ const defs = {
     safety: 'Safety', // New addition
     functions: 'Functions', // New addition
     reliability: 'Reliability', // New addition
-    reports: 'Reports', // New addition
-    annualAopCostReport: 'Annual AOP Cost Basis', // New addition
-    productionVolumeDataBasis: 'Production Volume Data Basis', // New addition
-    normsHistorianBasis: 'Norms Historian Basis', // New addition
+    reports: 'Data Set', // New addition
+    annualAopCostReport: 'Annual AOP Cost', // New addition
+    productionVolumeDataBasis: 'Production Volume Data', // New addition
+    normsHistorianBasis: 'Norms Historian', // New addition
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     monthwiseRawMaterial: 'Monthwise Raw Material',

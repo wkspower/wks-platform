@@ -75,12 +75,14 @@ const MonthwiseProduction = () => {
               title: 'Budget',
               width: 120,
               editable: false,
+              type:'number'
             },
             {
               field: 'EOEProdActual',
               title: 'Actual',
               width: 120,
               editable: false,
+              type:'number'
             },
           ],
         },
@@ -92,12 +94,14 @@ const MonthwiseProduction = () => {
               title: 'Budget',
               width: 120,
               editable: false,
+              type:'number'
             },
             {
               field: 'OpHrsActual',
               title: 'Actual',
               width: 120,
               editable: false,
+              type:'number'
             },
           ],
         },
@@ -109,12 +113,14 @@ const MonthwiseProduction = () => {
               title: 'Budget',
               width: 120,
               editable: false,
+              type:'number'
             },
             {
               field: 'ThroughputActual',
               title: 'Actual',
               width: 120,
               editable: false,
+              type:'number'
             },
           ],
         },
@@ -129,30 +135,35 @@ const MonthwiseProduction = () => {
           title: 'Operating Hours',
           width: 150,
           editable: false,
+          type:'number'
         },
         {
           field: 'MEGThroughput',
           title: 'MEG Throughput, TPH',
           width: 150,
           editable: false,
+          type:'number'
         },
         {
           field: 'EOThroughput',
           title: 'EO Throughput, TPH',
           width: 150,
           editable: false,
+          type:'number'
         },
         {
           field: 'EOEThroughput',
           title: 'EOE Throughput, TPH',
           width: 150,
           editable: false,
+          type:'number'
         },
         {
           field: 'TotalEOE',
           title: 'Total EOE, MT',
           width: 150,
           editable: false,
+          type:'number'
         },
       ],
     },

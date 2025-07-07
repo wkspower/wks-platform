@@ -17,13 +17,9 @@ import {
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
 
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import KendoDataGrid, { UOMDropdown } from 'components/Kendo-Report-DataGrid/index'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
-import {
-  Button,
-  MenuItem,
-  TextField,
-} from '../../../../node_modules/@mui/material/index'
+import { Button } from '../../../../node_modules/@mui/material/index'
 import moment from '../../../../node_modules/moment/moment'
 
 const CustomAccordion = styled((props) => (
@@ -56,8 +52,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
-  const [selectedUnit, setSelectedUnit] = useState('TPH')
-
+  const [uom, setUom] = useState('TPH')
   const [rowsHistorianValues, setHistorianValues] = useState([])
   const [rowsMcuAndNormGrid, setMcuAndNormGrid] = useState([])
   const [rowsProductionVolumeData, setProductionVolumeData] = useState([])
@@ -69,31 +64,16 @@ const NormsHistorianBasis = () => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [loading, setLoading] = useState(false)
-  const units = ['TPH', 'TPD']
 
   useEffect(() => {
-    const fetchAllData = async (selectedUnit) => {
-      if (!selectedUnit) return
+    const fetchAllData = async () => {
       setLoading(true)
 
       try {
         const results = await Promise.all([
-          DataService.getNormsHistorianBasis(
-            keycloak,
-            'HistorianValues',
-            selectedUnit,
-          ),
-          DataService.getNormsHistorianBasis(
-            keycloak,
-            'McuAndNormGrid',
-            selectedUnit,
-          ),
-
-          DataService.getNormsHistorianBasis(
-            keycloak,
-            'ProductionVolumeData',
-            selectedUnit,
-          ),
+          DataService.getNormsHistorianBasis(keycloak, 'HistorianValues', uom),
+          DataService.getNormsHistorianBasis(keycloak, 'McuAndNormGrid', uom),
+          DataService.getNormsHistorianBasis(keycloak, 'ProductionVolumeData', uom),
         ])
 
         const [historianRes, mcuRes, prodRes] = results
@@ -144,15 +124,8 @@ const NormsHistorianBasis = () => {
       }
     }
 
-    fetchAllData(selectedUnit)
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    lowerVertName,
-    selectedUnit,
-  ])
+    fetchAllData()
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName, uom])
 
   const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
@@ -197,11 +170,6 @@ const NormsHistorianBasis = () => {
     .replace(/:/g, '-')
     .split('.')[0]
   const fileName = `Norms Historian Basis ${currentDateTime}.xlsx`
-
-  const handleUnitChange = (unit) => {
-    setLoading(true)
-    setSelectedUnit(unit)
-  }
 
   return (
     <div>
@@ -249,7 +217,12 @@ const NormsHistorianBasis = () => {
         </ExcelExport>
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      <Box display='flex' justifyContent='flex-end' mb='2px' gap={1}>
+        <UOMDropdown
+          value={uom}
+          onChange={(e) => setUom(e.target.value)}
+          options={['TPH', 'TPD']}
+        />
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -257,32 +230,6 @@ const NormsHistorianBasis = () => {
         >
           Export
         </Button>
-
-        <TextField
-          select
-          value={selectedUnit || 'TPH'}
-          onChange={(e) => {
-            setSelectedUnit(e.target.value)
-            handleUnitChange(e.target.value)
-          }}
-          sx={{
-            width: '150px',
-            backgroundColor: '#FFFFFF',
-            marginLeft: '12px',
-          }}
-          variant='outlined'
-          label='Select UOM'
-        >
-          <MenuItem value='' disabled>
-            Select UOM
-          </MenuItem>
-
-          {units.map((unit) => (
-            <MenuItem key={unit} value={unit}>
-              {unit}
-            </MenuItem>
-          ))}
-        </TextField>
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>

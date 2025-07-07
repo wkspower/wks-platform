@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import KendoDataGrid, { UOMDropdown } from 'components/Kendo-Report-DataGrid/index'
 import getKendoColumns from 'components/data-tables/CommonHeader/kendoHeader'
 import {
   ExcelExport,
@@ -51,6 +51,7 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const AnnualAopCost = () => {
   const keycloak = useSession()
+  const [uom, setUom] = useState('TPH')
   const [rowsProduction, setRowsProduction] = useState([])
   const [rowsPrice, setRowsPrice] = useState([])
   const [rowsNorm, setRowsNorm] = useState([])
@@ -137,11 +138,11 @@ const AnnualAopCost = () => {
       setLoading(true)
 
       const allFetches = [
-        fetchData('production', setRowsProduction),
-        fetchData('price', setRowsPrice),
-        fetchData('norm', setRowsNorm),
-        fetchData('quantity', setRowsQuantity),
-        fetchData('normCost', setRowsNormCost),
+        fetchData('production', setRowsProduction, uom),
+        fetchData('price', setRowsPrice, uom),
+        fetchData('norm', setRowsNorm, uom),
+        fetchData('quantity', setRowsQuantity, uom),
+        fetchData('normCost', setRowsNormCost, uom),
       ]
 
       await Promise.all(allFetches)
@@ -149,7 +150,7 @@ const AnnualAopCost = () => {
     }
 
     fetchAllData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName, uom])
 
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
@@ -248,7 +249,12 @@ const AnnualAopCost = () => {
         </ExcelExport>
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      <Box display='flex' justifyContent='flex-end' mb='2px' gap={1}>
+        <UOMDropdown
+          value={uom}
+          onChange={(e) => setUom(e.target.value)}
+          options={['TPH', 'TPD']}
+        />
         <Button
           variant='contained'
           onClick={exportAllGrids}

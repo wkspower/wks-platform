@@ -176,6 +176,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimals(params.value)}</span>
         </Tooltip>
       ),
+      type:'number'
     },
     { field: 'uom', headerName: 'UOM', editable: true, flex: 1 },
   ]
@@ -219,6 +220,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
+      type:'number'
     },
     {
       field: 'uom',
@@ -271,6 +273,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimalsTwo(params.value)}</span>
         </Tooltip>
       ),
+      type:'number'
     },
     {
       field: 'durationHours',
@@ -287,6 +290,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
+      type:'number'
     },
     {
       field: 'periodFrom',
@@ -396,6 +400,8 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.#####}',
+          type:'number'
         },
       ],
     },

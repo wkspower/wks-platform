@@ -126,7 +126,6 @@ const WorkFlowMerge = () => {
   useEffect(() => {
     fetchData()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
-
   const handleCalculate = () => {
     if (lowerVertName == 'meg') {
       handleCalculateMeg()
@@ -215,7 +214,6 @@ const WorkFlowMerge = () => {
   const handleExportAll = async () => {
     try {
       setLoading(true)
-      // console.log('true 2')
 
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -322,55 +320,66 @@ const WorkFlowMerge = () => {
     )
   }
   const generateColumns = (data, numericKeys, handleRemarkCellClick) => {
-    const cols = data.headers.map((header, i) => {
-      const field = data.keys[i]
-      const isNumeric = numericKeys.includes(field)
-      return {
-        field,
-        headerName: header,
-        // minWidth: i === 0 ? 300 : 150,
-        flex: 1,
-        ...(i === 0 && {
-          renderHeader: (p) => <div>{p.colDef.headerName}</div>,
-        }),
-        ...(isNumeric && {
-          type: 'number',
-          format: '{0:#.###}',
-          // valueFormatter: ({ value }) =>
-          //   value === '' || value == null ? '' : Number(value).toFixed(2),
-        }),
-      }
-    })
+  const cols = data.headers.map((header, i) => {
+    const field = data.keys[i]
+    const isNumeric = numericKeys.includes(field)
+    return {
+      field,
+      headerName: header,
+      flex: 1,
+      ...(i === 0 && {
+        renderHeader: (p) => <div>{p.colDef.headerName}</div>,
+      }),
+      ...(isNumeric && {
+        type: 'number',
+        // Use both valueFormatter and renderCell to ensure formatting
+        valueFormatter: ({ value }) => {
+          if (value === '' || value == null || value === undefined) return '';
+          const numValue = Number(value);
+          return isNaN(numValue) ? '' : numValue.toFixed(5);
+        },
+        renderCell: (params) => {
+          if (params.value === '' || params.value == null || params.value === undefined) return '';
+          const numValue = Number(params.value);
+          return isNaN(numValue) ? '' : numValue.toFixed(5);
+        },
+      }),
+    }
+  })
 
     const remarkIdx = cols.findIndex((c) => c.field === 'remark')
     if (remarkIdx > -1) {
       cols[remarkIdx] = remarkColumn(handleRemarkCellClick)
+
     }
 
     return cols
-    // The column is considered numeric if:
-    // - It's a valid number (including empty values)
+        // The column is considered numeric if:
+        // - It's a valid number (including empty values)
   }
 
-  const fetchData = async () => {
-    // setLoading(true)
-    // console.log('true 3')
-    try {
-      const { headers, keys, results } = await DataService.getWorkflowData(
-        keycloak,
-        plantId,
-      )
-      const numericKeys = getNumericKeysInAllRows(results)
-      const formatted = results.map((row, idx) => ({
-        id: idx,
-        ...row,
-        ...Object.fromEntries(
-          Object.entries(row).map(([k, v]) => [
-            k,
-            numericKeys.includes(k) && v !== '' ? Number(v) : v,
-          ]),
-        ),
-      }))
+// Also update the fetchData function to ensure numeric values are properly formatted
+const fetchData = async () => {
+  setLoading(true)
+  try {
+    const { headers, keys, results } = await DataService.getWorkflowData(
+      keycloak,
+      plantId,
+    )
+    const numericKeys = getNumericKeysInAllRows(results)
+    const formatted = results.map((row, idx) => ({
+      id: idx,
+      ...row,
+      ...Object.fromEntries(
+        Object.entries(row).map(([k, v]) => {
+          if (numericKeys.includes(k) && v !== '' && v != null) {
+            const numValue = Number(v);
+            return [k, isNaN(numValue) ? v : parseFloat(numValue.toFixed(5))];
+          }
+          return [k, v];
+        }),
+      ),
+    }))
 
       setRows(formatted)
       setColumns(
