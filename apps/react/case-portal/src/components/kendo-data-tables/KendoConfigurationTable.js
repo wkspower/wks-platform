@@ -1,15 +1,14 @@
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box, Tab, Tabs } from '@mui/material'
+import MuiAccordion from '@mui/material/Accordion'
+import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-
 import { styled } from '@mui/material/styles'
-
+import Notification from 'components/Utilities/Notification'
 import {
   Backdrop,
   Button,
@@ -22,10 +21,8 @@ import {
   TextField,
   Typography,
 } from '../../../node_modules/@mui/material/index'
-import SelectivityData from './SelectivityData'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
-import Notification from 'components/Utilities/Notification'
-
+import SelectivityData from './SelectivityData'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -37,7 +34,6 @@ const CustomAccordion = styled((props) => (
     display: 'none',
   },
 }))
-
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
 ))(() => ({
@@ -52,21 +48,17 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   padding: '0px 0px 12px',
   backgroundColor: '#F2F3F8',
 }))
-
 const ConfigurationTable = () => {
   const keycloak = useSession()
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-
   const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
-
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
@@ -82,16 +74,12 @@ const ConfigurationTable = () => {
   const [discontiniousGradeData, setDiscontiniousGradeData] = useState([])
   const [tabs, setTabs] = useState([])
   const [availableTabs, setAvailableTabs] = useState([])
-  // const [summary, setSummary] = useState('')
-
   const [summary, setSummary] = useState('')
   const [debouncedSummary, setDebouncedSummary] = useState('')
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSummary(summary)
     }, 300) // adjust debounce delay as needed
-
     return () => clearTimeout(handler)
   }, [summary])
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -106,31 +94,18 @@ const ConfigurationTable = () => {
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
   const [isEdited, setIsEdited] = useState(false)
-
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
-
   const handleOpenDialog = () => {
     setOpenConfirmDialog(true)
   }
-
   const handleCloseDialog = () => {
     setOpenConfirmDialog(false)
   }
-
   const handleConfirmLoad = () => {
     setOpenConfirmDialog(false)
     onLoad()
   }
-
-  // const [_plantID, set_PlantID] = useState('')
-  // useEffect(() => {
-  //   if (plantID?.plantId) {
-  //     set_PlantID(plantID?.plantId)
-  //   }
-  // }, [plantID])
-
   const fetchData = async () => {
-    // setRows([])
     setProductionRows([])
     setProductionRowsConstants([])
     setProductionRowsConstantsMannualEntry([])
@@ -138,10 +113,8 @@ const ConfigurationTable = () => {
     try {
       setLoading(true)
       var data = await DataService.getCatalystSelectivityData(keycloak)
-
       if (lowerVertName == 'meg') {
         data = data?.filter((item) => item.normType !== 'Report Manual Entry')
-
         const formattedData = data.map((item, index) => ({
           ...item,
           idFromApi: item.id,
@@ -154,7 +127,6 @@ const ConfigurationTable = () => {
         if (data) {
           setLoading(false)
         }
-
         // setRows(formattedData)
       } else if (lowerVertName == 'elastomer') {
         const formattedData = data.map((item, index) => ({
@@ -221,7 +193,6 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
-
   const fetchDataConstants = async () => {
     setProductionRowsConstants([])
     try {
@@ -241,18 +212,15 @@ const ConfigurationTable = () => {
         Particulars: item.NormTypeName,
         remarks: item.Remarks,
       }))
-
       setProductionRowsConstants(formattedData)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
   }
-
   const fetchDataConstantsMnnualEntry = async () => {
     setProductionRowsConstantsMannualEntry([])
     try {
       var constantsRes = await DataService.getCatalystSelectivityData(keycloak)
-
       const formattedData = constantsRes.map((item, index) => ({
         ...item,
         idFromApi: item.id,
@@ -261,17 +229,14 @@ const ConfigurationTable = () => {
         srNo: index + 1,
         Particulars: item.normType,
       }))
-
       var data = formattedData?.filter(
         (item) => item?.Particulars == 'Report Manual Entry',
       )
-
       setProductionRowsConstantsMannualEntry(data)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
   }
-
   const fetchGradeData = async () => {
     setLoading(true)
     try {
@@ -288,14 +253,12 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
-
   const getConfigurationTabsMatrix = async () => {
     setLoading(true)
     try {
       var response = await DataService.getConfigurationTabsMatrix(keycloak)
       if (response?.code == 200) {
         const parsedData = JSON.parse(response?.data)
-
         setTabs(parsedData)
         setLoading(false)
       } else {
@@ -308,12 +271,10 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
-
   const getConfigurationAvailableTabs = async () => {
     setLoading(true)
     try {
       var response = await DataService.getConfigurationAvailableTabs(keycloak)
-
       if (response?.code == 200) {
         setAvailableTabs(response?.data?.configurationTypeList)
         setLoading(false)
@@ -327,7 +288,6 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
-
   useEffect(() => {
     getConfigurationExecutionDetails()
     getAopSummary()
@@ -341,7 +301,6 @@ const ConfigurationTable = () => {
         fetchGradeData()
       }
     }, 500)
-
     // const today = new Date()
     // const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
     // const startDate = new Date(
@@ -352,27 +311,22 @@ const ConfigurationTable = () => {
     // setStartDate(startDate)
     // setEndDate(endDate)
   }, [oldYear, yearChanged, keycloak, plantID])
-
   const computeAndSetDates = useCallback(() => {
     setStartDate('')
     setEndDate('')
     // if (!configurationExecutionDetails.length) return
-
     const hasModifiedOn = configurationExecutionDetails[0]?.ModifiedOn
-
     if (hasModifiedOn) {
       // console.log(
       //   'configurationExecutionDetails',
       //   configurationExecutionDetails,
       // )
-
       const getDateValue = (name) =>
         new Date(
           configurationExecutionDetails.find(
             (item) => item.Name === name,
           )?.AttributeValue,
         )
-
       setStartDate(getDateValue('StartDate'))
       setEndDate(getDateValue('EndDate'))
     } else {
@@ -383,62 +337,47 @@ const ConfigurationTable = () => {
         today.getMonth(),
         1,
       )
-
       setStartDate(fallbackStartDate)
       setEndDate(fallbackEndDate)
     }
   }, [configurationExecutionDetails, plantID])
-
   useEffect(() => {
     computeAndSetDates()
   }, [computeAndSetDates])
-
   const getTheId = (name) => {
     const tab = availableTabs.find((tab) => tab.name === name)
     return tab ? tab.id : null
   }
-
   function formatDate(date) {
     if (!date) return ''
-
     const year = date?.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
-
     return `${year}-${month}-${day}`
   }
   function formatDateForText(date, time = false) {
     if (!date) return ''
-
     const parsedDate = new Date(date)
     if (isNaN(parsedDate)) return 'Invalid Date'
-
     const day = String(parsedDate.getDate()).padStart(2, '0')
     const month = String(parsedDate.getMonth() + 1).padStart(2, '0')
     const year = parsedDate.getFullYear()
-
     let formatted = `${day}-${month}-${year}`
-
     if (time) {
       let hours = parsedDate.getHours()
       const minutes = String(parsedDate.getMinutes()).padStart(2, '0')
       const ampm = hours >= 12 ? 'PM' : 'AM'
-
       hours = hours % 12
       hours = hours ? hours : 12 // 0 becomes 12
-
       const formattedTime = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`
       formatted += ` ${formattedTime}`
     }
-
     return formatted
   }
-
   const getAopSummary = async () => {
     try {
       setSummary('')
       var res = await DataService.getAopSummary(keycloak)
-
       if (res?.code == 200) {
         setSummary(res?.data?.summary)
       } else {
@@ -450,15 +389,12 @@ const ConfigurationTable = () => {
   }
   const onLoadTest = async (startDateObj, endDateObj) => {
     setLoading1(true)
-
     const plantId =
       JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
     const auditYear = localStorage.getItem('year')
-
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
     const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
-
     const createPayloadItem = (obj, date) => ({
       apr: date,
       UOM: '',
@@ -468,15 +404,12 @@ const ConfigurationTable = () => {
       id: obj?.Id || null,
       plantId,
     })
-
     const payload = [
       createPayloadItem(startDateObj, formatDate(startDate)),
       createPayloadItem(endDateObj, formatDate(endDate)),
     ]
-
     try {
       const response = await DataService.executeConfiguration(payload, keycloak)
-
       if (response?.code === 200) {
         await getConfigurationExecutionDetails()
       } else {
@@ -495,35 +428,27 @@ const ConfigurationTable = () => {
       setLoading1(false)
     }
   }
-
   useEffect(() => {
     hasExecutedRef.current = false
     getConfigurationExecutionDetails()
   }, [plantID])
-
   const hasExecutedRef = useRef(false)
-
   const getConfigurationExecutionDetails = async () => {
     try {
       const response =
         await DataService.getConfigurationExecutionDetails(keycloak)
       const details = response?.data || []
-
       if (details.length === 0) {
         console.warn(
           'getConfigurationExecutionDetails returned an empty array:',
           response,
         )
       }
-
       const hasNoModifiedOn = details.length && !details[0]?.ModifiedOn
-
       if (hasNoModifiedOn && !hasExecutedRef.current) {
         const startDateObj = details.find((item) => item.Name === 'StartDate')
         const endDateObj = details.find((item) => item.Name === 'EndDate')
-
         hasExecutedRef.current = true
-
         await onLoadTest(startDateObj, endDateObj)
       } else {
         setConfigurationExecutionDetails(details)
@@ -535,7 +460,6 @@ const ConfigurationTable = () => {
       // setLoading1(false)
     }
   }
-
   const onLoad = async () => {
     setLoading1(true)
     if (startDate && endDate && startDate > endDate) {
@@ -546,15 +470,12 @@ const ConfigurationTable = () => {
       })
       return
     }
-
     const startDateObj = configurationExecutionDetails.find(
       (item) => item.Name === 'StartDate',
     )
-
     const endDateObj = configurationExecutionDetails.find(
       (item) => item.Name === 'EndDate',
     )
-
     if (!startDateObj?.Id || !endDateObj?.Id) {
       console.warn(
         'StartDate or EndDate object is missing Id. Aborting execution.',
@@ -566,7 +487,6 @@ const ConfigurationTable = () => {
       })
       return
     }
-
     setLoading(true)
     try {
       var plantId = ''
@@ -575,13 +495,10 @@ const ConfigurationTable = () => {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-
       // console.log('startDateObj', startDateObj)
       // console.log('endDateObj', endDateObj)
-
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
-
       const payload = [
         {
           apr: formatDate(startDate),
@@ -602,7 +519,6 @@ const ConfigurationTable = () => {
           plantId: plantId,
         },
       ]
-
       const response = await DataService.executeConfiguration(payload, keycloak)
       if (response) {
         setSnackbarOpen(true)
@@ -630,14 +546,11 @@ const ConfigurationTable = () => {
       setLoading1(false)
     }
   }
-
   useEffect(() => {
     if (tabIndex >= tabs.length) {
       setTabIndex(0)
     }
   }, [tabs])
-
-  // const [isEdited, setIsEdited] = useState(false)
   if (lowerVertName == 'elastomer') {
     return (
       <SelectivityData
@@ -651,29 +564,22 @@ const ConfigurationTable = () => {
       />
     )
   }
-
   const one = configurationExecutionDetails.find(
     (item) => item.Name === 'StartDate',
   )
   const two = configurationExecutionDetails.find(
     (item) => item.Name === 'EndDate',
   )
-
   const startDate1 = new Date(one?.AttributeValue)
   const endDate1 = new Date(two?.AttributeValue)
-
   if (lowerVertName == 'meg' && lowerVertName !== 'cracker') {
     const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')
-
     let displayYear = ''
     if (auditYear) {
       const [start, end] = auditYear.split('-').map(Number)
       displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
     }
-
-    // console.log(loading1)
-
     return (
       <div>
         <Backdrop
@@ -682,7 +588,6 @@ const ConfigurationTable = () => {
         >
           <CircularProgress color='inherit' />
         </Backdrop>
-
         <Box sx={{ mb: '4px' }}>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
@@ -725,7 +630,6 @@ const ConfigurationTable = () => {
                       style={{ height: '80px' }}
                       size={'large'}
                     />
-
                     <Typography
                       className='grid-title'
                       sx={{ whiteSpace: 'nowrap' }}
@@ -762,7 +666,6 @@ const ConfigurationTable = () => {
                   )}
                 </Box>
               </Box>
-
               <TextField
                 label='AOP Design Basis'
                 multiline
@@ -810,7 +713,6 @@ const ConfigurationTable = () => {
             </CustomAccordionDetails>
           </CustomAccordion>
         </Box>
-
         <Box>
           <Tabs
             value={tabIndex}
@@ -836,7 +738,6 @@ const ConfigurationTable = () => {
               />
             ))}
           </Tabs>
-
           {(() => {
             const currentTab = megTabs[tabIndex]?.toLowerCase()
             switch (currentTab) {
@@ -885,20 +786,17 @@ const ConfigurationTable = () => {
                     tabIndex='2'
                   />
                 )
-
               default:
                 return null
             }
           })()}
         </Box>
-
         <Notification
           open={snackbarOpen}
           message={snackbarData?.message || ''}
           severity={snackbarData?.severity || 'info'}
           onClose={() => setSnackbarOpen(false)}
         />
-
         <Dialog
           open={openConfirmDialog}
           onClose={handleCloseDialog}
@@ -921,7 +819,6 @@ const ConfigurationTable = () => {
       </div>
     )
   }
-
   return (
     <div>
       <Backdrop
@@ -930,7 +827,6 @@ const ConfigurationTable = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
       <Box sx={{ mb: '6px' }}>
         <CustomAccordion defaultExpanded disableGutters>
           <CustomAccordionSummary
@@ -973,7 +869,6 @@ const ConfigurationTable = () => {
                     style={{ height: '80px' }}
                     size={'large'}
                   />
-
                   <Typography
                     className='grid-title'
                     sx={{ whiteSpace: 'nowrap' }}
@@ -1009,7 +904,6 @@ const ConfigurationTable = () => {
                   </Typography>
                 )}
               </Box>
-
               {/* Right Side: Save Button */}
               {/* <Button
                   variant='contained'
@@ -1020,7 +914,6 @@ const ConfigurationTable = () => {
                   Save Summary
                 </Button> */}
             </Box>
-
             <TextField
               label='AOP Design Basis'
               multiline
@@ -1068,14 +961,12 @@ const ConfigurationTable = () => {
           </CustomAccordionDetails>
         </CustomAccordion>
       </Box>
-
       <Notification
         open={snackbarOpen}
         message={snackbarData?.message || ''}
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
       />
-
       <Dialog
         open={openConfirmDialog}
         onClose={handleCloseDialog}
@@ -1095,7 +986,6 @@ const ConfigurationTable = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       <div
         style={{
           display: 'flex',
@@ -1131,7 +1021,6 @@ const ConfigurationTable = () => {
             )
           })}
         </Tabs>
-
         <Box>
           {(() => {
             const currentTabId = tabs[tabIndex]?.toLowerCase()
@@ -1228,5 +1117,4 @@ const ConfigurationTable = () => {
     </div>
   )
 }
-
 export default ConfigurationTable
