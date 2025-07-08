@@ -1,7 +1,7 @@
 import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import {
   Box,
   Button,
@@ -20,10 +20,6 @@ import UploadIcon from '@mui/icons-material/Upload'
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
 import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/index'
-import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
-import MonthCell from './Utilities-Kendo/MonthCell'
-import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
-import ProductCell from './Utilities-Kendo/ProductCell'
 import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
@@ -31,8 +27,8 @@ import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import { styled } from '@mui/material/styles'
+import { Switch } from '@progress/kendo-react-inputs'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
-import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 import {
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
@@ -40,7 +36,6 @@ import {
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
-import { Switch } from '@progress/kendo-react-inputs'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -68,12 +63,6 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-export const dateFields = [
-  'maintStartDateTime',
-  'maintEndDateTime',
-  'fromDate',
-  'toDate',
-]
 export const dateFields1 = [
   'ibrSD',
   'ibrED',
@@ -99,7 +88,7 @@ export const monthMap = {
   december: 12,
 }
 
-const KendoDataTablesCracker = ({
+const KendoDataTablesCrackerRunLength = ({
   rows = [],
   grades = [],
   allRedCell = [],
@@ -172,23 +161,54 @@ const KendoDataTablesCracker = ({
   }
   const itemChange = useCallback(
     (e) => {
-      setIsRowEdited(true)
       const { dataItem, field, value } = e
       const itemId = dataItem.id
-      setRows((prev) =>
-        prev.map((r) => {
-          if (r.id !== itemId) return r
-          const updated = { ...r, [field]: value }
-          return updated
-        }),
-      )
+
+      setRows((prevRows) => {
+        const editedIndex = prevRows.findIndex((r) => r.id === itemId)
+
+        if (value === 'SAD') {
+          // Find the last "SAD" above the current cell
+          let lastSADIndex = -1
+          for (let i = editedIndex - 1; i >= 0; i--) {
+            if (prevRows[i][field] === 'SAD') {
+              lastSADIndex = i
+              break
+            }
+          }
+
+          // Reset values between lastSADIndex and editedIndex
+          let counter = 0
+          const updatedRows = prevRows.map((row, index) => {
+            if (index > lastSADIndex && index < editedIndex) {
+              return { ...row, [field]: counter++ }
+            }
+            if (index === editedIndex) {
+              return { ...row, [field]: 'SAD' }
+            }
+            return row
+          })
+
+          return updatedRows
+        } else {
+          // Default case: update single cell
+          return prevRows.map((row) =>
+            row.id === itemId ? { ...row, [field]: value } : row,
+          )
+        }
+      })
+
+      // update modifiedCells (if still used)
       setModifiedCells((prev) => {
         const base = { ...dataItem, [field]: value }
         return { ...prev, [itemId]: base }
       })
+
+      setIsRowEdited(true)
     },
     [setRows, setModifiedCells],
   )
+
   const handleRemarkSave = () => {
     setRows((prevRows) => {
       let updatedRow = null
@@ -320,6 +340,8 @@ const KendoDataTablesCracker = ({
       onFilterChange={(e) => setFilter(e.filter)}
       onItemChange={itemChange}
       resizable={true}
+      defaultSkip={0}
+      defaultTake={100}
       contextMenu={true}
       grade={grades}
       onRowClick={handleRowClick}
@@ -328,41 +350,18 @@ const KendoDataTablesCracker = ({
       }}
       allRedCell={allRedCell}
       size='small'
+      pageable={
+        rows?.length > 100
+          ? {
+              buttonCount: 4,
+              pageSizes: [50, 100, 500],
+            }
+          : false
+      }
     >
       {columns.map((col) => {
         const isActive = isColumnActive(col?.field, filter, sort)
-        if (dateFields.includes(col.field)) {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              filter='date'
-              filterable={{
-                cell: {
-                  operator: 'gte',
-                  showOperators: true,
-                },
-              }}
-              cells={{
-                edit: {
-                  date: ['fromDate', 'toDate'].includes(col.field)
-                    ? DateOnlyPicker
-                    : DateTimePickerEditor,
-                },
-                data: toolTipRenderer,
-              }}
-              format={
-                ['fromDate', 'toDate'].includes(col.field)
-                  ? '{0:dd-MM-yyyy}'
-                  : '{0:dd-MM-yyyy hh:mm a}'
-              }
-              editor='date'
-              hidden={col.hidden}
-              columnMenu={DateColumnMenu}
-            />
-          )
-        }
+
         if (dateFields1.includes(col.field)) {
           return (
             <GridColumn
@@ -382,42 +381,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-        if (col?.field === 'productName1') {
-          return (
-            <GridColumn
-              key='productName1'
-              field='productName1'
-              title={col.title || col.headerName || 'Particulars'}
-              // width={210}
-              editable={col.editable || true}
-              hidden={col.hidden}
-              cells={{
-                data: (cellProps) => (
-                  <ProductCell {...cellProps} allProducts={allProducts} />
-                ),
-              }}
-              columnMenu={ColumnMenuCheckboxFilter}
-            />
-          )
-        }
-        if (col?.field === 'month') {
-          return (
-            <GridColumn
-              key='month'
-              field='month'
-              title={col.title || col.headerName || 'month'}
-              editable={col.editable || true}
-              hidden={col.hidden}
-              width={col.widthT}
-              cells={{
-                data: (cellProps) => (
-                  <MonthCell {...cellProps} allMonths={allMonths} />
-                ),
-              }}
-              columnMenu={ColumnMenuCheckboxFilter}
-            />
-          )
-        }
+
         if (
           ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(col.field)
         ) {
@@ -442,75 +406,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-        if (col.type === 'number') {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              hidden={col.hidden}
-              className={
-                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
-              }
-              editable={col?.editable ? true : false}
-              headerClassName={isActive ? 'active-column' : ''}
-              cells={{
-                edit: { text: NoSpinnerNumericEditor },
-                data: toolTipRenderer,
-              }}
-              filter='numeric'
-              format={col.format}
-              sortable={false}
-            />
-          )
-        }
-        if (col.type === 'text') {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              // width={col.width}
-              hidden={col.hidden}
-              className={
-                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
-              }
-              editable={col?.editable ? true : false}
-              headerClassName={isActive ? 'active-column' : ''}
-              cells={{
-                edit: { text: NoSpinnerNumericEditor },
-                data: toolTipRenderer,
-              }}
-              columnMenu={ColumnMenuCheckboxFilter}
-              filter='numeric'
-              format={col.format}
-            />
-          )
-        }
-        if (col.type === 'numberWidth') {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              width={col.width}
-              hidden={col.hidden}
-              className={
-                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
-              }
-              editable={col?.editable ? true : false}
-              headerClassName={isActive ? 'active-column' : ''}
-              cells={{
-                edit: { text: NoSpinnerNumericEditor },
-                data: toolTipRenderer,
-              }}
-              columnMenu={ColumnMenuCheckboxFilter}
-              filter='numeric'
-              format={col.format}
-            />
-          )
-        }
-        //--
+
         if (col.type === 'switch') {
           const handleSwitchChange = (props, value) => {
             itemChange({
@@ -569,7 +465,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-        //---
+
         return (
           <GridColumn
             key={col.field}
@@ -583,6 +479,7 @@ const KendoDataTablesCracker = ({
               edit: { text: TextCellEditor },
               data: toolTipRenderer,
             }}
+            className={col?.isDisabled ? 'k-right-disabled' : ''}
             columnMenu={ColumnMenuCheckboxFilter}
           />
         )
@@ -648,7 +545,7 @@ const KendoDataTablesCracker = ({
                   </span>
                 </Tooltip>
               )}
-              {permissions?.uploadExcelBtn && (
+              {/* {permissions?.uploadExcelBtn && (
                 <Tooltip>
                   <span title='Import Data'>
                     <Button
@@ -668,7 +565,7 @@ const KendoDataTablesCracker = ({
                     style={{ display: 'none' }}
                   />
                 </Tooltip>
-              )}
+              )} */}
               {permissions?.saveBtn && (
                 <Button
                   variant='contained'
@@ -832,4 +729,4 @@ const KendoDataTablesCracker = ({
   )
 }
 
-export default KendoDataTablesCracker
+export default KendoDataTablesCrackerRunLength

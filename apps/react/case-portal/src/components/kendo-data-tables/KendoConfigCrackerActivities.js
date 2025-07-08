@@ -93,10 +93,100 @@ const DecokingConfig = () => {
             }
           }
           // Screen 2
+          // if (!screen || screen === 2) {
+          //   const data2 = await DataService.getIbrScreen2(keycloak)
+          //   const toDateObject = (value) =>
+          //     value ? moment(value, 'DD/MM/YYYY').toDate() : null
+          //   if (data2?.code === 200) {
+          //     const processedData = data2.data.map((item, index) => ({
+          //       ...item,
+          //       idFromApi: item.id,
+          //       id: index,
+          //       remarks: item?.remarks || '',
+          //       ibrSD: toDateObject(item.ibrSD),
+          //       ibrED: toDateObject(item.ibrED),
+          //       taSD: toDateObject(item.taSD),
+          //       taED: toDateObject(item.taED),
+          //       sdSD: toDateObject(item.sdSD),
+          //       sdED: toDateObject(item.sdED),
+
+          //       isCoil: item?.isCoil || '',
+          //       preCoil: item?.preCoil || '',
+          //       postCoil: item?.postCoil || '',
+
+          //       isCoilId: item?.isCoilId || '',
+          //       postCoilId: item?.postCoilId || '',
+          //       preCoilId: item?.preCoilId || '',
+          //     }))
+          //     setRowsForTab(currentTab, processedData, 2)
+          //   }
+
+          //   else {
+          //     setRowsForTab(currentTab, [], 2)
+          //   }
+          // }
+
           if (!screen || screen === 2) {
-            const data2 = await DataService.getIbrScreen2(keycloak)
+            // Mock hardcoded data
+            const data2 = {
+              code: 200,
+              data: [
+                {
+                  id: 1,
+                  furnace: 'H10',
+                  ibrSD: '01/07/2025',
+                  ibrED: '03/07/2025',
+                  taSD: '05/07/2025',
+                  taED: '07/07/2025',
+                  sdSD: '10/07/2025',
+                  sdED: '12/07/2025',
+
+                  remarks: 'Routine Check',
+                  isCoil: 'Yes',
+                  preCoil: '50',
+                  postCoil: '60',
+
+                  isCoilId: 'coil-1',
+                  postCoilId: 'post-1',
+                  preCoilId: 'pre-1',
+                  ibrSDId: 'ibrsd-1',
+                  ibrEDId: 'ibred-1',
+                  taSDId: 'tasd-1',
+                  taEDId: 'taed-1',
+                  sdSDId: 'sdsd-1',
+                  sdEDId: 'sded-1',
+                },
+                {
+                  id: 2,
+                  furnace: 'H11',
+                  ibrSD: '02/07/2025',
+                  ibrED: '04/07/2025',
+                  taSD: '06/07/2025',
+                  taED: '08/07/2025',
+                  sdSD: '11/07/2025',
+                  sdED: '13/07/2025',
+
+                  remarks: '',
+                  isCoil: 'No',
+                  preCoil: '20',
+                  postCoil: '22',
+
+                  isCoilId: 'coil-2',
+                  postCoilId: 'post-2',
+                  preCoilId: 'pre-2',
+                  ibrSDId: 'ibrsd-2',
+                  ibrEDId: 'ibred-2',
+                  taSDId: 'tasd-2',
+                  taEDId: 'taed-2',
+                  sdSDId: 'sdsd-2',
+                  sdEDId: 'sded-2',
+                },
+              ],
+            }
+
             const toDateObject = (value) =>
               value ? moment(value, 'DD/MM/YYYY').toDate() : null
+
             if (data2?.code === 200) {
               const processedData = data2.data.map((item, index) => ({
                 ...item,
@@ -117,29 +207,59 @@ const DecokingConfig = () => {
                 isCoilId: item?.isCoilId || '',
                 postCoilId: item?.postCoilId || '',
                 preCoilId: item?.preCoilId || '',
+
+                ibrSDId: item?.ibrSDId || '',
+                ibrEDId: item?.ibrEDId || '',
+                taSDId: item?.taSDId || '',
+                taEDId: item?.taEDId || '',
+                sdSDId: item?.sdSDId || '',
+                sdEDId: item?.sdEDId || '',
               }))
               setRowsForTab(currentTab, processedData, 2)
             } else {
               setRowsForTab(currentTab, [], 2)
             }
           }
+
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
             const data3 = await DataService.getIbrScreen3(keycloak)
             const toDateObject = (value) =>
-              value ? moment(value, 'DD/MM/YYYY').toDate() : null
+              value ? moment(value, 'YYYY-MM-DD').toDate() : null
+
             if (data3?.code === 200) {
               setCalculationObject(data3?.data?.aopCalculation)
-              const processedData = data3.data?.decokingActivitiesList.map(
-                (item, index) => ({
+              const fiscalMonthOrder = [
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December',
+                'January',
+                'February',
+                'March',
+              ]
+
+              const processedData = data3.data?.decokingActivitiesList
+                .map((item, index) => ({
                   ...item,
                   month_: item?.month,
                   idFromApi: item?.id,
                   id: index,
                   remarks: item?.remarks || '',
                   date: toDateObject(item.date),
-                }),
-              )
+                }))
+                .sort((a, b) => {
+                  return (
+                    fiscalMonthOrder.indexOf(a.month_) -
+                    fiscalMonthOrder.indexOf(b.month_)
+                  )
+                })
+
               setRowsForTab(currentTab, processedData, 3)
             } else {
               setRowsForTab(currentTab, [], 3)
@@ -193,6 +313,7 @@ const DecokingConfig = () => {
     }
     // }, 400)
   }, [modifiedCells2])
+
   const saveChanges3 = React.useCallback(async () => {
     // setLoading(true)
     try {

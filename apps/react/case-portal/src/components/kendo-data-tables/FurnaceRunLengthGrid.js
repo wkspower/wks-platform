@@ -1,6 +1,6 @@
 import React from 'react'
 import { Box } from '@mui/material'
-import KendoDataTablesCracker from './index-cracker.js'
+import KendoDataTablesCrackerRunLength from './index-cracker-runlength'
 
 const FurnaceRunLengthGrid = ({
   columns,
@@ -28,7 +28,7 @@ const FurnaceRunLengthGrid = ({
 }) => {
   return (
     <Box sx={{ mt: 1 }}>
-      <KendoDataTablesCracker
+      <KendoDataTablesCrackerRunLength
         columns={columns}
         rows={rows}
         setRows={setRows}

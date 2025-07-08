@@ -116,7 +116,7 @@ const SlowDown = ({ permissions }) => {
           const matched = allProducts.find(
             (p) => p.displayName === row.productName1,
           )
-          return matched?.realId || ''
+          return matched?.realId || null
         })(),
         productName: row.productName1,
         discription: row.discription,
@@ -129,7 +129,7 @@ const SlowDown = ({ permissions }) => {
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
-        rate: row.rate,
+        rate: row.rate || null,
         audityear: localStorage.getItem('year'),
         id: row.idFromApi || null,
         rateEO: row.rateEO,
@@ -182,6 +182,7 @@ const SlowDown = ({ permissions }) => {
       setLoading(false)
     } finally {
       fetchData()
+      fetchData2()
       setLoading(false)
     }
   }
@@ -282,7 +283,7 @@ const SlowDown = ({ permissions }) => {
     } catch (error) {
       console.error('Error saving Slowdown data:', error)
     } finally {
-      fetchData()
+      fetchData2()
     }
   }
   const updateSlowdownData2 = async (newRow) => {
@@ -316,7 +317,7 @@ const SlowDown = ({ permissions }) => {
     } catch (error) {
       console.error('Error saving Slowdown data:', error)
     } finally {
-      fetchData()
+      fetchData2()
     }
   }
 
@@ -359,37 +360,37 @@ const SlowDown = ({ permissions }) => {
         setColDefs2([])
       }
 
-      const rows3 = [
-        {
-          Particulars: 'Yield 1',
-          Shutdown_01_July: 120,
-          Shutdown_02_August: 90,
-          Shutdown_03_September: 100,
-          id: 0,
-        },
-        {
-          Particulars: 'Yield 2',
-          Shutdown_01_July: 80,
-          Shutdown_02_August: 60,
-          Shutdown_03_September: 70,
-          id: 1,
-        },
-        {
-          Particulars: 'Yield 3',
-          Shutdown_01_July: 200,
-          Shutdown_02_August: 180,
-          Shutdown_03_September: 160,
-          id: 2,
-        },
-        {
-          Particulars: 'Yield 4',
-          Shutdown_01_July: 40,
-          Shutdown_02_August: 35,
-          Shutdown_03_September: 45,
-          id: 3,
-        },
-      ]
-      setRows2(rows3)
+      // const rows3 = [
+      //   {
+      //     Particulars: 'Yield 1',
+      //     Shutdown_01_July: 120,
+      //     Shutdown_02_August: 90,
+      //     Shutdown_03_September: 100,
+      //     id: 0,
+      //   },
+      //   {
+      //     Particulars: 'Yield 2',
+      //     Shutdown_01_July: 80,
+      //     Shutdown_02_August: 60,
+      //     Shutdown_03_September: 70,
+      //     id: 1,
+      //   },
+      //   {
+      //     Particulars: 'Yield 3',
+      //     Shutdown_01_July: 200,
+      //     Shutdown_02_August: 180,
+      //     Shutdown_03_September: 160,
+      //     id: 2,
+      //   },
+      //   {
+      //     Particulars: 'Yield 4',
+      //     Shutdown_01_July: 40,
+      //     Shutdown_02_August: 35,
+      //     Shutdown_03_September: 45,
+      //     id: 3,
+      //   },
+      // ]
+      setRows2([])
       setLoading(false)
     } catch (error) {
       console.error('Error fetching SlowDown data:', error)
@@ -500,14 +501,14 @@ const SlowDown = ({ permissions }) => {
 
     {
       field: 'rateEOE',
-      title: 'Rate (EOE)',
+      title: 'Op.Production Rate(EOE)',
       editable: true,
       type: 'number',
       hidden: lowerVertName === 'meg' ? false : true,
     },
     {
       field: 'rateEO',
-      title: 'Rate (EO)',
+      title: 'Op.Production Rate(EO)',
       editable: true,
       type: 'number',
       hidden: lowerVertName === 'meg' ? false : true,
@@ -538,6 +539,7 @@ const SlowDown = ({ permissions }) => {
           severity: 'success',
         })
         fetchData()
+        fetchData2()
       }
     } catch (error) {
       console.error('Error deleting Record!', error)

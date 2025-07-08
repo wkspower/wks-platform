@@ -113,7 +113,13 @@ export const ibrPlanColumns = [
     editable: true,
     width: 200,
   },
-  { field: 'isCoil', title: 'Is Coil Replacement', editable: true,type: 'switch',width: 200 },
+  {
+    field: 'isCoil',
+    title: 'Is Coil Replacement',
+    editable: true,
+    type: 'switch',
+    width: 200,
+  },
 
   // { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
 ]
@@ -147,11 +153,9 @@ export const ibrGridThree = [
   {
     field: 'hTenActual',
     title: 'H10 Actual run length',
-    type: 'number',
-    format: '{0:n0}',
+
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
+
     editable: false,
     isDisabled: true,
   },
@@ -159,22 +163,14 @@ export const ibrGridThree = [
   {
     field: 'tenProposed',
     title: 'H10 Proposed AOP',
-    type: 'number',
-    format: '{0:n0}',
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
     editable: true,
   },
 
   {
     field: 'hElevenActual',
     title: 'H11 Actual run length',
-    type: 'number',
-    format: '{0:n0}',
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
     editable: false,
     isDisabled: true,
   },
@@ -182,22 +178,14 @@ export const ibrGridThree = [
   {
     field: 'elevenProposed',
     title: 'H11 Proposed AOP',
-    type: 'number',
-    format: '{0:n0}',
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
     editable: true,
   },
 
   {
     field: 'hTwelveActual',
     title: 'H12 Actual run length',
-    type: 'number',
-    format: '{0:n0}',
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
     editable: false,
     isDisabled: true,
   },
@@ -205,22 +193,18 @@ export const ibrGridThree = [
   {
     field: 'twelveProposed',
     title: 'H12 Proposed AOP',
-    type: 'number',
-    format: '{0:n0}',
+
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
+
     editable: true,
   },
 
   {
     field: 'hThirteenActual',
     title: 'H13 Actual run length',
-    type: 'number',
-    format: '{0:n0}',
+
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
+
     editable: false,
     isDisabled: true,
   },
@@ -228,22 +212,18 @@ export const ibrGridThree = [
   {
     field: 'thirteenProposed',
     title: 'H13 Proposed AOP',
-    type: 'number',
-    format: '{0:n0}',
+
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
+
     editable: true,
   },
 
   {
     field: 'hFourteenActual',
     title: 'H14 Actual run length',
-    type: 'number',
-    format: '{0:n0}',
+
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
+
     editable: false,
     isDisabled: true,
   },
@@ -251,11 +231,9 @@ export const ibrGridThree = [
   {
     field: 'fourteenProposed',
     title: 'H14 Proposed AOP',
-    type: 'number',
-    format: '{0:n0}',
+
     width: 120,
-    align: 'right',
-    headerAlign: 'right',
+
     editable: true,
   },
 
