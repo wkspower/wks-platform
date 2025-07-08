@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.wks.caseengine.dto.CrackerConfigurationDTO;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.DecokePlanningIBRDTO;
 import com.wks.caseengine.dto.DecokeRunLengthDTO;
@@ -47,12 +48,10 @@ public class DecokingActivitiesController {
 	}
 	
 	@PostMapping(value="/decoking-activities/ibr")
-	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokePlanningIBRDTO> decokePlanningIBRDTOList) {
-		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,decokePlanningIBRDTOList);
+	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<CrackerConfigurationDTO> crackerConfigurationDTOList) {
+		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,crackerConfigurationDTOList);
 	}
 
-
-	
 	@GetMapping(value = "/run-length-export-excel")
 	public ResponseEntity<byte[]> exportConfigurationReport(
 	         @RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType
@@ -74,7 +73,6 @@ public class DecokingActivitiesController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-
 
 	@PostMapping(value = "/run-length-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
