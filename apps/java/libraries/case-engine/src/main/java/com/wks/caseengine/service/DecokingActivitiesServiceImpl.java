@@ -435,6 +435,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				}
 			}
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to update data");
 		}
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("sd-ta-activity");

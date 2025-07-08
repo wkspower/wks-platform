@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.context.annotation.Configuration;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,12 +22,7 @@ public class CrackerConfigurationDTO {
 	private UUID id;
     private String name;
     private String displayName;
-    private Date ibrStartDate;
-    private Date ibrEndDate;
-    private Date taStartDate;
-    private Date taEndDate;
-    private Date shutDownStartDate;
-    private Date shutDownEndDate;
+   
     private Integer postCrDays;
     private Integer preCrDays;
     private Boolean isCr;
@@ -33,6 +30,25 @@ public class CrackerConfigurationDTO {
     private String aopYear;
     private String remarks;
     private Integer displaySeq;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
+    private Date ibrStartDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
+    private Date ibrEndDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
+    private Date taStartDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
+    private Date taEndDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
+    private Date shutDownStartDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
+    private Date shutDownEndDate;
+
 
 
 }
