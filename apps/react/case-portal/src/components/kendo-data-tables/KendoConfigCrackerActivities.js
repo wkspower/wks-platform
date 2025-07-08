@@ -6,7 +6,6 @@ import { useSession } from 'SessionStoreContext'
 import moment from '../../../node_modules/moment/moment.js'
 import { ibrGridThree, ibrPlanColumns } from './columnDefs'
 import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
-import { runningDurationRowsSample } from './rowSamples'
 import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
 const DecokingConfig = () => {
   const keycloak = useSession()
@@ -93,99 +92,10 @@ const DecokingConfig = () => {
             }
           }
           // Screen 2
-          // if (!screen || screen === 2) {
-          //   const data2 = await DataService.getIbrScreen2(keycloak)
-          //   const toDateObject = (value) =>
-          //     value ? moment(value, 'DD/MM/YYYY').toDate() : null
-          //   if (data2?.code === 200) {
-          //     const processedData = data2.data.map((item, index) => ({
-          //       ...item,
-          //       idFromApi: item.id,
-          //       id: index,
-          //       remarks: item?.remarks || '',
-          //       ibrSD: toDateObject(item.ibrSD),
-          //       ibrED: toDateObject(item.ibrED),
-          //       taSD: toDateObject(item.taSD),
-          //       taED: toDateObject(item.taED),
-          //       sdSD: toDateObject(item.sdSD),
-          //       sdED: toDateObject(item.sdED),
-
-          //       isCoil: item?.isCoil || '',
-          //       preCoil: item?.preCoil || '',
-          //       postCoil: item?.postCoil || '',
-
-          //       isCoilId: item?.isCoilId || '',
-          //       postCoilId: item?.postCoilId || '',
-          //       preCoilId: item?.preCoilId || '',
-          //     }))
-          //     setRowsForTab(currentTab, processedData, 2)
-          //   }
-
-          //   else {
-          //     setRowsForTab(currentTab, [], 2)
-          //   }
-          // }
-
           if (!screen || screen === 2) {
-            // Mock hardcoded data
-            const data2 = {
-              code: 200,
-              data: [
-                {
-                  id: 1,
-                  furnace: 'H10',
-                  ibrSD: '01/07/2025',
-                  ibrED: '03/07/2025',
-                  taSD: '05/07/2025',
-                  taED: '07/07/2025',
-                  sdSD: '10/07/2025',
-                  sdED: '12/07/2025',
-
-                  remarks: 'Routine Check',
-                  isCoil: 'Yes',
-                  preCoil: '50',
-                  postCoil: '60',
-
-                  isCoilId: 'coil-1',
-                  postCoilId: 'post-1',
-                  preCoilId: 'pre-1',
-                  ibrSDId: 'ibrsd-1',
-                  ibrEDId: 'ibred-1',
-                  taSDId: 'tasd-1',
-                  taEDId: 'taed-1',
-                  sdSDId: 'sdsd-1',
-                  sdEDId: 'sded-1',
-                },
-                {
-                  id: 2,
-                  furnace: 'H11',
-                  ibrSD: '02/07/2025',
-                  ibrED: '04/07/2025',
-                  taSD: '06/07/2025',
-                  taED: '08/07/2025',
-                  sdSD: '11/07/2025',
-                  sdED: '13/07/2025',
-
-                  remarks: '',
-                  isCoil: 'No',
-                  preCoil: '20',
-                  postCoil: '22',
-
-                  isCoilId: 'coil-2',
-                  postCoilId: 'post-2',
-                  preCoilId: 'pre-2',
-                  ibrSDId: 'ibrsd-2',
-                  ibrEDId: 'ibred-2',
-                  taSDId: 'tasd-2',
-                  taEDId: 'taed-2',
-                  sdSDId: 'sdsd-2',
-                  sdEDId: 'sded-2',
-                },
-              ],
-            }
-
+            const data2 = await DataService.getIbrScreen2(keycloak)
             const toDateObject = (value) =>
-              value ? moment(value, 'DD/MM/YYYY').toDate() : null
+              value ? moment(value, 'MMM D, YYYY').toDate() : null
 
             if (data2?.code === 200) {
               const processedData = data2.data.map((item, index) => ({
@@ -207,13 +117,6 @@ const DecokingConfig = () => {
                 isCoilId: item?.isCoilId || '',
                 postCoilId: item?.postCoilId || '',
                 preCoilId: item?.preCoilId || '',
-
-                ibrSDId: item?.ibrSDId || '',
-                ibrEDId: item?.ibrEDId || '',
-                taSDId: item?.taSDId || '',
-                taEDId: item?.taEDId || '',
-                sdSDId: item?.sdSDId || '',
-                sdEDId: item?.sdEDId || '',
               }))
               setRowsForTab(currentTab, processedData, 2)
             } else {
@@ -267,7 +170,7 @@ const DecokingConfig = () => {
             // setRowsForTab(currentTab, ibrGridThreeRowsSample, 3)
           }
         } else if (currentTab === 'Running Duration') {
-          setRowsForTab(currentTab, runningDurationRowsSample)
+          // setRowsForTab(currentTab, runningDurationRowsSample)
         }
       } catch (err) {
         console.error('Error loading data:', err)
@@ -283,8 +186,7 @@ const DecokingConfig = () => {
     fetchData()
   }, [plantID, oldYear, yearChanged, keycloak, fetchData])
 
-  const saveChanges2 = React.useCallback(async () => {
-    // setLoading(true)
+  const saveChangesIbr = React.useCallback(async () => {
     try {
       if (Object.keys(modifiedCells2).length === 0) {
         setSnackbarOpen(true)
@@ -306,18 +208,15 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
-      // console.log(data)
-      saveCracker2(data)
+      postIbr(data)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-    // }, 400)
   }, [modifiedCells2])
 
-  const saveChanges3 = React.useCallback(async () => {
-    // setLoading(true)
+  const saveChangesRunLength = React.useCallback(async () => {
     try {
-      if (Object.keys(modifiedCells3).length === 0) {
+      if (Object.keys(modifiedCells3.updatedRows).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'No Records to Save!',
@@ -326,9 +225,11 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
-      var rawData = Object.values(modifiedCells3)
-      const data = rawData.filter((row) => row.inEdit)
-      if (data.length == 0) {
+      // var rawData = Object.values(modifiedCells3)
+      const rawData = modifiedCells3.updatedRows || []
+
+      // const data = rawData.filter((row) => row.inEdit)
+      if (rawData.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'No Records to Save!',
@@ -337,60 +238,48 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
-      // console.log(data)
-      saveCracker3(data)
+      saveCracker3(rawData)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-    // }, 400)
   }, [modifiedCells3])
 
-  const saveCracker2 = async (newRow) => {
+  const postIbr = async (newRow) => {
     setLoading(true)
     try {
-      var plantId = ''
+      let plantId = ''
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
-      var payload = []
       const formatIfDate = (value) => {
         if (!value) return ''
-        return value instanceof Date
-          ? moment(value).format('DD/MM/YYYY')
+        return moment(value, ['MMM D, YYYY', moment.ISO_8601], true).isValid()
+          ? moment(value).format('YYYY/MM/DD')
           : value
       }
-      payload = newRow.map((row) => ({
-        furnace: row?.furnace || '',
-        plantId: row?.plantId || '',
-        ibrED: formatIfDate(row?.ibrED),
-        ibrEDId: row?.ibrEDId || '',
-        ibrSD: formatIfDate(row?.ibrSD),
-        ibrSDId: row?.ibrSDId || '',
-        sdED: formatIfDate(row?.sdED),
-        sdEDId: row?.sdEDId || '',
-        sdSD: formatIfDate(row?.sdSD),
-        sdSDId: row?.sdSDId || '',
-        taED: formatIfDate(row?.taED),
-        taEDId: row?.taEDId || '',
-        taSD: formatIfDate(row?.taSD),
-        taSDId: row?.taSDId || '',
-        remarks: row?.remarks || '',
 
-        postCoil: row?.postCoil || '',
-        preCoil: row?.preCoil || '',
-        isCoil: row?.isCoil || '',
+      const payload = newRow.map((row) => ({
+        id: row?.idFromApi || null,
+        displayName: row?.displayName,
+        name: row?.name,
+        aopYear: localStorage.getItem('year'),
+        plantFkId: row?.plantFkId,
+        ibrStartDate: formatIfDate(row?.ibrStartDate) || '',
+        ibrEndDate: formatIfDate(row?.ibrEndDate) || '',
+        taStartDate: formatIfDate(row?.taStartDate) || '',
+        taEndDate: formatIfDate(row?.taEndDate) || '',
+        shutDownStartDate: formatIfDate(row?.shutDownStartDate) || '',
+        shutDownEndDate: formatIfDate(row?.shutDownEndDate) || '',
 
-        preCoilId: row?.preCoilId || '',
-        postCoilId: row?.postCoilId || '',
-        isCoilId: row?.isCoilId || '',
+        preCrDays: row?.preCrDays || '',
+        postCrDays: row?.postCrDays || '',
+        isCr: row?.isCr ? 1 : 0,
       }))
-      const response = await DataService.saveCracker2(
-        plantId,
-        payload,
-        keycloak,
-      )
+
+      const response = await DataService.postIbr(plantId, payload, keycloak)
+
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -398,24 +287,23 @@ const DecokingConfig = () => {
           severity: 'success',
         })
         setModifiedCells2({})
-        setLoading(false)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Saved Falied!',
+          message: 'Data Save Failed!',
           severity: 'error',
         })
       }
       return response
     } catch (error) {
       console.error('Error saving data:', error)
-      setLoading(false)
     } finally {
       fetchData(2)
       fetchData(3)
       setLoading(false)
     }
   }
+
   const saveCracker3 = async (newRow) => {
     setLoading(true)
     try {
@@ -677,7 +565,7 @@ const DecokingConfig = () => {
             allMonths={allMonths}
             setModifiedCells={setModifiedCells2}
             permissions={adjustedPermissions2}
-            saveChanges={saveChanges2}
+            saveChanges={saveChangesIbr}
             setRemarkDialogOpen={setRemarkDialogOpen2}
           />
           <FurnaceRunLengthGrid
@@ -698,7 +586,7 @@ const DecokingConfig = () => {
             allMonths={allMonths}
             setModifiedCells={setModifiedCells3}
             permissions={adjustedPermissions3}
-            saveChanges={saveChanges3}
+            saveChanges={saveChangesRunLength}
             setRemarkDialogOpen={setRemarkDialogOpen3}
             handleExcelUpload={handleExcelUpload}
             downloadExcelForConfiguration={downloadExcelForConfiguration}

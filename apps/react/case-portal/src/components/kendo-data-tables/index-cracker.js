@@ -74,13 +74,12 @@ export const dateFields = [
   'fromDate',
   'toDate',
 ]
-export const dateFields1 = [
-  'ibrSD',
-  'ibrED',
-  'taSD',
-  'taED',
-  'sdED',
-  'sdSD',
+export const dateFieldsCracker = [
+  'ibrStartDate',
+  'ibrEndDate',
+  'taStartDate',
+  'taEndDate',
+  'shutDownStartDate',
   'date',
 ]
 export const hiddenFields = []
@@ -363,7 +362,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-        if (dateFields1.includes(col.field)) {
+        if (dateFieldsCracker.includes(col.field)) {
           return (
             <GridColumn
               key={col.field}

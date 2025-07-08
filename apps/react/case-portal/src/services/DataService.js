@@ -140,13 +140,14 @@ export const DataService = {
   saveCracker,
   saveAnnualProduction,
   getIbrScreen2,
-  saveCracker2,
+  // ,saveCracker2
   getIbrScreen3,
   saveCracker3,
   getRunLengthExcel,
   saveRunLengthExcel,
   handleCalculateDecokingActivities,
   getSlowDownPlantDataTab,
+  postIbr,
 }
 async function handleRefresh(year, plantId, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/handleRefresh?year=${year}&plantId=${plantId}`
@@ -3197,7 +3198,7 @@ async function saveAnnualProduction(payload, keycloak) {
 async function getIbrScreen2(keycloak, reportType) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/decoking-activities?plantId=${plantId}&year=${year}&reportType=ibr`
+  const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -3211,7 +3212,7 @@ async function getIbrScreen2(keycloak, reportType) {
     return await Promise.reject(e)
   }
 }
-async function saveCracker2(plantId, data, keycloak) {
+async function postIbr(plantId, data, keycloak) {
   var year = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr?plantId=${plantId}&year=${year}`
   const headers = {

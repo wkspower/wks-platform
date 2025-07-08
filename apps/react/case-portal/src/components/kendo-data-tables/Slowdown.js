@@ -586,7 +586,7 @@ const SlowDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
+      <Box style={{ margin: 0, padding: 0 }}>
         <Tabs value={selectedTab} onChange={handleTabChange}>
           <Tab label='Slowdown Details' />
           <Tab label='Configuration' />

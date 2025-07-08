@@ -167,44 +167,63 @@ const KendoDataTablesCrackerRunLength = ({
       setRows((prevRows) => {
         const editedIndex = prevRows.findIndex((r) => r.id === itemId)
 
+        let updatedRows = [...prevRows]
+
         if (value === 'SAD') {
-          // Find the last "SAD" above the current cell
-          let lastSADIndex = -1
-          for (let i = editedIndex - 1; i >= 0; i--) {
-            if (prevRows[i][field] === 'SAD') {
-              lastSADIndex = i
-              break
+          const isNextNonNumeric =
+            editedIndex + 1 < prevRows.length &&
+            isNaN(Number(prevRows[editedIndex + 1][field]))
+
+          if (isNextNonNumeric) {
+            let anchorIndex = -1
+            for (let i = editedIndex - 1; i >= 1; i--) {
+              if (
+                prevRows[i][field] === 'SAD' &&
+                prevRows[i - 1][field] === 'SAD'
+              ) {
+                anchorIndex = i - 2
+                break
+              }
             }
+
+            let startValue = 0
+            if (
+              anchorIndex >= 0 &&
+              !isNaN(Number(prevRows[anchorIndex][field]))
+            ) {
+              startValue = Number(prevRows[anchorIndex][field]) + 1
+            }
+
+            let counter = startValue
+
+            updatedRows = prevRows.map((row, index) => {
+              if (index > anchorIndex && index < editedIndex - 1) {
+                return { ...row, [field]: counter++ }
+              }
+              if (index === editedIndex || index === editedIndex - 1) {
+                return { ...row, [field]: 'SAD' }
+              }
+              return row
+            })
+          } else {
+            updatedRows = prevRows.map((row) =>
+              row.id === itemId ? { ...row, [field]: value } : row,
+            )
           }
-
-          // Reset values between lastSADIndex and editedIndex
-          let counter = 0
-          const updatedRows = prevRows.map((row, index) => {
-            if (index > lastSADIndex && index < editedIndex) {
-              return { ...row, [field]: counter++ }
-            }
-            if (index === editedIndex) {
-              return { ...row, [field]: 'SAD' }
-            }
-            return row
-          })
-
-          return updatedRows
         } else {
-          // Default case: update single cell
-          return prevRows.map((row) =>
+          updatedRows = prevRows.map((row) =>
             row.id === itemId ? { ...row, [field]: value } : row,
           )
         }
-      })
 
-      // update modifiedCells (if still used)
-      setModifiedCells((prev) => {
-        const base = { ...dataItem, [field]: value }
-        return { ...prev, [itemId]: base }
-      })
+        // console.log('run length', updatedRows)
 
-      setIsRowEdited(true)
+        setModifiedCells(() => ({ updatedRows }))
+
+        setIsRowEdited(true)
+
+        return updatedRows
+      })
     },
     [setRows, setModifiedCells],
   )
