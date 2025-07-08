@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 import com.wks.caseengine.rest.db2.entity.CaseCauseDescription;
 
 @Repository
-public interface CaseCauseDescriptionRepository extends JpaRepository<CaseCauseDescription, Long> {
+public interface CaseCauseDescriptionRepository //extends JpaRepository<CaseCauseDescription, Long> 
+{
 
 	@Query(value="SELECT * FROM case_cause_description where categoryId = :categoryId",nativeQuery = true)
 	List<CaseCauseDescription> findAllDescriptionByCategoryId(@Param(value = "categoryId") Long categoryId);

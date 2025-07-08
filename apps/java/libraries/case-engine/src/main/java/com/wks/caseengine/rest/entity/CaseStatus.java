@@ -6,8 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "case_status")
+//@Entity
+//@Table(name = "case_status")
 public class CaseStatus {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

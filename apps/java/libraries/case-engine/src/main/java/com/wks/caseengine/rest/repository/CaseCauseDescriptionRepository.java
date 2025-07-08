@@ -11,7 +11,8 @@ import com.wks.caseengine.rest.entity.CaseCauseCategory;
 import com.wks.caseengine.rest.entity.CaseCauseDescription;
 
 @Repository
-public interface CaseCauseDescriptionRepository extends JpaRepository<CaseCauseDescription, Long> {
+public interface CaseCauseDescriptionRepository //extends JpaRepository<CaseCauseDescription, Long> 
+{
     
 	List<CaseCauseDescription> findByCategory(CaseCauseCategory category);
 

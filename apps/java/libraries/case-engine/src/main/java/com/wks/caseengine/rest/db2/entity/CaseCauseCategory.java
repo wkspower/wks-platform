@@ -6,8 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "case_cause_category")
+//@Entity
+//@Table(name = "case_cause_category")
 public class CaseCauseCategory {
     
 	@Id

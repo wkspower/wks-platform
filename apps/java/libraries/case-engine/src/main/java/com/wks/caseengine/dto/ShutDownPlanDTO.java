@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.wks.caseengine.entity.Plants;
+
 
 @Configuration
 @NoArgsConstructor
