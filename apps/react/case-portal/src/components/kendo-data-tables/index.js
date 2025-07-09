@@ -125,6 +125,7 @@ const KendoDataTables = ({
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+  const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
   const initialGroup = groupBy
@@ -807,7 +808,8 @@ const KendoDataTables = ({
                     }
                     editor='date'
                     hidden={col.hidden}
-                    columnMenu={DateColumnMenu}
+                    columnMenu={(props) =>  <DateColumnMenu {...props} isDateFilterActive={isDateFilterActive} setIsDateFilterActive={setIsDateFilterActive}/>}
+                    headerClassName={isDateFilterActive.includes(col.field) ? 'active-column' : ''}
                   />
                 )
               }
@@ -1015,6 +1017,7 @@ const KendoDataTables = ({
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
+                    headerClassName={isActive ? 'active-column' : ''}
                   />
                 )
               }
@@ -1038,6 +1041,7 @@ const KendoDataTables = ({
                       edit: { text: DurationEditor },
                       data: DurationDisplayWithTooltipCell,
                     }}
+                    headerClassName={isActive ? 'active-column' : ''}
                   />
                 )
               }
