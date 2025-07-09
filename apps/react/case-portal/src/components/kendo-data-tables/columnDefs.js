@@ -25,7 +25,6 @@ export const ibrGridOne = [
     field: 'remarks',
     title: 'Remarks',
     type: 'string',
-
     editable: true,
   },
   {
@@ -44,14 +43,11 @@ export const ibrGridOne = [
     hidden: true,
   },
 ]
-
 export const ibrPlanColumns = [
   { field: 'id', title: 'ID', hidden: true },
   { field: 'plantFkId', title: 'Plant ID', hidden: true },
   { field: 'name', title: 'name', hidden: true },
-
   { field: 'displayName', title: 'Furnace', editable: false, width: 200 },
-
   {
     field: 'ibrStartDate',
     title: 'Start Date - IBR',
@@ -59,7 +55,6 @@ export const ibrPlanColumns = [
     width: 200,
   },
   { field: 'ibrEndDate', title: 'End Date - IBR', editable: true, width: 200 },
-
   {
     field: 'taStartDate',
     title: 'Start Date - TA',
@@ -67,7 +62,6 @@ export const ibrPlanColumns = [
     width: 200,
   },
   { field: 'taEndDate', title: 'End Date - TA', editable: true, width: 200 },
-
   {
     field: 'shutDownStartDate',
     title: 'Start Date - SD',
@@ -80,7 +74,6 @@ export const ibrPlanColumns = [
     editable: true,
     width: 200,
   },
-
   {
     field: 'preCrDays',
     title: 'Pre Coil Replacement',
@@ -101,7 +94,6 @@ export const ibrPlanColumns = [
     width: 200,
   },
 ]
-
 export const ibrGridThree = [
   {
     field: 'id',
@@ -126,95 +118,83 @@ export const ibrGridThree = [
     headerAlign: 'left',
     editable: false,
     isDisabled: true,
+    filter: false,
   },
-
   {
     field: 'hTenActual',
     title: 'H10 Actual run length',
-
     width: 120,
-
+    filter: false,
     editable: false,
     isDisabled: true,
   },
-
   {
     field: 'tenProposed',
     title: 'H10 Proposed AOP',
     width: 120,
     editable: true,
+    filter: false,
   },
-
   {
     field: 'hElevenActual',
     title: 'H11 Actual run length',
     width: 120,
     editable: false,
     isDisabled: true,
+    filter: false,
   },
-
   {
     field: 'elevenProposed',
     title: 'H11 Proposed AOP',
     width: 120,
     editable: true,
+    filter: false,
   },
-
   {
     field: 'hTwelveActual',
     title: 'H12 Actual run length',
     width: 120,
     editable: false,
     isDisabled: true,
+    filter: false,
   },
-
   {
     field: 'twelveProposed',
     title: 'H12 Proposed AOP',
-
+    filter: false,
     width: 120,
-
     editable: true,
   },
-
   {
     field: 'hThirteenActual',
     title: 'H13 Actual run length',
-
+    filter: false,
     width: 120,
-
     editable: false,
     isDisabled: true,
   },
-
   {
     field: 'thirteenProposed',
     title: 'H13 Proposed AOP',
-
+    filter: false,
     width: 120,
-
     editable: true,
   },
-
   {
     field: 'hFourteenActual',
     title: 'H14 Actual run length',
-
+    filter: false,
     width: 120,
-
     editable: false,
     isDisabled: true,
   },
-
   {
     field: 'fourteenProposed',
     title: 'H14 Proposed AOP',
-
+    filter: false,
     width: 120,
-
     editable: true,
   },
-
   {
     field: 'demo',
     title: 'DEMO',
@@ -222,9 +202,9 @@ export const ibrGridThree = [
     width: 80,
     headerAlign: 'center',
     editable: true,
+    filter: false,
   },
 ]
-
 export const runningDurationColumns = [
   { field: 'month', title: 'Month', editable: false },
   { field: 'ibr', title: 'IBR', editable: true, type: 'number' },

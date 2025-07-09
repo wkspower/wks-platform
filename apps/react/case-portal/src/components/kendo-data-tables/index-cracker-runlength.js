@@ -63,15 +63,8 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-export const dateFields1 = [
-  'ibrSD',
-  'ibrED',
-  'taSD',
-  'taED',
-  'sdED',
-  'sdSD',
-  'date',
-]
+export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
+export const dateFieldsRunLength = ['date']
 export const hiddenFields = []
 export const monthMap = {
   january: 1,
@@ -164,66 +157,115 @@ const KendoDataTablesCrackerRunLength = ({
       const { dataItem, field, value } = e
       const itemId = dataItem.id
 
-      setRows((prevRows) => {
-        const editedIndex = prevRows.findIndex((r) => r.id === itemId)
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.id === itemId ? { ...row, [field]: value } : row,
+        ),
+      )
 
-        let updatedRows = [...prevRows]
+      if (value?.toUpperCase() === 'SAD' && dataItem[field] !== 'SAD') {
+        setTimeout(() => {
+          setRows((prevRows) => {
+            const editedIndex = prevRows.findIndex((r) => r.id === itemId)
+            let updatedRows = [...prevRows]
 
-        if (value === 'SAD') {
-          const isNextNonNumeric =
-            editedIndex + 1 < prevRows.length &&
-            isNaN(Number(prevRows[editedIndex + 1][field]))
+            const next = prevRows[editedIndex + 1]?.[field]
+            const nextNext = prevRows[editedIndex + 2]?.[field]
 
-          if (isNextNonNumeric) {
-            let anchorIndex = -1
-            for (let i = editedIndex - 1; i >= 1; i--) {
+            const isNextNonNumeric =
+              editedIndex + 1 < prevRows.length && isNaN(Number(next))
+            const isNextNextNonNumeric =
+              editedIndex + 2 < prevRows.length && isNaN(Number(nextNext))
+
+            if (isNextNonNumeric || isNextNextNonNumeric) {
+              let anchorIndex = -1
+              for (let i = editedIndex - 1; i >= 1; i--) {
+                if (
+                  prevRows[i][field] === 'SAD' &&
+                  prevRows[i - 1]?.[field] === 'SAD'
+                ) {
+                  anchorIndex = i - 2
+                  break
+                }
+              }
+
+              let startValue = 0
               if (
-                prevRows[i][field] === 'SAD' &&
-                prevRows[i - 1][field] === 'SAD'
+                anchorIndex >= 0 &&
+                !isNaN(Number(prevRows[anchorIndex][field]))
               ) {
-                anchorIndex = i - 2
-                break
+                startValue = Number(prevRows[anchorIndex][field]) + 1
               }
+
+              let counter = startValue
+
+              updatedRows = prevRows.map((row, index) => {
+                const updatedRow = { ...row }
+
+                if (index > anchorIndex && index < editedIndex - 1) {
+                  updatedRow[field] = counter++
+                }
+
+                if (
+                  index <= editedIndex - 2 &&
+                  prevRows[index][field] === 'SAD' &&
+                  prevRows[index + 1]?.[field] === 'SAD'
+                ) {
+                  updatedRow.demo = 1
+                }
+                if (
+                  index <= editedIndex - 1 &&
+                  prevRows[index - 1]?.[field] === 'SAD' &&
+                  prevRows[index][field] === 'SAD'
+                ) {
+                  updatedRow.demo = 2
+                }
+                if (
+                  index <= editedIndex - 3 &&
+                  prevRows[index + 1]?.[field] === 'SAD' &&
+                  prevRows[index + 2]?.[field] === 'SAD'
+                ) {
+                  updatedRow.demo = 'SD'
+                }
+
+                if (isNextNonNumeric) {
+                  if (index === editedIndex - 1) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 1
+                  }
+                  if (index === editedIndex) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 2
+                  }
+                  if (index === editedIndex - 2) {
+                    updatedRow.demo = 'BBU'
+                  }
+                }
+
+                if (!isNextNonNumeric && isNextNextNonNumeric) {
+                  if (index === editedIndex) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 1
+                  }
+                  if (index === editedIndex + 1) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 2
+                  }
+                  if (index === editedIndex - 1) {
+                    updatedRow.demo = 'BBU'
+                  }
+                }
+
+                return updatedRow
+              })
             }
 
-            let startValue = 0
-            if (
-              anchorIndex >= 0 &&
-              !isNaN(Number(prevRows[anchorIndex][field]))
-            ) {
-              startValue = Number(prevRows[anchorIndex][field]) + 1
-            }
-
-            let counter = startValue
-
-            updatedRows = prevRows.map((row, index) => {
-              if (index > anchorIndex && index < editedIndex - 1) {
-                return { ...row, [field]: counter++ }
-              }
-              if (index === editedIndex || index === editedIndex - 1) {
-                return { ...row, [field]: 'SAD' }
-              }
-              return row
-            })
-          } else {
-            updatedRows = prevRows.map((row) =>
-              row.id === itemId ? { ...row, [field]: value } : row,
-            )
-          }
-        } else {
-          updatedRows = prevRows.map((row) =>
-            row.id === itemId ? { ...row, [field]: value } : row,
-          )
-        }
-
-        // console.log('run length', updatedRows)
-
-        setModifiedCells(() => ({ updatedRows }))
-
-        setIsRowEdited(true)
-
-        return updatedRows
-      })
+            setModifiedCells(() => ({ updatedRows }))
+            setIsRowEdited(true)
+            return updatedRows
+          })
+        }, 150) // delay to avoid blocking typing
+      }
     },
     [setRows, setModifiedCells],
   )
@@ -359,8 +401,6 @@ const KendoDataTablesCrackerRunLength = ({
       onFilterChange={(e) => setFilter(e.filter)}
       onItemChange={itemChange}
       resizable={true}
-      defaultSkip={0}
-      defaultTake={100}
       contextMenu={true}
       grade={grades}
       onRowClick={handleRowClick}
@@ -369,11 +409,14 @@ const KendoDataTablesCrackerRunLength = ({
       }}
       allRedCell={allRedCell}
       size='small'
+      defaultSkip={0}
+      defaultTake={50}
       pageable={
-        rows?.length > 100
+        rows?.length > 50
           ? {
               buttonCount: 4,
-              pageSizes: [50, 100, 500],
+              pageSizes: [50, 100, 150, 300, 500],
+              pageSizeValue: 50,
             }
           : false
       }
@@ -397,6 +440,26 @@ const KendoDataTablesCrackerRunLength = ({
               editor='date'
               hidden={col.hidden}
               sortable={false}
+            />
+          )
+        }
+        if (dateFieldsRunLength.includes(col.field)) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              cells={{
+                edit: {
+                  date: DateOnlyPicker,
+                },
+                data: toolTipRenderer,
+              }}
+              format='{0:dd-MM-yyyy}'
+              editor='date'
+              hidden={col.hidden}
+              sortable={false}
+              className={'k-right-disabled'}
             />
           )
         }
@@ -426,92 +489,6 @@ const KendoDataTablesCrackerRunLength = ({
           )
         }
 
-        // if (col.type === 'switch') {
-        //   const handleSwitchChange = (props, value) => {
-        //     itemChange({
-        //       dataItem: props.dataItem,
-        //       field: props.field,
-        //       value: value,
-        //     })
-        //   }
-
-        //   return (
-        //     <GridColumn
-        //       key={col.field}
-        //       field={col.field}
-        //       title={col.title || col.headerName}
-        //       width={col.width || 150}
-        //       hidden={col.hidden}
-        //       editable={true}
-        //       headerClassName={
-        //         isColumnActive(col?.field, filter, sort) ? 'active-column' : ''
-        //       }
-        //       columnMenu={ColumnMenuCheckboxFilter}
-        //       cells={{
-        //         edit: {
-        //           text: (props) => (
-        //             <td
-        //               style={{
-        //                 display: 'flex',
-        //                 justifyContent: 'center',
-        //                 alignItems: 'center',
-        //               }}
-        //             >
-        //               <button
-        //                 style={{
-        //                   padding: '4px 10px',
-        //                   backgroundColor: props.dataItem[props.field]
-        //                     ? '#4caf50'
-        //                     : '#f44336',
-        //                   color: 'white',
-        //                   border: 'none',
-        //                   borderRadius: '4px',
-        //                   cursor: 'pointer',
-        //                 }}
-        //                 onClick={() =>
-        //                   handleSwitchChange(
-        //                     props,
-        //                     !props.dataItem[props.field],
-        //                   )
-        //                 }
-        //               >
-        //                 {props.dataItem[props.field] ? 'YES' : 'NO'}
-        //               </button>
-        //             </td>
-        //           ),
-        //         },
-        //         data: (props) => (
-        //           <td
-        //             style={{
-        //               display: 'flex',
-        //               justifyContent: 'center',
-        //               alignItems: 'center',
-        //             }}
-        //           >
-        //             <button
-        //               style={{
-        //                 padding: '4px 10px',
-        //                 backgroundColor: props.dataItem[props.field]
-        //                   ? '#4caf50'
-        //                   : '#f44336',
-        //                 color: 'white',
-        //                 border: 'none',
-        //                 borderRadius: '4px',
-        //                 cursor: 'pointer',
-        //               }}
-        //               onClick={() =>
-        //                 handleSwitchChange(props, !props.dataItem[props.field])
-        //               }
-        //             >
-        //               {props.dataItem[props.field] ? 'YES' : 'NO'}
-        //             </button>
-        //           </td>
-        //         ),
-        //       }}
-        //     />
-        //   )
-        // }
-
         return (
           <GridColumn
             key={col.field}
@@ -526,7 +503,8 @@ const KendoDataTablesCrackerRunLength = ({
               data: toolTipRenderer,
             }}
             className={col?.isDisabled ? 'k-right-disabled' : ''}
-            columnMenu={ColumnMenuCheckboxFilter}
+            columnMenu={col?.filter ? ColumnMenuCheckboxFilter : null}
+            sortable={col?.filter ? false : true}
           />
         )
       })}

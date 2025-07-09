@@ -50,6 +50,9 @@ export const dateFields = [
   'maintEndDateTime',
   'periodTo',
   'periodFrom',
+
+  'toDateReport',
+  'fromDateReport',
 ]
 export const dateFields2 = ['fromDate', 'toDate']
 export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
@@ -530,7 +533,7 @@ const KendoDataTables = ({
                 </Typography>
               )}
 
-              {permissions?.showT15 && (
+              {permissions?.showReportTitle && (
                 <Typography component='div' className='grid-title'>
                   {titleName}
                 </Typography>
@@ -793,6 +796,9 @@ const KendoDataTables = ({
                           'toDate',
                           'periodTo',
                           'periodFrom',
+
+                          'toDateReport',
+                          'fromDateReport',
                         ].includes(col.field)
                           ? DateOnlyPicker
                           : DateTimePickerEditor,
@@ -800,15 +806,21 @@ const KendoDataTables = ({
                       data: toolTipRenderer,
                     }}
                     format={
-                      ['fromDate', 'toDate', 'periodFrom', 'periodTo'].includes(
-                        col.field,
-                      )
+                      [
+                        'fromDate',
+                        'toDate',
+                        'periodFrom',
+                        'periodTo',
+                        'toDateReport',
+                        'fromDateReport',
+                      ].includes(col.field)
                         ? '{0:dd-MM-yyyy}'
                         : '{0:dd-MM-yyyy hh:mm a}'
                     }
                     editor='date'
                     hidden={col.hidden}
                     columnMenu={DateColumnMenu}
+                    headerClassName={isActive ? 'active-column' : ''}
                   />
                 )
               }

@@ -588,7 +588,7 @@ const ConfigurationTable = () => {
         >
           <CircularProgress color='inherit' />
         </Backdrop>
-        <Box sx={{ mb: '4px' }}>
+        <Box sx={{ mb: '0px' }}>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary
               aria-controls='meg-grid-content'
@@ -827,7 +827,7 @@ const ConfigurationTable = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <Box sx={{ mb: '6px' }}>
+      <Box sx={{ mb: '0px' }}>
         <CustomAccordion defaultExpanded disableGutters>
           <CustomAccordionSummary
             aria-controls='meg-grid-content'
@@ -851,7 +851,7 @@ const ConfigurationTable = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
-                  marginTop: '10px',
+                  marginTop: '0px',
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
