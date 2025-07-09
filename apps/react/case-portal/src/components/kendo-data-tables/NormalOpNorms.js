@@ -12,17 +12,18 @@ import KendoDataTables from './index'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { validateFields } from 'utils/validationUtils'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
+import { validateFields } from 'utils/validationUtils'
 // import TextField from '@mui/material/TextField'
 
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Box, Typography } from '../../../node_modules/@mui/material/index'
 import { styled } from '@mui/material/styles'
+import getNormalOpNormColDef from 'components/data-tables/CommonHeader/getNormalOpNormColDef'
+import { Box, Typography } from '../../../node_modules/@mui/material/index'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -234,168 +235,9 @@ const NormalOpNormsScreen = () => {
     fetchAllData()
   }, [oldYear, yearChanged, keycloak, gradeId, plantID])
 
-  const colDefs = [
-    {
-      field: 'Particulars',
-      title: 'Type',
-      width: 110,
-      groupable: true,
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'materialFkId',
-      title: 'Particulars',
-      width: 120,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      title: 'Particulars',
-      width: 120,
-    },
-
-    {
-      field: 'UOM',
-      title: 'UOM / MT',
-      width: 100,
-      editable: false,
-    },
-
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'may',
-      title: headerMap[5],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'july',
-      title: headerMap[7],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-
-    {
-      field: 'august',
-      title: headerMap[8],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      editable: true,
-
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.#####}',
-      type: 'number',
-    },
-    {
-      field: 'remarks',
-      title: 'Remark',
-      width: 125,
-      editable: true,
-    },
-
-    {
-      field: 'idFromApi',
-      title: 'idFromApi',
-      hidden: true,
-    },
-    {
-      field: 'isEditable',
-      title: 'isEditable',
-      hidden: true,
-    },
-  ]
+  const colDefs = getNormalOpNormColDef({
+    headerMap,
+  })
 
   const colDefsIntermediateValues = [
     {

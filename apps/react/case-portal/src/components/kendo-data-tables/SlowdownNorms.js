@@ -1,5 +1,3 @@
-import Tooltip from '@mui/material/Tooltip'
-
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import React, { useEffect, useState } from 'react'
@@ -9,7 +7,6 @@ import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 // import NumericInputOnly from 'utils/NumericInputOnly'
-import { truncateRemarks } from 'utils/remarksUtils'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -17,6 +14,7 @@ import { validateFields } from 'utils/validationUtils'
 // import TextField from '@mui/material/TextField'
 // import { useDispatch } from 'react-redux'
 // import { setIsBlocked } from 'store/reducers/dataGridStore'
+import getSlowdownNormsColDef from 'components/data-tables/CommonHeader/getSlowdownNormsColDef'
 import KendoDataTables from './index'
 
 const SlowdownNorms = () => {
@@ -213,153 +211,7 @@ const SlowdownNorms = () => {
 
   // const months = slowdownMonths
 
-  const colDefs = [
-    {
-      field: 'Particulars',
-      headerName: 'Type',
-      width: 140,
-      hidden: true,
-    },
-
-    {
-      field: 'materialFkId',
-      headerName: 'Particulars',
-      width: 150,
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      headerName: 'Particulars',
-      width: 130,
-      editable: false,
-    },
-
-    { field: 'UOM', headerName: 'UOM', width: 100, editable: false },
-
-    {
-      field: 'april',
-      headerName: headerMap[4],
-      editable: slowdownMonths?.includes(4),
-      isDisabled: !slowdownMonths?.includes(4),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-
-    {
-      field: 'may',
-      headerName: headerMap[5],
-      editable: slowdownMonths?.includes(5),
-      isDisabled: !slowdownMonths?.includes(5),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-
-    {
-      field: 'june',
-      headerName: headerMap[6],
-      editable: slowdownMonths?.includes(6),
-      isDisabled: !slowdownMonths?.includes(6),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'july',
-      headerName: headerMap[7],
-      editable: slowdownMonths?.includes(7),
-      isDisabled: !slowdownMonths?.includes(7),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-
-    {
-      field: 'august',
-      headerName: headerMap[8],
-      editable: slowdownMonths?.includes(8),
-      isDisabled: !slowdownMonths?.includes(8),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'september',
-      headerName: headerMap[9],
-      editable: slowdownMonths?.includes(9),
-      isDisabled: !slowdownMonths?.includes(9),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'october',
-      headerName: headerMap[10],
-      editable: slowdownMonths?.includes(10),
-      isDisabled: !slowdownMonths?.includes(10),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'november',
-      headerName: headerMap[11],
-      editable: slowdownMonths?.includes(11),
-      isDisabled: !slowdownMonths?.includes(11),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'december',
-      headerName: headerMap[12],
-      editable: slowdownMonths?.includes(12),
-      isDisabled: !slowdownMonths?.includes(12),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'january',
-      headerName: headerMap[1],
-      editable: slowdownMonths?.includes(1),
-      isDisabled: !slowdownMonths?.includes(1),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'february',
-      headerName: headerMap[2],
-      editable: slowdownMonths?.includes(2),
-      isDisabled: !slowdownMonths?.includes(2),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'march',
-      headerName: headerMap[3],
-      editable: slowdownMonths?.includes(3),
-      isDisabled: !slowdownMonths?.includes(3),
-      type: 'number',
-      width: 120,
-    },
-
-    {
-      field: 'remarks',
-      headerName: 'Remark',
-      minWidth: 125,
-      editable: false,
-      width: 120,
-    },
-    {
-      field: 'idFromApi',
-      headerName: 'idFromApi',
-      hidden: true,
-    },
-  ]
+  const colDefs = getSlowdownNormsColDef({ headerMap, slowdownMonths })
 
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return

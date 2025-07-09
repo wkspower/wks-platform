@@ -1,22 +1,22 @@
-import { BusinessDemandElastomerColumns } from 'components/colums/ElastomerColums'
-import { BusinessDemandMegColumns } from 'components/colums/MegColums'
-import { BusinessDemandPeColumns } from 'components/colums/PeColums'
-import { BusinessDemandPpColumns } from 'components/colums/PpColums'
-import { BusinessDemandPtaColumns } from 'components/colums/PtaColums'
+import { NormalOpNormElastomerColumns } from 'components/colums/ElastomerColums'
+import { NormalOpNormMegColumns } from 'components/colums/MegColums'
+import { NormalOpNormPeColumns } from 'components/colums/PeColums'
+import { NormalOpNormPpColumns } from 'components/colums/PpColums'
+import { NormalOpNormPtaColumns } from 'components/colums/PtaColums'
 import { verticalEnums } from 'enums/verticalEnums'
 import { useSelector } from 'react-redux'
 
 const colDefsCache = new Map()
 
 const VERTICAL_COLDEFS_MAP = {
-  [verticalEnums.PE]: BusinessDemandPeColumns,
-  [verticalEnums.PP]: BusinessDemandPpColumns,
-  [verticalEnums.PTA]: BusinessDemandPtaColumns,
-  [verticalEnums.ELASTOMER]: BusinessDemandElastomerColumns,
-  [verticalEnums.MEG]: BusinessDemandMegColumns,
+  [verticalEnums.PE]: NormalOpNormPeColumns,
+  [verticalEnums.PP]: NormalOpNormPpColumns,
+  [verticalEnums.PTA]: NormalOpNormPtaColumns,
+  [verticalEnums.ELASTOMER]: NormalOpNormElastomerColumns,
+  [verticalEnums.MEG]: NormalOpNormMegColumns,
 }
 
-const kendoBusinessDemColDef = ({ headerMap }) => {
+const getNormalOpNormColDef = ({ headerMap }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
@@ -26,7 +26,7 @@ const kendoBusinessDemColDef = ({ headerMap }) => {
   if (colDefsCache.has(cacheKey)) {
     return colDefsCache.get(cacheKey)
   }
-  const cols = VERTICAL_COLDEFS_MAP[lowerVertName] || BusinessDemandMegColumns
+  const cols = VERTICAL_COLDEFS_MAP[lowerVertName] || NormalOpNormMegColumns
 
   const enhancedColDefs = cols.map((col) => {
     if (!headerMap || headerMap[col.title] === undefined) {
@@ -47,4 +47,4 @@ const kendoBusinessDemColDef = ({ headerMap }) => {
 
 export const clearColDefsCache = () => colDefsCache.clear()
 
-export default kendoBusinessDemColDef
+export default getNormalOpNormColDef

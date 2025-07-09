@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 // import NumericInputOnly from 'utils/NumericInputOnly'
-import { truncateRemarks } from 'utils/remarksUtils'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -15,6 +14,7 @@ import { validateFields } from 'utils/validationUtils'
 // import TextField from '@mui/material/TextField'
 // import { useDispatch } from 'react-redux'
 // import { setIsBlocked } from 'store/reducers/dataGridStore'
+import getShutdownConsumptionColDef from 'components/data-tables/CommonHeader/getShutdownConsumptionColDef'
 import KendoDataTables from './index'
 
 const ShutdownNorms = () => {
@@ -191,154 +191,7 @@ const ShutdownNorms = () => {
     return params.row.isEditable
   }
 
-  const colDefs = [
-    {
-      field: 'Particulars',
-      headerName: 'Type',
-      width: 120,
-      hidden: true,
-    },
-
-    {
-      field: 'materialFkId',
-      headerName: 'Particulars',
-      minWidth: 150,
-      editable: false,
-      hidden: true,
-      width: 120,
-    },
-    {
-      field: 'productName',
-      headerName: 'Particulars',
-      width: 180,
-      editable: false,
-    },
-
-    { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
-
-    {
-      field: 'april',
-      headerName: headerMap[4],
-      editable: shutdownMonths?.includes(4),
-      isDisabled: !shutdownMonths?.includes(4),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-
-    {
-      field: 'may',
-      headerName: headerMap[5],
-      editable: shutdownMonths?.includes(5),
-      isDisabled: !shutdownMonths?.includes(5),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-
-    {
-      field: 'june',
-      headerName: headerMap[6],
-      editable: shutdownMonths?.includes(6),
-      isDisabled: !shutdownMonths?.includes(6),
-      type: 'number',
-      format: '{0:#.#####}',
-      width: 120,
-    },
-    {
-      field: 'july',
-      headerName: headerMap[7],
-      editable: shutdownMonths?.includes(7),
-      isDisabled: !shutdownMonths?.includes(7),
-      type: 'number',
-      width: 120,
-      format: '{0:#.#####}',
-    },
-
-    {
-      field: 'august',
-      headerName: headerMap[8],
-      width: 120,
-      editable: shutdownMonths?.includes(8),
-      isDisabled: !shutdownMonths?.includes(8),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'september',
-      width: 120,
-      headerName: headerMap[9],
-      editable: shutdownMonths?.includes(9),
-      isDisabled: !shutdownMonths?.includes(9),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'october',
-      width: 120,
-      headerName: headerMap[10],
-      editable: shutdownMonths?.includes(10),
-      isDisabled: !shutdownMonths?.includes(10),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'november',
-      width: 120,
-      headerName: headerMap[11],
-      editable: shutdownMonths?.includes(11),
-      isDisabled: !shutdownMonths?.includes(11),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'december',
-      width: 120,
-      headerName: headerMap[12],
-      editable: shutdownMonths?.includes(12),
-      isDisabled: !shutdownMonths?.includes(12),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'january',
-      width: 120,
-      headerName: headerMap[1],
-      editable: shutdownMonths?.includes(1),
-      isDisabled: !shutdownMonths?.includes(1),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'february',
-      width: 120,
-      headerName: headerMap[2],
-      editable: shutdownMonths?.includes(2),
-      isDisabled: !shutdownMonths?.includes(2),
-      type: 'number',
-      format: '{0:#.#####}',
-    },
-    {
-      field: 'march',
-      width: 120,
-      headerName: headerMap[3],
-      editable: shutdownMonths?.includes(3),
-      isDisabled: !shutdownMonths?.includes(3),
-      type: 'number',
-    },
-
-    {
-      field: 'remarks',
-      headerName: 'Remark',
-      width: 120,
-      editable: false,
-    },
-    {
-      field: 'idFromApi',
-      headerName: 'idFromApi',
-      hidden: true,
-    },
-  ]
+  const colDefs = getShutdownConsumptionColDef({ headerMap, shutdownMonths })
 
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
