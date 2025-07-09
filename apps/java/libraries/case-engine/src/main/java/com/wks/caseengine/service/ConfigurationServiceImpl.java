@@ -662,7 +662,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(configurationDTO, i);
 
-					saveData(normParameterFKId, i, year, attributeValue, configurationDTO);
+					saveData(optionNormParameters.get(), i, year, attributeValue, configurationDTO);
 
 					if (!steamLatentName.isEmpty() && attributeValue != null
 							&& optionNormParameters.get().getName().equalsIgnoreCase("TST")) {
@@ -688,7 +688,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						Double attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
 
 						if (optionNormParametersHP.isPresent()) {
-							saveData(optionNormParametersHP.get().getId(), i, year, attributeValueHP, configurationDTO);
+							saveData(optionNormParametersHP.get(), i, year, attributeValueHP, configurationDTO);
 						}
 
 					}
@@ -837,11 +837,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return null;
 	}
 
-	void saveData(UUID normParameterFKId, Integer i, String year, Double attributeValue,
+	void saveData(NormParameters normParameter, Integer i, String year, Double attributeValue,
 			ConfigurationDTO configurationDTO) {
 
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
-				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameter.getId(), i, year);
 
 		NormAttributeTransactions normAttributeTransactions;
 
@@ -856,9 +856,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
 			normAttributeTransactions.setUserName("System");
-			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+			normAttributeTransactions.setNormParameterFKId(normParameter.getId());
 			normAttributeTransactions.setAopMonth(i);
-			normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
+			//normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
 			normAttributeTransactions.setAuditYear(year);
 		}
 
@@ -1289,7 +1289,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				try {
 					dto.setUOM(getStringCellValue(row.getCell(1), dto));
 					dto.setProductName(getStringCellValue(row.getCell(0), dto));
-					dto.setAuditYear(year);
+					//dto.setAuditYear(year);
 					dto.setApr(getNumericCellValue(row.getCell(2), dto));
 					dto.setMay(getNumericCellValue(row.getCell(2), dto));
 					dto.setJun(getNumericCellValue(row.getCell(2), dto));
@@ -1303,16 +1303,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					dto.setFeb(getNumericCellValue(row.getCell(2), dto));
 					dto.setMar(getNumericCellValue(row.getCell(2), dto));
 					dto.setRemarks(getStringCellValue(row.getCell(3), dto));
-					dto.setTypeName(getStringCellValue(row.getCell(4), dto));
-					if (row.getCell(5) != null) {
-						dto.setNormParameterFKId(getStringCellValue(row.getCell(5), dto));
+					//dto.setTypeName(getStringCellValue(row.getCell(4), dto));
+					if (row.getCell(4) != null) {
+						dto.setNormParameterFKId(getStringCellValue(row.getCell(4), dto));
 					} else {
 						dto.setSaveStatus("Failed");
+					
 						dto.setErrDescription("Normparameter Id is not found");
 					}
 
-					dto.setTypeDisplayName(getStringCellValue(row.getCell(6), dto));
-					dto.setIsEditable(getBooleanCellValue(row.getCell(8)));
+					//dto.setTypeDisplayName(getStringCellValue(row.getCell(6), dto));
+					//dto.setIsEditable(getBooleanCellValue(row.getCell(8)));
 				} catch (Exception e) {
 					e.printStackTrace();
 					dto.setErrDescription(e.getMessage());
@@ -1428,11 +1429,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					list.add(row[4]);
 					list.add(row[5]);
 					list.add(row[7]);
-					list.add(row[0]);
+					//list.add(row[0]);
 					list.add(row[1]);
-					list.add(row[2]);
-					list.add(row[6]);
-					list.add(row[8]);
+					//list.add(row[2]);
+					//list.add(row[6]);
+					//list.add(row[8]);
 					rows.add(list);
 				}
 			}
@@ -1444,11 +1445,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.add("Value");
 			innerHeaders.add("Remark");
 
-			innerHeaders.add("NormTypeName");
+			//innerHeaders.add("NormTypeName");
 			innerHeaders.add("NormParameter_FK_Id");
-			innerHeaders.add("Name");
-			innerHeaders.add("AuditYear");
-			innerHeaders.add("isEditable");
+			//innerHeaders.add("Name");
+			//innerHeaders.add("AuditYear");
+			//innerHeaders.add("isEditable");
 
 			List<List<String>> headers = new ArrayList<>();
 			headers.add(innerHeaders);
@@ -1480,10 +1481,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 			}
 			sheet.setColumnHidden(4, true);
-			sheet.setColumnHidden(5, true);
-			sheet.setColumnHidden(6, true);
-			sheet.setColumnHidden(7, true);
-			sheet.setColumnHidden(8, true);
+			//sheet.setColumnHidden(5, true);
+			//sheet.setColumnHidden(6, true);
+			//sheet.setColumnHidden(7, true);
+			//sheet.setColumnHidden(8, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1525,11 +1526,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				list.add(dto.getUOM());
 				list.add(dto.getApr());
 				list.add(dto.getRemarks());
-				list.add(dto.getTypeName());
+				//list.add(dto.getTypeName());
 				list.add(dto.getNormParameterFKId());
-				list.add(dto.getIsEditable());
-				list.add(year);
-				list.add(dto.getTypeDisplayName());
+				//list.add(dto.getIsEditable());
+				//list.add(year);
+				//list.add(dto.getTypeDisplayName());
 				list.add(dto.getSaveStatus());
 				list.add(dto.getErrDescription());
 				rows.add(list);
@@ -1543,11 +1544,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.add("Value");
 			innerHeaders.add("Remark");
 
-			innerHeaders.add("NormTypeName");
+			//innerHeaders.add("NormTypeName");
 			innerHeaders.add("NormParameter_FK_Id");
-			innerHeaders.add("Name");
-			innerHeaders.add("AuditYear");
-			innerHeaders.add("isEditable");
+			//innerHeaders.add("Name");
+			//innerHeaders.add("AuditYear");
+			//innerHeaders.add("isEditable");
 			innerHeaders.add("Status");
 			innerHeaders.add("Error Description");
 
@@ -1581,10 +1582,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 			}
 			sheet.setColumnHidden(4, true);
-			sheet.setColumnHidden(5, true);
-			sheet.setColumnHidden(6, true);
-			sheet.setColumnHidden(7, true);
-			sheet.setColumnHidden(8, true);
+			//sheet.setColumnHidden(5, true);
+			//sheet.setColumnHidden(6, true);
+			//sheet.setColumnHidden(7, true);
+			//sheet.setColumnHidden(8, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
