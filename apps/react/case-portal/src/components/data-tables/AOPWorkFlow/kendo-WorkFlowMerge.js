@@ -604,9 +604,9 @@ const WorkFlowMerge = () => {
             variant='scrollable'
             scrollButtons='auto'
             sx={{
-              borderBottom: 0,
+              borderBottom: '0px solid #ccc',
               '.MuiTabs-indicator': { display: 'none' },
-              maxWidth: '100%',
+              margin: '0px 0px 0px 0px',
             }}
             textColor='primary'
             indicatorColor='primary'
@@ -624,11 +624,8 @@ const WorkFlowMerge = () => {
                 key={idx}
                 label={label}
                 sx={{
-                  border: tabIndex === idx ? '1px solid' : 'none',
-                  borderBottom: '1px solid',
-                  mr: 0.5,
-                  minWidth: 'auto',
-                  paddingX: 1,
+                  border: '1px solid #ADD8E6',
+                  borderBottom: '1px solid #ADD8E6',
                   fontSize: '0.75rem',
                 }}
               />

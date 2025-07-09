@@ -135,14 +135,14 @@ export const DataService = {
   // getConfigurationExcelConstants,
   getNormalOperationNormsGrades,
   deleteTurnArondReportItem,
-  getIbrScreen1,
+  getIbr,
   getConsumptionAOPNormsGrades,
   saveCracker,
   saveAnnualProduction,
-  getIbrScreen2,
+  getIbrSdTa,
   // ,saveCracker2
   getIbrScreen3,
-  saveCracker3,
+  saveCrackerRunLength,
   getRunLengthExcel,
   saveRunLengthExcel,
   handleCalculateDecokingActivities,
@@ -3112,7 +3112,7 @@ async function deleteTurnArondReportItem(maintenanceId, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getIbrScreen1(keycloak, reportType) {
+async function getIbr(keycloak, reportType) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/decoking-activities?plantId=${plantId}&year=${year}&reportType=RunningDuration`
@@ -3195,7 +3195,7 @@ async function saveAnnualProduction(payload, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getIbrScreen2(keycloak, reportType) {
+async function getIbrSdTa(keycloak, reportType) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr?plantId=${plantId}&year=${year}`
@@ -3249,7 +3249,7 @@ async function getIbrScreen3(keycloak, reportType) {
     return await Promise.reject(e)
   }
 }
-async function saveCracker3(plantId, data, keycloak) {
+async function saveCrackerRunLength(plantId, data, keycloak) {
   var year = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/decoking-activities/run-length?plantId=${plantId}&year=${year}`
   const headers = {

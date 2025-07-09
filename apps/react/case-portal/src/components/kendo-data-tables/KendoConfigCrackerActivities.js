@@ -20,30 +20,45 @@ const DecokingConfig = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [activeTabIndex, setActiveTabIndex] = useState(0)
-  const [remarkDialogOpen2, setRemarkDialogOpen2] = useState(false)
-  const [currentRemark2, setCurrentRemark2] = useState('')
-  const [currentRowId2, setCurrentRowId2] = useState(null)
-  const [remarkDialogOpen3, setRemarkDialogOpen3] = useState(false)
-  const [currentRemark3, setCurrentRemark3] = useState('')
-  const [currentRowId3, setCurrentRowId3] = useState(null)
+  const [remarkDialogOpenSdTa, setRemarkDialogOpenSdTa] = useState(false)
+  const [currentRemarkSdTa, setCurrentRemarkSdTa] = useState('')
+  const [currentRowIdSdTa, setCurrentRowId2] = useState(null)
+  const [remarkDialogOpenRunLength, setRemarkDialogOpenRunLength] =
+    useState(false)
+  const [currentRemarkRunLength, setCurrentRemarkRunLength] = useState('')
+  const [currentRowIdRunLength, setCurrentRowId3] = useState(null)
   const [calculationObject, setCalculationObject] = useState([])
   const handleRemarkCellClick2 = (dataItem) => {
-    setCurrentRemark2(dataItem.remarks || '')
+    setCurrentRemarkSdTa(dataItem.remarks || '')
     setCurrentRowId2(dataItem.id)
-    setRemarkDialogOpen2(true)
+    setRemarkDialogOpenSdTa(true)
   }
-  const handleRemarkCellClick3 = (dataItem) => {
-    setCurrentRemark3(dataItem.remarks || '')
+  const handleRemarkCellClickRunLength = (dataItem) => {
+    setCurrentRemarkRunLength(dataItem.remarks || '')
     setCurrentRowId3(dataItem.id)
-    setRemarkDialogOpen3(true)
+    setRemarkDialogOpenRunLength(true)
   }
-  // --- Rows State Per Tab ----------------------------------------------------
   const [ibrScreen1Rows, setIbrScreen1Rows] = useState([])
   const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
   const [ibrScreen3Rows, setIbrScreen3Rows] = useState([])
   const [runningDurationRows, setRunningDurationRows] = useState([])
-  const [modifiedCells2, setModifiedCells2] = React.useState({})
-  const [modifiedCells3, setModifiedCells3] = React.useState({})
+  const [modifiedCellsSdTa, setModifiedCellsSdTa] = React.useState({})
+  const [modifiedCellsRunLength, setModifiedCellsRunLength] = React.useState({})
+  const allMonths = [
+    'N/A',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+    'January',
+    'February',
+    'March',
+  ].map((month) => ({ value: month, displayName: month }))
   const getRows = useCallback(
     (tab) => {
       if (tab === 'IBR Plan') {
@@ -73,7 +88,7 @@ const DecokingConfig = () => {
         if (currentTab === 'IBR Plan') {
           // Screen 1
           if (!screen || screen === 1) {
-            const data1 = await DataService.getIbrScreen1(keycloak)
+            const data1 = await DataService.getIbr(keycloak)
             if (data1?.code === 200) {
               const processedData = data1.data
                 .map((item, index) => ({
@@ -93,7 +108,7 @@ const DecokingConfig = () => {
           }
           // Screen 2
           if (!screen || screen === 2) {
-            const data2 = await DataService.getIbrScreen2(keycloak)
+            const data2 = await DataService.getIbrSdTa(keycloak)
             const toDateObject = (value) =>
               value ? moment(value, 'MMM D, YYYY').toDate() : null
 
@@ -103,21 +118,14 @@ const DecokingConfig = () => {
                 idFromApi: item.id,
                 id: index,
                 remarks: item?.remarks || '',
-                ibrSD: toDateObject(item.ibrSD),
-                ibrED: toDateObject(item.ibrED),
-                taSD: toDateObject(item.taSD),
-                taED: toDateObject(item.taED),
-                sdSD: toDateObject(item.sdSD),
-                sdED: toDateObject(item.sdED),
-
-                isCoil: item?.isCoil || '',
-                preCoil: item?.preCoil || '',
-                postCoil: item?.postCoil || '',
-
-                isCoilId: item?.isCoilId || '',
-                postCoilId: item?.postCoilId || '',
-                preCoilId: item?.preCoilId || '',
+                ibrStartDate: toDateObject(item.ibrStartDate),
+                ibrEndDate: toDateObject(item.ibrEndDate),
+                taStartDate: toDateObject(item.taStartDate),
+                taEndDate: toDateObject(item.taEndDate),
+                shutDownStartDate: toDateObject(item.shutDownStartDate),
+                shutDownEndDate: toDateObject(item.shutDownEndDate),
               }))
+
               setRowsForTab(currentTab, processedData, 2)
             } else {
               setRowsForTab(currentTab, [], 2)
@@ -186,9 +194,9 @@ const DecokingConfig = () => {
     fetchData()
   }, [plantID, oldYear, yearChanged, keycloak, fetchData])
 
-  const saveChangesIbr = React.useCallback(async () => {
+  const saveChangesSdTa = React.useCallback(async () => {
     try {
-      if (Object.keys(modifiedCells2).length === 0) {
+      if (Object.keys(modifiedCellsSdTa).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'No Records to Save!',
@@ -197,26 +205,17 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
-      var rawData = Object.values(modifiedCells2)
-      const data = rawData.filter((row) => row.inEdit)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        setLoading(false)
-        return
-      }
-      postIbr(data)
+      var rawData = Object.values(modifiedCellsSdTa)
+
+      postIbr(rawData)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [modifiedCells2])
+  }, [modifiedCellsSdTa])
 
   const saveChangesRunLength = React.useCallback(async () => {
     try {
-      if (Object.keys(modifiedCells3.updatedRows).length === 0) {
+      if (Object.keys(modifiedCellsRunLength.updatedRows).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'No Records to Save!',
@@ -225,10 +224,7 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
-      // var rawData = Object.values(modifiedCells3)
-      const rawData = modifiedCells3.updatedRows || []
-
-      // const data = rawData.filter((row) => row.inEdit)
+      const rawData = modifiedCellsRunLength.updatedRows || []
       if (rawData.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -238,11 +234,11 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
-      saveCracker3(rawData)
+      saveCrackerRunLength(rawData)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [modifiedCells3])
+  }, [modifiedCellsRunLength])
 
   const postIbr = async (newRow) => {
     setLoading(true)
@@ -255,8 +251,13 @@ const DecokingConfig = () => {
       }
       const formatIfDate = (value) => {
         if (!value) return ''
-        return moment(value, ['MMM D, YYYY', moment.ISO_8601], true).isValid()
-          ? moment(value).format('YYYY/MM/DD')
+        const parsed = moment.utc(
+          value,
+          ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A'],
+          true,
+        )
+        return parsed.isValid()
+          ? new Date(parsed.add(1, 'day').format('YYYY-MM-DD'))
           : value
       }
 
@@ -273,20 +274,21 @@ const DecokingConfig = () => {
         shutDownStartDate: formatIfDate(row?.shutDownStartDate) || '',
         shutDownEndDate: formatIfDate(row?.shutDownEndDate) || '',
 
-        preCrDays: row?.preCrDays || '',
-        postCrDays: row?.postCrDays || '',
-        isCr: row?.isCr ? 1 : 0,
+        preCrDays: row?.preCrDays ? Number(row.preCrDays) : null,
+        postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
+
+        isCr: row?.isCr ? true : false,
       }))
 
       const response = await DataService.postIbr(plantId, payload, keycloak)
 
-      if (response) {
+      if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        setModifiedCells2({})
+        setModifiedCellsSdTa({})
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -304,7 +306,7 @@ const DecokingConfig = () => {
     }
   }
 
-  const saveCracker3 = async (newRow) => {
+  const saveCrackerRunLength = async (newRow) => {
     setLoading(true)
     try {
       var plantId = ''
@@ -324,18 +326,18 @@ const DecokingConfig = () => {
         id: row?.idFromApi || '',
         demo: row?.demo || '',
       }))
-      const response = await DataService.saveCracker3(
+      const response = await DataService.saveCrackerRunLength(
         plantId,
         payload,
         keycloak,
       )
-      if (response) {
+      if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        setModifiedCells2({})
+        setModifiedCellsSdTa({})
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -368,7 +370,7 @@ const DecokingConfig = () => {
       showAccordian: true,
     }
   }
-  const adjustedPermissions2 = getAdjustedPermissions(
+  const adjustedPermissionsSdTa = getAdjustedPermissions(
     {
       showAction: false,
       addButton: false,
@@ -383,7 +385,7 @@ const DecokingConfig = () => {
     },
     isOldYear,
   )
-  const adjustedPermissions3 = getAdjustedPermissions(
+  const adjustedPermissionsRunLength = getAdjustedPermissions(
     {
       showAction: false,
       addButton: false,
@@ -404,21 +406,7 @@ const DecokingConfig = () => {
     },
     isOldYear,
   )
-  const allMonths = [
-    'N/A',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-    'January',
-    'February',
-    'March',
-  ].map((month) => ({ value: month, displayName: month }))
+
   const handleExcelUpload = (rawFile) => {
     saveExcelFile(rawFile)
   }
@@ -462,7 +450,6 @@ const DecokingConfig = () => {
           message: 'Data Upload Successfully!',
           severity: 'success',
         })
-        // setModifiedCells({})
         setLoading(false)
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
@@ -505,8 +492,6 @@ const DecokingConfig = () => {
     }
   }
   const handleCalculate = async () => {
-    // dispatch(setIsBlocked(true))
-    // setCalculatebtnClicked(true)
     setLoading(true)
     try {
       const year = localStorage.getItem('year')
@@ -553,41 +538,41 @@ const DecokingConfig = () => {
             setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
             fetchData={fetchData}
             handleRemarkCellClick={handleRemarkCellClick2}
-            remarkDialogOpen={remarkDialogOpen2}
-            currentRemark={currentRemark2}
-            setCurrentRemark={setCurrentRemark2}
-            currentRowId={currentRowId2}
+            remarkDialogOpen={remarkDialogOpenSdTa}
+            currentRemark={currentRemarkSdTa}
+            setCurrentRemark={setCurrentRemarkSdTa}
+            currentRowId={currentRowIdSdTa}
             snackbarData={snackbarData}
             snackbarOpen={snackbarOpen}
             setSnackbarOpen={setSnackbarOpen}
             setSnackbarData={setSnackbarData}
-            modifiedCells={modifiedCells2}
+            modifiedCells={modifiedCellsSdTa}
             allMonths={allMonths}
-            setModifiedCells={setModifiedCells2}
-            permissions={adjustedPermissions2}
-            saveChanges={saveChangesIbr}
-            setRemarkDialogOpen={setRemarkDialogOpen2}
+            setModifiedCells={setModifiedCellsSdTa}
+            permissions={adjustedPermissionsSdTa}
+            saveChanges={saveChangesSdTa}
+            setRemarkDialogOpen={setRemarkDialogOpenSdTa}
           />
           <FurnaceRunLengthGrid
             columns={ibrGridThree}
             rows={getRows('IBR Plan')[3]}
             setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
             fetchData={fetchData}
-            handleRemarkCellClick={handleRemarkCellClick3}
-            remarkDialogOpen={remarkDialogOpen3}
-            currentRemark={currentRemark3}
-            setCurrentRemark={setCurrentRemark3}
-            currentRowId={currentRowId3}
+            handleRemarkCellClick={handleRemarkCellClickRunLength}
+            remarkDialogOpen={remarkDialogOpenRunLength}
+            currentRemark={currentRemarkRunLength}
+            setCurrentRemark={setCurrentRemarkRunLength}
+            currentRowId={currentRowIdRunLength}
             snackbarData={snackbarData}
             snackbarOpen={snackbarOpen}
             setSnackbarOpen={setSnackbarOpen}
             setSnackbarData={setSnackbarData}
-            modifiedCells={modifiedCells3}
+            modifiedCells={modifiedCellsRunLength}
             allMonths={allMonths}
-            setModifiedCells={setModifiedCells3}
-            permissions={adjustedPermissions3}
+            setModifiedCells={setModifiedCellsRunLength}
+            permissions={adjustedPermissionsRunLength}
             saveChanges={saveChangesRunLength}
-            setRemarkDialogOpen={setRemarkDialogOpen3}
+            setRemarkDialogOpen={setRemarkDialogOpenRunLength}
             handleExcelUpload={handleExcelUpload}
             downloadExcelForConfiguration={downloadExcelForConfiguration}
             handleCalculate={handleCalculate}

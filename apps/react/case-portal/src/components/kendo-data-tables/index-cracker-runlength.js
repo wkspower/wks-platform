@@ -426,64 +426,91 @@ const KendoDataTablesCrackerRunLength = ({
           )
         }
 
-        if (col.type === 'switch') {
-          const handleSwitchChange = (props, value) => {
-            itemChange({
-              dataItem: props.dataItem,
-              field: props.field,
-              value: value,
-            })
-          }
+        // if (col.type === 'switch') {
+        //   const handleSwitchChange = (props, value) => {
+        //     itemChange({
+        //       dataItem: props.dataItem,
+        //       field: props.field,
+        //       value: value,
+        //     })
+        //   }
 
-          return (
-            <GridColumn
-              key={col.field} // Fixed typo: was col.fieldf
-              field={col.field}
-              title={col.title || col.headerName}
-              width={col.width || 150}
-              hidden={col.hidden}
-              editable={true}
-              headerClassName={
-                isColumnActive(col?.field, filter, sort) ? 'active-column' : ''
-              }
-              columnMenu={ColumnMenuCheckboxFilter}
-              cells={{
-                edit: {
-                  text: (props) => (
-                    <td
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Switch
-                        className='custom-switch'
-                        checked={!!props.dataItem[props.field]}
-                        onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
-                      />
-                    </td>
-                  ),
-                },
-                data: (props) => (
-                  <td
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Switch
-                      className='custom-switch'
-                      checked={!!props.dataItem[props.field]}
-                      onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
-                    />
-                  </td>
-                ),
-              }}
-            />
-          )
-        }
+        //   return (
+        //     <GridColumn
+        //       key={col.field}
+        //       field={col.field}
+        //       title={col.title || col.headerName}
+        //       width={col.width || 150}
+        //       hidden={col.hidden}
+        //       editable={true}
+        //       headerClassName={
+        //         isColumnActive(col?.field, filter, sort) ? 'active-column' : ''
+        //       }
+        //       columnMenu={ColumnMenuCheckboxFilter}
+        //       cells={{
+        //         edit: {
+        //           text: (props) => (
+        //             <td
+        //               style={{
+        //                 display: 'flex',
+        //                 justifyContent: 'center',
+        //                 alignItems: 'center',
+        //               }}
+        //             >
+        //               <button
+        //                 style={{
+        //                   padding: '4px 10px',
+        //                   backgroundColor: props.dataItem[props.field]
+        //                     ? '#4caf50'
+        //                     : '#f44336',
+        //                   color: 'white',
+        //                   border: 'none',
+        //                   borderRadius: '4px',
+        //                   cursor: 'pointer',
+        //                 }}
+        //                 onClick={() =>
+        //                   handleSwitchChange(
+        //                     props,
+        //                     !props.dataItem[props.field],
+        //                   )
+        //                 }
+        //               >
+        //                 {props.dataItem[props.field] ? 'YES' : 'NO'}
+        //               </button>
+        //             </td>
+        //           ),
+        //         },
+        //         data: (props) => (
+        //           <td
+        //             style={{
+        //               display: 'flex',
+        //               justifyContent: 'center',
+        //               alignItems: 'center',
+        //             }}
+        //           >
+        //             <button
+        //               style={{
+        //                 padding: '4px 10px',
+        //                 backgroundColor: props.dataItem[props.field]
+        //                   ? '#4caf50'
+        //                   : '#f44336',
+        //                 color: 'white',
+        //                 border: 'none',
+        //                 borderRadius: '4px',
+        //                 cursor: 'pointer',
+        //               }}
+        //               onClick={() =>
+        //                 handleSwitchChange(props, !props.dataItem[props.field])
+        //               }
+        //             >
+        //               {props.dataItem[props.field] ? 'YES' : 'NO'}
+        //             </button>
+        //           </td>
+        //         ),
+        //       }}
+        //     />
+        //   )
+        // }
 
         return (
           <GridColumn

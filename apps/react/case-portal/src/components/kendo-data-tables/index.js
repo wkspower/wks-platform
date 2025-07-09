@@ -416,6 +416,7 @@ const KendoDataTables = ({
     if (!file) return
 
     handleExcelUpload(file)
+    event.target.value = ''
   }
 
   const DurationDisplayWithTooltipCell = (props) => {

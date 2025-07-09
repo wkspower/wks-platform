@@ -587,9 +587,29 @@ const SlowDown = ({ permissions }) => {
       </Backdrop>
 
       <Box style={{ margin: 0, padding: 0 }}>
-        <Tabs value={selectedTab} onChange={handleTabChange}>
-          <Tab label='Slowdown Details' />
-          <Tab label='Configuration' />
+        <Tabs
+          value={selectedTab}
+          onChange={handleTabChange}
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '0px 0px 0px 0px',
+          }}
+        >
+          <Tab
+            label='Slowdown Details'
+            sx={{
+              border: '1px solid #ADD8E6',
+              borderBottom: '1px solid #ADD8E6',
+            }}
+          />
+          <Tab
+            label='Configuration'
+            sx={{
+              border: '1px solid #ADD8E6',
+              borderBottom: '1px solid #ADD8E6',
+            }}
+          />
         </Tabs>
       </Box>
 

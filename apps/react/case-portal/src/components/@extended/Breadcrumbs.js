@@ -283,7 +283,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                 {itemContent}
               </MuiBreadcrumbs>
             </Grid> */}
-            {/* 
+
             <Grid
               container
               sx={{ ml: 1.5 }}
@@ -303,6 +303,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                   }}
                 >
                   {verticalName} / {siteName} / {plantName}{' '}
+                  {/* {getRoleName(verticalId, item?.id)} */}
+                  {/* {keycloak?.realmAccess?.roles[0]} */}
                   {itemContent}
                 </Typography>
               </Grid>
@@ -312,12 +314,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                   <Chip
                     color='primary'
                     variant='outlined'
+                    // label={getRoleName(verticalId, item?.id)}
                     className='role-name'
-                    sx={{ border: 'none' }} 
+                    sx={{ border: 'none' }} // Remove the border
                   />
                 </Grid>
               </Stack>
-            </Grid> */}
+            </Grid>
 
             {/* HIDE THE TITLE NAME */}
             {title && (

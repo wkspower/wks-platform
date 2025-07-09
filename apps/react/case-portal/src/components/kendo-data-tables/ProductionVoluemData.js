@@ -174,119 +174,80 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  // const processRowUpdate = React.useCallback((newRow, oldRow) => {
-  //   const rowId = newRow.id
-  //   const updatedFields = []
-  //   for (const key in newRow) {
-  //     if (
-  //       Object.prototype.hasOwnProperty.call(newRow, key) &&
-  //       newRow[key] !== oldRow[key]
-  //     ) {
-  //       updatedFields.push(key)
-  //     }
-  //   }
-
-  //   unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-  //   if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-  //     unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-  //   }
-  //   setRows((prevRows) =>
-  //     prevRows.map((row) =>
-  //       row.id === newRow.id ? { ...newRow, isNew: false } : row,
-  //     ),
-  //   )
-  //   if (updatedFields.length > 0) {
-  //     setModifiedCells((prevModifiedCells) => ({
-  //       ...prevModifiedCells,
-  //       [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-  //     }))
-  //   }
-  //   return newRow
-  // }, [])
-  // console.log(modifiedCells)
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
+    try {
+      var data = Object.values(modifiedCells)
+      // console.log(data)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
+      }
 
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-    setTimeout(() => {
-      try {
-        var data = Object.values(modifiedCells)
-        // console.log(data)
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
+      const months = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december',
+        'january',
+        'february',
+        'march',
+      ]
+
+      const invalidRows = data.filter((row) => {
+        if (!row.normParametersFKId || !row.normParametersFKId.trim()) {
+          return true
         }
 
-        const months = [
-          'april',
-          'may',
-          'june',
-          'july',
-          'august',
-          'september',
-          'october',
-          'november',
-          'december',
-          'january',
-          'february',
-          'march',
-        ]
-
-        const invalidRows = data.filter((row) => {
-          if (!row.normParametersFKId || !row.normParametersFKId.trim()) {
-            return true
-          }
-
-          for (const month of months) {
-            const value = row[month]
-            if (
-              value === 0 ||
-              value === null ||
-              (typeof value === 'string' && !value.trim())
-            ) {
-              return true
-            }
-          }
-
-          const remarkValue = row.remark || row.remarks
-          const originalRemarkValue =
-            row.originalRemark || row.originalRemarks || ''
-
+        for (const month of months) {
+          const value = row[month]
           if (
-            !remarkValue ||
-            (typeof remarkValue === 'string' && !remarkValue.trim()) ||
-            remarkValue.trim() === originalRemarkValue.trim()
+            value === 0 ||
+            value === null ||
+            (typeof value === 'string' && !value.trim())
           ) {
             return true
           }
-
-          return false
-        })
-
-        if (invalidRows.length > 0) {
-          setSnackbarData({
-            message:
-              'Please fill all fields in edited row and update the Remark!',
-            severity: 'error',
-          })
-          setSnackbarOpen(true)
-          return
-        } else {
-          editAOPMCCalculatedData(data)
         }
-        setEnableSaveAddBtn(false)
-      } catch (error) {
-        console.log('Facing issue at saving data', error)
+
+        const remarkValue = row.remark || row.remarks
+        const originalRemarkValue =
+          row.originalRemark || row.originalRemarks || ''
+
+        if (
+          !remarkValue ||
+          (typeof remarkValue === 'string' && !remarkValue.trim()) ||
+          remarkValue.trim() === originalRemarkValue.trim()
+        ) {
+          return true
+        }
+
+        return false
+      })
+
+      if (invalidRows.length > 0) {
+        setSnackbarData({
+          message:
+            'Please fill all fields in edited row and update the Remark!',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        return
+      } else {
+        editAOPMCCalculatedData(data)
       }
-    }, 400)
+      setEnableSaveAddBtn(false)
+    } catch (error) {
+      console.log('Facing issue at saving data', error)
+    }
   }, [modifiedCells, selectedUnit])
 
   const fetchData = async () => {
@@ -297,12 +258,6 @@ const ProductionvolumeData = ({ permissions }) => {
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
-
-        // setSnackbarOpen(true)
-        // setSnackbarData({
-        //   message: 'Error fetching data. Please try again.',
-        //   severity: 'error',
-        // })
 
         return
       }
@@ -416,8 +371,6 @@ const ProductionvolumeData = ({ permissions }) => {
       return newRow
     })
   }
-  const formatValueToFiveDecimals = (params) =>
-    params ? parseFloat(params).toFixed(2) : ''
 
   const colDefs = [
     {
@@ -923,7 +876,7 @@ const ProductionvolumeData = ({ permissions }) => {
         rawFile,
         keycloak,
       )
-      if (response) {
+      if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Upload Successfully!',
@@ -933,6 +886,29 @@ const ProductionvolumeData = ({ permissions }) => {
         setLoading(false)
 
         fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File Production Vol Data.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
       } else {
         setSnackbarOpen(true)
         setSnackbarData({

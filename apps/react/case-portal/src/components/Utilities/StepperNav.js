@@ -103,16 +103,19 @@ export default function StepperNav() {
         ))}
       </Stepper>
 
-      <Typography
+      {/* <Typography
         variant='body2'
         sx={{
           textAlign: 'left',
           fontWeight: 'bold',
           ml: '20px',
+          mb: '10px',
+          mt: '10px',
+          fontSize: '1rem',
         }}
       >
         {verticalName} / {siteName} / {plantName}
-      </Typography>
+      </Typography> */}
     </>
   )
 }
