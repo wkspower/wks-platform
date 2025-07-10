@@ -371,5 +371,4 @@ const BusinessDemand = ({ permissions }) => {
     </div>
   )
 }
-
 export default BusinessDemand
