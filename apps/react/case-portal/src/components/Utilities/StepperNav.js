@@ -94,9 +94,14 @@ export default function StepperNav() {
       >
         {steps.map((step) => (
           <Step
-            sx={{ cursor: 'pointer' }}
             key={step.key}
             onClick={() => navigate(step.url)}
+            sx={{
+              cursor: 'pointer',
+              '& .MuiStepIcon-root.Mui-active': {
+                color: '#0100cb',
+              },
+            }}
           >
             <StepLabel sx={{ cursor: 'pointer' }}>{step.label}</StepLabel>
           </Step>

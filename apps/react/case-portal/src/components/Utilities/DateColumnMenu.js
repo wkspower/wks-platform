@@ -13,6 +13,8 @@ export const DateColumnMenu = (props) => {
     filter = { logic: 'and', filters: [] },
     onFilterChange,
     onCloseMenu,
+    setIsDateFilterActive,
+    isDateFilterActive
   } = props
 
   const current = filter.filters.find((f) => f.field === column.field) || {}
@@ -34,6 +36,7 @@ export const DateColumnMenu = (props) => {
       ...filter,
       filters: newFilters,
     })
+    setIsDateFilterActive(p => p.includes(column.field) ? p : [...p,column.field])
   }
 
   const clearDateFilter = () => {
@@ -42,6 +45,7 @@ export const DateColumnMenu = (props) => {
       logic: 'and',
       filters: newFilters,
     })
+    setIsDateFilterActive(p => p.includes(column.field) ? p.filter(c => c !== column.field) : p)
   }
 
   return (

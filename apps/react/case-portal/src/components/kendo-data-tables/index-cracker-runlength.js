@@ -415,8 +415,7 @@ const KendoDataTablesCrackerRunLength = ({
         rows?.length > 50
           ? {
               buttonCount: 4,
-              pageSizes: [50, 100, 150, 300, 500],
-              pageSizeValue: 50,
+              pageSizes: [10, 50, 100, 366],
             }
           : false
       }
@@ -485,6 +484,7 @@ const KendoDataTablesCrackerRunLength = ({
               }}
               columnMenu={ColumnMenuCheckboxFilter}
               hidden={col.hidden}
+              sortable={false}
             />
           )
         }
@@ -504,7 +504,7 @@ const KendoDataTablesCrackerRunLength = ({
             }}
             className={col?.isDisabled ? 'k-right-disabled' : ''}
             columnMenu={col?.filter ? ColumnMenuCheckboxFilter : null}
-            sortable={col?.filter ? false : true}
+            sortable={col?.filter ? true : false}
           />
         )
       })}
@@ -542,7 +542,6 @@ const KendoDataTablesCrackerRunLength = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
-              p: 1,
             }}
           >
             {/* Left side - Note */}
@@ -556,18 +555,14 @@ const KendoDataTablesCrackerRunLength = ({
             {/* Right side - All other actions */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {permissions?.downloadExcelBtn && (
-                <Tooltip>
-                  <span title='Export Data'>
-                    <Button
-                      variant='outlined'
-                      size='large'
-                      onClick={downloadExcelForConfiguration}
-                      disabled={isButtonDisabled}
-                    >
-                      <DownloadIcon fontSize='small' />
-                    </Button>
-                  </span>
-                </Tooltip>
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={downloadExcelForConfiguration}
+                  disabled={isButtonDisabled}
+                >
+                  Export
+                </Button>
               )}
               {/* {permissions?.uploadExcelBtn && (
                 <Tooltip>

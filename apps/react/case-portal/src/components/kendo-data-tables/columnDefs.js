@@ -108,6 +108,7 @@ export const ibrGridThree = [
     headerAlign: 'left',
     editable: false,
     isDisabled: true,
+    filter: true,
   },
   {
     field: 'date',

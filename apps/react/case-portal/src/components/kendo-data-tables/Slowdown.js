@@ -1,21 +1,26 @@
+import React, { useEffect, useMemo, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
-import React, { useState, useEffect } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
-import { useSelector } from 'react-redux'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
-import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
-import KendoDataTables from './index'
+import { SlowDownElastomerColumns } from 'components/colums/ElastomerColums'
+import { SlowDownMegColumns } from 'components/colums/MegColums'
+import { SlowDownPeColumns } from 'components/colums/PeColums'
+import { SlowDownPpColumns } from 'components/colums/PpColums'
+import { SlowDownPtaColumns } from 'components/colums/PtaColums'
+import { verticalEnums } from 'enums/verticalEnums'
 import { validateFields } from 'utils/validationUtils'
 import { Box, Tab, Tabs } from '../../../node_modules/@mui/material/index'
+import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
+import KendoDataTables from './index'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
@@ -360,36 +365,6 @@ const SlowDown = ({ permissions }) => {
         setColDefs2([])
       }
 
-      // const rows3 = [
-      //   {
-      //     Particulars: 'Yield 1',
-      //     Shutdown_01_July: 120,
-      //     Shutdown_02_August: 90,
-      //     Shutdown_03_September: 100,
-      //     id: 0,
-      //   },
-      //   {
-      //     Particulars: 'Yield 2',
-      //     Shutdown_01_July: 80,
-      //     Shutdown_02_August: 60,
-      //     Shutdown_03_September: 70,
-      //     id: 1,
-      //   },
-      //   {
-      //     Particulars: 'Yield 3',
-      //     Shutdown_01_July: 200,
-      //     Shutdown_02_August: 180,
-      //     Shutdown_03_September: 160,
-      //     id: 2,
-      //   },
-      //   {
-      //     Particulars: 'Yield 4',
-      //     Shutdown_01_July: 40,
-      //     Shutdown_02_August: 35,
-      //     Shutdown_03_September: 45,
-      //     id: 3,
-      //   },
-      // ]
       setRows2([])
       setLoading(false)
     } catch (error) {
@@ -449,77 +424,94 @@ const SlowDown = ({ permissions }) => {
     }))
   }
 
-  const colDefs = [
-    {
-      field: 'discription',
-      title: 'Slowdown Desc',
-      editable: true,
-    },
+  const colDefs = useMemo(() => {
+    switch (lowerVertName) {
+      case verticalEnums.PE:
+        return SlowDownPeColumns
+      case verticalEnums.PP:
+        return SlowDownPpColumns
+      case verticalEnums.PTA:
+        return SlowDownPtaColumns
+      case verticalEnums.ELASTOMER:
+        return SlowDownElastomerColumns
+      case verticalEnums.MEG:
+        return SlowDownMegColumns
+      default:
+        return SlowDownMegColumns
+    }
+  }, [lowerVertName])
 
-    {
-      field: 'maintenanceId',
-      title: 'maintenanceId',
-      editable: false,
-      hidden: true,
-    },
+  // const colDefs = [
+  //   {
+  //     field: 'discription',
+  //     title: 'Slowdown Desc',
+  //     editable: true,
+  //   },
 
-    {
-      field: 'productName1',
-      title: 'Particulars',
-      editable: true,
-      hidden:
-        lowerVertName === 'elastomer' || lowerVertName === 'meg' ? true : false,
-    },
+  //   {
+  //     field: 'maintenanceId',
+  //     title: 'maintenanceId',
+  //     editable: false,
+  //     hidden: true,
+  //   },
 
-    {
-      field: 'maintStartDateTime',
-      title: 'SD- From',
-      type: 'dateTime',
-      editable: true,
-    },
+  //   {
+  //     field: 'productName1',
+  //     title: 'Particulars',
+  //     editable: true,
+  //     hidden:
+  //       lowerVertName === 'elastomer' || lowerVertName === 'meg' ? true : false,
+  //   },
 
-    {
-      field: 'maintEndDateTime',
-      title: 'SD- To',
-      type: 'dateTime',
-      editable: true,
-    },
+  //   {
+  //     field: 'maintStartDateTime',
+  //     title: 'SD- From',
+  //     type: 'dateTime',
+  //     editable: true,
+  //   },
 
-    {
-      field: 'durationInHrs',
-      title: 'Duration (hrs)',
-      editable: true,
-    },
+  //   {
+  //     field: 'maintEndDateTime',
+  //     title: 'SD- To',
+  //     type: 'dateTime',
+  //     editable: true,
+  //   },
 
-    {
-      field: 'rate',
-      title: 'Rate (TPH)',
-      editable: true,
-      type: 'number',
-      hidden: lowerVertName === 'meg' ? true : false,
-    },
+  //   {
+  //     field: 'durationInHrs',
+  //     title: 'Duration (hrs)',
+  //     editable: true,
+  //   },
 
-    {
-      field: 'rateEOE',
-      title: 'Op.Production Rate(EOE)',
-      editable: true,
-      type: 'number',
-      hidden: lowerVertName === 'meg' ? false : true,
-    },
-    {
-      field: 'rateEO',
-      title: 'Op.Production Rate(EO)',
-      editable: true,
-      type: 'number',
-      hidden: lowerVertName === 'meg' ? false : true,
-    },
+  //   {
+  //     field: 'rate',
+  //     title: 'Rate (TPH)',
+  //     editable: true,
+  //     type: 'number',
+  //     hidden: lowerVertName === 'meg' ? true : false,
+  //   },
 
-    {
-      field: 'remark',
-      title: 'Remarks',
-      editable: true,
-    },
-  ]
+  //   {
+  //     field: 'rateEOE',
+  //     title: 'Rate (EOE)',
+  //     editable: true,
+  //     type: 'number',
+  //     hidden: lowerVertName === 'meg' ? false : true,
+  //   },
+  //   {
+  //     field: 'rateEO',
+  //     title: 'Rate (EO)',
+  //     editable: true,
+  //     type: 'number',
+  //     hidden: lowerVertName === 'meg' ? false : true,
+  //   },
+
+  //   {
+  //     field: 'remark',
+  //     title: 'Remarks',
+  //     editable: true,
+  //   },
+  // ]
 
   const deleteRowData = async (paramsForDelete) => {
     try {
@@ -594,6 +586,7 @@ const SlowDown = ({ permissions }) => {
             borderBottom: '0px solid #ccc',
             '.MuiTabs-indicator': { display: 'none' },
             margin: '0px 0px 0px 0px',
+            minHeight: '35px',
           }}
         >
           <Tab
@@ -601,6 +594,9 @@ const SlowDown = ({ permissions }) => {
             sx={{
               border: '1px solid #ADD8E6',
               borderBottom: '1px solid #ADD8E6',
+
+              padding: '9px',
+              minHeight: '10px',
             }}
           />
           <Tab
@@ -608,6 +604,8 @@ const SlowDown = ({ permissions }) => {
             sx={{
               border: '1px solid #ADD8E6',
               borderBottom: '1px solid #ADD8E6',
+              padding: '9px',
+              minHeight: '10px',
             }}
           />
         </Tabs>

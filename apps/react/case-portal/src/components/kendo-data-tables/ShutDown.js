@@ -1,8 +1,8 @@
-import { DataService } from 'services/DataService'
-import React, { useState, useEffect } from 'react'
-import { useSession } from 'SessionStoreContext'
-import { useSelector } from 'react-redux'
 import { useGridApiRef } from '@mui/x-data-grid'
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -16,14 +16,7 @@ const ShutDown = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const {
-    sitePlantChange,
-    verticalChange,
-    yearChanged,
-    oldYear,
-    siteID,
-    plantID,
-  } = dataGridStore
+  const { yearChanged, oldYear, plantID } = dataGridStore
 
   useEffect(() => {
     if (plantID?.plantId) {
@@ -32,9 +25,6 @@ const ShutDown = ({ permissions }) => {
   }, [plantID])
 
   const isOldYear = oldYear?.oldYear
-
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
@@ -59,40 +49,38 @@ const ShutDown = ({ permissions }) => {
   }
 
   const saveChanges = React.useCallback(async () => {
-    setTimeout(() => {
-      try {
-        var data = Object.values(modifiedCells)
+    try {
+      var data = Object.values(modifiedCells)
 
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
-
-        const requiredFields = [
-          'maintStartDateTime',
-          'maintEndDateTime',
-          'discription',
-          'remark',
-        ]
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
-
-        saveShutdownData(data)
-      } catch (error) {
-        console.log('Error saving changes:', error)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
       }
-    }, 400)
+
+      const requiredFields = [
+        'maintStartDateTime',
+        'maintEndDateTime',
+        'discription',
+        'remark',
+      ]
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      saveShutdownData(data)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    }
   }, [modifiedCells])
 
   function addTimeOffset(dateTime) {
@@ -215,15 +203,7 @@ const ShutDown = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [
-    // sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    // verticalChange,
-    // lowerVertName,
-    _plantID,
-  ])
+  }, [oldYear, yearChanged, keycloak, _plantID])
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs

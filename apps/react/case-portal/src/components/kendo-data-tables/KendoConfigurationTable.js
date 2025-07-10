@@ -38,14 +38,14 @@ const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
 ))(() => ({
   backgroundColor: '#fff',
-  padding: '0px 12px',
+  padding: '0px 0px',
   minHeight: '40px',
   '& .MuiAccordionSummary-content': {
     margin: '8px 0',
   },
 }))
 const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
+  padding: '0px 0px 0px',
   backgroundColor: '#F2F3F8',
 }))
 const ConfigurationTable = () => {
@@ -721,6 +721,7 @@ const ConfigurationTable = () => {
               borderBottom: '0px solid #ccc',
               '.MuiTabs-indicator': { display: 'none' },
               margin: '0px 0px 0px 0px',
+              minHeight: '32px', // reduce tab bar height
             }}
             textColor='primary'
             indicatorColor='primary'
@@ -734,6 +735,9 @@ const ConfigurationTable = () => {
                 sx={{
                   border: '1px solid #ADD8E6',
                   borderBottom: '1px solid #ADD8E6',
+
+                  padding: '9px',
+                  minHeight: '10px',
                 }}
               />
             ))}
@@ -986,19 +990,17 @@ const ConfigurationTable = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <div
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '5px',
-          marginTop: '40px',
         }}
       >
         <Tabs
           sx={{
             borderBottom: '0px solid #ccc',
             '.MuiTabs-indicator': { display: 'none' },
-            margin: '-35px 0px -8px 0%',
           }}
           textColor='primary'
           indicatorColor='primary'
@@ -1015,6 +1017,9 @@ const ConfigurationTable = () => {
                 sx={{
                   border: '1px solid #ADD8E6',
                   borderBottom: '1px solid #ADD8E6',
+
+                  padding: '9px',
+                  minHeight: '10px',
                 }}
                 label={tabInfo?.displayName || 'loading..'}
               />

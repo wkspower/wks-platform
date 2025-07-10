@@ -128,6 +128,7 @@ const KendoDataTables = ({
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+  const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
   const initialGroup = groupBy
@@ -522,7 +523,6 @@ const KendoDataTables = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
-              p: 1,
             }}
           >
             {/* Left side - Note */}
@@ -595,32 +595,27 @@ const KendoDataTables = ({
               )}
 
               {permissions?.downloadExcelBtn && (
-                <Tooltip>
-                  <span title='Export Data'>
-                    <Button
-                      variant='outlined'
-                      size='large'
-                      onClick={downloadExcelForConfiguration}
-                      disabled={isButtonDisabled}
-                    >
-                      <DownloadIcon fontSize='small' />
-                    </Button>
-                  </span>
-                </Tooltip>
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={downloadExcelForConfiguration}
+                  disabled={isButtonDisabled}
+                >
+                  Export
+                </Button>
               )}
 
               {permissions?.uploadExcelBtn && (
-                <Tooltip>
-                  <span title='Import Data'>
-                    <Button
-                      variant='outlined'
-                      size='large'
-                      onClick={triggerFileUpload}
-                      disabled={isButtonDisabled}
-                    >
-                      <UploadIcon fontSize='small' />
-                    </Button>
-                  </span>
+                <>
+                  <Button
+                    variant='contained'
+                    onClick={triggerFileUpload}
+                    disabled={isButtonDisabled}
+                    className='btn-save'
+                  >
+                    Import
+                  </Button>
+
                   <input
                     type='file'
                     accept='.xlsx,.xls'
@@ -628,7 +623,7 @@ const KendoDataTables = ({
                     ref={fileInputRef}
                     style={{ display: 'none' }}
                   />
-                </Tooltip>
+                </>
               )}
 
               {permissions?.saveBtn && (
@@ -819,8 +814,18 @@ const KendoDataTables = ({
                     }
                     editor='date'
                     hidden={col.hidden}
-                    columnMenu={DateColumnMenu}
-                    headerClassName={isActive ? 'active-column' : ''}
+                    columnMenu={(props) => (
+                      <DateColumnMenu
+                        {...props}
+                        isDateFilterActive={isDateFilterActive}
+                        setIsDateFilterActive={setIsDateFilterActive}
+                      />
+                    )}
+                    headerClassName={
+                      isDateFilterActive.includes(col.field)
+                        ? 'active-column'
+                        : ''
+                    }
                   />
                 )
               }
@@ -1028,6 +1033,7 @@ const KendoDataTables = ({
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
+                    headerClassName={isActive ? 'active-column' : ''}
                   />
                 )
               }
@@ -1051,6 +1057,7 @@ const KendoDataTables = ({
                       edit: { text: DurationEditor },
                       data: DurationDisplayWithTooltipCell,
                     }}
+                    headerClassName={isActive ? 'active-column' : ''}
                   />
                 )
               }

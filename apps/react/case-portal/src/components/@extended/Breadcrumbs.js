@@ -241,7 +241,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           content={false}
         >
           {location?.pathname.startsWith('/production-norms-plan') && (
-            <Box sx={{ m: '10px -10px 16px' }}>
+            <Box>
               <StepperNav />
             </Box>
           )}

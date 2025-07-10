@@ -532,7 +532,7 @@ const DecokingConfig = () => {
       </Backdrop>
       <>
         <>
-          {/* <SDTAActivitiesGrid
+          <SDTAActivitiesGrid
             columns={ibrPlanColumns}
             rows={getRows('IBR Plan')[2]}
             setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
@@ -552,7 +552,7 @@ const DecokingConfig = () => {
             permissions={adjustedPermissionsSdTa}
             saveChanges={saveChangesSdTa}
             setRemarkDialogOpen={setRemarkDialogOpenSdTa}
-          /> */}
+          />
           <FurnaceRunLengthGrid
             columns={ibrGridThree}
             rows={getRows('IBR Plan')[3]}

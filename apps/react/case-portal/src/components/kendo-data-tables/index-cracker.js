@@ -630,7 +630,6 @@ const KendoDataTablesCracker = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
-              p: 1,
             }}
           >
             {/* Left side - Note */}

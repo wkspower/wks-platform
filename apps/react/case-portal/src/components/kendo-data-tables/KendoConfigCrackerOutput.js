@@ -427,7 +427,8 @@ const CrackerConfig = () => {
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
-                textTransform: 'capitalize',
+                padding: '9px',
+                minHeight: '10px',
               }}
               label={label}
             />
