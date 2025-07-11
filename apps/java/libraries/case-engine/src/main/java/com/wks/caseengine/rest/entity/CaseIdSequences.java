@@ -7,8 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name="case_id_sequence")
+//@Entity
+//@Table(name="case_id_sequence")
 public class CaseIdSequences {
 
 	@Id

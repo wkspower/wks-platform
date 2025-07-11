@@ -20,8 +20,7 @@ import KendoDataTables from './index'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
@@ -349,6 +348,24 @@ const SlowDown = ({ permissions }) => {
       setLoading(false)
     }
   }
+  const fetchConfigurationData = async () => {
+    setLoading(true)
+    try {
+      const {data} = await DataService.getSlowDownConfigurationData(keycloak)
+      console.log('---config data---',data);
+      
+      const formattedData = data.map((item, index) => ({
+        ...item,
+        particulars:item.normParameterDisplayName
+      }))
+
+      setRows2(formattedData)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching SlowDown Configuration data:', error)
+      setLoading(false)
+    }
+  }
   const fetchData2 = async () => {
     setLoading(true)
     try {
@@ -365,37 +382,7 @@ const SlowDown = ({ permissions }) => {
         setColDefs2([])
       }
 
-      const rows3 = [
-        {
-          Particulars: 'Yield 1',
-          Shutdown_01_July: 120,
-          Shutdown_02_August: 90,
-          Shutdown_03_September: 100,
-          id: 0,
-        },
-        {
-          Particulars: 'Yield 2',
-          Shutdown_01_July: 80,
-          Shutdown_02_August: 60,
-          Shutdown_03_September: 70,
-          id: 1,
-        },
-        {
-          Particulars: 'Yield 3',
-          Shutdown_01_July: 200,
-          Shutdown_02_August: 180,
-          Shutdown_03_September: 160,
-          id: 2,
-        },
-        {
-          Particulars: 'Yield 4',
-          Shutdown_01_July: 40,
-          Shutdown_02_August: 35,
-          Shutdown_03_September: 45,
-          id: 3,
-        },
-      ]
-      setRows2(rows3)
+      // setRows2([])
       setLoading(false)
     } catch (error) {
       console.error('Error fetching SlowDown data:', error)
@@ -439,7 +426,7 @@ const SlowDown = ({ permissions }) => {
 
     fetchData()
     fetchData2()
-
+    fetchConfigurationData()
     // saveShutdownData()
     getAllProducts()
   }, [oldYear, yearChanged, keycloak, plantID])
@@ -607,10 +594,36 @@ const SlowDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 2 }}>
-        <Tabs value={selectedTab} onChange={handleTabChange}>
-          <Tab label='Slowdown Details' />
-          <Tab label='Configuration' />
+      <Box style={{ margin: 0, padding: 0 }}>
+        <Tabs
+          value={selectedTab}
+          onChange={handleTabChange}
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '0px 0px 0px 0px',
+            minHeight: '35px',
+          }}
+        >
+          <Tab
+            label='Slowdown Details'
+            sx={{
+              border: '1px solid #ADD8E6',
+              borderBottom: '1px solid #ADD8E6',
+
+              padding: '9px',
+              minHeight: '10px',
+            }}
+          />
+          <Tab
+            label='Configuration'
+            sx={{
+              border: '1px solid #ADD8E6',
+              borderBottom: '1px solid #ADD8E6',
+              padding: '9px',
+              minHeight: '10px',
+            }}
+          />
         </Tabs>
       </Box>
 

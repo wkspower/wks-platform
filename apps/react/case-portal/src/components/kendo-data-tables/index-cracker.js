@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Switch,
   TextField,
   Typography,
 } from '../../../node_modules/@mui/material/index'
@@ -40,7 +41,7 @@ import {
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
-import { Switch } from '@progress/kendo-react-inputs'
+
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -74,13 +75,13 @@ export const dateFields = [
   'fromDate',
   'toDate',
 ]
-export const dateFields1 = [
-  'ibrSD',
-  'ibrED',
-  'taSD',
-  'taED',
-  'sdED',
-  'sdSD',
+export const dateFieldsCracker = [
+  'ibrStartDate',
+  'ibrEndDate',
+  'taStartDate',
+  'taEndDate',
+  'shutDownStartDate',
+  'shutDownEndDate',
   'date',
 ]
 export const hiddenFields = []
@@ -364,7 +365,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-        if (dateFields1.includes(col.field)) {
+        if (dateFieldsCracker.includes(col.field)) {
           return (
             <GridColumn
               key={col.field}
@@ -512,6 +513,7 @@ const KendoDataTablesCracker = ({
           )
         }
         //--
+
         if (col.type === 'switch') {
           const handleSwitchChange = (props, value) => {
             itemChange({
@@ -523,7 +525,7 @@ const KendoDataTablesCracker = ({
 
           return (
             <GridColumn
-              key={col.field} // Fixed typo: was col.fieldf
+              key={col.field}
               field={col.field}
               title={col.title || col.headerName}
               width={col.width || 150}
@@ -538,15 +540,18 @@ const KendoDataTablesCracker = ({
                   text: (props) => (
                     <td
                       style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
+                        textAlign: 'center',
+                        paddingTop: 0,
+                        paddingBottom: 0,
                       }}
                     >
                       <Switch
-                        className='custom-switch'
                         checked={!!props.dataItem[props.field]}
-                        onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
+                        onChange={(e) =>
+                          handleSwitchChange(props, e.target.checked)
+                        }
+                        inputProps={{ 'aria-label': 'Switch toggle' }}
+                        style={{ marginTop: 0, marginBottom: 0 }}
                       />
                     </td>
                   ),
@@ -554,15 +559,18 @@ const KendoDataTablesCracker = ({
                 data: (props) => (
                   <td
                     style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
+                      textAlign: 'center',
+                      paddingTop: 0,
+                      paddingBottom: 0,
                     }}
                   >
                     <Switch
-                      className='custom-switch'
                       checked={!!props.dataItem[props.field]}
-                      onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
+                      onChange={(e) =>
+                        handleSwitchChange(props, e.target.checked)
+                      }
+                      inputProps={{ 'aria-label': 'Switch toggle' }}
+                      style={{ marginTop: 0, marginBottom: 0 }}
                     />
                   </td>
                 ),
@@ -570,6 +578,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
+
         //---
         return (
           <GridColumn
@@ -622,7 +631,6 @@ const KendoDataTablesCracker = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
-              p: 1,
             }}
           >
             {/* Left side - Note */}

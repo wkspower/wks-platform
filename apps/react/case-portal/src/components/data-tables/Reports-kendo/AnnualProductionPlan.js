@@ -176,7 +176,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimals(params.value)}</span>
         </Tooltip>
       ),
-      type:'number'
+      type: 'number',
     },
     { field: 'uom', headerName: 'UOM', editable: true, flex: 1 },
   ]
@@ -220,7 +220,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
-      type:'number'
+      type: 'number',
     },
     {
       field: 'uom',
@@ -273,7 +273,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimalsTwo(params.value)}</span>
         </Tooltip>
       ),
-      type:'number'
+      type: 'number',
     },
     {
       field: 'durationHours',
@@ -290,7 +290,7 @@ const AnnualProductionPlan = () => {
           <span>{formatValueToThreeDecimalsZero(params.value)}</span>
         </Tooltip>
       ),
-      type:'number'
+      type: 'number',
     },
     {
       field: 'periodFrom',
@@ -401,7 +401,7 @@ const AnnualProductionPlan = () => {
           flex: 1,
           align: 'right',
           format: '{0:#.#####}',
-          type:'number'
+          type: 'number',
         },
       ],
     },
@@ -822,51 +822,47 @@ const AnnualProductionPlan = () => {
           showTitle: true,
           saveBtn: true,
           allAction: true,
-          showT15: true,
+          showReportTitle: true,
         }}
       />
 
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Max hourly rate achieved{' '}
-      </Typography>
       <KendoDataTables
         rows={rowsMaxRate}
         columns={columnsMaxRate}
-        permissions={{ saveBtn: true, allAction: true }}
+        permissions={{ saveBtn: true, allAction: true, showReportTitle: true }}
         modifiedCells={modifiedCells2}
         setModifiedCells={setModifiedCells2}
         currentRowId={currentRowId2}
         setCurrentRowId={setCurrentRowId2}
         setRows={setRowsMaxRate}
         saveChanges={saveChanges2}
+        titleName='Max hourly rate achieved'
       />
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Calculation of Operating hours{' '}
-      </Typography>
+
       <KendoDataTables
         rows={rowsOperatingHrs}
         columns={columnsOperatingHrs}
-        permissions={{ saveBtn: true, allAction: true }}
+        permissions={{ saveBtn: true, allAction: true, showReportTitle: true }}
         modifiedCells={modifiedCells3}
         setModifiedCells={setModifiedCells3}
         currentRowId={currentRowId3}
         setCurrentRowId={setCurrentRowId3}
         setRows={setRowsOperatingHrs}
         saveChanges={saveChanges3}
+        titleName='Calculation of Operating hours'
       />
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Calculation of Average hourly rate{' '}
-      </Typography>
+
       <KendoDataTables
         rows={rowsAverageHourlyRate}
         columns={columnsAverageHourlyRate}
-        permissions={{ saveBtn: true, allAction: true }}
+        permissions={{ saveBtn: true, allAction: true, showReportTitle: true }}
         modifiedCells={modifiedCells4}
         setModifiedCells={setModifiedCells4}
         currentRowId={currentRowId4}
         setCurrentRowId={setCurrentRowId4}
         setRows={setRowsAverageHourlyRate}
         saveChanges={saveChanges4}
+        titleName='Calculation of Average hourly rate'
       />
       <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
         Production performance comparision with last 3 years{' '}
@@ -878,6 +874,7 @@ const AnnualProductionPlan = () => {
         setRows={setRowsProductionPerformance}
         permissions={{
           textAlignment: 'center',
+          showReportTitle: true,
         }}
         // modifiedCells={modifiedCells5}
         // setModifiedCells={setModifiedCells5}

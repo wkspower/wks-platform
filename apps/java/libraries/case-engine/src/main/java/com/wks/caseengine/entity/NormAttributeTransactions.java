@@ -24,16 +24,14 @@ import java.time.LocalDateTime;
 @Builder
 public class NormAttributeTransactions {
 
-   @Id
+	@Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
-
     @Column(name = "AttributeValue", length = 250)
     private String attributeValue;
-
 
     @Column(name = "AOPMonth")
     private Integer aopMonth;
@@ -53,14 +51,14 @@ public class NormAttributeTransactions {
     @Column(name = "AttributeValueVersion", length = 10)
     private String attributeValueVersion;
 
-   
-
     @Column(name = "[User]")
     private String userName;
 
-
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFKId;
+    
+    @Column(name="Maintenance_Id")
+    private UUID MaintenanceId;
 
 
 }

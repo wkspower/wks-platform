@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.SlowDownPlanDTO;
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -63,5 +65,26 @@ public class SlowdownPlanController {
 	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId,plantId);
         return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
     }
+	
+	@PostMapping(value="/slowdown/configuration")
+	public AOPMessageVM saveSlowdownConfigurationData(@RequestParam String plantId,@RequestParam String year, @RequestBody List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList){
+		return slowdownPlanService.saveSlowdownConfigurationData(plantId,year,normAttributeTransactionsDTOList);		
+	}
+	
+	@GetMapping(value = "/slowdown/configuration")
+    public AOPMessageVM getSlowdownConfigurationData(@RequestParam String plantId, @RequestParam String year) {
+		
+		try {
+			return slowdownPlanService.getSlowdownConfigurationData(plantId,year);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+        return null;
+    }
+	
+	@GetMapping("/shutdown/dynamic/columns")
+	  public AOPMessageVM getShutdownDynamicColumns(@RequestParam String year,@RequestParam String plantId){
+		  return slowdownPlanService.getShutdownDynamicColumns(year,UUID.fromString(plantId));
+	  }
 	
 }

@@ -7,6 +7,7 @@ import { DataService } from 'services/DataService'
 import { Typography } from '../../../../node_modules/@mui/material/index'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import { validateFields } from 'utils/validationUtils'
+import moment from '../../../../node_modules/moment/moment'
 
 const TurnaroundReport = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -66,8 +67,8 @@ const TurnaroundReport = () => {
     {
       title: 'Turnaround Period',
       children: [
-        { field: 'fromDate', title: 'From', width: 120, editable: false },
-        { field: 'toDate', title: 'To', width: 120, editable: false },
+        { field: 'fromDateReport', title: 'From', width: 120, editable: false },
+        { field: 'toDateReport', title: 'To', width: 120, editable: false },
       ],
     },
 
@@ -100,13 +101,13 @@ const TurnaroundReport = () => {
     },
 
     {
-      field: 'fromDate',
+      field: 'fromDateReport',
       title: 'Turnaround Period From',
       width: 120,
       editable: true,
     },
     {
-      field: 'toDate',
+      field: 'toDateReport',
       title: 'Turnaround Period To',
       width: 120,
       editable: true,
@@ -150,6 +151,8 @@ const TurnaroundReport = () => {
       originalRemark: item?.remarks ?? '',
       isEditable: true,
       durationInHrs1: item?.durationInHrs,
+      fromDateReport: item?.fromDate,
+      toDateReport: item?.toDate,
     }))
 
   const fetchCurrentYear = async () => {
@@ -258,11 +261,23 @@ const TurnaroundReport = () => {
         setLoading(false)
         return
       }
-      // console.log(modifiedCells2)
+
+      const formatIfDate = (value) => {
+        if (!value) return ''
+        const parsed = moment.utc(
+          value,
+          ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A'],
+          true,
+        )
+        return parsed.isValid()
+          ? new Date(parsed.add(1, 'day').format('YYYY-MM-DD'))
+          : value
+      }
+
       const rowsToUpdate = data.map((row) => ({
         id: row.Id || null,
-        fromDate: row.fromDate,
-        toDate: row.toDate,
+        fromDate: formatIfDate(row.fromDateReport),
+        toDate: formatIfDate(row.toDateReport),
         activity: row.activity,
         sno: row.rowNumber,
         durationInHrs: row.durationInHrs1,

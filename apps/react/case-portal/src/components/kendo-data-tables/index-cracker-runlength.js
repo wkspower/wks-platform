@@ -63,15 +63,8 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
   backgroundColor: '#F2F3F8',
 }))
 
-export const dateFields1 = [
-  'ibrSD',
-  'ibrED',
-  'taSD',
-  'taED',
-  'sdED',
-  'sdSD',
-  'date',
-]
+export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
+export const dateFieldsRunLength = ['date']
 export const hiddenFields = []
 export const monthMap = {
   january: 1,
@@ -164,47 +157,115 @@ const KendoDataTablesCrackerRunLength = ({
       const { dataItem, field, value } = e
       const itemId = dataItem.id
 
-      setRows((prevRows) => {
-        const editedIndex = prevRows.findIndex((r) => r.id === itemId)
+      setRows((prevRows) =>
+        prevRows.map((row) =>
+          row.id === itemId ? { ...row, [field]: value } : row,
+        ),
+      )
 
-        if (value === 'SAD') {
-          // Find the last "SAD" above the current cell
-          let lastSADIndex = -1
-          for (let i = editedIndex - 1; i >= 0; i--) {
-            if (prevRows[i][field] === 'SAD') {
-              lastSADIndex = i
-              break
-            }
-          }
+      if (value?.toUpperCase() === 'SAD' && dataItem[field] !== 'SAD') {
+        setTimeout(() => {
+          setRows((prevRows) => {
+            const editedIndex = prevRows.findIndex((r) => r.id === itemId)
+            let updatedRows = [...prevRows]
 
-          // Reset values between lastSADIndex and editedIndex
-          let counter = 0
-          const updatedRows = prevRows.map((row, index) => {
-            if (index > lastSADIndex && index < editedIndex) {
-              return { ...row, [field]: counter++ }
+            const next = prevRows[editedIndex + 1]?.[field]
+            const nextNext = prevRows[editedIndex + 2]?.[field]
+
+            const isNextNonNumeric =
+              editedIndex + 1 < prevRows.length && isNaN(Number(next))
+            const isNextNextNonNumeric =
+              editedIndex + 2 < prevRows.length && isNaN(Number(nextNext))
+
+            if (isNextNonNumeric || isNextNextNonNumeric) {
+              let anchorIndex = -1
+              for (let i = editedIndex - 1; i >= 1; i--) {
+                if (
+                  prevRows[i][field] === 'SAD' &&
+                  prevRows[i - 1]?.[field] === 'SAD'
+                ) {
+                  anchorIndex = i - 2
+                  break
+                }
+              }
+
+              let startValue = 0
+              if (
+                anchorIndex >= 0 &&
+                !isNaN(Number(prevRows[anchorIndex][field]))
+              ) {
+                startValue = Number(prevRows[anchorIndex][field]) + 1
+              }
+
+              let counter = startValue
+
+              updatedRows = prevRows.map((row, index) => {
+                const updatedRow = { ...row }
+
+                if (index > anchorIndex && index < editedIndex - 1) {
+                  updatedRow[field] = counter++
+                }
+
+                if (
+                  index <= editedIndex - 2 &&
+                  prevRows[index][field] === 'SAD' &&
+                  prevRows[index + 1]?.[field] === 'SAD'
+                ) {
+                  updatedRow.demo = 1
+                }
+                if (
+                  index <= editedIndex - 1 &&
+                  prevRows[index - 1]?.[field] === 'SAD' &&
+                  prevRows[index][field] === 'SAD'
+                ) {
+                  updatedRow.demo = 2
+                }
+                if (
+                  index <= editedIndex - 3 &&
+                  prevRows[index + 1]?.[field] === 'SAD' &&
+                  prevRows[index + 2]?.[field] === 'SAD'
+                ) {
+                  updatedRow.demo = 'SD'
+                }
+
+                if (isNextNonNumeric) {
+                  if (index === editedIndex - 1) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 1
+                  }
+                  if (index === editedIndex) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 2
+                  }
+                  if (index === editedIndex - 2) {
+                    updatedRow.demo = 'BBU'
+                  }
+                }
+
+                if (!isNextNonNumeric && isNextNextNonNumeric) {
+                  if (index === editedIndex) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 1
+                  }
+                  if (index === editedIndex + 1) {
+                    updatedRow[field] = 'SAD'
+                    updatedRow.demo = 2
+                  }
+                  if (index === editedIndex - 1) {
+                    updatedRow.demo = 'BBU'
+                  }
+                }
+
+                return updatedRow
+              })
             }
-            if (index === editedIndex) {
-              return { ...row, [field]: 'SAD' }
-            }
-            return row
+
+            setModifiedCells(() => ({ updatedRows }))
+            setIsRowEdited(true)
+            return updatedRows
           })
-
-          return updatedRows
-        } else {
-          // Default case: update single cell
-          return prevRows.map((row) =>
-            row.id === itemId ? { ...row, [field]: value } : row,
-          )
-        }
-      })
-
-      // update modifiedCells (if still used)
-      setModifiedCells((prev) => {
-        const base = { ...dataItem, [field]: value }
-        return { ...prev, [itemId]: base }
-      })
-
-      setIsRowEdited(true)
+        }, 150) // delay to avoid blocking typing
+      }
     },
     [setRows, setModifiedCells],
   )
@@ -340,8 +401,6 @@ const KendoDataTablesCrackerRunLength = ({
       onFilterChange={(e) => setFilter(e.filter)}
       onItemChange={itemChange}
       resizable={true}
-      defaultSkip={0}
-      defaultTake={100}
       contextMenu={true}
       grade={grades}
       onRowClick={handleRowClick}
@@ -350,11 +409,13 @@ const KendoDataTablesCrackerRunLength = ({
       }}
       allRedCell={allRedCell}
       size='small'
+      defaultSkip={0}
+      defaultTake={50}
       pageable={
-        rows?.length > 100
+        rows?.length > 50
           ? {
               buttonCount: 4,
-              pageSizes: [50, 100, 500],
+              pageSizes: [10, 50, 100, 366],
             }
           : false
       }
@@ -381,6 +442,26 @@ const KendoDataTablesCrackerRunLength = ({
             />
           )
         }
+        if (dateFieldsRunLength.includes(col.field)) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              cells={{
+                edit: {
+                  date: DateOnlyPicker,
+                },
+                data: toolTipRenderer,
+              }}
+              format='{0:dd-MM-yyyy}'
+              editor='date'
+              hidden={col.hidden}
+              sortable={false}
+              className={'k-right-disabled'}
+            />
+          )
+        }
 
         if (
           ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(col.field)
@@ -403,65 +484,7 @@ const KendoDataTablesCrackerRunLength = ({
               }}
               columnMenu={ColumnMenuCheckboxFilter}
               hidden={col.hidden}
-            />
-          )
-        }
-
-        if (col.type === 'switch') {
-          const handleSwitchChange = (props, value) => {
-            itemChange({
-              dataItem: props.dataItem,
-              field: props.field,
-              value: value,
-            })
-          }
-
-          return (
-            <GridColumn
-              key={col.field} // Fixed typo: was col.fieldf
-              field={col.field}
-              title={col.title || col.headerName}
-              width={col.width || 150}
-              hidden={col.hidden}
-              editable={true}
-              headerClassName={
-                isColumnActive(col?.field, filter, sort) ? 'active-column' : ''
-              }
-              columnMenu={ColumnMenuCheckboxFilter}
-              cells={{
-                edit: {
-                  text: (props) => (
-                    <td
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Switch
-                        className='custom-switch'
-                        checked={!!props.dataItem[props.field]}
-                        onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
-                      />
-                    </td>
-                  ),
-                },
-                data: (props) => (
-                  <td
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Switch
-                      className='custom-switch'
-                      checked={!!props.dataItem[props.field]}
-                      onChange={(e) => handleSwitchChange(props, e.value)} // Kendo uses e.value
-                    />
-                  </td>
-                ),
-              }}
+              sortable={false}
             />
           )
         }
@@ -480,7 +503,8 @@ const KendoDataTablesCrackerRunLength = ({
               data: toolTipRenderer,
             }}
             className={col?.isDisabled ? 'k-right-disabled' : ''}
-            columnMenu={ColumnMenuCheckboxFilter}
+            columnMenu={col?.filter ? ColumnMenuCheckboxFilter : null}
+            sortable={col?.filter ? true : false}
           />
         )
       })}
@@ -518,7 +542,6 @@ const KendoDataTablesCrackerRunLength = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
-              p: 1,
             }}
           >
             {/* Left side - Note */}
@@ -532,18 +555,14 @@ const KendoDataTablesCrackerRunLength = ({
             {/* Right side - All other actions */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {permissions?.downloadExcelBtn && (
-                <Tooltip>
-                  <span title='Export Data'>
-                    <Button
-                      variant='outlined'
-                      size='large'
-                      onClick={downloadExcelForConfiguration}
-                      disabled={isButtonDisabled}
-                    >
-                      <DownloadIcon fontSize='small' />
-                    </Button>
-                  </span>
-                </Tooltip>
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={downloadExcelForConfiguration}
+                  disabled={isButtonDisabled}
+                >
+                  Export
+                </Button>
               )}
               {/* {permissions?.uploadExcelBtn && (
                 <Tooltip>

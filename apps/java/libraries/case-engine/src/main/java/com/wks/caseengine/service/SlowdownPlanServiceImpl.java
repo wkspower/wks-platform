@@ -1,27 +1,39 @@
 package com.wks.caseengine.service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.Session;
 
+
+import java.sql.*;
+import java.util.*;
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
-import com.wks.caseengine.dto.SlowDownPlanDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SlowdownPlanRepository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 @Service
 public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
@@ -42,8 +54,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
-
 	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+	
+	@PersistenceContext
+	private EntityManager entityManager;
+
+
 	@Override
 	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,
 			String year) {
@@ -247,5 +265,178 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		// TODO Auto-generated method stub
 		return shutDownPlanDTOList;
 	}
+
+	@Override
+	public AOPMessageVM saveSlowdownConfigurationData(String plantId, String year,
+			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
+		try {
+			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
+				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year);
+				if(normAttributeTransactions!=null) {
+					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				}else {
+					normAttributeTransactions = new NormAttributeTransactions();
+					normAttributeTransactions.setAopMonth(normAttributeTransactionsDTO.getMonth());
+					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					normAttributeTransactions.setAttributeValueVersion("v1");
+					normAttributeTransactions.setAuditYear(year);
+					normAttributeTransactions.setCreatedOn(new Date());
+					normAttributeTransactions.setMaintenanceId(normAttributeTransactionsDTO.getMaintenanceId());
+					normAttributeTransactions.setNormParameterFKId(normAttributeTransactionsDTO.getNormParameterFKId());
+					normAttributeTransactions.setUserName("System");
+					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				}
+			}
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to save/update data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(normAttributeTransactionsList);
+		aopMessageVM.setMessage("Data updated successfully");
+		return aopMessageVM;
+	}
+
+	 	@Override
+	    public AOPMessageVM getSlowdownConfigurationData(String plantId, String year) {
+		 AOPMessageVM aopMessageVM = new AOPMessageVM();
+	        try {
+	            // Get the data
+	            List<Object[]> rows = getData(plantId, year);
+
+	            // Get column names
+	            List<String> columnNames = getColumnNames("GetPlantNormConfigurations_Static", plantId, year);
+
+	            // Prepare the list of maps
+	            List<Map<String, Object>> resultList = new ArrayList<>();
+
+	            for (Object[] row : rows) {
+	                Map<String, Object> rowMap = new LinkedHashMap<>();
+	                for (int i = 0; i < columnNames.size(); i++) {
+	                    rowMap.put(columnNames.get(i), row[i]);
+	                }
+	                resultList.add(rowMap);
+	            }
+	            aopMessageVM.setCode(200);
+	    		aopMessageVM.setData(resultList);
+	    		aopMessageVM.setMessage("Data updated successfully");
+	    		return aopMessageVM;
+	            
+	        } catch (Exception ex) {
+	            throw new RuntimeException("Failed to fetch data", ex);
+	        }
+	    }
+	
+	public List<Object[]> getData(String plantId, String aopYear) {
+		try {
+			String procedureName = "GetPlantNormConfigurations_Static";
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getColumnNames(String procedureName, String plantId, String aopYear) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<String> columnNames = new ArrayList<>();
+
+	        String sql = "EXEC " + procedureName + " @plantId = ?, @aopYear = ?";
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setString(1, plantId);
+	            ps.setString(2, aopYear);
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData rsMetaData = rs.getMetaData();
+	                for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                    columnNames.add(rsMetaData.getColumnLabel(i));
+	                }
+	            }
+	        }
+	        return columnNames;
+	    });
+	}
+	
+	@Override
+	public AOPMessageVM getShutdownDynamicColumns(String auditYear, UUID plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<Map<String, String>> listOfMaps = new ArrayList<>();
+		Map<String, String> map = new HashMap<>();
+		String result=null;
+		try {
+			List<String> data = getColumnNames("GetPlantNormConfigurations_Static", plantId.toString(), auditYear);
+
+			map.put("field", "particulars");
+			map.put("title", "Particulars");
+			listOfMaps.add(map);
+
+			// Iterate over data
+			for (String row : data) {
+			    map = new HashMap<>();
+			    map.put("field", row);
+			    map.put("title", row);
+			    listOfMaps.add(map);
+			}
+
+		   
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid data format", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(listOfMaps);
+		return aopMessageVM;
+	}
+	
+	public static String getMonth(Integer month) {
+		if (month == null) {
+			return "Invalid month";
+		}
+		switch (month) {
+			case 1:
+				return "January";
+			case 2:
+				return "February";
+			case 3:
+				return "March";
+			case 4:
+				return "April";
+			case 5:
+				return "May";
+			case 6:
+				return "June";
+			case 7:
+				return "July";
+			case 8:
+				return "August";
+			case 9:
+				return "September";
+			case 10:
+				return "October";
+			case 11:
+				return "November";
+			case 12:
+				return "December";
+			default:
+				return "0";
+		}
+	}
+
+
+
+
 
 }

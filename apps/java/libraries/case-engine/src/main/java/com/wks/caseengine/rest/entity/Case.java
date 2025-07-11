@@ -16,8 +16,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-@Entity
-@Table(name ="Cases")
+//@Entity
+//@Table(name ="Cases")
 public class Case {
 	@Id
     @Column(name = "case_no", nullable = false, unique = true)

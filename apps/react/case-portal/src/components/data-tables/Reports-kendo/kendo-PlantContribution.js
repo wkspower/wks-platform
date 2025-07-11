@@ -230,7 +230,7 @@ export default function PlantContribution() {
         const key = 'OtherVariableCost'
         const rpt = reports[key] || {}
         return (
-          <Box key={key} sx={{ mt: 4 }}>
+          <Box key={key} sx={{ mt: 0 }}>
             <KendoDataTablesReports
               modifiedCells={modifiedCells}
               setRows={setRows}
@@ -238,7 +238,6 @@ export default function PlantContribution() {
               rows={rows || []}
               handleCalculate={handleCalculate}
               title={'Other Variable Cost'}
-              // unsavedChangesRef={unsavedChangesRef}
               setRemarkDialogOpen={setRemarkDialogOpen}
               currentRemark={currentRemark}
               setCurrentRemark={setCurrentRemark}

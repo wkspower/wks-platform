@@ -50,6 +50,9 @@ export const dateFields = [
   'maintEndDateTime',
   'periodTo',
   'periodFrom',
+
+  'toDateReport',
+  'fromDateReport',
 ]
 export const dateFields2 = ['fromDate', 'toDate']
 export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
@@ -417,6 +420,7 @@ const KendoDataTables = ({
     if (!file) return
 
     handleExcelUpload(file)
+    event.target.value = ''
   }
 
   const DurationDisplayWithTooltipCell = (props) => {
@@ -519,7 +523,6 @@ const KendoDataTables = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
-              p: 1,
             }}
           >
             {/* Left side - Note */}
@@ -530,7 +533,7 @@ const KendoDataTables = ({
                 </Typography>
               )}
 
-              {permissions?.showT15 && (
+              {permissions?.showReportTitle && (
                 <Typography component='div' className='grid-title'>
                   {titleName}
                 </Typography>
@@ -592,32 +595,27 @@ const KendoDataTables = ({
               )}
 
               {permissions?.downloadExcelBtn && (
-                <Tooltip>
-                  <span title='Export Data'>
-                    <Button
-                      variant='outlined'
-                      size='large'
-                      onClick={downloadExcelForConfiguration}
-                      disabled={isButtonDisabled}
-                    >
-                      <DownloadIcon fontSize='small' />
-                    </Button>
-                  </span>
-                </Tooltip>
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={downloadExcelForConfiguration}
+                  disabled={isButtonDisabled}
+                >
+                  Export
+                </Button>
               )}
 
               {permissions?.uploadExcelBtn && (
-                <Tooltip>
-                  <span title='Import Data'>
-                    <Button
-                      variant='outlined'
-                      size='large'
-                      onClick={triggerFileUpload}
-                      disabled={isButtonDisabled}
-                    >
-                      <UploadIcon fontSize='small' />
-                    </Button>
-                  </span>
+                <>
+                  <Button
+                    variant='contained'
+                    onClick={triggerFileUpload}
+                    disabled={isButtonDisabled}
+                    className='btn-save'
+                  >
+                    Import
+                  </Button>
+
                   <input
                     type='file'
                     accept='.xlsx,.xls'
@@ -625,7 +623,7 @@ const KendoDataTables = ({
                     ref={fileInputRef}
                     style={{ display: 'none' }}
                   />
-                </Tooltip>
+                </>
               )}
 
               {permissions?.saveBtn && (
@@ -793,6 +791,9 @@ const KendoDataTables = ({
                           'toDate',
                           'periodTo',
                           'periodFrom',
+
+                          'toDateReport',
+                          'fromDateReport',
                         ].includes(col.field)
                           ? DateOnlyPicker
                           : DateTimePickerEditor,
@@ -800,16 +801,31 @@ const KendoDataTables = ({
                       data: toolTipRenderer,
                     }}
                     format={
-                      ['fromDate', 'toDate', 'periodFrom', 'periodTo'].includes(
-                        col.field,
-                      )
+                      [
+                        'fromDate',
+                        'toDate',
+                        'periodFrom',
+                        'periodTo',
+                        'toDateReport',
+                        'fromDateReport',
+                      ].includes(col.field)
                         ? '{0:dd-MM-yyyy}'
                         : '{0:dd-MM-yyyy hh:mm a}'
                     }
                     editor='date'
                     hidden={col.hidden}
-                    columnMenu={(props) =>  <DateColumnMenu {...props} isDateFilterActive={isDateFilterActive} setIsDateFilterActive={setIsDateFilterActive}/>}
-                    headerClassName={isDateFilterActive.includes(col.field) ? 'active-column' : ''}
+                    columnMenu={(props) => (
+                      <DateColumnMenu
+                        {...props}
+                        isDateFilterActive={isDateFilterActive}
+                        setIsDateFilterActive={setIsDateFilterActive}
+                      />
+                    )}
+                    headerClassName={
+                      isDateFilterActive.includes(col.field)
+                        ? 'active-column'
+                        : ''
+                    }
                   />
                 )
               }

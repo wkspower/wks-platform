@@ -189,7 +189,6 @@ const ConfigurationTable = () => {
     getConfigurationAvailableTabs()
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-
   const getTheId = (name) => {
     const tab = availableTabs.find((tab) => tab.name === name)
     return tab ? tab.id : null
@@ -201,8 +200,8 @@ const ConfigurationTable = () => {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '5px',
-          marginTop: '20px',
+          gap: '0px',
+          marginTop: '0px',
         }}
       >
         <Box>
@@ -223,8 +222,8 @@ const ConfigurationTable = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '5px',
-        marginTop: '20px',
+        gap: '0px',
+        marginTop: '0px',
       }}
     >
       <Tabs
@@ -248,6 +247,8 @@ const ConfigurationTable = () => {
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
+                padding: '9px',
+                minHeight: '10px',
               }}
               label={tabInfo?.displayName || 'N/A'}
             />
