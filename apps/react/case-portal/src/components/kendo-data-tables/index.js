@@ -855,7 +855,7 @@ const KendoDataTables = ({
                     }
                     editor='date'
                     hidden={col.hidden}
-                    columnMenu={DateColumnMenu}
+                    columnMenu={(props) =>  <DateColumnMenu {...props} isDateFilterActive={isDateFilterActive} setIsDateFilterActive={setIsDateFilterActive}/>}
                   />
                 )
               }

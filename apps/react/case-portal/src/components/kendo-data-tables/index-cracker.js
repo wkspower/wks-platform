@@ -146,6 +146,7 @@ const KendoDataTablesCracker = ({
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
+  const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const initialGroup = groupBy
     ? [
         {
@@ -359,7 +360,7 @@ const KendoDataTablesCracker = ({
               }
               editor='date'
               hidden={col.hidden}
-              columnMenu={DateColumnMenu}
+              columnMenu={(props) =>  <DateColumnMenu {...props} isDateFilterActive={isDateFilterActive} setIsDateFilterActive={setIsDateFilterActive}/>}
             />
           )
         }
