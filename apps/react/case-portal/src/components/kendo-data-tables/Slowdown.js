@@ -190,6 +190,54 @@ const SlowDown = ({ permissions }) => {
       setLoading(false)
     }
   }
+  const saveSlowDownConfigurationData = async (row) => {
+      setLoading(true)
+      try {
+        var plantId = ''
+         const storedPlant = localStorage.getItem('selectedPlant')
+         if (storedPlant) {
+           const parsedPlant = JSON.parse(storedPlant)
+           plantId = parsedPlant.id
+         }
+         const year = localStorage.getItem('year')
+        
+
+        const response = await DataService.saveSlowdownConfigData(
+          plantId,
+          year,
+          row,
+          keycloak,
+        )
+        if (response.status === 200) {
+           setSnackbarOpen(true)
+
+            setSnackbarData({
+              message: 'Saved Successfully!',
+              severity: 'success',
+            })
+            setModifiedCells({})
+
+            unsavedChangesRef.current = {
+              unsavedRows: {},
+              rowsBeforeChange: {},
+            }
+            fetchConfigurationData()
+          
+        }
+        console.log('---response---',response);
+        
+        
+      setLoading(false)
+      return response
+      } catch (error) {
+        console.error('Error saving Slowdown data:', error)
+        setLoading(false)
+      } finally {
+        // fetchConfigurationData()
+        setLoading(false)
+      }
+
+  }
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -240,6 +288,17 @@ const SlowDown = ({ permissions }) => {
   }, [modifiedCells])
   const saveChanges2 = React.useCallback(async () => {
     try {
+      let finalData = Object.values(modifiedCells2).map((mdata,i) => ({...mdata,
+              normParameterFKId:mdata.NormParameter_FK_Id,
+              NormParameter_FK_Id:undefined,
+              inEdit:undefined,
+              particulars:undefined,
+              id: undefined,
+              aopYear:undefined,
+              normParameterDisplayName:undefined,
+              plantId:undefined,
+              srNo:undefined}))
+      
       var data = Object.values(modifiedCells2)
       if (data.length == 0) {
         setSnackbarOpen(true)
@@ -249,8 +308,9 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
-
-      saveSlowDownData(data)
+   
+      
+      saveSlowDownConfigurationData(finalData)
     } catch (error) {
       // setIsSaving(false);
     }
@@ -356,6 +416,7 @@ const SlowDown = ({ permissions }) => {
       
       const formattedData = data.map((item, index) => ({
         ...item,
+        id: index,
         particulars:item.normParameterDisplayName
       }))
 
@@ -370,11 +431,13 @@ const SlowDown = ({ permissions }) => {
     setLoading(true)
     try {
       const data1 = await DataService.getSlowDownPlantDataTab(keycloak)
-
+      const removedCols = ['srNo','NormParameter_FK_Id','normParameterDisplayName','aopYear','plantId']
       if (data1?.code === 200 && Array.isArray(data1.data)) {
         const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
           title: item.title,
+          editable: item.field === 'particulars' ? false :true,
+          hidden: removedCols.includes(item.field) 
         }))
 
         setColDefs2(dynamicColDefs)
