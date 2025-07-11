@@ -273,13 +273,18 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
 		try {
 			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
+				UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
+				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
 				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year);
 				if(normAttributeTransactions!=null) {
 					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
 					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
 				}else {
 					normAttributeTransactions = new NormAttributeTransactions();
-					normAttributeTransactions.setAopMonth(normAttributeTransactionsDTO.getMonth());
+					Optional<PlantMaintenanceTransaction> PlantMaintenanceTransactionopt=plantMaintenanceTransactionRepository.findById(maintenanceId);
+					if(PlantMaintenanceTransactionopt.isPresent()) {
+						normAttributeTransactions.setAopMonth(PlantMaintenanceTransactionopt.get().getMaintForMonth());
+					}	
 					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
 					normAttributeTransactions.setAttributeValueVersion("v1");
 					normAttributeTransactions.setAuditYear(year);
@@ -400,43 +405,4 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		aopMessageVM.setData(listOfMaps);
 		return aopMessageVM;
 	}
-	
-	public static String getMonth(Integer month) {
-		if (month == null) {
-			return "Invalid month";
-		}
-		switch (month) {
-			case 1:
-				return "January";
-			case 2:
-				return "February";
-			case 3:
-				return "March";
-			case 4:
-				return "April";
-			case 5:
-				return "May";
-			case 6:
-				return "June";
-			case 7:
-				return "July";
-			case 8:
-				return "August";
-			case 9:
-				return "September";
-			case 10:
-				return "October";
-			case 11:
-				return "November";
-			case 12:
-				return "December";
-			default:
-				return "0";
-		}
-	}
-
-
-
-
-
 }
