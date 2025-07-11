@@ -69,8 +69,5 @@ public class ShutDownPlanController {
 			  return shutDownPlanService.getMonthlyShutdownHours(auditYear,UUID.fromString(plantId));
 		  }
 		  
-		  @GetMapping("/shutdown/dynamic/columns")
-		  public AOPMessageVM getShutdownDynamicColumns(@RequestParam String year,@RequestParam String plantId){
-			  return shutDownPlanService.getShutdownDynamicColumns(year,UUID.fromString(plantId));
-		  }
+		  
 }

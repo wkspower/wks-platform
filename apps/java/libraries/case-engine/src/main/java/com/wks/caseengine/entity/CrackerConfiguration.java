@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -32,27 +31,21 @@ public class CrackerConfiguration {
     private String displayName;
 
     @Column(name = "IBR_SD")
-    
     private Date ibrStartDate;
 
     @Column(name = "IBR_ED")
-    
     private Date ibrEndDate;
 
     @Column(name = "TA_SD")
-    
     private Date taStartDate;
 
     @Column(name = "TA_ED")
-    
     private Date taEndDate;
 
     @Column(name = "ShutDown_SD")
-    
     private Date shutDownStartDate;
 
     @Column(name = "ShutDown_ED")
-    
     private Date shutDownEndDate;
 
     @Column(name = "Post_CR_Days")

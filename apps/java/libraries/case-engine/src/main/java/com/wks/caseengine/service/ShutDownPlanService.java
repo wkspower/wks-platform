@@ -3,7 +3,10 @@ package com.wks.caseengine.service;
 import java.util.List;
 import java.util.UUID;
 
+
+
 import com.wks.caseengine.dto.MonthWiseDataDTO;
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -19,7 +22,7 @@ public interface ShutDownPlanService {
 	public void deletePlanData(UUID plantMaintenanceTransactionId,UUID plantId);
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear,  UUID plantId);
-	public AOPMessageVM getShutdownDynamicColumns(String auditYear,  UUID plantId);
+	
 	void deleteShutPlanData(UUID plantMaintenanceTransactionId, UUID plantId);
-
+	
 }

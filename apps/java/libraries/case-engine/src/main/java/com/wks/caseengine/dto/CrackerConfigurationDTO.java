@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.springframework.context.annotation.Configuration;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,21 +30,15 @@ public class CrackerConfigurationDTO {
     private String remarks;
     private Integer displaySeq;
     
-
     private Date ibrStartDate;
-
 
     private Date ibrEndDate;
 
-
     private Date taStartDate;
-
 
     private Date taEndDate;
 
-
     private Date shutDownStartDate;
-
 
     private Date shutDownEndDate;
 

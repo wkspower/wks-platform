@@ -171,6 +171,16 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 			@Param("year") String year);
 	
 	Optional<NormAttributeTransactions> findByNormParameterFKId(UUID normParameterFKId);
+	
+	@Query(value = "SELECT * FROM NormAttributeTransactions " +
+            "WHERE Maintenance_Id = :maintenanceId " +
+            "AND NormParameter_FK_Id = :normParameterFKId " +
+            "AND AuditYear = :auditYear", nativeQuery = true)
+	NormAttributeTransactions findByMaintenanceIdAndNormParameterFKIdAndAuditYear(
+	     @Param("maintenanceId") UUID maintenanceId,
+	     @Param("normParameterFKId") UUID normParameterFKId,
+	     @Param("auditYear") String auditYear
+);
 
 
 }
