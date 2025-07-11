@@ -47,4 +47,6 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	List<Object[]> findDescriptionsByPlantFkId( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
+	@Query(value = "SELECT Id FROM PlantMaintenanceTransaction WHERE Discription = :discription AND NormParameter_FK_Id = :normParameterFKId", nativeQuery = true)
+	UUID findIdByNormIdAndDiscription(@Param("discription") String discription, @Param("normParameterFKId") UUID normParameterFKId);
 }
