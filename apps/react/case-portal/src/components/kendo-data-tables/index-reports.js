@@ -545,6 +545,41 @@ const KendoDataTablesReports = ({
           />
         )
       }
+  // ✅ Separate handling for 'spec'
+  const fiveDecimalFormatter = (props) => {
+  const value = props.dataItem[props.field];
+  const num = parseFloat(value);
+  const formatted = !isNaN(num) ? num.toFixed(5) : '';
+  return <td title={value} 
+      style={{
+        textAlign: 'right',
+        backgroundColor: '#e7e7e7',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}>{formatted}</td>;
+};
+
+  if (col.field === 'spec') {
+    return (
+      <GridColumn
+        key={col.field}
+        field={col.field}
+        title={col.title || col.headerName}
+        hidden={col.hidden}
+        className=" k-number-right-disabled"
+        editable={col?.editable ?? false}
+        headerClassName={isActive ? 'active-column' : ''}
+        cells={{
+          edit: { text: NoSpinnerNumericEditor },
+          data: fiveDecimalFormatter,
+        }}
+        columnMenu={ColumnMenuCheckboxFilter}
+        filter="numeric"
+        format="{0:0.00000}"
+      />
+    );
+  }
       if (col.type === 'number') {
         return (
           <GridColumn

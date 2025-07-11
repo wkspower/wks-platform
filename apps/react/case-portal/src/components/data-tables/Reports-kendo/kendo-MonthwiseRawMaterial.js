@@ -62,8 +62,7 @@ const MonthwiseRawMaterial = () => {
       align: 'right',
       headerAlign: 'left',
       flex: 1,
-      format: '{0:#.#####}',
-      type:'number'
+      type:'number',
     },
     {
       field: 'april',
