@@ -40,10 +40,10 @@ public class PlantMaintenanceTransaction {
     @Column(name = "Rate")
     private Double rate;
     
-    @Column(name = "RateEO")
+    @Column(name = "EO_OpsProdRate")
     private Double rateEO;
     
-    @Column(name = "RateEOE")
+    @Column(name = "EOE_OpsProdRate")
     private Double rateEOE;
 
     @Column(name = "Remarks", length = 500)
@@ -67,5 +67,8 @@ public class PlantMaintenanceTransaction {
     
     @Transient
     private Double durationInHrs;
+    
+    @Column(name = "Plant_FK_Id")
+    private UUID plantFKId;
 
 }
