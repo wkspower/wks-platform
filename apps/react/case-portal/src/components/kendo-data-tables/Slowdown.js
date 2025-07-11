@@ -240,6 +240,21 @@ const SlowDown = ({ permissions }) => {
   }, [modifiedCells])
   const saveChanges2 = React.useCallback(async () => {
     try {
+      // console.log('--modifiedCells2---',modifiedCells2);
+         const finalData = {
+        ...modifiedCells2['0'],
+        nptID:modifiedCells2['0'].NormParameter_FK_Id,
+        NormParameter_FK_Id:undefined,
+        inEdit:undefined,
+        particulars:undefined,
+        id: undefined,
+        aopYear:undefined,
+        normParameterDisplayName:undefined,
+        plantId:undefined,
+        srNo:undefined
+      }
+      console.log('--finalData--',finalData);
+      
       var data = Object.values(modifiedCells2)
       if (data.length == 0) {
         setSnackbarOpen(true)
@@ -249,8 +264,9 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
-
-      saveSlowDownData(data)
+   
+      
+      // saveSlowDownData(data)
     } catch (error) {
       // setIsSaving(false);
     }
@@ -356,6 +372,7 @@ const SlowDown = ({ permissions }) => {
       
       const formattedData = data.map((item, index) => ({
         ...item,
+        id: index,
         particulars:item.normParameterDisplayName
       }))
 
@@ -370,11 +387,13 @@ const SlowDown = ({ permissions }) => {
     setLoading(true)
     try {
       const data1 = await DataService.getSlowDownPlantDataTab(keycloak)
-
+      const removedCols = ['srNo','NormParameter_FK_Id','normParameterDisplayName','aopYear','plantId']
       if (data1?.code === 200 && Array.isArray(data1.data)) {
         const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
           title: item.title,
+          editable: true,
+          hidden: removedCols.includes(item.field) 
         }))
 
         setColDefs2(dynamicColDefs)
