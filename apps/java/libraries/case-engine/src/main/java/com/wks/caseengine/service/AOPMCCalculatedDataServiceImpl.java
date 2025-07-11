@@ -134,10 +134,10 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
-			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel) {
+			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantId) {
 		try {
-			String finYear = "";
-			UUID plantId = null;
+			// String finYear = "";
+			// UUID plantId = null;
 			List<AOPMCCalculatedDataDTO> failedList = new ArrayList<>();
 
 			for (AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO : aOPMCCalculatedDataDTOList) {
@@ -169,11 +169,14 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
 
 				}
-				aOPMCCalculatedData.setPlantFKId(UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId()));
-				plantId = UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId());
-				aOPMCCalculatedData.setSiteFKId(UUID.fromString(aOPMCCalculatedDataDTO.getSiteFKId()));
-				aOPMCCalculatedData.setVerticalFKId(UUID.fromString(aOPMCCalculatedDataDTO.getVerticalFKId()));
-				aOPMCCalculatedData.setMaterialFKId(UUID.fromString(aOPMCCalculatedDataDTO.getMaterialFKId()));
+				if (!isFromExcel) {
+					aOPMCCalculatedData.setPlantFKId(UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId()));
+					aOPMCCalculatedData.setSiteFKId(UUID.fromString(aOPMCCalculatedDataDTO.getSiteFKId()));
+					aOPMCCalculatedData.setVerticalFKId(UUID.fromString(aOPMCCalculatedDataDTO.getVerticalFKId()));
+					aOPMCCalculatedData.setMaterialFKId(UUID.fromString(aOPMCCalculatedDataDTO.getMaterialFKId()));
+					aOPMCCalculatedData.setFinancialYear(aOPMCCalculatedDataDTO.getFinancialYear());
+				}
+
 				aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 				aOPMCCalculatedData.setFebruary(aOPMCCalculatedDataDTO.getFebruary());
 				aOPMCCalculatedData.setMarch(aOPMCCalculatedDataDTO.getMarch());
@@ -188,8 +191,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
 				aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 
-				aOPMCCalculatedData.setFinancialYear(aOPMCCalculatedDataDTO.getFinancialYear());
-				finYear = aOPMCCalculatedDataDTO.getFinancialYear();
+				
 				aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
 
 				AOPMCCalculatedData saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
@@ -204,16 +206,16 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					.findByDependentScreen("production-volume-data");
 			for (ScreenMapping screenMapping : screenMappingList) {
 				AopCalculation aopCalculation = new AopCalculation();
-				aopCalculation.setAopYear(finYear);
+				aopCalculation.setAopYear(year);
 				aopCalculation.setIsChanged(true);
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId((plantId));
+				aopCalculation.setPlantId(UUID.fromString(plantId));
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
 
 			// TODO Auto-generated method stub
-			return aOPMCCalculatedDataDTOList;
+			return failedList;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to edit data", ex);
 		}
@@ -287,7 +289,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		}
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<AOPMCCalculatedDataDTO> dtoList) {
+	public byte[] createExcel(String year, String plantFKId, boolean isAfterSave,
+			List<AOPMCCalculatedDataDTO> dtoList) {
 		try {
 			Workbook workbook = new XSSFWorkbook();
 			Sheet sheet = workbook.createSheet("Sheet1");
@@ -316,11 +319,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					list.add(row[17] != null ? row[17].toString() : " ");
 
 					list.add(row[0] != null ? row[0].toString() : null);
-					list.add(row[1] != null ? row[1].toString() : null);
-					list.add(row[2] != null ? row[2].toString() : null);
-					list.add(row[3] != null ? row[3].toString() : null);
-					list.add(row[16] != null ? row[16].toString() : null);
-					list.add(row[22] != null ? row[22].toString() : null);
+					// list.add(row[1] != null ? row[1].toString() : null);
+					// list.add(row[2] != null ? row[2].toString() : null);
+					// list.add(row[3] != null ? row[3].toString() : null);
+					// list.add(row[16] != null ? row[16].toString() : null);
+					// list.add(row[22] != null ? row[22].toString() : null);
 					rows.add(list);
 				}
 			} else {
@@ -341,13 +344,14 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					list.add(aopMCCalculatedDataDTO.getMarch());
 					list.add(aopMCCalculatedDataDTO.getRemarks());
 					list.add(aopMCCalculatedDataDTO.getId());
-					list.add(aopMCCalculatedDataDTO.getSiteFKId());
-					list.add(aopMCCalculatedDataDTO.getPlantFKId());
-					list.add(aopMCCalculatedDataDTO.getMaterialFKId());
-					list.add(aopMCCalculatedDataDTO.getFinancialYear());
-					list.add(aopMCCalculatedDataDTO.getVerticalFKId());
+					// list.add(aopMCCalculatedDataDTO.getSiteFKId());
+					// list.add(aopMCCalculatedDataDTO.getPlantFKId());
+					// list.add(aopMCCalculatedDataDTO.getMaterialFKId());
+					// list.add(aopMCCalculatedDataDTO.getFinancialYear());
+					// list.add(aopMCCalculatedDataDTO.getVerticalFKId());
 					list.add(aopMCCalculatedDataDTO.getSaveStatus());
 					list.add(aopMCCalculatedDataDTO.getErrDescription());
+					rows.add(list);
 				}
 			}
 
@@ -359,11 +363,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			innerHeaders.addAll(monthsList);
 			innerHeaders.add("Remarks");
 			innerHeaders.add("Id");
-			innerHeaders.add("SiteFKId");
-			innerHeaders.add("PlantFKId");
-			innerHeaders.add("MaterialFKId");
-			innerHeaders.add("FinancialYear");
-			innerHeaders.add("VerticalFKId");
+			// innerHeaders.add("SiteFKId");
+			// innerHeaders.add("PlantFKId");
+			// innerHeaders.add("MaterialFKId");
+			// innerHeaders.add("FinancialYear");
+			// innerHeaders.add("VerticalFKId");
 			if (isAfterSave) {
 				innerHeaders.add("Status");
 				innerHeaders.add("Error Description");
@@ -398,11 +402,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				}
 			}
 			sheet.setColumnHidden(14, true);
-			sheet.setColumnHidden(15, true);
-			sheet.setColumnHidden(16, true);
-			sheet.setColumnHidden(17, true);
-			sheet.setColumnHidden(18, true);
-			sheet.setColumnHidden(19, true);
+			// sheet.setColumnHidden(15, true);
+			// sheet.setColumnHidden(16, true);
+			// sheet.setColumnHidden(17, true);
+			// sheet.setColumnHidden(18, true);
+			// sheet.setColumnHidden(19, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -446,12 +450,13 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, String plantFKId, MultipartFile file) {
 		// TODO Auto-generated method stub
 		try {
-			List<AOPMCCalculatedDataDTO> data = readData(file.getInputStream(), plantFKId, year);
 
-			List<AOPMCCalculatedDataDTO> failedRecords = editAOPMCCalculatedData(data, true);
+			List<AOPMCCalculatedDataDTO> data = readData(file.getInputStream(), UUID.fromString(plantFKId), year);
+
+			List<AOPMCCalculatedDataDTO> failedRecords = editAOPMCCalculatedData(data, true, year, plantFKId);
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
@@ -531,11 +536,11 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					dto.setMarch(getNumericCellValue(row.getCell(12), dto));
 					dto.setRemarks(getStringCellValue(row.getCell(13), dto));
 					dto.setId(getStringCellValue(row.getCell(14), dto));
-					dto.setSiteFKId(getStringCellValue(row.getCell(15), dto));
-					dto.setPlantFKId(getStringCellValue(row.getCell(16), dto));
-					dto.setMaterialFKId(getStringCellValue(row.getCell(17), dto));
-					dto.setFinancialYear(getStringCellValue(row.getCell(18), dto));
-					dto.setVerticalFKId(getStringCellValue(row.getCell(19), dto));
+					// dto.setSiteFKId(getStringCellValue(row.getCell(15), dto));
+					// dto.setPlantFKId(getStringCellValue(row.getCell(16), dto));
+					// dto.setMaterialFKId(getStringCellValue(row.getCell(17), dto));
+					// dto.setFinancialYear(getStringCellValue(row.getCell(18), dto));
+					// dto.setVerticalFKId(getStringCellValue(row.getCell(19), dto));
 				} catch (Exception e) {
 					e.printStackTrace();
 					dto.setErrDescription(e.getMessage());

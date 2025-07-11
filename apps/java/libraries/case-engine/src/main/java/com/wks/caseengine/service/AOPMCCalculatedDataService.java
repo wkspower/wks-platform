@@ -12,9 +12,9 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 public interface AOPMCCalculatedDataService {
 	
 	public  AOPMessageVM getAOPMCCalculatedData(String plantId, String year);
-	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel);
+	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantFKId);
 	public  AOPMessageVM getAOPMCCalculatedDataSP(String plantId, String year);
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave,List<AOPMCCalculatedDataDTO> dtoList);
-	public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file);
+	public byte[] createExcel(String year, String plantFKId, boolean isAfterSave,List<AOPMCCalculatedDataDTO> dtoList);
+	public AOPMessageVM importExcel(String year, String plantId, MultipartFile file);
 
 }
