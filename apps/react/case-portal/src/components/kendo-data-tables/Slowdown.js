@@ -437,7 +437,7 @@ const SlowDown = ({ permissions }) => {
       console.log('---column data---',data1);
       const removedCols = ['srNo','NormTypeName','DisplayName', 'NormParameter_FK_Id','normParameterDisplayName','aopYear','plantId']
       if (data1?.code === 200 && Array.isArray(data1.data)) {
-        const dynamicColDefs = data1.data.map((item) => ({
+        const dynamicColDefs = data1.data.filter(col => !col.title.includes('.')).map((item) => ({
           field: item.field,
           title: item.title,
           editable: item.field === 'particulars' ? false :true,
