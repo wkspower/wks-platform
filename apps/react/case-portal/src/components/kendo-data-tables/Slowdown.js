@@ -121,7 +121,7 @@ const SlowDown = ({ permissions }) => {
           const matched = allProducts.find(
             (p) => p.displayName === row.productName1,
           )
-          return matched?.realId || ''
+          return matched?.realId || null
         })(),
         productName: row.productName1,
         discription: row.discription,
