@@ -395,9 +395,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, String>> listOfMaps = new ArrayList<>();
 		Map<String, String> map = new HashMap<>();
+		Plants plant = plantsRepository.findById(plantId).orElseThrow();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String procedureName = vertical.getName()+"_GetSlowdownNormConfiguration";
 		String result=null;
 		try {
-			List<String> data = getColumnNames("GetPlantNormConfigurations_Static", plantId.toString(), auditYear);
+			List<String> data = getColumnNames(procedureName, plantId.toString(), auditYear);
 
 			map.put("field", "particulars");
 			map.put("title", "Particulars");
