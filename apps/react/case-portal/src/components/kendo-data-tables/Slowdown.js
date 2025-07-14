@@ -208,7 +208,7 @@ const SlowDown = ({ permissions }) => {
           row,
           keycloak,
         )
-        if (response.status === 200) {
+        if (response.code === 200) {
            setSnackbarOpen(true)
 
             setSnackbarData({
@@ -299,6 +299,7 @@ const SlowDown = ({ permissions }) => {
               plantId:undefined,
               DisplayName:undefined,
               NormTypeName:undefined,
+              IsEditable:undefined,
               srNo:undefined}))
       
       var data = Object.values(modifiedCells2)
