@@ -77,6 +77,22 @@ const ShutDown = ({ permissions }) => {
         return
       }
 
+      const allDescriptions = rows.map((r) =>
+        (r.discription || '').trim().toLowerCase(),
+      )
+      const duplicate = allDescriptions.find(
+        (d, i) => d && allDescriptions.indexOf(d) !== i,
+      )
+
+      if (duplicate) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Duplicate description "${duplicate}" found. Descriptions must be unique.`,
+          severity: 'error',
+        })
+        return
+      }
+
       saveShutdownData(data)
     } catch (error) {
       console.log('Error saving changes:', error)
@@ -230,6 +246,7 @@ const ShutDown = ({ permissions }) => {
       title: 'Shutdown Desc',
       width: 250,
       editable: true,
+      type: 'descLimit',
     },
     {
       field: 'maintenanceId',

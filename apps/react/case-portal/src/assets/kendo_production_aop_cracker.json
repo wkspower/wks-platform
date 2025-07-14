@@ -12,7 +12,14 @@
   { "field": "plantFkId", "title": "Plant ID", "width": 80, "hidden": true },
   {
     "field": "normParametersFKId",
-    "title": "Particulars",
+    "title": "normParametersFKId",
+    "editable": false,
+    "width": 125,
+    "hidden": true
+  },
+  {
+    "field": "displayName",
+    "title": "Products",
     "editable": false,
     "width": 125
   },

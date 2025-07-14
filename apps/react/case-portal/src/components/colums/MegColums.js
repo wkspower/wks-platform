@@ -157,6 +157,7 @@ export const SlowDownMegColumns = [
     field: 'discription',
     title: 'Slowdown Desc',
     editable: true,
+    type: 'descLimit',
   },
 
   {
@@ -188,15 +189,17 @@ export const SlowDownMegColumns = [
 
   {
     field: 'rateEOE',
-    title: 'Rate (EOE)',
+    title: 'EOE Production Rate',
     editable: true,
     type: 'number',
+    widthT: 225,
   },
   {
     field: 'rateEO',
-    title: 'Rate (EO)',
+    title: 'EO Production Rate',
     editable: true,
     type: 'number',
+    widthT: 215,
   },
 
   {

@@ -47,19 +47,33 @@ export const ibrPlanColumns = [
   { field: 'id', title: 'ID', hidden: true },
   { field: 'plantFkId', title: 'Plant ID', hidden: true },
   { field: 'name', title: 'name', hidden: true },
-  { field: 'displayName', title: 'Furnace', editable: false, width: 200 },
+  {
+    field: 'displayName',
+    title: 'Furnace',
+    editable: false,
+    width: 200,
+    filter: true,
+  },
   {
     field: 'ibrStartDate',
     title: 'Start Date - IBR',
     editable: true,
     width: 200,
+    filter: false,
   },
-  { field: 'ibrEndDate', title: 'End Date - IBR', editable: true, width: 200 },
+  {
+    field: 'ibrEndDate',
+    filter: false,
+    title: 'End Date - IBR',
+    editable: true,
+    width: 200,
+  },
   {
     field: 'taStartDate',
     title: 'Start Date - TA',
     editable: true,
     width: 200,
+    filter: false,
   },
   { field: 'taEndDate', title: 'End Date - TA', editable: true, width: 200 },
   {
@@ -67,24 +81,28 @@ export const ibrPlanColumns = [
     title: 'Start Date - SD',
     editable: true,
     width: 200,
+    filter: false,
   },
   {
     field: 'shutDownEndDate',
     title: 'End Date - SD',
     editable: true,
     width: 200,
+    filter: false,
   },
   {
     field: 'preCrDays',
     title: 'Pre Coil Replacement',
     editable: true,
     width: 200,
+    filter: false,
   },
   {
     field: 'postCrDays',
     title: 'Post Coil Replacement',
     editable: true,
     width: 200,
+    filter: false,
   },
   {
     field: 'isCr',
@@ -92,6 +110,7 @@ export const ibrPlanColumns = [
     editable: true,
     type: 'switch',
     width: 200,
+    filter: false,
   },
 ]
 export const ibrGridThree = [

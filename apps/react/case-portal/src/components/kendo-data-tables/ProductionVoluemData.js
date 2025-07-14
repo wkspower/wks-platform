@@ -94,6 +94,7 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const editAOPMCCalculatedData = async (newRows) => {
+    setLoading(true)
     try {
       let plantId = ''
       const isTPH = selectedUnit == 'TPD'
@@ -149,14 +150,15 @@ const ProductionvolumeData = ({ permissions }) => {
         keycloak,
       )
       // console.log(response)
-      if (response?.length > 0) {
+      if (response) {
         dispatch(setIsBlocked(false))
 
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Production Vol Data Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
+        setLoading(false)
         setModifiedCells({})
       } else {
         setSnackbarOpen(true)
@@ -164,13 +166,15 @@ const ProductionvolumeData = ({ permissions }) => {
           message: 'Please fill all fields, try again!',
           severity: 'error',
         })
+        setLoading(false)
       }
       fetchData()
       return response
     } catch (error) {
-      console.error('Error saving Production Vol Data:', error)
+      console.error('Error saving Data:', error)
     } finally {
       // fetchData()
+      setLoading(false)
     }
   }
 

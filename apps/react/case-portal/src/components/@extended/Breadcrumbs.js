@@ -199,7 +199,15 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
     const normalizedTitle = itemTitle?.toLowerCase().replace(/\s/g, '')
 
-    if (['productionaop', 'consumptionaop'].includes(normalizedTitle)) {
+    // console.log('normalizedTitle', normalizedTitle)
+
+    // if (['productionaop', 'consumptionaop'].includes(normalizedTitle)) {
+    if (
+      [
+        'monthwiseproductionplan',
+        'overallaopconsumption(norm/quantity)',
+      ].includes(normalizedTitle)
+    ) {
       itemContent = (
         <Typography
           variant='subtitle1'

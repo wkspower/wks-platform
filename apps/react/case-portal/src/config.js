@@ -1,6 +1,6 @@
 const config = {
   basename: '/',
-  defaultPath: '/production-norms-plan/business-demand',
+  defaultPath: '/production-norms-plan/configuration',
   fontFamily: "'Public Sans', sans-serif",
   i18n: 'en',
   miniDrawer: false,

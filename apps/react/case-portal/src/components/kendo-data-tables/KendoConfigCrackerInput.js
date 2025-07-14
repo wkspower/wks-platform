@@ -382,7 +382,7 @@ const CrackerConfig = () => {
       if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Spyro Input data Saved Successfully!',
+          message: 'Data Saved Successfully!',
           severity: 'success',
         })
         setModifiedCells({})
@@ -392,7 +392,7 @@ const CrackerConfig = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Error saving Spyro Input data!',
+          message: 'Error saving Spyro data!',
           severity: 'error',
         })
       }

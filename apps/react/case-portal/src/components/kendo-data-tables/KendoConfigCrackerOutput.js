@@ -60,7 +60,8 @@ const CrackerConfig = () => {
   // const [furnace, setFurnance] = useState([])
 
   // Mode selection
-  const allModes = ['5F Operation', '4F Operation', '4F+D Operation']
+  // const allModes = ['5F Operation', '4F Operation', '4F+D Operation']
+  const allModes = ['5F', '4F', '4F+D']
   const [selectMode, setSelectMode] = useState(allModes[0])
 
   // Permissions helper
@@ -370,7 +371,7 @@ const CrackerConfig = () => {
       if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Spyro Input data Saved Successfully!',
+          message: 'Data Saved Successfully!',
           severity: 'success',
         })
         setModifiedCells({})
@@ -380,13 +381,13 @@ const CrackerConfig = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Error saving Spyro Input data!',
+          message: 'Error saving data!',
           severity: 'error',
         })
       }
       return response
     } catch (error) {
-      console.error('Error saving Spyro Input data!', error)
+      console.error('Error saving data!', error)
     } finally {
       setLoading(false)
     }

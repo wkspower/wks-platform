@@ -398,7 +398,7 @@ const KendoDataTablesCracker = ({
                   <ProductCell {...cellProps} allProducts={allProducts} />
                 ),
               }}
-              columnMenu={ColumnMenuCheckboxFilter}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
             />
           )
         }
@@ -416,7 +416,7 @@ const KendoDataTablesCracker = ({
                   <MonthCell {...cellProps} allMonths={allMonths} />
                 ),
               }}
-              columnMenu={ColumnMenuCheckboxFilter}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
             />
           )
         }
@@ -439,7 +439,7 @@ const KendoDataTablesCracker = ({
                   />
                 ),
               }}
-              columnMenu={ColumnMenuCheckboxFilter}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               hidden={col.hidden}
             />
           )
@@ -483,7 +483,7 @@ const KendoDataTablesCracker = ({
                 edit: { text: NoSpinnerNumericEditor },
                 data: toolTipRenderer,
               }}
-              columnMenu={ColumnMenuCheckboxFilter}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               filter='numeric'
               format={col.format}
             />
@@ -506,7 +506,7 @@ const KendoDataTablesCracker = ({
                 edit: { text: NoSpinnerNumericEditor },
                 data: toolTipRenderer,
               }}
-              columnMenu={ColumnMenuCheckboxFilter}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               filter='numeric'
               format={col.format}
             />
@@ -534,43 +534,39 @@ const KendoDataTablesCracker = ({
               headerClassName={
                 isColumnActive(col?.field, filter, sort) ? 'active-column' : ''
               }
-              columnMenu={ColumnMenuCheckboxFilter}
+              sortable={col?.filter}
               cells={{
-                edit: {
-                  text: (props) => (
-                    <td
-                      style={{
-                        textAlign: 'center',
-                        paddingTop: 0,
-                        paddingBottom: 0,
-                      }}
-                    >
-                      <Switch
-                        checked={!!props.dataItem[props.field]}
-                        onChange={(e) =>
-                          handleSwitchChange(props, e.target.checked)
-                        }
-                        inputProps={{ 'aria-label': 'Switch toggle' }}
-                        style={{ marginTop: 0, marginBottom: 0 }}
-                      />
-                    </td>
-                  ),
-                },
+                // edit: {
+                //   text: (props) => (
+                //     <td
+                //       style={{
+                //         textAlign: 'center',
+                //       }}
+                //     >
+                //       <Switch
+                //         checked={!!props.dataItem[props.field]}
+                //         size='small'
+                //         onChange={(e) =>
+                //           handleSwitchChange(props, e.target.checked)
+                //         }
+                //         inputProps={{ 'aria-label': 'Switch toggle' }}
+                //       />
+                //     </td>
+                //   ),
+                // },
                 data: (props) => (
                   <td
                     style={{
                       textAlign: 'center',
-                      paddingTop: 0,
-                      paddingBottom: 0,
                     }}
                   >
                     <Switch
                       checked={!!props.dataItem[props.field]}
+                      size='small'
                       onChange={(e) =>
                         handleSwitchChange(props, e.target.checked)
                       }
                       inputProps={{ 'aria-label': 'Switch toggle' }}
-                      style={{ marginTop: 0, marginBottom: 0 }}
                     />
                   </td>
                 ),
@@ -593,7 +589,8 @@ const KendoDataTablesCracker = ({
               edit: { text: TextCellEditor },
               data: toolTipRenderer,
             }}
-            columnMenu={ColumnMenuCheckboxFilter}
+            columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
+            sortable={col?.filter}
           />
         )
       })}

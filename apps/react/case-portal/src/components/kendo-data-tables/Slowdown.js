@@ -53,6 +53,7 @@ const SlowDown = ({ permissions }) => {
   })
 
   const [_plantID, set_PlantID] = useState('')
+  const [selectedTab, setSelectedTab] = useState(0)
 
   useEffect(() => {
     if (plantID?.plantId) {
@@ -60,9 +61,14 @@ const SlowDown = ({ permissions }) => {
     }
   }, [plantID])
 
-  const [selectedTab, setSelectedTab] = useState(0)
   const handleTabChange = (event, newValue) => {
+    setModifiedCells({})
+    setModifiedCells2({})
+
     setSelectedTab(newValue)
+    setColDefs2([])
+    setRows2([])
+    fetchData2()
   }
 
   const handleCancelClick = () => () => {
@@ -170,7 +176,7 @@ const SlowDown = ({ permissions }) => {
       setSnackbarOpen(true)
 
       setSnackbarData({
-        message: 'Slowdown data Saved Successfully!',
+        message: 'Saved Successfully!',
         severity: 'success',
       })
       setModifiedCells({})
@@ -183,7 +189,7 @@ const SlowDown = ({ permissions }) => {
 
       return response
     } catch (error) {
-      console.error('Error saving Slowdown data:', error)
+      console.error('Error saving data:', error)
       setLoading(false)
     } finally {
       fetchData()
@@ -191,52 +197,54 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const saveSlowDownConfigurationData = async (row) => {
-      setLoading(true)
-      try {
-        var plantId = ''
-         const storedPlant = localStorage.getItem('selectedPlant')
-         if (storedPlant) {
-           const parsedPlant = JSON.parse(storedPlant)
-           plantId = parsedPlant.id
-         }
-         const year = localStorage.getItem('year')
-        
+    setLoading(true)
+    try {
+      var plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      const year = localStorage.getItem('year')
 
-        const response = await DataService.saveSlowdownConfigData(
-          plantId,
-          year,
-          row,
-          keycloak,
-        )
-        if (response.code === 200) {
-           setSnackbarOpen(true)
+      const response = await DataService.saveSlowdownConfigData(
+        plantId,
+        year,
+        row,
+        keycloak,
+      )
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
 
-            setSnackbarData({
-              message: 'Saved Successfully!',
-              severity: 'success',
-            })
-            setModifiedCells({})
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells2({})
 
-            unsavedChangesRef.current = {
-              unsavedRows: {},
-              rowsBeforeChange: {},
-            }
-            fetchConfigurationData()
-          
+        unsavedChangesRef.current = {
+          unsavedRows: {},
+          rowsBeforeChange: {},
         }
-        console.log('---response---',response);
-        
-        
-      setLoading(false)
-      return response
-      } catch (error) {
-        console.error('Error saving Slowdown data:', error)
-        setLoading(false)
-      } finally {
-        // fetchConfigurationData()
+        fetchConfigurationData()
+      } else {
+        setSnackbarOpen(true)
+
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
         setLoading(false)
       }
 
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
+      setLoading(false)
+    } finally {
+      // fetchConfigurationData()
+      // setLoading(false)
+    }
   }
   const saveChanges = React.useCallback(async () => {
     try {
@@ -281,6 +289,22 @@ const SlowDown = ({ permissions }) => {
         return
       }
 
+      const allDescriptions = rows.map((r) =>
+        (r.discription || '').trim().toLowerCase(),
+      )
+      const duplicate = allDescriptions.find(
+        (d, i) => d && allDescriptions.indexOf(d) !== i,
+      )
+
+      if (duplicate) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Duplicate description "${duplicate}" found. Descriptions must be unique.`,
+          severity: 'error',
+        })
+        return
+      }
+
       saveSlowDownData(data)
     } catch (error) {
       // setIsSaving(false);
@@ -288,20 +312,24 @@ const SlowDown = ({ permissions }) => {
   }, [modifiedCells])
   const saveChanges2 = React.useCallback(async () => {
     try {
-      let finalData = Object.values(modifiedCells2).map((mdata,i) => ({...mdata,
-              normParameterFKId:mdata.NormParameter_FK_Id,
-              NormParameter_FK_Id:undefined,
-              inEdit:undefined,
-              particulars:undefined,
-              id: undefined,
-              aopYear:undefined,
-              normParameterDisplayName:undefined,
-              plantId:undefined,
-              DisplayName:undefined,
-              NormTypeName:undefined,
-              IsEditable:undefined,
-              srNo:undefined}))
-      
+      let finalData = Object.values(modifiedCells2).map((mdata, i) => ({
+        ...mdata,
+        normParameterFKId: mdata.NormParameter_FK_Id,
+        NormParameter_FK_Id: undefined,
+        inEdit: undefined,
+        particulars: undefined,
+        id: undefined,
+        aopYear: undefined,
+        normParameterDisplayName: undefined,
+        plantId: undefined,
+        DisplayName: undefined,
+        NormTypeName: undefined,
+        srNo: undefined,
+        isEditable: undefined,
+        IsEditable: undefined,
+        Particulars: undefined,
+      }))
+
       var data = Object.values(modifiedCells2)
       if (data.length == 0) {
         setSnackbarOpen(true)
@@ -311,8 +339,7 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
-   
-      
+
       saveSlowDownConfigurationData(finalData)
     } catch (error) {
       // setIsSaving(false);
@@ -342,7 +369,7 @@ const SlowDown = ({ permissions }) => {
       setSnackbarOpen(true)
 
       setSnackbarData({
-        message: 'Slowdown data Updated successfully!',
+        message: 'Updated successfully!',
         severity: 'success',
       })
 
@@ -351,6 +378,7 @@ const SlowDown = ({ permissions }) => {
       console.error('Error saving Slowdown data:', error)
     } finally {
       fetchData()
+      // fetchConfigurationData()
     }
   }
   const updateSlowdownData2 = async (newRow) => {
@@ -376,13 +404,13 @@ const SlowDown = ({ permissions }) => {
       setSnackbarOpen(true)
 
       setSnackbarData({
-        message: 'Slowdown data Updated successfully!',
+        message: 'Updated successfully!',
         severity: 'success',
       })
 
       return response
     } catch (error) {
-      console.error('Error saving Slowdown data:', error)
+      console.error('Error saving data:', error)
     } finally {
       fetchData()
     }
@@ -412,16 +440,17 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const fetchConfigurationData = async () => {
+    setRows2([])
     setLoading(true)
     try {
-      const {data} = await DataService.getSlowDownConfigurationData(keycloak)
-      console.log('---config data---',data);
-      
+      const { data } = await DataService.getSlowDownConfigurationData(keycloak)
+
       const formattedData = data.map((item, index) => ({
         ...item,
         id: index,
-        particulars:item.DisplayName,
-        // 'slowdown 0.2_July':item['slowdown 0.2_July']
+        particulars: item.DisplayName,
+        Particulars: item?.NormTypeName,
+        isEditable: item?.IsEditable,
       }))
 
       setRows2(formattedData)
@@ -429,31 +458,40 @@ const SlowDown = ({ permissions }) => {
     } catch (error) {
       console.error('Error fetching SlowDown Configuration data:', error)
       setLoading(false)
+      setRows2([])
     }
   }
   const fetchData2 = async () => {
     setLoading(true)
+    setColDefs2([])
     try {
       const data1 = await DataService.getSlowDownPlantDataTab(keycloak)
-      console.log('---column data---',data1);
-      const removedCols = ['srNo','NormTypeName','DisplayName', 'NormParameter_FK_Id','normParameterDisplayName','aopYear','plantId']
+      const removedCols = [
+        'srNo',
+        'NormTypeName',
+        'DisplayName',
+        'NormParameter_FK_Id',
+        'normParameterDisplayName',
+        'aopYear',
+        'plantId',
+        'IsEditable',
+      ]
       if (data1?.code === 200 && Array.isArray(data1.data)) {
-        const dynamicColDefs = data1.data.filter(col => !col.title.includes('.')).map((item) => ({
+        const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
           title: item.title,
-          editable: item.field === 'particulars' ? false :true,
-          hidden: removedCols.includes(item.field) 
+          editable: item.field === 'particulars' ? false : true,
+          hidden: removedCols.includes(item.field),
+          ...(item.field !== 'particulars' && { type: 'number' }),
         }))
 
         setColDefs2(dynamicColDefs)
+        fetchConfigurationData()
       } else {
         setColDefs2([])
       }
-
-      // setRows2([])
-      setLoading(false)
     } catch (error) {
-      console.error('Error fetching SlowDown data:', error)
+      console.error('Error fetching data:', error)
       setLoading(false)
     }
   }
@@ -486,17 +524,21 @@ const SlowDown = ({ permissions }) => {
 
         setAllProducts(productList)
       } catch (error) {
-        console.error('Error fetching product:', error)
+        console.error('Error fetching data', error)
       } finally {
         // handleMenuClose();
       }
     }
 
     fetchData()
-    fetchData2()
-    fetchConfigurationData()
-    // saveShutdownData()
+
     getAllProducts()
+
+    if (selectedTab == 1) {
+      setColDefs2([])
+      setRows2([])
+      fetchData2()
+    }
   }, [oldYear, yearChanged, keycloak, plantID])
 
   const focusFirstField = async () => {
@@ -525,78 +567,6 @@ const SlowDown = ({ permissions }) => {
         return SlowDownMegColumns
     }
   }, [lowerVertName])
-
-  // const colDefs = [
-  //   {
-  //     field: 'discription',
-  //     title: 'Slowdown Desc',
-  //     editable: true,
-  //   },
-
-  //   {
-  //     field: 'maintenanceId',
-  //     title: 'maintenanceId',
-  //     editable: false,
-  //     hidden: true,
-  //   },
-
-  //   {
-  //     field: 'productName1',
-  //     title: 'Particulars',
-  //     editable: true,
-  //     hidden:
-  //       lowerVertName === 'elastomer' || lowerVertName === 'meg' ? true : false,
-  //   },
-
-  //   {
-  //     field: 'maintStartDateTime',
-  //     title: 'SD- From',
-  //     type: 'dateTime',
-  //     editable: true,
-  //   },
-
-  //   {
-  //     field: 'maintEndDateTime',
-  //     title: 'SD- To',
-  //     type: 'dateTime',
-  //     editable: true,
-  //   },
-
-  //   {
-  //     field: 'durationInHrs',
-  //     title: 'Duration (hrs)',
-  //     editable: true,
-  //   },
-
-  //   {
-  //     field: 'rate',
-  //     title: 'Rate (TPH)',
-  //     editable: true,
-  //     type: 'number',
-  //     hidden: lowerVertName === 'meg' ? true : false,
-  //   },
-
-  //   {
-  //     field: 'rateEOE',
-  //     title: 'Rate (EOE)',
-  //     editable: true,
-  //     type: 'number',
-  //     hidden: lowerVertName === 'meg' ? false : true,
-  //   },
-  //   {
-  //     field: 'rateEO',
-  //     title: 'Rate (EO)',
-  //     editable: true,
-  //     type: 'number',
-  //     hidden: lowerVertName === 'meg' ? false : true,
-  //   },
-
-  //   {
-  //     field: 'remark',
-  //     title: 'Remarks',
-  //     editable: true,
-  //   },
-  // ]
 
   const deleteRowData = async (paramsForDelete) => {
     try {
@@ -683,15 +653,17 @@ const SlowDown = ({ permissions }) => {
               minHeight: '10px',
             }}
           />
-          <Tab
-            label='Configuration'
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-              padding: '9px',
-              minHeight: '10px',
-            }}
-          />
+          {lowerVertName === 'meg' && (
+            <Tab
+              label='Configuration'
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                p: '9px',
+                minHeight: 10,
+              }}
+            />
+          )}
         </Tabs>
       </Box>
 
@@ -753,6 +725,7 @@ const SlowDown = ({ permissions }) => {
           unsavedChangesRef={unsavedChangesRef}
           permissions={{ saveBtn: true, allAction: true }}
           handleCancelClick={handleCancelClick}
+          groupBy='Particulars'
         />
       )}
     </div>

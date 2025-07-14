@@ -90,6 +90,9 @@ export default function StepperNav() {
             fontWeight: 'bold',
             color: '#000',
           },
+          '& .MuiStepLabel-alternativeLabel': {
+            marginTop: '3px !important',
+          },
         }}
       >
         {steps.map((step) => (

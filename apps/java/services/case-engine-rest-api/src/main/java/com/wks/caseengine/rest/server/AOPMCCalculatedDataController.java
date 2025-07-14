@@ -36,9 +36,9 @@ public class AOPMCCalculatedDataController {
 
 	@PutMapping(value = "/editAOPMCCalculatedData")
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
-			@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO,@RequestParam("plantId") String plantId,
+			@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO, @RequestParam("plantId") String plantId,
 			@RequestParam("year") String year) {
-		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO,false,plantId,year);
+		return aOPMCCalculatedDataService.editAOPMCCalculatedData(aOPMCCalculatedDataDTO, false, year, plantId);
 
 	}
 
@@ -53,10 +53,10 @@ public class AOPMCCalculatedDataController {
 		try {
 
 			byte[] excelBytes = aOPMCCalculatedDataService.createExcel(year, plantId, false, null); // excelService.generateFlexibleExcel(data,
-																														// plantId,
-																														// year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId,
-																														// year,
-																														// reportType);
+																									// plantId,
+																									// year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId,
+																									// year,
+																									// reportType);
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(
@@ -75,7 +75,7 @@ public class AOPMCCalculatedDataController {
 	public AOPMessageVM importExcel(@RequestParam("plantId") String plantId,
 			@RequestParam("year") String year, @RequestParam("file") MultipartFile file) {
 		return aOPMCCalculatedDataService.importExcel(year, plantId, file);
-		
+
 	}
 
 }

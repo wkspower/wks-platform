@@ -402,7 +402,7 @@ const DecokingConfig = () => {
         Object.keys(calculationObject || {}).length > 0 ? true : false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
-      byDefCollaps: true,
+      byDefCollaps: false,
     },
     isOldYear,
   )

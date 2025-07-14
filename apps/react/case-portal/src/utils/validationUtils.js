@@ -13,6 +13,9 @@ export const validateFields = (data, requiredFields) => {
     remarks: 'Remark',
     ThroughputActual: 'Actual Throughput',
     attributeValue: 'Run Length',
+    rateEO: 'EO Rate',
+    rateEOE: 'EOE Rate',
+    productName1: 'Particular',
   }
 
   const invalidRows = data.filter((row) => {

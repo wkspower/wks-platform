@@ -49,7 +49,7 @@ export default function HeaderContent({ keycloak }) {
   const [selectedYear, setSelectedYear] = useState('')
 
   const screenTitle = useSelector((s) => s.dataGridStore.screenTitle)
-  const screenTitleName = screenTitle?.title || 'Business Demand'
+  const screenTitleName = screenTitle?.title
 
   const [allowedMap, setAllowedMap] = useState({})
   const [fullDetails, setFullDetails] = useState([])

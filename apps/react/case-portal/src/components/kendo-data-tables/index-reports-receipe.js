@@ -148,7 +148,7 @@ const KendoDataTablesReciepe = ({
   }, [])
 
   const handleRowClick = (e) => {
-    console.log(e.dataItem)
+    // console.log(e.dataItem)
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return

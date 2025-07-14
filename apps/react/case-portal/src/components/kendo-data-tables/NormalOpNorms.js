@@ -134,9 +134,10 @@ const NormalOpNormsScreen = () => {
 
       setRows(formattedData)
     } catch (error) {
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching Data:', error)
     } finally {
       setLoading(false)
+      // console.log(1)
     }
   }
 
@@ -228,6 +229,7 @@ const NormalOpNormsScreen = () => {
       console.error('Error during data fetching:', error)
     } finally {
       setLoading(false)
+      // console.log(2)
     }
   }
 
@@ -477,7 +479,7 @@ const NormalOpNormsScreen = () => {
           dispatch(setIsBlocked(false))
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Normal Operations Norms Saved Successfully!`,
+            message: `Saved Successfully!`,
             severity: 'success',
           })
 
@@ -493,14 +495,14 @@ const NormalOpNormsScreen = () => {
         } else {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Normal Operations Norms not saved!`,
+            message: `Norms not saved!`,
             severity: 'error',
           })
         }
         return response
       }
     } catch (error) {
-      console.error(`Error saving Normal Operations Norms`, error)
+      console.error(`Error saving Norms`, error)
     } finally {
       // fetchData()
       // setLoading(false)
@@ -695,7 +697,7 @@ const NormalOpNormsScreen = () => {
           severity: 'success',
         })
         setModifiedCells({})
-        setLoading(false)
+        // setLoading(false)
 
         fetchAllData()
       } else {
@@ -710,9 +712,10 @@ const NormalOpNormsScreen = () => {
     } catch (error) {
       console.error('Error saving data:', error)
       setLoading(false)
+      // console.log(4)
     } finally {
       // fetchData()
-      setLoading(false)
+      // setLoading(false)
     }
   }
   const handleGradeChange = (gradeId) => {

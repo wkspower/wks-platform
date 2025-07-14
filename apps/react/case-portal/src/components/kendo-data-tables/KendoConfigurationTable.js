@@ -292,7 +292,7 @@ const ConfigurationTable = () => {
     getConfigurationExecutionDetails()
     getAopSummary()
     let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-    let verticalName = vertical.toLowerCase()
+    let verticalName = vertical?.toLowerCase()
     setTimeout(() => {
       if (verticalName != 'cracker' && verticalName != 'meg') {
         getConfigurationTabsMatrix()

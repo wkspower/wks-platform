@@ -211,21 +211,21 @@ const KendoDataTablesCrackerRunLength = ({
                   prevRows[index][field] === 'SAD' &&
                   prevRows[index + 1]?.[field] === 'SAD'
                 ) {
-                  updatedRow.demo = 1
+                  updatedRow.demo = 'SD'
                 }
                 if (
                   index <= editedIndex - 1 &&
                   prevRows[index - 1]?.[field] === 'SAD' &&
                   prevRows[index][field] === 'SAD'
                 ) {
-                  updatedRow.demo = 2
+                  updatedRow.demo = 'SD'
                 }
                 if (
                   index <= editedIndex - 3 &&
                   prevRows[index + 1]?.[field] === 'SAD' &&
                   prevRows[index + 2]?.[field] === 'SAD'
                 ) {
-                  updatedRow.demo = 'SD'
+                  updatedRow.demo = 'BBU'
                 }
 
                 if (isNextNonNumeric) {

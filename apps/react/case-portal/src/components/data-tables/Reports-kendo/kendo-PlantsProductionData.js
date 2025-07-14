@@ -89,16 +89,15 @@ const PlantsProductionSummary = () => {
           width: 120,
           editable: false,
           format: '{0:#.###}',
-          type:'number'
+          type: 'number',
         },
         {
           field: 'ActualPrevYear',
           title: 'Actual',
           width: 120,
-          // editable: true,
-          editable: false,
           format: '{0:#.###}',
-          type:'number'
+          editable: false,
+          type: 'number',
         },
       ],
     },
@@ -112,7 +111,7 @@ const PlantsProductionSummary = () => {
           width: 120,
           editable: false,
           format: '{0:#.###}',
-          type:'number'
+          type: 'number',
         },
       ],
     },
@@ -126,7 +125,7 @@ const PlantsProductionSummary = () => {
           width: 120,
           editable: false,
           format: '{0:#.###}',
-          type:'number'
+          type: 'number',
         },
         {
           field: 'VarBudgetPer',
@@ -134,7 +133,7 @@ const PlantsProductionSummary = () => {
           width: 100,
           editable: false,
           format: '{0:#.###}',
-          type:'number'
+          type: 'number',
         },
       ],
     },
@@ -148,7 +147,7 @@ const PlantsProductionSummary = () => {
           width: 120,
           editable: false,
           format: '{0:#.###}',
-          type:'number'
+          type: 'number',
         },
         {
           field: 'VarActualPer',
@@ -156,7 +155,7 @@ const PlantsProductionSummary = () => {
           width: 100,
           editable: false,
           format: '{0:#.###}',
-          type:'number'
+          type: 'number',
         },
       ],
     },
