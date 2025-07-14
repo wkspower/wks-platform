@@ -132,6 +132,7 @@ export const DataService = {
   savePlantContributionData,
   getProductionVolDataBasisPe,
   saveCrackerMaintenance,
+  saveSlowdownConfigData,
   // saveConfigurationExcelConstants,
   // getConfigurationExcelConstants,
   getNormalOperationNormsGrades,
@@ -1802,6 +1803,25 @@ async function saveSummaryAOPConsumptionNorm(
       method: 'POST',
       headers,
       body: JSON.stringify({ summary }), // <-- send JSON object with summary key
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function saveSlowdownConfigData(plantId, year, slowDownConfigDetails, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/slowdown/configuration?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(slowDownConfigDetails),
     })
     return json(keycloak, resp)
   } catch (e) {
