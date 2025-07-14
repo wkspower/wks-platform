@@ -8,10 +8,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.Session;
-
-
-import java.sql.*;
+import java.text.DateFormatSymbols;
 import java.util.*;
+import java.util.regex.*;
+import java.sql.*;
+
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -399,43 +400,56 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	
 	@Override
 	public AOPMessageVM getShutdownDynamicColumns(String auditYear, UUID plantId) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, String>> listOfMaps = new ArrayList<>();
-		Map<String, String> map = new HashMap<>();
-		Plants plant = plantsRepository.findById(plantId).orElseThrow();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		String procedureName = vertical.getName()+"_GetSlowdownNormConfiguration";
-		String result=null;
-		try {
-			List<String> data = getColumnNames(procedureName, plantId.toString(), auditYear);
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<Map<String, String>> listOfMaps = new ArrayList<>();
 
-			map.put("field", "particulars");
-			map.put("title", "Particulars");
-			listOfMaps.add(map);
+	    // 1. Add static "Particulars" column
+	    {
+	        Map<String, String> map = new HashMap<>();
+	        map.put("field", "particulars");
+	        map.put("title", "Particulars");
+	        listOfMaps.add(map);
+	    }
 
-			// Iterate over data
-			for (String row : data) {
-			   
-			    map.put("field", row);
+	    // 2. Prepare month-regex pattern
+	    List<String> months = Arrays.asList(
+	        "January", "February", "March", "April", "May", "June",
+	        "July", "August", "September", "October", "November", "December"
+	    );
+	    String monthPattern = String.join("|", months);
+	    Pattern monthSuffixPattern = Pattern.compile("_(?i)(" + monthPattern + ")$");
 
-			    String title = row.replaceFirst("_(?=[^_]+$)", " (")  
-			                      + ")";                             
+	    try {
+	    	Plants plant = plantsRepository.findById(plantId).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String procedureName = vertical.getName()+"_GetSlowdownNormConfiguration";
+	        List<String> data = getColumnNames(procedureName, plantId.toString(), auditYear);
 
-			    map.put("title", title);
-			    listOfMaps.add(map);
-			}
+	        // 3. Process each dynamic column
+	        for (String row : data) {
+	            Map<String, String> map = new HashMap<>();
+	            map.put("field", row);
 
+	            String title = row;
+	            Matcher m = monthSuffixPattern.matcher(row);
+	            if (m.find()) {
+	                title = row.replaceFirst("_(?=[^_]+$)", " (") + ")";
+	            }
+	            map.put("title", title);
 
-		   
-		}catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid data format", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
-		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("Data fetched successfully");
-		aopMessageVM.setData(listOfMaps);
-		return aopMessageVM;
+	            listOfMaps.add(map);
+	        }
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid data format", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+
+	    aopMessageVM.setCode(200);
+	    aopMessageVM.setMessage("Data fetched successfully");
+	    aopMessageVM.setData(listOfMaps);
+	    return aopMessageVM;
 	}
 	
 	private String stripTrailingSuffix(String description) {
