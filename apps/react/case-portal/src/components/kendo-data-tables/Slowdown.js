@@ -297,6 +297,8 @@ const SlowDown = ({ permissions }) => {
               aopYear:undefined,
               normParameterDisplayName:undefined,
               plantId:undefined,
+              DisplayName:undefined,
+              NormTypeName:undefined,
               srNo:undefined}))
       
       var data = Object.values(modifiedCells2)
@@ -417,7 +419,8 @@ const SlowDown = ({ permissions }) => {
       const formattedData = data.map((item, index) => ({
         ...item,
         id: index,
-        particulars:item.normParameterDisplayName
+        particulars:item.DisplayName,
+        // 'slowdown 0.2_July':item['slowdown 0.2_July']
       }))
 
       setRows2(formattedData)
@@ -431,7 +434,8 @@ const SlowDown = ({ permissions }) => {
     setLoading(true)
     try {
       const data1 = await DataService.getSlowDownPlantDataTab(keycloak)
-      const removedCols = ['srNo','NormParameter_FK_Id','normParameterDisplayName','aopYear','plantId']
+      console.log('---column data---',data1);
+      const removedCols = ['srNo','NormTypeName','DisplayName', 'NormParameter_FK_Id','normParameterDisplayName','aopYear','plantId']
       if (data1?.code === 200 && Array.isArray(data1.data)) {
         const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
