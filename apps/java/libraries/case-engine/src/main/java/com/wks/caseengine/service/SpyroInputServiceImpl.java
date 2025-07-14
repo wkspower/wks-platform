@@ -65,7 +65,7 @@ public class SpyroInputServiceImpl implements SpyroInputService{
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-					if(row[4].toString().contains(type)) {	
+					if(!type.equalsIgnoreCase("Composition") &&  row[4].toString().contains(type)) {	
 						map.put("VerticalFKId", row[0]);
 						map.put("PlantFKId", row[1]);
 						map.put("NormParameterFKID", row[2]);
@@ -89,6 +89,34 @@ public class SpyroInputServiceImpl implements SpyroInputService{
 						map.put("Nov", row[20]);
 						map.put("Dec", row[21]);
 						spyroInputDataList.add(map); // Add the map to the list here				
+					}else {
+						if(type.equalsIgnoreCase("Composition")) {
+							if(row[4].toString().contains("C2/C3") || row[4].toString().contains("Hexene Purge Gas") || row[4].toString().contains("BPCL Kochi Propylene") || row[4].toString().contains("Import Propane") || row[4].toString().contains("FCC C3") || row[4].toString().contains("LDPE Off Gas")) {
+								map.put("VerticalFKId", row[0]);
+								map.put("PlantFKId", row[1]);
+								map.put("NormParameterFKID", row[2]);
+								map.put("Particulars", row[3]);
+								map.put("NormParameterTypeName", row[4]);
+								map.put("NormParameterTypeFKID", row[5]);
+								map.put("Type", row[6]);
+								map.put("UOM", row[7]);
+								map.put("AuditYear", row[8]);
+								map.put("Remarks", row[9]);
+								map.put("Jan", row[10]);
+								map.put("Feb", row[11]);
+								map.put("Mar", row[12]);
+								map.put("Apr", row[13]);
+								map.put("May", row[14]);
+								map.put("Jun", row[15]);
+								map.put("Jul", row[16]);
+								map.put("Aug", row[17]);
+								map.put("Sep", row[18]);
+								map.put("Oct", row[19]);
+								map.put("Nov", row[20]);
+								map.put("Dec", row[21]);
+								spyroInputDataList.add(map); // Add the map to the list here
+							}
+						}
 					}
 			}
 			aopMessageVM.setCode(200);
