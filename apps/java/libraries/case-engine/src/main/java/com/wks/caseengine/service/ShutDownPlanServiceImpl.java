@@ -234,6 +234,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 
 					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+					plantMaintenanceTransaction.setPlantFKId(plantId);
 
 					// Save new record
 					plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
@@ -293,7 +294,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 							plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 							plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-
+							plantMaintenanceTransaction.setPlantFKId(plantId);
 							// Save updated record
 							plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
 						} else {

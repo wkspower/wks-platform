@@ -21,13 +21,17 @@ import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SlowdownPlanRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.rest.entity.Vertical;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -60,6 +64,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	@Autowired
+	private PlantsRepository plantsRepository;
+	
+	@Autowired
+	private VerticalsRepository verticalRepository;
 
 
 	@Override
@@ -174,6 +184,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
 						plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
 					}
+					plantMaintenanceTransaction.setPlantFKId(plantId);
 					slowdownPlanRepository.save(plantMaintenanceTransaction);
 				} else {
 
@@ -219,6 +230,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
 					System.out.println("At end name is:" + plantMaintenanceTransaction.getName());
 					// Save new record
+					plantMaintenanceTransaction.setPlantFKId(plantId);
 					slowdownPlanRepository.save(plantMaintenanceTransaction);
 
 				}
@@ -307,12 +319,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	 	@Override
 	    public AOPMessageVM getSlowdownConfigurationData(String plantId, String year) {
 		 AOPMessageVM aopMessageVM = new AOPMessageVM();
+		 Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String procedureName = vertical.getName()+"_GetSlowdownNormConfiguration";
 	        try {
 	            // Get the data
-	            List<Object[]> rows = getData(plantId, year);
+	            List<Object[]> rows = getData(plantId, year,procedureName);
 
 	            // Get column names
-	            List<String> columnNames = getColumnNames("GetPlantNormConfigurations_Static", plantId, year);
+	            
+	            List<String> columnNames = getColumnNames(procedureName, plantId, year);
 
 	            // Prepare the list of maps
 	            List<Map<String, Object>> resultList = new ArrayList<>();
@@ -334,9 +350,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        }
 	    }
 	
-	public List<Object[]> getData(String plantId, String aopYear) {
+	public List<Object[]> getData(String plantId, String aopYear,String procedureName) {
+		
 		try {
-			String procedureName = "GetPlantNormConfigurations_Static";
+			
 			String sql = "EXEC " + procedureName +
 					" @plantId = :plantId, @aopYear = :aopYear";
 
