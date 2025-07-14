@@ -184,7 +184,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
 						plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
 					}
-					plantMaintenanceTransaction.setPlantFKId(plantId);
 					slowdownPlanRepository.save(plantMaintenanceTransaction);
 				} else {
 
@@ -230,7 +229,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
 					System.out.println("At end name is:" + plantMaintenanceTransaction.getName());
 					// Save new record
-					plantMaintenanceTransaction.setPlantFKId(plantId);
 					slowdownPlanRepository.save(plantMaintenanceTransaction);
 
 				}
@@ -285,7 +283,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
 		try {
 			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
-				UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
+				String rawDesc = normAttributeTransactionsDTO.getDescription();
+				String cleanDesc = stripTrailingSuffix(rawDesc);
+				UUID maintenanceId=plantMaintenanceTransactionRepository.findTransactionIdByDynamicParams("Slowdown",year,UUID.fromString(plantId),cleanDesc);
+				if(maintenanceId==null) {
+					throw new RuntimeException("No Maintenance Id found with "+normAttributeTransactionsDTO.getDescription());
+				}
+				
+				//UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
 				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
 				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year);
 				if(normAttributeTransactions!=null) {
@@ -293,6 +298,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
 				}else {
 					normAttributeTransactions = new NormAttributeTransactions();
+			
 					Optional<PlantMaintenanceTransaction> PlantMaintenanceTransactionopt=plantMaintenanceTransactionRepository.findById(maintenanceId);
 					if(PlantMaintenanceTransactionopt.isPresent()) {
 						normAttributeTransactions.setAopMonth(PlantMaintenanceTransactionopt.get().getMaintForMonth());
@@ -308,6 +314,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				}
 			}
 		}catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to save/update data", ex);
 		}
 		aopMessageVM.setCode(200);
@@ -408,11 +415,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 			// Iterate over data
 			for (String row : data) {
-			    map = new HashMap<>();
+			   
 			    map.put("field", row);
-			    map.put("title", row);
+
+			    String title = row.replaceFirst("_(?=[^_]+$)", " (")  
+			                      + ")";                             
+
+			    map.put("title", title);
 			    listOfMaps.add(map);
 			}
+
 
 		   
 		}catch (IllegalArgumentException e) {
@@ -424,5 +436,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		aopMessageVM.setMessage("Data fetched successfully");
 		aopMessageVM.setData(listOfMaps);
 		return aopMessageVM;
+	}
+	
+	private String stripTrailingSuffix(String description) {
+	    return description.replaceAll("_[^_]*$", "");
 	}
 }

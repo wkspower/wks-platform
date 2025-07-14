@@ -47,6 +47,31 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	List<Object[]> findDescriptionsByPlantFkId( 
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
-	@Query(value = "SELECT Id FROM PlantMaintenanceTransaction WHERE Discription = :discription AND NormParameter_FK_Id = :normParameterFKId", nativeQuery = true)
-	UUID findIdByNormIdAndDiscription(@Param("discription") String discription, @Param("normParameterFKId") UUID normParameterFKId);
+	@Query(
+			  value = "SELECT Id FROM PlantMaintenanceTransaction inner join  WHERE Discription LIKE CONCAT('%', :discription, '%') AND NormParameter_FK_Id = :normParameterFKId",
+			  nativeQuery = true
+			)
+			UUID findIdByNormIdAndDiscription(
+			  @Param("discription") String discription,
+			  @Param("normParameterFKId") UUID normParameterFKId
+			);
+	
+	@Query(value = """
+	        SELECT PMT.Id
+	        FROM PlantMaintenance D
+	        INNER JOIN PlantMaintenanceTransaction PMT
+	          ON PMT.PlantMaintenance_FK_Id = D.Id
+	        WHERE D.MaintenanceText = :maintenanceText
+	          AND PMT.AuditYear = :auditYear
+	          AND D.Plant_FK_Id = :plantId
+	          AND PMT.Discription = :description
+	        """,
+	        nativeQuery = true)
+	    UUID findTransactionIdByDynamicParams(
+	        @Param("maintenanceText") String maintenanceText,
+	        @Param("auditYear") String auditYear,
+	        @Param("plantId") UUID plantId,
+	        @Param("description") String description
+	    );
+
 }

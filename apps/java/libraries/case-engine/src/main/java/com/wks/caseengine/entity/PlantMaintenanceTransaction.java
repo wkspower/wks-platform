@@ -67,8 +67,5 @@ public class PlantMaintenanceTransaction {
     
     @Transient
     private Double durationInHrs;
-    
-    @Column(name = "Plant_FK_Id")
-    private UUID plantFKId;
 
 }
