@@ -57,8 +57,8 @@ public class NormAttributeTransactions {
     @Column(name = "NormParameter_FK_Id")
     private UUID normParameterFKId;
     
-    @Column(name="Maintenance_Id")
-    private UUID MaintenanceId;
+    @Column(name="PlantMaintenanceTransaction_FK_Id")
+    private UUID maintenanceId;
 
 
 }
