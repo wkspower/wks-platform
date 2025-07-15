@@ -1,28 +1,28 @@
-import { useState, useEffect } from 'react'
 import {
   Box,
-  Typography,
   FormControl,
-  Select,
   MenuItem,
+  Select,
   Stack,
+  Typography,
   useMediaQuery,
 } from '@mui/material'
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
 import {
   setAopYear,
-  setYearChange,
-  setVerticalChange,
-  setSitePlantChange,
   setCurrentYear,
   setOldYear,
-  setSiteID,
   setPlantID,
+  setSiteID,
+  setSitePlantChange,
+  setVerticalChange,
+  setYearChange,
 } from 'store/reducers/dataGridStore'
-import { DataService } from 'services/DataService'
-import Search from './Search'
-import Profile from './Profile/index'
 import MobileSection from './MobileSection'
+import Profile from './Profile/index'
+import Search from './Search'
 
 // import Logo from '../../../assets/images/ril-logo2.png'
 import Logo from 'assets/images/ril-logo2.png'
@@ -42,6 +42,9 @@ function parseAllowed(raw) {
 }
 
 export default function HeaderContent({ keycloak }) {
+  const getSelectedVerticalStorage = localStorage.getItem('selectedVertical')
+    ? JSON.parse(localStorage.getItem('selectedVertical'))
+    : null
   const dispatch = useDispatch()
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))
 
@@ -58,7 +61,9 @@ export default function HeaderContent({ keycloak }) {
   const [sites, setSites] = useState([])
   const [plants, setPlants] = useState([])
 
-  const [selectedVertical, setSelectedVertical] = useState('')
+  const [selectedVertical, setSelectedVertical] = useState(
+    getSelectedVerticalStorage ? getSelectedVerticalStorage.id : '',
+  )
   const [selectedSite, setSelectedSite] = useState('')
   const [selectedPlant, setSelectedPlant] = useState('')
 
