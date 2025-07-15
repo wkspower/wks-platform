@@ -122,6 +122,28 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<Object[]> getYieldData(String plantId, String aopYear,
+			String procedureName) {
+		try {
+			
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 	@Override
 	public AOPMessageVM updateSpyroOutputData(List<SpyroOutputDTO> spyroOutputDTOList) {
@@ -210,6 +232,44 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		normAttributeTransactions.setRemarks(spyroOutputDTO.getRemarks());
 
 		normAttributeTransactionsRepository.save(normAttributeTransactions);
+	}
+
+	@Override
+	public AOPMessageVM getSpyroOutputYieldData(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<Map<String, Object>> spyroOutputYieldDataList = new ArrayList<>();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+        
+        String procedureName=vertical.getName()+"_GetYield";
+		try {
+			List<Object[]> results = getYieldData(plantId, year,procedureName);
+
+			for (Object[] row : results) {
+				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+				
+					map.put("normParameterId", row[0]);
+					map.put("name", row[1]);
+					map.put("displayName", row[2]);
+					map.put("uom", row[3]);
+					map.put("attributeValue", row[4]);
+					map.put("remarks", row[5]);
+					map.put("operation", row[6]);
+					map.put("type", row[7]);
+					spyroOutputYieldDataList.add(map); // Add the map to the list here
+				
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(spyroOutputYieldDataList);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
 	}
 
 
