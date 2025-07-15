@@ -119,23 +119,28 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 				map.put("id", row[0]);
 				map.put("monthName", row[1]);
-				map.put("ibr", row[2]);
+				map.put("coilReplacement", row[2]);
 				map.put("mnt", row[3]);
 				map.put("shutdown", row[4]);
-				map.put("sad", row[5]);
-				map.put("bud", row[6]);
-				map.put("demoHHS", row[7]);
-				map.put("demoBBU", row[8]);
-				map.put("demoSAD", row[9]);
-				map.put("fourFD", row[10]);
-				map.put("fourF", row[11]);
-				map.put("fiveF", row[12]);
-				map.put("total", row[13]);
-				map.put("fourFHours", row[14]);
-				map.put("aopYear", row[15]);
-				map.put("plantId", row[16]);
-				String remarks = row[17] == null ? "" : row[17].toString();
+				map.put("slowdown", row[5]);
+				map.put("sad", row[6]);
+				map.put("bbd", row[7]);
+				map.put("bbu", row[8]);
+				map.put("demoHSS", row[9]);
+				map.put("demoBBU", row[10]);
+				map.put("demoSAD", row[11]);
+				map.put("demoSD", row[12]);
+				map.put("fourFD", row[13]);
+				map.put("fourF", row[14]);
+				map.put("fiveF", row[15]);
+				map.put("total", row[16]);
+				map.put("fourFHours", row[17]);
+				map.put("aopYear", row[18]);
+				map.put("plantId", row[19]);
+				String remarks = row[20] == null ? "" : row[17].toString();
 				map.put("remarks", remarks);
+				map.put("totalSAD", row[21]);
+				map.put("numberOfDays", row[22]);
 
 				data.add(map); // Add the map to the list here
 			}
