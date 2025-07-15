@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +39,12 @@ public class BasisReportServiceImpl implements BasisReportService{
 	private EntityManager entityManager;
 
 	@Override
-	public AOPMessageVM getNormBasisReport(String plantId, String aopYear, String type) {
+	public AOPMessageVM getNormBasisReport(String plantId, String aopYear, String type,Date periodFrom, Date periodTo) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> normBasisList = new ArrayList<>();
 		try {
 					
-		List<Object[]> obj=getReportData( plantId,  aopYear,  type);
+		List<Object[]> obj=getReportData( plantId,  aopYear,  type,periodFrom,periodTo);
 		for (Object[] row : obj) {
 			Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 
@@ -52,18 +53,19 @@ public class BasisReportServiceImpl implements BasisReportService{
 				map.put("account", row[0]);
 				map.put("uom", row[1]);
 				map.put("material", row[2]);
-				map.put("january", row[3]);
-				map.put("february", row[4]);
-				map.put("march", row[5]);
-				map.put("april", row[6]);
-				map.put("may", row[7]);
-				map.put("june", row[8]);
-				map.put("july", row[9]);
-				map.put("august", row[10]);
-				map.put("september", row[11]);
-				map.put("october", row[12]);
-				map.put("november", row[13]);
-				map.put("december", row[14]);
+				map.put("grade", row[3]);
+				map.put("january", row[4]);
+				map.put("february", row[5]);
+				map.put("march", row[6]);
+				map.put("april", row[7]);
+				map.put("may", row[8]);
+				map.put("june", row[9]);
+				map.put("july", row[10]);
+				map.put("august", row[11]);
+				map.put("september", row[12]);
+				map.put("october", row[13]);
+				map.put("november", row[14]);
+				map.put("december", row[15]);
 				normBasisList.add(map); // Add the map to the list here
 
 			}if (type.equalsIgnoreCase("RAW MCU")) {
@@ -127,8 +129,51 @@ public class BasisReportServiceImpl implements BasisReportService{
 	}
 
 	}
-	
-	public List<Object[]> getReportData(String plantId, String aopYear, String type){
+
+	@Override
+	public AOPMessageVM getNormBasisReportForPE(String plantId, String aopYear, String type,Date periodFrom, Date periodTo) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<Map<String, Object>> normBasisList = new ArrayList<>();
+		try {
+					
+		List<Object[]> obj=getReportDataForPE( plantId,  aopYear,  type);
+		for (Object[] row : obj) {
+			Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+
+			if (type.equalsIgnoreCase("Production")) {
+
+				map.put("norm", row[0]);
+				map.put("particulars", row[1]);
+				map.put("april", row[2]);
+				map.put("may", row[3]);
+				map.put("june", row[4]);
+				map.put("july", row[5]);
+				map.put("august", row[6]);
+				map.put("september", row[7]);
+				map.put("october", row[8]);
+				map.put("november", row[9]);
+				map.put("december", row[10]);
+				map.put("january", row[11]);
+				map.put("february", row[12]);
+				map.put("march", row[13]);
+				map.put("total", row[14]);
+				
+				normBasisList.add(map); // Add the map to the list here
+
+			}	}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("SP Executed successfully");
+		aopMessageVM.setData(normBasisList);
+		return aopMessageVM;
+     
+	} catch (Exception e) {
+		e.printStackTrace();
+		return aopMessageVM;
+	}
+
+	}
+
+	public List<Object[]> getReportData(String plantId, String aopYear, String type,Date PeriodFrom, Date PeriodTo){
 		
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -141,7 +186,7 @@ public class BasisReportServiceImpl implements BasisReportService{
 		UUID verticalId = vertical.getId();
 		String storedProcedure = vertical.getName()+"_" +site.getName()+ "_NormsBasisReport";
 		String sql = "EXEC " + storedProcedure
-                + " @plantId = :plantId,@siteId = :siteId,@verticalId = :verticalId, @aopYear = :aopYear, @Type = :type";
+                + " @plantId = :plantId,@siteId = :siteId,@verticalId = :verticalId, @aopYear = :aopYear, @Type = :type, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo";
 
         Query query = entityManager.createNativeQuery(sql);
 
@@ -150,10 +195,35 @@ public class BasisReportServiceImpl implements BasisReportService{
         query.setParameter("type", type);
         query.setParameter("siteId", siteId);
         query.setParameter("verticalId", verticalId);
+        query.setParameter("PeriodFrom", PeriodFrom);
+        query.setParameter("PeriodTo", PeriodTo);
 
         return query.getResultList();
 
 		
+	}
+
+public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType){
+		
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+		
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+		
+		String storedProcedure = vertical.getName()+ "_AnnualCostAOPReport";
+		String sql = "EXEC " + storedProcedure
+                + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+
+        Query query = entityManager.createNativeQuery(sql);
+
+        query.setParameter("plantId", plantId);
+        query.setParameter("aopYear", aopYear);
+        query.setParameter("reportType", reportType);
+       
+       
+        return query.getResultList();
 	}
 
 }
