@@ -14,7 +14,7 @@ import Notification from 'components/Utilities/Notification'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import moment from '../../../../node_modules/moment/moment'
-
+import { useSelector } from 'react-redux';
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
 
@@ -60,7 +60,8 @@ const AnnualProductionPlan = () => {
   const [currentRowId3, setCurrentRowId3] = useState(null)
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [rows, setRows] = useState()
-
+  const { oldYear } = useSelector(s => s.dataGridStore);
+  const isOldYear = oldYear?.oldYear === 1 
   const formatValueToThreeDecimals = (params) => {
     const dateRegex =
       /^(\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{1,2} [a-zA-Z]+ \d{4}|\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
@@ -820,7 +821,7 @@ const AnnualProductionPlan = () => {
           showWorkFlowBtns: true,
           showCalculate: false,
           showTitle: true,
-          saveBtn: true,
+          saveBtn: !isOldYear,
           allAction: true,
           showReportTitle: true,
         }}
@@ -829,7 +830,7 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsMaxRate}
         columns={columnsMaxRate}
-        permissions={{ saveBtn: true, allAction: true, showReportTitle: true }}
+        permissions={{ saveBtn: !isOldYear,allAction: true, showReportTitle: true }}
         modifiedCells={modifiedCells2}
         setModifiedCells={setModifiedCells2}
         currentRowId={currentRowId2}
@@ -842,7 +843,7 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsOperatingHrs}
         columns={columnsOperatingHrs}
-        permissions={{ saveBtn: true, allAction: true, showReportTitle: true }}
+        permissions={{ saveBtn: !isOldYear, allAction: true, showReportTitle: true }}
         modifiedCells={modifiedCells3}
         setModifiedCells={setModifiedCells3}
         currentRowId={currentRowId3}
@@ -855,7 +856,7 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsAverageHourlyRate}
         columns={columnsAverageHourlyRate}
-        permissions={{ saveBtn: true, allAction: true, showReportTitle: true }}
+        permissions={{ saveBtn: !isOldYear, allAction: true, showReportTitle: true }}
         modifiedCells={modifiedCells4}
         setModifiedCells={setModifiedCells4}
         currentRowId={currentRowId4}

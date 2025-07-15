@@ -46,7 +46,7 @@ const MonthwiseProduction = () => {
     const [start, end] = thisYear.split('-').map(Number)
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
-
+ const isOldYear = oldYear?.oldYear === 1 
   const formatValueToThreeDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
@@ -392,7 +392,7 @@ const MonthwiseProduction = () => {
           remarksEditable: true,
           showCalculate: false,
           saveBtnForRemark: true,
-          saveBtn: true,
+          saveBtn: !isOldYear,
           showWorkFlowBtns: true,
           showTitle: true,
         }}

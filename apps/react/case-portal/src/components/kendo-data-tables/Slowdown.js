@@ -22,6 +22,7 @@ const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
+  const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
 
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -723,7 +724,7 @@ const SlowDown = ({ permissions }) => {
           open1={open1}
           fetchData={fetchData2}
           unsavedChangesRef={unsavedChangesRef}
-          permissions={{ saveBtn: true, allAction: true }}
+          permissions={{ saveBtn: !isOldYearFlag, allAction: true }}
           handleCancelClick={handleCancelClick}
           groupBy='Particulars'
         />

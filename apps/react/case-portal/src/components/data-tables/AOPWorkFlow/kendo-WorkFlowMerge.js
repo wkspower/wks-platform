@@ -109,6 +109,7 @@ const WorkFlowMerge = () => {
   const [status, setStatus] = useState('')
   const [caseId, setCaseId] = useState('')
   const [role, setRole] = useState('')
+  const isOldYear = oldYear?.oldYear === 1 
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -706,7 +707,7 @@ const WorkFlowMerge = () => {
               showCreateCasebutton={showCreateCasebutton}
               permissions={{
                 // customHeight: defaultCustomHeight,
-                saveBtn: true,
+                saveBtn: !isOldYear,
                 saveBtnForWorkflow: true,
                 remarksEditable: true,
                 showCreateCasebutton: showCreateCasebutton,

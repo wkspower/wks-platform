@@ -8,7 +8,7 @@ import { Typography } from '../../../../node_modules/@mui/material/index'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import { validateFields } from 'utils/validationUtils'
 import moment from '../../../../node_modules/moment/moment'
-
+import { useSelector } from 'react-redux';
 const TurnaroundReport = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -46,7 +46,8 @@ const TurnaroundReport = () => {
     setCurrentRowId2(row.id)
     setRemarkDialogOpen2(true)
   }
-
+  const { oldYear } = useSelector(state => state.dataGridStore);
+  const isOldYear = oldYear?.oldYear === 1 
   const formatValueToThreeDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
   }
@@ -421,7 +422,7 @@ const TurnaroundReport = () => {
           remarksEditable: true,
           showCalculate: false,
           saveBtnForRemark: true,
-          saveBtn: true,
+          saveBtn: !isOldYear,
           showWorkFlowBtns: true,
           showTitle: true,
         }}
@@ -452,9 +453,9 @@ const TurnaroundReport = () => {
         deleteRowData={deleteRowData}
         permissions={{
           remarksEditable: true,
-          saveBtn: true,
+          saveBtn: !isOldYear,
           saveBtnForRemark: true,
-          addButton: true,
+          addButton: !isOldYear,
           allAction: true,
           deleteButton: true,
         }}

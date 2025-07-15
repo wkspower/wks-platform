@@ -54,7 +54,7 @@ const MonthwiseProduction = () => {
   const formatValueToThreeDecimalsZero = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
   }
-
+ const isOldYear = oldYear?.oldYear === 1 
   const columns = [
     {
       field: 'RowNo',
@@ -390,7 +390,7 @@ const MonthwiseProduction = () => {
           remarksEditable: true,
           showCalculate: false,
           saveBtnForRemark: true,
-          saveBtn: true,
+          saveBtn: !isOldYear,
           showWorkFlowBtns: true,
           showTitle: true,
         }}
@@ -426,7 +426,7 @@ const MonthwiseProduction = () => {
           editButton: false,
           showUnit: false,
           saveWithRemark: false,
-          saveBtn: false,
+          saveBtn: !isOldYear,
           showCalculate: false,
           customHeight: defaultCustomHeight,
           // dynamicGridHeight: true,

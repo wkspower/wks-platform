@@ -53,6 +53,7 @@ const ConfigurationTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
+  const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
@@ -646,6 +647,7 @@ const ConfigurationTable = () => {
                     />
                   </Box>
                   {/* Load Button */}
+                  {!isOldYearFlag && (
                   <Button
                     variant='contained'
                     // onClick={onLoad}
@@ -656,6 +658,7 @@ const ConfigurationTable = () => {
                   >
                     Load
                   </Button>
+                  )}
                   {configurationExecutionDetails[0]?.ModifiedOn && (
                     <Typography
                       className='summary-title'
@@ -889,6 +892,7 @@ const ConfigurationTable = () => {
                   />
                 </Box>
                 {/* Load Button */}
+                {!isOldYearFlag && (
                 <Button
                   variant='contained'
                   // onClick={onLoad}
@@ -899,6 +903,7 @@ const ConfigurationTable = () => {
                 >
                   Load
                 </Button>
+                )}
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'

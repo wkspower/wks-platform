@@ -44,7 +44,7 @@ const ProductionAopView = ({
   })
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
-
+  const isOldYear = oldYear?.oldYear === 1
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
 
@@ -209,10 +209,10 @@ const ProductionAopView = ({
         handleExport={handleExport}
         permissions={{
           textAlignment: 'center',
-          remarksEditable: true,
-          saveBtn: true,
-          allAction: true,
-          showCalculate: true,
+          remarksEditable: !isOldYear,
+          saveBtn: !isOldYear,
+          allAction: !isOldYear,
+          showCalculate: !isOldYear,
           showTitle: true,
         }}
       />

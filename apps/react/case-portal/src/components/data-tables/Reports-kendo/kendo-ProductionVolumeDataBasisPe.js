@@ -67,7 +67,7 @@ const ProductionVolumeDataBasisPe = () => {
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const isOldYear = oldYear?.oldYear === 1
   const [loading, setLoading] = useState(false)
 
   function parseDDMMYYYY(dateStr) {
@@ -270,16 +270,17 @@ const ProductionVolumeDataBasisPe = () => {
         </ExcelExport>
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
-        <Button
-          variant='contained'
-          onClick={exportAllGrids}
-          className='btn-save'
-        >
+      {!isOldYear && (
+        <Box display='flex' justifyContent='flex-end' mb='2px'>
+          <Button
+            variant='contained'
+            onClick={exportAllGrids}
+            className='btn-save'
+          >
           Export
         </Button>
       </Box>
-
+      )}
       <Box display='flex' flexDirection='column' gap={2}>
         <div>
           <CustomAccordion defaultExpanded disableGutters>

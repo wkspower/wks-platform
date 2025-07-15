@@ -131,7 +131,7 @@ const KendoDataTables = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
-
+  const [customModifiedCells, setCustomModifiedCells] = useState({});
   const initialGroup = groupBy
     ? [
         {
@@ -253,8 +253,14 @@ const KendoDataTables = ({
         }
         return { ...prev, [itemId]: base }
       })
+
+setCustomModifiedCells(prev => ({
+  ...prev,
+  [itemId]: { ...(prev[itemId] || {}), [field]: value }
+}));
+
     },
-    [setRows, setModifiedCells],
+    [setRows, setModifiedCells, setCustomModifiedCells],
   )
 
   const handleRemarkSave = () => {
@@ -295,7 +301,7 @@ const KendoDataTables = ({
     const newRow = {
       id: newRowId,
       isNew: true,
-      ...Object.fromEntries(columns?.map((col) => [col.field, ''])),
+      ...Object.fromEntries(columns.map((col) => [col.field, ''])),
     }
 
     setRows((prevRows) => [newRow, ...prevRows])
@@ -375,6 +381,36 @@ const KendoDataTables = ({
     )
   }, [])
 
+    const RedHighlightCell = (props) => {
+      const { dataItem, field, tdProps, children, customModifiedCells, allRedCell } = props;
+      const rowId = dataItem.id;
+      const value = dataItem[field];
+      // Highlight if edited
+      const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field);
+      // Highlight if part of allRedCell (MEG logic)
+      const month = monthMap[field?.toLowerCase()];
+      const normId = dataItem.materialFkId?.toLowerCase();
+      const isRedFromAllRedCell = allRedCell?.some(
+        (cell) =>
+          cell.month === month &&
+          cell.normParameterFKId?.toLowerCase() === normId
+      );
+
+      const shouldHighlight = isEdited || isRedFromAllRedCell;
+
+      return (
+        <td
+          {...tdProps}
+          title={value}
+          style={{
+            color: shouldHighlight ? 'orange' : undefined,
+            fontWeight: shouldHighlight ? 'bold' : undefined,
+          }}
+        >
+          {children}
+        </td>
+      );
+    };
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
     const month = monthMap[props.field?.toLowerCase()]
@@ -827,7 +863,13 @@ const KendoDataTables = ({
                           ? DateOnlyPicker
                           : DateTimePickerEditor,
                       },
-                      data: toolTipRenderer,
+                      data: (props) => (
+                      <RedHighlightCell
+                        {...props}
+                        customModifiedCells={customModifiedCells}
+                        allRedCell={allRedCell}
+                      />
+                    ),
                     }}
                     format={
                       [
@@ -884,7 +926,13 @@ const KendoDataTables = ({
                           ? DateOnlyPicker
                           : DateOnlyPicker,
                       },
-                      data: toolTipRenderer,
+                     data: (props) => (
+                      <RedHighlightCell
+                        {...props}
+                        customModifiedCells={customModifiedCells}
+                        allRedCell={allRedCell}
+                      />
+                    ),
                     }}
                     format={
                       [
@@ -959,7 +1007,13 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: TextCellEditor },
-                      data: toolTipRenderer,
+                      data: (props) => (
+                      <RedHighlightCell
+                        {...props}
+                        customModifiedCells={customModifiedCells}
+                        allRedCell={allRedCell}
+                      />
+                    ),
                     }}
                   />
                 )
@@ -1090,7 +1144,13 @@ const KendoDataTables = ({
                     }
                     cells={{
                       edit: { text: DurationEditor },
-                      data: DurationDisplayWithTooltipCell,
+                      data: (props) => (
+                      <RedHighlightCell
+                        {...props}
+                        customModifiedCells={customModifiedCells}
+                        allRedCell={allRedCell}
+                      />
+                    ),
                     }}
                     headerClassName={isActive ? 'active-column' : ''}
                   />
@@ -1137,7 +1197,13 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
-                      data: toolTipRenderer,
+                      data: (props) => (
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'
@@ -1162,7 +1228,13 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
-                      data: toolTipRenderer,
+                     data: (props) => (
+                    <RedHighlightCell
+                      {...props}
+                      customModifiedCells={customModifiedCells}
+                      allRedCell={allRedCell}
+                    />
+                  ),
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'

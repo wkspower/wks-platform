@@ -70,7 +70,7 @@ const NormsHistorianBasis = () => {
 
   const [loading, setLoading] = useState(false)
   const units = ['TPH', 'TPD']
-
+  const isOldYear = oldYear?.oldYear === 1
   useEffect(() => {
     const fetchAllData = async (selectedUnit) => {
       if (!selectedUnit) return
@@ -250,13 +250,15 @@ const NormsHistorianBasis = () => {
       </div>
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
-        <Button
-          variant='contained'
-          onClick={exportAllGrids}
-          className='btn-save'
-        >
-          Export
+        {!isOldYear && (
+          <Button
+            variant='contained'
+            onClick={exportAllGrids}
+            className='btn-save'
+          >
+            Export
         </Button>
+      )}
 
         <TextField
           select

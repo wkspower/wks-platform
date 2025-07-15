@@ -64,6 +64,7 @@ const AnnualAopCost = () => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
+  const isOldYear = oldYear?.oldYear === 1
   const fetchData = async (reportType, setState, selectedDropdown) => {
     try {
       selectedDropdown = localStorage.getItem('year')
@@ -248,6 +249,7 @@ const AnnualAopCost = () => {
         </ExcelExport>
       </div>
 
+      {!isOldYear && (
       <Box display='flex' justifyContent='flex-end' mb='2px'>
         <Button
           variant='contained'
@@ -257,6 +259,7 @@ const AnnualAopCost = () => {
           Export
         </Button>
       </Box>
+    )}
 
       <Box display='flex' flexDirection='column' gap={1}>
         <div>

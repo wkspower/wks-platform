@@ -70,7 +70,7 @@ const ProductionVolumeDataBasis = () => {
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const isOldYear = oldYear?.oldYear=== 1 
   const [loading, setLoading] = useState(false)
 
   function parseDDMMYYYY(dateStr) {
@@ -242,6 +242,7 @@ const ProductionVolumeDataBasis = () => {
       </div>
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
+        {!isOldYear && ( 
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -249,7 +250,7 @@ const ProductionVolumeDataBasis = () => {
         >
           Export
         </Button>
-
+        )}
         <TextField
           select
           value={selectedUnit || 'TPH'}

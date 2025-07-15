@@ -191,9 +191,28 @@ export default function HeaderContent({ keycloak }) {
       try {
         var resp = await DataService.getAopyears(keycloak)
         if (resp?.length) {
-          setAopYears(resp)
+          //console.log('AOP Years:', resp) 
+          const res=[
+    {
+        "AOPDisplayYear": "2024-25",
+        "AOPYear": "2024-25",
+        "currentYear": "0"
+    },
+     {
+        "AOPDisplayYear": "2025-26",
+        "AOPYear": "2025-26",
+        "currentYear": "1"
+    },
+    {
+        "AOPDisplayYear": "2026-27",
+        "AOPYear": "2026-27",
+        "currentYear": "0"
+    }
+]
 
-          const currentYear = resp.find(
+          setAopYears(res)
+
+          const currentYear = res.find(
             (item) => item.currentYear == 1,
           )?.AOPYear
 
