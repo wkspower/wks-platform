@@ -995,10 +995,10 @@ async function getProductionVolDataBasis(keycloak, reportType, uom) {
 // 		AOPMessageVM response	=basisReportService.getNormBasisReport(plantId,year,type);
 // 		return ResponseEntity.status(response.getCode()).body(response);
 // 	}
-async function getProductionVolDataBasisPe(keycloak, reportType) {
+async function getProductionVolDataBasisPe(keycloak, reportType, PeriodFrom, PeriodTo) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/report/norms-basis?plantId=${plantId}&year=${year}&type=${reportType}`
+  const url = `${Config.CaseEngineUrl}/task/report/norms-basis?plantId=${plantId}&year=${year}&type=${reportType}&PeriodFrom=${PeriodFrom}&PeriodTo=${PeriodTo}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

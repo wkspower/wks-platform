@@ -80,19 +80,25 @@ const ProductionVolumeDataBasisPe = () => {
     try {
       setLoading(true)
       var data = []
-      data = await DataService.getProductionVolDataBasisPe(keycloak, reportType)
-
-      if (data?.code === 200) {
-        const rowsWithId = data?.data?.map((item, index) => ({
-          ...item,
-          id: index,
-          isEditable: false,
-          startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
-          endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
-          dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
-        }))
-        setLoading(false)
-        setState(rowsWithId)
+      const configData = await DataService.getConfigurationExecutionDetails(keycloak)
+      if (configData.code === 200) {
+        const StartDate = configData.data.find(d => d.Name === 'StartDate')?.AttributeValue
+        const EndDate = configData.data.find(d => d.Name === 'EndDate')?.AttributeValue
+        
+        data = await DataService.getProductionVolDataBasisPe(keycloak, reportType, StartDate, EndDate)
+  
+        if (data?.code === 200) {
+          const rowsWithId = data?.data?.map((item, index) => ({
+            ...item,
+            id: index,
+            isEditable: false,
+            startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
+            endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
+            dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
+          }))
+          setLoading(false)
+          setState(rowsWithId)
+      }
       } else {
         console.error(`Error fetching ${reportType} data`)
         setLoading(false)
@@ -354,7 +360,7 @@ const ProductionVolumeDataBasisPe = () => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                AVG ANNUAL NORMS
+                AVG NORMS
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>

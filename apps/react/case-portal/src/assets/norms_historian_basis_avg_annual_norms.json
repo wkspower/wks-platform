@@ -13,6 +13,13 @@
     "headerAlign": "left"
   },
   {
+    "field": "material",
+    "headerName": "Material",
+    "editable": false,
+    "align": "left",
+    "headerAlign": "left"
+  },
+  {
     "field": "avgFinalNorms",
     "headerName": "AVG Final Norms",
     "editable": false,
