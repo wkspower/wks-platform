@@ -1,11 +1,27 @@
 package com.wks.caseengine.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.sql.DataSource;
+
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.SlowdownNormsValueDTO;
@@ -17,6 +33,7 @@ import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.SlowdownNormsValue;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -51,6 +68,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	private DataSource dataSource;
+
+	// Inject or set your DataSource (e.g., via constructor or setter)
+	public SlowdownNormsServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
 
 	
 
@@ -337,5 +362,195 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		}
 		return null;
 	}
+	
+	@Override
+	@Transactional
+	public AOPMessageVM getCalculateSlowdownNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure = vertical.getName() + "_" + site.getName() + "_SlowdownConsumptionCalculation";
+		System.out.println("storedProcedure" + storedProcedure);
+		int result = executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+				vertical.getId().toString(), year);
+		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
+				"configuration");
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("configuration");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("SP Executed successfully");
+		aopMessageVM.setData(result);
+		return aopMessageVM;
+	}
+	
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId,
+			String finYear) {
+		String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
+
+		try (Connection connection = dataSource.getConnection();
+				CallableStatement stmt = connection.prepareCall(callSql)) {
+
+			// Set parameters
+			stmt.setString(1, plantId);
+			stmt.setString(2, siteId);
+			stmt.setString(3, verticalId);
+			stmt.setString(4, finYear);
+
+			// Execute the stored procedure
+			int rowsAffected = stmt.executeUpdate();
+
+			// Optional: commit if auto-commit is off
+			if (!connection.getAutoCommit()) {
+				connection.commit();
+			}
+
+			return rowsAffected;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+	
+	@Override
+	public AOPMessageVM getSlowdownNormsDynamicColumns(String auditYear, UUID plantId) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<Map<String, String>> listOfMaps = new ArrayList<>();
+
+	    // 1. Add static "Particulars" column
+	    {
+	        Map<String, String> map = new HashMap<>();
+	        map.put("field", "particulars");
+	        map.put("title", "Particulars");
+	        listOfMaps.add(map);
+	    }
+
+	    // 2. Prepare month-regex pattern
+	    List<String> months = Arrays.asList(
+	        "January", "February", "March", "April", "May", "June",
+	        "July", "August", "September", "October", "November", "December"
+	    );
+	    String monthPattern = String.join("|", months);
+	    Pattern monthSuffixPattern = Pattern.compile("_(?i)(" + monthPattern + ")$");
+
+	    try {
+	    	Plants plant = plantsRepository.findById(plantId).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String procedureName = vertical.getName()+"_GetSlowdownConsumption";
+	        List<String> data = getColumnNames(procedureName, plantId.toString(), auditYear);
+
+	        // 3. Process each dynamic column
+	        for (String row : data) {
+	            Map<String, String> map = new HashMap<>();
+	            map.put("field", row);
+
+	            String title = row;
+	            Matcher m = monthSuffixPattern.matcher(row);
+	            if (m.find()) {
+	                title = row.replaceFirst("_(?=[^_]+$)", " (") + ")";
+	            }
+	            map.put("title", title);
+
+	            listOfMaps.add(map);
+	        }
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid data format", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+
+	    aopMessageVM.setCode(200);
+	    aopMessageVM.setMessage("Data fetched successfully");
+	    aopMessageVM.setData(listOfMaps);
+	    return aopMessageVM;
+	}
+
+	public List<String> getColumnNames(String procedureName, String plantId, String aopYear) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<String> columnNames = new ArrayList<>();
+
+	        String sql = "EXEC " + procedureName + " @plantId = ?, @aopYear = ?";
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setString(1, plantId);
+	            ps.setString(2, aopYear);
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData rsMetaData = rs.getMetaData();
+	                for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                    columnNames.add(rsMetaData.getColumnLabel(i));
+	                }
+	            }
+	        }
+	        return columnNames;
+	    });
+	}
+	
+	@Override
+    public AOPMessageVM getSlowdownNormsConfigurationData(String plantId, String year) {
+	 AOPMessageVM aopMessageVM = new AOPMessageVM();
+	 Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String procedureName = vertical.getName()+"_GetSlowdownConsumption";
+        try {
+            // Get the data
+            List<Object[]> rows = getData(plantId, year,procedureName);
+
+            // Get column names
+            
+            List<String> columnNames = getColumnNames(procedureName, plantId, year);
+
+            // Prepare the list of maps
+            List<Map<String, Object>> resultList = new ArrayList<>();
+
+            for (Object[] row : rows) {
+                Map<String, Object> rowMap = new LinkedHashMap<>();
+                for (int i = 0; i < columnNames.size(); i++) {
+                    rowMap.put(columnNames.get(i), row[i]);
+                }
+                resultList.add(rowMap);
+            }
+            aopMessageVM.setCode(200);
+    		aopMessageVM.setData(resultList);
+    		aopMessageVM.setMessage("Data updated successfully");
+    		return aopMessageVM;
+            
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to fetch data", ex);
+        }
+    }
+	
+	public List<Object[]> getData(String plantId, String aopYear,String procedureName) {
+		
+		try {
+			
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+
 
 }

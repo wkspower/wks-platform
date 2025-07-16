@@ -43,7 +43,7 @@ public class SpyroOutputController {
 		return	spyroOutputService.getSpyroOutputYieldData(year, plantId);
 	}
 	
-	@PostMapping("/spyro-output/yield")
+	@PostMapping(value="/spyro-output/yield")
 	public AOPMessageVM updateSpyroOutputYieldData(
 	    @RequestParam String plantId,
 	    @RequestParam String year,
