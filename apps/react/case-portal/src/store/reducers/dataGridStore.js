@@ -1,5 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+const getSelectedPlantStorage = localStorage.getItem('selectedPlant')
+  ? JSON.parse(localStorage.getItem('selectedPlant'))
+  : null
+
 const initialState = {
   sitePlantChange: false,
   verticalChange: {},
@@ -9,7 +13,7 @@ const initialState = {
   currentYear: null,
   oldYear: null,
   siteID: null,
-  plantID: null,
+  plantID: getSelectedPlantStorage,
 }
 
 const dataGridStore = createSlice({

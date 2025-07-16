@@ -1,12 +1,19 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Stepper, Step, StepLabel } from '@mui/material'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Step, StepLabel, Stepper } from '@mui/material'
+import { verticalEnums } from 'enums/verticalEnums'
 import { useMenuContext } from 'menu/menuProvider'
-import { Typography } from '../../../node_modules/@mui/material/index'
+import { useCallback, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function StepperNav() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { plantID, verticalChange } = useSelector(
+    (state) => state.dataGridStore,
+  )
+  const plantName = plantID?.plantName
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [steps, setSteps] = useState([])
 
@@ -54,8 +61,17 @@ export default function StepperNav() {
 
   useEffect(() => {
     const newSteps = buildSteps(menuItems)
-    setSteps(newSteps)
+    const shouldFilterSlowdown =
+      lowerVertName === verticalEnums.PE && plantName === 'LDPE'
 
+    if (shouldFilterSlowdown) {
+      const filteredSteps = newSteps.filter(
+        (step) => step.key !== 'slowdown-norms',
+      )
+      setSteps(filteredSteps)
+    } else {
+      setSteps(newSteps)
+    }
     // Derive current path slug
     const currentSlug = location.pathname.split('/').pop()
     const found = newSteps.some((s) => s.key === currentSlug)
@@ -64,18 +80,14 @@ export default function StepperNav() {
     if (newSteps.length && !found) {
       navigate(newSteps[0].url, { replace: true })
     }
-  }, [menuItems])
-
-  const plantName = JSON.parse(localStorage.getItem('selectedPlant'))?.name
-  const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name
-  const verticalName = JSON.parse(
-    localStorage.getItem('selectedVertical'),
-  )?.name
+  }, [menuItems, lowerVertName, plantName])
 
   const currentPath = location.pathname.split('/').pop()
   const activeStep = steps.findIndex((s) => s.key === currentPath)
 
   // -- Render Stepper ----------------------tested
+
+  console.log('steps', steps)
   return (
     <>
       <Stepper

@@ -182,7 +182,7 @@ export default function HeaderContent({ keycloak }) {
         JSON.stringify({ id: defP.id, name: defP.name }),
       )
       dispatch(setSitePlantChange({ sitePlantChange: true }))
-      dispatch(setPlantID({ plantId: defP.id }))
+      dispatch(setPlantID({ plantId: defP.id, plantName: defP.name }))
     }
   }, [selectedSite, selectedVertical, fullDetails, allowedMap, dispatch])
 
@@ -191,30 +191,28 @@ export default function HeaderContent({ keycloak }) {
       try {
         var resp = await DataService.getAopyears(keycloak)
         if (resp?.length) {
-          //console.log('AOP Years:', resp) 
-          const res=[
-    {
-        "AOPDisplayYear": "2024-25",
-        "AOPYear": "2024-25",
-        "currentYear": "0"
-    },
-     {
-        "AOPDisplayYear": "2025-26",
-        "AOPYear": "2025-26",
-        "currentYear": "1"
-    },
-    {
-        "AOPDisplayYear": "2026-27",
-        "AOPYear": "2026-27",
-        "currentYear": "0"
-    }
-]
+          //console.log('AOP Years:', resp)
+          const res = [
+            {
+              AOPDisplayYear: '2024-25',
+              AOPYear: '2024-25',
+              currentYear: '0',
+            },
+            {
+              AOPDisplayYear: '2025-26',
+              AOPYear: '2025-26',
+              currentYear: '1',
+            },
+            {
+              AOPDisplayYear: '2026-27',
+              AOPYear: '2026-27',
+              currentYear: '0',
+            },
+          ]
 
           setAopYears(res)
 
-          const currentYear = res.find(
-            (item) => item.currentYear == 1,
-          )?.AOPYear
+          const currentYear = res.find((item) => item.currentYear == 1)?.AOPYear
 
           if (currentYear) {
             setSelectedYear(currentYear)
@@ -264,7 +262,7 @@ export default function HeaderContent({ keycloak }) {
       )
 
       dispatch(setSitePlantChange({ sitePlantChange: true }))
-      dispatch(setPlantID({ plantId: plantObj.id }))
+      dispatch(setPlantID({ plantId: plantObj.id, plantName: plantObj.name }))
     }
   }
   const handleVertChange = (e) => {
