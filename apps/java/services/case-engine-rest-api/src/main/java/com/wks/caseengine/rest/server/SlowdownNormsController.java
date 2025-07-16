@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.dto.SlowdownNormsValueDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutdownNormsService;
 import com.wks.caseengine.service.SlowdownNormsService;
 
@@ -43,5 +44,27 @@ public class SlowdownNormsController {
 	    public ResponseEntity<List> getSlowdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName,@RequestParam String year){
 	        List data = slowdownNormsService.getSlowdownMonths(plantId, maintenanceName,year);
 	        return ResponseEntity.ok(data);
+	    }
+	 
+	 @GetMapping(value = "/slowdown-norms/calculate")
+		public AOPMessageVM getCalculateSlowdownNorms(@RequestParam String year, @RequestParam String plantId) {
+			return slowdownNormsService.getCalculateSlowdownNorms(year, plantId);
+		}
+	 
+		
+		@GetMapping("/slowdown-norms/dynamic/columns")
+		  public AOPMessageVM getSlowdownNormsDynamicColumns(@RequestParam String year,@RequestParam String plantId){
+			  return slowdownNormsService.getSlowdownNormsDynamicColumns(year,UUID.fromString(plantId));
+		  }
+		
+		@GetMapping(value = "/slowdown-norms/configuration")
+	    public AOPMessageVM getSlowdownNormsConfigurationData(@RequestParam String plantId, @RequestParam String year) {
+			
+			try {
+				return slowdownNormsService.getSlowdownNormsConfigurationData(plantId,year);
+			}catch(Exception e) {
+				e.printStackTrace();
+			}
+	        return null;
 	    }
 }

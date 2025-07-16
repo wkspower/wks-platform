@@ -1,6 +1,5 @@
 package com.wks.caseengine.service;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,14 +9,18 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -43,6 +46,9 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
 
 	@Override
 	public AOPMessageVM getSpyroOutputData(String year, String plantId,String Mode,String type) {
@@ -270,6 +276,44 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 
+	}
+
+	@Override
+	public AOPMessageVM updateSpyroOutputYieldData(String plantId, String year,
+			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
+		
+		try {
+			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
+				String normParameterName=normAttributeTransactionsDTO.getNormParameterName();
+				Optional<NormParameters> normParameterOpt=normParametersRepository.findByNameAndPlantFkId(normParameterName, UUID.fromString(plantId));
+				if(normParameterOpt.isPresent()) {
+					NormParameters normParameters = normParameterOpt.get();
+					NormAttributeTransactions normAttributeTransactions=normAttributeTransactionsRepository.findByNormParameterFKIdAndAuditYear(normParameters.getId(),year);
+					if(normAttributeTransactions==null) {
+						normAttributeTransactions=new NormAttributeTransactions();
+						normAttributeTransactions.setAopMonth(4);
+						normAttributeTransactions.setNormParameterFKId(normParameters.getId());
+						normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+						normAttributeTransactions.setAuditYear(year);
+						normAttributeTransactions.setCreatedOn(new Date());
+						normAttributeTransactions.setUserName("System");
+						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					}else {
+						normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					}
+				}
+			
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data updated successfully");
+			aopMessageVM.setData(normAttributeTransactionsList);
+			return aopMessageVM;
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
+		}
 	}
 
 
