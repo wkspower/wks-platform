@@ -39,13 +39,30 @@ const CrackerConfig = () => {
     [],
   )
 
+  // const rawTabsStatic = [
+  //   'Feed',
+  //   'Composition',
+  //   'Hydrogenation',
+  //   'Recovery',
+  //   'Optimizing',
+  //   'Furnace',
+  // ]
+  //  const rawTabsStatic = [
+  //   {id:'Feed',displayName:'Feed'},
+  //   {id:'Composition',displayName:'Composition'},
+  //   {id:'Hydrogenation',displayName:'Hydrogenation'},
+  //   {id:'Recovery',displayName:'Recovery Model'},
+  //   {id:'Optimizing',displayName:'Optimizing Variables'},
+  //   {id:'Furnace',displayName:'Major Optimizer Furnace Constraints'},
+  
+  // ]
   const rawTabsStatic = [
     'Feed',
-    'Optimizing',
     'Composition',
     'Hydrogenation',
-    'Recovery',
-    'Furnace',
+    'Recovery Model',
+    'Optimizing Variables',
+    'Major Optimizer Furnace Constraints',
   ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [availableTabs, setAvailableTabs] = useState([])
@@ -138,8 +155,11 @@ const CrackerConfig = () => {
       } else if (Array.isArray(resp.data)) {
         tabsFromApi = resp.data
       }
+      // console.log('---rawTabsStatic---',tabsFromApi, rawTabsStatic);
+      
       if (Array.isArray(tabsFromApi) && tabsFromApi.length) {
-        setTabs(tabsFromApi)
+        // setTabs(tabsFromApi)
+        setTabs(rawTabsStatic)
       } else {
         setTabs(rawTabsStatic)
       }
@@ -188,11 +208,11 @@ const CrackerConfig = () => {
           return compositionRows
         case 'Hydrogenation':
           return hydrogenationRows
-        case 'Recovery':
+        case 'Recovery Model':
           return recoveryRows
-        case 'Optimizing':
+        case 'Optimizing Variables':
           return optimizing
-        case 'Furnace':
+        case 'Major Optimizer Furnace Constraints':
           return furnace
         default:
           return []
@@ -218,13 +238,13 @@ const CrackerConfig = () => {
       case 'Hydrogenation':
         setHydrogenationRows(data)
         break
-      case 'Recovery':
+      case 'Recovery Model':
         setRecoveryRows(data)
         break
-      case 'Furnace':
+      case 'Major Optimizer Furnace Constraints':
         setFurnance(data)
         break
-      case 'Optimizing':
+      case 'Optimizing Variables':
         setOptimizing(data)
         break
       default:
@@ -237,10 +257,20 @@ const CrackerConfig = () => {
       if (!currentTabDisplay) return
       try {
         setLoading(true)
+        let type = currentTabDisplay
+          if (currentTabDisplay === 'Optimizing Variables') {
+            type = 'Optimizing'
+          }
+          if (currentTabDisplay === 'Recovery Model') {
+            type = 'Recovery'
+          }
+          if (currentTabDisplay === 'Major Optimizer Furnace Constraints') {
+            type = 'Furnace'
+          }
         const spyroVM = await DataService.getSpyroInputData(
           keycloak,
           mode,
-          currentTabDisplay,
+          type,
         )
         let transformedData = []
         if (spyroVM?.data && Array.isArray(spyroVM.data)) {
@@ -456,9 +486,9 @@ const CrackerConfig = () => {
           switch (currentTabDisplay) {
             case 'Feed':
             case 'Hydrogenation':
-            case 'Recovery':
-            case 'Optimizing':
-            case 'Furnace':
+            case 'Recovery Model':
+            case 'Optimizing Variables':
+            case 'Major Optimizer Furnace Constraints':
               return (
                 <Box key={currentTabDisplay}>
                   <KendoDataTables

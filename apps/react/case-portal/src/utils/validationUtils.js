@@ -80,8 +80,8 @@ export const validateFields = (data, requiredFields) => {
         })
 
         // Add End Date check message
-        const startDate = new Date(row.maintStartDateTime)
-        const endDate = new Date(row.maintEndDateTime)
+        const startDate = new Date(row.maintStartDateTime).getTime()
+        const endDate = new Date(row.maintEndDateTime).getTime()
         if (startDate && endDate && endDate <= startDate) {
           missingFieldsMessage.push('End Date must be after Start Date')
         }
