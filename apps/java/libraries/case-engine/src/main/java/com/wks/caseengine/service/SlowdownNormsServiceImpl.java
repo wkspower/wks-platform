@@ -24,8 +24,12 @@ import javax.sql.DataSource;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.SlowdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownNormsValue;
@@ -35,6 +39,8 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -68,6 +74,12 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
 	private DataSource dataSource;
 
@@ -521,8 +533,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
                 }
                 resultList.add(rowMap);
             }
+            Map<String, Object> map = new HashMap<>();
+
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "slowdown-norms-configuration");
+			map.put("resultList", resultList);
+			map.put("aopCalculation", aopCalculation);
             aopMessageVM.setCode(200);
-    		aopMessageVM.setData(resultList);
+    		aopMessageVM.setData(map);
     		aopMessageVM.setMessage("Data updated successfully");
     		return aopMessageVM;
             
@@ -551,6 +569,54 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		}
 	}
 
-
+	@Override
+	public AOPMessageVM saveSlowdownNormsConfigurationData(String plantId, String year,
+			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
+		try {
+			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
+				String rawDesc = normAttributeTransactionsDTO.getDescription();
+				String cleanDesc = stripTrailingSuffix(rawDesc);
+				UUID maintenanceId=plantMaintenanceTransactionRepository.findTransactionIdByDynamicParams("Slowdown",year,UUID.fromString(plantId),cleanDesc);
+				if(maintenanceId==null) {
+					throw new RuntimeException("No Maintenance Id found with "+normAttributeTransactionsDTO.getDescription());
+				}
+				
+				//UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
+				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
+				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year);
+				if(normAttributeTransactions!=null) {
+					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				}else {
+					normAttributeTransactions = new NormAttributeTransactions();
+			
+					Optional<PlantMaintenanceTransaction> PlantMaintenanceTransactionopt=plantMaintenanceTransactionRepository.findById(maintenanceId);
+					if(PlantMaintenanceTransactionopt.isPresent()) {
+						normAttributeTransactions.setAopMonth(PlantMaintenanceTransactionopt.get().getMaintForMonth());
+					}	
+					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					normAttributeTransactions.setAttributeValueVersion("v1");
+					normAttributeTransactions.setAuditYear(year);
+					normAttributeTransactions.setCreatedOn(new Date());
+					normAttributeTransactions.setMaintenanceId(normAttributeTransactionsDTO.getMaintenanceId());
+					normAttributeTransactions.setNormParameterFKId(normAttributeTransactionsDTO.getNormParameterFKId());
+					normAttributeTransactions.setUserName("System");
+					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				}
+			}
+		}catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to save/update data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(normAttributeTransactionsList);
+		aopMessageVM.setMessage("Data updated successfully");
+		return aopMessageVM;
+	}
+	private String stripTrailingSuffix(String description) {
+	    return description.replaceAll("_[^_]*$", "");
+	}
 
 }

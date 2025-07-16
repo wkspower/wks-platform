@@ -1,6 +1,8 @@
 package com.wks.caseengine.rest.server;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.dto.SlowdownNormsValueDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -67,4 +70,34 @@ public class SlowdownNormsController {
 			}
 	        return null;
 	    }
+		
+		@PostMapping(value="/slowdown-norms/configuration")
+		public AOPMessageVM saveSlowdowNormsConfigurationData(@RequestParam String plantId,@RequestParam String year, @RequestBody List<Map<String, Object>> payload){
+			List<NormAttributeTransactionsDTO> dtoList = new ArrayList<>();
+
+		    for (Map<String, Object> item : payload) {
+		    	 UUID normParameterId = UUID.fromString(item.get("normParameterFKId").toString());
+
+		        for (Map.Entry<String, Object> entry : item.entrySet()) {
+		            String key = entry.getKey();
+
+		            if (!"normParameterFKId".equals(key)) {
+		                Object value = entry.getValue();
+		                
+		                NormAttributeTransactionsDTO dto = new NormAttributeTransactionsDTO();
+
+		                dto.setNormParameterFKId(normParameterId); 
+		                dto.setDescription(key);
+		                if(value!=null) {
+		                	dto.setAttributeValue(value.toString());   
+		                }
+		                        
+		                dtoList.add(dto);
+		            }
+		        }
+		    }
+			
+			return slowdownNormsService.saveSlowdownNormsConfigurationData(plantId,year,dtoList);		
+		}
+
 }
