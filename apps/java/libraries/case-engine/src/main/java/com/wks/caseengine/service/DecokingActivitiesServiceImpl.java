@@ -877,9 +877,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	            dto.setPlantFkId(row[12] != null ? UUID.fromString(row[12].toString()) : null);
 	            dto.setAopYear(row[13] != null ? row[13].toString() : null);
-	            dto.setRemarks(row[14] != null ? row[14].toString() : null);
+	            dto.setRemarks(row[14] != null ? row[14].toString() : "");
 	            dto.setDisplaySeq(row[15] != null ? ((Number) row[15]).intValue() : null);
-
+	 
 	            crackerConfigurationDTOList.add(dto);
 	        }
 
