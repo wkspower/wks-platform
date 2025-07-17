@@ -792,6 +792,16 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to update data");
 		}
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("Furnace-run-length");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(year);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(failedList);
@@ -830,6 +840,16 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 				aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),
 						aopYear, "Furnace-run-length");
+				List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("Furnace-run-length");
+				for (ScreenMapping screenMapping : screenMappingList) {
+					AopCalculation aopCalculation = new AopCalculation();
+					aopCalculation.setAopYear(aopYear);
+					aopCalculation.setIsChanged(true);
+					aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+					aopCalculation.setPlantId(UUID.fromString(plantId));
+					aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+					aopCalculationRepository.save(aopCalculation);
+				}
 
 				aopMessageVM.setCode(200);
 				aopMessageVM.setMessage("SP Executed successfully");

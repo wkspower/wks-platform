@@ -8,11 +8,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.Session;
-import java.text.DateFormatSymbols;
 import java.util.*;
 import java.util.regex.*;
 import java.sql.*;
-
+import java.time.Month;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -21,7 +20,6 @@ import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
-import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -32,12 +30,6 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SlowdownPlanRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.rest.entity.Vertical;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
-
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 @Service
 public class SlowdownPlanServiceImpl implements SlowdownPlanService {
@@ -285,6 +277,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		try {
 			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
 				String rawDesc = normAttributeTransactionsDTO.getDescription();
+				int month=extractMonthNumber(rawDesc);
 				String cleanDesc = stripTrailingSuffix(rawDesc);
 				UUID maintenanceId=plantMaintenanceTransactionRepository.findTransactionIdByDynamicParams("Slowdown",year,UUID.fromString(plantId),cleanDesc);
 				if(maintenanceId==null) {
@@ -293,7 +286,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				
 				//UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
 				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
-				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year);
+				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year,month);
 				if(normAttributeTransactions!=null) {
 					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
 					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
@@ -455,4 +448,20 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	private String stripTrailingSuffix(String description) {
 	    return description.replaceAll("_[^_]*$", "");
 	}
+	
+	public static int extractMonthNumber(String description) {
+        // 1. Grab the suffix after the last underscore
+        int u = description.lastIndexOf('_');
+        if (u < 0 || u == description.length() - 1) {
+            throw new IllegalArgumentException("No month suffix found.");
+        }
+        String monthName = description.substring(u + 1);
+        try {
+            // 2. Map it to month number (1-12) using Month enum
+            Month m = Month.valueOf(monthName.toUpperCase());
+            return m.getValue(); // = 1 for Jan … 7 for July … 12 for Dec
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Unknown month: " + monthName, ex);
+        }
+    }
 }

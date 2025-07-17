@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,6 +35,7 @@ import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.SlowdownConsumption;
 import com.wks.caseengine.entity.SlowdownNormsValue;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -44,6 +46,7 @@ import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.SlowdownConsumptionRepository;
 import com.wks.caseengine.repository.SlowdownNormsRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import jakarta.persistence.EntityManager;
@@ -80,6 +83,9 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+	
+	@Autowired
+	private SlowdownConsumptionRepository slowdownConsumptionRepository;
 	
 	private DataSource dataSource;
 
@@ -573,37 +579,33 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	public AOPMessageVM saveSlowdownNormsConfigurationData(String plantId, String year,
 			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
+		List<SlowdownConsumption> slowdownConsumptionList = new ArrayList<>();
 		try {
 			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
 				String rawDesc = normAttributeTransactionsDTO.getDescription();
+				int month=extractMonthNumber(rawDesc);
 				String cleanDesc = stripTrailingSuffix(rawDesc);
 				UUID maintenanceId=plantMaintenanceTransactionRepository.findTransactionIdByDynamicParams("Slowdown",year,UUID.fromString(plantId),cleanDesc);
 				if(maintenanceId==null) {
 					throw new RuntimeException("No Maintenance Id found with "+normAttributeTransactionsDTO.getDescription());
 				}
-				
-				//UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
-				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
-				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year);
-				if(normAttributeTransactions!=null) {
-					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
-					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				SlowdownConsumption  slowdownConsumption= slowdownConsumptionRepository.findByParameterFKIdAndAuditYear(UUID.fromString(plantId),normAttributeTransactionsDTO.getNormParameterFKId(),year,maintenanceId,month);
+				if(slowdownConsumption!=null) {
+					slowdownConsumption.setParameterValue(Double.parseDouble(normAttributeTransactionsDTO.getAttributeValue()));
+					slowdownConsumption.setUpdatedOn(new Date());
+					slowdownConsumption.setUpdatedBy("System");
+					slowdownConsumptionList.add(slowdownConsumptionRepository.save(slowdownConsumption));
 				}else {
-					normAttributeTransactions = new NormAttributeTransactions();
-			
-					Optional<PlantMaintenanceTransaction> PlantMaintenanceTransactionopt=plantMaintenanceTransactionRepository.findById(maintenanceId);
-					if(PlantMaintenanceTransactionopt.isPresent()) {
-						normAttributeTransactions.setAopMonth(PlantMaintenanceTransactionopt.get().getMaintForMonth());
-					}	
-					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
-					normAttributeTransactions.setAttributeValueVersion("v1");
-					normAttributeTransactions.setAuditYear(year);
-					normAttributeTransactions.setCreatedOn(new Date());
-					normAttributeTransactions.setMaintenanceId(normAttributeTransactionsDTO.getMaintenanceId());
-					normAttributeTransactions.setNormParameterFKId(normAttributeTransactionsDTO.getNormParameterFKId());
-					normAttributeTransactions.setUserName("System");
-					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					slowdownConsumption = new SlowdownConsumption();
+					slowdownConsumption.setParameterValue(Double.parseDouble(normAttributeTransactionsDTO.getAttributeValue()));
+					slowdownConsumption.setAopYear(year);
+					slowdownConsumption.setCreatedOn(new Date());
+					slowdownConsumption.setPlantMaintenanceFkId(maintenanceId);
+					slowdownConsumption.setAopMonth(month);
+					slowdownConsumption.setNormParameterFkId(normAttributeTransactionsDTO.getNormParameterFKId());
+					slowdownConsumption.setCreatedBy("System");
+					slowdownConsumption.setPlantFkId(UUID.fromString(plantId));
+					slowdownConsumptionList.add(slowdownConsumptionRepository.save(slowdownConsumption));
 				}
 			}
 		}catch (Exception ex) {
@@ -611,12 +613,28 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			throw new RuntimeException("Failed to save/update data", ex);
 		}
 		aopMessageVM.setCode(200);
-		aopMessageVM.setData(normAttributeTransactionsList);
+		aopMessageVM.setData(slowdownConsumptionList);
 		aopMessageVM.setMessage("Data updated successfully");
 		return aopMessageVM;
 	}
 	private String stripTrailingSuffix(String description) {
 	    return description.replaceAll("_[^_]*$", "");
 	}
+	
+	public static int extractMonthNumber(String description) {
+        // 1. Grab the suffix after the last underscore
+        int u = description.lastIndexOf('_');
+        if (u < 0 || u == description.length() - 1) {
+            throw new IllegalArgumentException("No month suffix found.");
+        }
+        String monthName = description.substring(u + 1);
+        try {
+            // 2. Map it to month number (1-12) using Month enum
+            Month m = Month.valueOf(monthName.toUpperCase());
+            return m.getValue(); // = 1 for Jan … 7 for July … 12 for Dec
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Unknown month: " + monthName, ex);
+        }
+    }
 
 }

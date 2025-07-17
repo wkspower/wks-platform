@@ -117,6 +117,17 @@ public class BasisReportServiceImpl implements BasisReportService{
 				map.put("year", row[4]);
 				normBasisList.add(map); // Add the map to the list here
 			}
+			if (type.equalsIgnoreCase("PRODUCTION VOLUME BASIS")) {
+				map.put("productName", row[0]);
+				map.put("aopYear", row[1]);
+				map.put("monthNumber", row[2]);
+				map.put("operatingHrs", row[3]);
+				map.put("avgMCU", row[4]);
+				map.put("monthlyBudgetedProduction", row[5]);
+				map.put("demand", row[6]);
+				map.put("productionValue", row[7]);
+				normBasisList.add(map); // Add the map to the list here
+			}
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("SP Executed successfully");
