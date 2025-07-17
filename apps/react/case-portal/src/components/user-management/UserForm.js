@@ -680,7 +680,7 @@ const UserAccessForm = ({ keycloak }) => {
                           )}
                         </Grid>
                         {siteEntry.plants.map((plantEntry, plantIndex) => (
-                          <Box key={plantIndex} style={{ display: 'flex', width: '60%', marginTop:'15px', marginLeft:'12px' }} >
+                          <Box key={plantIndex} style={{ display: 'flex', width: '60%', marginTop:'15px', marginLeft:plantIndex === 0 ? '12px' : '26%' }} >
                             {/* Plant Dropdown */}
                             <Grid item xs={4} sm={3}>
                               <Typography variant='h6' gutterBottom>Plant</Typography>
