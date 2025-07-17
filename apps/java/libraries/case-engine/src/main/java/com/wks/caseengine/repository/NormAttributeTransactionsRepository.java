@@ -143,7 +143,8 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	List<Object[]> findByYearAndPlantFkIdMEG(@Param("year") String year, @Param("plantFKId") UUID plantFKId);
 
 	@Query(value = """
-				SELECT * FROM NormAttributeTransactions d WHERE d.NormParameter_FK_Id = :normParameterFKId  AND d.AOPMonth = :month AND d.AuditYear = :auditYear
+				SELECT * FROM NormAttributeTransactions d WHERE d.NormParameter_FK_Id = :normParameterFKId  AND d.AOPMonth = :month 
+				AND d.AuditYear = :auditYear AND PlantMaintenanceTransaction_FK_Id IS NULL
 			""", nativeQuery = true)
 	Optional<NormAttributeTransactions> findByNormParameterFKIdAndAOPMonthAndAuditYear(
 			@Param("normParameterFKId") UUID normParameterFKId,

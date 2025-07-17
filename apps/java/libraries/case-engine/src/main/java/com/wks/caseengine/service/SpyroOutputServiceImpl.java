@@ -12,16 +12,20 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.SpyroOutputDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 
@@ -49,6 +53,13 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
+
 
 	@Override
 	public AOPMessageVM getSpyroOutputData(String year, String plantId,String Mode,String type) {
@@ -90,6 +101,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 					map.put("Oct", row[19]);
 					map.put("Nov", row[20]);
 					map.put("Dec", row[21]);
+					map.put("isEditable", row[22]);
 					spyroOutputDataList.add(map); // Add the map to the list here
 				}
 			}
@@ -154,15 +166,28 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	@Override
 	public AOPMessageVM updateSpyroOutputData(List<SpyroOutputDTO> spyroOutputDTOList) {
 		AOPMessageVM aopMessageVM=new AOPMessageVM();
+		String year=null;
+		UUID plantId=null;
 		try {
 			for (SpyroOutputDTO spyroOutputDTO : spyroOutputDTOList) {
 				UUID normParameterFKId = UUID.fromString(spyroOutputDTO.getNormParameterFKID());
-
+				year=spyroOutputDTO.getAuditYear();
+				plantId=UUID.fromString(spyroOutputDTO.getPlantFKId());
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(spyroOutputDTO, i);
 		
 					saveData(normParameterFKId, i, attributeValue, spyroOutputDTO);
 				}
+			}
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-output");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data updated successfully");
@@ -306,6 +331,16 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 					}
 				}
 			
+			}
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-output");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data updated successfully");

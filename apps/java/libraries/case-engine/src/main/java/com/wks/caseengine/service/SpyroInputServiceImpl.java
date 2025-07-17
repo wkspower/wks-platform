@@ -88,6 +88,7 @@ public class SpyroInputServiceImpl implements SpyroInputService{
 						map.put("Oct", row[19]);
 						map.put("Nov", row[20]);
 						map.put("Dec", row[21]);
+						map.put("isEditable", row[22]);
 						spyroInputDataList.add(map); // Add the map to the list here				
 					}else {
 						if(type.equalsIgnoreCase("Composition")) {
@@ -114,6 +115,7 @@ public class SpyroInputServiceImpl implements SpyroInputService{
 								map.put("Oct", row[19]);
 								map.put("Nov", row[20]);
 								map.put("Dec", row[21]);
+								map.put("isEditable", row[22]);
 								spyroInputDataList.add(map); // Add the map to the list here
 							}
 						}
