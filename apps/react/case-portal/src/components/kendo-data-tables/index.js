@@ -17,8 +17,6 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import '../../kendo-data-grid.css'
 
-import DownloadIcon from '@mui/icons-material/Download'
-import UploadIcon from '@mui/icons-material/Upload'
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
 import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/index'
@@ -43,8 +41,8 @@ import { DurationEditor } from './Utilities-Kendo/numericViewCells'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 // import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
-import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { descLimit } from './Utilities-Kendo/descLimit'
+import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -117,6 +115,7 @@ const KendoDataTables = ({
   downloadExcelForConfiguration = () => {},
   onLoad = () => {},
 }) => {
+  console.log('permissions?.saveBtn', permissions?.saveBtn)
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
@@ -131,7 +130,7 @@ const KendoDataTables = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
-  const [customModifiedCells, setCustomModifiedCells] = useState({});
+  const [customModifiedCells, setCustomModifiedCells] = useState({})
   const initialGroup = groupBy
     ? [
         {
@@ -254,11 +253,10 @@ const KendoDataTables = ({
         return { ...prev, [itemId]: base }
       })
 
-setCustomModifiedCells(prev => ({
-  ...prev,
-  [itemId]: { ...(prev[itemId] || {}), [field]: value }
-}));
-
+      setCustomModifiedCells((prev) => ({
+        ...prev,
+        [itemId]: { ...(prev[itemId] || {}), [field]: value },
+      }))
     },
     [setRows, setModifiedCells, setCustomModifiedCells],
   )
@@ -381,36 +379,43 @@ setCustomModifiedCells(prev => ({
     )
   }, [])
 
-    const RedHighlightCell = (props) => {
-      const { dataItem, field, tdProps, children, customModifiedCells, allRedCell } = props;
-      const rowId = dataItem.id;
-      const value = dataItem[field];
-      // Highlight if edited
-      const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field);
-      // Highlight if part of allRedCell (MEG logic)
-      const month = monthMap[field?.toLowerCase()];
-      const normId = dataItem.materialFkId?.toLowerCase();
-      const isRedFromAllRedCell = allRedCell?.some(
-        (cell) =>
-          cell.month === month &&
-          cell.normParameterFKId?.toLowerCase() === normId
-      );
+  const RedHighlightCell = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+    } = props
+    const rowId = dataItem.id
+    const value = dataItem[field]
+    // Highlight if edited
+    const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field)
+    // Highlight if part of allRedCell (MEG logic)
+    const month = monthMap[field?.toLowerCase()]
+    const normId = dataItem.materialFkId?.toLowerCase()
+    const isRedFromAllRedCell = allRedCell?.some(
+      (cell) =>
+        cell.month === month &&
+        cell.normParameterFKId?.toLowerCase() === normId,
+    )
 
-      const shouldHighlight = isEdited || isRedFromAllRedCell;
+    const shouldHighlight = isEdited || isRedFromAllRedCell
 
-      return (
-        <td
-          {...tdProps}
-          title={value}
-          style={{
-            color: shouldHighlight ? 'orange' : undefined,
-            fontWeight: shouldHighlight ? 'bold' : undefined,
-          }}
-        >
-          {children}
-        </td>
-      );
-    };
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: shouldHighlight ? 'orange' : undefined,
+          fontWeight: shouldHighlight ? 'bold' : undefined,
+        }}
+      >
+        {children}
+      </td>
+    )
+  }
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
     const month = monthMap[props.field?.toLowerCase()]
@@ -815,6 +820,7 @@ setCustomModifiedCells(prev => ({
             }
           >
             {columns?.map((col) => {
+              console.log('col', col)
               const isActive = isColumnActive(col?.field, filter, sort)
 
               if (col.type === 'descLimit') {
@@ -864,12 +870,12 @@ setCustomModifiedCells(prev => ({
                           : DateTimePickerEditor,
                       },
                       data: (props) => (
-                      <RedHighlightCell
-                        {...props}
-                        customModifiedCells={customModifiedCells}
-                        allRedCell={allRedCell}
-                      />
-                    ),
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                     }}
                     format={
                       [
@@ -926,13 +932,13 @@ setCustomModifiedCells(prev => ({
                           ? DateOnlyPicker
                           : DateOnlyPicker,
                       },
-                     data: (props) => (
-                      <RedHighlightCell
-                        {...props}
-                        customModifiedCells={customModifiedCells}
-                        allRedCell={allRedCell}
-                      />
-                    ),
+                      data: (props) => (
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                     }}
                     format={
                       [
@@ -1008,12 +1014,12 @@ setCustomModifiedCells(prev => ({
                     cells={{
                       edit: { text: TextCellEditor },
                       data: (props) => (
-                      <RedHighlightCell
-                        {...props}
-                        customModifiedCells={customModifiedCells}
-                        allRedCell={allRedCell}
-                      />
-                    ),
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                     }}
                   />
                 )
@@ -1145,12 +1151,12 @@ setCustomModifiedCells(prev => ({
                     cells={{
                       edit: { text: DurationEditor },
                       data: (props) => (
-                      <RedHighlightCell
-                        {...props}
-                        customModifiedCells={customModifiedCells}
-                        allRedCell={allRedCell}
-                      />
-                    ),
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                     }}
                     headerClassName={isActive ? 'active-column' : ''}
                   />
@@ -1228,13 +1234,13 @@ setCustomModifiedCells(prev => ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
-                     data: (props) => (
-                    <RedHighlightCell
-                      {...props}
-                      customModifiedCells={customModifiedCells}
-                      allRedCell={allRedCell}
-                    />
-                  ),
+                      data: (props) => (
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'

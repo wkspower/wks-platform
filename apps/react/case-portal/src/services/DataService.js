@@ -1,5 +1,5 @@
-import { json } from './request'
 import Config from '../consts'
+import { json } from './request'
 export const DataService = {
   getProductById,
   getYearWiseProduct,
@@ -995,7 +995,12 @@ async function getProductionVolDataBasis(keycloak, reportType, uom) {
 // 		AOPMessageVM response	=basisReportService.getNormBasisReport(plantId,year,type);
 // 		return ResponseEntity.status(response.getCode()).body(response);
 // 	}
-async function getProductionVolDataBasisPe(keycloak, reportType, PeriodFrom, PeriodTo) {
+async function getProductionVolDataBasisPe(
+  keycloak,
+  reportType,
+  PeriodFrom,
+  PeriodTo,
+) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/report/norms-basis/pe?plantId=${plantId}&year=${year}&type=${encodeURIComponent(reportType)}&periodFrom=${PeriodFrom}&periodTo=${PeriodTo}`
@@ -1810,7 +1815,12 @@ async function saveSummaryAOPConsumptionNorm(
     return await Promise.reject(e)
   }
 }
-async function saveSlowdownConfigData(plantId, year, slowDownConfigDetails, keycloak) {
+async function saveSlowdownConfigData(
+  plantId,
+  year,
+  slowDownConfigDetails,
+  keycloak,
+) {
   const url = `${Config.CaseEngineUrl}/task/slowdown/configuration?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
@@ -2466,6 +2476,7 @@ async function getShutDownPlantData(keycloak, _plantID) {
 async function getSlowDownConfigurationData(keycloak) {
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
+  console.log('🚀 ~ getSlowDownConfigurationData ~ storedPlant:', storedPlant)
   if (storedPlant) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id

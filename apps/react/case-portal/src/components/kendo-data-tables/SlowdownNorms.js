@@ -1,15 +1,12 @@
-import Tooltip from '@mui/material/Tooltip'
-
 import { useGridApiRef } from '@mui/x-data-grid'
-import { useSession } from 'SessionStoreContext'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useSession } from 'SessionStoreContext'
 // import DataGridTable from '../ASDataGrid'
 // import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 // import NumericInputOnly from 'utils/NumericInputOnly'
-import { truncateRemarks } from 'utils/remarksUtils'
 
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -18,7 +15,9 @@ import { validateFields } from 'utils/validationUtils'
 // import { useDispatch } from 'react-redux'
 // import { setIsBlocked } from 'store/reducers/dataGridStore'
 import getSlowdownNormsColDef from 'components/data-tables/CommonHeader/getSlowdownNormsColDef'
+import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
+import SlowdownNormForMeg from './SlowdownNormForMeg'
 
 const SlowdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -200,9 +199,11 @@ const SlowdownNorms = () => {
         // handleMenuClose();
       }
     }
-    fetchData()
-    getAllProducts()
-    getSlowdownMonths()
+    if (lowerVertName !== verticalEnums.MEG) {
+      fetchData()
+      getAllProducts()
+      getSlowdownMonths()
+    }
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   // const formatValueToFiveDecimals = (params) =>
@@ -532,56 +533,60 @@ const SlowdownNorms = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <KendoDataTables
-        modifiedCells={modifiedCells}
-        NormParameterIdCell={NormParameterIdCell}
-        setModifiedCells={setModifiedCells}
-        isCellEditable={isCellEditable}
-        title='Shutdown Norms'
-        columns={colDefs}
-        setRows={setRows}
-        rows={rows}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        processRowUpdate={processRowUpdate}
-        handleUnitChange={handleUnitChange}
-        onRowModesModelChange={onRowModesModelChange}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        apiRef={apiRef}
-        rowModesModel={rowModesModel}
-        open1={open1}
-        setOpen1={setOpen1}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        onProcessRowUpdateError={onProcessRowUpdateError}
-        fetchData={fetchData}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
-        handleRemarkCellClick={handleRemarkCellClick}
-        handleCalculate={handleCalculate}
-        permissions={adjustedPermissions}
-        groupBy='Particulars'
+      {lowerVertName === 'meg' ? (
+        <SlowdownNormForMeg />
+      ) : (
+        <KendoDataTables
+          modifiedCells={modifiedCells}
+          NormParameterIdCell={NormParameterIdCell}
+          setModifiedCells={setModifiedCells}
+          isCellEditable={isCellEditable}
+          title='Shutdown Norms'
+          columns={colDefs}
+          setRows={setRows}
+          rows={rows}
+          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+          onDeleteRow={(id) => console.log('Row Deleted:', id)}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+          paginationOptions={[100, 200, 300]}
+          processRowUpdate={processRowUpdate}
+          handleUnitChange={handleUnitChange}
+          onRowModesModelChange={onRowModesModelChange}
+          saveChanges={saveChanges}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          apiRef={apiRef}
+          rowModesModel={rowModesModel}
+          open1={open1}
+          setOpen1={setOpen1}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          onProcessRowUpdateError={onProcessRowUpdateError}
+          fetchData={fetchData}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          unsavedChangesRef={unsavedChangesRef}
+          handleRemarkCellClick={handleRemarkCellClick}
+          handleCalculate={handleCalculate}
+          permissions={adjustedPermissions}
+          groupBy='Particulars'
 
-        // permissions={{
-        //   showAction: false,
-        //   addButton: false,
-        //   deleteButton: false,
-        //   editButton: false,
-        //   showUnit: false,
-        //   units: ['TPH', 'TPD'],
-        //   saveWithRemark: false,
-        //   saveBtn: true,
-        //   showCalculate: lowerVertName == 'meg' ? false : false,
-        // }}
-      />
+          // permissions={{
+          //   showAction: false,
+          //   addButton: false,
+          //   deleteButton: false,
+          //   editButton: false,
+          //   showUnit: false,
+          //   units: ['TPH', 'TPD'],
+          //   saveWithRemark: false,
+          //   saveBtn: true,
+          //   showCalculate: lowerVertName == 'meg' ? false : false,
+          // }}
+        />
+      )}
     </div>
   )
 }

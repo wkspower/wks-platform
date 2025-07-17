@@ -42,6 +42,11 @@ function parseAllowed(raw) {
 }
 
 export default function HeaderContent({ keycloak }) {
+  console.log(
+    '🚀 ~ MenuProvider ~ keycloak:',
+    keycloak,
+    keycloak?.realmAccess?.roles,
+  )
   const getSelectedVerticalStorage = localStorage.getItem('selectedVertical')
     ? JSON.parse(localStorage.getItem('selectedVertical'))
     : null
@@ -191,33 +196,17 @@ export default function HeaderContent({ keycloak }) {
       try {
         var resp = await DataService.getAopyears(keycloak)
         if (resp?.length) {
-          //console.log('AOP Years:', resp)
-          const res = [
-            {
-              AOPDisplayYear: '2024-25',
-              AOPYear: '2024-25',
-              currentYear: '0',
-            },
-            {
-              AOPDisplayYear: '2025-26',
-              AOPYear: '2025-26',
-              currentYear: '1',
-            },
-            {
-              AOPDisplayYear: '2026-27',
-              AOPYear: '2026-27',
-              currentYear: '0',
-            },
-          ]
+          setAopYears(resp)
 
-          setAopYears(res)
-
-          const currentYear = res.find((item) => item.currentYear == 1)?.AOPYear
+          const currentYear = resp.find(
+            (item) => item.currentYear == 1,
+          )?.AOPYear
 
           if (currentYear) {
             setSelectedYear(currentYear)
             localStorage.setItem('year', currentYear)
             dispatch(setAopYear({ selectedYear: currentYear }))
+            dispatch(setOldYear({ oldYear: 0 }))
           }
         }
       } catch (err) {

@@ -1,19 +1,19 @@
 import {
   createContext,
-  useState,
-  useEffect,
-  useContext,
-  useMemo,
   useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from 'react'
+import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from '../SessionStoreContext'
-import { useSelector } from 'react-redux'
 import plan from './plan'
 
-import workspace from './workspace'
-import planCracker from './planCracker'
 import { mapScreen } from 'components/Utilities/menuRefractoring'
+import planCracker from './planCracker'
+import workspace from './workspace'
 
 const MenuContext = createContext()
 const STATIC_MENU_DEFAULT = [plan, workspace]
@@ -24,6 +24,7 @@ export function MenuProvider({ children }) {
   // const navigate = useNavigate()
 
   const keycloak = useSession()
+
   const { verticalChange } = useSelector((state) => state.dataGridStore)
   const verticalName = verticalChange?.selectedVertical || ''
   const verticalId =
