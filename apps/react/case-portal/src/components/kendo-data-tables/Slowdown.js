@@ -441,27 +441,44 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const fetchConfigurationData = async () => {
-    setRows2([])
-    setLoading(true)
-    try {
-      const { data } = await DataService.getSlowDownConfigurationData(keycloak)
+  setRows2([])
+  setLoading(true)
 
-      const formattedData = data.map((item, index) => ({
+  try {
+    const { data } = await DataService.getSlowDownConfigurationData(keycloak)
+
+    const isNumeric = (val) =>
+      typeof val === 'string' && /^[+-]?(\d*\.)?\d+$/.test(val.trim())
+
+    const formattedData = data.map((item, index) => {
+      const formattedItem = {
         ...item,
         id: index,
         particulars: item.DisplayName,
         Particulars: item?.NormTypeName,
         isEditable: item?.IsEditable,
-      }))
+      }
 
-      setRows2(formattedData)
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching SlowDown Configuration data:', error)
-      setLoading(false)
-      setRows2([])
-    }
+      // Convert only pure numeric strings to float with 4 decimals
+      Object.keys(formattedItem).forEach((key) => {
+        const value = formattedItem[key];
+        if (isNumeric(value)) {
+          formattedItem[key] = parseFloat(parseFloat(value).toFixed(4));
+        }
+      })
+
+      return formattedItem;
+    })
+
+    setRows2(formattedData)
+    setLoading(false)
+  } catch (error) {
+    console.error('Error fetching SlowDown Configuration data:', error)
+    setLoading(false)
+    setRows2([])
   }
+}
+
   const fetchData2 = async () => {
     setLoading(true)
     setColDefs2([])
