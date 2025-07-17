@@ -478,7 +478,7 @@ const UserAccessForm = ({ keycloak }) => {
       ? data.map((user) => user.userId)
       : [data.userId]
     const result = {
-      role: userDetails.role,
+      role: 'cts_head',
       userIds: userIds,
       attributes: {
         plants: selectedVerticals.map((verticalId) => {
@@ -569,26 +569,8 @@ const UserAccessForm = ({ keycloak }) => {
         <>
           <Box p={3}>
             <Grid container spacing={2} alignItems='center'>
-              {/* Role Dropdown */}
-              <Grid item xs={12} sm={4}>
-                <Typography variant='h6' gutterBottom>
-                  Role
-                </Typography>
-                <FormControl fullWidth size='small'>
-                  <TextField id="outlined-basic" label="Role" variant="outlined" value='cts_head' disabled />
-                  {/* <Select
-                    name='role'
-                    value={userDetails.role}
-                    onChange={handleUserDetailChange}
-                  >
-                    {userRoles.map((role) => (
-                      <MenuItem key={role} value={role}>
-                        {role}
-                      </MenuItem>
-                    ))}
-                  </Select> */}
-                </FormControl>
-              </Grid>
+       
+           
               {/* Vertical Dropdown */}
               <Grid item xs={12} sm={4}>
                 <Typography variant='h6' gutterBottom>
@@ -698,13 +680,14 @@ const UserAccessForm = ({ keycloak }) => {
                           )}
                         </Grid>
                         {siteEntry.plants.map((plantEntry, plantIndex) => (
-                          <Box key={plantIndex} style={{ display: 'flex', width: '60%', marginTop:'38px', marginLeft:'12px' }} >
+                          <Box key={plantIndex} style={{ display: 'flex', width: '60%', marginTop:'15px', marginLeft:'12px' }} >
                             {/* Plant Dropdown */}
                             <Grid item xs={4} sm={3}>
-                              <Typography variant='subtitle2'>Plant</Typography>
+                              <Typography variant='h6' gutterBottom>Plant</Typography>
                               <FormControl fullWidth size='small'>
                                 <Select
                                   value={plantEntry.plantId}
+                                  sx={{ height: '40px' }}
                                   onChange={(e) =>
                                     handlePlantChange(
                                       verticalId,
@@ -731,7 +714,7 @@ const UserAccessForm = ({ keycloak }) => {
                               </FormControl>
                             </Grid>
                             {/* Add or Remove Plant Entry */}
-                            <Grid item xs={1} style={{marginInline:'10px'}}>
+                            <Grid item xs={1} style={{marginInline:'10px', paddingTop:'12px', paddingLeft:'5px'}}>
                               {plantIndex === 0 ? (
                                 <IconButton
                                   onClick={() =>
@@ -760,13 +743,14 @@ const UserAccessForm = ({ keycloak }) => {
                             </Grid>
                             {/* Screens Dropdown */}
                             <Grid item xs={4} sm={3}>
-                              <Typography variant='subtitle2'>
+                              <Typography variant='h6' gutterBottom>
                                 Screens
                               </Typography>
 
                               <FormControl fullWidth size='small'>
                                 <Select
                                   multiple
+                                  sx={{ height: '40px' }}
                                   value={plantEntry.screens || []}
                                   onChange={(e) => {
                                     const allScreens = getAvailableScreens(
