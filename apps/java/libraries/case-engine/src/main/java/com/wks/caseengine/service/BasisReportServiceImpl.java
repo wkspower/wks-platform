@@ -136,7 +136,7 @@ public class BasisReportServiceImpl implements BasisReportService{
 		List<Map<String, Object>> normBasisList = new ArrayList<>();
 		try {
 					
-		List<Object[]> obj=getReportDataForPE( plantId,  aopYear,  type);
+		List<Object[]> obj=getReportDataForPE( plantId,  aopYear,  type,periodFrom,periodTo);
 		for (Object[] row : obj) {
 			Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 
@@ -203,7 +203,7 @@ public class BasisReportServiceImpl implements BasisReportService{
 		
 	}
 
-public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType){
+public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType,Date PeriodFrom, Date PeriodTo){
 		
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -214,13 +214,15 @@ public List<Object[]> getReportDataForPE(String plantId, String aopYear, String 
 		
 		String storedProcedure = vertical.getName()+ "_AnnualCostAOPReport";
 		String sql = "EXEC " + storedProcedure
-                + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+                + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo";
 
         Query query = entityManager.createNativeQuery(sql);
 
         query.setParameter("plantId", plantId);
         query.setParameter("aopYear", aopYear);
         query.setParameter("reportType", reportType);
+        query.setParameter("PeriodFrom", PeriodFrom);
+        query.setParameter("PeriodTo", PeriodTo);
        
        
         return query.getResultList();

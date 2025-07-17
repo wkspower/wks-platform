@@ -27,6 +27,7 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -46,6 +47,9 @@ public class AOPReportServiceImpl implements AOPReportService {
 
 	@Autowired
 	private SiteRepository siteRepository;
+	
+	@Autowired
+	private VerticalsRepository verticalRepository;
 
 	@Override
 	public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType, String AopYearFilter) {
@@ -182,8 +186,15 @@ public class AOPReportServiceImpl implements AOPReportService {
 	public List<Object[]> getAnnualAOPReportData(String plantId, String aopYear, String reportType,
 			String AopYearFilter) {
 		try {
-			String procedureName = "AnnualCostAopReport";
-			String sql = "EXEC " + procedureName +
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName()+ "_AnnualCostAOPReport";
+			String sql = "EXEC " + storedProcedure +
 					" @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType, @aopYearFilter = :AopYearFilter";
 
 			Query query = entityManager.createNativeQuery(sql);
