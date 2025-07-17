@@ -21,6 +21,12 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import { DataService } from 'services/DataService'
 import Notification from 'components/Utilities/Notification'
 import i18n from '../../i18n'
+import { TextField } from '@mui/material'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
 
 const UserAccessForm = ({ keycloak }) => {
   const location = useLocation()
@@ -34,7 +40,8 @@ const UserAccessForm = ({ keycloak }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
+  const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
+  const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   // User Details State
   const [userDetails, setUserDetails] = useState({
     username: data.username || '',
@@ -163,21 +170,21 @@ const UserAccessForm = ({ keycloak }) => {
           siteEntries.length > 0
             ? siteEntries
             : [
-                {
-                  site: '',
-                  plants: [
-                    {
-                      plantId: '',
-                      screens: [],
-                      permissions: {
-                        read: false,
-                        write: false,
-                        approve: false,
-                      },
+              {
+                site: '',
+                plants: [
+                  {
+                    plantId: '',
+                    screens: [],
+                    permissions: {
+                      read: false,
+                      write: false,
+                      approve: false,
                     },
-                  ],
-                },
-              ]
+                  },
+                ],
+              },
+            ]
       })
       setSelectedVerticals(newSelectedVerticals)
       setVerticalSites(newVerticalSites)
@@ -568,7 +575,8 @@ const UserAccessForm = ({ keycloak }) => {
                   Role
                 </Typography>
                 <FormControl fullWidth size='small'>
-                  <Select
+                  <TextField id="outlined-basic" label="Role" variant="outlined" value='cts_head' disabled />
+                  {/* <Select
                     name='role'
                     value={userDetails.role}
                     onChange={handleUserDetailChange}
@@ -578,7 +586,7 @@ const UserAccessForm = ({ keycloak }) => {
                         {role}
                       </MenuItem>
                     ))}
-                  </Select>
+                  </Select> */}
                 </FormControl>
               </Grid>
               {/* Vertical Dropdown */}
@@ -629,7 +637,7 @@ const UserAccessForm = ({ keycloak }) => {
                 </Typography>
                 <Box
                   p={2}
-                  sx={{ border: '1px solid #eee', borderRadius: '4px' }}
+                  sx={{ border: '1px solid #eee', borderRadius: '4px', display:'flex', flexDirection:'column-reverse', width:'100%' }}
                 >
                   {verticalSites[verticalId]?.map((siteEntry, siteIndex) => (
                     <Box key={siteIndex} mb={2}>
@@ -689,17 +697,8 @@ const UserAccessForm = ({ keycloak }) => {
                             </IconButton>
                           )}
                         </Grid>
-                      </Grid>
-
-                      {/* Plant Section */}
-                      <Box ml={4} mt={2}>
                         {siteEntry.plants.map((plantEntry, plantIndex) => (
-                          <Grid
-                            container
-                            spacing={2}
-                            alignItems='center'
-                            key={plantIndex}
-                          >
+                          <Box key={plantIndex} style={{ display: 'flex', width: '60%', marginTop:'38px', marginLeft:'12px' }} >
                             {/* Plant Dropdown */}
                             <Grid item xs={4} sm={3}>
                               <Typography variant='subtitle2'>Plant</Typography>
@@ -732,7 +731,7 @@ const UserAccessForm = ({ keycloak }) => {
                               </FormControl>
                             </Grid>
                             {/* Add or Remove Plant Entry */}
-                            <Grid item xs={1}>
+                            <Grid item xs={1} style={{marginInline:'10px'}}>
                               {plantIndex === 0 ? (
                                 <IconButton
                                   onClick={() =>
@@ -781,7 +780,7 @@ const UserAccessForm = ({ keycloak }) => {
                                     if (selected.includes(SELECT_ALL)) {
                                       newSelection =
                                         (plantEntry.screens || []).length ===
-                                        allScreens.length
+                                          allScreens.length
                                           ? []
                                           : allScreens
                                     } else {
@@ -833,9 +832,12 @@ const UserAccessForm = ({ keycloak }) => {
                                 </Select>
                               </FormControl>
                             </Grid>
-                          </Grid>
+
+                          </Box>
                         ))}
-                      </Box>
+                      </Grid>
+
+
                     </Box>
                   ))}
                 </Box>
@@ -852,7 +854,7 @@ const UserAccessForm = ({ keycloak }) => {
                 gap: 2,
               }}
             >
-              <Button variant='contained' color='primary' onClick={handleSave}>
+              <Button variant='contained' color='primary' onClick={setOpenSaveDialogeBox}>
                 Save
               </Button>
               <Button
@@ -864,6 +866,25 @@ const UserAccessForm = ({ keycloak }) => {
               </Button>
             </Box>
           </Box>
+           <Dialog
+                  open={openSaveDialogeBox}
+                  onClose={closeSaveDialogeBox}
+                  aria-labelledby='alert-dialog-title'
+                  aria-describedby='alert-dialog-description'
+                >
+                  <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
+                  <DialogContent>
+                    <DialogContentText id='alert-dialog-description'>
+                      Are you sure you want to save these changes?
+                    </DialogContentText>
+                  </DialogContent>
+                  <DialogActions>
+                    <Button onClick={closeSaveDialogeBox}>Cancel</Button>
+                    <Button onClick={handleSave} autoFocus>
+                      Save
+                    </Button>
+                  </DialogActions>
+                </Dialog>
         </>
       )}
 
