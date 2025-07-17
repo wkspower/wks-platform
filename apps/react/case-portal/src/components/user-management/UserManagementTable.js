@@ -1,4 +1,4 @@
-import { Box } from '@mui/material'
+import { Box, Tab, Tabs, Button } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import DataGridTable from 'components/data-tables/ASDataGrid'
 import { useCallback, useEffect, useState, useRef } from 'react'
@@ -31,6 +31,7 @@ const UserManagementTable = ({ keycloak }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [inputValue, setInputValue] = useState('') // keeps the typed text intact
   const [open, setOpen] = useState(false)
+  const [tabIndex, setTabIndex] = useState(0)
 
   const location = useLocation()
   const data = location.state || ''
@@ -240,10 +241,39 @@ const UserManagementTable = ({ keycloak }) => {
     setRows((prev) => prev.filter((row) => !selectionModel.includes(row.id)))
     setSelectionModel([]) // clear selection
   }
+  const handleTabChange = (event, newValue) => {
+    setTabIndex(newValue);
+  };
   return (
     <Box sx={{ height: 600, width: '100%', p: 2 }}>
       {/* Autocomplete for selecting multiple users */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
+
+      <Tabs
+        sx={{
+          borderBottom: '0px solid #ccc',
+          '.MuiTabs-indicator': { display: 'none' },
+          // margin: '-35px 0px -8px 0%',
+        }}
+        textColor='primary'
+        indicatorColor='primary'
+        value={tabIndex}
+        onChange={handleTabChange}
+      >
+        {['Grant Access', 'Revoke Access'].map(tabId => (
+          <Tab
+            key={tabId}
+            sx={{
+              border: '1px solid #ADD8E6',
+              borderBottom: '1px solid #ADD8E6',
+              padding: '9px',
+              minHeight: '10px',
+            }}
+            label={tabId}
+          />
+        ))}
+      </Tabs>
+
+      {tabIndex === 0 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
         <Autocomplete
           multiple
           disableCloseOnSelect
@@ -264,6 +294,7 @@ const UserManagementTable = ({ keycloak }) => {
           onChange={(e, newSel) => {
             setTempSelectedUsers(newSel)
             finalizeSelection(newSel)
+            setInputValue('')
             e.preventDefault()
           }}
           loading={loading}
@@ -283,19 +314,34 @@ const UserManagementTable = ({ keycloak }) => {
               {...params}
               label='Select Users'
               variant='outlined'
-              // onKeyDown={(e) => {
-              //   if (e.key === 'Enter') {
-              //     finalizeSelection(tempSelectedUsers)
-              //     e.preventDefault()
-              //   }
-              // }}
+            // onKeyDown={(e) => {
+            //   if (e.key === 'Enter') {
+            //     finalizeSelection(tempSelectedUsers)
+            //     e.preventDefault()
+            //   }
+            // }}
             />
           )}
         />
-      </Box>
-
+      </Box>}
+      {tabIndex === 1 && <Box>Revoke access</Box>}
+        <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={() => {
+                    // Write any additional logic here before navigating.
+                    // console.log('Navigating to dashboard')
+                    // navigate('/user-form')
+                    handleAddPlantSite()
+                  }}
+                  disabled={!selectedUsers.length}
+                  loading={loading} // Use the loading prop to trigger loading state
+                  loadingposition='start' // Use loadingPosition to control where the spinner appears
+                >
+                  Next
+                </Button>
       {/* DataGridTable now uses selectedUsers as the rows to show only the confirmed selections */}
-      <DataGridTable
+      {/* <DataGridTable
         modifiedCells={modifiedCells}
         columns={columns}
         rows={selectedUsers}
@@ -329,7 +375,7 @@ const UserManagementTable = ({ keycloak }) => {
           customHeight: defaultCustomHeight,
           allAction: false,
         }}
-      />
+      /> */}
     </Box>
   )
 }
