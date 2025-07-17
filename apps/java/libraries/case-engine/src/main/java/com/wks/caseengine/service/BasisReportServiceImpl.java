@@ -39,12 +39,12 @@ public class BasisReportServiceImpl implements BasisReportService{
 	private EntityManager entityManager;
 
 	@Override
-	public AOPMessageVM getNormBasisReport(String plantId, String aopYear, String type,Date periodFrom, Date periodTo) {
+	public AOPMessageVM getNormBasisReportForPE(String plantId, String aopYear, String type,String periodFrom, String periodTo) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> normBasisList = new ArrayList<>();
 		try {
 					
-		List<Object[]> obj=getReportData( plantId,  aopYear,  type,periodFrom,periodTo);
+		List<Object[]> obj=getReportDataForPE( plantId,  aopYear,  type,periodFrom,periodTo);
 		for (Object[] row : obj) {
 			Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 
@@ -130,91 +130,21 @@ public class BasisReportServiceImpl implements BasisReportService{
 
 	}
 
-	@Override
-	public AOPMessageVM getNormBasisReportForPE(String plantId, String aopYear, String type,Date periodFrom, Date periodTo) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, Object>> normBasisList = new ArrayList<>();
-		try {
-					
-		List<Object[]> obj=getReportDataForPE( plantId,  aopYear,  type,periodFrom,periodTo);
-		for (Object[] row : obj) {
-			Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-
-			if (type.equalsIgnoreCase("Production")) {
-
-				map.put("norm", row[0]);
-				map.put("particulars", row[1]);
-				map.put("april", row[2]);
-				map.put("may", row[3]);
-				map.put("june", row[4]);
-				map.put("july", row[5]);
-				map.put("august", row[6]);
-				map.put("september", row[7]);
-				map.put("october", row[8]);
-				map.put("november", row[9]);
-				map.put("december", row[10]);
-				map.put("january", row[11]);
-				map.put("february", row[12]);
-				map.put("march", row[13]);
-				map.put("total", row[14]);
-				
-				normBasisList.add(map); // Add the map to the list here
-
-			}	}
-		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("SP Executed successfully");
-		aopMessageVM.setData(normBasisList);
-		return aopMessageVM;
-     
-	} catch (Exception e) {
-		e.printStackTrace();
-		return aopMessageVM;
-	}
-
-	}
-
-	public List<Object[]> getReportData(String plantId, String aopYear, String type,Date PeriodFrom, Date PeriodTo){
+	
+public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType,String PeriodFrom, String PeriodTo){
 		
-		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
-				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
-		Sites site = siteRepository.findById(plant.getSiteFkId())
-				.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+			.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	Sites site = siteRepository.findById(plant.getSiteFkId())
+			.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+	Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+			.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-		UUID siteId = site.getId();
-		UUID verticalId = vertical.getId();
-		String storedProcedure = vertical.getName()+"_" +site.getName()+ "_NormsBasisReport";
+	UUID siteId = site.getId();
+	UUID verticalId = vertical.getId();
+	String storedProcedure = vertical.getName()+"_" +site.getName()+ "_NormsBasisReport";
 		String sql = "EXEC " + storedProcedure
-                + " @plantId = :plantId,@siteId = :siteId,@verticalId = :verticalId, @aopYear = :aopYear, @Type = :type, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo";
-
-        Query query = entityManager.createNativeQuery(sql);
-
-        query.setParameter("plantId", plantId);
-        query.setParameter("aopYear", aopYear);
-        query.setParameter("type", type);
-        query.setParameter("siteId", siteId);
-        query.setParameter("verticalId", verticalId);
-        query.setParameter("PeriodFrom", PeriodFrom);
-        query.setParameter("PeriodTo", PeriodTo);
-
-        return query.getResultList();
-
-		
-	}
-
-public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType,Date PeriodFrom, Date PeriodTo){
-		
-		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
-				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
-		
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-
-		
-		String storedProcedure = vertical.getName()+ "_AnnualCostAOPReport";
-		String sql = "EXEC " + storedProcedure
-                + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo";
+                + " @plantId = :plantId, @aopYear = :aopYear, @Type = :reportType, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo, @verticalId = :verticalId, @siteId = :siteId";
 
         Query query = entityManager.createNativeQuery(sql);
 
@@ -223,6 +153,9 @@ public List<Object[]> getReportDataForPE(String plantId, String aopYear, String 
         query.setParameter("reportType", reportType);
         query.setParameter("PeriodFrom", PeriodFrom);
         query.setParameter("PeriodTo", PeriodTo);
+        query.setParameter("siteId", siteId);
+        query.setParameter("verticalId", verticalId);
+        
        
        
         return query.getResultList();

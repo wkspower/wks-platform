@@ -1,6 +1,6 @@
 package com.wks.caseengine.rest.server;
 
-import java.util.Date;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,16 +19,11 @@ public class BasisReportController {
 	@Autowired
 	private BasisReportService basisReportService;
 	
-	@GetMapping(value="/report/norms-basis")
-	public ResponseEntity<AOPMessageVM> getNormBasisReport(@RequestParam String plantId,@RequestParam String year,@RequestParam String type,@RequestParam(value="periodFrom", required=false) Date periodFrom,@RequestParam(value="periodTo", required=false) Date periodTo){
-		AOPMessageVM response	=basisReportService.getNormBasisReport(plantId,year,type,periodFrom,periodTo);
-		return ResponseEntity.status(response.getCode()).body(response);
-	}
-	
 	@GetMapping(value="/report/norms-basis/pe")
-	public ResponseEntity<AOPMessageVM> getNormBasisReportForPE(@RequestParam String plantId,@RequestParam String year,@RequestParam String type,@RequestParam(value="periodFrom", required=false) Date periodFrom,@RequestParam(value="periodTo", required=false) Date periodTo){
+	public ResponseEntity<AOPMessageVM> getNormBasisReport(@RequestParam String plantId,@RequestParam String year,@RequestParam String type,@RequestParam(value="periodFrom", required=false) String periodFrom,@RequestParam(value="periodTo", required=false) String periodTo){
 		AOPMessageVM response	=basisReportService.getNormBasisReportForPE(plantId,year,type,periodFrom,periodTo);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
-
+	
+	
 }
