@@ -163,11 +163,13 @@ const KendoDataTablesCrackerRunLength = ({
         ),
       )
 
+      let updatedRows = []
+
       if (value?.toUpperCase() === 'SAD' && dataItem[field] !== 'SAD') {
         setTimeout(() => {
           setRows((prevRows) => {
             const editedIndex = prevRows.findIndex((r) => r.id === itemId)
-            let updatedRows = [...prevRows]
+            updatedRows = [...prevRows]
 
             const next = prevRows[editedIndex + 1]?.[field]
             const nextNext = prevRows[editedIndex + 2]?.[field]
@@ -228,7 +230,38 @@ const KendoDataTablesCrackerRunLength = ({
                   updatedRow.demo = 'BBU'
                 }
 
+                // if (isNextNonNumeric) {
+                //   if (index === editedIndex - 1) {
+                //     updatedRow[field] = 'SAD'
+                //     updatedRow.demo = 1
+                //   }
+                //   if (index === editedIndex) {
+                //     updatedRow[field] = 'SAD'
+                //     updatedRow.demo = 2
+                //   }
+                //   if (index === editedIndex - 2) {
+                //     updatedRow.demo = 'BBU'
+                //   }
+                // }
+
+                // if (!isNextNonNumeric && isNextNextNonNumeric) {
+                //   if (index === editedIndex) {
+                //     updatedRow[field] = 'SAD'
+                //     updatedRow.demo = 1
+                //   }
+                //   if (index === editedIndex + 1) {
+                //     updatedRow[field] = 'SAD'
+                //     updatedRow.demo = 2
+                //   }
+                //   if (index === editedIndex - 1) {
+                //     updatedRow.demo = 'BBU'
+                //   }
+                // }
+
                 if (isNextNonNumeric) {
+                  if (index === editedIndex - 2) {
+                    updatedRow.demo = 'BBU'
+                  }
                   if (index === editedIndex - 1) {
                     updatedRow[field] = 'SAD'
                     updatedRow.demo = 1
@@ -237,12 +270,23 @@ const KendoDataTablesCrackerRunLength = ({
                     updatedRow[field] = 'SAD'
                     updatedRow.demo = 2
                   }
-                  if (index === editedIndex - 2) {
-                    updatedRow.demo = 'BBU'
+
+                  // Continue demo numbering: 3, 4, ... until a non-numeric is encountered
+                  if (index > editedIndex) {
+                    const currentDemo = prevRows[index]?.demo
+                    if (!isNaN(Number(currentDemo))) {
+                      updatedRow.demo = index - editedIndex + 2 // demo = 3, 4, 5...
+                    } else {
+                      // stop numbering when non-numeric encountered
+                      updatedRow.demo = prevRows[index]?.demo
+                    }
                   }
                 }
 
                 if (!isNextNonNumeric && isNextNextNonNumeric) {
+                  if (index === editedIndex - 1) {
+                    updatedRow.demo = 'BBU'
+                  }
                   if (index === editedIndex) {
                     updatedRow[field] = 'SAD'
                     updatedRow.demo = 1
@@ -251,8 +295,16 @@ const KendoDataTablesCrackerRunLength = ({
                     updatedRow[field] = 'SAD'
                     updatedRow.demo = 2
                   }
-                  if (index === editedIndex - 1) {
-                    updatedRow.demo = 'BBU'
+
+                  // Continue demo numbering: 3, 4, ... until a non-numeric is encountered
+                  if (index > editedIndex + 1) {
+                    const currentDemo = prevRows[index]?.demo
+                    if (!isNaN(Number(currentDemo))) {
+                      updatedRow.demo = index - editedIndex + 1 // demo = 3, 4, 5...
+                    } else {
+                      // stop numbering when non-numeric encountered
+                      updatedRow.demo = prevRows[index]?.demo
+                    }
                   }
                 }
 
@@ -260,11 +312,16 @@ const KendoDataTablesCrackerRunLength = ({
               })
             }
 
-            setModifiedCells(() => ({ updatedRows }))
+            setModifiedCells(() => updatedRows)
             setIsRowEdited(true)
             return updatedRows
           })
         }, 150) // delay to avoid blocking typing
+      } else {
+        setModifiedCells((prev) => {
+          const base = { ...dataItem, [field]: value }
+          return { ...prev, [itemId]: base }
+        })
       }
     },
     [setRows, setModifiedCells],
@@ -410,7 +467,7 @@ const KendoDataTablesCrackerRunLength = ({
       allRedCell={allRedCell}
       size='small'
       defaultSkip={0}
-      defaultTake={50}
+      defaultTake={100}
       pageable={
         rows?.length > 50
           ? {
@@ -591,8 +648,7 @@ const KendoDataTablesCrackerRunLength = ({
                   className='btn-save'
                   onClick={saveModalOpen}
                   disabled={
-                    isButtonDisabled ||
-                    (!summaryEdited && Object.keys(modifiedCells).length === 0)
+                    isButtonDisabled || Object.keys(modifiedCells).length === 0
                   }
                   {...(loading ? {} : {})}
                 >

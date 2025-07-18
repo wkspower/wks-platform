@@ -93,6 +93,8 @@ const SlowdownNormForMeg = () => {
         isEditable: undefined,
         IsEditable: undefined,
         Particulars: undefined,
+        uom: undefined,
+        UOM: undefined,
       }))
 
       await saveSlowdownConfiguration(sanitizedData)
@@ -138,14 +140,32 @@ const SlowdownNormForMeg = () => {
         })
 
       const formattedRows =
-        data?.resultList?.map((item, index) => ({
-          ...item,
-          id: index,
-          particulars: item.DisplayName,
-          Particulars: item?.NormTypeName,
-          isEditable: item?.IsEditable,
-        })) || []
+        data?.resultList?.map((item, index) => {
+          const parsedItem = Object.entries(item).reduce(
+            (acc, [key, value]) => {
+              if (
+                typeof value === 'string' &&
+                !isNaN(value) &&
+                value.trim() !== ''
+              ) {
+                const parsedValue = parseFloat(value)
+                acc[key] = isNaN(parsedValue) ? value : parsedValue
+              } else {
+                acc[key] = value
+              }
+              return acc
+            },
+            {},
+          )
 
+          return {
+            ...parsedItem,
+            id: index,
+            particulars: item.DisplayName,
+            Particulars: item?.NormTypeName,
+            isEditable: item?.IsEditable,
+          }
+        }) || []
       setTableRows(formattedRows)
       setCalculationResults(data?.aopCalculation || [])
     } catch (error) {
@@ -184,9 +204,17 @@ const SlowdownNormForMeg = () => {
         const dynamicColumns = response.data.map((column) => ({
           field: column.field,
           title: column.title,
-          editable: column.field !== 'particulars',
+          editable:
+            column.field === 'particulars' ||
+            column.field.toLowerCase() === 'uom'
+              ? false
+              : true,
           hidden: hiddenColumns.includes(column.field),
-          ...(column.field !== 'particulars' && { type: 'number' }),
+          ...(column.field !== 'particulars' &&
+            column.field.toLowerCase() !== 'uom' && {
+              format: '{0:#.###}',
+              type: 'number',
+            }),
         }))
 
         setColumnDefinitions(dynamicColumns)

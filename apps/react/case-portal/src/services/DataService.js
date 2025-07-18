@@ -150,6 +150,8 @@ export const DataService = {
   handleCalculateDecokingActivities,
   getSlowDownPlantDataTab,
   postIbr,
+  getSpyroOutputDataYield,
+  saveSpyroOutputYield,
 }
 async function handleRefresh(year, plantId, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/handleRefresh?year=${year}&plantId=${plantId}`
@@ -1003,7 +1005,7 @@ async function getProductionVolDataBasisPe(
 ) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/report/norms-basis/pe?plantId=${plantId}&year=${year}&type=${encodeURIComponent(reportType)}&periodFrom=${PeriodFrom}&periodTo=${PeriodTo}`
+  const url = `${Config.CaseEngineUrl}/task/report/norms-basis/pe?plantId=${plantId}&year=${year}&type=${reportType}&PeriodFrom=${PeriodFrom}&PeriodTo=${PeriodTo}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2476,7 +2478,6 @@ async function getShutDownPlantData(keycloak, _plantID) {
 async function getSlowDownConfigurationData(keycloak) {
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
-  console.log('🚀 ~ getSlowDownConfigurationData ~ storedPlant:', storedPlant)
   if (storedPlant) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
@@ -3447,6 +3448,63 @@ async function getSlowDownPlantDataTab(keycloak) {
   }
   try {
     const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getSpyroOutputDataYield(keycloak, mode, type) {
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url =
+    `${Config.CaseEngineUrl}/task/spyro-output/yield` +
+    `?year=${encodeURIComponent(year)}` +
+    `&plantId=${encodeURIComponent(plantId)}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Failed to fetch spyro-output data', e)
+    return Promise.reject(e)
+  }
+}
+
+async function saveSpyroOutputYield(payload, keycloak) {
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/spyro-output/yield?plantId=${plantId}&year=${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

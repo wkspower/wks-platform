@@ -22,7 +22,6 @@ const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
-  const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
 
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -329,6 +328,8 @@ const SlowDown = ({ permissions }) => {
         isEditable: undefined,
         IsEditable: undefined,
         Particulars: undefined,
+        uom: undefined,
+        UOM: undefined,
       }))
 
       var data = Object.values(modifiedCells2)
@@ -441,49 +442,49 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const fetchConfigurationData = async () => {
-  setRows2([])
-  setLoading(true)
+    setRows2([])
+    setLoading(true)
+    try {
+      const { data } = await DataService.getSlowDownConfigurationData(keycloak)
 
-  try {
-    const { data } = await DataService.getSlowDownConfigurationData(keycloak)
+      const formattedData = data.map((item, index) => {
+        const parsedItem = Object.entries(item).reduce((acc, [key, value]) => {
+          if (
+            typeof value === 'string' &&
+            !isNaN(value) &&
+            value.trim() !== ''
+          ) {
+            const parsedValue = parseFloat(value)
+            acc[key] = isNaN(parsedValue) ? value : parsedValue
+          } else {
+            acc[key] = value
+          }
+          return acc
+        }, {})
 
-    const isNumeric = (val) =>
-      typeof val === 'string' && /^[+-]?(\d*\.)?\d+$/.test(val.trim())
-
-    const formattedData = data.map((item, index) => {
-      const formattedItem = {
-        ...item,
-        id: index,
-        particulars: item.DisplayName,
-        Particulars: item?.NormTypeName,
-        isEditable: item?.IsEditable,
-      }
-
-      // Convert only pure numeric strings to float with 4 decimals
-      Object.keys(formattedItem).forEach((key) => {
-        const value = formattedItem[key];
-        if (isNumeric(value)) {
-          formattedItem[key] = parseFloat(parseFloat(value).toFixed(4));
+        return {
+          ...parsedItem,
+          id: index,
+          particulars: item.DisplayName,
+          Particulars: item?.NormTypeName,
+          isEditable: item?.IsEditable,
         }
       })
 
-      return formattedItem;
-    })
-
-    setRows2(formattedData)
-    setLoading(false)
-  } catch (error) {
-    console.error('Error fetching SlowDown Configuration data:', error)
-    setLoading(false)
-    setRows2([])
+      setRows2(formattedData)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching SlowDown Configuration data:', error)
+      setLoading(false)
+      setRows2([])
+    }
   }
-}
-
   const fetchData2 = async () => {
     setLoading(true)
     setColDefs2([])
     try {
-      const data1 = await DataService.getSlowDownPlantDataTab(keycloak)
+      var data1 = await DataService.getSlowDownPlantDataTab(keycloak)
+
       const removedCols = [
         'srNo',
         'NormTypeName',
@@ -498,15 +499,23 @@ const SlowDown = ({ permissions }) => {
         const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
           title: item.title,
-          editable: item.field === 'particulars' ? false : true,
+          editable:
+            item.field === 'particulars' || item.field.toLowerCase() === 'uom'
+              ? false
+              : true,
           hidden: removedCols.includes(item.field),
-          ...(item.field !== 'particulars' && { type: 'number' }),
+          ...(item.field !== 'particulars' &&
+            item.field.toLowerCase() !== 'uom' && {
+              format: '{0:#.###}',
+              type: 'number',
+            }),
         }))
 
         setColDefs2(dynamicColDefs)
         fetchConfigurationData()
       } else {
         setColDefs2([])
+        setLoading(false)
       }
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -741,7 +750,7 @@ const SlowDown = ({ permissions }) => {
           open1={open1}
           fetchData={fetchData2}
           unsavedChangesRef={unsavedChangesRef}
-          permissions={{ saveBtn: !isOldYearFlag, allAction: true }}
+          permissions={{ saveBtn: true, allAction: true }}
           handleCancelClick={handleCancelClick}
           groupBy='Particulars'
         />

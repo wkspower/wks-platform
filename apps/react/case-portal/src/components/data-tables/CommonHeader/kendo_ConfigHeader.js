@@ -6,6 +6,8 @@ import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
 // import productionColumnsPE4 from '../../../assets/kendo_config_pe4.json'
 import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
+import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
+import cracker_yield from '../../../assets/kendo_config_cracker_yield_coldefs.json'
 
 const getConfigByType = (configType) => {
   switch (configType) {
@@ -31,6 +33,10 @@ const getConfigByType = (configType) => {
       return crackerColumns
     case 'cracker_composition':
       return cracker_composition
+    case 'cracker_constants':
+      return cracker_constants
+    case 'cracker_yield':
+      return cracker_yield
     default:
       return productionColumns
   }

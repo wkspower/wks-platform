@@ -45,6 +45,8 @@ const CrackerConfig = () => {
     'Total Feed',
     'Total Products',
     'Miscellaneous Parameters',
+    'Constant',
+    'Yield',
   ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [availableTabs, setAvailableTabs] = useState([])
@@ -52,6 +54,8 @@ const CrackerConfig = () => {
 
   // ===== Separate row states per known tab =====
   // Initialize an individual state for each rawTabsStatic entry:
+  const [yieldRows, setYieldRows] = useState([])
+  const [constantsRows, setConstantsRows] = useState([])
   const [feedRows, setFeedRows] = useState([])
   const [compositionRows, setCompositionRows] = useState([])
   const [hydrogenationRows, setHydrogenationRows] = useState([])
@@ -63,6 +67,34 @@ const CrackerConfig = () => {
   // const allModes = ['5F Operation', '4F Operation', '4F+D Operation']
   const allModes = ['5F', '4F', '4F+D']
   const [selectMode, setSelectMode] = useState(allModes[0])
+
+  // NormParameterIdCell
+  const NormParameterIdCell = (props) => <td>{props?.dataItem?.particulars}</td>
+
+  // currentTab displayName
+  const currentTabDisplay = useMemo(() => {
+    const idLower = tabs[tabIndex]?.toLowerCase() || ''
+    const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
+    // console.log(info)
+    return info ? info.displayName : tabs[tabIndex] || 'Feed'
+  }, [tabs, tabIndex, availableTabs])
+
+  const productionColumns = useMemo(() => {
+    const configType =
+      currentTabDisplay === 'Composition'
+        ? 'cracker_composition'
+        : currentTabDisplay === 'Constant'
+          ? 'cracker_constants'
+          : currentTabDisplay === 'Yield'
+            ? 'cracker_yield'
+            : 'cracker'
+
+    return getEnhancedAOPColDefs({
+      headerMap,
+      handleRemarkCellClick,
+      configType,
+    })
+  }, [headerMap, currentTabDisplay])
 
   // Permissions helper
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -88,7 +120,7 @@ const CrackerConfig = () => {
       deleteButton: false,
       editButton: false,
       showUnit: false,
-      showModes: lowerVertName === 'cracker',
+      showModes: lowerVertName === 'cracker' && currentTabDisplay != 'Yield',
       saveWithRemark: true,
       saveBtn: true,
       allAction: lowerVertName === 'cracker',
@@ -96,28 +128,6 @@ const CrackerConfig = () => {
     },
     isOldYear,
   )
-
-  // NormParameterIdCell
-  const NormParameterIdCell = (props) => <td>{props?.dataItem?.particulars}</td>
-
-  // currentTab displayName
-  const currentTabDisplay = useMemo(() => {
-    const idLower = tabs[tabIndex]?.toLowerCase() || ''
-    const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
-    // console.log(info)
-    return info ? info.displayName : tabs[tabIndex] || 'Feed'
-  }, [tabs, tabIndex, availableTabs])
-
-  // Columns: recalc when headerMap or currentTab changes
-  const productionColumns = useMemo(() => {
-    const configType =
-      currentTabDisplay === 'Composition' ? 'cracker_composition' : 'cracker'
-    return getEnhancedAOPColDefs({
-      headerMap,
-      handleRemarkCellClick,
-      configType,
-    })
-  }, [headerMap, currentTabDisplay])
 
   // ===== Fetch dynamic-tabs from API =====
   const fetchTabsMatrix = useCallback(async () => {
@@ -190,6 +200,10 @@ const CrackerConfig = () => {
           return hydrogenationRows
         case 'Miscellaneous Parameters':
           return feedRows
+        case 'Constant':
+          return constantsRows
+        case 'Yield':
+          return yieldRows
 
         default:
           return []
@@ -199,6 +213,8 @@ const CrackerConfig = () => {
       feedRows,
       compositionRows,
       hydrogenationRows,
+      constantsRows,
+      yieldRows,
       // recoveryRows,
       // furnace,
       // optimizing,
@@ -216,20 +232,24 @@ const CrackerConfig = () => {
       case 'Total Products':
         setHydrogenationRows(data)
         break
+      case 'Constant':
+        setConstantsRows(data)
+        break
+      case 'Yield':
+        setYieldRows(data)
+        break
 
       default:
-        // no-op or log if unexpected
         console.warn('No state for tab:', tabId)
     }
   }, [])
 
-  // ===== Fetch rows for a given tab =====
   const fetchCrackerRows = useCallback(
     async (currentTabDisplay, mode) => {
       if (!currentTabDisplay) return
       try {
         setLoading(true)
-        // Use tabId directly for API
+
         const spyroVM = await DataService.getSpyroOutputData(
           keycloak,
           mode,
@@ -262,7 +282,6 @@ const CrackerConfig = () => {
         }
         setRowsForTab(currentTabDisplay, transformedData)
       } catch (err) {
-        // console.warn(`Failed to load ${tabId} data:`, err)
         setSnackbarData({
           message: `Failed to load ${currentTabDisplay} data. Please try again.`,
           severity: 'error',
@@ -276,11 +295,74 @@ const CrackerConfig = () => {
     [keycloak, setRowsForTab, currentTabDisplay],
   )
 
-  // When tabIndex, selectMode, plantId change, load that tab
+  const fetchCrackerRowsYield = useCallback(
+    async (currentTabDisplay, mode) => {
+      if (!currentTabDisplay) return
+      try {
+        setLoading(true)
+        var spyroVMYield1 = []
+        if (currentTabDisplay == 'Yield') {
+          spyroVMYield1 = await DataService.getSpyroOutputDataYield(
+            keycloak,
+            mode,
+            currentTabDisplay,
+          )
+        }
+        let transformedData1 = []
+        if (spyroVMYield1 && Array.isArray(spyroVMYield1.data)) {
+          const rowMap = {}
+
+          spyroVMYield1.data.forEach((item, i) => {
+            const comp = item.displayName
+            const col = `${item.operation}_${item.type}`
+
+            if (!rowMap[comp]) {
+              rowMap[comp] = {
+                id: `row_${i}`,
+                particulars: comp,
+                uom: item.uom,
+                remarks: item.remarks,
+                NormParameterFKID: item.normParameterId,
+                '5F_C2C3': null,
+                '5F_Propane': null,
+                '5F_Ethane': null,
+                '4F_C2C3': null,
+                '4F_Propane': null,
+                '4F_Ethane': null,
+                '4FD_C2C3': null,
+                '4FD_Propane': null,
+                '4FD_Ethane': null,
+              }
+            }
+
+            rowMap[comp][col] = item.attributeValue
+          })
+
+          transformedData1 = Object.values(rowMap)
+        }
+
+        setRowsForTab(currentTabDisplay, transformedData1)
+      } catch (err) {
+        setSnackbarData({
+          message: `Failed to load ${currentTabDisplay} data. Please try again.`,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setRowsForTab(currentTabDisplay, [])
+      } finally {
+        setLoading(false)
+      }
+    },
+    [keycloak, setRowsForTab, currentTabDisplay],
+  )
+
   useEffect(() => {
-    // const tabId = tabs[tabIndex]
     if (keycloak && plantId && currentTabDisplay) {
-      fetchCrackerRows(currentTabDisplay, selectMode)
+      if (currentTabDisplay === 'Yield') {
+        fetchCrackerRowsYield(currentTabDisplay, selectMode)
+      } else {
+        fetchCrackerRows(currentTabDisplay, selectMode)
+      }
     } else {
       console.warn('Missing data for fetchCrackerRows:', {
         hasKeycloak: !!keycloak,
@@ -294,13 +376,18 @@ const CrackerConfig = () => {
     plantId,
     tabs,
     fetchCrackerRows,
+    fetchCrackerRowsYield,
     keycloak,
     currentTabDisplay,
   ])
 
-  // ===== Save logic unchanged except reload uses setRowsForTab =====
   const [modifiedCells, setModifiedCells] = useState({})
+
   const saveChanges = useCallback(async () => {
+    if (currentTabDisplay === 'Yield') {
+      await saveSpyroDataYield(yieldRows)
+      return
+    }
     try {
       if (Object.keys(modifiedCells).length === 0) {
         setSnackbarOpen(true)
@@ -316,7 +403,7 @@ const CrackerConfig = () => {
         setLoading(false)
         return
       }
-      // console.log(data)
+
       const validationMessage = validateFields(data, ['particulars', 'remarks'])
       if (validationMessage) {
         setSnackbarOpen(true)
@@ -349,19 +436,19 @@ const CrackerConfig = () => {
         UOM: row.uom ?? row.UOM ?? null,
         AuditYear: row.AuditYear ?? null,
         Remarks: row.remarks ?? row.Remarks ?? null,
-        Jan: row.jan ?? row.Jan ?? null,
-        Feb: row.feb ?? row.Feb ?? null,
-        Mar: row.march ?? row.Mar ?? null,
-        Apr: row.april ?? row.Apr ?? null,
-        May: row.may ?? row.May ?? null,
-        Jun: row.june ?? row.Jun ?? null,
-        Jul: row.july ?? row.Jul ?? null,
-        Aug: row.aug ?? row.Aug ?? null,
-        Sep: row.sep ?? row.Sep ?? null,
-        Oct: row.oct ?? row.Oct ?? null,
-        Nov: row.nov ?? row.Nov ?? null,
-        Dec: row.dec ?? row.Dec ?? null,
-        id: row.idFromApi ?? row.id ?? null,
+        Jan: row.jan || null,
+        Feb: row.feb || null,
+        Mar: row.march || null,
+        Apr: row.april || null,
+        May: row.may || null,
+        Jun: row.june || null,
+        Jul: row.july || null,
+        Aug: row.aug || null,
+        Sep: row.sep || null,
+        Oct: row.oct || null,
+        Nov: row.nov || null,
+        Dec: row.dec || null,
+        id: row.idFromApi || null,
         inEdit: row.inEdit || false,
       }))
       const response = await DataService.saveSpyroOutput(
@@ -377,7 +464,67 @@ const CrackerConfig = () => {
         setModifiedCells({})
         // Reload current tab
         const tabId = tabs[tabIndex]
-        if (tabId) fetchCrackerRows(currentTabDisplay, selectMode)
+        if (tabId) {
+          if (currentTabDisplay === 'Yield') {
+            fetchCrackerRowsYield(currentTabDisplay, selectMode)
+          } else {
+            fetchCrackerRows(currentTabDisplay, selectMode)
+          }
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error saving data!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving data!', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveSpyroDataYield = async (newRows) => {
+    setLoading(true)
+
+    try {
+      const SpyroOutputYield = newRows.map((row) => ({
+        particulars: row.particulars,
+        '5F_C2C3': row['5F_C2C3'],
+        '5F_Propane': row['5F_Propane'],
+        '5F_Ethane': row['5F_Ethane'],
+        '4F_C2C3': row['4F_C2C3'],
+        '4F_Propane': row['4F_Propane'],
+        '4F_Ethane': row['4F_Ethane'],
+        '4FD_C2C3': row['4FD_C2C3'],
+        '4FD_Propane': row['4FD_Propane'],
+        '4FD_Ethane': row['4FD_Ethane'],
+      }))
+
+      // console.log('SpyroOutputYield', SpyroOutputYield)
+
+      const response = await DataService.saveSpyroOutputYield(
+        SpyroOutputYield,
+        keycloak,
+      )
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        // Reload current tab
+        const tabId = tabs[tabIndex]
+        if (tabId) {
+          if (currentTabDisplay === 'Yield') {
+            fetchCrackerRowsYield(currentTabDisplay, selectMode)
+          } else {
+            fetchCrackerRows(currentTabDisplay, selectMode)
+          }
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -439,8 +586,6 @@ const CrackerConfig = () => {
 
       <Box>
         {(() => {
-          // const tabId = tabs[tabIndex]
-          // console.log(tabId)
           const rows = getRows(currentTabDisplay)
           const setRowsForCurrent = useCallback(
             (newRows) => setRowsForTab(currentTabDisplay, newRows),
@@ -450,13 +595,17 @@ const CrackerConfig = () => {
             case 'Total Feed':
             case 'Total Products':
             case 'Miscellaneous Parameters':
+            case 'Constant':
+            case 'Yield':
               return (
                 <Box key={currentTabDisplay}>
                   <KendoDataTables
                     rows={rows}
                     setRows={setRowsForCurrent}
                     fetchData={() =>
-                      fetchCrackerRows(currentTabDisplay, selectMode)
+                      currentTabDisplay === 'Yield'
+                        ? fetchCrackerRowsYield(currentTabDisplay, selectMode)
+                        : fetchCrackerRows(currentTabDisplay, selectMode)
                     }
                     configType='cracker'
                     handleRemarkCellClick={handleRemarkCellClick}

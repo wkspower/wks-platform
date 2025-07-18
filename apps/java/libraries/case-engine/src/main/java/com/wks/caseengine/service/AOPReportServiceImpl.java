@@ -47,7 +47,7 @@ public class AOPReportServiceImpl implements AOPReportService {
 
 	@Autowired
 	private SiteRepository siteRepository;
-	
+
 	@Autowired
 	private VerticalsRepository verticalRepository;
 
@@ -188,12 +188,17 @@ public class AOPReportServiceImpl implements AOPReportService {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
-			
+
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-			
-			String storedProcedure = vertical.getName()+ "_AnnualCostAOPReport";
+			String storedProcedure;
+			if ("MEG".equalsIgnoreCase(vertical.getName())) {
+				storedProcedure = "AnnualCostAOPReport";
+			} else {
+				storedProcedure = vertical.getName() + "_AnnualCostAOPReport";
+			}
+
 			String sql = "EXEC " + storedProcedure +
 					" @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType, @aopYearFilter = :AopYearFilter";
 
@@ -219,7 +224,7 @@ public class AOPReportServiceImpl implements AOPReportService {
 	}
 
 	public List<Object[]> getProductionVolumnDataReport(String plantId, String aopYear, String reportType,
-			String verticalName,String uom) {
+			String verticalName, String uom) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
@@ -243,13 +248,13 @@ public class AOPReportServiceImpl implements AOPReportService {
 	}
 
 	@Override
-	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String reportType,String uom) {
+	public AOPMessageVM getReportForProductionVolumnData(String plantId, String year, String reportType, String uom) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<Map<String, Object>> productionVolumnDataReportList = new ArrayList<>();
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 
-			List<Object[]> results = getProductionVolumnDataReport(plantId, year, reportType, verticalName,uom);
+			List<Object[]> results = getProductionVolumnDataReport(plantId, year, reportType, verticalName, uom);
 			List<String> headers = null;
 			List<String> keys = null;
 

@@ -199,6 +199,7 @@ const KendoDataTables = ({
       // console.log('e', e)
 
       if (dataItem?.field === 'Particulars') return
+      if (dataItem?.field === 'ParticularsType') return
 
       const itemId = dataItem.id
       setRows((prev) =>
@@ -820,7 +821,6 @@ const KendoDataTables = ({
             }
           >
             {columns?.map((col) => {
-              console.log('col', col)
               const isActive = isColumnActive(col?.field, filter, sort)
 
               if (col.type === 'descLimit') {
@@ -1183,6 +1183,7 @@ const KendoDataTables = ({
                     }}
                     format={col.format}
                     sortable={false}
+                    width={col?.widthT}
                   />
                 )
               }

@@ -522,7 +522,7 @@ const ConsumptionNorms = () => {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
-      showCalculate: false,
+      showCalculate: true,
     }
   }
 

@@ -1,0 +1,36 @@
+[
+  {
+    "field": "particulars",
+    "title": "Particulars",
+    "editable": false,
+    "widthT": 300,
+    "hidden": false
+  },
+  {
+    "field": "uom",
+    "title": "UOM",
+    "editable": false,
+    "width": 120
+  },
+  {
+    "field": "april",
+    "title": "Value",
+    "editable": true,
+    "widthT": 200,
+    "type": "number"
+  },
+
+  {
+    "field": "remarks",
+    "title": "Remark",
+    "editable": false,
+    "width": 180,
+    "type": "string"
+  },
+  {
+    "field": "NormParameterFKID",
+    "title": "NormParameterFKID",
+    "filterable": false,
+    "hidden": true
+  }
+]

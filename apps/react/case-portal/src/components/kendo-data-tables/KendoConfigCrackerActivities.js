@@ -215,26 +215,7 @@ const DecokingConfig = () => {
 
   const saveChangesRunLength = React.useCallback(async () => {
     try {
-      if (Object.keys(modifiedCellsRunLength.updatedRows).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        setLoading(false)
-        return
-      }
-      const rawData = modifiedCellsRunLength.updatedRows || []
-      if (rawData.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        setLoading(false)
-        return
-      }
-      saveCrackerRunLength(rawData)
+      saveCrackerRunLength(Object.values(modifiedCellsRunLength))
     } catch (error) {
       console.log('Error saving changes:', error)
     }
@@ -267,12 +248,12 @@ const DecokingConfig = () => {
         name: row?.name,
         aopYear: localStorage.getItem('year'),
         plantFkId: row?.plantFkId,
-        ibrStartDate: formatIfDate(row?.ibrStartDate) || '',
-        ibrEndDate: formatIfDate(row?.ibrEndDate) || '',
-        taStartDate: formatIfDate(row?.taStartDate) || '',
-        taEndDate: formatIfDate(row?.taEndDate) || '',
-        shutDownStartDate: formatIfDate(row?.shutDownStartDate) || '',
-        shutDownEndDate: formatIfDate(row?.shutDownEndDate) || '',
+        ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
+        ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
+        taStartDate: formatIfDate(row?.taStartDate) || null,
+        taEndDate: formatIfDate(row?.taEndDate) || null,
+        shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
+        shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
 
         preCrDays: row?.preCrDays ? Number(row.preCrDays) : null,
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
@@ -337,7 +318,7 @@ const DecokingConfig = () => {
           message: 'Data Saved Successfully!',
           severity: 'success',
         })
-        setModifiedCellsSdTa({})
+        setModifiedCellsRunLength({})
         setLoading(false)
       } else {
         setSnackbarOpen(true)

@@ -86,8 +86,6 @@ export default function StepperNav() {
   const activeStep = steps.findIndex((s) => s.key === currentPath)
 
   // -- Render Stepper ----------------------tested
-
-  console.log('steps', steps)
   return (
     <>
       <Stepper

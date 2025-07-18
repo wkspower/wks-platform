@@ -96,15 +96,16 @@ const planCracker = {
               icon: icons.IconChartBar,
               breadcrumbs: true,
             },
-            {
-              id: 'decoking-activities',
-              title: i18n.t('menu.decokingActivities'),
-              type: 'item',
-              url: '/production-norms-plan/spyro-menu/decoking-activities',
-              icon: icons.IconPower,
-              breadcrumbs: true,
-            },
           ],
+        },
+
+        {
+          id: 'decoking-activities',
+          title: i18n.t('menu.decokingActivities'),
+          type: 'item',
+          url: '/production-norms-plan/spyro-menu/decoking-activities',
+          icon: icons.IconPower,
+          breadcrumbs: true,
         },
         {
           id: 'maintenance-details',

@@ -35,7 +35,7 @@ const ProductionNorms = ({ permissions }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [selectedUnit, setSelectedUnit] = useState('MT')
+  const [selectedUnit, setSelectedUnit] = useState('')
   const [rows, setRows] = useState([])
   const [rowsByProducts, setRowsByProducts] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -51,6 +51,9 @@ const ProductionNorms = ({ permissions }) => {
     if (plantID?.plantId) {
       set_PlantID(plantID?.plantId)
     }
+    setSelectedUnit(
+      lowerVertName == 'cracker' ? ['MT/Month', 'KT'] : ['MT', 'KT'],
+    )
   }, [plantID])
   // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
 
@@ -115,7 +118,7 @@ const ProductionNorms = ({ permissions }) => {
 
     try {
       let plantId = ''
-      const isKiloTon = selectedUnit != 'MT'
+      const isKiloTon = selectedUnit != ('MT' || 'MT/Month')
       const storedPlant = localStorage.getItem('selectedPlant')
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
@@ -313,7 +316,87 @@ const ProductionNorms = ({ permissions }) => {
         return
       }
 
-      var data = response?.data?.aopDTOList
+      // const rowDataForCracker = [
+      //   {
+      //     idFromApi: null,
+      //     aopCaseId: null,
+      //     aopType: null,
+      //     aopYear: null,
+      //     plantFkId: null,
+      //     normParametersFKId: 'Ethyelene',
+      //     uom: 'MT/Month',
+      //     april: 13420,
+      //     may: 12875,
+      //     june: 14210,
+      //     july: 13750,
+      //     aug: 12995,
+      //     sep: 14130,
+      //     oct: 13580,
+      //     nov: 13045,
+      //     dec: 13670,
+      //     jan: 13920,
+      //     feb: 13105,
+      //     march: 13840,
+      //     averageTPH: '',
+      //     isEditable: false,
+      //     aopStatus: '',
+      //   },
+      //   {
+      //     idFromApi: null,
+      //     aopCaseId: null,
+      //     aopType: null,
+      //     aopYear: null,
+      //     plantFkId: null,
+      //     normParametersFKId: 'Propylene',
+      //     uom: 'MT/Month',
+      //     april: 9450,
+      //     may: 10235,
+      //     june: 11090,
+      //     july: 10720,
+      //     aug: 11560,
+      //     sep: 10985,
+      //     oct: 11340,
+      //     nov: 10575,
+      //     dec: 11120,
+      //     jan: 11280,
+      //     feb: 10850,
+      //     march: 11430,
+      //     averageTPH: '',
+      //     isEditable: false,
+      //     aopStatus: '',
+      //   },
+      //   {
+      //     idFromApi: null,
+      //     aopCaseId: null,
+      //     aopType: null,
+      //     aopYear: null,
+      //     plantFkId: null,
+      //     normParametersFKId: 'E + P',
+      //     uom: 'MT/Month',
+      //     april: 950,
+      //     may: 1035,
+      //     june: 1090,
+      //     july: 1720,
+      //     aug: 1560,
+      //     sep: 985,
+      //     oct: 140,
+      //     nov: 575,
+      //     dec: 1120,
+      //     jan: 280,
+      //     feb: 850,
+      //     march: 1430,
+      //     averageTPH: '',
+      //     isEditable: false,
+      //     aopStatus: '',
+      //   },
+      // ]
+
+      let dataSet = response?.data?.aopDTOList
+      // if (lowerVertName === 'cracker') {
+      //   dataSet = rowDataForCracker
+      // }
+
+      var data = dataSet
         ?.map((product) => ({
           ...product,
           normParametersFKId: product.materialFKId,
@@ -328,7 +411,7 @@ const ProductionNorms = ({ permissions }) => {
         .map(({ materialFKId, ...rest }) => rest)
 
       const formattedData = data.map((item, index) => {
-        const isKiloTon = selectedUnit !== 'MT'
+        const isKiloTon = selectedUnit == 'KT'
 
         const transformedItem = {
           ...item,
@@ -544,7 +627,7 @@ const ProductionNorms = ({ permissions }) => {
           ? permissions?.showCalculate ?? true
           : false,
       saveBtn: permissions?.saveBtn ?? false,
-      units: ['MT', 'KT'],
+      units: lowerVertName == 'cracker' ? ['MT/Month', 'KT'] : ['MT', 'KT'],
       customHeight: permissions?.customHeight,
     },
     isOldYear,
@@ -565,86 +648,12 @@ const ProductionNorms = ({ permissions }) => {
           ? permissions?.showCalculate ?? true
           : false,
       saveBtn: permissions?.saveBtn ?? false,
-      units: ['MT', 'KT'],
+      units: lowerVertName == 'cracker' ? ['MT/Month', 'KT'] : ['MT', 'KT'],
+
       customHeight: permissions?.customHeight,
     },
     isOldYear,
   )
-
-  const rowDataForCracker = [
-    {
-      idFromApi: null,
-      aopCaseId: null,
-      aopType: null,
-      aopYear: null,
-      plantFkId: null,
-      normParametersFKId: 'Ethyelene',
-      uom: 'MT/Month',
-      april: 13420,
-      may: 12875,
-      june: 14210,
-      july: 13750,
-      aug: 12995,
-      sep: 14130,
-      oct: 13580,
-      nov: 13045,
-      dec: 13670,
-      jan: 13920,
-      feb: 13105,
-      march: 13840,
-      averageTPH: '',
-      isEditable: false,
-      aopStatus: '',
-    },
-    {
-      idFromApi: null,
-      aopCaseId: null,
-      aopType: null,
-      aopYear: null,
-      plantFkId: null,
-      normParametersFKId: 'Propylene',
-      uom: 'MT/Month',
-      april: 9450,
-      may: 10235,
-      june: 11090,
-      july: 10720,
-      aug: 11560,
-      sep: 10985,
-      oct: 11340,
-      nov: 10575,
-      dec: 11120,
-      jan: 11280,
-      feb: 10850,
-      march: 11430,
-      averageTPH: '',
-      isEditable: false,
-      aopStatus: '',
-    },
-    {
-      idFromApi: null,
-      aopCaseId: null,
-      aopType: null,
-      aopYear: null,
-      plantFkId: null,
-      normParametersFKId: 'E + P',
-      uom: 'MT/Month',
-      april: 950,
-      may: 1035,
-      june: 1090,
-      july: 1720,
-      aug: 1560,
-      sep: 985,
-      oct: 140,
-      nov: 575,
-      dec: 1120,
-      jan: 280,
-      feb: 850,
-      march: 1430,
-      averageTPH: '',
-      isEditable: false,
-      aopStatus: '',
-    },
-  ]
 
   return (
     <div>
@@ -685,7 +694,11 @@ const ProductionNorms = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
         // groupBy='Particulars'
-        note={!permissions?.hideNoteText ? '* MT per Annum' : ''}
+        note={
+          !permissions?.hideNoteText && lowerVertName !== 'cracker'
+            ? '* MT per Annum'
+            : ''
+        }
       />
 
       {lowerVertName === 'meg' && !permissions?.hideNoteText && (
