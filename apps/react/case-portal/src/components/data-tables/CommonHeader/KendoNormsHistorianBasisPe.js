@@ -22,6 +22,9 @@ export default function getKendoNormsHistorianBasisPe({ headerMap, type }) {
     case 'BEST ACHIEVED NORMS':
       rawCols = require('../../../assets/norms_historian_basis_best_achieved_norms.json')
       break
+    case 'PRODUCTION VOLUME BASIS':
+      rawCols = require('../../../assets/norms_historian_basis_production_volume_basis.json')
+      break
     default:
       throw new Error(`Unknown type "${type}"`)
   }

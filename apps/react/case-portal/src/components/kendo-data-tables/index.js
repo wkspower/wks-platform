@@ -114,6 +114,7 @@ const KendoDataTables = ({
   handleExcelUpload = () => {},
   downloadExcelForConfiguration = () => {},
   onLoad = () => {},
+  isFormatedNumber = false,
 }) => {
   console.log('permissions?.saveBtn', permissions?.saveBtn)
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -369,6 +370,7 @@ const KendoDataTables = ({
   }
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
+    console.log('CustomRow', rest)
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
     const rowClassName = isDisabled ? `custom-disabled-row` : className
@@ -380,6 +382,43 @@ const KendoDataTables = ({
     )
   }, [])
 
+  // const RedHighlightCell = (props) => {
+  //   const {
+  //     dataItem,
+  //     field,
+  //     tdProps,
+  //     children,
+  //     customModifiedCells,
+  //     allRedCell,
+  //   } = props
+  //   const rowId = dataItem.id
+  //   const value = dataItem[field]
+  //   // Highlight if edited
+  //   const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field)
+  //   // Highlight if part of allRedCell (MEG logic)
+  //   const month = monthMap[field?.toLowerCase()]
+  //   const normId = dataItem.materialFkId?.toLowerCase()
+  //   const isRedFromAllRedCell = allRedCell?.some(
+  //     (cell) =>
+  //       cell.month === month &&
+  //       cell.normParameterFKId?.toLowerCase() === normId,
+  //   )
+
+  //   const shouldHighlight = isEdited || isRedFromAllRedCell
+  //   console.log('RedHighlightCell', children)
+  //   return (
+  //     <td
+  //       {...tdProps}
+  //       title={value}
+  //       style={{
+  //         color: shouldHighlight ? 'orange' : undefined,
+  //         fontWeight: shouldHighlight ? 'bold' : undefined,
+  //       }}
+  //     >
+  //       {children}
+  //     </td>
+  //   )
+  // }
   const RedHighlightCell = (props) => {
     const {
       dataItem,
@@ -388,10 +427,12 @@ const KendoDataTables = ({
       children,
       customModifiedCells,
       allRedCell,
+      shouldFormatAsDecimal, // Add this prop when calling the component
     } = props
+
     const rowId = dataItem.id
     const value = dataItem[field]
-    // Highlight if edited
+
     const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field)
     // Highlight if part of allRedCell (MEG logic)
     const month = monthMap[field?.toLowerCase()]
@@ -404,6 +445,23 @@ const KendoDataTables = ({
 
     const shouldHighlight = isEdited || isRedFromAllRedCell
 
+    const formatChildren = (children) => {
+      if (children == null || children === '') return children
+
+      const numericValue = parseFloat(children)
+      if (!isNaN(numericValue)) {
+        const numStr = numericValue.toString()
+        const decimalIndex = numStr.indexOf('.')
+        if (decimalIndex !== -1 && numStr.length - decimalIndex - 1 > 4) {
+          return numericValue.toFixed(4)
+        }
+        return numericValue
+      }
+      return children
+    }
+
+    // ... rest of your logic
+
     return (
       <td
         {...tdProps}
@@ -413,7 +471,7 @@ const KendoDataTables = ({
           fontWeight: shouldHighlight ? 'bold' : undefined,
         }}
       >
-        {children}
+        {formatChildren(children)}
       </td>
     )
   }
@@ -1204,13 +1262,16 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                      data: (props) => {
+                        return (
+                          <RedHighlightCell
+                            {...props}
+                            customModifiedCells={customModifiedCells}
+                            allRedCell={allRedCell}
+                            shouldFormatAsDecimal={isFormatedNumber}
+                          />
+                        )
+                      },
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'

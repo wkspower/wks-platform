@@ -1,0 +1,50 @@
+[
+  {
+    "field": "productName",
+    "headerName": "Product Name",
+    "minWidth": 150,
+    "editable": false
+  },
+
+  {
+    "field": "monthNumber",
+    "headerName": "Month No",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "operatingHrs",
+    "headerName": "Operating Hrs",
+    "minWidth": 150,
+    "editable": false,
+    "type": "number"
+  },
+  {
+    "field": "avgMCU",
+    "headerName": "Avg MCU",
+    "minWidth": 150,
+    "editable": false,
+    "type": "number"
+  },
+  {
+    "field": "monthlyBudgetedProduction",
+    "headerName": "Monthly Budgeted Production",
+    "minWidth": 200,
+    "editable": false,
+    "type": "number"
+  },
+  {
+    "field": "demand",
+    "headerName": "Demand",
+    "minWidth": 150,
+    "editable": false,
+    "type": "number"
+  },
+  {
+    "field": "productionValue",
+    "headerName": "Production Value",
+    "minWidth": 150,
+    "editable": false,
+    "type": "number"
+  }
+]

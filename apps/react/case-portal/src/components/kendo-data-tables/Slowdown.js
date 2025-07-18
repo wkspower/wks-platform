@@ -444,31 +444,20 @@ const SlowDown = ({ permissions }) => {
   const fetchConfigurationData = async () => {
     setRows2([])
     setLoading(true)
+
     try {
       const { data } = await DataService.getSlowDownConfigurationData(keycloak)
 
       const formattedData = data.map((item, index) => {
-        const parsedItem = Object.entries(item).reduce((acc, [key, value]) => {
-          if (
-            typeof value === 'string' &&
-            !isNaN(value) &&
-            value.trim() !== ''
-          ) {
-            const parsedValue = parseFloat(value)
-            acc[key] = isNaN(parsedValue) ? value : parsedValue
-          } else {
-            acc[key] = value
-          }
-          return acc
-        }, {})
-
-        return {
-          ...parsedItem,
+        const formattedItem = {
+          ...item,
           id: index,
           particulars: item.DisplayName,
           Particulars: item?.NormTypeName,
           isEditable: item?.IsEditable,
         }
+
+        return formattedItem
       })
 
       setRows2(formattedData)
@@ -510,7 +499,6 @@ const SlowDown = ({ permissions }) => {
               type: 'number',
             }),
         }))
-
         setColDefs2(dynamicColDefs)
         fetchConfigurationData()
       } else {
@@ -753,6 +741,7 @@ const SlowDown = ({ permissions }) => {
           permissions={{ saveBtn: true, allAction: true }}
           handleCancelClick={handleCancelClick}
           groupBy='Particulars'
+          isFormatedNumber={true}
         />
       )}
     </div>

@@ -239,10 +239,6 @@ const SlowdownNormForMeg = () => {
   }, [keycloak, plantId, selectedYear, fetchSlowdownNormsColumns])
 
   const tablePermissions = useMemo(() => {
-    if (tableRows.length === 0) {
-      return { allAction: false }
-    }
-
     const isCurrentYear = isOldYear !== 1
     const hasCalculationResults = calculationResults.length > 0
 
@@ -273,6 +269,7 @@ const SlowdownNormForMeg = () => {
         fetchData={fetchSlowdownNormsColumns}
         permissions={tablePermissions}
         groupBy='Particulars'
+        isFormatedNumber={true}
       />
     </div>
   )
