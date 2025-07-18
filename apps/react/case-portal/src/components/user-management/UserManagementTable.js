@@ -98,7 +98,8 @@ const UserManagementTable = ({ keycloak }) => {
   }, [])
 
   const handleAddPlantSite = () => {
-    navigate('/user-form', { state: rows })
+     navigate(`/user-form`, { state: {rows,type:tabIndex,plantData:tempSelectedUsers[0]?.attributes?.plants[0]} })
+    //  navigate(`/user-form`,{state:rows})
   }
 
   // Fetch plant and site data.
@@ -324,7 +325,57 @@ const UserManagementTable = ({ keycloak }) => {
           )}
         />
       </Box>}
-      {tabIndex === 1 && <Box>Revoke access</Box>}
+      {tabIndex === 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
+        <Autocomplete
+          multiple
+          disableCloseOnSelect
+          filterSelectedOptions
+          open={open}
+          onOpen={() => setOpen(true)}
+          onClose={() => setOpen(false)}
+          options={searchOptions}
+          getOptionLabel={(opt) => opt.username}
+          value={tempSelectedUsers}
+          inputValue={inputValue} // controlled text :contentReference[oaicite:3]{index=3}
+          onInputChange={(e, newVal, reason) => {
+            if (reason === 'input') {
+              setInputValue(newVal)
+              handleSearchChange(newVal)
+            }
+          }}
+          onChange={(e, newSel) => {
+            setTempSelectedUsers(newSel)
+            finalizeSelection(newSel)
+            setInputValue('')
+            e.preventDefault()
+          }}
+          loading={loading}
+          noOptionsText='No users found'
+          sx={{ width: '100%' }}
+          renderOption={(props, option, { selected }) => {
+            const { id } = props
+            return (
+              <li key={id} {...props}>
+                <Checkbox checked={selected} style={{ marginRight: 8 }} />
+                <ListItemText primary={option.username} />
+              </li>
+            )
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label='Select Users'
+              variant='outlined'
+            // onKeyDown={(e) => {
+            //   if (e.key === 'Enter') {
+            //     finalizeSelection(tempSelectedUsers)
+            //     e.preventDefault()
+            //   }
+            // }}
+            />
+          )}
+        />
+      </Box>}
         <Button
                   variant='contained'
                   className='btn-save'

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Container,
   Box,
@@ -30,7 +30,9 @@ import DialogTitle from '@mui/material/DialogTitle'
 
 const UserAccessForm = ({ keycloak }) => {
   const location = useLocation()
-  const data = location.state || {}
+  const data = location?.state?.rows || {}
+  const type = location?.state?.type
+  
   const navigate = useNavigate()
 
   // Loading & Snackbar state
@@ -63,6 +65,77 @@ const UserAccessForm = ({ keycloak }) => {
   // Screens fetched per vertical (verticalId → [titles])
   const [screensByVertical, setScreensByVertical] = useState({})
 
+  
+  useEffect(() => {
+    if (type === 1) {
+      const plantData = location?.state?.plantData
+      const verticalIds = plantData ? JSON.parse(plantData) : null
+      const fVerticalIds = verticalIds?.map(v => Object.keys(v)[0]) 
+  
+      // console.log('---plantSiteData---',plantSiteData);
+      const selVerticals = plantSiteData.filter(pl => fVerticalIds.some(vi => vi === pl.id))
+      // console.log('---verticalIds---',selVerticals );
+      setSelectedVerticals(fVerticalIds)
+       const newVerticalSites = {}
+      fVerticalIds.forEach((verticalId) => {
+        const vertical = plantSiteData.find((v) => v.id === verticalId)
+        if (!vertical) return
+        const siteEntries = vertical.sites.reduce((acc, site) => {
+          if (
+            data.sites &&
+            (data.sites.includes(site.displayName) ||
+              data.sites.includes(site.name))
+          ) {
+            const matchedPlant = site.plants.find(
+              (plant) =>
+                data.plants &&
+                (data.plants.includes(plant.displayName) ||
+                  data.plants.includes(plant.name)),
+            )
+            acc.push({
+              site: site.id,
+              plants: [
+                {
+                  plantId: matchedPlant ? matchedPlant.id : '',
+                  screens: [],
+                  permissions: { read: false, write: false, approve: false },
+                },
+              ],
+            })
+          }
+          return acc
+        }, [])
+        newVerticalSites[verticalId] =
+          siteEntries.length > 0
+            ? siteEntries
+            : [
+              {
+                site: '',
+                plants: [
+                  {
+                    plantId: '',
+                    screens: [],
+                    permissions: {
+                      read: false,
+                      write: false,
+                      approve: false,
+                    },
+                  },
+                ],
+              },
+            ]
+      })
+      // console.log('---newVerticalSites---',newVerticalSites);
+      
+      setVerticalSites(newVerticalSites)
+    }
+
+
+  }, [type, location.state,plantSiteData ])
+  
+
+
+  
   // Check if data from navigation is empty. Redirect if so.
   useEffect(() => {
     if (Object.keys(data).length === 0) {
@@ -119,16 +192,17 @@ const UserAccessForm = ({ keycloak }) => {
   // Initialize verticalSites & default vertical selection when plantSiteData loads
   useEffect(() => {
     if (plantSiteData.length > 0) {
-      if (selectedVerticals.length === 0) {
+      if (selectedVerticals.length === 0 && type === 0) {
         setSelectedVerticals([plantSiteData[0].id])
       }
       setVerticalSites(getInitialVerticalSites(plantSiteData))
     }
-  }, [plantSiteData])
+  }, [plantSiteData, type])
 
   // Prepopulate vertical selections from navigation data if available
   useEffect(() => {
     if (plantSiteData.length > 0 && data && data.verticals) {
+      alert('runnn')
       const newSelectedVerticals = plantSiteData
         .filter(
           (vertical) =>
@@ -188,11 +262,11 @@ const UserAccessForm = ({ keycloak }) => {
       })
       setSelectedVerticals(newSelectedVerticals)
       setVerticalSites(newVerticalSites)
-    } else if (plantSiteData.length > 0 && !data.verticals) {
+    } else if (plantSiteData.length > 0 && !data.verticals && type === 0) {
       setSelectedVerticals([plantSiteData[0].id])
       setVerticalSites(getInitialVerticalSites(plantSiteData))
     }
-  }, [plantSiteData, data])
+  }, [plantSiteData, data, type])
 
   // Helper: Retrieve a vertical by ID
   const getVerticalById = (id) =>
