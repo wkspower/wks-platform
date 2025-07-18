@@ -41,6 +41,7 @@ public class CrackerConfigurationDTO {
     private Date shutDownStartDate;
 
     private Date shutDownEndDate;
+    private Boolean isEditable;
 
 
 

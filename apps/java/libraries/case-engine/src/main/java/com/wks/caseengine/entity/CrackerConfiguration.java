@@ -68,4 +68,10 @@ public class CrackerConfiguration {
 
     @Column(name = "DisplaySeq")
     private Integer displaySeq;
+    
+    @Column(name = "isEditable")
+    private Boolean isEditable;
+    
+    @Column(name = "isVisible")
+    private Boolean isVisible;
 }

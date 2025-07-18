@@ -86,7 +86,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@Autowired
 	private DecokeRunLengthRepository decokeRunLengthRepository;
-
+	
 	@Autowired
 	private CrackerConfigurationRepository crackerConfigurationRepository;
 
@@ -153,7 +153,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					map.put("preCoilId", row[8] != null ? row[8] : "");
 					map.put("postCoilId", row[9] != null ? row[9] : "");
 					map.put("isCoilId", row[10] != null ? row[10] : "");
-
+					
 					map.put("ibrSD", row[11] != null ? row[11] : "");
 					map.put("ibrED", row[12] != null ? row[12] : "");
 					map.put("taSD", row[13] != null ? row[13] : "");
@@ -870,60 +870,68 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@Override
 	public AOPMessageVM getDecokingActivitiesIBRData(String year, String plantId, String reportType) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<CrackerConfigurationDTO> crackerConfigurationDTOList = new ArrayList<>();
-		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<CrackerConfigurationDTO> crackerConfigurationDTOList = new ArrayList<>();
+	    Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-		String viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
-		try {
-			List<Object[]> crackerConfigurationList = findByYearAndPlantFkId(year, UUID.fromString(plantId), viewName);
-			for (Object[] row : crackerConfigurationList) {
-				CrackerConfigurationDTO dto = new CrackerConfigurationDTO();
+		String viewName="vwScrn"+vertical.getName()+"_"+site.getName()+"_DecokePlanningDates";
+	    try {
+	        List<Object[]> crackerConfigurationList = findByYearAndPlantFkId(year, UUID.fromString(plantId), viewName);
+	        for (Object[] row : crackerConfigurationList) {
+	            CrackerConfigurationDTO dto = new CrackerConfigurationDTO();
 
-				dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
-				dto.setName(row[1] != null ? row[1].toString() : null);
-				dto.setDisplayName(row[2] != null ? row[2].toString() : null);
+	            dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
+	            dto.setName(row[1] != null ? row[1].toString() : null);
+	            dto.setDisplayName(row[2] != null ? row[2].toString() : null);
 
-				dto.setIbrStartDate(row[3] != null ? (Date) row[3] : null);
-				dto.setIbrEndDate(row[4] != null ? (Date) row[4] : null);
-				dto.setTaStartDate(row[5] != null ? (Date) row[5] : null);
-				dto.setTaEndDate(row[6] != null ? (Date) row[6] : null);
-				dto.setShutDownStartDate(row[7] != null ? (Date) row[7] : null);
-				dto.setShutDownEndDate(row[8] != null ? (Date) row[8] : null);
+	            dto.setIbrStartDate(row[3] != null ? (Date) row[3] : null);
+	            dto.setIbrEndDate(row[4] != null ? (Date) row[4] : null);
+	            dto.setTaStartDate(row[5] != null ? (Date) row[5] : null);
+	            dto.setTaEndDate(row[6] != null ? (Date) row[6] : null);
+	            dto.setShutDownStartDate(row[7] != null ? (Date) row[7] : null);
+	            dto.setShutDownEndDate(row[8] != null ? (Date) row[8] : null);
 
-				dto.setPostCrDays(row[9] != null ? ((Number) row[9]).intValue() : null);
-				dto.setPreCrDays(row[10] != null ? ((Number) row[10]).intValue() : null);
-				dto.setIsCr(row[11] != null ? (Boolean) row[11] : null);
+	            dto.setPostCrDays(row[9] != null ? ((Number) row[9]).intValue() : null);
+	            dto.setPreCrDays(row[10] != null ? ((Number) row[10]).intValue() : null);
+	            dto.setIsCr(row[11] != null ? (Boolean) row[11] : null);
 
-				dto.setPlantFkId(row[12] != null ? UUID.fromString(row[12].toString()) : null);
-				dto.setAopYear(row[13] != null ? row[13].toString() : null);
+	            dto.setPlantFkId(row[12] != null ? UUID.fromString(row[12].toString()) : null);
+	            dto.setAopYear(row[13] != null ? row[13].toString() : null);
 	            dto.setRemarks(row[14] != null ? row[14].toString() : "");
-				dto.setDisplaySeq(row[15] != null ? ((Number) row[15]).intValue() : null);
+	            dto.setDisplaySeq(row[15] != null ? ((Number) row[15]).intValue() : null);
+	            Object val = row[16];
+	            if (val instanceof Number) {
+	                int i = ((Number) val).intValue();
+	                dto.setIsEditable(i != 0);
+	            } else if (val instanceof Boolean) {
+	                dto.setIsEditable((Boolean) val);
+	            } else {
+	                dto.setIsEditable(null); // or choose default
+	            }
 
-				crackerConfigurationDTOList.add(dto);
-			}
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(crackerConfigurationDTOList);
-			return aopMessageVM;
+	            crackerConfigurationDTOList.add(dto);
+	        }
 
-		} catch (IllegalArgumentException iae) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to update data", ex);
-		}
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(crackerConfigurationDTOList);
+	        return aopMessageVM;
+
+	    } catch (IllegalArgumentException iae) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to update data", ex);
+	    }
 	}
 
+	
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String viewName) {
 		try {
-			String sql = "SELECT "
-					+ "Id, Name, DisplayName, IBR_SD, IBR_ED, TA_SD, TA_ED, ShutDown_SD, ShutDown_ED, Post_CR_Days, Pre_CR_Days, IsCR, Plant_FK_Id, AOPYear, "
-					+ "Remarks, DisplaySeq FROM " + viewName + " "
-					+ "WHERE AOPYear = :year "
-					+ "AND Plant_FK_Id = :plantFkId "
-					+ "ORDER BY DisplaySeq";
+			String sql = "SELECT " + "Id, Name, DisplayName, IBR_SD, IBR_ED, TA_SD, TA_ED, ShutDown_SD, ShutDown_ED, Post_CR_Days, Pre_CR_Days, IsCR, Plant_FK_Id, AOPYear, "
+					+ "Remarks, DisplaySeq,isEditable FROM " + viewName + " "
+					+ "WHERE AOPYear = :year " + "AND Plant_FK_Id = :plantFkId ";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("year", year);
@@ -937,5 +945,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
 
 }
