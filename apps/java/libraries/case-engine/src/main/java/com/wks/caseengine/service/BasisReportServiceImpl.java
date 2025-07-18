@@ -81,6 +81,8 @@ public class BasisReportServiceImpl implements BasisReportService{
 				map.put("year", row[2]);
 				map.put("highRange", row[3]);
 				map.put("lowRange", row[4]);
+				map.put("lowerLimitPercent", row[5]);
+				map.put("upperLimitPercent", row[6]);
 				normBasisList.add(map); // Add the map to the list here
 			}
 			if (type.equalsIgnoreCase("MCU WITHIN RANGE")) {
