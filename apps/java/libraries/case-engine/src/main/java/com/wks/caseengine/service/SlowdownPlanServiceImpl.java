@@ -288,8 +288,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
 				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year,month);
 				if(normAttributeTransactions!=null) {
-					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
-					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					if(!(normAttributeTransactions.getAttributeValue().equals(normAttributeTransactionsDTO.getAttributeValue()))) {
+						normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+						normAttributeTransactions.setMaintenanceId(maintenanceId);
+						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+					}
 				}else {
 					normAttributeTransactions = new NormAttributeTransactions();
 			
@@ -320,6 +323,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	 	@Override
 	    public AOPMessageVM getSlowdownConfigurationData(String plantId, String year) {
 		 AOPMessageVM aopMessageVM = new AOPMessageVM();
+		 List<Map<String, Object>> monthIdList = new ArrayList<>();
 		 Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String procedureName = vertical.getName()+"_GetSlowdownNormConfiguration";
@@ -341,9 +345,30 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                }
 	                resultList.add(rowMap);
 	            }
+	            for (Map<String, Object> row : resultList) {
+	                String normId = (String) row.get("NormParameter_FK_Id");
+	                for (String key : row.keySet()) {
+	                    int idx = key.lastIndexOf('_');
+	                    if (idx > 0 && !key.equalsIgnoreCase("NormParameter_FK_Id")) {
+	                        String month = key.substring(idx + 1);
+	                        int monthNumber=extractMonthNumber(key);
+	                        NormAttributeTransactions normAttributeTransactions=  normAttributeTransactionsRepository.findByNormParameterFKIdAndAuditYear(UUID.fromString(normId),year,monthNumber);
+	                        if(normAttributeTransactions!=null) {
+	                        	Map<String, Object> m = new HashMap<>();
+		                        m.put("NormParameter_FK_Id", normId);
+		                        m.put("month", key);
+		                        monthIdList.add(m);
+	                        }
+	                        
+	                    }
+	                }
+	            }
+	            Map<String, Object> data = new HashMap<>();
+	            data.put("data", resultList);
+	            data.put("changedData", monthIdList);
 	            aopMessageVM.setCode(200);
-	    		aopMessageVM.setData(resultList);
-	    		aopMessageVM.setMessage("Data updated successfully");
+	    		aopMessageVM.setData(data);
+	    		aopMessageVM.setMessage("Data fetched successfully");
 	    		return aopMessageVM;
 	            
 	        } catch (Exception ex) {
