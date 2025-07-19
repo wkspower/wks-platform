@@ -112,6 +112,14 @@ export const ibrPlanColumns = [
     width: 200,
     filter: false,
   },
+  {
+    field: 'remarks',
+    title: 'Remarks',
+    editable: true,
+    width: 200,
+    filter: false,
+  },
+
 ]
 export const ibrGridThree = [
   {

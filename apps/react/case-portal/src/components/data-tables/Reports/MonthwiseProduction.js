@@ -146,7 +146,7 @@ const MonthwiseProduction = () => {
       children: [
         {
           groupId: 'cy-eoe',
-          headerName: 'EOE Production, MT',
+          headerName: 'Production, MT',
           children: [
             { field: 'EOEProdBudget' }, // was eoeBudgetCY
             { field: 'EOEProdActual' }, // was eoeActualCY

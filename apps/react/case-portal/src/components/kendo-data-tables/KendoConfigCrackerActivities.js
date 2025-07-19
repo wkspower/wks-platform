@@ -7,6 +7,7 @@ import moment from '../../../node_modules/moment/moment.js'
 import { ibrGridThree, ibrPlanColumns } from './columnDefs'
 import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
 import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
+import { validateFields } from 'utils/validationUtils'
 const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']
@@ -117,7 +118,7 @@ const DecokingConfig = () => {
                 ...item,
                 idFromApi: item.id,
                 id: index,
-                remarks: item?.remarks || '',
+                originalRemark: item?.remarks || '',
                 ibrStartDate: toDateObject(item.ibrStartDate),
                 ibrEndDate: toDateObject(item.ibrEndDate),
                 taStartDate: toDateObject(item.taStartDate),
@@ -206,7 +207,21 @@ const DecokingConfig = () => {
         return
       }
       var rawData = Object.values(modifiedCellsSdTa)
+      const requiredFields = [
+        'idFromApi',
+        'remarks'
+      ]
 
+      const validationMessage = validateFields(rawData, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
       postIbr(rawData)
     } catch (error) {
       console.log('Error saving changes:', error)
@@ -257,7 +272,7 @@ const DecokingConfig = () => {
 
         preCrDays: row?.preCrDays ? Number(row.preCrDays) : null,
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
-
+        remarks: row.remarks || '',
         isCr: row?.isCr ? true : false,
       }))
 

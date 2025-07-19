@@ -7,7 +7,7 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 import KendoDataTables from './index'
-
+import { validateFields } from 'utils/validationUtils'
 const MaintenanceTable = () => {
   const keycloak = useSession()
   const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
@@ -23,12 +23,12 @@ const MaintenanceTable = () => {
         lowerVertName === 'cracker'
           ? DataService.getCrackerMaintenanceData
           : DataService.getMaintenanceData,
-      // editable: lowerVertName === 'cracker',
-      editable: false,
+       editable: lowerVertName === 'cracker',
+      //editable: false,
     }),
     [lowerVertName],
   )
-
+console.log('Data Config:', dataConfig);
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const [_plantID, set_PlantID] = useState('')
@@ -77,13 +77,13 @@ const MaintenanceTable = () => {
         return
       }
 
-      // const validationMessage = validateFields(data, ['remarks'])
-      // if (validationMessage) {
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({ message: validationMessage, severity: 'error' })
-      //   setLoading(false)
-      //   return
-      // }
+      const validationMessage = validateFields(data, ['remarks'])
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({ message: validationMessage, severity: 'error' })
+        setLoading(false)
+        return
+      }
 
       await saveCrackerMaintenanceData(data)
     } catch (err) {
@@ -374,11 +374,11 @@ const MaintenanceTable = () => {
           editButton: false,
           showUnit: false,
           saveWithRemark: false,
-          // saveBtn: dataConfig.isCracker,
-          // allAction: dataConfig.isCracker,
+          saveBtn: dataConfig.isCracker,
+          allAction: dataConfig.isCracker,
 
-          saveBtn: false,
-          allAction: false,
+          saveBtn: true,
+          //allAction: false,
           showRefresh: false,
         },
         oldYear?.oldYear,

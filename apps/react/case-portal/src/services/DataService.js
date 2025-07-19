@@ -3121,8 +3121,7 @@ async function getCrackerMaintenanceData(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function saveCrackerMaintenance(payload, keycloak) {
-  const { plantId, year, decokePlanningDTOList } = payload
+async function saveCrackerMaintenance({ plantId, year, decokePlanningDTOList }, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',

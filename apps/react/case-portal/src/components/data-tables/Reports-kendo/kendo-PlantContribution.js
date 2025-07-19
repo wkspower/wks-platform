@@ -7,18 +7,25 @@ import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { DataService } from 'services/DataService'
 import { MockReportService } from './mockPlantContributionAPI'
 
-const categories = [
-  {
-    key: 'ProductMixAndProduction',
-    title: 'Plant Contribution (T-21)- MEG\nProduct mix and Production',
-  },
-  { key: 'ByProducts', title: 'By products' },
-  { key: 'RawMaterial', title: 'Raw material' },
-  { key: 'CatChem', title: 'Cat chem' },
-  { key: 'Utilities', title: 'Utilities' },
-  { key: 'OtherVariableCost', title: 'Other Variable Cost' },
-  { key: 'ProductionCostCalculations', title: 'Production Cost Calculation' },
-]
+const categories = () => {
+  const verticalName = JSON.parse(localStorage.getItem('selectedVertical'))?.name?.toLowerCase()
+
+  return [
+    {
+      key: 'ProductMixAndProduction',
+      title:
+        verticalName === 'meg'
+          ? 'Plant Contribution (T-21) - MEG\nProduct mix and Production'
+          : 'Plant Contribution (T-21)\nProduct mix and Production',
+    },
+    { key: 'ByProducts', title: 'By products' },
+    { key: 'RawMaterial', title: 'Raw material' },
+    { key: 'CatChem', title: 'Cat chem' },
+    { key: 'Utilities', title: 'Utilities' },
+    { key: 'OtherVariableCost', title: 'Other Variable Cost' },
+    { key: 'ProductionCostCalculations', title: 'Production Cost Calculation' },
+  ]
+}
 
 export default function PlantContribution() {
   const keycloak = useSession()
@@ -42,7 +49,7 @@ export default function PlantContribution() {
     const out = {}
 
     await Promise.all(
-      categories.map(async ({ key }) => {
+      categories().map(async ({ key }) => {
         const { columns, columnGrouping } = await MockReportService.getReport({
           category: key,
           year,
@@ -160,7 +167,6 @@ export default function PlantContribution() {
         prevYearActual: row.PrevYearActual,
         PrevYearBudget: row.PrevYearBudget,
         CurrentYearBudget: row.CurrentYearBudget,
-
         remark: row.remarks || '',
       }))
       const res = await DataService.savePlantContributionData(
@@ -203,7 +209,7 @@ export default function PlantContribution() {
       ></Backdrop>
 
       {/* Main Categories Except 'OtherVariableCost' */}
-      {categories
+      {categories()
         .filter(({ key }) => key !== 'OtherVariableCost')
         .map(({ key, title }, idx) => {
           const rpt = reports[key] || {}

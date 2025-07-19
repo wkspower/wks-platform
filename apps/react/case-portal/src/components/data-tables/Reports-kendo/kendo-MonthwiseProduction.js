@@ -175,6 +175,46 @@ const MonthwiseProduction = () => {
       editable: true,
     },
   ]
+const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
+const verticalName = vertical?.toLowerCase()
+const isPEVertical = verticalName === 'pe'
+
+
+const filteredColumns = columns.map((topGroup) => {
+  if (!topGroup.children) return topGroup
+
+  const filteredChildren = topGroup.children
+    .map((child) => {
+      // Handle nested children
+      if (child.children) {
+        const filteredGrandChildren = child.children.filter((fieldDef) => {
+          if (isPEVertical) {
+            return (
+              fieldDef.field !== 'EOThroughput' &&
+              fieldDef.field !== 'EOEThroughput'
+            )
+          }
+          return true
+        })
+        return { ...child, children: filteredGrandChildren }
+      }
+
+      // Handle direct children (1-level)
+      if (isPEVertical) {
+        if (
+          child.field === 'EOThroughput' ||
+          child.field === 'EOEThroughput'
+        ) {
+          return null
+        }
+      }
+
+      return child
+    })
+    .filter(Boolean) // remove nulls
+
+  return { ...topGroup, children: filteredChildren }
+})
 
   const [rows, setRows] = useState()
 
@@ -385,7 +425,7 @@ const MonthwiseProduction = () => {
         title='Monthwise Production (T-16)'
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        columns={columns}
+        columns={filteredColumns}
         permissions={{
           customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',
