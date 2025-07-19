@@ -16,13 +16,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DecokePlanningDTO {
 
-    private UUID id;
+	private UUID id;
     private String monthName;
     private Integer ibr;
     private Integer mnt;
     private Integer shutdown;
     private Integer sad;
-    private Integer bud;
+    private Integer totalSAD;
+    private Integer bbu;
     private Integer demoHSS;
     private Integer demoBBU;
     private Integer demoSAD;
@@ -34,4 +35,9 @@ public class DecokePlanningDTO {
     private String aopYear;
     private UUID plantId;
     private String remarks;
+    private Integer slowdown;
+    private Integer bbd;
+    private Integer demoSD;
+    private Integer numberOfDays;
+    private Integer coilReplacement;	    
 }
