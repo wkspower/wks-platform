@@ -424,7 +424,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    List<Map<String, String>> listOfMaps = new ArrayList<>();
 
-	    // 1. Add static "Particulars" column
+	    
 	    {
 	        Map<String, String> map = new HashMap<>();
 	        map.put("field", "particulars");
@@ -432,7 +432,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        listOfMaps.add(map);
 	    }
 
-	    // 2. Prepare month-regex pattern
+	    
 	    List<String> months = Arrays.asList(
 	        "January", "February", "March", "April", "May", "June",
 	        "July", "August", "September", "October", "November", "December"
@@ -446,7 +446,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			String procedureName = vertical.getName()+"_GetSlowdownNormConfiguration";
 	        List<String> data = getColumnNames(procedureName, plantId.toString(), auditYear);
 
-	        // 3. Process each dynamic column
+	       
 	        for (String row : data) {
 	            Map<String, String> map = new HashMap<>();
 	            map.put("field", row);
@@ -478,16 +478,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	}
 	
 	public static int extractMonthNumber(String description) {
-        // 1. Grab the suffix after the last underscore
+        
         int u = description.lastIndexOf('_');
         if (u < 0 || u == description.length() - 1) {
             throw new IllegalArgumentException("No month suffix found.");
         }
         String monthName = description.substring(u + 1);
         try {
-            // 2. Map it to month number (1-12) using Month enum
+            
             Month m = Month.valueOf(monthName.toUpperCase());
-            return m.getValue(); // = 1 for Jan … 7 for July … 12 for Dec
+            return m.getValue(); 
         } catch (Exception ex) {
             throw new IllegalArgumentException("Unknown month: " + monthName, ex);
         }
