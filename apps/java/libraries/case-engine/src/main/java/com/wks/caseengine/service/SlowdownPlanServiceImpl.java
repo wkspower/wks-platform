@@ -286,29 +286,36 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				
 				//UUID maintenanceId=plantMaintenanceTransactionRepository.findIdByNormIdAndDiscription(normAttributeTransactionsDTO.getDescription(),normAttributeTransactionsDTO.getNormParameterFKId());
 				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
-				NormAttributeTransactions  normAttributeTransactions= normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(normAttributeTransactionsDTO.getMaintenanceId(),normAttributeTransactionsDTO.getNormParameterFKId(),year,month);
-				if(normAttributeTransactions!=null) {
-					if(!(normAttributeTransactions.getAttributeValue().equals(normAttributeTransactionsDTO.getAttributeValue()))) {
-						normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
-						normAttributeTransactions.setMaintenanceId(maintenanceId);
-						normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
+				List<NormAttributeTransactions> existingList = normAttributeTransactionsRepository
+					    .findByMaintenanceIdAndNormParameterFKIdAndAuditYear(
+					        normAttributeTransactionsDTO.getMaintenanceId(),
+					        normAttributeTransactionsDTO.getNormParameterFKId(),
+					        year,
+					        month
+					    );
+
+					if (existingList != null && !existingList.isEmpty()) {
+					    for (NormAttributeTransactions existing : existingList) {
+					        if (!Objects.equals(existing.getAttributeValue(), normAttributeTransactionsDTO.getAttributeValue())) {
+					            existing.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					            normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(existing));
+					        }
+					    }
+					} else {
+					    NormAttributeTransactions nat = new NormAttributeTransactions();
+					    plantMaintenanceTransactionRepository.findById(maintenanceId).ifPresent(pmt -> {
+					        nat.setAopMonth(pmt.getMaintForMonth());
+					    });
+
+					    nat.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					    nat.setAttributeValueVersion("v1");
+					    nat.setAuditYear(year);
+					    nat.setCreatedOn(new Date());
+					    nat.setMaintenanceId(maintenanceId);
+					    nat.setNormParameterFKId(normAttributeTransactionsDTO.getNormParameterFKId());
+					    nat.setUserName("System");
+					    normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(nat));
 					}
-				}else {
-					normAttributeTransactions = new NormAttributeTransactions();
-			
-					Optional<PlantMaintenanceTransaction> PlantMaintenanceTransactionopt=plantMaintenanceTransactionRepository.findById(maintenanceId);
-					if(PlantMaintenanceTransactionopt.isPresent()) {
-						normAttributeTransactions.setAopMonth(PlantMaintenanceTransactionopt.get().getMaintForMonth());
-					}	
-					normAttributeTransactions.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
-					normAttributeTransactions.setAttributeValueVersion("v1");
-					normAttributeTransactions.setAuditYear(year);
-					normAttributeTransactions.setCreatedOn(new Date());
-					normAttributeTransactions.setMaintenanceId(normAttributeTransactionsDTO.getMaintenanceId());
-					normAttributeTransactions.setNormParameterFKId(normAttributeTransactionsDTO.getNormParameterFKId());
-					normAttributeTransactions.setUserName("System");
-					normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
-				}
 			}
 		}catch (Exception ex) {
 			ex.printStackTrace();
