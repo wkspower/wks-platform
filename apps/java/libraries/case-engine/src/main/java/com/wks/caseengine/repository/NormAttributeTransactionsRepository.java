@@ -188,7 +188,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
             "WHERE  PlantMaintenanceTransaction_FK_Id IS NOT NULL " +
             "AND NormParameter_FK_Id = :normParameterFKId " +
             "AND AuditYear = :auditYear AND AOPMonth = :month", nativeQuery = true)
-	NormAttributeTransactions findByNormParameterFKIdAndAuditYear(
+	List<NormAttributeTransactions> findByNormParameterFKIdAndAuditYear(
 	     @Param("normParameterFKId") UUID normParameterFKId,
 	     @Param("auditYear") String auditYear,
 	     @Param("month") int month

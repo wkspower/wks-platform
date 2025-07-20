@@ -352,13 +352,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    if (idx > 0 && !key.equalsIgnoreCase("NormParameter_FK_Id")) {
 	                        String month = key.substring(idx + 1);
 	                        int monthNumber=extractMonthNumber(key);
-	                        NormAttributeTransactions normAttributeTransactions=  normAttributeTransactionsRepository.findByNormParameterFKIdAndAuditYear(UUID.fromString(normId),year,monthNumber);
-	                        if(normAttributeTransactions!=null) {
-	                        	Map<String, Object> m = new HashMap<>();
-		                        m.put("NormParameter_FK_Id", normId);
-		                        m.put("month", key);
-		                        monthIdList.add(m);
+	                        List<NormAttributeTransactions> normAttributeTransactionsList=  normAttributeTransactionsRepository.findByNormParameterFKIdAndAuditYear(UUID.fromString(normId),year,monthNumber);
+	                        for(NormAttributeTransactions normAttributeTransactions: normAttributeTransactionsList) {
+	                        	if(normAttributeTransactions!=null) {
+		                        	Map<String, Object> m = new HashMap<>();
+			                        m.put("NormParameter_FK_Id", normId);
+			                        m.put("month", key);
+			                        monthIdList.add(m);
+		                        }
 	                        }
+	                        
 	                        
 	                    }
 	                }
