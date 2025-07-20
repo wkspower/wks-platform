@@ -288,7 +288,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
 				List<NormAttributeTransactions> existingList = normAttributeTransactionsRepository
 					    .findByMaintenanceIdAndNormParameterFKIdAndAuditYear(
-					        normAttributeTransactionsDTO.getMaintenanceId(),
 					        normAttributeTransactionsDTO.getNormParameterFKId(),
 					        year,
 					        month
