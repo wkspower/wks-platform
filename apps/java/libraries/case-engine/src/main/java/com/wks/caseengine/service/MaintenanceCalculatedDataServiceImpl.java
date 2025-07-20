@@ -137,7 +137,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 				map.put("fourFHours", row[17]);
 				map.put("aopYear", row[18]);
 				map.put("plantId", row[19]);
-				String remarks = row[20] == null ? "" : row[17].toString();
+				String remarks = row[20] == null ? "" : row[20].toString();
 				map.put("remarks", remarks);
 				map.put("totalSAD", row[21]);
 				map.put("numberOfDays", row[22]);
@@ -206,27 +206,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 						.findById(decokePlanningDTO.getId());
 				if (decokePlanningop.isPresent()) {
 					DecokePlanning decokePlanning = decokePlanningop.get();
-					decokePlanning.setId(decokePlanningDTO.getId());
-					decokePlanning.setMonthName(decokePlanningDTO.getMonthName());
-					decokePlanning.setIbr(decokePlanningDTO.getIbr());
 					decokePlanning.setMnt(decokePlanningDTO.getMnt());
-					decokePlanning.setShoutdown(decokePlanningDTO.getShutdown());  // or setShutdown if your entity uses that
-					decokePlanning.setSad(decokePlanningDTO.getSad());
-					decokePlanning.setBbu(decokePlanningDTO.getBbu());
-					decokePlanning.setDemoHss(decokePlanningDTO.getDemoHSS());
-					decokePlanning.setDemoBbu(decokePlanningDTO.getDemoBBU());
-					decokePlanning.setDemoSad(decokePlanningDTO.getDemoSAD());
-					decokePlanning.setFourFd(decokePlanningDTO.getFourFD());
-					decokePlanning.setFourF(decokePlanningDTO.getFourF());
-					decokePlanning.setFiveF(decokePlanningDTO.getFiveF());
-					decokePlanning.setTotal(decokePlanningDTO.getTotal());
-					decokePlanning.setFourFHours(decokePlanningDTO.getFourFHours());
-					decokePlanning.setAopYear(decokePlanningDTO.getAopYear());
-					decokePlanning.setPlantId(decokePlanningDTO.getPlantId());
 					decokePlanning.setRemarks(decokePlanningDTO.getRemarks());
-					decokePlanning.setSlowdown(decokePlanningDTO.getSlowdown());
-					decokePlanning.setBbd(decokePlanningDTO.getBbd());
-					decokePlanning.setDemoSd(decokePlanningDTO.getDemoSD());
 					decokePlanningList.add(decokePlanningRepository.save(decokePlanning));
 				}
 			}
