@@ -90,37 +90,9 @@ public class KeycloakUserService {
 		    Object roleObj = data.get("role");
 
 		    // Step 1: Build plantMapping structure
-		    List<Map<String, List<Map<String, List<String>>>>> plantMapping = new ArrayList<>();
+		    List<Map<String, List<Map<String, List<String>>>>> plantMapping = buildPlantMapping(attrObj);
 
-		    if (attrObj instanceof Map) {
-		        Map<String, Object> attrMap = (Map<String, Object>) attrObj;
-		        List<Map<String, Object>> plants = (List<Map<String, Object>>) attrMap.get("plants");
-
-		        for (Map<String, Object> vertical : plants) {
-		            String verticalId = (String) vertical.get("verticalId");
-		            List<Map<String, Object>> sites = (List<Map<String, Object>>) vertical.get("sites");
-
-		            List<Map<String, List<String>>> siteEntries = new ArrayList<>();
-
-		            for (Map<String, Object> site : sites) {
-		                String siteId = (String) site.get("siteId");
-		                List<Map<String, Object>> plantList = (List<Map<String, Object>>) site.get("plants");
-
-		                List<String> plantIds = new ArrayList<>();
-
-		                for (Map<String, Object> plant : plantList) {
-		                    String plantId = (String) plant.get("plantId");
-		                    plantIds.add(plantId);
-		                }
-
-		                siteEntries.add(Map.of(siteId, plantIds));
-		            }
-
-		            plantMapping.add(Map.of(verticalId, siteEntries));
-		        }
-		    }
-
-		 // Step 2: Loop through each userId
+		    // Step 2: Loop through each userId
 		    for (String userId : new HashSet<>(userIds)) {
 		        UserResource userResource = keycloak.realm(keycloakRealmName).users().get(userId);
 		        UserRepresentation user = userResource.toRepresentation();
@@ -152,19 +124,7 @@ public class KeycloakUserService {
 		                        plantIds.add(plantId);
 
 		                        ObjectMapper objectMapper = new ObjectMapper();
-		                        String permissionsString = objectMapper.writeValueAsString(permissions);
-		                        
-//		                        for (String screen : screens) {
-//			                        UserScreenMapping userScreenMapping = new UserScreenMapping();
-//			                        userScreenMapping.setId(UUID.randomUUID());
-//			                        userScreenMapping.setUserId(UUID.fromString(userId));
-//			                        userScreenMapping.setPlantFKId(UUID.fromString(plantId));
-//			                        userScreenMapping.setVerticalFKId(UUID.fromString(verticalId));
-//			                        userScreenMapping.setScreenCode(screen);
-//			                        userScreenMapping.setPermissions(permissionsString);
-//			                        
-//			                        userScreenMappingRepository.save(userScreenMapping);
-//		                        }
+		                        String permissionsString = objectMapper.writeValueAsString(permissions);	                        
 		                        
 		                        List<UserScreenMapping> existingMappings = userScreenMappingRepository
 		                        	    .findByUserIdAndPlantFKIdAndVerticalFKId(
@@ -346,6 +306,128 @@ public class KeycloakUserService {
 	    }
 
 	    return result;
+	}
+
+	public Map<String, Object> revokeUserAccess(String userId, Map<String, Object> data) throws Exception {
+		Map<String, Object> result = new HashMap<>();
+		Keycloak keycloak = keycloakAdminClient.getInstance();
+
+		try {
+			UserResource userResource = keycloak.realm(keycloakRealmName).users().get(userId);
+			UserRepresentation user = userResource.toRepresentation();
+
+			Object attrObj = data.get("attributes");
+			Object roleObj = data.get("role");
+
+		    List<Map<String, List<Map<String, List<String>>>>> plantMapping = buildPlantMapping(attrObj);
+
+			// Prepare mapping for this user
+			List<Map<String, List<Map<String, List<String>>>>> userPlantMapping = new ArrayList<>();
+
+			if (attrObj instanceof Map) {
+				Map<String, Object> attrMap = (Map<String, Object>) attrObj;
+				List<Map<String, Object>> plants = (List<Map<String, Object>>) attrMap.get("plants");
+
+				for (Map<String, Object> vertical : plants) {
+					String verticalId = (String) vertical.get("verticalId");
+					List<Map<String, Object>> sites = (List<Map<String, Object>>) vertical.get("sites");
+
+					List<Map<String, List<String>>> siteEntries = new ArrayList<>();
+
+					for (Map<String, Object> site : sites) {
+						String siteId = (String) site.get("siteId");
+						List<Map<String, Object>> plantList = (List<Map<String, Object>>) site.get("plants");
+
+						List<String> plantIds = new ArrayList<>();
+
+						for (Map<String, Object> plant : plantList) {
+							String plantId = (String) plant.get("plantId");
+							List<String> screens = (List<String>) plant.get("screens");
+							List<String> permissions = (List<String>) plant.get("permission");
+
+							plantIds.add(plantId);
+
+							ObjectMapper objectMapper = new ObjectMapper();
+							String permissionsString = objectMapper.writeValueAsString(permissions);
+
+							userScreenMappingRepository.deleteAllByUserId(userId);
+							List<UserScreenMapping> newMappings = new ArrayList<>();
+
+							for (String screen : screens) {
+								UserScreenMapping userScreenMapping = new UserScreenMapping();
+								userScreenMapping.setId(UUID.randomUUID());
+								userScreenMapping.setUserId(UUID.fromString(userId));
+								userScreenMapping.setPlantFKId(UUID.fromString(plantId));
+								userScreenMapping.setVerticalFKId(UUID.fromString(verticalId));
+								userScreenMapping.setScreenCode(screen);
+								userScreenMapping.setPermissions(permissionsString);
+
+								newMappings.add(userScreenMapping);
+							}
+
+							userScreenMappingRepository.saveAll(newMappings);
+						}
+
+						siteEntries.add(Map.of(siteId, plantIds));
+					}
+
+					userPlantMapping.add(Map.of(verticalId, siteEntries));
+				}
+			}
+
+			System.out.println("User screen mapping saved.");
+
+			Map<String, List<String>> attributes = Optional.ofNullable(user.getAttributes()).orElseGet(HashMap::new);
+
+			ObjectMapper objectMapper = new ObjectMapper();
+
+			String finalPlantMappingJson = objectMapper.writeValueAsString(plantMapping);
+			attributes.put("plants", Collections.singletonList(finalPlantMappingJson));
+			user.setAttributes(attributes);
+			userResource.update(user);
+
+			System.out.println("User attributes updated..");
+
+			result.put("status", 200);
+			result.put("message", "User access revoked successfully.");
+			result.put("data", user);
+		} catch (Exception ex) {
+			throw new Exception("Failed to revoke user access: " + ex.getMessage(), ex);
+		}
+
+		return result;
+	}
+	
+	private List<Map<String, List<Map<String, List<String>>>>> buildPlantMapping(Object attrObj) {
+	    if (!(attrObj instanceof Map)) {
+	        return new ArrayList<>();
+	    }
+
+	    Map<String, Object> attrMap = (Map<String, Object>) attrObj;
+	    List<Map<String, Object>> plants = (List<Map<String, Object>>) attrMap.get("plants");
+	    List<Map<String, List<Map<String, List<String>>>>> plantMapping = new ArrayList<>();
+
+	    for (Map<String, Object> vertical : plants) {
+	        String verticalId = (String) vertical.get("verticalId");
+	        List<Map<String, Object>> sites = (List<Map<String, Object>>) vertical.get("sites");
+
+	        List<Map<String, List<String>>> siteEntries = new ArrayList<>();
+
+	        for (Map<String, Object> site : sites) {
+	            String siteId = (String) site.get("siteId");
+	            List<Map<String, Object>> plantList = (List<Map<String, Object>>) site.get("plants");
+
+	            List<String> plantIds = new ArrayList<>();
+	            for (Map<String, Object> plant : plantList) {
+	                plantIds.add((String) plant.get("plantId"));
+	            }
+
+	            siteEntries.add(Map.of(siteId, plantIds));
+	        }
+
+	        plantMapping.add(Map.of(verticalId, siteEntries));
+	    }
+	    return plantMapping;
 	}
 
 }
