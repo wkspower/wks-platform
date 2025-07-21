@@ -1,7 +1,5 @@
 package com.wks.caseengine.dto;
 
-
-
 import org.springframework.context.annotation.Configuration;
 
 import lombok.AllArgsConstructor;
@@ -15,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class SpyroInputDTO {
-	
-	private String VerticalFKId;
+
+    private String VerticalFKId;
     private String PlantFKId;
     private String NormParameterFKID;
     private String Particulars;
@@ -39,5 +37,8 @@ public class SpyroInputDTO {
     private Double Oct;
     private Double Nov;
     private Double Dec;
+
+    private String saveStatus;
+    private String errDescription;
 
 }
