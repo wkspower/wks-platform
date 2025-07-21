@@ -288,6 +288,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				normAttributeTransactionsDTO.setMaintenanceId(maintenanceId);
 				List<NormAttributeTransactions> existingList = normAttributeTransactionsRepository
 					    .findByMaintenanceIdAndNormParameterFKIdAndAuditYear(
+					        normAttributeTransactionsDTO.getMaintenanceId(),
 					        normAttributeTransactionsDTO.getNormParameterFKId(),
 					        year,
 					        month
@@ -358,7 +359,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    if (idx > 0 && !key.equalsIgnoreCase("NormParameter_FK_Id")) {
 	                        String month = key.substring(idx + 1);
 	                        int monthNumber=extractMonthNumber(key);
-	                        List<NormAttributeTransactions> normAttributeTransactionsList=  normAttributeTransactionsRepository.findByNormParameterFKIdAndAuditYear(UUID.fromString(normId),year,monthNumber);
+	                        String cleanDesc = stripTrailingSuffix(key);
+	                        UUID maintenanceId=plantMaintenanceTransactionRepository.findTransactionIdByDynamicParams("Slowdown",year,UUID.fromString(plantId),cleanDesc);
+	                        List<NormAttributeTransactions> normAttributeTransactionsList=  normAttributeTransactionsRepository.findByMaintenanceIdAndNormParameterFKIdAndAuditYear(maintenanceId,UUID.fromString(normId),year,monthNumber);
 	                        for(NormAttributeTransactions normAttributeTransactions: normAttributeTransactionsList) {
 	                        	if(normAttributeTransactions!=null) {
 		                        	Map<String, Object> m = new HashMap<>();
