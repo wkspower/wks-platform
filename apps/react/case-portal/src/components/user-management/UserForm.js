@@ -79,32 +79,74 @@ const UserAccessForm = ({ keycloak }) => {
        const newVerticalSites = {}
       fVerticalIds.forEach((verticalId) => {
         const vertical = plantSiteData.find((v) => v.id === verticalId)
+        
         if (!vertical) return
-        const siteEntries = vertical.sites.reduce((acc, site) => {
-          if (
-            data.sites &&
-            (data.sites.includes(site.displayName) ||
-              data.sites.includes(site.name))
-          ) {
-            const matchedPlant = site.plants.find(
-              (plant) =>
-                data.plants &&
-                (data.plants.includes(plant.displayName) ||
-                  data.plants.includes(plant.name)),
-            )
-            acc.push({
-              site: site.id,
-              plants: [
-                {
-                  plantId: matchedPlant ? matchedPlant.id : '',
-                  screens: [],
-                  permissions: { read: false, write: false, approve: false },
-                },
-              ],
-            })
+        let siteEntries = []
+        vertical.sites.forEach(site => {
+          let sitePlants = []
+          site.plants.forEach(plant => {
+              const plantObj = {
+                plantId:plant.id,
+                screens:[
+                    "menu.catalystSelectivity",
+                    "menu.productMCUVal",
+                    "menu.productDemand",
+                    "menu.shutdownPlan",
+                    "menu.slowdownPlan",
+                    "menu.maintenanceDetails",
+                    "menu.productionNorms",
+                    "menu.normalOpNorms",
+                    "menu.shutdownNorms",
+                    "menu.slowdownNorms",
+                    "menu.consumptionNorms",
+                    "menu.feedStock",
+                    "menu.productionVolumeDataBasis",
+                    "menu.normsHistorianBasis",
+                    "menu.annualAopCostReport",
+                    "menu.workflow",
+                    "menu.userManage"
+                  ],
+                permissions:{
+                  "read": false,
+                  "write": false,
+                  "approve": false
+                }
+              }
+              sitePlants.push(plantObj)
+          });
+          const siteObj = {
+            site:site.id,
+            plants:sitePlants
           }
-          return acc
-        }, [])
+          siteEntries.push(siteObj)
+        });
+        
+        // const siteEntries = vertical.sites.reduce((acc, site) => {
+        //   if (
+        //     data.sites &&
+        //     (data.sites.includes(site.displayName) ||
+        //       data.sites.includes(site.name))
+        //     // true
+        //   ) {
+        //     const matchedPlant = site.plants.find(
+        //       (plant) =>
+        //         data.plants &&
+        //         (data.plants.includes(plant.displayName) ||
+        //           data.plants.includes(plant.name)),
+        //     )
+        //     acc.push({
+        //       site: site.id,
+        //       plants: [
+        //         {
+        //           plantId: matchedPlant ? matchedPlant.id : '',
+        //           screens: [],
+        //           permissions: { read: false, write: false, approve: false },
+        //         },
+        //       ],
+        //     })
+        //   }
+        //   return acc
+        // }, [])
         newVerticalSites[verticalId] =
           siteEntries.length > 0
             ? siteEntries
@@ -125,7 +167,6 @@ const UserAccessForm = ({ keycloak }) => {
               },
             ]
       })
-      // console.log('---newVerticalSites---',newVerticalSites);
       
       setVerticalSites(newVerticalSites)
     }
@@ -191,8 +232,8 @@ const UserAccessForm = ({ keycloak }) => {
 
   // Initialize verticalSites & default vertical selection when plantSiteData loads
   useEffect(() => {
-    if (plantSiteData.length > 0) {
-      if (selectedVerticals.length === 0 && type === 0) {
+    if (plantSiteData.length > 0 && type === 0) {
+      if (selectedVerticals.length === 0) {
         setSelectedVerticals([plantSiteData[0].id])
       }
       setVerticalSites(getInitialVerticalSites(plantSiteData))
