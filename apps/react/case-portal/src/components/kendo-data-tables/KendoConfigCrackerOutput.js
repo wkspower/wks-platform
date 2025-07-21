@@ -624,22 +624,14 @@ const CrackerConfig = () => {
     const mode = selectMode;          // Can be empty — that's fine
   
     try {
-      const response = await DataService.exportSpyroOutputExcel(
+      await DataService.exportSpyroOutputExcel(
         keycloak,
         mode
       );
-  
-      if (response?.code === 200) {
         setSnackbarData({
           message: 'Excel download completed successfully!',
           severity: 'success',
         });
-      } else {
-        setSnackbarData({
-          message: 'Failed to download Excel.',
-          severity: 'error',
-        });
-      }
     } catch (error) {
       console.error('Error downloading Excel:', error);
       setSnackbarData({

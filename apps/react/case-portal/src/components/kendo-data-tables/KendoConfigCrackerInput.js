@@ -78,7 +78,31 @@ const CrackerConfig = () => {
   const [selectMode, setSelectMode] = useState(allModes[0])
   const [constantsRows, setConstantsRows] = useState([])
 
-  const getAdjustedPermissions = (permissions, isOldYear) => {
+  const NormParameterIdCell = (props) => <td>{props?.dataItem?.particulars}</td>
+  const currentTabDisplay = useMemo(() => {
+    const idLower = tabs[tabIndex]?.toLowerCase() || ''
+    const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
+    // console.log(info)
+    return info ? info.name : tabs[tabIndex] || 'Feed'
+  }, [tabs, tabIndex, availableTabs])
+
+  const productionColumns = useMemo(() => {
+    const configType =
+      currentTabDisplay === 'Composition'
+        ? 'cracker_composition'
+        : currentTabDisplay === 'Constant'
+          ? 'cracker_constants'
+          : currentTabDisplay === 'Yield'
+            ? 'cracker_yield'
+            : 'cracker'
+
+    return getEnhancedAOPColDefs({
+      headerMap,
+      handleRemarkCellClick,
+      configType,
+    })
+  }, [headerMap, currentTabDisplay])
+ const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
       ...permissions,
@@ -108,36 +132,11 @@ const CrackerConfig = () => {
       saveBtn: true,
       allAction: lowerVertName === 'cracker',
       modes: allModes,
-      uploadExcelBtn: true,
-      downloadExcelBtn: true,
+      uploadExcelBtn: currentTabDisplay !== 'Constant',
+      downloadExcelBtn: currentTabDisplay !== 'Constant',
     },
     isOldYear,
   )
-  const NormParameterIdCell = (props) => <td>{props?.dataItem?.particulars}</td>
-  const currentTabDisplay = useMemo(() => {
-    const idLower = tabs[tabIndex]?.toLowerCase() || ''
-    const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
-    // console.log(info)
-    return info ? info.name : tabs[tabIndex] || 'Feed'
-  }, [tabs, tabIndex, availableTabs])
-
-  const productionColumns = useMemo(() => {
-    const configType =
-      currentTabDisplay === 'Composition'
-        ? 'cracker_composition'
-        : currentTabDisplay === 'Constant'
-          ? 'cracker_constants'
-          : currentTabDisplay === 'Yield'
-            ? 'cracker_yield'
-            : 'cracker'
-
-    return getEnhancedAOPColDefs({
-      headerMap,
-      handleRemarkCellClick,
-      configType,
-    })
-  }, [headerMap, currentTabDisplay])
-
   const fetchTabsMatrix = useCallback(async () => {
     try {
       const resp = await DataService.getConfigurationTabsMatrix(
@@ -464,40 +463,33 @@ const CrackerConfig = () => {
   const saveSpyroInputExcelFile = async (rawFile) => {
   setLoading(true);
 
-  // Disable upload for 'Constant' tab
-  if (currentTabDisplay === 'Constant') {
-    setSnackbarOpen(true);
-    setSnackbarData({
-      message: 'Excel import is not available for the "Constant" tab.',
-      severity: 'info',
-    });
-    setLoading(false);
-    return;
-  }
-
   try {
+    let plantId = '';
     const storedPlant = localStorage.getItem('selectedPlant');
-    const plantId = storedPlant ? JSON.parse(storedPlant)?.id : '';
-    const mode = selectMode || ''; // Optional mode
-    let response;
-    // Conditional call based on tabIndex or mode
-      response = await DataService.importSpyroInputExcel(rawFile, keycloak, mode);
-    // Success case
+    if (storedPlant) {
+      const parsedPlant = JSON.parse(storedPlant);
+      plantId = parsedPlant.id;
+    }
+
+    const mode = selectMode || '';
+    const response = await DataService.importSpyroInputExcel(rawFile, keycloak, mode);
+
     if (response?.code === 200) {
       setSnackbarOpen(true);
       setSnackbarData({
-        message: 'Uploaded Successfully!',
+        message: 'Data uploaded successfully!',
         severity: 'success',
       });
       setModifiedCells({});
       fetchAllData?.();
-    }
-    // Partial failure with error file
-    else if (response?.code === 400 && response?.data) {
+    } else if (response?.code === 400 && response?.data) {
       const byteCharacters = atob(response.data);
-      const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
-      const byteArray = new Uint8Array(byteNumbers);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
 
+      const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
@@ -516,12 +508,10 @@ const CrackerConfig = () => {
         message: 'Partial data saved. Error file downloaded.',
         severity: 'warning',
       });
-    }
-    // Failure
-    else {
+    } else {
       setSnackbarOpen(true);
       setSnackbarData({
-        message: 'Upload Failed!',
+        message: 'Upload failed!',
         severity: 'error',
       });
     }
@@ -538,47 +528,27 @@ const CrackerConfig = () => {
     setLoading(false);
   }
 };
+
 const handleExcelUpload = (rawFile) => {
   saveSpyroInputExcelFile(rawFile);
 };
 
-
 const downloadExcelForConfiguration = async () => {
-  // Block export if the current tab is "Constant"
-  if (currentTabDisplay === 'Constant') {
-    setSnackbarOpen(true);
-    setSnackbarData({
-      message: 'Excel export is not available for the "Constant" tab.',
-      severity: 'info',
-    });
-    return;
-  }
-
   setSnackbarOpen(true);
   setSnackbarData({
     message: 'Excel download started!',
     severity: 'success',
   });
-
-  const mode = selectMode;          // Can be empty — that's fine
-
+  const mode = selectMode; 
   try {
-    const response = await DataService.exportSpyroInputExcel(
+   await DataService.exportSpyroInputExcel(
       keycloak,
       mode
     );
-
-    if (response?.code === 200) {
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
       });
-    } else {
-      setSnackbarData({
-        message: 'Failed to download Excel.',
-        severity: 'error',
-      });
-    }
   } catch (error) {
     console.error('Error downloading Excel:', error);
     setSnackbarData({
