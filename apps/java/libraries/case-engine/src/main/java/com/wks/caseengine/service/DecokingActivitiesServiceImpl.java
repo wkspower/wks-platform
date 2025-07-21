@@ -875,7 +875,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-		String viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
+		String viewName =  vertical.getName() + "_" + site.getName() + "_GetDecokePlanningDatesForScrn";
 		try {
 			List<Object[]> crackerConfigurationList = findByYearAndPlantFkId(year, UUID.fromString(plantId), viewName);
 			for (Object[] row : crackerConfigurationList) {
@@ -926,25 +926,27 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		}
 	}
 
-	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String viewName) {
+	
+	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String procedureName) {
 		try {
-			String sql = "SELECT " + "Id, Name, DisplayName, IBR_SD, IBR_ED, TA_SD, TA_ED, ShutDown_SD, ShutDown_ED, Post_CR_Days, Pre_CR_Days, IsCR, Plant_FK_Id, AOPYear, "
-					+ "Remarks, DisplaySeq,isEditable FROM " + viewName + " "
-					+ "WHERE AOPYear = :year "
-					+ "AND Plant_FK_Id = :plantFkId "
-					+ "ORDER BY DisplaySeq";
+			Plants plant = plantsRepository.findById(plantFkId).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId, @aopYear = :aopYear";
 
 			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("year", year);
-			query.setParameter("plantFkId", plantFkId);
+
+			query.setParameter("plantId", plantFkId);
+			query.setParameter("aopYear", year);
+			
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {
-			ex.printStackTrace();
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
 
 }
