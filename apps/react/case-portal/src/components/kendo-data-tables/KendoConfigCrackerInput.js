@@ -92,6 +92,8 @@ const CrackerConfig = () => {
       saveBtn: false,
       isOldYear: isOldYear,
       allAction: false,
+      uploadExcelBtn: false,
+      downloadExcelBtn: false,
     }
   }
   const adjustedPermissions = getAdjustedPermissions(
@@ -106,6 +108,8 @@ const CrackerConfig = () => {
       saveBtn: true,
       allAction: lowerVertName === 'cracker',
       modes: allModes,
+      uploadExcelBtn: true,
+      downloadExcelBtn: true,
     },
     isOldYear,
   )
@@ -362,6 +366,7 @@ const CrackerConfig = () => {
 
   // ===== Save logic unchanged except reload uses setRowsForTab =====
   const [modifiedCells, setModifiedCells] = useState({})
+
   // allProducts,
   const saveChanges = useCallback(async () => {
     try {
@@ -454,6 +459,105 @@ const CrackerConfig = () => {
       setLoading(false)
     }
   }
+  //------------------
+  const saveSpyroInputExcelFile = async (rawFile) => {
+  setLoading(true);
+   if (currentTabDisplay === 'Constant') {
+    setSnackbarOpen(true);
+    setSnackbarData({
+      message: 'Excel export is not available for the "Constant" tab.',
+      severity: 'info',
+    });
+    return;
+  }
+  try {
+    const storedPlant = localStorage.getItem('selectedPlant');
+    const plantId = storedPlant ? JSON.parse(storedPlant)?.id : '';
+    const mode = selectMode; // Can be empty — that's fine
+
+    const response = await DataService.importSpyroInputExcel(
+      rawFile,
+      keycloak,
+      mode
+    );
+
+    if (response) {
+      setSnackbarOpen(true);
+      setSnackbarData({
+        message: 'Uploaded Successfully!',
+        severity: 'success',
+      });
+      setModifiedCells({});
+      fetchAllData();
+    } else {
+      setSnackbarOpen(true);
+      setSnackbarData({
+        message: 'Upload Failed!',
+        severity: 'error',
+      });
+    }
+
+    return response;
+  } catch (error) {
+    console.error('Error uploading Spyro Input Excel:', error);
+    setLoading(false);
+  } finally {
+    // optionally re-enable UI
+  }
+};
+const handleExcelUpload = (rawFile) => {
+  saveSpyroInputExcelFile(rawFile);
+};
+
+
+const downloadExcelForConfiguration = async () => {
+  // Block export if the current tab is "Constant"
+  if (currentTabDisplay === 'Constant') {
+    setSnackbarOpen(true);
+    setSnackbarData({
+      message: 'Excel export is not available for the "Constant" tab.',
+      severity: 'info',
+    });
+    return;
+  }
+
+  setSnackbarOpen(true);
+  setSnackbarData({
+    message: 'Excel download started!',
+    severity: 'success',
+  });
+
+  const mode = selectMode;          // Can be empty — that's fine
+
+  try {
+    const response = await DataService.exportSpyroInputExcel(
+      keycloak,
+      mode
+    );
+
+    if (response?.code === 200) {
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      });
+    } else {
+      setSnackbarData({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      });
+    }
+  } catch (error) {
+    console.error('Error downloading Excel:', error);
+    setSnackbarData({
+      message: 'Failed to download Excel.',
+      severity: 'error',
+    });
+  } finally {
+    setSnackbarOpen(true);
+  }
+};
+
+//--------------------
   return (
     <Box>
       <Backdrop
@@ -538,6 +642,8 @@ const CrackerConfig = () => {
                     setSnackbarData={setSnackbarData}
                     modifiedCells={modifiedCells}
                     setModifiedCells={setModifiedCells}
+                    handleExcelUpload={handleExcelUpload}
+                    downloadExcelForConfiguration={downloadExcelForConfiguration}
                   />
                 </Box>
               )
