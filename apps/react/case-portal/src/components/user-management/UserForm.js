@@ -31,8 +31,8 @@ import DialogTitle from '@mui/material/DialogTitle'
 const UserAccessForm = ({ keycloak }) => {
   const location = useLocation()
   const data = location?.state?.rows || {}
-  const type = location?.state?.type
-  const userId = location?.state?.userId
+  const type = localStorage.getItem('revokeData') ? JSON.parse(localStorage.getItem('revokeData'))?.type : null
+  const userId = localStorage.getItem('revokeData') ? JSON.parse(localStorage.getItem('revokeData'))?.userId : null
   
   const navigate = useNavigate()
 
@@ -69,23 +69,25 @@ const UserAccessForm = ({ keycloak }) => {
   
   useEffect(() => {
     if (type === 1) {
-      const plantData = location?.state?.plantData
+      const plantData = localStorage.getItem('revokeData') ? JSON.parse(localStorage.getItem('revokeData'))?.plantData : null
       const verticalIds = plantData ? JSON.parse(plantData) : null
       const fVerticalIds = verticalIds?.map(v => Object.keys(v)[0]) 
-  
-      // console.log('---plantSiteData---',plantSiteData);
       const selVerticals = plantSiteData.filter(pl => fVerticalIds.some(vi => vi === pl.id))
-      // console.log('---verticalIds---',selVerticals );
       setSelectedVerticals(fVerticalIds)
        const newVerticalSites = {}
       fVerticalIds.forEach((verticalId) => {
         const vertical = plantSiteData.find((v) => v.id === verticalId)
-        
+        const vert = verticalIds.find(v => v[verticalId])
+        const sites = Object.values(vert)[0]
+        const selSites = Object.values(vert)[0].map(s => Object.keys(s)[0])
         if (!vertical) return
         let siteEntries = []
-        vertical.sites.forEach(site => {
+        vertical.sites.filter(s => selSites.some(so => so === s.id)).forEach(site => {
           let sitePlants = []
-          site.plants.forEach(plant => {
+          const plants = sites.find(v => v[site.id])
+          const selPlants = Object.values(plants)[0]
+          site.plants.filter(p => selPlants.some(sp => sp === p.id)).forEach(plant => {
+            
               const plantObj = {
                 plantId:plant.id,
                 screens:[
@@ -636,9 +638,10 @@ const UserAccessForm = ({ keycloak }) => {
         message: 'User Data Updated successfully!',
         severity: 'success',
       })
-      // navigate('/user-management', {
-      //   state: 'success',
-      // })
+      closeSaveDialogeBox()
+      navigate('/user-management', {
+        state: 'success',
+      })
     } catch (error) {
       console.error('Update failed:', error)
       setSnackbarOpen(true)

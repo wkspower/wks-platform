@@ -98,7 +98,15 @@ const UserManagementTable = ({ keycloak }) => {
   }, [])
 
   const handleAddPlantSite = () => {
-     navigate(`/user-form`, { state: {rows,type:tabIndex,plantData:tempSelectedUsers[0]?.attributes?.plants[0],userId:selectedUsers[0].id} })
+    
+      const revokeData = {
+        type:tabIndex,
+        plantData:tempSelectedUsers[0]?.attributes?.plants[0] || [],
+        userId:selectedUsers[0].id
+      }
+      localStorage.setItem('revokeData',JSON.stringify(revokeData))
+    
+     navigate(`/user-form`, { state: {rows} })
     //  navigate(`/user-form`,{state:rows})
   }
 
@@ -246,7 +254,9 @@ const UserManagementTable = ({ keycloak }) => {
     setTabIndex(newValue);
   };
   return (
-    <Box sx={{ height: 600, width: '100%', p: 2 }}>
+    <Box sx={{
+      //  height: 600,
+     width: '100%', p: 2 }}>
       {/* Autocomplete for selecting multiple users */}
 
       <Tabs
@@ -274,7 +284,7 @@ const UserManagementTable = ({ keycloak }) => {
         ))}
       </Tabs>
 
-      {tabIndex === 0 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', gridGap:'20px', mb: 2, mr: 1 }}>
+      {tabIndex === 0 && <Box sx={{ display: 'flex', justifyContent: 'flex-end',flexDirection: 'column', gridGap:'20px', mb: 2, mr: 1 }}>
         <Autocomplete
           multiple
           disableCloseOnSelect
@@ -334,6 +344,9 @@ const UserManagementTable = ({ keycloak }) => {
                     // navigate('/user-form')
                     handleAddPlantSite()
                   }}
+                   style={{marginTop: '30%',
+                        width: '10%',
+                        alignSelf: 'flex-end'}}
                   disabled={!selectedUsers.length}
                   loading={loading} // Use the loading prop to trigger loading state
                   loadingposition='start' // Use loadingPosition to control where the spinner appears
@@ -341,7 +354,7 @@ const UserManagementTable = ({ keycloak }) => {
                   Next
                 </Button>
       </Box>}
-      {tabIndex === 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', gridGap:'20px', mb: 2, mr: 1 }}>
+      {tabIndex === 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end',    flexDirection: 'column', gridGap:'20px', mb: 2, mr: 1 }}>
         <Autocomplete
           multiple
           disableCloseOnSelect
@@ -400,6 +413,9 @@ const UserManagementTable = ({ keycloak }) => {
                     // navigate('/user-form')
                     handleAddPlantSite()
                   }}
+                  style={{marginTop: '30%',
+                        width: '10%',
+                        alignSelf: 'flex-end'}}
                   disabled={!selectedUsers.length}
                   loading={loading} // Use the loading prop to trigger loading state
                   loadingposition='start' // Use loadingPosition to control where the spinner appears
