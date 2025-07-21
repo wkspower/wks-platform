@@ -98,7 +98,7 @@ const UserManagementTable = ({ keycloak }) => {
   }, [])
 
   const handleAddPlantSite = () => {
-     navigate(`/user-form`, { state: {rows,type:tabIndex,plantData:tempSelectedUsers[0]?.attributes?.plants[0]} })
+     navigate(`/user-form`, { state: {rows,type:tabIndex,plantData:tempSelectedUsers[0]?.attributes?.plants[0],userId:selectedUsers[0].id} })
     //  navigate(`/user-form`,{state:rows})
   }
 
@@ -274,7 +274,7 @@ const UserManagementTable = ({ keycloak }) => {
         ))}
       </Tabs>
 
-      {tabIndex === 0 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
+      {tabIndex === 0 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', gridGap:'20px', mb: 2, mr: 1 }}>
         <Autocomplete
           multiple
           disableCloseOnSelect
@@ -324,8 +324,24 @@ const UserManagementTable = ({ keycloak }) => {
             />
           )}
         />
+          <Button
+                  variant='contained'
+                  // style={{marginBottom:'-80%', marginLeft:'90%'}}
+                  className='btn-save'
+                  onClick={() => {
+                    // Write any additional logic here before navigating.
+                    // console.log('Navigating to dashboard')
+                    // navigate('/user-form')
+                    handleAddPlantSite()
+                  }}
+                  disabled={!selectedUsers.length}
+                  loading={loading} // Use the loading prop to trigger loading state
+                  loadingposition='start' // Use loadingPosition to control where the spinner appears
+                >
+                  Next
+                </Button>
       </Box>}
-      {tabIndex === 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2, mr: 1 }}>
+      {tabIndex === 1 && <Box sx={{ display: 'flex', justifyContent: 'flex-end', gridGap:'20px', mb: 2, mr: 1 }}>
         <Autocomplete
           multiple
           disableCloseOnSelect
@@ -375,8 +391,7 @@ const UserManagementTable = ({ keycloak }) => {
             />
           )}
         />
-      </Box>}
-        <Button
+          <Button
                   variant='contained'
                   className='btn-save'
                   onClick={() => {
@@ -391,6 +406,23 @@ const UserManagementTable = ({ keycloak }) => {
                 >
                   Next
                 </Button>
+      </Box>}
+        {/* <Button
+                  variant='contained'
+                  // style={{marginBottom:'-80%', marginLeft:'90%'}}
+                  className='btn-save'
+                  onClick={() => {
+                    // Write any additional logic here before navigating.
+                    // console.log('Navigating to dashboard')
+                    // navigate('/user-form')
+                    handleAddPlantSite()
+                  }}
+                  disabled={!selectedUsers.length}
+                  loading={loading} // Use the loading prop to trigger loading state
+                  loadingposition='start' // Use loadingPosition to control where the spinner appears
+                >
+                  Next
+                </Button> */}
       {/* DataGridTable now uses selectedUsers as the rows to show only the confirmed selections */}
       {/* <DataGridTable
         modifiedCells={modifiedCells}

@@ -32,6 +32,7 @@ const UserAccessForm = ({ keycloak }) => {
   const location = useLocation()
   const data = location?.state?.rows || {}
   const type = location?.state?.type
+  const userId = location?.state?.userId
   
   const navigate = useNavigate()
 
@@ -88,23 +89,23 @@ const UserAccessForm = ({ keycloak }) => {
               const plantObj = {
                 plantId:plant.id,
                 screens:[
-                    "menu.catalystSelectivity",
-                    "menu.productMCUVal",
-                    "menu.productDemand",
-                    "menu.shutdownPlan",
-                    "menu.slowdownPlan",
-                    "menu.maintenanceDetails",
-                    "menu.productionNorms",
-                    "menu.normalOpNorms",
-                    "menu.shutdownNorms",
-                    "menu.slowdownNorms",
-                    "menu.consumptionNorms",
-                    "menu.feedStock",
-                    "menu.productionVolumeDataBasis",
-                    "menu.normsHistorianBasis",
-                    "menu.annualAopCostReport",
-                    "menu.workflow",
-                    "menu.userManage"
+                    // "menu.catalystSelectivity",
+                    // "menu.productMCUVal",
+                    // "menu.productDemand",
+                    // "menu.shutdownPlan",
+                    // "menu.slowdownPlan",
+                    // "menu.maintenanceDetails",
+                    // "menu.productionNorms",
+                    // "menu.normalOpNorms",
+                    // "menu.shutdownNorms",
+                    // "menu.slowdownNorms",
+                    // "menu.consumptionNorms",
+                    // "menu.feedStock",
+                    // "menu.productionVolumeDataBasis",
+                    // "menu.normsHistorianBasis",
+                    // "menu.annualAopCostReport",
+                    // "menu.workflow",
+                    // "menu.userManage"
                   ],
                 permissions:{
                   "read": false,
@@ -120,7 +121,7 @@ const UserAccessForm = ({ keycloak }) => {
           }
           siteEntries.push(siteObj)
         });
-        
+        // `/task/users//revoke-access/{userId} - PUT`
         // const siteEntries = vertical.sites.reduce((acc, site) => {
         //   if (
         //     data.sites &&
@@ -619,7 +620,14 @@ const UserAccessForm = ({ keycloak }) => {
 
     try {
       setLoading(true)
-      const res = await DataService.updateUserPlants(keycloak, result)
+      let res = {}
+      if (type === 1) {
+        res = await DataService.updateUserPlantsForRevokeAccess(keycloak, result, userId)
+        
+      }else{
+        res = await DataService.updateUserPlants(keycloak, result)
+
+      }
       if (res.status !== 200) {
         throw new Error('Failed to update user')
       }
@@ -628,9 +636,9 @@ const UserAccessForm = ({ keycloak }) => {
         message: 'User Data Updated successfully!',
         severity: 'success',
       })
-      navigate('/user-management', {
-        state: 'success',
-      })
+      // navigate('/user-management', {
+      //   state: 'success',
+      // })
     } catch (error) {
       console.error('Update failed:', error)
       setSnackbarOpen(true)

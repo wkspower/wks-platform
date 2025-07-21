@@ -54,6 +54,7 @@ export const DataService = {
   updateTurnAroundData,
   updateProductNormData,
   updateBusinessDemandDataM,
+  updateUserPlantsForRevokeAccess,
   createCase,
   getTasksByBusinessKey,
   getProcessInstanceVariables,
@@ -1881,6 +1882,28 @@ async function updateSlowdownData(maintenanceId, slowDownDetails, keycloak) {
     return await resp.json() // Ensure proper response handling
   } catch (e) {
     console.error('Error updating slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function updateUserPlantsForRevokeAccess(keycloak, payload, userId) {
+  const url = `${Config.CaseEngineUrl}/task/users/revoke-access/${userId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    if (!resp.ok) {
+      throw new Error(`API Error: ${resp.status} ${resp.statusText}`)
+    }
+    return await resp.json()
+  } catch (e) {
+    console.error('Update user plants API failed:', e)
     return Promise.reject(e)
   }
 }
