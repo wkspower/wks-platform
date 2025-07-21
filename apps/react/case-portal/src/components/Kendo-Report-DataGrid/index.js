@@ -134,7 +134,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
                   headerClassName={
                     isColumnActive(field, filter, sort) ? 'active-column' : ''
                   }
-                  columnMenu={(props) =>  <DateColumnMenu {...props} isDateFilterActive={isDateFilterActive} setIsDateFilterActive={setIsDateFilterActive}/>}
+                  columnMenu={DateColumnMenu}
                 />
               )
             }

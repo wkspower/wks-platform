@@ -80,13 +80,23 @@ const ProductionVolumeDataBasisPe = () => {
     try {
       setLoading(true)
       var data = []
-      const configData = await DataService.getConfigurationExecutionDetails(keycloak)
+      const configData =
+        await DataService.getConfigurationExecutionDetails(keycloak)
       if (configData.code === 200) {
-        const StartDate = configData.data.find(d => d.Name === 'StartDate')?.AttributeValue
-        const EndDate = configData.data.find(d => d.Name === 'EndDate')?.AttributeValue
-        
-        data = await DataService.getProductionVolDataBasisPe(keycloak, reportType, StartDate, EndDate)
-  
+        const StartDate = configData.data.find(
+          (d) => d.Name === 'StartDate',
+        )?.AttributeValue
+        const EndDate = configData.data.find(
+          (d) => d.Name === 'EndDate',
+        )?.AttributeValue
+
+        data = await DataService.getProductionVolDataBasisPe(
+          keycloak,
+          reportType,
+          StartDate,
+          EndDate,
+        )
+
         if (data?.code === 200) {
           const rowsWithId = data?.data?.map((item, index) => ({
             ...item,
@@ -98,7 +108,7 @@ const ProductionVolumeDataBasisPe = () => {
           }))
           setLoading(false)
           setState(rowsWithId)
-      }
+        }
       } else {
         console.error(`Error fetching ${reportType} data`)
         setLoading(false)

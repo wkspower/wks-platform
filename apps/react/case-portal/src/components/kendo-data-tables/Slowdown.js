@@ -263,9 +263,6 @@ const SlowDown = ({ permissions }) => {
         'maintEndDateTime',
         'discription',
         'remark',
-        // 'rate',
-        // 'durationInHrs',
-        // 'productName1',
       ]
       const requiredFieldsForElastomer = [
         'maintStartDateTime',
@@ -304,6 +301,33 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
+
+      // const allRecords = [...rows, ...data]
+      // for (let i = 0; i < allRecords.length; i++) {
+      //   const a = allRecords[i]
+      //   const aStart = new Date(a.maintStartDateTime)
+      //   const aEnd = new Date(a.maintEndDateTime)
+
+      //   if (isNaN(aStart) || isNaN(aEnd)) continue // Skip if invalid
+
+      //   for (let j = i + 1; j < allRecords.length; j++) {
+      //     const b = allRecords[j]
+      //     const bStart = new Date(b.maintStartDateTime)
+      //     const bEnd = new Date(b.maintEndDateTime)
+
+      //     if (isNaN(bStart) || isNaN(bEnd)) continue // Skip if invalid
+
+      //     // Check for overlapping intervals
+      //     if (aStart < bEnd && bStart < aEnd) {
+      //       setSnackbarOpen(true)
+      //       setSnackbarData({
+      //         message: 'Maintenance time intervals should not overlap.',
+      //         severity: 'error',
+      //       })
+      //       return
+      //     }
+      //   }
+      // }
 
       saveSlowDownData(data)
     } catch (error) {
@@ -441,23 +465,44 @@ const SlowDown = ({ permissions }) => {
       setLoading(false)
     }
   }
+  const [allRedCell, setAllRedCell] = useState([])
+
   const fetchConfigurationData = async () => {
     setRows2([])
     setLoading(true)
-
     try {
-      const { data } = await DataService.getSlowDownConfigurationData(keycloak)
+      var response = await DataService.getSlowDownConfigurationData(keycloak)
+      var data = response?.data?.data
+      var redCells = response?.data?.changedData
+
+      const normalized = redCells.map((obj) => ({
+        ...obj,
+        normParameterFKId: obj.NormParameter_FK_Id.toUpperCase(),
+      }))
+      setAllRedCell(normalized)
 
       const formattedData = data.map((item, index) => {
-        const formattedItem = {
-          ...item,
+        const parsedItem = Object.entries(item).reduce((acc, [key, value]) => {
+          if (
+            typeof value === 'string' &&
+            !isNaN(value) &&
+            value.trim() !== ''
+          ) {
+            const parsedValue = parseFloat(value)
+            acc[key] = isNaN(parsedValue) ? value : parsedValue
+          } else {
+            acc[key] = value
+          }
+          return acc
+        }, {})
+
+        return {
+          ...parsedItem,
           id: index,
           particulars: item.DisplayName,
           Particulars: item?.NormTypeName,
           isEditable: item?.IsEditable,
         }
-
-        return formattedItem
       })
 
       setRows2(formattedData)
@@ -499,6 +544,7 @@ const SlowDown = ({ permissions }) => {
               type: 'number',
             }),
         }))
+
         setColDefs2(dynamicColDefs)
         fetchConfigurationData()
       } else {
@@ -738,10 +784,10 @@ const SlowDown = ({ permissions }) => {
           open1={open1}
           fetchData={fetchData2}
           unsavedChangesRef={unsavedChangesRef}
-          permissions={{ saveBtn: true, allAction: true }}
+          permissions={{ saveBtn: true, allAction: true, onlyCellUpdate: true }}
           handleCancelClick={handleCancelClick}
           groupBy='Particulars'
-          isFormatedNumber={true}
+          allRedCell={allRedCell}
         />
       )}
     </div>

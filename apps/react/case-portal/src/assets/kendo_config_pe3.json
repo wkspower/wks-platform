@@ -1,11 +1,5 @@
 [
   {
-    "field": "ConfigTypeDisplayName",
-    "title": "Constant",
-    "groupable": true,
-    "editable": false
-  },
-  {
     "field": "TypeDisplayName",
     "title": "Type",
     "groupable": true,

@@ -16,7 +16,7 @@ import Notification from 'components/Utilities/Notification'
 // import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { validateFields } from 'utils/validationUtils'
-import { useSelector } from 'react-redux';
+
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
@@ -28,8 +28,7 @@ const MonthwiseRawMaterial = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const { oldYear } = useSelector(s => s.dataGridStore);
-  const isOldYear = oldYear?.oldYear === 1 
+
   // const formatValueToThreeDecimals = (params) => {
   //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
   // }
@@ -586,7 +585,7 @@ const MonthwiseRawMaterial = () => {
           allAction: true,
           showTitle: true,
           // saveBtn: true,
-          saveBtn: !isOldYear,
+          saveBtn: false,
           textAlignment: 'center',
           remarksEditable: true,
         }}

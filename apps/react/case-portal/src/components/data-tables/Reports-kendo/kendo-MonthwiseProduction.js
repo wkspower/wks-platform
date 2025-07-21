@@ -46,13 +46,17 @@ const MonthwiseProduction = () => {
     const [start, end] = thisYear.split('-').map(Number)
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
- const isOldYear = oldYear?.oldYear === 1 
+  const isOldYear = oldYear?.oldYear === 1
   const formatValueToThreeDecimals = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
   }
   const formatValueToThreeDecimalsZero = (params) => {
     return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
   }
+
+  const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
+  const verticalName = vertical?.toLowerCase()
+  const isPEVertical = verticalName === 'pe'
 
   const columns = [
     { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
@@ -68,21 +72,21 @@ const MonthwiseProduction = () => {
       title: oldYear || 'Old Year',
       children: [
         {
-          title: 'EOE Production, MT',
+          title: 'Production, MT',
           children: [
             {
               field: 'EOEProdBudget',
               title: 'Budget',
               width: 120,
               editable: false,
-              type:'number'
+              type: 'number',
             },
             {
               field: 'EOEProdActual',
               title: 'Actual',
               width: 120,
               editable: false,
-              type:'number'
+              type: 'number',
             },
           ],
         },
@@ -94,14 +98,14 @@ const MonthwiseProduction = () => {
               title: 'Budget',
               width: 120,
               editable: false,
-              type:'number'
+              type: 'number',
             },
             {
               field: 'OpHrsActual',
               title: 'Actual',
               width: 120,
               editable: false,
-              type:'number'
+              type: 'number',
             },
           ],
         },
@@ -113,14 +117,14 @@ const MonthwiseProduction = () => {
               title: 'Budget',
               width: 120,
               editable: false,
-              type:'number'
+              type: 'number',
             },
             {
               field: 'ThroughputActual',
               title: 'Actual',
               width: 120,
               editable: false,
-              type:'number'
+              type: 'number',
             },
           ],
         },
@@ -135,35 +139,35 @@ const MonthwiseProduction = () => {
           title: 'Operating Hours',
           width: 150,
           editable: false,
-          type:'number'
+          type: 'number',
         },
         {
           field: 'MEGThroughput',
-          title: 'MEG Throughput, TPH',
+          title: 'Throughput, TPH',
           width: 150,
           editable: false,
-          type:'number'
+          type: 'number',
         },
         {
           field: 'EOThroughput',
           title: 'EO Throughput, TPH',
           width: 150,
           editable: false,
-          type:'number'
+          type: 'number',
         },
         {
           field: 'EOEThroughput',
           title: 'EOE Throughput, TPH',
           width: 150,
           editable: false,
-          type:'number'
+          type: 'number',
         },
         {
           field: 'TotalEOE',
-          title: 'Total EOE, MT',
+          title: verticalName == 'meg' ? 'Total EOE, MT' : 'Total, MT',
           width: 150,
           editable: false,
-          type:'number'
+          type: 'number',
         },
       ],
     },
@@ -175,46 +179,42 @@ const MonthwiseProduction = () => {
       editable: true,
     },
   ]
-const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-const verticalName = vertical?.toLowerCase()
-const isPEVertical = verticalName === 'pe'
 
+  const filteredColumns = columns.map((topGroup) => {
+    if (!topGroup.children) return topGroup
 
-const filteredColumns = columns.map((topGroup) => {
-  if (!topGroup.children) return topGroup
-
-  const filteredChildren = topGroup.children
-    .map((child) => {
-      // Handle nested children
-      if (child.children) {
-        const filteredGrandChildren = child.children.filter((fieldDef) => {
-          if (isPEVertical) {
-            return (
-              fieldDef.field !== 'EOThroughput' &&
-              fieldDef.field !== 'EOEThroughput'
-            )
-          }
-          return true
-        })
-        return { ...child, children: filteredGrandChildren }
-      }
-
-      // Handle direct children (1-level)
-      if (isPEVertical) {
-        if (
-          child.field === 'EOThroughput' ||
-          child.field === 'EOEThroughput'
-        ) {
-          return null
+    const filteredChildren = topGroup.children
+      .map((child) => {
+        // Handle nested children
+        if (child.children) {
+          const filteredGrandChildren = child.children.filter((fieldDef) => {
+            if (isPEVertical) {
+              return (
+                fieldDef.field !== 'EOThroughput' &&
+                fieldDef.field !== 'EOEThroughput'
+              )
+            }
+            return true
+          })
+          return { ...child, children: filteredGrandChildren }
         }
-      }
 
-      return child
-    })
-    .filter(Boolean) // remove nulls
+        // Handle direct children (1-level)
+        if (isPEVertical) {
+          if (
+            child.field === 'EOThroughput' ||
+            child.field === 'EOEThroughput'
+          ) {
+            return null
+          }
+        }
 
-  return { ...topGroup, children: filteredChildren }
-})
+        return child
+      })
+      .filter(Boolean) // remove nulls
+
+    return { ...topGroup, children: filteredChildren }
+  })
 
   const [rows, setRows] = useState()
 

@@ -51,7 +51,7 @@ export const ibrPlanColumns = [
     field: 'displayName',
     title: 'Furnace',
     editable: false,
-    width: 200,
+    width: 85,
     filter: true,
   },
   {
@@ -119,7 +119,6 @@ export const ibrPlanColumns = [
     width: 200,
     filter: false,
   },
-
 ]
 export const ibrGridThree = [
   {

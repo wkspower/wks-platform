@@ -7,7 +7,6 @@ import moment from '../../../node_modules/moment/moment.js'
 import { ibrGridThree, ibrPlanColumns } from './columnDefs'
 import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
 import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
-import { validateFields } from 'utils/validationUtils'
 const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']

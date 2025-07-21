@@ -361,7 +361,7 @@ const KendoDataTablesCracker = ({
               }
               editor='date'
               hidden={col.hidden}
-              columnMenu={(props) =>  <DateColumnMenu {...props} isDateFilterActive={isDateFilterActive} setIsDateFilterActive={setIsDateFilterActive}/>}
+              columnMenu={DateColumnMenu}
             />
           )
         }

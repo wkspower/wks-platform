@@ -29,5 +29,17 @@
     "headerName": "Low Range",
     "minWidth": 150,
     "editable": false
+  },
+  {
+    "field": "lowerLimitPercent",
+    "headerName": "Lower Limit Percent",
+    "minWidth": 150,
+    "editable": false
+  },
+  {
+    "field": "upperLimitPercent",
+    "headerName": "Upper Limit Percent",
+    "minWidth": 150,
+    "editable": false
   }
 ]

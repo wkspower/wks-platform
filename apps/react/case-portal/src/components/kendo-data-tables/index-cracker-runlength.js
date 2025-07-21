@@ -15,8 +15,6 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import '../../kendo-data-grid.css'
 
-import DownloadIcon from '@mui/icons-material/Download'
-import UploadIcon from '@mui/icons-material/Upload'
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
 import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/index'
@@ -27,7 +25,6 @@ import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import { styled } from '@mui/material/styles'
-import { Switch } from '@progress/kendo-react-inputs'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
 import {
   isColumnMenuFilterActive,
@@ -35,7 +32,6 @@ import {
 } from '../../../node_modules/@progress/kendo-react-grid/index'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
-import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -441,146 +437,15 @@ const KendoDataTablesCrackerRunLength = ({
     event.target.value = ''
   }
 
-  const renderGrid = () => (
-    <Grid
-      scrollable='virtual'
-      modifiedCells={modifiedCells}
-      autoProcessData={true}
-      defaultGroup={initialGroup}
-      data={rows}
-      rows={{ data: CustomRow }}
-      dataItemKey='id'
-      editField='inEdit'
-      editable={{ mode: 'incell' }}
-      onEditChange={handleEditChange}
-      edit={edit}
-      filter={filter}
-      onFilterChange={(e) => setFilter(e.filter)}
-      onItemChange={itemChange}
-      resizable={true}
-      contextMenu={true}
-      grade={grades}
-      onRowClick={handleRowClick}
-      sortable={{
-        mode: 'multiple',
-      }}
-      allRedCell={allRedCell}
-      size='small'
-      defaultSkip={0}
-      defaultTake={100}
-      pageable={
-        rows?.length > 50
-          ? {
-              buttonCount: 4,
-              pageSizes: [10, 50, 100, 366],
-            }
-          : false
-      }
-    >
-      {columns.map((col) => {
-        const isActive = isColumnActive(col?.field, filter, sort)
-
-        if (dateFields1.includes(col.field)) {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              cells={{
-                edit: {
-                  date: DateOnlyPicker,
-                },
-                data: toolTipRenderer,
-              }}
-              format='{0:dd-MM-yyyy}'
-              editor='date'
-              hidden={col.hidden}
-              sortable={false}
-            />
-          )
-        }
-        if (dateFieldsRunLength.includes(col.field)) {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              cells={{
-                edit: {
-                  date: DateOnlyPicker,
-                },
-                data: toolTipRenderer,
-              }}
-              format='{0:dd-MM-yyyy}'
-              editor='date'
-              hidden={col.hidden}
-              sortable={false}
-              className={'k-right-disabled'}
-            />
-          )
-        }
-
-        if (
-          ['aopRemarks', 'remarks', 'remark', 'Remarks'].includes(col.field)
-        ) {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              editor={true}
-              editable={{ mode: 'popup' }}
-              cells={{
-                data: (cellProps, allRedCell) => (
-                  <RemarkCell
-                    {...cellProps}
-                    allRedCell={allRedCell} // pass your extra flag
-                    onRemarkClick={handleRemarkCellClick}
-                  />
-                ),
-              }}
-              columnMenu={ColumnMenuCheckboxFilter}
-              hidden={col.hidden}
-              sortable={false}
-            />
-          )
-        }
-
-        return (
-          <GridColumn
-            key={col.field}
-            field={col.field}
-            title={col.title || col.headerName}
-            width={col.widthT}
-            hidden={col.hidden}
-            editable={col?.editable ? true : false}
-            headerClassName={isActive ? 'active-column' : ''}
-            cells={{
-              edit: { text: TextCellEditor },
-              data: toolTipRenderer,
-            }}
-            className={col?.isDisabled ? 'k-right-disabled' : ''}
-            columnMenu={col?.filter ? ColumnMenuCheckboxFilter : null}
-            sortable={col?.filter ? true : false}
-          />
-        )
-      })}
-      {permissions?.deleteButton && (
-        <GridColumn
-          key='actions'
-          field='actions'
-          title='Action'
-          width={80}
-          className='k-text-center'
-          filterable={false}
-          editable={false}
-          cells={{
-            data: ActionsCell,
-          }}
-        />
-      )}
-    </Grid>
-  )
+  // const HeaderWithTooltip = (props) => {
+  //   return (
+  //     <th {...props.thProps}>
+  //       <a className='k-link' onClick={props.onClick}>
+  //         <span title={props.title}>{props.title}</span>
+  //       </a>
+  //     </th>
+  //   )
+  // }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -675,36 +540,120 @@ const KendoDataTablesCrackerRunLength = ({
         </Box>
       )}
       <div className='kendo-data-grid'>
-        <>
-          {permissions?.showAccordian ? (
-            <CustomAccordion
-              defaultExpanded={!permissions?.byDefCollaps}
-              disableGutters
-            >
-              <CustomAccordionSummary
-                aria-controls='meg-grid-content'
-                id='meg-grid-header'
-              >
-                <Typography component='span' className='grid-title'>
-                  {titleName}
-                </Typography>
-              </CustomAccordionSummary>
-              <CustomAccordionDetails>
-                <Tooltip
-                  openDelay={50}
-                  position='default'
-                  anchorElement='target'
-                >
-                  {renderGrid()}
-                </Tooltip>
-              </CustomAccordionDetails>
-            </CustomAccordion>
-          ) : (
-            <Tooltip openDelay={50} position='default' anchorElement='target'>
-              {renderGrid()}
-            </Tooltip>
+        <Grid
+          scrollable='virtual'
+          modifiedCells={modifiedCells}
+          autoProcessData={true}
+          defaultGroup={initialGroup}
+          data={rows}
+          rows={{ data: CustomRow }}
+          dataItemKey='id'
+          editField='inEdit'
+          editable={{ mode: 'incell' }}
+          onEditChange={handleEditChange}
+          edit={edit}
+          filter={filter}
+          onFilterChange={(e) => setFilter(e.filter)}
+          onItemChange={itemChange}
+          resizable={true}
+          contextMenu={true}
+          grade={grades}
+          onRowClick={handleRowClick}
+          sortable={{
+            mode: 'multiple',
+          }}
+          allRedCell={allRedCell}
+          size='small'
+          // defaultSkip={0}
+          // defaultTake={100}
+          // pageable={
+          //   rows?.length > 50
+          //     ? {
+          //         buttonCount: 4,
+          //         pageSizes: [10, 50, 100, 366],
+          //       }
+          //     : false
+          // }
+        >
+          {columns.map((col) => {
+            const isActive = isColumnActive(col?.field, filter, sort)
+
+            if (dateFields1.includes(col.field)) {
+              return (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  cells={{
+                    edit: {
+                      date: DateOnlyPicker,
+                    },
+                    data: toolTipRenderer,
+                    // headerCell: HeaderWithTooltip,
+                  }}
+                  format='{0:dd-MM-yyyy}'
+                  editor='date'
+                  hidden={col.hidden}
+                  sortable={false}
+                />
+              )
+            }
+            if (dateFieldsRunLength.includes(col.field)) {
+              return (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  cells={{
+                    edit: {
+                      date: DateOnlyPicker,
+                      // headerCell: HeaderWithTooltip,
+                    },
+                    data: toolTipRenderer,
+                  }}
+                  format='{0:dd-MM-yyyy}'
+                  editor='date'
+                  hidden={col.hidden}
+                  sortable={false}
+                  className={'k-right-disabled'}
+                />
+              )
+            }
+
+            return (
+              <GridColumn
+                key={col.field}
+                field={col.field}
+                title={col.title || col.headerName}
+                width={col.widthT}
+                hidden={col.hidden}
+                editable={col?.editable ? true : false}
+                headerClassName={isActive ? 'active-column' : ''}
+                cells={{
+                  edit: { text: TextCellEditor },
+                  data: toolTipRenderer,
+                }}
+                className={col?.isDisabled ? 'k-right-disabled' : ''}
+                columnMenu={col?.filter ? ColumnMenuCheckboxFilter : null}
+                sortable={col?.filter ? true : false}
+              />
+            )
+          })}
+          {permissions?.deleteButton && (
+            <GridColumn
+              key='actions'
+              field='actions'
+              title='Action'
+              width={80}
+              className='k-text-center'
+              filterable={false}
+              editable={false}
+              cells={{
+                data: ActionsCell,
+              }}
+            />
           )}
-        </>
+        </Grid>
       </div>
       <Box
         sx={{

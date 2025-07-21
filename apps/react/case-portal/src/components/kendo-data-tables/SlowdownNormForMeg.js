@@ -115,6 +115,8 @@ const SlowdownNormForMeg = () => {
 
       if (response) {
         showNotification('Data refreshed successfully!', 'success')
+        await fetchSlowdownNormsColumns()
+
         await fetchSlowdownNormsData()
       } else {
         showNotification('Data Refresh Failed!', 'error')
@@ -269,7 +271,6 @@ const SlowdownNormForMeg = () => {
         fetchData={fetchSlowdownNormsColumns}
         permissions={tablePermissions}
         groupBy='Particulars'
-        isFormatedNumber={true}
       />
     </div>
   )

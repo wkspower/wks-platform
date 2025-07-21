@@ -114,9 +114,7 @@ const KendoDataTables = ({
   handleExcelUpload = () => {},
   downloadExcelForConfiguration = () => {},
   onLoad = () => {},
-  isFormatedNumber = false,
 }) => {
-  console.log('permissions?.saveBtn', permissions?.saveBtn)
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
@@ -131,7 +129,7 @@ const KendoDataTables = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
-  const [customModifiedCells, setCustomModifiedCells] = useState({})
+
   const initialGroup = groupBy
     ? [
         {
@@ -234,33 +232,50 @@ const KendoDataTables = ({
           return updated
         }),
       )
+      if (permissions?.onlyCellUpdate) {
+        setModifiedCells((prev) => {
+          const updated = { ...(prev[itemId] || {}) }
 
-      setModifiedCells((prev) => {
-        const base = { ...dataItem, [field]: value }
-        if (
-          'maintStartDateTime' in base &&
-          'maintEndDateTime' in base &&
-          'durationInHrs' in base
-        ) {
-          if (field === 'maintStartDateTime' || field === 'maintEndDateTime') {
-            base.durationInHrs = recalcDuration(
-              base.maintStartDateTime,
-              base.maintEndDateTime,
-            )
-          } else if (field === 'durationInHrs') {
-            const newEnd = recalcEndDate(base.maintStartDateTime, value)
-            if (newEnd) base.maintEndDateTime = newEnd.toISOString()
+          updated[field] = value
+
+          if (!updated.NormParameter_FK_Id && dataItem?.NormParameter_FK_Id) {
+            updated.NormParameter_FK_Id = dataItem.NormParameter_FK_Id
           }
-        }
-        return { ...prev, [itemId]: base }
-      })
 
-      setCustomModifiedCells((prev) => ({
-        ...prev,
-        [itemId]: { ...(prev[itemId] || {}), [field]: value },
-      }))
+          const result = {
+            ...prev,
+            [itemId]: updated,
+          }
+
+          return result
+        })
+      } else {
+        setModifiedCells((prev) => {
+          const base = { ...dataItem, [field]: value }
+          if (
+            'maintStartDateTime' in base &&
+            'maintEndDateTime' in base &&
+            'durationInHrs' in base
+          ) {
+            if (
+              field === 'maintStartDateTime' ||
+              field === 'maintEndDateTime'
+            ) {
+              base.durationInHrs = recalcDuration(
+                base.maintStartDateTime,
+                base.maintEndDateTime,
+              )
+            } else if (field === 'durationInHrs') {
+              const newEnd = recalcEndDate(base.maintStartDateTime, value)
+              if (newEnd) base.maintEndDateTime = newEnd.toISOString()
+            }
+          }
+
+          return { ...prev, [itemId]: base }
+        })
+      }
     },
-    [setRows, setModifiedCells, setCustomModifiedCells],
+    [setRows, setModifiedCells],
   )
 
   const handleRemarkSave = () => {
@@ -301,7 +316,7 @@ const KendoDataTables = ({
     const newRow = {
       id: newRowId,
       isNew: true,
-      ...Object.fromEntries(columns.map((col) => [col.field, ''])),
+      ...Object.fromEntries(columns?.map((col) => [col.field, ''])),
     }
 
     setRows((prevRows) => [newRow, ...prevRows])
@@ -370,7 +385,6 @@ const KendoDataTables = ({
   }
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    console.log('CustomRow', rest)
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
     const rowClassName = isDisabled ? `custom-disabled-row` : className
@@ -382,115 +396,18 @@ const KendoDataTables = ({
     )
   }, [])
 
-  // const RedHighlightCell = (props) => {
-  //   const {
-  //     dataItem,
-  //     field,
-  //     tdProps,
-  //     children,
-  //     customModifiedCells,
-  //     allRedCell,
-  //   } = props
-  //   const rowId = dataItem.id
-  //   const value = dataItem[field]
-  //   // Highlight if edited
-  //   const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field)
-  //   // Highlight if part of allRedCell (MEG logic)
-  //   const month = monthMap[field?.toLowerCase()]
-  //   const normId = dataItem.materialFkId?.toLowerCase()
-  //   const isRedFromAllRedCell = allRedCell?.some(
-  //     (cell) =>
-  //       cell.month === month &&
-  //       cell.normParameterFKId?.toLowerCase() === normId,
-  //   )
-
-  //   const shouldHighlight = isEdited || isRedFromAllRedCell
-  //   console.log('RedHighlightCell', children)
-  //   return (
-  //     <td
-  //       {...tdProps}
-  //       title={value}
-  //       style={{
-  //         color: shouldHighlight ? 'orange' : undefined,
-  //         fontWeight: shouldHighlight ? 'bold' : undefined,
-  //       }}
-  //     >
-  //       {children}
-  //     </td>
-  //   )
-  // }
-  const RedHighlightCell = (props) => {
-    const {
-      dataItem,
-      field,
-      tdProps,
-      children,
-      customModifiedCells,
-      allRedCell,
-      shouldFormatAsDecimal, // Add this prop when calling the component
-    } = props
-
-    const rowId = dataItem.id
-    const value = dataItem[field]
-
-    const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field)
-    // Highlight if part of allRedCell (MEG logic)
-    const month = monthMap[field?.toLowerCase()]
-    const normId = dataItem.materialFkId?.toLowerCase()
-    const isRedFromAllRedCell = allRedCell?.some(
-      (cell) =>
-        cell.month === month &&
-        cell.normParameterFKId?.toLowerCase() === normId,
-    )
-
-    const shouldHighlight = isEdited || isRedFromAllRedCell
-
-    const formatChildren = (children) => {
-      if (children == null || children === '') return children
-
-      const numericValue = parseFloat(children)
-      if (!isNaN(numericValue)) {
-        const numStr = numericValue.toString()
-        const decimalIndex = numStr.indexOf('.')
-        if (decimalIndex !== -1 && numStr.length - decimalIndex - 1 > 4) {
-          return numericValue.toFixed(4)
-        }
-        return numericValue
-      }
-      return children
-    }
-
-    // ... rest of your logic
-
-    return (
-      <td
-        {...tdProps}
-        title={value}
-        style={{
-          color: shouldHighlight ? 'orange' : undefined,
-          fontWeight: shouldHighlight ? 'bold' : undefined,
-        }}
-      >
-        {formatChildren(children)}
-      </td>
-    )
-  }
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
-    const month = monthMap[props.field?.toLowerCase()]
-    const normId = props.dataItem.materialFkId
+    const month = props.field
+    const normId =
+      props.dataItem.materialFkId || props.dataItem.NormParameter_FK_Id
 
     const isRedFromAllRedCell = allRedCell.some(
       (cell) =>
         cell.month === month &&
-        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
     )
 
-    // const isRedFromEdit =
-    //   editedCellMap?.[rowId]?.[props.field] !== undefined &&
-    //   editedCellMap?.[rowId]?.[props.field]?.toString() === value?.toString()
-
-    // const isRed = isRedFromAllRedCell || isRedFromEdit
     const isRed = isRedFromAllRedCell
 
     return (
@@ -499,6 +416,7 @@ const KendoDataTables = ({
         title={value}
         style={{
           color: isRed ? 'orange' : undefined,
+          fontWeight: isRed ? 'bold' : undefined,
         }}
       >
         {props.children}
@@ -927,13 +845,7 @@ const KendoDataTables = ({
                           ? DateOnlyPicker
                           : DateTimePickerEditor,
                       },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                      data: toolTipRenderer,
                     }}
                     format={
                       [
@@ -949,13 +861,7 @@ const KendoDataTables = ({
                     }
                     editor='date'
                     hidden={col.hidden}
-                    columnMenu={(props) => (
-                      <DateColumnMenu
-                        {...props}
-                        isDateFilterActive={isDateFilterActive}
-                        setIsDateFilterActive={setIsDateFilterActive}
-                      />
-                    )}
+                    columnMenu={DateColumnMenu}
                     headerClassName={
                       isDateFilterActive.includes(col.field)
                         ? 'active-column'
@@ -990,13 +896,7 @@ const KendoDataTables = ({
                           ? DateOnlyPicker
                           : DateOnlyPicker,
                       },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                      data: toolTipRenderer,
                     }}
                     format={
                       [
@@ -1012,13 +912,7 @@ const KendoDataTables = ({
                     }
                     editor='date'
                     hidden={col.hidden}
-                    columnMenu={(props) => (
-                      <DateColumnMenu
-                        {...props}
-                        isDateFilterActive={isDateFilterActive}
-                        setIsDateFilterActive={setIsDateFilterActive}
-                      />
-                    )}
+                    columnMenu={DateColumnMenu}
                   />
                 )
               }
@@ -1058,6 +952,7 @@ const KendoDataTables = ({
                   />
                 )
               }
+
               if (['discription', 'Name'].includes(col?.field)) {
                 return (
                   <GridColumn
@@ -1071,13 +966,7 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: TextCellEditor },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                      data: toolTipRenderer,
                     }}
                   />
                 )
@@ -1094,6 +983,7 @@ const KendoDataTables = ({
                     hidden={col.hidden}
                     cells={{
                       data: toolTipRenderer,
+                      // headerCell: HeaderWithTooltip,
                     }}
                   />
                 )
@@ -1208,13 +1098,7 @@ const KendoDataTables = ({
                     }
                     cells={{
                       edit: { text: DurationEditor },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                      data: DurationDisplayWithTooltipCell,
                     }}
                     headerClassName={isActive ? 'active-column' : ''}
                   />
@@ -1262,16 +1146,7 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
-                      data: (props) => {
-                        return (
-                          <RedHighlightCell
-                            {...props}
-                            customModifiedCells={customModifiedCells}
-                            allRedCell={allRedCell}
-                            shouldFormatAsDecimal={isFormatedNumber}
-                          />
-                        )
-                      },
+                      data: toolTipRenderer,
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'
@@ -1279,6 +1154,7 @@ const KendoDataTables = ({
                   />
                 )
               }
+
               if (col.type === 'numberWidth') {
                 return (
                   <GridColumn
@@ -1296,13 +1172,7 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                      data: toolTipRenderer,
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'

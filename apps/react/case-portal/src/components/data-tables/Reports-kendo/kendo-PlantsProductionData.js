@@ -319,7 +319,7 @@ const isOldYear = (() => {
           saveBtn: !isOldYear,
           textAlignment: 'center',
           remarksEditable: true,
-          showCalculate: !isOldYear,
+          showCalculate: false,
           showTitle: true,
         }}
         remarkDialogOpen={remarkDialogOpen}

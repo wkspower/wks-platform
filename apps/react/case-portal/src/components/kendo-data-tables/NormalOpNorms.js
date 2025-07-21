@@ -198,8 +198,8 @@ const NormalOpNormsScreen = () => {
           ...obj,
           normParameterFKId: obj.normParameterFKId.toUpperCase(),
         }))
-        // setAllRedCell(normalized)
-        setAllRedCell([])
+        setAllRedCell(normalized)
+        // setAllRedCell([])
       }
     } catch (error) {
       console.error('Error fetching data:', error)
