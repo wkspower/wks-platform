@@ -1008,7 +1008,7 @@ async function getProductionVolDataBasisPe(
 ) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/report/norms-basis/pe?plantId=${plantId}&year=${year}&type=${reportType}&PeriodFrom=${PeriodFrom}&PeriodTo=${PeriodTo}`
+  const url = `${Config.CaseEngineUrl}/task/report/norms-basis/pe?plantId=${plantId}&year=${year}&type=${reportType}&periodFrom=${PeriodFrom}&periodTo=${PeriodTo}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

@@ -42,11 +42,6 @@ function parseAllowed(raw) {
 }
 
 export default function HeaderContent({ keycloak }) {
-  console.log(
-    '🚀 ~ MenuProvider ~ keycloak:',
-    keycloak,
-    keycloak?.realmAccess?.roles,
-  )
   const getSelectedVerticalStorage = localStorage.getItem('selectedVertical')
     ? JSON.parse(localStorage.getItem('selectedVertical'))
     : null

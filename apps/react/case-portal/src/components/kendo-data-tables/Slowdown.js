@@ -62,13 +62,16 @@ const SlowDown = ({ permissions }) => {
   }, [plantID])
 
   const handleTabChange = (event, newValue) => {
-    setModifiedCells({})
     setModifiedCells2({})
-
     setSelectedTab(newValue)
-    setColDefs2([])
-    setRows2([])
-    fetchData2()
+
+    if (newValue === 0) {
+      setModifiedCells({})
+    } else if (newValue === 1) {
+      setColDefs2([])
+      setRows2([])
+      fetchData2()
+    }
   }
 
   const handleCancelClick = () => () => {

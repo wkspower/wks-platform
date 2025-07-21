@@ -250,16 +250,16 @@ const AnnualAopCost = () => {
       </div>
 
       {!isOldYear && (
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
-        <Button
-          variant='contained'
-          onClick={exportAllGrids}
-          className='btn-save'
-        >
-          Export
-        </Button>
-      </Box>
-    )}
+        <Box display='flex' justifyContent='flex-end' mb='2px'>
+          <Button
+            variant='contained'
+            onClick={exportAllGrids}
+            className='btn-save'
+          >
+            Export
+          </Button>
+        </Box>
+      )}
 
       <Box display='flex' flexDirection='column' gap={1}>
         <div>
@@ -327,7 +327,9 @@ const AnnualAopCost = () => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                Quantity (EOE Production * Individual Particluars Norms Value)
+                {lowerVertName === 'meg'
+                  ? 'Quantity (EOE Production * Individual Particulars Norms Value)'
+                  : 'Quantity (Production * Individual Particulars Norms Value)'}
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>

@@ -12,7 +12,7 @@ import { useSession } from 'SessionStoreContext'
 const CrackerConfig = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, oldYear } = dataGridStore
+  const { verticalChange, oldYear, plantID, yearChanged } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -352,11 +352,12 @@ const CrackerConfig = () => {
   }, [
     tabIndex,
     selectMode,
-    plantId,
+    plantID,
     tabs,
     fetchCrackerRows,
     keycloak,
     currentTabDisplay,
+    yearChanged,
   ])
   // console.log(props)
   // const productId = props.dataItem.normParameterFKId

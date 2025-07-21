@@ -12,7 +12,7 @@ const CrackerConfig = () => {
   // Redux/context
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, oldYear } = dataGridStore
+  const { verticalChange, oldYear, plantID, yearChanged } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -373,12 +373,13 @@ const CrackerConfig = () => {
   }, [
     tabIndex,
     selectMode,
-    plantId,
+    plantID,
     tabs,
     fetchCrackerRows,
     fetchCrackerRowsYield,
     keycloak,
     currentTabDisplay,
+    yearChanged,
   ])
 
   const [modifiedCells, setModifiedCells] = useState({})

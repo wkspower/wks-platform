@@ -324,7 +324,9 @@ const AnnualAopCost = () => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                Quantity (EOE Production * Individual Particluars Norms Value)
+                {lowerVertName === 'meg'
+                  ? 'Quantity (EOE Production * Individual Particulars Norms Value)'
+                  : 'Quantity (Production * Individual Particulars Norms Value)'}
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
