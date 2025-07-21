@@ -209,7 +209,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     sheet.autoSizeColumn(i);
                 }
 
-                sheet.setDisplayGridlines(false);
+                //sheet.setDisplayGridlines(false);
             }
 
             // File outputDir = new File("output");

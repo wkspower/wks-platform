@@ -206,6 +206,11 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 			for (SpyroInputDTO spyroInputDTO : spyroInputDTOList) {
 				// year = spyroInputDTO.getAuditYear();
 				plantId = UUID.fromString(plantFKId);
+				if (spyroInputDTO.getSaveStatus() != null
+						&& spyroInputDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(spyroInputDTO);
+					continue;
+				}
 				UUID normParameterFKId = UUID.fromString(spyroInputDTO.getNormParameterFKID());
 				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
 				if (!optionNormParameters.isPresent()) {
@@ -440,6 +445,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 					try {
 						dto.setNormParameterFKID(getStringCellValue(row.getCell(0), dto));
+						dto.setParticulars(getStringCellValue(row.getCell(1), dto));
 						dto.setUOM(getStringCellValue(row.getCell(2), dto));
 						dto.setAuditYear(year);
 						dto.setApr(getNumericCellValue(row.getCell(3), dto));
