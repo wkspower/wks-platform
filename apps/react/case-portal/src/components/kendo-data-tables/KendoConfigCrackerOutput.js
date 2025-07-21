@@ -545,28 +545,50 @@ const CrackerConfig = () => {
     }
   }
 //----
-  const saveSpyroInputExcelFile = async (rawFile) => {
+  const saveSpyroOutputExcelFile = async (rawFile) => {
   setLoading(true);
-  
+
   try {
     const storedPlant = localStorage.getItem('selectedPlant');
     const plantId = storedPlant ? JSON.parse(storedPlant)?.id : '';
-    const mode = selectMode; // Can be empty — that's fine
+    const mode = selectMode || ''; // Optional
 
-    const response = await DataService.importSpyroOutputExcel(
-      rawFile,
-      keycloak,
-      mode
-    );
+    let response;
 
-    if (response) {
+    // Spyro Output Excel Import API call
+    response = await DataService.importSpyroOutputExcel(rawFile, keycloak, mode);
+
+    if (response?.code === 200) {
       setSnackbarOpen(true);
       setSnackbarData({
         message: 'Uploaded Successfully!',
         severity: 'success',
       });
       setModifiedCells({});
-      fetchAllData();
+      fetchAllData?.();
+    } else if (response?.code === 400 && response?.data) {
+      const byteCharacters = atob(response.data);
+      const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+
+      const blob = new Blob([byteArray], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'Error File - Spyro Output.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setSnackbarOpen(true);
+      setSnackbarData({
+        message: 'Partial data saved. Error file downloaded.',
+        severity: 'warning',
+      });
     } else {
       setSnackbarOpen(true);
       setSnackbarData({
@@ -577,14 +599,19 @@ const CrackerConfig = () => {
 
     return response;
   } catch (error) {
-    console.error('Error uploading Spyro Input Excel:', error);
-    setLoading(false);
+    console.error('Error uploading Spyro Output Excel:', error);
+    setSnackbarOpen(true);
+    setSnackbarData({
+      message: 'Unexpected error occurred!',
+      severity: 'error',
+    });
   } finally {
-    // optionally re-enable UI
+    setLoading(false);
   }
 };
+
   const handleExcelUpload = (rawFile) => {
-    saveSpyroInputExcelFile(rawFile);
+    saveSpyroOutputExcelFile(rawFile);
   };
 
   const downloadExcelForConfiguration = async () => {
