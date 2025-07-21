@@ -291,7 +291,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			// 2. Construct SQL with dynamic view name
 			String sql = "SELECT * FROM " + viewName +
 					" WHERE PlantId = :plantId" +
-					" ORDER BY DisplaySeq"; //  sort by DisplaySeq (ascending)
+					" ORDER BY DisplaySeq"; // sort by DisplaySeq (ascending)
 
 			// 3. Create and parameterize the native query
 			Query query = entityManager.createNativeQuery(sql);
