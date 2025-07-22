@@ -89,10 +89,6 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 				.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-		System.out.println("year " + year);
-		System.out.println("plantId " + plantId);
-		System.out.println("Mode " + Mode);
-		System.out.println("type " + type);
 		String siteId = site.getId().toString();
 		String verticalId = vertical.getId().toString();
 		String procedureName = vertical.getName() + "_" + site.getName() + "_GetSpyroInput";
@@ -102,15 +98,11 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 				if (!type.equalsIgnoreCase("Composition") && row[4].toString().contains(type)) {
-					map.put("VerticalFKId", row[0]);
-					map.put("PlantFKId", row[1]);
+					
 					map.put("NormParameterFKID", row[2]);
 					map.put("Particulars", row[3]);
 					map.put("NormParameterTypeName", row[4]);
-					map.put("NormParameterTypeFKID", row[5]);
-					map.put("Type", row[6]);
 					map.put("UOM", row[7]);
-					map.put("AuditYear", row[8]);
 					map.put("Remarks", row[9]);
 					map.put("Jan", row[10]);
 					map.put("Feb", row[11]);
@@ -222,7 +214,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(spyroInputDTO, i);
 
-					saveData(normParameterFKId, i, attributeValue, spyroInputDTO);
+					saveData(normParameterFKId, i, attributeValue, spyroInputDTO,plantFKId,year);
 				}
 			}
 			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-input");
@@ -279,7 +271,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		return spyroInputDTO.getJan();
 	}
 
-	void saveData(UUID normParameterFKId, Integer i, Double attributeValue, SpyroInputDTO spyroInputDTO) {
+	void saveData(UUID normParameterFKId, Integer i, Double attributeValue, SpyroInputDTO spyroInputDTO,String plantId,String year) {
 
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, spyroInputDTO.getAuditYear());
@@ -298,7 +290,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 			normAttributeTransactions.setUserName("System");
 			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
 			normAttributeTransactions.setAopMonth(i);
-			normAttributeTransactions.setAuditYear(spyroInputDTO.getAuditYear());
+			normAttributeTransactions.setAuditYear(year);
 		}
 
 		normAttributeTransactions

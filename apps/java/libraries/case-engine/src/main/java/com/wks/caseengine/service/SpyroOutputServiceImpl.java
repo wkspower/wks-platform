@@ -79,15 +79,11 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 				
 				if(row[4].toString().contains(type)) {	
-					map.put("VerticalFKId", row[0]);
-					map.put("PlantFKId", row[1]);
+					
 					map.put("NormParameterFKID", row[2]);
 					map.put("Particulars", row[3]);
 					map.put("NormParameterDisplayName", row[4]);
-					map.put("NormParameterTypeFKID", row[5]);
-					map.put("Type", row[6]);
 					map.put("UOM", row[7]);
-					map.put("AuditYear", row[8]);
 					map.put("Remarks", row[9]);
 					map.put("Jan", row[10]);
 					map.put("Feb", row[11]);
@@ -164,15 +160,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 
 
 	@Override
-	public AOPMessageVM updateSpyroOutputData(List<SpyroOutputDTO> spyroOutputDTOList) {
+	public AOPMessageVM updateSpyroOutputData(String year,String plantId,List<SpyroOutputDTO> spyroOutputDTOList) {
 		AOPMessageVM aopMessageVM=new AOPMessageVM();
-		String year=null;
-		UUID plantId=null;
+		
 		try {
 			for (SpyroOutputDTO spyroOutputDTO : spyroOutputDTOList) {
 				UUID normParameterFKId = UUID.fromString(spyroOutputDTO.getNormParameterFKID());
-				year=spyroOutputDTO.getAuditYear();
-				plantId=UUID.fromString(spyroOutputDTO.getPlantFKId());
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(spyroOutputDTO, i);
 		
@@ -185,7 +178,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				aopCalculation.setAopYear(year);
 				aopCalculation.setIsChanged(true);
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(plantId);
+				aopCalculation.setPlantId(UUID.fromString(plantId));
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}

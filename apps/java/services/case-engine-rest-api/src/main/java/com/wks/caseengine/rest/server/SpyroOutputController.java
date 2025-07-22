@@ -34,8 +34,8 @@ public class SpyroOutputController {
 	}
 
 	@PostMapping(value="/spyro-output")
-	public AOPMessageVM updateSpyroOutputData(@RequestBody List<SpyroOutputDTO> spyroOutputDTOList){
-		return spyroOutputService.updateSpyroOutputData(spyroOutputDTOList);
+	public AOPMessageVM updateSpyroOutputData(@RequestParam String year,@RequestParam String plantId,@RequestBody List<SpyroOutputDTO> spyroOutputDTOList){
+		return spyroOutputService.updateSpyroOutputData(year,plantId,spyroOutputDTOList);
 	}
 	
 	@GetMapping(value="/spyro-output/yield")
