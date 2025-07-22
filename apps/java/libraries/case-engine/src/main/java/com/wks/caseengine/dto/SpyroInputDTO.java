@@ -14,29 +14,29 @@ import lombok.NoArgsConstructor;
 @Data
 public class SpyroInputDTO {
 
-    private String VerticalFKId;
-    private String PlantFKId;
-    private String NormParameterFKID;
-    private String Particulars;
-    private String NormParameterTypeName;
-    private String NormParameterTypeFKID;
-    private String Type;
-    private String UOM;
-    private String AuditYear;
-    private String Remarks;
+    private String verticalFKId;
+    private String plantFKId;
+    private String normParameterFKID;
+    private String particulars;
+    private String normParameterTypeName;
+    private String normParameterTypeFKID;
+    private String type;
+    private String uom;
+    private String auditYear;
+    private String remarks;
 
-    private Double Jan;
-    private Double Feb;
-    private Double Mar;
-    private Double Apr;
-    private Double May;
-    private Double Jun;
-    private Double Jul;
-    private Double Aug;
-    private Double Sep;
-    private Double Oct;
-    private Double Nov;
-    private Double Dec;
+    private Double jan;
+    private Double feb;
+    private Double mar;
+    private Double apr;
+    private Double may;
+    private Double jun;
+    private Double jul;
+    private Double aug;
+    private Double sep;
+    private Double oct;
+    private Double nov;
+    private Double dec;
 
     private String saveStatus;
     private String errDescription;
