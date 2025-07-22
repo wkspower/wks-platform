@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
@@ -176,6 +178,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		String year=null;
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userId = authentication.getName();	
 		try {
 			UUID plantMaintenanceId = findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
 			if (plantMaintenanceId == null) {
@@ -221,7 +225,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 					plantMaintenanceTransaction
 							.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
-					plantMaintenanceTransaction.setUser("system");
+					plantMaintenanceTransaction.setUser(userId);
 					plantMaintenanceTransaction.setName("Default Name");
 					plantMaintenanceTransaction.setVersion("V1");
 					plantMaintenanceTransaction.setCreatedOn(new Date());

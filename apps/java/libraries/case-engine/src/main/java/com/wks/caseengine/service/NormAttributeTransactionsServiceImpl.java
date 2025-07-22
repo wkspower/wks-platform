@@ -11,6 +11,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -214,6 +216,8 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	
 	@Override
 	public Boolean saveCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userId = authentication.getName();	
 		for(Integer i=1;i<12;i++) {
 			NormAttributeTransactions normAttributeTransactions= new NormAttributeTransactions();
 			normAttributeTransactions.setAttributeValue(getAttributeValue(catalystAttributesDTO,(i+1)).toString());
@@ -227,7 +231,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
 			normAttributeTransactions.setRemarks(catalystAttributesDTO.getRemarks());
-			normAttributeTransactions.setUserName("System");
+			normAttributeTransactions.setUserName(userId);
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
 			
 		}

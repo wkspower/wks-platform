@@ -839,7 +839,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	void saveData(NormParameters normParameter, Integer i, String year, Double attributeValue,
 			ConfigurationDTO configurationDTO) {
-
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userId = authentication.getName();	
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameter.getId(), i, year);
 
@@ -855,7 +856,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			// normAttributeTransactions.setId(UUID.randomUUID());
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
-			normAttributeTransactions.setUserName("System");
+			normAttributeTransactions.setUserName(userId);
 			normAttributeTransactions.setNormParameterFKId(normParameter.getId());
 			normAttributeTransactions.setAopMonth(i);
 			//normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
@@ -984,6 +985,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Override
 	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(String year, String plantId,
 			List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userId = authentication.getName();	
 		try {
 
 			List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
@@ -1018,7 +1021,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						newEntity.setAopYear(year);
 						newEntity.setCreatedOn(new Date());
 						newEntity.setModifiedOn(new Date());
-						newEntity.setUser("System");
+						newEntity.setUser(userId);
 
 						if (attributeValue != null && !attributeValue.trim().isEmpty()) {
 							newEntity.setAttributeValue((attributeValue.trim()));
