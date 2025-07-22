@@ -551,12 +551,9 @@ const CrackerConfig = () => {
   try {
     const storedPlant = localStorage.getItem('selectedPlant');
     const plantId = storedPlant ? JSON.parse(storedPlant)?.id : '';
-    const mode = selectMode || ''; // Optional
+    const mode = selectMode || '';
 
-    let response;
-
-    // Spyro Output Excel Import API call
-    response = await DataService.importSpyroOutputExcel(rawFile, keycloak, mode);
+    const response = await DataService.importSpyroOutputExcel(rawFile, keycloak, mode);
 
     if (response?.code === 200) {
       setSnackbarOpen(true);
@@ -565,7 +562,14 @@ const CrackerConfig = () => {
         severity: 'success',
       });
       setModifiedCells({});
-      fetchAllData?.();
+
+      // ✅ Refresh current tab data after successful upload
+      if (currentTabDisplay === 'Yield') {
+        fetchCrackerRowsYield(currentTabDisplay, selectMode);
+      } else {
+        fetchCrackerRows(currentTabDisplay, selectMode);
+      }
+
     } else if (response?.code === 400 && response?.data) {
       const byteCharacters = atob(response.data);
       const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));

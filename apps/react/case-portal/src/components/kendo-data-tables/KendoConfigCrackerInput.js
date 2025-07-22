@@ -477,51 +477,53 @@ const CrackerConfig = () => {
     if (response?.code === 200) {
       setSnackbarOpen(true);
       setSnackbarData({
-        message: 'Data uploaded successfully!',
+        message: response?.message || 'Data uploaded successfully!',
         severity: 'success',
       });
-      setModifiedCells({});
-      fetchAllData?.();
+      await fetchCrackerRows(currentTabDisplay, selectMode); // Wait until data is reloaded
     } else if (response?.code === 400 && response?.data) {
-      const byteCharacters = atob(response.data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      // Server responded with error file (base64)
+      try {
+        const byteCharacters = atob(response.data);
+        const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'Error File - Spyro Input.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (fileError) {
+        console.error('Error processing error file:', fileError);
       }
-
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'Error File - Spyro Input.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
 
       setSnackbarOpen(true);
       setSnackbarData({
-        message: 'Partial data saved. Error file downloaded.',
+        message: response?.message || 'Partial data saved. Error file downloaded.',
         severity: 'warning',
       });
+
+      await fetchCrackerRows(currentTabDisplay, selectMode);
     } else {
       setSnackbarOpen(true);
       setSnackbarData({
-        message: 'Upload failed!',
+        message: response?.message || 'Failed to save data!',
         severity: 'error',
       });
     }
 
     return response;
   } catch (error) {
-    console.error('Error uploading Spyro Input Excel:', error);
+    console.error('Error uploading Excel:', error);
     setSnackbarOpen(true);
     setSnackbarData({
-      message: 'Unexpected error occurred!',
+      message: error?.message || 'Unexpected error occurred during upload.',
       severity: 'error',
     });
   } finally {
