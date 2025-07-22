@@ -81,23 +81,23 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				
 				if(row[4].toString().contains(type)) {	
 					
-					map.put("NormParameterFKID", row[2]);
-					map.put("Particulars", row[3]);
-					map.put("NormParameterDisplayName", row[4]);
-					map.put("UOM", row[7]);
-					map.put("Remarks", row[9]);
-					map.put("Jan", row[10]);
-					map.put("Feb", row[11]);
-					map.put("Mar", row[12]);
-					map.put("Apr", row[13]);
-					map.put("May", row[14]);
-					map.put("Jun", row[15]);
-					map.put("Jul", row[16]);
-					map.put("Aug", row[17]);
-					map.put("Sep", row[18]);
-					map.put("Oct", row[19]);
-					map.put("Nov", row[20]);
-					map.put("Dec", row[21]);
+					map.put("normParameterFKID", row[2]);
+					map.put("Pparticulars", row[3]);
+					map.put("normParameterDisplayName", row[4]);
+					map.put("uom", row[7]);
+					map.put("remarks", row[9]);
+					map.put("jan", row[10]);
+					map.put("feb", row[11]);
+					map.put("mar", row[12]);
+					map.put("apr", row[13]);
+					map.put("may", row[14]);
+					map.put("jun", row[15]);
+					map.put("jul", row[16]);
+					map.put("aug", row[17]);
+					map.put("sep", row[18]);
+					map.put("oct", row[19]);
+					map.put("nov", row[20]);
+					map.put("dec", row[21]);
 					map.put("isEditable", row[22]);
 					spyroOutputDataList.add(map); // Add the map to the list here
 				}
