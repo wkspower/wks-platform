@@ -26,6 +26,7 @@ import Search from './Search'
 
 // import Logo from '../../../assets/images/ril-logo2.png'
 import Logo from 'assets/images/ril-logo2.png'
+import { Skeleton } from '../../../../../node_modules/@progress/kendo-react-indicators/index'
 
 // Utility to parse the Keycloak ?allowed? JSON
 function parseAllowed(raw) {
@@ -42,6 +43,7 @@ function parseAllowed(raw) {
 }
 
 export default function HeaderContent({ keycloak }) {
+  const [headerLoading, setHeaderLoading] = useState(false)
   const getSelectedVerticalStorage = localStorage.getItem('selectedVertical')
     ? JSON.parse(localStorage.getItem('selectedVertical'))
     : null
@@ -78,13 +80,21 @@ export default function HeaderContent({ keycloak }) {
   }, [keycloak])
 
   // 2?? fetch full details once
+
+  const fetchAllSites = async () => {
+    setHeaderLoading(true)
+    try {
+      const data = await DataService.getAllSites(keycloak)
+      setFullDetails(data || [])
+    } catch (error) {
+      console.error('Error fetching sites', error)
+      setFullDetails([])
+    } finally {
+      setHeaderLoading(false)
+    }
+  }
   useEffect(() => {
-    DataService.getAllSites(keycloak)
-      .then((data) => setFullDetails(data || []))
-      .catch((err) => {
-        console.error('Error fetching sites', err)
-        setFullDetails([])
-      })
+    fetchAllSites()
   }, [keycloak])
 
   useEffect(() => {
@@ -188,6 +198,7 @@ export default function HeaderContent({ keycloak }) {
 
   useEffect(() => {
     async function fetchYears() {
+      setHeaderLoading(true)
       try {
         var resp = await DataService.getAopyears(keycloak)
         if (resp?.length) {
@@ -206,6 +217,8 @@ export default function HeaderContent({ keycloak }) {
         }
       } catch (err) {
         console.error('Error fetching AOP years', err)
+      } finally {
+        setHeaderLoading(false)
       }
     }
     fetchYears()
@@ -334,19 +347,23 @@ export default function HeaderContent({ keycloak }) {
           <Typography variant='body1' className='custom-title-dropdown'>
             Year:
           </Typography>
-          <FormControl sx={{ minWidth: 100 }}>
-            <Select
-              value={selectedYear}
-              onChange={handleYearChange}
-              className='custom-title-dropdown-content'
-            >
-              {aopYears.map((y) => (
-                <MenuItem key={y.AOPYear} value={y.AOPYear}>
-                  {y.AOPDisplayYear}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {headerLoading ? (
+            <Skeleton variant='rectangle' width={100} height={40} />
+          ) : (
+            <FormControl sx={{ minWidth: 100 }}>
+              <Select
+                value={selectedYear}
+                onChange={handleYearChange}
+                className='custom-title-dropdown-content'
+              >
+                {aopYears.map((y) => (
+                  <MenuItem key={y.AOPYear} value={y.AOPYear}>
+                    {y.AOPDisplayYear}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
 
         {/* Vertical */}
@@ -354,19 +371,23 @@ export default function HeaderContent({ keycloak }) {
           <Typography variant='body1' className='custom-title-dropdown'>
             Vertical:
           </Typography>
-          <FormControl sx={{ minWidth: 100 }}>
-            <Select
-              value={selectedVertical}
-              onChange={handleVertChange}
-              className='custom-title-dropdown-content'
-            >
-              {verticals.map((v) => (
-                <MenuItem key={v.id} value={v.id}>
-                  {v.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {headerLoading ? (
+            <Skeleton variant='rectangle' width={100} height={40} />
+          ) : (
+            <FormControl sx={{ minWidth: 100 }}>
+              <Select
+                value={selectedVertical}
+                onChange={handleVertChange}
+                className='custom-title-dropdown-content'
+              >
+                {verticals.map((v) => (
+                  <MenuItem key={v.id} value={v.id}>
+                    {v.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
 
         {/* Site */}
@@ -374,20 +395,24 @@ export default function HeaderContent({ keycloak }) {
           <Typography variant='body1' className='custom-title-dropdown'>
             Site:
           </Typography>
-          <FormControl sx={{ minWidth: 100 }}>
-            <Select
-              value={selectedSite}
-              onChange={handleSiteChange}
-              disabled={!sites.length}
-              className='custom-title-dropdown-content'
-            >
-              {sites.map((s) => (
-                <MenuItem key={s.id} value={s.id}>
-                  {s.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {headerLoading ? (
+            <Skeleton variant='rectangle' width={100} height={40} />
+          ) : (
+            <FormControl sx={{ minWidth: 100 }}>
+              <Select
+                value={selectedSite}
+                onChange={handleSiteChange}
+                disabled={!sites.length}
+                className='custom-title-dropdown-content'
+              >
+                {sites.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
 
         {/* Plant */}
@@ -395,20 +420,24 @@ export default function HeaderContent({ keycloak }) {
           <Typography variant='body1' className='custom-title-dropdown'>
             Plant:
           </Typography>
-          <FormControl sx={{ minWidth: 100 }}>
-            <Select
-              value={selectedPlant}
-              onChange={handlePlantChange}
-              disabled={!plants.length}
-              className='custom-title-dropdown-content'
-            >
-              {plants.map((p) => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          {headerLoading ? (
+            <Skeleton variant='rectangle' width={100} height={40} />
+          ) : (
+            <FormControl sx={{ minWidth: 100 }}>
+              <Select
+                value={selectedPlant}
+                onChange={handlePlantChange}
+                disabled={!plants.length}
+                className='custom-title-dropdown-content'
+              >
+                {plants.map((p) => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
       </Stack>
 

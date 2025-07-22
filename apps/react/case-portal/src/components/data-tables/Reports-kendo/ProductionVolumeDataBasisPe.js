@@ -341,6 +341,11 @@ const ProductionVolumeDataBasisPe = () => {
           columns={columns.mcuRange}
           exportRef={exportRefs.mcuRange}
         />
+        <ExcelExportComponent
+          data={data.rowsProductionVolDataBasis}
+          columns={columns.productionVolume}
+          exportRef={exportRefs.productionVolume}
+        />
       </div>
 
       {/* Export Button */}
@@ -377,7 +382,7 @@ const ProductionVolumeDataBasisPe = () => {
         />
 
         <DataAccordion
-          title='PRODUCTION VOLUME BASIS'
+          title='Production Volume Basis'
           rows={formattedProductionVolDataBasis}
           columns={columns.productionVolume}
         />
