@@ -693,13 +693,13 @@ const UserAccessForm = ({ keycloak }) => {
         </Backdrop>
       ) : (
         <>
-          <Box p={3}>
+          <Box py={3}>
             <Grid container spacing={2} alignItems='center'>
        
            
               {/* Vertical Dropdown */}
               <Grid item xs={12} sm={4}>
-                <Typography variant='h6' gutterBottom>
+                <Typography variant='h6' gutterBottom style={{marginLeft:'8px', fontWeight:600}}>
                   Vertical
                 </Typography>
                 <FormControl fullWidth size='small'>
