@@ -302,6 +302,7 @@ public class KeycloakUserService {
 	        result.put("message", "Users fetched successfully.");
 	        result.put("data", users);
 	    } catch (Exception ex) {
+	    	ex.printStackTrace();
 	        throw new Exception("Failed to search users: " + ex.getMessage(), ex);
 	    }
 
