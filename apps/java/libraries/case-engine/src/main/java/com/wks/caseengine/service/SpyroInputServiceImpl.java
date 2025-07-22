@@ -273,7 +273,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userId = authentication.getName();	
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
-				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, spyroInputDTO.getAuditYear());
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
 
 		NormAttributeTransactions normAttributeTransactions;
 
