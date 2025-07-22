@@ -13,7 +13,7 @@
     "width": 120
   },
   {
-    "field": "april",
+    "field": "apr",
     "title": 4,
     "editable": true,
     "width": 120,
@@ -27,14 +27,14 @@
     "type": "number"
   },
   {
-    "field": "june",
+    "field": "jun",
     "title": 6,
     "editable": true,
     "width": 120,
     "type": "number"
   },
   {
-    "field": "july",
+    "field": "jul",
     "title": 7,
     "editable": true,
     "width": 120,
@@ -90,7 +90,7 @@
     "type": "number"
   },
   {
-    "field": "march",
+    "field": "mar",
     "title": 3,
     "editable": true,
     "width": 120,
@@ -104,8 +104,8 @@
     "type": "string"
   },
   {
-    "field": "NormParameterFKID",
-    "title": "NormParameterFKID",
+    "field": "normParameterFKID",
+    "title": "normParameterFKID",
     "filterable": false,
     "hidden": true
   }

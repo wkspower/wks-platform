@@ -218,7 +218,7 @@ const BusinessDemand = ({ permissions }) => {
 
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Business Demand data Saved Successfully!',
+        message: 'Saved Successfully!',
         severity: 'success',
       })
       setModifiedCells({})
@@ -230,7 +230,7 @@ const BusinessDemand = ({ permissions }) => {
       fetchData()
       return response
     } catch (error) {
-      console.error('Error saving Business Demand data!', error)
+      console.error('Error in saving data!', error)
     } finally {
       // fetchData()
     }

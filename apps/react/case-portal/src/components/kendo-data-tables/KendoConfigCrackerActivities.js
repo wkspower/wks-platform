@@ -7,6 +7,8 @@ import moment from '../../../node_modules/moment/moment.js'
 import { ibrGridThree, ibrPlanColumns } from './columnDefs'
 import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
 import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
+import { validateFields } from 'utils/validationUtils.js'
+import { Height } from '../../../node_modules/@mui/icons-material/index.js'
 const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']
@@ -59,6 +61,7 @@ const DecokingConfig = () => {
     'February',
     'March',
   ].map((month) => ({ value: month, displayName: month }))
+
   const getRows = useCallback(
     (tab) => {
       if (tab === 'IBR Plan') {
@@ -80,6 +83,7 @@ const DecokingConfig = () => {
       setRunningDurationRows(data)
     }
   }, [])
+
   const fetchData = useCallback(
     async (screen = null) => {
       const currentTab = tabs[activeTabIndex]
@@ -140,36 +144,17 @@ const DecokingConfig = () => {
 
             if (data3?.code === 200) {
               setCalculationObject(data3?.data?.aopCalculation)
-              const fiscalMonthOrder = [
-                'April',
-                'May',
-                'June',
-                'July',
-                'August',
-                'September',
-                'October',
-                'November',
-                'December',
-                'January',
-                'February',
-                'March',
-              ]
 
-              const processedData = data3.data?.decokingActivitiesList
-                .map((item, index) => ({
+              const processedData = data3.data?.decokingActivitiesList.map(
+                (item, index) => ({
                   ...item,
                   month_: item?.month,
                   idFromApi: item?.id,
                   id: index,
                   remarks: item?.remarks || '',
                   date: toDateObject(item.date),
-                }))
-                .sort((a, b) => {
-                  return (
-                    fiscalMonthOrder.indexOf(a.month_) -
-                    fiscalMonthOrder.indexOf(b.month_)
-                  )
-                })
+                }),
+              )
 
               setRowsForTab(currentTab, processedData, 3)
             } else {
@@ -206,10 +191,7 @@ const DecokingConfig = () => {
         return
       }
       var rawData = Object.values(modifiedCellsSdTa)
-      const requiredFields = [
-        'idFromApi',
-        'remarks'
-      ]
+      const requiredFields = ['idFromApi', 'remarks']
 
       const validationMessage = validateFields(rawData, requiredFields)
       if (validationMessage) {
@@ -258,17 +240,12 @@ const DecokingConfig = () => {
 
       const payload = newRow.map((row) => ({
         id: row?.idFromApi || null,
-        displayName: row?.displayName,
-        name: row?.name,
-        aopYear: localStorage.getItem('year'),
-        plantFkId: row?.plantFkId,
         ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
         ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
         taStartDate: formatIfDate(row?.taStartDate) || null,
         taEndDate: formatIfDate(row?.taEndDate) || null,
         shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
         shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
-
         preCrDays: row?.preCrDays ? Number(row.preCrDays) : null,
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
         remarks: row.remarks || '',
@@ -548,6 +525,7 @@ const DecokingConfig = () => {
             saveChanges={saveChangesSdTa}
             setRemarkDialogOpen={setRemarkDialogOpenSdTa}
           />
+
           <FurnaceRunLengthGrid
             columns={ibrGridThree}
             rows={getRows('IBR Plan')[3]}

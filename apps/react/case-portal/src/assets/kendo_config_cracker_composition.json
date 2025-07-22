@@ -1,6 +1,6 @@
 [
   {
-    "field": "ParticularsType",
+    "field": "normParameterTypeName",
     "title": "Type",
     "width": 110,
     "groupable": true,
@@ -20,7 +20,7 @@
     "width": 120
   },
   {
-    "field": "april",
+    "field": "apr",
     "title": 4,
     "editable": true,
     "width": 120
@@ -35,7 +35,7 @@
     "type": "number"
   },
   {
-    "field": "june",
+    "field": "jun",
     "title": 6,
     "editable": true,
     "width": 120,
@@ -44,7 +44,7 @@
     "type": "number"
   },
   {
-    "field": "july",
+    "field": "jul",
     "title": 7,
     "editable": true,
     "width": 120,
@@ -117,7 +117,7 @@
     "type": "number"
   },
   {
-    "field": "march",
+    "field": "mar",
     "title": 3,
     "editable": true,
     "width": 120,
@@ -131,11 +131,5 @@
     "editable": false,
     "width": 180,
     "type": "string"
-  },
-  {
-    "field": "idFromApi",
-    "title": "idFromApi",
-    "filterable": false,
-    "hidden": true
   }
 ]

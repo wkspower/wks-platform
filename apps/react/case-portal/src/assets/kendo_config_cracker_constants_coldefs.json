@@ -13,8 +13,8 @@
     "width": 120
   },
   {
-    "field": "april",
-    "title": "Value",
+    "field": "apr",
+    "title": 4,
     "editable": true,
     "widthT": 200,
     "type": "number"
@@ -28,8 +28,8 @@
     "type": "string"
   },
   {
-    "field": "NormParameterFKID",
-    "title": "NormParameterFKID",
+    "field": "normParameterFKID",
+    "title": "normParameterFKID",
     "filterable": false,
     "hidden": true
   }

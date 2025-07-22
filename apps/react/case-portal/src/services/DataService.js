@@ -2067,8 +2067,9 @@ async function saveBusinessDemandData(plantId, turnAroundDetails, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function saveSpyroInput(payload, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/spyro-input`
+async function saveSpyroInput(payload, keycloak, plantId) {
+  var year = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/spyro-input?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2087,7 +2088,7 @@ async function saveSpyroInput(payload, keycloak) {
   }
 }
 async function saveSpyroOutput(payload, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/spyro-output`
+  const url = `${Config.CaseEngineUrl}/task/spyro-output?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2152,7 +2153,7 @@ async function saveNormalOperationNormsData(
 ) {
   const year = localStorage.getItem('year')
   const queryParams = new URLSearchParams({ year, plantId })
-  if (lowerVertName === 'pe') {
+  if (lowerVertName === 'pe' || lowerVertName === 'pp') {
     queryParams.append('gradeId', gradeId)
   }
   const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?${queryParams.toString()}`
@@ -2919,134 +2920,134 @@ async function saveProductionVolDataExcel(file, keycloak) {
 }
 //----
 async function importSpyroOutputExcel(file, keycloak, mode) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id;
-  const year = localStorage.getItem('year');
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-output-import-excel?plantId=${plantId}&year=${year}&Mode=${encodeURIComponent(mode)}`;
-  const formData = new FormData();
-  formData.append('file', file);
+  const url = `${Config.CaseEngineUrl}/task/spyro-output-import-excel?plantId=${plantId}&year=${year}&Mode=${encodeURIComponent(mode)}`
+  const formData = new FormData()
+  formData.append('file', file)
 
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
       body: formData,
-    });
-    return json(keycloak, resp); // assuming `json()` handles response properly
+    })
+    return json(keycloak, resp) // assuming `json()` handles response properly
   } catch (e) {
-    console.error('Error importing Spyro Input Excel:', e);
-    return await Promise.reject(e);
+    console.error('Error importing Spyro Input Excel:', e)
+    return await Promise.reject(e)
   }
 }
 async function exportSpyroOutputExcel(keycloak, mode) {
-  const year = localStorage.getItem('year');
-  let plantId = '';
-  const storedPlant = localStorage.getItem('selectedPlant');
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
   if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant);
-    plantId = parsedPlant.id;
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`;
+  const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
 
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
     const resp = await fetch(url, {
       method: 'GET',
       headers,
-    });
+    })
 
     if (!resp.ok) {
-      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`);
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
     }
 
-    const blob = await resp.blob();
-    const urlBlob = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = urlBlob;
-    a.download = `SpyroOutput_${mode || 'Export'}.xlsx`; // mode as filename suffix
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(urlBlob);
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `SpyroOutput_${mode || 'Export'}.xlsx` // mode as filename suffix
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e);
-    return Promise.reject(e);
+    console.error('Error exporting Spyro Input Excel:', e)
+    return Promise.reject(e)
   }
 }
 async function importSpyroInputExcel(file, keycloak, mode) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id;
-  const year = localStorage.getItem('year');
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-input-import-excel?plantId=${plantId}&year=${year}&mode=${encodeURIComponent(mode)}`;
-  const formData = new FormData();
-  formData.append('file', file);
+  const url = `${Config.CaseEngineUrl}/task/spyro-input-import-excel?plantId=${plantId}&year=${year}&mode=${encodeURIComponent(mode)}`
+  const formData = new FormData()
+  formData.append('file', file)
 
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
       body: formData,
-    });
-    return json(keycloak, resp); // assuming `json()` handles response properly
+    })
+    return json(keycloak, resp) // assuming `json()` handles response properly
   } catch (e) {
-    console.error('Error importing Spyro Input Excel:', e);
-    return await Promise.reject(e);
+    console.error('Error importing Spyro Input Excel:', e)
+    return await Promise.reject(e)
   }
 }
 
 async function exportSpyroInputExcel(keycloak, mode) {
-  const year = localStorage.getItem('year');
-  let plantId = '';
-  const storedPlant = localStorage.getItem('selectedPlant');
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
   if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant);
-    plantId = parsedPlant.id;
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-input-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&mode=${encodeURIComponent(mode)}`;
+  const url = `${Config.CaseEngineUrl}/task/spyro-input-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
 
   try {
     const resp = await fetch(url, {
       method: 'GET',
       headers,
-    });
+    })
 
     if (!resp.ok) {
-      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`);
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
     }
 
-    const blob = await resp.blob();
-    const urlBlob = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = urlBlob;
-    a.download = `SpyroInput_${mode || 'Export'}.xlsx`; // mode as filename suffix
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(urlBlob);
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `SpyroInput_${mode || 'Export'}.xlsx` // mode as filename suffix
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e);
-    return Promise.reject(e);
+    console.error('Error exporting Spyro Input Excel:', e)
+    return Promise.reject(e)
   }
 }
 
@@ -3282,7 +3283,10 @@ async function getCrackerMaintenanceData(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function saveCrackerMaintenance({ plantId, year, decokePlanningDTOList }, keycloak) {
+async function saveCrackerMaintenance(
+  { plantId, year, decokePlanningDTOList },
+  keycloak,
+) {
   const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',

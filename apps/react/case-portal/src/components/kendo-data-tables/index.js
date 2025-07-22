@@ -1007,7 +1007,6 @@ const KendoDataTables = ({
                 )
               }
               if (col?.field === 'UOM') {
-                console.log('col', col?.field)
                 return (
                   <GridColumn
                     key='UOM'

@@ -206,7 +206,10 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       [
         'monthwiseproductionplan',
         'overallaopconsumption(norm/quantity)',
-      ].includes(normalizedTitle)
+      ].includes(normalizedTitle) &&
+      JSON.parse(
+        localStorage.getItem('selectedVertical'),
+      )?.name?.toLowerCase() == 'meg'
     ) {
       itemContent = (
         <Typography

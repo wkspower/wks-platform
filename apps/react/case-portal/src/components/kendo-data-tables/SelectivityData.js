@@ -190,7 +190,7 @@ const SelectivityData = (props) => {
       if (response) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Configuration data Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
 
@@ -239,14 +239,14 @@ const SelectivityData = (props) => {
         if (response) {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: 'Configuration Data Saved Successfully!',
+            message: 'Saved Successfully!',
             severity: 'success',
           })
           fetchConfigData()
         } else {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: 'Configuration Data Saved failed!',
+            message: 'Data Saved failed!',
             severity: 'error',
           })
         }

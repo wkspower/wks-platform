@@ -96,6 +96,7 @@ export const ibrPlanColumns = [
     editable: true,
     width: 200,
     filter: false,
+    type: 'number',
   },
   {
     field: 'postCrDays',
@@ -103,6 +104,7 @@ export const ibrPlanColumns = [
     editable: true,
     width: 200,
     filter: false,
+    type: 'number',
   },
   {
     field: 'isCr',
@@ -254,7 +256,7 @@ export const runningDurationColumns = [
   { field: 'buD', title: 'BUD', editable: true, type: 'number' },
   { field: 'fourF', title: '4F', editable: true, type: 'number' },
   { field: 'fiveF', title: '5F', editable: true, type: 'number' },
-  { field: 'fourFD', title: '4FD', editable: true, type: 'number' },
+  { field: 'fourFD', title: '4F+D', editable: true, type: 'number' },
   { field: 'total', title: 'Total', editable: false, type: 'number' },
   { field: 'remarks', title: 'Remarks', editable: true, width: 250 },
 ]

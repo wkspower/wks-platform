@@ -46,7 +46,7 @@ const CrackerConfig = () => {
     'Total Products',
     'Miscellaneous Parameters',
     'Constant',
-    'Yield',
+    'Yield as per Optimizer Run',
   ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [availableTabs, setAvailableTabs] = useState([])
@@ -85,7 +85,7 @@ const CrackerConfig = () => {
         ? 'cracker_composition'
         : currentTabDisplay === 'Constant'
           ? 'cracker_constants'
-          : currentTabDisplay === 'Yield'
+          : currentTabDisplay === 'Yield as per Optimizer Run'
             ? 'cracker_yield'
             : 'cracker'
 
@@ -122,13 +122,15 @@ const CrackerConfig = () => {
       deleteButton: false,
       editButton: false,
       showUnit: false,
-      showModes: lowerVertName === 'cracker' && currentTabDisplay != 'Yield',
+      showModes:
+        lowerVertName === 'cracker' &&
+        currentTabDisplay != 'Yield as per Optimizer Run',
       saveWithRemark: true,
       saveBtn: true,
       allAction: lowerVertName === 'cracker',
       modes: allModes,
-      uploadExcelBtn: true,
-      downloadExcelBtn: true,
+      uploadExcelBtn: false,
+      downloadExcelBtn: false,
     },
     isOldYear,
   )
@@ -206,7 +208,7 @@ const CrackerConfig = () => {
           return feedRows
         case 'Constant':
           return constantsRows
-        case 'Yield':
+        case 'Yield as per Optimizer Run':
           return yieldRows
 
         default:
@@ -239,7 +241,7 @@ const CrackerConfig = () => {
       case 'Constant':
         setConstantsRows(data)
         break
-      case 'Yield':
+      case 'Yield as per Optimizer Run':
         setYieldRows(data)
         break
 
@@ -305,7 +307,7 @@ const CrackerConfig = () => {
       try {
         setLoading(true)
         var spyroVMYield1 = []
-        if (currentTabDisplay == 'Yield') {
+        if (currentTabDisplay == 'Yield as per Optimizer Run') {
           spyroVMYield1 = await DataService.getSpyroOutputDataYield(
             keycloak,
             mode,
@@ -362,7 +364,7 @@ const CrackerConfig = () => {
 
   useEffect(() => {
     if (keycloak && plantId && currentTabDisplay) {
-      if (currentTabDisplay === 'Yield') {
+      if (currentTabDisplay === 'Yield as per Optimizer Run') {
         fetchCrackerRowsYield(currentTabDisplay, selectMode)
       } else {
         fetchCrackerRows(currentTabDisplay, selectMode)
@@ -389,7 +391,7 @@ const CrackerConfig = () => {
   const [modifiedCells, setModifiedCells] = useState({})
 
   const saveChanges = useCallback(async () => {
-    if (currentTabDisplay === 'Yield') {
+    if (currentTabDisplay === 'Yield as per Optimizer Run') {
       await saveSpyroDataYield(yieldRows)
       return
     }
@@ -426,20 +428,9 @@ const CrackerConfig = () => {
     setLoading(true)
 
     try {
-      let plant = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) plant = JSON.parse(storedPlant).id
-      let verticalId = localStorage.getItem('verticalId')
       const SpyroInputData = newRows.map((row) => ({
-        VerticalFKId: verticalId,
-        PlantFKId: plant,
         NormParameterFKID: row.NormParameterFKID ?? null,
         Particulars: row.particulars ?? row.Particulars ?? null,
-        NormParameterTypeName: row.NormParameterTypeName ?? null,
-        NormParameterTypeFKID: row.NormParameterTypeFKID ?? null,
-        Type: row.ParticularsType ?? row.Type ?? null,
-        UOM: row.uom ?? row.UOM ?? null,
-        AuditYear: row.AuditYear ?? null,
         Remarks: row.remarks ?? row.Remarks ?? null,
         Jan: row.jan || null,
         Feb: row.feb || null,
@@ -454,11 +445,11 @@ const CrackerConfig = () => {
         Nov: row.nov || null,
         Dec: row.dec || null,
         id: row.idFromApi || null,
-        inEdit: row.inEdit || false,
       }))
       const response = await DataService.saveSpyroOutput(
         SpyroInputData,
         keycloak,
+        plantId,
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -470,7 +461,7 @@ const CrackerConfig = () => {
         // Reload current tab
         const tabId = tabs[tabIndex]
         if (tabId) {
-          if (currentTabDisplay === 'Yield') {
+          if (currentTabDisplay === 'Yield as per Optimizer Run') {
             fetchCrackerRowsYield(currentTabDisplay, selectMode)
           } else {
             fetchCrackerRows(currentTabDisplay, selectMode)
@@ -524,7 +515,7 @@ const CrackerConfig = () => {
         // Reload current tab
         const tabId = tabs[tabIndex]
         if (tabId) {
-          if (currentTabDisplay === 'Yield') {
+          if (currentTabDisplay === 'Yield as per Optimizer Run') {
             fetchCrackerRowsYield(currentTabDisplay, selectMode)
           } else {
             fetchCrackerRows(currentTabDisplay, selectMode)
@@ -544,110 +535,117 @@ const CrackerConfig = () => {
       setLoading(false)
     }
   }
-//----
+  //----
   const saveSpyroOutputExcelFile = async (rawFile) => {
-  setLoading(true);
+    setLoading(true)
 
-  try {
-    const storedPlant = localStorage.getItem('selectedPlant');
-    const plantId = storedPlant ? JSON.parse(storedPlant)?.id : '';
-    const mode = selectMode || '';
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const plantId = storedPlant ? JSON.parse(storedPlant)?.id : ''
+      const mode = selectMode || '' // Optional
 
-    const response = await DataService.importSpyroOutputExcel(rawFile, keycloak, mode);
+      let response
 
-    if (response?.code === 200) {
-      setSnackbarOpen(true);
-      setSnackbarData({
-        message: 'Uploaded Successfully!',
-        severity: 'success',
-      });
-      setModifiedCells({});
+      // Spyro Output Excel Import API call
+      response = await DataService.importSpyroOutputExcel(
+        rawFile,
+        keycloak,
+        mode,
+      )
 
-      // ✅ Refresh current tab data after successful upload
-      if (currentTabDisplay === 'Yield') {
-        fetchCrackerRowsYield(currentTabDisplay, selectMode);
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchAllData?.()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File - Spyro Output.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
       } else {
-        fetchCrackerRows(currentTabDisplay, selectMode);
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
       }
 
-    } else if (response?.code === 400 && response?.data) {
-      const byteCharacters = atob(response.data);
-      const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
-      const byteArray = new Uint8Array(byteNumbers);
-
-      const blob = new Blob([byteArray], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'Error File - Spyro Output.xlsx');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      setSnackbarOpen(true);
+      return response
+    } catch (error) {
+      console.error('Error uploading Spyro Output Excel:', error)
+      setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Partial data saved. Error file downloaded.',
-        severity: 'warning',
-      });
-    } else {
-      setSnackbarOpen(true);
-      setSnackbarData({
-        message: 'Upload Failed!',
+        message: 'Unexpected error occurred!',
         severity: 'error',
-      });
+      })
+    } finally {
+      setLoading(false)
     }
-
-    return response;
-  } catch (error) {
-    console.error('Error uploading Spyro Output Excel:', error);
-    setSnackbarOpen(true);
-    setSnackbarData({
-      message: 'Unexpected error occurred!',
-      severity: 'error',
-    });
-  } finally {
-    setLoading(false);
   }
-};
 
   const handleExcelUpload = (rawFile) => {
-    saveSpyroOutputExcelFile(rawFile);
-  };
+    saveSpyroOutputExcelFile(rawFile)
+  }
 
   const downloadExcelForConfiguration = async () => {
-    setSnackbarOpen(true);
+    setSnackbarOpen(true)
     setSnackbarData({
       message: 'Excel download started!',
       severity: 'success',
-    });
-  
-    const mode = selectMode;          // Can be empty — that's fine
-  
+    })
+
+    const mode = selectMode // Can be empty � that's fine
+
     try {
-      await DataService.exportSpyroOutputExcel(
-        keycloak,
-        mode
-      );
+      const response = await DataService.exportSpyroOutputExcel(keycloak, mode)
+
+      if (response?.code === 200) {
         setSnackbarData({
           message: 'Excel download completed successfully!',
           severity: 'success',
-        });
+        })
+      } else {
+        setSnackbarData({
+          message: 'Failed to download Excel.',
+          severity: 'error',
+        })
+      }
     } catch (error) {
-      console.error('Error downloading Excel:', error);
+      console.error('Error downloading Excel:', error)
       setSnackbarData({
         message: 'Failed to download Excel.',
         severity: 'error',
-      });
+      })
     } finally {
-      setSnackbarOpen(true);
+      setSnackbarOpen(true)
     }
-  };
+  }
 
-//----
+  //----
   // ===== Render =====
   return (
     <Box>
@@ -704,14 +702,14 @@ const CrackerConfig = () => {
             case 'Total Products':
             case 'Miscellaneous Parameters':
             case 'Constant':
-            case 'Yield':
+            case 'Yield as per Optimizer Run':
               return (
                 <Box key={currentTabDisplay}>
                   <KendoDataTables
                     rows={rows}
                     setRows={setRowsForCurrent}
                     fetchData={() =>
-                      currentTabDisplay === 'Yield'
+                      currentTabDisplay === 'Yield as per Optimizer Run'
                         ? fetchCrackerRowsYield(currentTabDisplay, selectMode)
                         : fetchCrackerRows(currentTabDisplay, selectMode)
                     }
@@ -735,7 +733,9 @@ const CrackerConfig = () => {
                     modifiedCells={modifiedCells}
                     setModifiedCells={setModifiedCells}
                     handleExcelUpload={handleExcelUpload}
-                    downloadExcelForConfiguration={downloadExcelForConfiguration}
+                    downloadExcelForConfiguration={
+                      downloadExcelForConfiguration
+                    }
                   />
                 </Box>
               )

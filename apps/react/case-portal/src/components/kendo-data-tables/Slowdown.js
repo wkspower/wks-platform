@@ -306,22 +306,27 @@ const SlowDown = ({ permissions }) => {
       }
 
       // const allRecords = [...rows, ...data]
+
       // for (let i = 0; i < allRecords.length; i++) {
       //   const a = allRecords[i]
-      //   const aStart = new Date(a.maintStartDateTime)
-      //   const aEnd = new Date(a.maintEndDateTime)
+      //   const aStart = new Date(a.maintStartDateTime).getTime()
+      //   const aEnd = new Date(a.maintEndDateTime).getTime()
 
-      //   if (isNaN(aStart) || isNaN(aEnd)) continue // Skip if invalid
+      //   if (isNaN(aStart) || isNaN(aEnd)) continue
 
       //   for (let j = i + 1; j < allRecords.length; j++) {
       //     const b = allRecords[j]
-      //     const bStart = new Date(b.maintStartDateTime)
-      //     const bEnd = new Date(b.maintEndDateTime)
+      //     const bStart = new Date(b.maintStartDateTime).getTime()
+      //     const bEnd = new Date(b.maintEndDateTime).getTime()
 
-      //     if (isNaN(bStart) || isNaN(bEnd)) continue // Skip if invalid
+      //     if (isNaN(bStart) || isNaN(bEnd)) continue
 
       //     // Check for overlapping intervals
       //     if (aStart < bEnd && bStart < aEnd) {
+      //       console.log(`Overlap found between record ${i} and ${j}`)
+      //       console.log('A:', aStart, '-', aEnd)
+      //       console.log('B:', bStart, '-', bEnd)
+
       //       setSnackbarOpen(true)
       //       setSnackbarData({
       //         message: 'Maintenance time intervals should not overlap.',
@@ -561,6 +566,7 @@ const SlowDown = ({ permissions }) => {
   }
 
   useEffect(() => {
+    setSelectedTab(0)
     const getAllProducts = async () => {
       try {
         var data = []
@@ -696,28 +702,28 @@ const SlowDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Box style={{ margin: 0, padding: 0 }}>
-        <Tabs
-          value={selectedTab}
-          onChange={handleTabChange}
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 0px 0px',
-            minHeight: '35px',
-          }}
-        >
-          <Tab
-            label='Slowdown Details'
+      {lowerVertName === 'meg' && (
+        <Box style={{ margin: 0, padding: 0 }}>
+          <Tabs
+            value={selectedTab}
+            onChange={handleTabChange}
             sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-
-              padding: '9px',
-              minHeight: '10px',
+              borderBottom: '0px solid #ccc',
+              '.MuiTabs-indicator': { display: 'none' },
+              margin: '0px 0px 0px 0px',
+              minHeight: '35px',
             }}
-          />
-          {lowerVertName === 'meg' && (
+          >
+            <Tab
+              label='Slowdown Details'
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                padding: '9px',
+                minHeight: '10px',
+              }}
+            />
+
             <Tab
               label='Configuration'
               sx={{
@@ -727,9 +733,9 @@ const SlowDown = ({ permissions }) => {
                 minHeight: 10,
               }}
             />
-          )}
-        </Tabs>
-      </Box>
+          </Tabs>
+        </Box>
+      )}
 
       {selectedTab === 0 && (
         <KendoDataTables

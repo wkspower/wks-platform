@@ -1,7 +1,239 @@
+// import * as React from 'react'
+// import { Grid, GridColumn } from '@progress/kendo-react-grid'
+// import { Input } from '@progress/kendo-react-inputs'
+// import { orderBy } from '@progress/kendo-data-query'
+// import { DataService } from 'services/DataService'
+// import { useSession } from 'SessionStoreContext'
+
+// const CellWithState = (props) => {
+//   const field = props.field || ''
+//   const [inEdit, setInEdit] = React.useState(false)
+//   const [value, setValue] = React.useState(props.dataItem[field])
+
+//   const handleChange = (event) => setValue(event.value)
+//   const handleBlur = (e) => {
+//     setInEdit(false)
+//     if (props.onChange) {
+//       props.onChange({
+//         dataItem: props.dataItem,
+//         field: field,
+//         value: value,
+//         syntheticEvent: e.syntheticEvent,
+//       })
+//     }
+//   }
+
+//   if (inEdit) {
+//     return (
+//       <td {...props.tdProps}>
+//         <Input
+//           value={value}
+//           style={{ width: '100%' }}
+//           onChange={handleChange}
+//           onBlur={handleBlur}
+//           autoFocus
+//         />
+//       </td>
+//     )
+//   }
+
+//   return (
+//     <td {...props.tdProps} onClick={() => setInEdit(true)}>
+//       {props.dataItem[field]}
+//     </td>
+//   )
+// }
+
+// const columns = [
+//   {
+//     field: 'id',
+//     title: 'id',
+//     hidden: true,
+//   },
+//   {
+//     field: 'month',
+//     title: 'Month',
+//     type: 'string',
+//     width: 80,
+//     headerAlign: 'left',
+//     editable: false,
+//     isDisabled: true,
+//     filter: true,
+//   },
+//   {
+//     field: 'date',
+//     title: 'Date',
+//     type: 'date',
+//     format: '{0:dd-MMM-yy}',
+//     width: 100,
+//     headerAlign: 'left',
+//     editable: false,
+//     isDisabled: true,
+//     filter: false,
+//   },
+//   {
+//     field: 'hTenActual',
+//     title: 'H10 Actual run length',
+//     width: 120,
+//     filter: false,
+//     editable: false,
+//     isDisabled: true,
+//   },
+//   {
+//     field: 'tenProposed',
+//     title: 'H10 Proposed AOP',
+//     width: 120,
+//     editable: true,
+//     filter: false,
+//   },
+//   {
+//     field: 'hElevenActual',
+//     title: 'H11 Actual run length',
+//     width: 120,
+//     editable: false,
+//     isDisabled: true,
+//     filter: false,
+//   },
+//   {
+//     field: 'elevenProposed',
+//     title: 'H11 Proposed AOP',
+//     width: 120,
+//     editable: true,
+//     filter: false,
+//   },
+//   {
+//     field: 'hTwelveActual',
+//     title: 'H12 Actual run length',
+//     width: 120,
+//     editable: false,
+//     isDisabled: true,
+//     filter: false,
+//   },
+//   {
+//     field: 'twelveProposed',
+//     title: 'H12 Proposed AOP',
+//     filter: false,
+//     width: 120,
+//     editable: true,
+//   },
+//   {
+//     field: 'hThirteenActual',
+//     title: 'H13 Actual run length',
+//     filter: false,
+//     width: 120,
+//     editable: false,
+//     isDisabled: true,
+//   },
+//   {
+//     field: 'thirteenProposed',
+//     title: 'H13 Proposed AOP',
+//     filter: false,
+//     width: 120,
+//     editable: true,
+//   },
+//   {
+//     field: 'hFourteenActual',
+//     title: 'H14 Actual run length',
+//     filter: false,
+//     width: 120,
+//     editable: false,
+//     isDisabled: true,
+//   },
+//   {
+//     field: 'fourteenProposed',
+//     title: 'H14 Proposed AOP',
+//     filter: false,
+//     width: 120,
+//     editable: true,
+//   },
+//   {
+//     field: 'demo',
+//     title: 'DEMO',
+//     type: 'string',
+//     width: 80,
+//     headerAlign: 'center',
+//     editable: true,
+//     filter: false,
+//   },
+// ]
+
+// const KendoDataTablesCrackerRunLength = () => {
+//   const [data, setData] = React.useState([])
+//   const [sort, setSort] = React.useState([])
+//   const [page, setPage] = React.useState({ skip: 0, take: 100 })
+//   const keycloak = useSession()
+
+//   const loadItems = React.useCallback(async () => {
+//     try {
+//       const response = await DataService.getIbrScreen3(keycloak)
+//       const allData = response?.data?.decokingActivitiesList || []
+//       setData(allData)
+//     } catch (err) {
+//       console.error('Failed to load data:', err)
+//     }
+//   }, [keycloak])
+
+//   React.useEffect(() => {
+//     loadItems()
+//   }, [loadItems])
+
+//   const pageChange = (event) => {
+//     setPage(event.page)
+//   }
+
+//   const sortChange = (e) => {
+//     setSort(e.sort)
+//     const sortedData = orderBy(data, e.sort)
+//     setData(sortedData)
+//   }
+
+//   const itemChange = (event) => {
+//     const { dataItem, field, value } = event
+//     const updated = data.map((item) =>
+//       item.id === dataItem.id ? { ...item, [field]: value } : item,
+//     )
+//     setData(updated)
+//   }
+
+//   return (
+//     <div className='kendo-data-grid'>
+//       <Grid
+//         data={data.slice(page.skip, page.skip + page.take)}
+//         total={data.length}
+//         skip={page.skip}
+//         take={page.take}
+//         pageable
+//         sortable
+//         onPageChange={pageChange}
+//         onSortChange={sortChange}
+//         sort={sort}
+//         onItemChange={itemChange}
+//         dataItemKey='id'
+//         rowHeight={35}
+//         columnVirtualization
+//         scrollable='virtual'
+//       >
+//         {columns.map((col) => (
+//           <GridColumn
+//             key={col.field}
+//             field={col.field}
+//             title={col.title}
+//             hidden={col.hidden}
+//             width={120}
+//             cells={col.editable ? { data: CellWithState } : undefined}
+//           />
+//         ))}
+//       </Grid>
+//     </div>
+//   )
+// }
+
+// export default KendoDataTablesCrackerRunLength
+
 import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import {
   Box,
   Button,
@@ -32,6 +264,7 @@ import {
 } from '../../../node_modules/@progress/kendo-react-grid/index'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
+import { Input } from '@progress/kendo-react-inputs'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -223,36 +456,9 @@ const KendoDataTablesCrackerRunLength = ({
                   prevRows[index + 1]?.[field] === 'SAD' &&
                   prevRows[index + 2]?.[field] === 'SAD'
                 ) {
-                  updatedRow.demo = 'BBU'
+                  // updatedRow.demo = 'BBU'
+                  updatedRow.demo = 'SD'
                 }
-
-                // if (isNextNonNumeric) {
-                //   if (index === editedIndex - 1) {
-                //     updatedRow[field] = 'SAD'
-                //     updatedRow.demo = 1
-                //   }
-                //   if (index === editedIndex) {
-                //     updatedRow[field] = 'SAD'
-                //     updatedRow.demo = 2
-                //   }
-                //   if (index === editedIndex - 2) {
-                //     updatedRow.demo = 'BBU'
-                //   }
-                // }
-
-                // if (!isNextNonNumeric && isNextNextNonNumeric) {
-                //   if (index === editedIndex) {
-                //     updatedRow[field] = 'SAD'
-                //     updatedRow.demo = 1
-                //   }
-                //   if (index === editedIndex + 1) {
-                //     updatedRow[field] = 'SAD'
-                //     updatedRow.demo = 2
-                //   }
-                //   if (index === editedIndex - 1) {
-                //     updatedRow.demo = 'BBU'
-                //   }
-                // }
 
                 if (isNextNonNumeric) {
                   if (index === editedIndex - 2) {
@@ -404,22 +610,9 @@ const KendoDataTablesCrackerRunLength = ({
   }, [])
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
-    const month = monthMap[props.field?.toLowerCase()]
-    const normId = props.dataItem.materialFkId
-    const isRedFromAllRedCell = allRedCell.some(
-      (cell) =>
-        cell.month === month &&
-        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
-    )
-    const isRed = isRedFromAllRedCell
+
     return (
-      <td
-        {...props.tdProps}
-        title={value}
-        style={{
-          color: isRed ? 'orange' : undefined,
-        }}
-      >
+      <td {...props.tdProps} title={value}>
         {props.children}
       </td>
     )
@@ -446,6 +639,209 @@ const KendoDataTablesCrackerRunLength = ({
   //     </th>
   //   )
   // }
+
+  const CellWithState = (props) => {
+    const field = props.field || ''
+    const [inEdit, setInEdit] = React.useState(false)
+    const [value, setValue] = React.useState(props.dataItem[field])
+
+    const handleChange = (event) => {
+      setValue(event.target.value)
+    }
+
+    const handleBlur = (e) => {
+      setInEdit(false)
+
+      if (props.onChange) {
+        props.onChange({
+          dataItem: props.dataItem,
+          field,
+          value,
+          syntheticEvent: e,
+        })
+      }
+    }
+    const handleKeyDown = (e) => {
+      const isNumber = /^[0-9]$/.test(e.key)
+      const isControl = [
+        'Backspace',
+        'ArrowLeft',
+        'ArrowRight',
+        'Tab',
+        'Enter',
+      ].includes(e.key)
+
+      const currentValue = e.target.value
+
+      if (!isNumber && !isControl) {
+        if (currentValue.length >= 3 && /^[^0-9]+$/.test(currentValue)) {
+          e.preventDefault()
+        }
+      }
+
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        handleBlur(e)
+      }
+    }
+
+    if (inEdit) {
+      return (
+        <td {...props.tdProps}>
+          <Input
+            value={value}
+            style={{ width: '100%' }}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+        </td>
+      )
+    }
+
+    return (
+      <td {...props.tdProps} onClick={() => setInEdit(true)}>
+        {value}
+      </td>
+    )
+  }
+
+  const CellWithTooltipAndEdit = (props) => {
+    const field = props.field || ''
+    const isEditable = props.editable // assume you pass this in
+    const [inEdit, setInEdit] = React.useState(false)
+    const [value, setValue] = React.useState(props.dataItem[field])
+
+    const handleChange = (event) => {
+      setValue(event.target.value)
+    }
+
+    const handleBlur = (e) => {
+      setInEdit(false)
+
+      if (props.onChange) {
+        props.onChange({
+          dataItem: props.dataItem,
+          field,
+          value,
+          syntheticEvent: e,
+        })
+      }
+    }
+
+    // If editable and in edit mode
+    if (isEditable && inEdit) {
+      return (
+        <td {...props.tdProps}>
+          <Input
+            value={value}
+            style={{ width: '100%' }}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            autoFocus
+          />
+        </td>
+      )
+    }
+
+    // Show tooltip + static text (or trigger edit if editable)
+    return (
+      <td
+        {...props.tdProps}
+        title={value}
+        onClick={() => {
+          if (isEditable) setInEdit(true)
+        }}
+      >
+        {value}
+      </td>
+    )
+  }
+
+  const [page, setPage] = React.useState({ skip: 0, take: 100 })
+
+  const renderGrid = () => (
+    <Grid
+      scrollable='virtual'
+      // columnVirtualization
+      rowHeight={35}
+      data={rows.slice(page.skip, page.skip + page.take)}
+      total={rows.length}
+      skip={page.skip}
+      take={page.take}
+      pageable={
+        rows.length > 50
+          ? { buttonCount: 4, pageSizes: [10, 50, 100, 366] }
+          : false
+      }
+      sortable={{
+        mode: 'multiple',
+      }}
+      sort={sort}
+      onSortChange={(e) => setSort(e.sort)}
+      onPageChange={(e) => setPage(e.page)}
+      onItemChange={itemChange}
+      dataItemKey='id'
+      size='small'
+    >
+      {columns.map((col) => {
+        const isActive = isColumnActive(col.field, filter, sort)
+
+        if (
+          dateFields1.includes(col.field) ||
+          dateFieldsRunLength.includes(col.field)
+        ) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              format='{0:dd-MM-yyyy}'
+              editor='date'
+              hidden={col.hidden}
+              sortable={false}
+              className={
+                dateFieldsRunLength.includes(col.field)
+                  ? 'k-right-disabled'
+                  : ''
+              }
+            />
+          )
+        }
+
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            // width={col.widthT}
+            hidden={col.hidden}
+            headerClassName={isActive ? 'active-column' : ''}
+            columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
+            sortable={!!col.filter}
+            className={col.isDisabled ? 'k-right-disabled' : ''}
+            cells={col.editable ? { data: CellWithState } : undefined}
+          />
+        )
+      })}
+
+      {permissions?.deleteButton && (
+        <GridColumn
+          key='actions'
+          field='actions'
+          title='Action'
+          width={80}
+          className='k-text-center'
+          filterable={false}
+          editable={false}
+          cells={{
+            data: ActionsCell,
+          }}
+        />
+      )}
+    </Grid>
+  )
 
   return (
     <div style={{ position: 'relative' }}>
@@ -540,120 +936,36 @@ const KendoDataTablesCrackerRunLength = ({
         </Box>
       )}
       <div className='kendo-data-grid'>
-        <Grid
-          scrollable='virtual'
-          modifiedCells={modifiedCells}
-          autoProcessData={true}
-          defaultGroup={initialGroup}
-          data={rows}
-          rows={{ data: CustomRow }}
-          dataItemKey='id'
-          editField='inEdit'
-          editable={{ mode: 'incell' }}
-          onEditChange={handleEditChange}
-          edit={edit}
-          filter={filter}
-          onFilterChange={(e) => setFilter(e.filter)}
-          onItemChange={itemChange}
-          resizable={true}
-          contextMenu={true}
-          grade={grades}
-          onRowClick={handleRowClick}
-          sortable={{
-            mode: 'multiple',
-          }}
-          allRedCell={allRedCell}
-          size='small'
-          // defaultSkip={0}
-          // defaultTake={100}
-          // pageable={
-          //   rows?.length > 50
-          //     ? {
-          //         buttonCount: 4,
-          //         pageSizes: [10, 50, 100, 366],
-          //       }
-          //     : false
-          // }
-        >
-          {columns.map((col) => {
-            const isActive = isColumnActive(col?.field, filter, sort)
-
-            if (dateFields1.includes(col.field)) {
-              return (
-                <GridColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title || col.headerName}
-                  cells={{
-                    edit: {
-                      date: DateOnlyPicker,
-                    },
-                    data: toolTipRenderer,
-                    // headerCell: HeaderWithTooltip,
-                  }}
-                  format='{0:dd-MM-yyyy}'
-                  editor='date'
-                  hidden={col.hidden}
-                  sortable={false}
-                />
-              )
-            }
-            if (dateFieldsRunLength.includes(col.field)) {
-              return (
-                <GridColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title || col.headerName}
-                  cells={{
-                    edit: {
-                      date: DateOnlyPicker,
-                      // headerCell: HeaderWithTooltip,
-                    },
-                    data: toolTipRenderer,
-                  }}
-                  format='{0:dd-MM-yyyy}'
-                  editor='date'
-                  hidden={col.hidden}
-                  sortable={false}
-                  className={'k-right-disabled'}
-                />
-              )
-            }
-
-            return (
-              <GridColumn
-                key={col.field}
-                field={col.field}
-                title={col.title || col.headerName}
-                width={col.widthT}
-                hidden={col.hidden}
-                editable={col?.editable ? true : false}
-                headerClassName={isActive ? 'active-column' : ''}
-                cells={{
-                  edit: { text: TextCellEditor },
-                  data: toolTipRenderer,
-                }}
-                className={col?.isDisabled ? 'k-right-disabled' : ''}
-                columnMenu={col?.filter ? ColumnMenuCheckboxFilter : null}
-                sortable={col?.filter ? true : false}
-              />
-            )
-          })}
-          {permissions?.deleteButton && (
-            <GridColumn
-              key='actions'
-              field='actions'
-              title='Action'
-              width={80}
-              className='k-text-center'
-              filterable={false}
-              editable={false}
-              cells={{
-                data: ActionsCell,
-              }}
-            />
+        <>
+          {permissions?.showAccordian ? (
+            <CustomAccordion
+              defaultExpanded={!permissions?.byDefCollaps}
+              disableGutters
+            >
+              <CustomAccordionSummary
+                aria-controls='meg-grid-content'
+                id='meg-grid-header'
+              >
+                <Typography component='span' className='grid-title'>
+                  {titleName}
+                </Typography>
+              </CustomAccordionSummary>
+              <CustomAccordionDetails>
+                <Tooltip
+                  openDelay={50}
+                  position='default'
+                  anchorElement='target'
+                >
+                  {renderGrid()}
+                </Tooltip>
+              </CustomAccordionDetails>
+            </CustomAccordion>
+          ) : (
+            <Tooltip openDelay={50} position='default' anchorElement='target'>
+              {renderGrid()}
+            </Tooltip>
           )}
-        </Grid>
+        </>
       </div>
       <Box
         sx={{

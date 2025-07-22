@@ -56,7 +56,8 @@ const MonthwiseProduction = () => {
 
   const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
   const verticalName = vertical?.toLowerCase()
-  const isPEVertical = verticalName === 'pe'
+
+  const isMEGVertical = verticalName === 'meg'
 
   const columns = [
     { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
@@ -185,10 +186,9 @@ const MonthwiseProduction = () => {
 
     const filteredChildren = topGroup.children
       .map((child) => {
-        // Handle nested children
         if (child.children) {
           const filteredGrandChildren = child.children.filter((fieldDef) => {
-            if (isPEVertical) {
+            if (!isMEGVertical) {
               return (
                 fieldDef.field !== 'EOThroughput' &&
                 fieldDef.field !== 'EOEThroughput'
@@ -199,8 +199,7 @@ const MonthwiseProduction = () => {
           return { ...child, children: filteredGrandChildren }
         }
 
-        // Handle direct children (1-level)
-        if (isPEVertical) {
+        if (!isMEGVertical) {
           if (
             child.field === 'EOThroughput' ||
             child.field === 'EOEThroughput'
@@ -211,7 +210,7 @@ const MonthwiseProduction = () => {
 
         return child
       })
-      .filter(Boolean) // remove nulls
+      .filter(Boolean)
 
     return { ...topGroup, children: filteredChildren }
   })
