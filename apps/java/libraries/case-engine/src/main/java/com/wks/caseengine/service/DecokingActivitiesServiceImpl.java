@@ -416,14 +416,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					Optional<CrackerConfiguration> crackerConfigurationopt = crackerConfigurationRepository.findById(crackerConfigurationDTO.getId());
 					if(crackerConfigurationopt.isPresent()) {
 						crackerConfiguration=crackerConfigurationopt.get();
-						crackerConfiguration.setAopYear(crackerConfigurationDTO.getAopYear());
-						crackerConfiguration.setDisplayName(crackerConfigurationDTO.getDisplayName());
-						crackerConfiguration.setDisplaySeq(crackerConfigurationDTO.getDisplaySeq());
 						crackerConfiguration.setIbrEndDate(crackerConfigurationDTO.getIbrEndDate());
 						crackerConfiguration.setIbrStartDate(crackerConfigurationDTO.getIbrStartDate());
 						crackerConfiguration.setIsCr(crackerConfigurationDTO.getIsCr());
-						crackerConfiguration.setName(crackerConfigurationDTO.getName());
-						crackerConfiguration.setPlantFkId(crackerConfigurationDTO.getPlantFkId());
 						crackerConfiguration.setPostCrDays(crackerConfigurationDTO.getPostCrDays());
 						crackerConfiguration.setPreCrDays(crackerConfigurationDTO.getPreCrDays());
 						crackerConfiguration.setRemarks(crackerConfigurationDTO.getRemarks());
@@ -882,7 +877,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				CrackerConfigurationDTO dto = new CrackerConfigurationDTO();
 
 				dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
-				dto.setName(row[1] != null ? row[1].toString() : null);
 				dto.setDisplayName(row[2] != null ? row[2].toString() : null);
 
 				dto.setIbrStartDate(row[3] != null ? (Date) row[3] : null);
@@ -895,11 +889,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				dto.setPostCrDays(row[9] != null ? ((Number) row[9]).intValue() : null);
 				dto.setPreCrDays(row[10] != null ? ((Number) row[10]).intValue() : null);
 				dto.setIsCr(row[11] != null ? (Boolean) row[11] : null);
-
-				dto.setPlantFkId(row[12] != null ? UUID.fromString(row[12].toString()) : null);
-				dto.setAopYear(row[13] != null ? row[13].toString() : null);
 	            dto.setRemarks(row[14] != null ? row[14].toString() : "");
-	            dto.setDisplaySeq(row[15] != null ? ((Number) row[15]).intValue() : null);
 	            Object val = row[16];
 	            if (val instanceof Number) {
 	                int i = ((Number) val).intValue();
@@ -909,8 +899,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	            } else {
 	                dto.setIsEditable(null); // or choose default
 	            }
-
-
 				crackerConfigurationDTOList.add(dto);
 			}
 
