@@ -82,7 +82,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				if(row[4].toString().contains(type)) {	
 					
 					map.put("normParameterFKID", row[2]);
-					map.put("Pparticulars", row[3]);
+					map.put("particulars", row[3]);
 					map.put("normParameterDisplayName", row[4]);
 					map.put("uom", row[7]);
 					map.put("remarks", row[9]);
