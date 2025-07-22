@@ -1003,7 +1003,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 					if (existingEntity != null) {
 						if (attributeValue != null && !attributeValue.trim().isEmpty()) {
-							existingEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+							existingEntity.setAttributeValue((attributeValue.trim()));
 						} else {
 							existingEntity.setAttributeValue(null);
 						}
@@ -1021,7 +1021,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						newEntity.setUser("System");
 
 						if (attributeValue != null && !attributeValue.trim().isEmpty()) {
-							newEntity.setAttributeValue(Integer.parseInt(attributeValue.trim()));
+							newEntity.setAttributeValue((attributeValue.trim()));
 						} else {
 							newEntity.setAttributeValue(null);
 						}

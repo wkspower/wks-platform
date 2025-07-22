@@ -27,7 +27,7 @@ public class NormAttributeTransactionReceipe {
     private UUID plantFkId;
 
     @Column(name = "AttributeValue")
-    private Integer attributeValue;
+    private String attributeValue;
 
     @Column(name = "[User]", nullable = false, length = 50)
     private String user;
