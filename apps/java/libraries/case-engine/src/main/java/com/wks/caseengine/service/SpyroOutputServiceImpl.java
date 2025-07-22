@@ -170,7 +170,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(spyroOutputDTO, i);
 		
-					saveData(normParameterFKId, i, attributeValue, spyroOutputDTO);
+					saveData(normParameterFKId, i, attributeValue, spyroOutputDTO,year);
 				}
 			}
 			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-output");
@@ -229,12 +229,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		return spyroOutputDTO.getJan();
 	}
 	
-	void saveData(UUID normParameterFKId, Integer i, Double attributeValue,SpyroOutputDTO spyroOutputDTO) {
+	void saveData(UUID normParameterFKId, Integer i, Double attributeValue,SpyroOutputDTO spyroOutputDTO,String year) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String userId = authentication.getName();	
 
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
-				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, spyroOutputDTO.getAuditYear());
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
 
 		NormAttributeTransactions normAttributeTransactions;
 
@@ -250,7 +250,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 			normAttributeTransactions.setUserName(userId);
 			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
 			normAttributeTransactions.setAopMonth(i);
-			normAttributeTransactions.setAuditYear(spyroOutputDTO.getAuditYear());
+			normAttributeTransactions.setAuditYear(year);
 		}
 
 		normAttributeTransactions
