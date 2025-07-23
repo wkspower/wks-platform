@@ -454,20 +454,50 @@ const ProductionNorms = ({ permissions }) => {
           averageTPH: total,
         }
       })
-
-      const finalData = [...formattedData]
-
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-        setRows(finalData)
+      const monthFields = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+        'jan',
+        'feb',
+        'march',
+      ]
+      const totalsRow = {
+        id: formattedData.length,
+        displayName: 'Total',
+        isEditable: false,
+        ...monthFields.reduce((acc, field) => {
+          acc[field] = formattedData.reduce(
+            (sum, row) => sum + (parseFloat(row[field]) || 0),
+            0,
+          )
+          return acc
+        }, {}),
       }
-      if (lowerVertName == 'meg') {
-        setRows(formattedData)
-      }
-      if (permissions?.needTotal) {
-        setRows(finalData)
+      totalsRow.averageTPH = monthFields.reduce(
+        (sum, field) => sum + (parseFloat(totalsRow[field]) || 0),
+        0,
+      )
+      let finalData = []
+
+      if (formattedData.length > 0) {
+        if (lowerVertName !== 'meg') {
+          finalData = [...formattedData, totalsRow]
+        } else {
+          finalData = [...formattedData]
+        }
       } else {
-        setRows(finalData)
+        finalData = []
       }
+
+      setRows(finalData)
+
       setLoading(false)
     } catch (error) {
       console.error('Error fetching Production AOP data:', error)
