@@ -265,6 +265,7 @@ import {
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { Input } from '@progress/kendo-react-inputs'
+import { Skeleton } from '../../../node_modules/@progress/kendo-react-indicators/index'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -761,10 +762,30 @@ const KendoDataTablesCrackerRunLength = ({
 
   const [page, setPage] = React.useState({ skip: 0, take: 100 })
 
+  const LoadingCell = (props) => {
+    const field = props.field || ''
+    if (props.dataItem[field] === undefined) {
+      // shows loading cell if no data
+      return (
+        <td {...props.tdProps}>
+          {' '}
+          <Skeleton
+            shape={'text'}
+            style={{
+              width: '100%',
+            }}
+          />
+        </td>
+      )
+    } // default rendering for this cell
+
+    return <td {...props.tdProps}>{props.children}</td>
+  }
+
   const renderGrid = () => (
     <Grid
-      scrollable='virtual'
-      // columnVirtualization
+      style={{ height: 600 }}
+      scrollable={'virtual'}
       rowHeight={35}
       data={rows.slice(page.skip, page.skip + page.take)}
       total={rows.length}
@@ -784,6 +805,10 @@ const KendoDataTablesCrackerRunLength = ({
       onItemChange={itemChange}
       dataItemKey='id'
       size='small'
+      autoProcessData={true}
+      cells={{
+        data: LoadingCell,
+      }}
     >
       {columns.map((col) => {
         const isActive = isColumnActive(col.field, filter, sort)
@@ -844,7 +869,7 @@ const KendoDataTablesCrackerRunLength = ({
   )
 
   return (
-    <div style={{ position: 'relative' }}>
+    <Box>
       {loading && (
         <div className='k-loading-mask'>
           <span className='k-loading-text'>Loading...</span>
@@ -935,38 +960,32 @@ const KendoDataTablesCrackerRunLength = ({
           </Box>
         </Box>
       )}
-      <div className='kendo-data-grid'>
-        <>
-          {permissions?.showAccordian ? (
-            <CustomAccordion
-              defaultExpanded={!permissions?.byDefCollaps}
-              disableGutters
+      <Box className='kendo-data-grid'>
+        {!permissions?.showAccordian ? (
+          <CustomAccordion
+            defaultExpanded={!permissions?.byDefCollaps}
+            disableGutters
+          >
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
             >
-              <CustomAccordionSummary
-                aria-controls='meg-grid-content'
-                id='meg-grid-header'
-              >
-                <Typography component='span' className='grid-title'>
-                  {titleName}
-                </Typography>
-              </CustomAccordionSummary>
-              <CustomAccordionDetails>
-                <Tooltip
-                  openDelay={50}
-                  position='default'
-                  anchorElement='target'
-                >
-                  {renderGrid()}
-                </Tooltip>
-              </CustomAccordionDetails>
-            </CustomAccordion>
-          ) : (
-            <Tooltip openDelay={50} position='default' anchorElement='target'>
-              {renderGrid()}
-            </Tooltip>
-          )}
-        </>
-      </div>
+              <Typography component='span' className='grid-title'>
+                {titleName}
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Tooltip openDelay={50} position='default' anchorElement='target'>
+                {renderGrid()}
+              </Tooltip>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        ) : (
+          <Tooltip openDelay={50} position='default' anchorElement='target'>
+            {renderGrid()}
+          </Tooltip>
+        )}
+      </Box>
       <Box
         sx={{
           marginTop: 2,
@@ -1061,7 +1080,7 @@ const KendoDataTablesCrackerRunLength = ({
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </Box>
   )
 }
 

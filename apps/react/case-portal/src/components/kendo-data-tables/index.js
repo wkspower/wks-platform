@@ -1116,6 +1116,7 @@ const KendoDataTables = ({
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
                     headerClassName={isActive ? 'active-column' : ''}
+                    width={col.widthT || ''}
                   />
                 )
               }

@@ -2087,7 +2087,8 @@ async function saveSpyroInput(payload, keycloak, plantId) {
     return await Promise.reject(e)
   }
 }
-async function saveSpyroOutput(payload, keycloak) {
+async function saveSpyroOutput(payload, keycloak, plantId) {
+  var year = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/spyro-output?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',

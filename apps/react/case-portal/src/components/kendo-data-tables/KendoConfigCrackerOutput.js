@@ -9,7 +9,6 @@ import { validateFields } from 'utils/validationUtils'
 import { useSession } from 'SessionStoreContext'
 
 const CrackerConfig = () => {
-  // Redux/context
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, oldYear, plantID, yearChanged } = dataGridStore
@@ -17,8 +16,8 @@ const CrackerConfig = () => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id
+  const [modifiedCells, setModifiedCells] = useState({})
 
-  // Snackbar/loading/remark
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -34,49 +33,35 @@ const CrackerConfig = () => {
     setRemarkDialogOpen(true)
   }
 
-  // Header map for columns
   const headerMap = useMemo(
     () => generateHeaderNames(localStorage.getItem('year')),
     [],
   )
 
-  // ===== Dynamic-tabs state (static fallback) =====
   const rawTabsStatic = [
     'Total Feed',
     'Total Products',
     'Miscellaneous Parameters',
     'Constant',
-    'Yield as per Optimizer Run',
+    'Yield',
   ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [availableTabs, setAvailableTabs] = useState([])
   const [tabIndex, setTabIndex] = useState(0)
 
-  // ===== Separate row states per known tab =====
-  // Initialize an individual state for each rawTabsStatic entry:
   const [yieldRows, setYieldRows] = useState([])
   const [constantsRows, setConstantsRows] = useState([])
   const [feedRows, setFeedRows] = useState([])
   const [compositionRows, setCompositionRows] = useState([])
   const [hydrogenationRows, setHydrogenationRows] = useState([])
-  // const [recoveryRows, setRecoveryRows] = useState([])
-  // const [optimizing, setOptimizing] = useState([])
-  // const [furnace, setFurnance] = useState([])
 
-  // Mode selection
-  // const allModes = ['5F Operation', '4F Operation', '4F+D Operation']
   const allModes = ['5F', '4F', '4F+D']
   const [selectMode, setSelectMode] = useState(allModes[0])
 
-  // NormParameterIdCell
-  const NormParameterIdCell = (props) => <td>{props?.dataItem?.particulars}</td>
-
-  // currentTab displayName
   const currentTabDisplay = useMemo(() => {
     const idLower = tabs[tabIndex]?.toLowerCase() || ''
     const info = availableTabs.find((t) => t.id.toLowerCase() === idLower)
-    // console.log(info)
-    return info ? info.displayName : tabs[tabIndex] || 'Feed'
+    return info ? info.name : tabs[tabIndex] || 'Feed'
   }, [tabs, tabIndex, availableTabs])
 
   const productionColumns = useMemo(() => {
@@ -85,7 +70,7 @@ const CrackerConfig = () => {
         ? 'cracker_composition'
         : currentTabDisplay === 'Constant'
           ? 'cracker_constants'
-          : currentTabDisplay === 'Yield as per Optimizer Run'
+          : currentTabDisplay === 'Yield'
             ? 'cracker_yield'
             : 'cracker'
 
@@ -96,7 +81,6 @@ const CrackerConfig = () => {
     })
   }, [headerMap, currentTabDisplay])
 
-  // Permissions helper
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -122,9 +106,7 @@ const CrackerConfig = () => {
       deleteButton: false,
       editButton: false,
       showUnit: false,
-      showModes:
-        lowerVertName === 'cracker' &&
-        currentTabDisplay != 'Yield as per Optimizer Run',
+      showModes: lowerVertName === 'cracker' && currentTabDisplay != 'Yield',
       saveWithRemark: true,
       saveBtn: true,
       allAction: lowerVertName === 'cracker',
@@ -135,7 +117,6 @@ const CrackerConfig = () => {
     isOldYear,
   )
 
-  // ===== Fetch dynamic-tabs from API =====
   const fetchTabsMatrix = useCallback(async () => {
     try {
       const resp = await DataService.getConfigurationTabsMatrix(
@@ -196,7 +177,6 @@ const CrackerConfig = () => {
     setTabIndex(0)
   }, [keycloak, fetchTabsMatrix, fetchAvailableTabs])
 
-  // ===== Helper: getRows / setRowsForTab =====
   const getRows = useCallback(
     (tabId) => {
       switch (tabId) {
@@ -208,23 +188,14 @@ const CrackerConfig = () => {
           return feedRows
         case 'Constant':
           return constantsRows
-        case 'Yield as per Optimizer Run':
+        case 'Yield':
           return yieldRows
 
         default:
           return []
       }
     },
-    [
-      feedRows,
-      compositionRows,
-      hydrogenationRows,
-      constantsRows,
-      yieldRows,
-      // recoveryRows,
-      // furnace,
-      // optimizing,
-    ],
+    [feedRows, compositionRows, hydrogenationRows, constantsRows, yieldRows],
   )
 
   const setRowsForTab = useCallback((tabId, data) => {
@@ -241,7 +212,7 @@ const CrackerConfig = () => {
       case 'Constant':
         setConstantsRows(data)
         break
-      case 'Yield as per Optimizer Run':
+      case 'Yield':
         setYieldRows(data)
         break
 
@@ -307,7 +278,7 @@ const CrackerConfig = () => {
       try {
         setLoading(true)
         var spyroVMYield1 = []
-        if (currentTabDisplay == 'Yield as per Optimizer Run') {
+        if (currentTabDisplay == 'Yield') {
           spyroVMYield1 = await DataService.getSpyroOutputDataYield(
             keycloak,
             mode,
@@ -364,7 +335,7 @@ const CrackerConfig = () => {
 
   useEffect(() => {
     if (keycloak && plantId && currentTabDisplay) {
-      if (currentTabDisplay === 'Yield as per Optimizer Run') {
+      if (currentTabDisplay === 'Yield') {
         fetchCrackerRowsYield(currentTabDisplay, selectMode)
       } else {
         fetchCrackerRows(currentTabDisplay, selectMode)
@@ -388,10 +359,8 @@ const CrackerConfig = () => {
     yearChanged,
   ])
 
-  const [modifiedCells, setModifiedCells] = useState({})
-
   const saveChanges = useCallback(async () => {
-    if (currentTabDisplay === 'Yield as per Optimizer Run') {
+    if (currentTabDisplay === 'Yield') {
       await saveSpyroDataYield(yieldRows)
       return
     }
@@ -461,7 +430,7 @@ const CrackerConfig = () => {
         // Reload current tab
         const tabId = tabs[tabIndex]
         if (tabId) {
-          if (currentTabDisplay === 'Yield as per Optimizer Run') {
+          if (currentTabDisplay === 'Yield') {
             fetchCrackerRowsYield(currentTabDisplay, selectMode)
           } else {
             fetchCrackerRows(currentTabDisplay, selectMode)
@@ -515,7 +484,7 @@ const CrackerConfig = () => {
         // Reload current tab
         const tabId = tabs[tabIndex]
         if (tabId) {
-          if (currentTabDisplay === 'Yield as per Optimizer Run') {
+          if (currentTabDisplay === 'Yield') {
             fetchCrackerRowsYield(currentTabDisplay, selectMode)
           } else {
             fetchCrackerRows(currentTabDisplay, selectMode)
@@ -535,7 +504,7 @@ const CrackerConfig = () => {
       setLoading(false)
     }
   }
-  //----
+
   const saveSpyroOutputExcelFile = async (rawFile) => {
     setLoading(true)
 
@@ -546,7 +515,6 @@ const CrackerConfig = () => {
 
       let response
 
-      // Spyro Output Excel Import API call
       response = await DataService.importSpyroOutputExcel(
         rawFile,
         keycloak,
@@ -645,8 +613,6 @@ const CrackerConfig = () => {
     }
   }
 
-  //----
-  // ===== Render =====
   return (
     <Box>
       <Backdrop
@@ -655,40 +621,42 @@ const CrackerConfig = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <Tabs
-        sx={{
-          borderBottom: '0px solid #ccc',
-          '.MuiTabs-indicator': { display: 'none' },
-        }}
-        textColor='primary'
-        indicatorColor='primary'
-        value={tabIndex}
-        onChange={(e, newIndex) => {
-          if (newIndex >= 0 && newIndex < tabs.length) {
-            setTabIndex(newIndex)
-          }
-        }}
-      >
-        {tabs.map((tabId) => {
-          const info = availableTabs.find(
-            (t) => t.id.toLowerCase() === tabId.toLowerCase(),
-          )
-          const label = info?.displayName || tabId
-          return (
-            <Tab
-              key={tabId}
-              sx={{
-                border: '1px solid #ADD8E6',
-                borderBottom: '1px solid #ADD8E6',
-                padding: '9px',
-                minHeight: '10px',
-              }}
-              label={label}
-            />
-          )
-        })}
-      </Tabs>
+      <Box sx={{ overflowX: 'auto', width: '100%' }}>
+        <Tabs
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            minWidth: 'max-content',
+          }}
+          textColor='primary'
+          indicatorColor='primary'
+          value={tabIndex}
+          onChange={(e, newIndex) => {
+            if (newIndex >= 0 && newIndex < tabs.length) {
+              setTabIndex(newIndex)
+            }
+          }}
+        >
+          {tabs.map((tabId) => {
+            const info = availableTabs.find(
+              (t) => t.id.toLowerCase() === tabId.toLowerCase(),
+            )
+            const label = info?.displayName || tabId
+            return (
+              <Tab
+                key={tabId}
+                sx={{
+                  border: '1px solid #ADD8E6',
+                  borderBottom: '1px solid #ADD8E6',
+                  padding: '9px',
+                  minHeight: '10px',
+                }}
+                label={label}
+              />
+            )
+          })}
+        </Tabs>
+      </Box>
 
       <Box>
         {(() => {
@@ -702,20 +670,19 @@ const CrackerConfig = () => {
             case 'Total Products':
             case 'Miscellaneous Parameters':
             case 'Constant':
-            case 'Yield as per Optimizer Run':
+            case 'Yield':
               return (
                 <Box key={currentTabDisplay}>
                   <KendoDataTables
                     rows={rows}
                     setRows={setRowsForCurrent}
                     fetchData={() =>
-                      currentTabDisplay === 'Yield as per Optimizer Run'
+                      currentTabDisplay === 'Yield'
                         ? fetchCrackerRowsYield(currentTabDisplay, selectMode)
                         : fetchCrackerRows(currentTabDisplay, selectMode)
                     }
                     configType='cracker'
                     handleRemarkCellClick={handleRemarkCellClick}
-                    NormParameterIdCell={NormParameterIdCell}
                     columns={productionColumns}
                     remarkDialogOpen={remarkDialogOpen}
                     setRemarkDialogOpen={setRemarkDialogOpen}

@@ -14,7 +14,7 @@
   },
   {
     "field": "apr",
-    "title": 4,
+    "title": "Value",
     "editable": true,
     "widthT": 200,
     "type": "number"
