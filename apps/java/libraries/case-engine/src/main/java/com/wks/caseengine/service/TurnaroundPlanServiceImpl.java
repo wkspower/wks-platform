@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutDownPlanDTO;
@@ -71,7 +73,12 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"TA_Plan");
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName();	
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}
 		if(plantMaintenanceId==null) {
 			UUID maintenanceTypesId =plantMaintenanceTransactionRepository.findIdByName("TA_Plan");
 			PlantMaintenance plantMaintenance=new PlantMaintenance();

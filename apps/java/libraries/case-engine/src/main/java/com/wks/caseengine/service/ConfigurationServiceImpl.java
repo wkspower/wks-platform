@@ -42,6 +42,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 import java.util.regex.Matcher;
 
 import jakarta.persistence.EntityManager;
@@ -405,7 +408,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	public AOPMessageVM saveConfigurationExecution(List<ExecutionDetailDto> executionDetailDtoList) {
-
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}
 		for (ExecutionDetailDto executionDetailDto : executionDetailDtoList) {
 			NormAttributeTransactions normAttributeTransactions = null;
 			if (executionDetailDto.getId() != null) {
@@ -420,8 +429,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			normAttributeTransactions.setRemarks(executionDetailDto.getRemarks());
 			normAttributeTransactions.setAopMonth(4);
 			normAttributeTransactions.setAuditYear(executionDetailDto.getAuditYear());
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			String userId = authentication.getName();
 			normAttributeTransactions.setUserName(userId);
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
 
@@ -840,7 +847,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	void saveData(NormParameters normParameter, Integer i, String year, Double attributeValue,
 			ConfigurationDTO configurationDTO) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName();	
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameter.getId(), i, year);
 
@@ -986,7 +998,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(String year, String plantId,
 			List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName();	
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}
 		try {
 
 			List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();

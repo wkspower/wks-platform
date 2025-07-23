@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -231,7 +234,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	
 	void saveData(UUID normParameterFKId, Integer i, Double attributeValue,SpyroOutputDTO spyroOutputDTO,String year) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName();	
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}
 
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
@@ -302,7 +310,12 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	public AOPMessageVM updateSpyroOutputYieldData(String plantId, String year,
 			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName();	
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}	
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
 		

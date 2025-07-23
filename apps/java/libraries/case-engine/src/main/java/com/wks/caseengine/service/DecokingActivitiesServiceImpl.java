@@ -32,6 +32,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -347,7 +349,12 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	public AOPMessageVM updateDecokingActivitiesData(String year, String plantId, String reportType,
 			List<DecokingActivitiesDTO> decokingActivitiesDTOList) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName();	
+		String userId=null;
+		if (authentication instanceof JwtAuthenticationToken) {
+		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
+		    Jwt jwt = jwtAuth.getToken();
+		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
+		}
 		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
