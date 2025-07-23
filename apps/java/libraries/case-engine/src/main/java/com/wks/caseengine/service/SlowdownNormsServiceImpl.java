@@ -53,6 +53,8 @@ import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.SlowdownConsumptionRepository;
 import com.wks.caseengine.repository.SlowdownNormsRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -194,13 +196,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	public List<SlowdownNormsValueDTO> saveSlowdownNormsData(List<SlowdownNormsValueDTO> slowdownNormsValueDTOList) {
 		String year=null;
 		UUID plantId=null;
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		try {
 			for (SlowdownNormsValueDTO slowdownNormsValueDTO : slowdownNormsValueDTOList) {
 				year=slowdownNormsValueDTO.getFinancialYear();
@@ -265,7 +261,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValue.setFinancialYear(slowdownNormsValueDTO.getFinancialYear());
 				slowdownNormsValue.setRemarks(slowdownNormsValueDTO.getRemarks());
 				slowdownNormsValue.setMcuVersion("V1");
-				slowdownNormsValue.setUpdatedBy(userId);
+				slowdownNormsValue.setUpdatedBy(Utility.getUserName());
 				System.out.println(slowdownNormsValue.getApril());
 				System.out.println("Data Saved Succussfully");
 				slowdownNormsRepository.save(slowdownNormsValue);
@@ -579,13 +575,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	public AOPMessageVM saveSlowdownNormsConfigurationData(String plantId, String year,
 			List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		List<SlowdownConsumption> slowdownConsumptionList = new ArrayList<>();
 		try {
 			for(NormAttributeTransactionsDTO normAttributeTransactionsDTO:normAttributeTransactionsDTOList) {
@@ -600,7 +590,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				if(slowdownConsumption!=null) {
 					slowdownConsumption.setParameterValue(Double.parseDouble(normAttributeTransactionsDTO.getAttributeValue()));
 					slowdownConsumption.setUpdatedOn(new Date());
-					slowdownConsumption.setUpdatedBy(userId);
+					slowdownConsumption.setUpdatedBy(Utility.getUserName());
 					slowdownConsumptionList.add(slowdownConsumptionRepository.save(slowdownConsumption));
 				}else {
 					slowdownConsumption = new SlowdownConsumption();
@@ -610,7 +600,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 					slowdownConsumption.setPlantMaintenanceFkId(maintenanceId);
 					slowdownConsumption.setAopMonth(month);
 					slowdownConsumption.setNormParameterFkId(normAttributeTransactionsDTO.getNormParameterFKId());
-					slowdownConsumption.setCreatedBy(userId);
+					slowdownConsumption.setCreatedBy(Utility.getUserName());
 					slowdownConsumption.setPlantFkId(UUID.fromString(plantId));
 					slowdownConsumptionList.add(slowdownConsumptionRepository.save(slowdownConsumption));
 				}

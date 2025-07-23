@@ -31,6 +31,8 @@ import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
+import com.wks.caseengine.utility.Utility;
+
 import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
@@ -274,13 +276,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		String year=null;
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		try {
 			UUID plantMaintenanceId = findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
 			if (plantMaintenanceId == null) {
@@ -326,7 +322,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 					plantMaintenanceTransaction
 							.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
-					plantMaintenanceTransaction.setUser(userId);
+					plantMaintenanceTransaction.setUser(Utility.getUserName());
 					plantMaintenanceTransaction.setName("Default Name");
 					plantMaintenanceTransaction.setVersion("V1");
 					plantMaintenanceTransaction.setCreatedOn(new Date());

@@ -22,6 +22,7 @@ import com.wks.caseengine.dto.CatalystAttributesDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -218,13 +219,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 	
 	@Override
 	public Boolean saveCatalystData(CatalystAttributesDTO catalystAttributesDTO) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}	
+		
 		for(Integer i=1;i<12;i++) {
 			NormAttributeTransactions normAttributeTransactions= new NormAttributeTransactions();
 			normAttributeTransactions.setAttributeValue(getAttributeValue(catalystAttributesDTO,(i+1)).toString());
@@ -238,7 +233,7 @@ public class NormAttributeTransactionsServiceImpl implements NormAttributeTransa
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
 			normAttributeTransactions.setRemarks(catalystAttributesDTO.getRemarks());
-			normAttributeTransactions.setUserName(userId);
+			normAttributeTransactions.setUserName(Utility.getUserName());
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
 			
 		}

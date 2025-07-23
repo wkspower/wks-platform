@@ -59,6 +59,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -348,13 +349,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	@Override
 	public AOPMessageVM updateDecokingActivitiesData(String year, String plantId, String reportType,
 			List<DecokingActivitiesDTO> decokingActivitiesDTOList) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
@@ -389,7 +384,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					normAttributeTransactions.setAttributeValueVersion("V1");
 					normAttributeTransactions
 							.setNormParameterFKId(UUID.fromString(decokingActivitiesDTO.getNormParameterId()));
-					normAttributeTransactions.setUserName(userId);
+					normAttributeTransactions.setUserName(Utility.getUserName());
 					normAttributeTransactionsList
 							.add(normAttributeTransactionsRepository.save(normAttributeTransactions));
 				}

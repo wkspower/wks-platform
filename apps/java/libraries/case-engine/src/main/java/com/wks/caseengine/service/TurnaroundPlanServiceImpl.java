@@ -19,6 +19,7 @@ import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.TurnaroundPlanRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
@@ -72,13 +73,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 	@Override
 	public List<ShutDownPlanDTO> saveTurnaroundPlanData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		UUID plantMaintenanceId=shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId,"TA_Plan");
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		if(plantMaintenanceId==null) {
 			UUID maintenanceTypesId =plantMaintenanceTransactionRepository.findIdByName("TA_Plan");
 			PlantMaintenance plantMaintenance=new PlantMaintenance();
@@ -115,7 +110,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 				plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 				plantMaintenanceTransaction.setName("Default Name"); 
 				plantMaintenanceTransaction.setVersion("V1");
-				plantMaintenanceTransaction.setUser(userId); 
+				plantMaintenanceTransaction.setUser(Utility.getUserName()); 
 	        if(shutDownPlanDTO.getProductId()!=null) {
 	        	plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 	        }
@@ -146,7 +141,7 @@ public class TurnaroundPlanServiceImpl implements TurnaroundPlanService{
 			plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 			plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 			plantMaintenanceTransaction.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth()+1);
-			plantMaintenanceTransaction.setUser(userId);
+			plantMaintenanceTransaction.setUser(Utility.getUserName());
 			plantMaintenanceTransaction.setName("Default Name");
 			plantMaintenanceTransaction.setVersion("V1");
 			plantMaintenanceTransaction.setCreatedOn(new Date());

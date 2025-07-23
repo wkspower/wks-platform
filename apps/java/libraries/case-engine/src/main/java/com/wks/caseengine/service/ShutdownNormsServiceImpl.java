@@ -29,6 +29,7 @@ import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutdownNormsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -124,13 +125,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	public List<ShutdownNormsValueDTO> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		String year=null;
 		UUID plantId=null;
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
 				year=shutdownNormsValueDTO.getFinancialYear();
@@ -195,7 +190,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				shutdownNormsValue.setFinancialYear(shutdownNormsValueDTO.getFinancialYear());
 				shutdownNormsValue.setRemarks(shutdownNormsValueDTO.getRemarks());
 				shutdownNormsValue.setMcuVersion("V1");
-				shutdownNormsValue.setUpdatedBy(userId);
+				shutdownNormsValue.setUpdatedBy(Utility.getUserName());
 
 				System.out.println("Data Saved Succussfully");
 				shutdownNormsRepository.save(shutdownNormsValue);

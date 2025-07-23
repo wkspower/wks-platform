@@ -53,7 +53,7 @@ import jakarta.persistence.PersistenceContext;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-
+import com.wks.caseengine.utility.Utility;
 import com.wks.caseengine.dto.ConfigurationDTO;
 
 import com.wks.caseengine.dto.ExecutionDetailDto;
@@ -408,13 +408,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	public AOPMessageVM saveConfigurationExecution(List<ExecutionDetailDto> executionDetailDtoList) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		for (ExecutionDetailDto executionDetailDto : executionDetailDtoList) {
 			NormAttributeTransactions normAttributeTransactions = null;
 			if (executionDetailDto.getId() != null) {
@@ -429,7 +423,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			normAttributeTransactions.setRemarks(executionDetailDto.getRemarks());
 			normAttributeTransactions.setAopMonth(4);
 			normAttributeTransactions.setAuditYear(executionDetailDto.getAuditYear());
-			normAttributeTransactions.setUserName(userId);
+			normAttributeTransactions.setUserName(Utility.getUserName());
 			normAttributeTransactionsRepository.save(normAttributeTransactions);
 
 		}
@@ -846,13 +840,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	void saveData(NormParameters normParameter, Integer i, String year, Double attributeValue,
 			ConfigurationDTO configurationDTO) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameter.getId(), i, year);
 
@@ -868,7 +856,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			// normAttributeTransactions.setId(UUID.randomUUID());
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
-			normAttributeTransactions.setUserName(userId);
+			normAttributeTransactions.setUserName(Utility.getUserName());
 			normAttributeTransactions.setNormParameterFKId(normParameter.getId());
 			normAttributeTransactions.setAopMonth(i);
 			//normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
@@ -997,13 +985,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Override
 	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(String year, String plantId,
 			List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		try {
 
 			List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
@@ -1038,7 +1020,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						newEntity.setAopYear(year);
 						newEntity.setCreatedOn(new Date());
 						newEntity.setModifiedOn(new Date());
-						newEntity.setUser(userId);
+						newEntity.setUser(Utility.getUserName());
 
 						if (attributeValue != null && !attributeValue.trim().isEmpty()) {
 							newEntity.setAttributeValue((attributeValue.trim()));

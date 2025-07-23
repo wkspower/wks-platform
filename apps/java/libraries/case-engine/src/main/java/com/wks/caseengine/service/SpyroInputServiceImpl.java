@@ -50,6 +50,7 @@ import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.utility.ExcelConstants;
+import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -274,13 +275,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 	}
 
 	void saveData(UUID normParameterFKId, Integer i, Double attributeValue, SpyroInputDTO spyroInputDTO,String plantId,String year) {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId=null;
-		if (authentication instanceof JwtAuthenticationToken) {
-		    JwtAuthenticationToken jwtAuth = (JwtAuthenticationToken) authentication;
-		    Jwt jwt = jwtAuth.getToken();
-		    userId = jwt.getClaimAsString("preferred_username"); // or "preferred_username"
-		}
+		
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
 
@@ -302,7 +297,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		normAttributeTransactions
 				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
 		normAttributeTransactions.setRemarks(spyroInputDTO.getRemarks());
-		normAttributeTransactions.setUserName(userId);
+		normAttributeTransactions.setUserName(Utility.getUserName());
 		normAttributeTransactionsRepository.save(normAttributeTransactions);
 	}
 
