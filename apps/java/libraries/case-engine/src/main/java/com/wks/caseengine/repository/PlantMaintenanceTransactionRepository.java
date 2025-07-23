@@ -32,6 +32,14 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 			@Param("normParamId") UUID normParamId,
 			@Param("name") String name);
 	
+	@Query(value = "SELECT Id FROM PlantMaintenanceTransaction "
+            + "WHERE NormParameter_FK_Id = :normParamId "
+            + "AND Name = :name", nativeQuery = true)
+	List<UUID> findRampActivityIdsByNormAndName(
+	       @Param("normParamId") UUID normParamId,
+	       @Param("name") String name);
+
+	
 	@Query(value = "SELECT " +
             "pm.Discription, " +
             "pm.MaintForMonth " +

@@ -16,12 +16,14 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
@@ -58,6 +60,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
 	
 	
@@ -117,62 +122,151 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	@Transactional
 	@Override
-	public void deletePlanData(UUID plantMaintenanceTransactionId,UUID plantId) {
-		try {
-			Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction = plantMaintenanceTransactionRepository
-					.findById(plantMaintenanceTransactionId);
-			plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
-			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-plan");
-			for(ScreenMapping screenMapping:screenMappingList) {
-				AopCalculation aopCalculation=new AopCalculation();
-				aopCalculation.setAopYear(plantMaintenanceTransaction.get().getAuditYear());
-				aopCalculation.setIsChanged(true);
-				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(plantId);
-				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-				aopCalculationRepository.save(aopCalculation);
-			}
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to delete data", ex);
-		}
+	public void deletePlanData(UUID plantMaintenanceTransactionId, UUID plantId) {
+	    try {
+	        Optional<PlantMaintenanceTransaction> plantMaintenanceTransactionOpt =
+	                plantMaintenanceTransactionRepository.findById(plantMaintenanceTransactionId);
+
+	        if (plantMaintenanceTransactionOpt.isEmpty()) {
+	            throw new RuntimeException("PlantMaintenanceTransaction not found for ID: " + plantMaintenanceTransactionId);
+	        }
+
+	        PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenanceTransactionOpt.get();
+
+	        List<NormAttributeTransactions> normAttributeTransactionsList =
+	                normAttributeTransactionsRepository.findByMaintenanceId(plantMaintenanceTransactionId);
+
+	        if (normAttributeTransactionsList != null && !normAttributeTransactionsList.isEmpty()) {
+	            for (NormAttributeTransactions normAttributeTransaction : normAttributeTransactionsList) {
+	                if (normAttributeTransaction != null) {
+	                    normAttributeTransactionsRepository.delete(normAttributeTransaction);
+	                }
+	            }
+	        }
+
+	        plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction);
+
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("slowdown-plan");
+	        if (screenMappingList != null && !screenMappingList.isEmpty()) {
+	            for (ScreenMapping screenMapping : screenMappingList) {
+	                if (screenMapping != null && screenMapping.getCalculationScreen() != null) {
+	                    AopCalculation aopCalculation = new AopCalculation();
+	                    aopCalculation.setAopYear(plantMaintenanceTransaction.getAuditYear());
+	                    aopCalculation.setIsChanged(true);
+	                    aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	                    aopCalculation.setPlantId(plantId);
+	                    aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	                    aopCalculationRepository.save(aopCalculation);
+	                }
+	            }
+	        }
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        throw new RuntimeException("Failed to delete data", ex);
+	    }
 	}
 
 	@Transactional
 	@Override
 	public void deleteShutPlanData(UUID plantMaintenanceTransactionId, UUID plantId) {
-		try {
-			Optional<PlantMaintenanceTransaction> plantMaintenanceTransaction = plantMaintenanceTransactionRepository
-					.findById(plantMaintenanceTransactionId);
+	    try {
+	        Optional<PlantMaintenanceTransaction> plantMaintenanceTransactionOpt =
+	                plantMaintenanceTransactionRepository.findById(plantMaintenanceTransactionId);
+	        // Delete dependent NormAttributeTransactions first
+	        List<NormAttributeTransactions> normAttributeTransactionsList =
+	                normAttributeTransactionsRepository.findByMaintenanceId(plantMaintenanceTransactionId);
 
-			String verticalName = plantsService.findVerticalNameByPlantId(plantId);
+	        if (normAttributeTransactionsList != null && !normAttributeTransactionsList.isEmpty()) {
+	            for (NormAttributeTransactions normAttr : normAttributeTransactionsList) {
+	                if (normAttr != null) {
+	                    normAttributeTransactionsRepository.delete(normAttr);
+	                }
+	            }
+	            normAttributeTransactionsRepository.flush(); // Ensure delete is committed before parent delete
+	        }
 
-			if (verticalName.equalsIgnoreCase("MEG")) {
-				UUID normparameterId1 = normParametersRepository.findNormParameterIdByNameAndPlant("EO", plantId);
+	        if (plantMaintenanceTransactionOpt.isEmpty()) {
+	            throw new RuntimeException("PlantMaintenanceTransaction not found for ID: " + plantMaintenanceTransactionId);
+	        }
 
-				int updatedRows = plantMaintenanceTransactionRepository.deleteRampActivitiesByNormAndDate(
-						normparameterId1, plantMaintenanceTransaction.get().getId().toString());
-				System.out.println("updatedRows = " + updatedRows);
+	        PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenanceTransactionOpt.get();
+	        String year = plantMaintenanceTransaction.getAuditYear();
 
-				UUID normparameterId2 = normParametersRepository.findNormParameterIdByNameAndPlant("EOE", plantId);
-				updatedRows = plantMaintenanceTransactionRepository.deleteRampActivitiesByNormAndDate(normparameterId2,
-						plantMaintenanceTransaction.get().getId().toString());
-				System.out.println("updatedRows = " + updatedRows);
-			}
-			String year=plantMaintenanceTransaction.get().getAuditYear();
-			plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction.get());
-			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-plan");
-			for(ScreenMapping screenMapping:screenMappingList) {
-				AopCalculation aopCalculation=new AopCalculation();
-				aopCalculation.setAopYear(year);
-				aopCalculation.setIsChanged(true);
-				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(plantId);
-				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-				aopCalculationRepository.save(aopCalculation);
-			}
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to delete data", ex);
-		}
+	        String verticalName = plantsService.findVerticalNameByPlantId(plantId);
+
+	        if ("MEG".equalsIgnoreCase(verticalName)) {
+	            UUID normparameterId1 = normParametersRepository.findNormParameterIdByNameAndPlant("EO", plantId);
+	            if (normparameterId1 != null) {
+	            	
+	            	List<UUID> ids= plantMaintenanceTransactionRepository.findRampActivityIdsByNormAndName(
+	                        normparameterId1, plantMaintenanceTransaction.getId().toString());
+	            	for(UUID id:ids) {
+	            		// Delete dependent NormAttributeTransactions first
+	        	        List<NormAttributeTransactions> normAttributeTransactionsLists =
+	        	                normAttributeTransactionsRepository.findByMaintenanceId(id);
+
+	        	        if (normAttributeTransactionsLists != null && !normAttributeTransactionsLists.isEmpty()) {
+	        	            for (NormAttributeTransactions normAttr : normAttributeTransactionsLists) {
+	        	                if (normAttr != null) {
+	        	                    normAttributeTransactionsRepository.delete(normAttr);
+	        	                }
+	        	            }
+	        	            normAttributeTransactionsRepository.flush(); // Ensure delete is committed before parent delete
+	        	        }
+
+	            	}
+	                plantMaintenanceTransactionRepository.deleteRampActivitiesByNormAndDate(
+	                        normparameterId1, plantMaintenanceTransaction.getId().toString());
+	            }
+
+	            UUID normparameterId2 = normParametersRepository.findNormParameterIdByNameAndPlant("EOE", plantId);
+	            if (normparameterId2 != null) {
+	            	List<UUID> ids= plantMaintenanceTransactionRepository.findRampActivityIdsByNormAndName(
+	            			normparameterId2, plantMaintenanceTransaction.getId().toString());
+	            	for(UUID id:ids) {
+	            		// Delete dependent NormAttributeTransactions first
+	        	        List<NormAttributeTransactions> normAttributeTransactionsLists =
+	        	                normAttributeTransactionsRepository.findByMaintenanceId(id);
+
+	        	        if (normAttributeTransactionsLists != null && !normAttributeTransactionsLists.isEmpty()) {
+	        	            for (NormAttributeTransactions normAttr : normAttributeTransactionsLists) {
+	        	                if (normAttr != null) {
+	        	                    normAttributeTransactionsRepository.delete(normAttr);
+	        	                }
+	        	            }
+	        	            normAttributeTransactionsRepository.flush(); // Ensure delete is committed before parent delete
+	        	        }
+
+	            	}
+
+	                plantMaintenanceTransactionRepository.deleteRampActivitiesByNormAndDate(
+	                        normparameterId2, plantMaintenanceTransaction.getId().toString());
+	            }
+	        }
+
+	        // Now delete the parent entity
+	        plantMaintenanceTransactionRepository.delete(plantMaintenanceTransaction);
+
+	        // Add AOP Calculation
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("shutdown-plan");
+	        if (screenMappingList != null && !screenMappingList.isEmpty()) {
+	            for (ScreenMapping screenMapping : screenMappingList) {
+	                if (screenMapping.getCalculationScreen() != null) {
+	                    AopCalculation aopCalculation = new AopCalculation();
+	                    aopCalculation.setAopYear(year);
+	                    aopCalculation.setIsChanged(true);
+	                    aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	                    aopCalculation.setPlantId(plantId);
+	                    aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	                    aopCalculationRepository.save(aopCalculation);
+	                }
+	            }
+	        }
+	    } catch (Exception ex) {
+	    	ex.printStackTrace();
+	        throw new RuntimeException("Failed to delete data", ex);
+	    }
 	}
 
 	@Override
