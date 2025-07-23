@@ -304,6 +304,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					    for (NormAttributeTransactions existing : existingList) {
 					        if (!Objects.equals(existing.getAttributeValue(), normAttributeTransactionsDTO.getAttributeValue())) {
 					            existing.setAttributeValue(normAttributeTransactionsDTO.getAttributeValue());
+					            existing.setModifiedOn(new Date());
 					            normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(existing));
 					        }
 					    }
