@@ -292,6 +292,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							mCUNormsValueGrade.setRemarks(mCUNormsValueDTO.getRemarks());
 							mCUNormsValueGrade.setMcuVersion("V1");
 							mCUNormsValueGrade.setUpdatedBy(userId);
+							mCUNormsValueGrade.setModifiedOn(new Date());
 							mCUNormsValueGrade.setGradeFkId(UUID.fromString(gradeId));
 							System.out.println("Data Saved Succussfully" + mCUNormsValue);
 							mcuNormsValueGradeRepository.save(mCUNormsValueGrade);

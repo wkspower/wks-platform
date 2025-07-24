@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,6 +12,8 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -149,6 +152,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				AOPMCCalculatedData aOPMCCalculatedData = new AOPMCCalculatedData();
 				if (aOPMCCalculatedDataDTO.getId() == null || aOPMCCalculatedDataDTO.getId().contains("#")) {
 					aOPMCCalculatedData.setId(null);
+					aOPMCCalculatedData.setCreatedOn(new Date());
 					if (isFromExcel) {
 						failedList.add(aOPMCCalculatedDataDTO);
 						continue;
@@ -165,9 +169,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 						continue;
 					}
 					aOPMCCalculatedData = aOPMCCalculatedDataOptional.get();
-
 					aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
-
+					aOPMCCalculatedData.setModifiedOn(new Date());
 				}
 				if (!isFromExcel) {
 					aOPMCCalculatedData.setPlantFKId(UUID.fromString(aOPMCCalculatedDataDTO.getPlantFKId()));
@@ -190,7 +193,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				aOPMCCalculatedData.setNovember(aOPMCCalculatedDataDTO.getNovember());
 				aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
 				aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
-
+				aOPMCCalculatedData.setUpdatedBy(Utility.getUserName());
 				
 				aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
 

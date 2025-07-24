@@ -13,6 +13,7 @@ import com.wks.caseengine.entity.AOPSummary;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPSummaryRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class AOPSummaryServiceImpl implements AOPSummaryService {
@@ -35,7 +36,7 @@ public class AOPSummaryServiceImpl implements AOPSummaryService {
 			}
 
 			existingSummary.setSummary(aopSummaryDTO.getSummary());
-			existingSummary.setUpdatedBy("system_user");
+			existingSummary.setUpdatedBy(Utility.getUserName());
 			existingSummary.setUpdatedDateTime(LocalDateTime.now());
 
 			aopSummaryRepository.save(existingSummary);
