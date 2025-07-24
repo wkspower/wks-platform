@@ -20,6 +20,10 @@ public class ExcelConstants {
     public static final String IS_ROW_MERGE_REQUIRED = "isRowMergeRequired";
     public static final String HIDDEN_COLUMNS ="hiddenColumns";
     public static final String STARTING_INDEX_OF_MONTHS ="startingIndexOfMonths";
+    public static final String GROUPING ="grouping";
+    public static final String DATA_INPUT = "dataInput";
+    public static final String TEXT_BEFORE_TITLE = "textBeforeTitle";
+    public static final String HIDE_TABLE = "hideTable";
 
 
     

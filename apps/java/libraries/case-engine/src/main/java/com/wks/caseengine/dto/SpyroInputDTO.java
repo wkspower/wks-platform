@@ -40,5 +40,6 @@ public class SpyroInputDTO {
 
     private String saveStatus;
     private String errDescription;
+    private String tableId;
 
 }

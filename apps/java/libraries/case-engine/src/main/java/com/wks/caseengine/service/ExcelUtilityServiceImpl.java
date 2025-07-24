@@ -10,6 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -23,6 +25,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.utility.ExcelConstants;
 
 @Service
@@ -47,6 +53,10 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                 System.out.println("data" + data);
                 for (Map<String, Object> table : tables) {
                     String title = "";
+                    boolean hideTable = (boolean) table.get(ExcelConstants.HIDE_TABLE);
+                    if(hideTable){
+                        continue;
+                    }
                     tableCount++;
                     Integer startRow = (table.get(ExcelConstants.STARTROW) == null) ? currentRow
                             : (int) table.get(ExcelConstants.STARTROW);
@@ -57,6 +67,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     List<List<Object>> rows = new ArrayList<>();
 
                     title = (String) table.get(ExcelConstants.TITLE);
+                   String textBeforeTitle = (String) table.get(ExcelConstants.TEXT_BEFORE_TITLE);
                     String tableId = (String) table.get(ExcelConstants.TABLEID);
                     rows = data.get(tableId);
                     System.out.println("rows " + rows);
@@ -78,6 +89,16 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
 
                     currentRow = Math.max(currentRow, startRow);
                     // currentRow += 1;
+                    
+                    if (textBeforeTitle != null && !textBeforeTitle.isEmpty()) {
+                        Row titleRow = sheet.createRow(currentRow++);
+                        Cell titleCell = titleRow.createCell(0);
+                        titleCell.setCellValue(textBeforeTitle);
+                        titleCell.setCellStyle(boldStyle);
+
+                        currentRow++;
+                        currentRow++;
+                    }
                     if (title != null && !title.isEmpty()) {
                         Row titleRow = sheet.createRow(currentRow++);
                         Cell titleCell = titleRow.createCell(0);
@@ -196,7 +217,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     for (Integer column : hiddenColumnsList) {
                         sheet.setColumnHidden(column, true);
                     }
-                    currentRow += 1;
+                    currentRow += 2;
 
                 }
                 for (int i = 0; i < columnCount; i++) {

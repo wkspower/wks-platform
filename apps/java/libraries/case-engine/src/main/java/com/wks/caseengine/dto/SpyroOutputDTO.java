@@ -40,4 +40,8 @@ public class SpyroOutputDTO {
     private Double nov;
     private Double dec;
 
+    private String saveStatus;
+    private String errDescription;
+
+
 }
