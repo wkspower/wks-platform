@@ -2,11 +2,11 @@ package com.wks.caseengine.service;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,7 +18,7 @@ import com.wks.caseengine.dto.PlantsDTO;
 import com.wks.caseengine.dto.SitesDTO;
 import com.wks.caseengine.dto.VerticalsDTO;
 import com.wks.caseengine.entity.Verticals;
-import com.wks.caseengine.exception.RestInvalidArgumentException;
+
 import com.wks.caseengine.repository.VerticalsRepository;
 
 @Service

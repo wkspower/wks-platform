@@ -3,7 +3,6 @@ package com.wks.caseengine.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.*;
 
 @Entity
 @Data

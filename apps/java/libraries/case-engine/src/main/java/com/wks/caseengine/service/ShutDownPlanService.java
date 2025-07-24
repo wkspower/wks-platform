@@ -6,10 +6,8 @@ import java.util.UUID;
 
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
-import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
-import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ShutDownPlanService {
 	

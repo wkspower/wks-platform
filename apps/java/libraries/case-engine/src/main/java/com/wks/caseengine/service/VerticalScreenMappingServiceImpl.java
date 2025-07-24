@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.dto.VerticalScreenMappingDTO;
 import com.wks.caseengine.entity.GroupMaster;
 import com.wks.caseengine.entity.VerticalScreenMapping;
 import com.wks.caseengine.repository.GroupMasterRepository;

@@ -3,12 +3,12 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-//import jakarta.transaction.Transactional;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -17,13 +17,13 @@ import com.wks.caseengine.entity.AnnualAOPCost;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
-import com.wks.caseengine.entity.BusinessDemand;
+
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.entity.Workflow;
 import com.wks.caseengine.entity.WorkflowMaster;
-import com.wks.caseengine.entity.WorkflowStepsMaster;
+
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.process.instance.ProcessInstanceService;
@@ -33,7 +33,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.stereotype.Repository;
+
 import java.lang.reflect.Field;
 import javax.sql.DataSource;
 import java.sql.CallableStatement;
@@ -47,11 +47,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.wks.bpm.engine.model.spi.ActivityInstance;
 import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.cases.instance.CaseInstance;
 import com.wks.caseengine.cases.instance.service.CaseInstanceService;
-import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.dto.WorkflowDTO;
 import com.wks.caseengine.dto.WorkflowMasterDTO;
 import com.wks.caseengine.dto.WorkflowPageDTO;
@@ -59,14 +57,12 @@ import com.wks.caseengine.dto.WorkflowStepsMasterDTO;
 import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.repository.AnnualAOPCostRepository;
-import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.repository.WorkflowMasterRepository;
 import com.wks.caseengine.repository.WorkflowRepository;
 import com.wks.caseengine.repository.WorkflowStepsMasterRepository;
-import com.wks.caseengine.rest.entity.OwnerDetails;
 import com.wks.caseengine.tasks.TaskService;
 
 @Service

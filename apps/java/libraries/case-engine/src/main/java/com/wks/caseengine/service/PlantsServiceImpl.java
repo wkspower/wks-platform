@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.PlantsDTO;
 import com.wks.caseengine.entity.Plants;
-import com.wks.caseengine.exception.RestInvalidArgumentException;
+
 import com.wks.caseengine.repository.PlantsRepository;
 
 @Service

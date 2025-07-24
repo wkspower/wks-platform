@@ -6,13 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.exception.RestInvalidArgumentException;
-import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.report.export.ExcelExportUtil;
 
 @Service

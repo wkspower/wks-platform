@@ -1,7 +1,6 @@
 package com.wks.caseengine.entity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;

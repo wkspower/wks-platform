@@ -10,12 +10,10 @@ import java.util.stream.Collectors;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 
 import com.wks.caseengine.entity.AopCalculation;
@@ -36,8 +34,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.rest.entity.Plant;
-import com.wks.caseengine.rest.entity.Vertical;
+import com.wks.caseengine.utility.Utility;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -178,8 +175,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			UUID plantFKId, String year, String gradeId, boolean isFromExcel) {
 
 		try {
-			Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-			String userId = authentication.getName();
+		
 			List<NormsTransactions> transactionsToSave = new ArrayList<>();
 			List<MCUNormsValueDTO> failedList = new ArrayList<>();
 			Plants plant = plantsRepository.findById(plantFKId).get();
@@ -218,7 +214,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						normsTransactions.setVersion(1);
 						normsTransactions.setCreatedDateTime(new Date());
 
-						normsTransactions.setCreatedBy(userId);
+						normsTransactions.setCreatedBy(Utility.getUserName());
 						normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));
 
 						transactionsToSave.add(normsTransactions);
@@ -291,7 +287,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 							mCUNormsValueGrade.setRemarks(mCUNormsValueDTO.getRemarks());
 							mCUNormsValueGrade.setMcuVersion("V1");
-							mCUNormsValueGrade.setUpdatedBy(userId);
+							mCUNormsValueGrade.setUpdatedBy(Utility.getUserName());
 							mCUNormsValueGrade.setModifiedOn(new Date());
 							mCUNormsValueGrade.setGradeFkId(UUID.fromString(gradeId));
 							System.out.println("Data Saved Succussfully" + mCUNormsValue);
@@ -349,7 +345,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 							mCUNormsValue.setRemarks(mCUNormsValueDTO.getRemarks());
 							mCUNormsValue.setMcuVersion("V1");
-							mCUNormsValue.setUpdatedBy(userId);
+							mCUNormsValue.setUpdatedBy(Utility.getUserName());
 							System.out.println("Data Saved Succussfully" + mCUNormsValue);
 							normalOperationNormsRepository.save(mCUNormsValue);
 						} else {

@@ -10,9 +10,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
-import com.wks.caseengine.entity.MonthwiseConsumptionReport;
 import com.wks.caseengine.entity.TurnAroundPlan;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;

@@ -2,17 +2,11 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
@@ -23,7 +17,6 @@ import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
-import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
@@ -34,8 +27,6 @@ import com.wks.caseengine.repository.ShutDownPlanRepository;
 import com.wks.caseengine.utility.Utility;
 
 import org.springframework.transaction.annotation.Transactional;
-import java.time.*;
-import java.time.temporal.ChronoUnit;
 
 @Service
 public class ShutDownPlanServiceImpl implements ShutDownPlanService {

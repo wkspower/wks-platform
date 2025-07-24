@@ -2,7 +2,7 @@ package com.wks.caseengine.service;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.repository.query.Param;
+
 
 import com.wks.caseengine.rest.entity.Plant;
 

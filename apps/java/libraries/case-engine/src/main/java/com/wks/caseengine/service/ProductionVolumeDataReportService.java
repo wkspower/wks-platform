@@ -5,7 +5,6 @@ import java.util.List;
 import com.wks.caseengine.dto.AnnualProductionPlanReportDto;
 import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
-import com.wks.caseengine.dto.PlantProductionDTO;
 import com.wks.caseengine.dto.PlantProductionDataDTO;
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
 import com.wks.caseengine.dto.YearWiseContributionDataDTO;
