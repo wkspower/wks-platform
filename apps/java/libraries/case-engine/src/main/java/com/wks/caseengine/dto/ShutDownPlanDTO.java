@@ -42,4 +42,5 @@ public class ShutDownPlanDTO {
 	private String productName;
 	private Double rateEO;
 	private Double rateEOE;
+	private String type;
 }
