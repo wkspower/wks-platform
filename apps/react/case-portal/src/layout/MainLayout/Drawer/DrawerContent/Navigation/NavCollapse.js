@@ -16,18 +16,18 @@ import NavItem from './NavItem'
 const NavCollapse = ({ menu, level }) => {
   const theme = useTheme()
   const [open, setOpen] = useState(true)
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState(menu.id)
   const { plantID, verticalChange } = useSelector(
     (state) => state.dataGridStore,
   )
   const plantName = plantID?.plantName
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const handleClick = (id) => {
+  const handleClick = () => {
     setOpen(!open)
-    setSelected(!selected ? id : null)
+    setSelected(!selected ? menu.id : null)
   }
-  console.log('selected', selected, menu)
+
   const menus = useMemo(() => {
     if (!menu?.children) return []
 
@@ -86,7 +86,7 @@ const NavCollapse = ({ menu, level }) => {
           pl: `${level * 24}px`,
         }}
         selected={selected === menu.id}
-        onClick={() => handleClick(menu.id)}
+        onClick={handleClick}
       >
         <ListItemIcon sx={{ my: 'auto', minWidth: !menu.icon ? 18 : 36 }}>
           {menuIcon}
