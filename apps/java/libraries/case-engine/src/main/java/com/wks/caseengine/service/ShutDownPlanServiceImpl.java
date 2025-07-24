@@ -340,11 +340,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
 
 					String verticalName = plantsService.findVerticalNameByPlantId(plantId);
-					System.out.println("verticalName" + verticalName);
+					
 					String description = shutDownPlanDTO.getDiscription();
 					if (verticalName.equalsIgnoreCase("MEG")) {
 						shutDownPlanDTO.setCreatedOn(plantMaintenanceTransaction.getCreatedOn());
-						shutDownPlanDTO.setMaintEndDateTime(shutDownPlanDTO.getMaintStartDateTime());
+						//shutDownPlanDTO.setMaintEndDateTime(shutDownPlanDTO.getMaintStartDateTime());
 						shutDownPlanDTO
 								.setPlantMaintenanceTransactionName(plantMaintenanceTransaction.getId().toString());
 						List<ShutDownPlanDTO> list = new ArrayList<>();
@@ -354,7 +354,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setProductId(
 								plantMaintenanceTransactionRepository.findIdByNameAndPlantFkId("EO", plantId));
 						list.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list);
+						slowdownPlanService.saveRampUpData(plantId, list);
 
 						List<ShutDownPlanDTO> list2 = new ArrayList<>();
 						shutDownPlanDTO.setDiscription(description + " Ramp Down");
@@ -363,7 +363,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						shutDownPlanDTO.setDurationInHrs(0.00);
 						shutDownPlanDTO.setDurationInMins(0);
 						list2.add(shutDownPlanDTO);
-						slowdownPlanService.saveShutdownData(plantId, list2);
+						slowdownPlanService.saveRampDownData(plantId, list2);
 					}
 				} else {
 					// Updating an existing record

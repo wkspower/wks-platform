@@ -109,6 +109,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				dto.setDisplayOrder(result[8] != null ? ((Integer) result[8]) : null);
 				dto.setRate(result[9] != null ? ((Number) result[9]).doubleValue() : null); // Extract Rate
 				dto.setProductName(result[10] != null ? result[10].toString() : null);
+				if(dto.getProductName()!=null && dto.getProductName().equalsIgnoreCase("EO")) {
+					dto.setType("ramp-up");
+				}
+				if(dto.getProductName()!=null && dto.getProductName().equalsIgnoreCase("EOE")) {
+					dto.setType("ramp-down");
+				}
 				dto.setRateEO(result[11] != null ? ((Number) result[11]).doubleValue() : null);
 				dto.setRateEOE(result[12] != null ? ((Number) result[12]).doubleValue() : null);
 				dtoList.add(dto);
@@ -140,11 +146,18 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			}
 			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
 				year=shutDownPlanDTO.getAudityear();
-
+				PlantMaintenanceTransaction plantMaintenanceTransaction =null;
 				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
-					PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+					plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 					plantMaintenanceTransaction.setId(UUID.randomUUID());
-					plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+					
+				} else {
+
+					 plantMaintenanceTransaction = slowdownPlanRepository
+							.findById(UUID.fromString(shutDownPlanDTO.getId())).get();
+					
+				}
+				plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 					if (shutDownPlanDTO.getDurationInHrs() != null) {
 						plantMaintenanceTransaction
 								.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
@@ -161,10 +174,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						plantMaintenanceTransaction
 								.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
 					}
-					System.out.println("plantMaintenanceTransaction.getMaintForMonth()"
-							+ plantMaintenanceTransaction.getMaintForMonth());
-
-					System.out.println("shutDownPlanDTO.getCreatedOn()" + shutDownPlanDTO.getCreatedOn());
 
 					plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 					plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
@@ -184,53 +193,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
 					}
 					slowdownPlanRepository.save(plantMaintenanceTransaction);
-				} else {
-
-					PlantMaintenanceTransaction plantMaintenanceTransaction = slowdownPlanRepository
-							.findById(UUID.fromString(shutDownPlanDTO.getId())).get();
-					System.out.println("At start name is:" + plantMaintenanceTransaction.getName());
-					// Set mandatory fields with default values if missing
-					plantMaintenanceTransaction
-							.setDiscription(shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription()
-									: "Default Description");
-
-					if (shutDownPlanDTO.getDurationInHrs() != null) {
-						plantMaintenanceTransaction
-								.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
-										+ (int) Math.round((shutDownPlanDTO.getDurationInHrs()
-												- Math.floor(shutDownPlanDTO.getDurationInHrs())) * 100));
-
-					} else {
-						plantMaintenanceTransaction.setDurationInMins(0);
-					}
-
-					plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
-					plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-					plantMaintenanceTransaction
-							.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
-					System.out.println("plantMaintenanceTransaction.getMaintForMonth()"
-							+ plantMaintenanceTransaction.getMaintForMonth());
-					plantMaintenanceTransaction.setUser(Utility.getUserName());
-					// plantMaintenanceTransaction.setName("Default Name");
-					plantMaintenanceTransaction.setVersion("V1");
-					System.out.println("shutDownPlanDTO.getCreatedOn()" + shutDownPlanDTO.getCreatedOn());
-
-					plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
-					plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
-					plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
-					plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
-					plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
-
-					if (shutDownPlanDTO.getProductId() != null) {
-						plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
-					}
-
-					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
-					System.out.println("At end name is:" + plantMaintenanceTransaction.getName());
-					// Save new record
-					slowdownPlanRepository.save(plantMaintenanceTransaction);
-
-				}
 			}
 			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-plan");
 			for(ScreenMapping screenMapping:screenMappingList) {
@@ -246,9 +208,172 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
+	}
+	@Override
+	public List<ShutDownPlanDTO> saveRampUpData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		String year=null;
+			
+		try {
+			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
+			if (plantMaintenanceId == null) {
+				UUID maintenanceTypesId = plantMaintenanceTransactionRepository.findIdByName("Slowdown");
+				PlantMaintenance plantMaintenance = new PlantMaintenance();
+				plantMaintenance.setMaintenanceText("Slowdown");
+				plantMaintenance.setIsDefault(true);
+				plantMaintenance.setPlantFkId(plantId);
+				plantMaintenance.setMaintenanceTypeFkId(maintenanceTypesId);
+				plantMaintenanceRepository.save(plantMaintenance);
+				plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
+			}
+			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+				year=shutDownPlanDTO.getAudityear();
+				PlantMaintenanceTransaction plantMaintenanceTransaction =null;
+				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
+					plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+					plantMaintenanceTransaction.setId(UUID.randomUUID());
+					
+				} else {
 
+					 plantMaintenanceTransaction = slowdownPlanRepository
+							.findById(UUID.fromString(shutDownPlanDTO.getId())).get();
+					
+				}
+				plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+					if (shutDownPlanDTO.getDurationInHrs() != null) {
+						plantMaintenanceTransaction
+								.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
+										+ (int) Math.round((shutDownPlanDTO.getDurationInHrs()
+												- Math.floor(shutDownPlanDTO.getDurationInHrs())) * 100));
+					} else {
+						plantMaintenanceTransaction.setDurationInMins(0);
+					}
+
+					plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+					plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintEndDateTime());
+					plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+					if (shutDownPlanDTO.getMaintStartDateTime() != null) {
+						plantMaintenanceTransaction
+								.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
+					}
+
+					plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+					plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
+					plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
+					plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+					// plantMaintenanceTransaction.setName("Default Name");
+					plantMaintenanceTransaction.setVersion("V1");
+					plantMaintenanceTransaction.setUser(Utility.getUserName());
+					if (shutDownPlanDTO.getProductId() != null) {
+						plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+					}
+					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+					if (shutDownPlanDTO.getCreatedOn() == null) {
+						plantMaintenanceTransaction.setCreatedOn(new Date());
+					} else {
+						plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
+						plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
+					}
+					slowdownPlanRepository.save(plantMaintenanceTransaction);
+			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-plan");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			return shutDownPlanDTOList;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save data", ex);
+		}
+	}
+	
+	@Override
+	public List<ShutDownPlanDTO> saveRampDownData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
+		String year=null;
+		try {
+			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
+			if (plantMaintenanceId == null) {
+				UUID maintenanceTypesId = plantMaintenanceTransactionRepository.findIdByName("Slowdown");
+				PlantMaintenance plantMaintenance = new PlantMaintenance();
+				plantMaintenance.setMaintenanceText("Slowdown");
+				plantMaintenance.setIsDefault(true);
+				plantMaintenance.setPlantFkId(plantId);
+				plantMaintenance.setMaintenanceTypeFkId(maintenanceTypesId);
+				plantMaintenanceRepository.save(plantMaintenance);
+				plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
+			}
+			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+				year=shutDownPlanDTO.getAudityear();
+				PlantMaintenanceTransaction plantMaintenanceTransaction =null;
+				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
+					plantMaintenanceTransaction = new PlantMaintenanceTransaction();
+					plantMaintenanceTransaction.setId(UUID.randomUUID());
+					
+				} else {
+
+					 plantMaintenanceTransaction = slowdownPlanRepository
+							.findById(UUID.fromString(shutDownPlanDTO.getId())).get();
+					
+				}
+				plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
+					if (shutDownPlanDTO.getDurationInHrs() != null) {
+						plantMaintenanceTransaction
+								.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
+										+ (int) Math.round((shutDownPlanDTO.getDurationInHrs()
+												- Math.floor(shutDownPlanDTO.getDurationInHrs())) * 100));
+					} else {
+						plantMaintenanceTransaction.setDurationInMins(0);
+					}
+
+					plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintStartDateTime());
+					plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+					plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
+					if (shutDownPlanDTO.getMaintStartDateTime() != null) {
+						plantMaintenanceTransaction
+								.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
+					}
+
+					plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
+					plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
+					plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
+					plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+					// plantMaintenanceTransaction.setName("Default Name");
+					plantMaintenanceTransaction.setVersion("V1");
+					plantMaintenanceTransaction.setUser(Utility.getUserName());
+					if (shutDownPlanDTO.getProductId() != null) {
+						plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+					}
+					plantMaintenanceTransaction.setAuditYear(shutDownPlanDTO.getAudityear());
+					if (shutDownPlanDTO.getCreatedOn() == null) {
+						plantMaintenanceTransaction.setCreatedOn(new Date());
+					} else {
+						plantMaintenanceTransaction.setCreatedOn(shutDownPlanDTO.getCreatedOn());
+						plantMaintenanceTransaction.setName(shutDownPlanDTO.getPlantMaintenanceTransactionName());
+					}
+					slowdownPlanRepository.save(plantMaintenanceTransaction);
+			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-plan");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			return shutDownPlanDTOList;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save data", ex);
+		}
 	}
 
+
+	
 	@Override
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId,
 			List<ShutDownPlanDTO> shutDownPlanDTOList) {
