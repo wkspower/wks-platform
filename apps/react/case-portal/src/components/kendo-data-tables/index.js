@@ -449,6 +449,7 @@ const KendoDataTables = ({
         title={props.title}
         style={{
           padding: '0px',
+          borderRight: '1px solid #ccc',
         }}
       >
         <Tooltip
