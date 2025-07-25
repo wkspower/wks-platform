@@ -222,12 +222,19 @@ a.k-grid-header-menu.k-grid-column-menu {
   word-break: break-word;
 } */
 
-.k-column-title {
-  /* white-space: normal !important;
+/* .k-column-title {
   overflow: visible !important;
-  text-overflow: unset !important;
-  word-break: break-word;*/
-  font-size: 12px;
+  letter-spacing: -0.2px !important;
+  font-size: 11px;
   margin-left: -8px;
+  margin-right: 4px;
+} */
+
+.k-column-title {
+  overflow: visible !important;
+  font-size: 12px;
+  /* font-family: 'Arial Narrow', sans-serif; */
+  letter-spacing: -0.3px;
+  margin-left: -9px;
   margin-right: 4px;
 }

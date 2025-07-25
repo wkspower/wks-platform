@@ -63,12 +63,7 @@ const ShutDown = ({ permissions }) => {
         return
       }
 
-      const requiredFields = [
-        'maintStartDateTime',
-        'maintEndDateTime',
-        'discription',
-        'remark',
-      ]
+      const requiredFields = ['discription', 'remark']
       const validationMessage = validateFields(data, requiredFields)
       if (validationMessage) {
         setSnackbarOpen(true)
@@ -97,81 +92,99 @@ const ShutDown = ({ permissions }) => {
 
       const allRecords = [...rows]
 
-      for (const row of allRecords) {
-        const start = new Date(row.maintStartDateTime)
-        const end = new Date(row.maintEndDateTime)
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
-
-        const formatDate = (date) =>
-          date.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          })
-
-        const isSameMonth =
-          start.getMonth() === end.getMonth() &&
-          start.getFullYear() === end.getFullYear()
-
-        if (!isSameMonth) {
+      for (const record of allRecords) {
+        if (
+          record.maintStartDateTime &&
+          record.maintEndDateTime &&
+          record.maintStartDateTime.getTime() >=
+            record.maintEndDateTime.getTime()
+        ) {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
+            message: `Start time must be before end time for "${record.description || 'this record'}".`,
             severity: 'error',
           })
           return
         }
       }
 
-      for (let i = 0; i < allRecords.length; i++) {
-        const a = allRecords[i]
-        const aStart = new Date(a.maintStartDateTime).getTime()
-        const aEnd = new Date(a.maintEndDateTime).getTime()
+      if (lowerVertName == 'meg') {
+        for (const row of allRecords) {
+          const start = new Date(row.maintStartDateTime)
+          const end = new Date(row.maintEndDateTime)
 
-        if (isNaN(aStart) || isNaN(aEnd)) continue
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
 
-        for (let j = 0; j < allRecords.length; j++) {
-          if (i === j) continue
-          const b = allRecords[j]
-          const bStart = new Date(b.maintStartDateTime).getTime()
-          const bEnd = new Date(b.maintEndDateTime).getTime()
+          const formatDate = (date) =>
+            date.toLocaleDateString('en-GB', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            })
 
-          if (isNaN(bStart) || isNaN(bEnd)) continue
+          const isSameMonth =
+            start.getMonth() === end.getMonth() &&
+            start.getFullYear() === end.getFullYear()
 
-          if (aStart < bEnd && bStart < aEnd) {
+          if (!isSameMonth) {
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `The shutdown timeframe for "${a.discription}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+              message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
               severity: 'error',
             })
             return
           }
         }
-      }
 
-      //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
-      for (let i = 0; i < rows.length; i++) {
-        const a = rows[i]
-        const aStart = new Date(a.maintStartDateTime).getTime()
-        const aEnd = new Date(a.maintEndDateTime).getTime()
+        for (let i = 0; i < allRecords.length; i++) {
+          const a = allRecords[i]
+          const aStart = new Date(a.maintStartDateTime).getTime()
+          const aEnd = new Date(a.maintEndDateTime).getTime()
 
-        if (isNaN(aStart) || isNaN(aEnd)) continue
+          if (isNaN(aStart) || isNaN(aEnd)) continue
 
-        for (let j = 0; j < rowsSlowdown.length; j++) {
-          const b = rowsSlowdown[j]
-          const bStart = new Date(b.maintStartDateTime).getTime()
-          const bEnd = new Date(b.maintEndDateTime).getTime()
+          for (let j = 0; j < allRecords.length; j++) {
+            if (i === j) continue
+            const b = allRecords[j]
+            const bStart = new Date(b.maintStartDateTime).getTime()
+            const bEnd = new Date(b.maintEndDateTime).getTime()
 
-          if (isNaN(bStart) || isNaN(bEnd)) continue
+            if (isNaN(bStart) || isNaN(bEnd)) continue
 
-          if (aStart < bEnd && bStart < aEnd) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `The timeframe for "${a.discription} (Shutdown)" overlaps with "${b.discription} (Slowdown)". Please ensure no overlapping timeframes.`,
-              severity: 'error',
-            })
-            return
+            if (aStart < bEnd && bStart < aEnd) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `The shutdown timeframe for "${a.discription}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+                severity: 'error',
+              })
+              return
+            }
+          }
+        }
+
+        //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
+        for (let i = 0; i < rows.length; i++) {
+          const a = rows[i]
+          const aStart = new Date(a.maintStartDateTime).getTime()
+          const aEnd = new Date(a.maintEndDateTime).getTime()
+
+          if (isNaN(aStart) || isNaN(aEnd)) continue
+
+          for (let j = 0; j < rowsSlowdown.length; j++) {
+            const b = rowsSlowdown[j]
+            const bStart = new Date(b.maintStartDateTime).getTime()
+            const bEnd = new Date(b.maintEndDateTime).getTime()
+
+            if (isNaN(bStart) || isNaN(bEnd)) continue
+
+            if (aStart < bEnd && bStart < aEnd) {
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `The timeframe for "${a.discription} (Shutdown)" overlaps with "${b.discription} (Slowdown)". Please ensure no overlapping timeframes.`,
+                severity: 'error',
+              })
+              return
+            }
           }
         }
       }
