@@ -20,11 +20,15 @@ public class UserScreenMappingController {
 	private UserScreenMappingService userScreenMappingService;
 	
 	@GetMapping
-	public Map<String, Object> getUserScreenMapping(@RequestParam String verticalId, @RequestParam String plantId) throws Exception{
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		String userId = authentication.getName(); 	
+	public Map<String, Object> getUserScreenMapping(@RequestParam String verticalId, @RequestParam String plantId,@RequestParam(value = "userId", required = false) String userId) throws Exception{
 		
-		System.out.println("UserId " + userId);
+		if(userId!=null) {
+			System.out.println("UserId " + userId);
+		}else {
+			 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+			 userId = authentication.getName(); 
+			 System.out.println("UserId " + userId);	 
+		}
 		return userScreenMappingService.getUserScreenMapping(verticalId,plantId, userId);
 					
 	}
