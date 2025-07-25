@@ -292,6 +292,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 			normAttributeTransactions = new NormAttributeTransactions();
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
+			normAttributeTransactions.setUserName(Utility.getUserName());
 			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
 			normAttributeTransactions.setAopMonth(i);
 			normAttributeTransactions.setAuditYear(year);

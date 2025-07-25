@@ -364,6 +364,8 @@ public class KeycloakUserService {
 								userScreenMapping.setPermissions(permissionsString);
 
 								newMappings.add(userScreenMapping);
+								System.out.println("getScreenCode "+userScreenMapping.getScreenCode());
+								System.out.println("getId "+userScreenMapping.getId());
 							}
 
 							userScreenMappingRepository.saveAll(newMappings);
