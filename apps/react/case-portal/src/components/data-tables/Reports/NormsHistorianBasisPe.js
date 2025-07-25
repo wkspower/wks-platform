@@ -370,28 +370,6 @@ const ProductionVolumeDataBasisPe = () => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                AVG NORMS
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsAvgAnnualNorms}
-                  columns={colsAvgAnnualNorms}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
                 CONSECUTIVE DAYS
               </Typography>
             </CustomAccordionSummary>
@@ -427,6 +405,29 @@ const ProductionVolumeDataBasisPe = () => {
             </CustomAccordionDetails>
           </CustomAccordion>
         </div>
+
+        <div>
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='meg-grid-content'
+              id='meg-grid-header'
+            >
+              <Typography component='span' className='grid-title'>
+                AVG NORMS
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <KendoDataGrid
+                  rows={rowsAvgAnnualNorms}
+                  columns={colsAvgAnnualNorms}
+                  permissions={{ allAction: false }}
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        </div>
+
         <div>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary

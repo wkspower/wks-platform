@@ -60,6 +60,35 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
 
   const dateFields = ['endDate', 'startDate', 'dateTime']
 
+  const SimpleHeaderWithTooltip = (props) => {
+    return (
+      // <div
+      //   className='k-header-cell-wrapper'
+      //   title={props.tooltipText || props.title}
+      // >
+      //   {props.children}
+      //   {/* You could implement a custom CSS-only tooltip here if needed */}
+      // </div>
+      <th
+        {...props.thProps}
+        title={props.title}
+        style={{
+          padding: '0px',
+          borderRight: '1px solid #ccc',
+        }}
+      >
+        <Tooltip
+          position={'top'}
+          anchorElement={props.thProps}
+          parentTitle={true}
+          className='test'
+        >
+          {props.children}
+        </Tooltip>
+      </th>
+    )
+  }
+
   return (
     <div className='kendo-data-grid'>
       <Tooltip openDelay={50} position='bottom' anchorElement='target'>
@@ -122,6 +151,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
                         : DateTimePickerEditor,
                     },
                     data: toolTipRenderer,
+                    headerCell: SimpleHeaderWithTooltip,
                   }}
                   editor='date'
                   format='{0:dd-MM-yyyy}'
@@ -146,7 +176,10 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
                 field={field}
                 title={title}
                 cell={cell}
-                cells={{ data: toolTipRenderer }}
+                cells={{
+                  data: toolTipRenderer,
+                  headerCell: SimpleHeaderWithTooltip,
+                }}
                 format={format}
                 className={
                   isRightAlligned === 'numeric'

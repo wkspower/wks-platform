@@ -10,7 +10,7 @@ const StyledAlert = styled(Alert)(({ theme, severity }) => ({
   }),
   ...(severity === 'warning' && {
     backgroundColor: amber[700],
-    color: theme.palette.common.black, // Darker text for better contrast
+    color: theme.palette.common.black,
   }),
   ...(severity === 'error' && {
     backgroundColor: red[700],
@@ -21,7 +21,12 @@ const StyledAlert = styled(Alert)(({ theme, severity }) => ({
     color: theme.palette.common.white,
   }),
   '& .MuiAlert-icon': {
-    color: theme.palette.common.white, // Ensure icon color is consistent
+    color: theme.palette.common.white,
+  },
+  '& .MuiAlert-message': {
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    maxWidth: '400px',
   },
 }))
 

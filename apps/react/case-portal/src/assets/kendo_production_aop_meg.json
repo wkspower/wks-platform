@@ -45,9 +45,9 @@
   {
     "field": "april",
     "title": "4",
+    "align": "left",
     "editable": false,
     "type": "number",
-    "align": "left",
     "format": "{0:#.##}"
   },
   {

@@ -30,6 +30,8 @@ const ShutDown = ({ permissions }) => {
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
+  const [rowsSlowdown, setRowsSlowdown] = useState()
+
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -87,10 +89,91 @@ const ShutDown = ({ permissions }) => {
       if (duplicate) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `Duplicate description "${duplicate}" found. Descriptions must be unique.`,
+          message: `The description "${duplicate}" already exists in the list. Please enter a unique description to avoid duplication.`,
           severity: 'error',
         })
         return
+      }
+
+      const allRecords = [...rows]
+
+      for (const row of allRecords) {
+        const start = new Date(row.maintStartDateTime)
+        const end = new Date(row.maintEndDateTime)
+
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
+
+        const formatDate = (date) =>
+          date.toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+
+        const isSameMonth =
+          start.getMonth() === end.getMonth() &&
+          start.getFullYear() === end.getFullYear()
+
+        if (!isSameMonth) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
+            severity: 'error',
+          })
+          return
+        }
+      }
+
+      for (let i = 0; i < allRecords.length; i++) {
+        const a = allRecords[i]
+        const aStart = new Date(a.maintStartDateTime).getTime()
+        const aEnd = new Date(a.maintEndDateTime).getTime()
+
+        if (isNaN(aStart) || isNaN(aEnd)) continue
+
+        for (let j = 0; j < allRecords.length; j++) {
+          if (i === j) continue
+          const b = allRecords[j]
+          const bStart = new Date(b.maintStartDateTime).getTime()
+          const bEnd = new Date(b.maintEndDateTime).getTime()
+
+          if (isNaN(bStart) || isNaN(bEnd)) continue
+
+          if (aStart < bEnd && bStart < aEnd) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `The shutdown timeframe for "${a.discription}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+              severity: 'error',
+            })
+            return
+          }
+        }
+      }
+
+      //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
+      for (let i = 0; i < rows.length; i++) {
+        const a = rows[i]
+        const aStart = new Date(a.maintStartDateTime).getTime()
+        const aEnd = new Date(a.maintEndDateTime).getTime()
+
+        if (isNaN(aStart) || isNaN(aEnd)) continue
+
+        for (let j = 0; j < rowsSlowdown.length; j++) {
+          const b = rowsSlowdown[j]
+          const bStart = new Date(b.maintStartDateTime).getTime()
+          const bEnd = new Date(b.maintEndDateTime).getTime()
+
+          if (isNaN(bStart) || isNaN(bEnd)) continue
+
+          if (aStart < bEnd && bStart < aEnd) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `The timeframe for "${a.discription} (Shutdown)" overlaps with "${b.discription} (Slowdown)". Please ensure no overlapping timeframes.`,
+              severity: 'error',
+            })
+            return
+          }
+        }
       }
 
       saveShutdownData(data)
@@ -157,6 +240,7 @@ const ShutDown = ({ permissions }) => {
       console.error('Error saving shutdown data:', error)
     } finally {
       fetchData()
+
       setLoading(false)
     }
   }
@@ -195,10 +279,30 @@ const ShutDown = ({ permissions }) => {
   }
 
   const fetchData = async () => {
-    if (!_plantID) return
+    if (!plantID) return
     try {
       setLoading(true)
-      const data = await DataService.getShutDownPlantData(keycloak, _plantID)
+      const data = await DataService.getShutDownPlantData(
+        keycloak,
+        plantID?.plantId,
+      )
+      const dataSlowDown = await DataService.getSlowDownPlantData(
+        keycloak,
+        plantID?.plantId,
+      )
+
+      const formattedDataSlowDown = dataSlowDown.map((item, index) => ({
+        ...item,
+        idFromApi: item?.id,
+        id: index,
+        originalRemark: item.remark,
+        inEdit: false,
+        maintStartDateTime: new Date(item?.maintStartDateTime),
+        maintEndDateTime: new Date(item?.maintEndDateTime),
+      }))
+
+      setRowsSlowdown(formattedDataSlowDown)
+
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item?.id,
@@ -277,6 +381,8 @@ const ShutDown = ({ permissions }) => {
   ]
 
   const deleteRowData = async (paramsForDelete) => {
+    setLoading(true)
+
     try {
       const { idFromApi, id } = paramsForDelete
       const deleteId = id
@@ -294,6 +400,7 @@ const ShutDown = ({ permissions }) => {
           severity: 'success',
         })
         fetchData()
+
         const maintenanceResponse =
           await DataService.getMaintenanceData(keycloak)
       }

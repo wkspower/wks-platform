@@ -332,6 +332,35 @@ const KendoDataTablesReciepe = ({
     )
   }
 
+  const SimpleHeaderWithTooltip = (props) => {
+    return (
+      // <div
+      //   className='k-header-cell-wrapper'
+      //   title={props.tooltipText || props.title}
+      // >
+      //   {props.children}
+      //   {/* You could implement a custom CSS-only tooltip here if needed */}
+      // </div>
+      <th
+        {...props.thProps}
+        title={props.title}
+        style={{
+          padding: '0px',
+          borderRight: '1px solid #ccc',
+        }}
+      >
+        <Tooltip
+          position={'top'}
+          anchorElement={props.thProps}
+          parentTitle={true}
+          className='test'
+        >
+          {props.children}
+        </Tooltip>
+      </th>
+    )
+  }
+
   const renderColumns = (cols, filter, sort) =>
     cols.map((col, idx) => {
       if (col.children) {
@@ -356,6 +385,7 @@ const KendoDataTablesReciepe = ({
           cells={{
             edit: { text: NoSpinnerNumericEditor },
             data: toolTipRenderer,
+            headerCell: SimpleHeaderWithTooltip,
           }}
           columnMenu={ColumnMenuCheckboxFilter}
         />

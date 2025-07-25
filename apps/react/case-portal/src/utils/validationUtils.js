@@ -83,7 +83,9 @@ export const validateFields = (data, requiredFields) => {
         const startDate = new Date(row.maintStartDateTime).getTime()
         const endDate = new Date(row.maintEndDateTime).getTime()
         if (startDate && endDate && endDate <= startDate) {
-          missingFieldsMessage.push('End Date must be after Start Date')
+          missingFieldsMessage.push(
+            'Start Date and End Date are in the wrong order. Please adjust the range.',
+          )
         }
 
         return missingFieldsMessage.join(', ')

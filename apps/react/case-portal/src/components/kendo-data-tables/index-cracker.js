@@ -270,6 +270,35 @@ const KendoDataTablesCracker = ({
       </tr>
     )
   }, [])
+
+  const SimpleHeaderWithTooltip = (props) => {
+    return (
+      // <div
+      //   className='k-header-cell-wrapper'
+      //   title={props.tooltipText || props.title}
+      // >
+      //   {props.children}
+      //   {/* You could implement a custom CSS-only tooltip here if needed */}
+      // </div>
+      <th
+        {...props.thProps}
+        title={props.title}
+        style={{
+          padding: '0px',
+          borderRight: '1px solid #ccc',
+        }}
+      >
+        <Tooltip
+          position={'top'}
+          anchorElement={props.thProps}
+          parentTitle={true}
+          className='test'
+        >
+          {props.children}
+        </Tooltip>
+      </th>
+    )
+  }
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
     const month = monthMap[props.field?.toLowerCase()]
@@ -353,6 +382,7 @@ const KendoDataTablesCracker = ({
                     : DateTimePickerEditor,
                 },
                 data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
               }}
               format={
                 ['fromDate', 'toDate'].includes(col.field)
@@ -376,6 +406,7 @@ const KendoDataTablesCracker = ({
                   date: DateOnlyPicker,
                 },
                 data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
               }}
               format='{0:dd-MM-yyyy}'
               editor='date'
@@ -459,6 +490,7 @@ const KendoDataTablesCracker = ({
               cells={{
                 edit: { text: NoSpinnerNumericEditor },
                 data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
               }}
               filter='numeric'
               format={col.format}
@@ -505,6 +537,7 @@ const KendoDataTablesCracker = ({
               cells={{
                 edit: { text: NoSpinnerNumericEditor },
                 data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
               }}
               columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               filter='numeric'
@@ -588,6 +621,7 @@ const KendoDataTablesCracker = ({
             cells={{
               edit: { text: TextCellEditor },
               data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
             }}
             columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
             sortable={col?.filter}

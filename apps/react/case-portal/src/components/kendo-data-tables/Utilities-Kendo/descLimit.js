@@ -2,6 +2,9 @@ import { Input } from '@progress/kendo-react-inputs'
 
 export const descLimit = (props) => {
   const rawValue = props.dataItem[props.field] ?? ''
+  const type = props?.dataItem?.type ?? ''
+  // const isDisabled = type === 'ramp-down' || type === 'ramp-up'
+  const isDisabled = false
 
   const handleChange = (e) => {
     const newVal = e.target.value
@@ -19,7 +22,12 @@ export const descLimit = (props) => {
 
   return (
     <td style={{ textAlign: 'end' }}>
-      <Input value={rawValue} onChange={handleChange} maxLength={250} />
+      <Input
+        value={rawValue}
+        onChange={handleChange}
+        maxLength={250}
+        disabled={isDisabled}
+      />
     </td>
   )
 }

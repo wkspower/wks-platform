@@ -51,9 +51,7 @@ const ProductionNorms = ({ permissions }) => {
     if (plantID?.plantId) {
       set_PlantID(plantID?.plantId)
     }
-    setSelectedUnit(
-      lowerVertName == 'cracker' ? ['MT/Month', 'KT'] : ['MT', 'KT'],
-    )
+    // setSelectedUnit('')
   }, [plantID])
   // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
 
@@ -295,106 +293,85 @@ const ProductionNorms = ({ permissions }) => {
     }
   }
 
+  const rowDataForCracker = [
+    {
+      displayName: 'Ethyelene',
+      uom: 'MT/Month',
+      april: 13420,
+      may: 12875,
+      june: 14210,
+      july: 13750,
+      aug: 12995,
+      sep: 14130,
+      oct: 13580,
+      nov: 13045,
+      dec: 13670,
+      jan: 13920,
+      feb: 13105,
+      march: 13840,
+      averageTPH: '',
+      isEditable: false,
+    },
+    {
+      displayName: 'Propylene',
+      uom: 'MT/Month',
+      april: 9450,
+      may: 10235,
+      june: 11090,
+      july: 10720.2322332332,
+      aug: 11560,
+      sep: 10985,
+      oct: 11340,
+      nov: 10575,
+      dec: 11120,
+      jan: 11280,
+      feb: 10850,
+      march: 11430,
+      averageTPH: '',
+      isEditable: false,
+      aopStatus: '',
+    },
+    {
+      displayName: 'E + P',
+      uom: 'MT/Month',
+      april: 950,
+      may: 1035,
+      june: 1090.3422343241232,
+      july: 1720,
+      aug: 1560,
+      sep: 985,
+      oct: 140,
+      nov: 575,
+      dec: 1120,
+      jan: 280,
+      feb: 850,
+      march: 1430,
+      averageTPH: '',
+      isEditable: false,
+      aopStatus: '',
+    },
+  ]
+
   const fetchData = async () => {
     try {
       setLoading(true)
-
       const response = await DataService.getAOPData(keycloak, 'Production')
-
       setCalculationObject(response?.data?.aopCalculation)
-
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
-
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Error fetching data. Please try again.',
           severity: 'error',
         })
-
         return
       }
 
-      // const rowDataForCracker = [
-      //   {
-      //     idFromApi: null,
-      //     aopCaseId: null,
-      //     aopType: null,
-      //     aopYear: null,
-      //     plantFkId: null,
-      //     normParametersFKId: 'Ethyelene',
-      //     uom: 'MT/Month',
-      //     april: 13420,
-      //     may: 12875,
-      //     june: 14210,
-      //     july: 13750,
-      //     aug: 12995,
-      //     sep: 14130,
-      //     oct: 13580,
-      //     nov: 13045,
-      //     dec: 13670,
-      //     jan: 13920,
-      //     feb: 13105,
-      //     march: 13840,
-      //     averageTPH: '',
-      //     isEditable: false,
-      //     aopStatus: '',
-      //   },
-      //   {
-      //     idFromApi: null,
-      //     aopCaseId: null,
-      //     aopType: null,
-      //     aopYear: null,
-      //     plantFkId: null,
-      //     normParametersFKId: 'Propylene',
-      //     uom: 'MT/Month',
-      //     april: 9450,
-      //     may: 10235,
-      //     june: 11090,
-      //     july: 10720,
-      //     aug: 11560,
-      //     sep: 10985,
-      //     oct: 11340,
-      //     nov: 10575,
-      //     dec: 11120,
-      //     jan: 11280,
-      //     feb: 10850,
-      //     march: 11430,
-      //     averageTPH: '',
-      //     isEditable: false,
-      //     aopStatus: '',
-      //   },
-      //   {
-      //     idFromApi: null,
-      //     aopCaseId: null,
-      //     aopType: null,
-      //     aopYear: null,
-      //     plantFkId: null,
-      //     normParametersFKId: 'E + P',
-      //     uom: 'MT/Month',
-      //     april: 950,
-      //     may: 1035,
-      //     june: 1090,
-      //     july: 1720,
-      //     aug: 1560,
-      //     sep: 985,
-      //     oct: 140,
-      //     nov: 575,
-      //     dec: 1120,
-      //     jan: 280,
-      //     feb: 850,
-      //     march: 1430,
-      //     averageTPH: '',
-      //     isEditable: false,
-      //     aopStatus: '',
-      //   },
-      // ]
-
       let dataSet = response?.data?.aopDTOList
-      // if (lowerVertName === 'cracker') {
-      //   dataSet = rowDataForCracker
-      // }
+      if (lowerVertName === 'cracker') {
+        dataSet = rowDataForCracker
+      }
 
       var data = dataSet
         ?.map((product) => ({
@@ -403,57 +380,110 @@ const ProductionNorms = ({ permissions }) => {
           originalRemark: product.aopRemarks,
           isEditable: false,
           Particulars: product.normParameterDisplayName,
-
           ...(product.materialFKId !== undefined
             ? { materialFKId: undefined }
             : {}),
         }))
         .map(({ materialFKId, ...rest }) => rest)
 
-      const formattedData = data.map((item, index) => {
-        const isKiloTon = selectedUnit == 'KT'
+      let formattedData = []
 
-        const transformedItem = {
-          ...item,
-          idFromApi: item.id,
-          normParametersFKId: item?.normParametersFKId?.toLowerCase(),
-          id: index,
-          ...(isKiloTon && {
-            jan: item.jan ? item.jan / 1000 : item.jan,
-            feb: item.feb ? item.feb / 1000 : item.feb,
-            march: item.march ? item.march / 1000 : item.march,
-            april: item.april ? item.april / 1000 : item.april,
-            may: item.may ? item.may / 1000 : item.may,
-            june: item.june ? item.june / 1000 : item.june,
-            july: item.july ? item.july / 1000 : item.july,
-            aug: item.aug ? item.aug / 1000 : item.aug,
-            sep: item.sep ? item.sep / 1000 : item.sep,
-            oct: item.oct ? item.oct / 1000 : item.oct,
-            nov: item.nov ? item.nov / 1000 : item.nov,
-            dec: item.dec ? item.dec / 1000 : item.dec,
-          }),
-        }
+      if (lowerVertName !== 'cracker') {
+        formattedData = data.map((item, index) => {
+          const isKiloTon = selectedUnit == 'KT'
+          const transformedItem = {
+            ...item,
+            idFromApi: item.id,
+            normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+            id: index,
+            ...(isKiloTon && {
+              jan: item.jan ? item.jan / 1000 : item.jan,
+              feb: item.feb ? item.feb / 1000 : item.feb,
+              march: item.march ? item.march / 1000 : item.march,
+              april: item.april ? item.april / 1000 : item.april,
+              may: item.may ? item.may / 1000 : item.may,
+              june: item.june ? item.june / 1000 : item.june,
+              july: item.july ? item.july / 1000 : item.july,
+              aug: item.aug ? item.aug / 1000 : item.aug,
+              sep: item.sep ? item.sep / 1000 : item.sep,
+              oct: item.oct ? item.oct / 1000 : item.oct,
+              nov: item.nov ? item.nov / 1000 : item.nov,
+              dec: item.dec ? item.dec / 1000 : item.dec,
+            }),
+          }
+          const total = [
+            transformedItem.april,
+            transformedItem.may,
+            transformedItem.june,
+            transformedItem.july,
+            transformedItem.aug,
+            transformedItem.sep,
+            transformedItem.oct,
+            transformedItem.nov,
+            transformedItem.dec,
+            transformedItem.jan,
+            transformedItem.feb,
+            transformedItem.march,
+          ].reduce((sum, val) => sum + (parseFloat(val) || 0), 0)
+          return {
+            ...transformedItem,
+            averageTPH: total,
+          }
+        })
+      }
 
-        const total = [
-          transformedItem.april,
-          transformedItem.may,
-          transformedItem.june,
-          transformedItem.july,
-          transformedItem.aug,
-          transformedItem.sep,
-          transformedItem.oct,
-          transformedItem.nov,
-          transformedItem.dec,
-          transformedItem.jan,
-          transformedItem.feb,
-          transformedItem.march,
-        ].reduce((sum, val) => sum + (parseFloat(val) || 0), 0)
+      const fiscalYear = localStorage.getItem('year')
+      const startYear = parseInt(fiscalYear.split('-')[0], 10)
+      const nextYear = startYear + 1
 
-        return {
-          ...transformedItem,
-          averageTPH: total,
-        }
-      })
+      const isLeap = (year) => new Date(year, 1, 29).getDate() === 29
+
+      if (lowerVertName === 'cracker') {
+        formattedData = data.map((item, index) => {
+          const TPH = selectedUnit == 'TPH'
+          const transformedItem = {
+            ...item,
+            idFromApi: item.id,
+            normParametersFKId: item?.normParametersFKId?.toLowerCase(),
+            id: index,
+            ...(TPH && {
+              jan: item.jan ? item.jan / 24 / 31 : item.jan,
+              feb: item.feb
+                ? item.feb / 24 / (isLeap(nextYear) ? 29 : 28)
+                : item.feb,
+              march: item.march ? item.march / 24 / 31 : item.march,
+              april: item.april ? item.april / 24 / 30 : item.april,
+              may: item.may ? item.may / 24 / 31 : item.may,
+              june: item.june ? item.june / 24 / 30 : item.june,
+              july: item.july ? item.july / 24 / 31 : item.july,
+              aug: item.aug ? item.aug / 24 / 31 : item.aug,
+              sep: item.sep ? item.sep / 24 / 30 : item.sep,
+              oct: item.oct ? item.oct / 24 / 31 : item.oct,
+              nov: item.nov ? item.nov / 24 / 30 : item.nov,
+              dec: item.dec ? item.dec / 24 / 31 : item.dec,
+            }),
+          }
+          const total = [
+            transformedItem.april,
+            transformedItem.may,
+            transformedItem.june,
+            transformedItem.july,
+            transformedItem.aug,
+            transformedItem.sep,
+            transformedItem.oct,
+            transformedItem.nov,
+            transformedItem.dec,
+            transformedItem.jan,
+            transformedItem.feb,
+            transformedItem.march,
+          ].reduce((sum, val) => sum + (parseFloat(val) || 0), 0)
+          return {
+            ...transformedItem,
+            averageTPH: total,
+          }
+        })
+      }
+
       const monthFields = [
         'april',
         'may',
@@ -487,7 +517,7 @@ const ProductionNorms = ({ permissions }) => {
       let finalData = []
 
       if (formattedData.length > 0) {
-        if (lowerVertName !== 'meg') {
+        if (lowerVertName !== 'meg' && lowerVertName !== 'cracker') {
           finalData = [...formattedData, totalsRow]
         } else {
           finalData = [...formattedData]
@@ -500,11 +530,12 @@ const ProductionNorms = ({ permissions }) => {
 
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching Production AOP data:', error)
+      console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
     }
   }
+
   const fetchDataByProducts = async () => {
     try {
       setLoading(true)
@@ -657,7 +688,7 @@ const ProductionNorms = ({ permissions }) => {
           ? permissions?.showCalculate ?? true
           : false,
       saveBtn: permissions?.saveBtn ?? false,
-      units: lowerVertName == 'cracker' ? ['MT/Month', 'KT'] : ['MT', 'KT'],
+      units: lowerVertName == 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
       customHeight: permissions?.customHeight,
     },
     isOldYear,
@@ -678,7 +709,7 @@ const ProductionNorms = ({ permissions }) => {
           ? permissions?.showCalculate ?? true
           : false,
       saveBtn: permissions?.saveBtn ?? false,
-      units: lowerVertName == 'cracker' ? ['MT/Month', 'KT'] : ['MT', 'KT'],
+      units: lowerVertName == 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
 
       customHeight: permissions?.customHeight,
     },

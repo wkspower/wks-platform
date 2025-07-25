@@ -28,9 +28,10 @@
     "field": "april",
     "title": "4",
     "editable": false,
-
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "may",
@@ -38,7 +39,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "june",
@@ -46,7 +49,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "july",
@@ -54,7 +59,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "aug",
@@ -62,7 +69,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "sep",
@@ -70,7 +79,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "oct",
@@ -78,7 +89,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "nov",
@@ -86,7 +99,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "dec",
@@ -94,7 +109,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "jan",
@@ -102,7 +119,9 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "feb",
@@ -110,21 +129,27 @@
     "editable": false,
 
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "march",
     "title": "3",
     "editable": false,
-
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "averageTPH",
     "title": "Total",
     "editable": false,
-    "hidden": true
+    "align": "left",
+    "headerAlign": "left",
+    "type": "number",
+    "format": "{0:#.##}"
   },
 
   {

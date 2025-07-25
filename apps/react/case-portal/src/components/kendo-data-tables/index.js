@@ -83,6 +83,7 @@ const KendoDataTables = ({
   loading = false,
   typeRank = {},
   permissions = {},
+
   setSnackbarOpen = () => {},
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
@@ -118,7 +119,7 @@ const KendoDataTables = ({
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
-  const [selectedUnit, setSelectedUnit] = useState()
+  const [selectedUnit, setSelectedUnit] = useState(permissions?.units?.[0])
   const [selectedGrade, setSelectedGrade] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
@@ -396,6 +397,24 @@ const KendoDataTables = ({
     )
   }, [])
 
+  const toolTipRendererdescLimit = (props) => {
+    const value = props.dataItem[props.field]
+    const type = props?.dataItem?.type ?? ''
+    // const isDisabled = type === 'ramp-down' || type === 'ramp-up'
+    const isDisabled = false
+
+    return (
+      <td
+        {...props.tdProps}
+        title={value}
+        style={{
+          backgroundColor: isDisabled ? '#f0f0f0' : undefined,
+        }}
+      >
+        {props.children}
+      </td>
+    )
+  }
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
     const month = props.field
@@ -425,7 +444,7 @@ const KendoDataTables = ({
   }
 
   const HeaderWithTooltip = (props) => {
-    console.log('HeaderWithTooltip', props)
+    // console.log('HeaderWithTooltip', props)
     return (
       <th {...props.thProps}>
         <a className='k-link' onClick={props.onClick}>
@@ -557,6 +576,17 @@ const KendoDataTables = ({
       handleGradeChange(firstGrade.gradeId)
     }
   }, [grades, permissions?.showG, selectedGrade])
+
+  useEffect(() => {
+    if (
+      permissions?.units?.length > 0 &&
+      (!selectedUnit || !permissions.units.includes(selectedUnit))
+    ) {
+      const defaultUnit = permissions.units[0]
+      setSelectedUnit(defaultUnit)
+      handleUnitChange(defaultUnit)
+    }
+  }, [permissions])
 
   return (
     <div style={{ position: 'relative' }}>
@@ -841,7 +871,7 @@ const KendoDataTables = ({
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
                       edit: { text: descLimit },
-                      data: toolTipRenderer,
+                      data: toolTipRendererdescLimit,
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     columnMenu={ColumnMenuCheckboxFilter}

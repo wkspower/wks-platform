@@ -1,235 +1,3 @@
-// import * as React from 'react'
-// import { Grid, GridColumn } from '@progress/kendo-react-grid'
-// import { Input } from '@progress/kendo-react-inputs'
-// import { orderBy } from '@progress/kendo-data-query'
-// import { DataService } from 'services/DataService'
-// import { useSession } from 'SessionStoreContext'
-
-// const CellWithState = (props) => {
-//   const field = props.field || ''
-//   const [inEdit, setInEdit] = React.useState(false)
-//   const [value, setValue] = React.useState(props.dataItem[field])
-
-//   const handleChange = (event) => setValue(event.value)
-//   const handleBlur = (e) => {
-//     setInEdit(false)
-//     if (props.onChange) {
-//       props.onChange({
-//         dataItem: props.dataItem,
-//         field: field,
-//         value: value,
-//         syntheticEvent: e.syntheticEvent,
-//       })
-//     }
-//   }
-
-//   if (inEdit) {
-//     return (
-//       <td {...props.tdProps}>
-//         <Input
-//           value={value}
-//           style={{ width: '100%' }}
-//           onChange={handleChange}
-//           onBlur={handleBlur}
-//           autoFocus
-//         />
-//       </td>
-//     )
-//   }
-
-//   return (
-//     <td {...props.tdProps} onClick={() => setInEdit(true)}>
-//       {props.dataItem[field]}
-//     </td>
-//   )
-// }
-
-// const columns = [
-//   {
-//     field: 'id',
-//     title: 'id',
-//     hidden: true,
-//   },
-//   {
-//     field: 'month',
-//     title: 'Month',
-//     type: 'string',
-//     width: 80,
-//     headerAlign: 'left',
-//     editable: false,
-//     isDisabled: true,
-//     filter: true,
-//   },
-//   {
-//     field: 'date',
-//     title: 'Date',
-//     type: 'date',
-//     format: '{0:dd-MMM-yy}',
-//     width: 100,
-//     headerAlign: 'left',
-//     editable: false,
-//     isDisabled: true,
-//     filter: false,
-//   },
-//   {
-//     field: 'hTenActual',
-//     title: 'H10 Actual run length',
-//     width: 120,
-//     filter: false,
-//     editable: false,
-//     isDisabled: true,
-//   },
-//   {
-//     field: 'tenProposed',
-//     title: 'H10 Proposed AOP',
-//     width: 120,
-//     editable: true,
-//     filter: false,
-//   },
-//   {
-//     field: 'hElevenActual',
-//     title: 'H11 Actual run length',
-//     width: 120,
-//     editable: false,
-//     isDisabled: true,
-//     filter: false,
-//   },
-//   {
-//     field: 'elevenProposed',
-//     title: 'H11 Proposed AOP',
-//     width: 120,
-//     editable: true,
-//     filter: false,
-//   },
-//   {
-//     field: 'hTwelveActual',
-//     title: 'H12 Actual run length',
-//     width: 120,
-//     editable: false,
-//     isDisabled: true,
-//     filter: false,
-//   },
-//   {
-//     field: 'twelveProposed',
-//     title: 'H12 Proposed AOP',
-//     filter: false,
-//     width: 120,
-//     editable: true,
-//   },
-//   {
-//     field: 'hThirteenActual',
-//     title: 'H13 Actual run length',
-//     filter: false,
-//     width: 120,
-//     editable: false,
-//     isDisabled: true,
-//   },
-//   {
-//     field: 'thirteenProposed',
-//     title: 'H13 Proposed AOP',
-//     filter: false,
-//     width: 120,
-//     editable: true,
-//   },
-//   {
-//     field: 'hFourteenActual',
-//     title: 'H14 Actual run length',
-//     filter: false,
-//     width: 120,
-//     editable: false,
-//     isDisabled: true,
-//   },
-//   {
-//     field: 'fourteenProposed',
-//     title: 'H14 Proposed AOP',
-//     filter: false,
-//     width: 120,
-//     editable: true,
-//   },
-//   {
-//     field: 'demo',
-//     title: 'DEMO',
-//     type: 'string',
-//     width: 80,
-//     headerAlign: 'center',
-//     editable: true,
-//     filter: false,
-//   },
-// ]
-
-// const KendoDataTablesCrackerRunLength = () => {
-//   const [data, setData] = React.useState([])
-//   const [sort, setSort] = React.useState([])
-//   const [page, setPage] = React.useState({ skip: 0, take: 100 })
-//   const keycloak = useSession()
-
-//   const loadItems = React.useCallback(async () => {
-//     try {
-//       const response = await DataService.getIbrScreen3(keycloak)
-//       const allData = response?.data?.decokingActivitiesList || []
-//       setData(allData)
-//     } catch (err) {
-//       console.error('Failed to load data:', err)
-//     }
-//   }, [keycloak])
-
-//   React.useEffect(() => {
-//     loadItems()
-//   }, [loadItems])
-
-//   const pageChange = (event) => {
-//     setPage(event.page)
-//   }
-
-//   const sortChange = (e) => {
-//     setSort(e.sort)
-//     const sortedData = orderBy(data, e.sort)
-//     setData(sortedData)
-//   }
-
-//   const itemChange = (event) => {
-//     const { dataItem, field, value } = event
-//     const updated = data.map((item) =>
-//       item.id === dataItem.id ? { ...item, [field]: value } : item,
-//     )
-//     setData(updated)
-//   }
-
-//   return (
-//     <div className='kendo-data-grid'>
-//       <Grid
-//         data={data.slice(page.skip, page.skip + page.take)}
-//         total={data.length}
-//         skip={page.skip}
-//         take={page.take}
-//         pageable
-//         sortable
-//         onPageChange={pageChange}
-//         onSortChange={sortChange}
-//         sort={sort}
-//         onItemChange={itemChange}
-//         dataItemKey='id'
-//         rowHeight={35}
-//         columnVirtualization
-//         scrollable='virtual'
-//       >
-//         {columns.map((col) => (
-//           <GridColumn
-//             key={col.field}
-//             field={col.field}
-//             title={col.title}
-//             hidden={col.hidden}
-//             width={120}
-//             cells={col.editable ? { data: CellWithState } : undefined}
-//           />
-//         ))}
-//       </Grid>
-//     </div>
-//   )
-// }
-
-// export default KendoDataTablesCrackerRunLength
-
 import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
@@ -295,21 +63,6 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
 export const dateFieldsRunLength = ['date']
-export const hiddenFields = []
-export const monthMap = {
-  january: 1,
-  february: 2,
-  march: 3,
-  april: 4,
-  may: 5,
-  june: 6,
-  july: 7,
-  august: 8,
-  september: 9,
-  october: 10,
-  november: 11,
-  december: 12,
-}
 
 const KendoDataTablesCrackerRunLength = ({
   rows = [],
@@ -760,7 +513,7 @@ const KendoDataTablesCrackerRunLength = ({
     )
   }
 
-  const [page, setPage] = React.useState({ skip: 0, take: 100 })
+  // const [page, setPage] = React.useState({ skip: 0, take: 100 })
 
   const LoadingCell = (props) => {
     const field = props.field || ''
@@ -782,32 +535,50 @@ const KendoDataTablesCrackerRunLength = ({
     return <td {...props.tdProps}>{props.children}</td>
   }
 
+  const SimpleHeaderWithTooltip = (props) => {
+    return (
+      <th
+        {...props.thProps}
+        title={props.title}
+        style={{
+          padding: '0px',
+        }}
+      >
+        <Tooltip
+          position={'top'}
+          anchorElement={props.thProps}
+          parentTitle={true}
+          className='test'
+        >
+          {props.children}
+        </Tooltip>
+      </th>
+    )
+  }
+
   const renderGrid = () => (
     <Grid
       style={{ height: 600 }}
       scrollable={'virtual'}
       rowHeight={35}
-      data={rows.slice(page.skip, page.skip + page.take)}
+      data={rows}
       total={rows.length}
-      skip={page.skip}
-      take={page.take}
-      pageable={
-        rows.length > 50
-          ? { buttonCount: 4, pageSizes: [10, 50, 100, 366] }
-          : false
-      }
       sortable={{
         mode: 'multiple',
       }}
       sort={sort}
-      onSortChange={(e) => setSort(e.sort)}
-      onPageChange={(e) => setPage(e.page)}
+      defaultSkip={0}
+      defaultTake={100}
       onItemChange={itemChange}
       dataItemKey='id'
       size='small'
       autoProcessData={true}
       cells={{
         data: LoadingCell,
+      }}
+      pageable={{
+        buttonCount: 4,
+        pageSizes: [10, 50, 100, 366],
       }}
     >
       {columns.map((col) => {
@@ -826,11 +597,33 @@ const KendoDataTablesCrackerRunLength = ({
               editor='date'
               hidden={col.hidden}
               sortable={false}
+              cells={{
+                headerCell: SimpleHeaderWithTooltip,
+              }}
               className={
                 dateFieldsRunLength.includes(col.field)
                   ? 'k-right-disabled'
                   : ''
               }
+            />
+          )
+        }
+
+        if (!col.editable) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              hidden={col.hidden}
+              headerClassName={isActive ? 'active-column' : ''}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
+              sortable={!!col.filter}
+              className={col.isDisabled ? 'k-right-disabled' : ''}
+              headerCell={SimpleHeaderWithTooltip}
+              cells={{
+                headerCell: SimpleHeaderWithTooltip,
+              }}
             />
           )
         }
@@ -846,7 +639,12 @@ const KendoDataTablesCrackerRunLength = ({
             columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
             sortable={!!col.filter}
             className={col.isDisabled ? 'k-right-disabled' : ''}
-            cells={col.editable ? { data: CellWithState } : undefined}
+            headerCell={SimpleHeaderWithTooltip}
+            cells={
+              col.editable
+                ? { data: CellWithState, headerCell: SimpleHeaderWithTooltip }
+                : undefined
+            }
           />
         )
       })}
