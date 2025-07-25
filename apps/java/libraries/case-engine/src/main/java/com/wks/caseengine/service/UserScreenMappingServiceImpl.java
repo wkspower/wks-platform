@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 
 	    Map<String, Object> result = new HashMap<String, Object>();
 	    List<String> userScreens = userScreenMappingRepository.findByVerticalFKIdAndPlantFKIdandUserId(verticalId, plantId, userId);
-
+	    List<String> permissions= userScreenMappingRepository.findPermissionsByVerticalFKIdAndPlantFKIdandUserId(verticalId, plantId, userId);
 	    Map<String, Object> verticalData = new HashMap<>();
 	    List<Map<String, Object>> children = new ArrayList<>();
 
@@ -260,6 +261,7 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	        result.put("status", 200);
 	        result.put("message", "Screens list by verticalId " + verticalId + ".");
 	        result.put("data", Arrays.asList(verticalData)); // Wrap the verticalData in a list to match the outer structure
+	        result.put("permission", permissions.get(0));
 	    } catch (Exception ex) {
 	        ex.printStackTrace();
 	        throw new Exception("Failed to fetch screens by vertical: " + ex.getMessage(), ex);
