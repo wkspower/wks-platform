@@ -294,8 +294,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 									: "Default Description");
 
 					if (shutDownPlanDTO.getDurationInHrs() != null) {
-						// plantMaintenanceTransaction.setDurationInMins((int)
-						// (shutDownPlanDTO.getDurationInHrs() * 60));
+						
 						plantMaintenanceTransaction
 								.setDurationInMins((int) (Math.floor(shutDownPlanDTO.getDurationInHrs()) * 60)
 										+ (int) Math.round((shutDownPlanDTO.getDurationInHrs()
@@ -305,10 +304,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						plantMaintenanceTransaction.setDurationInMins(0);
 					}
 
-					// plantMaintenanceTransaction.setDurationInMins(
-					// shutDownPlanDTO.getDurationInMins() != null ?
-					// shutDownPlanDTO.getDurationInMins().intValue() : 0
-					// );
 					plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 					plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
 					plantMaintenanceTransaction

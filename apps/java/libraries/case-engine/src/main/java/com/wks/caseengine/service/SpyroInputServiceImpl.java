@@ -1,7 +1,6 @@
 package com.wks.caseengine.service;
 
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -22,18 +21,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.security.oauth2.jwt.Jwt;
-// Optional: for using the standard claim constant
-import org.springframework.security.oauth2.core.oidc.StandardClaimNames;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wks.caseengine.dto.AOPReportDTO;
-import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.SpyroInputDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
