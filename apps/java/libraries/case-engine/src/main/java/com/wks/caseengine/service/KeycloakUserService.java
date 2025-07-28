@@ -324,7 +324,7 @@ public class KeycloakUserService {
 
 			// Prepare mapping for this user
 			List<Map<String, List<Map<String, List<String>>>>> userPlantMapping = new ArrayList<>();
-			userScreenMappingRepository.deleteAllByUserId(userId);
+			
 
 			if (attrObj instanceof Map) {
 				Map<String, Object> attrMap = (Map<String, Object>) attrObj;
@@ -344,6 +344,7 @@ public class KeycloakUserService {
 
 						for (Map<String, Object> plant : plantList) {
 							String plantId = (String) plant.get("plantId");
+							userScreenMappingRepository.deleteAllByUserId(userId,plantId);
 							List<String> screens = (List<String>) plant.get("screens");
 							List<String> permissions = (List<String>) plant.get("permission");
 
