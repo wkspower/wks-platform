@@ -489,7 +489,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
 			String procedureName = verticalName + "_GetConfiguration_Constant";
 			List<Object[]> obj = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")) {
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") || verticalName.equalsIgnoreCase("CRACKER")) {
 				obj = findConstantsByYearAndPlantFkId(year, plantFKId, procedureName);
 			}
 			for (Object[] row : obj) {
