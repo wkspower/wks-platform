@@ -16,7 +16,11 @@ const ShutDown = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { yearChanged, oldYear, plantID } = dataGridStore
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+
+  const vertName = verticalChange?.selectedVertical
+
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   useEffect(() => {
     if (plantID?.plantId) {
@@ -92,7 +96,7 @@ const ShutDown = ({ permissions }) => {
 
       const allRecords = [...rows]
 
-      for (const record of allRecords) {
+      for (const record of data) {
         if (
           record.maintStartDateTime &&
           record.maintEndDateTime &&
@@ -101,7 +105,7 @@ const ShutDown = ({ permissions }) => {
         ) {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Start time must be before end time for "${record.description || 'this record'}".`,
+            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
             severity: 'error',
           })
           return
@@ -416,6 +420,8 @@ const ShutDown = ({ permissions }) => {
 
         const maintenanceResponse =
           await DataService.getMaintenanceData(keycloak)
+      } else {
+        setLoading(false)
       }
     } catch (error) {
       console.error('Error deleting Record', error)

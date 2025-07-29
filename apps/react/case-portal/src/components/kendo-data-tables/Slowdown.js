@@ -302,7 +302,7 @@ const SlowDown = ({ permissions }) => {
 
       const allRecords = [...rows]
 
-      for (const record of allRecords) {
+      for (const record of data) {
         if (
           record.maintStartDateTime &&
           record.maintEndDateTime &&
@@ -311,7 +311,7 @@ const SlowDown = ({ permissions }) => {
         ) {
           setSnackbarOpen(true)
           setSnackbarData({
-            message: `Start time must be before end time for "${record.description || 'this record'}".`,
+            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
             severity: 'error',
           })
           return
@@ -738,6 +738,10 @@ const SlowDown = ({ permissions }) => {
           severity: 'success',
         })
         fetchData()
+        const maintenanceResponse =
+          await DataService.getMaintenanceData(keycloak)
+      } else {
+        setLoading(false)
       }
     } catch (error) {
       console.error('Error deleting Record!', error)
