@@ -2,28 +2,28 @@ import FolderOutlined from '@ant-design/icons/FolderOutlined'
 
 import {
   IconArchive,
-  IconFileCheck,
-  IconFileInvoice,
-  IconList,
-  IconSquareAsterisk,
-  IconDatabase,
-  IconChartBar, // For analytics/data trend
-  IconSettings, // For settings/reliability
-  IconPower, // For shutdown-related items
-  IconTrendingDown, // For slowdown
-  IconTools, // For maintenance (TA Plan)
-  IconShield, // For safety
-  IconFunction, // For functions module
-  IconReport, // For reports section
-  IconFile, // General file icon
-  IconFileText, // For textual reports
+  IconBarrierBlock, // For textual reports
   IconCalendarCog,
-  IconFilter,
-  IconSwitch,
-  IconBarrierBlock,
+  IconChartBar,
   IconChartHistogram,
-  IconPackages,
-  IconTrafficCone,
+  IconDatabase, // For reports section
+  IconFile,
+  IconFileCheck,
+  IconFileInvoice, // General file icon
+  IconFileText,
+  IconFilter, // For safety
+  IconFunction,
+  IconList,
+  IconPackages, // For settings/reliability
+  IconPower, // For functions module
+  IconReport, // For analytics/data trend
+  IconSettings, // For maintenance (TA Plan)
+  IconShield,
+  IconSquareAsterisk,
+  IconSwitch, // For slowdown
+  IconTools,
+  IconTrafficCone, // For shutdown-related items
+  IconTrendingDown, // For slowdown
 } from '@tabler/icons-react'
 // import { useSelector } from 'react-redux'
 import i18n from '../i18n'
@@ -75,6 +75,14 @@ const planCracker = {
         //   breadcrumbs: true,
         // },
         {
+          id: 'configuration',
+          title: i18n.t('menu.catalystSelectivity'),
+          type: 'item',
+          url: '/production-norms-plan/configuration',
+          icon: icons.IconFilter,
+          breadcrumbs: true,
+        },
+        {
           id: 'spyro-menu',
           title: i18n.t('menu.spyroMenu'),
           type: 'collapse',
@@ -121,6 +129,39 @@ const planCracker = {
           type: 'item',
           url: '/production-norms-plan/production-aop',
           icon: icons.IconDatabase,
+          breadcrumbs: true,
+        },
+        {
+          id: 'normal-op-norms',
+          title: i18n.t('menu.normalOpNorms'),
+          type: 'item',
+          url: '/production-norms-plan/normal-op-norms',
+          icon: icons.IconBarrierBlock,
+          breadcrumbs: true,
+        },
+        {
+          id: 'shutdown-norms',
+          title: i18n.t('menu.shutdownNorms'),
+          type: 'item',
+          url: '/production-norms-plan/shutdown-norms',
+          icon: icons.IconPower,
+          breadcrumbs: true,
+        },
+        {
+          id: 'slowdown-norms',
+          title: i18n.t('menu.slowdownNorms'),
+          type: 'item',
+          url: '/production-norms-plan/slowdown-norms',
+          icon: icons.IconTrafficCone,
+          breadcrumbs: true,
+        },
+
+        {
+          id: 'consumption-aop',
+          title: i18n.t('menu.consumptionNorms'),
+          type: 'item',
+          url: '/production-norms-plan/consumption-aop',
+          icon: icons.IconChartHistogram,
           breadcrumbs: true,
         },
       ],

@@ -215,7 +215,9 @@ const NormalOpNormsScreen = () => {
     setAllRedCell([])
 
     try {
-      const promises = [fetchData(gradeId), getNormTransactions()]
+      const promises = [fetchData(gradeId), 
+        // getNormTransactions()
+      ]
 
       if (lowerVertName === 'meg') {
         promises.push(fetchDataIntermediateValues())
@@ -491,7 +493,7 @@ const NormalOpNormsScreen = () => {
 
           fetchData(gradeId)
           if (lowerVertName == 'meg') fetchDataIntermediateValues()
-          getNormTransactions()
+          // getNormTransactions()
         } else {
           setSnackbarOpen(true)
           setSnackbarData({
@@ -556,7 +558,7 @@ const NormalOpNormsScreen = () => {
           fetchGradeDropdowns()
         fetchData(gradeId)
         if (lowerVertName == 'meg') fetchDataIntermediateValues()
-        getNormTransactions()
+        // getNormTransactions()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
