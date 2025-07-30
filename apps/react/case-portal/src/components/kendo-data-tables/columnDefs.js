@@ -122,6 +122,7 @@ export const ibrPlanColumns = [
     filter: false,
   },
 ]
+
 export const ibrGridThree = [
   {
     field: 'id',
@@ -234,6 +235,236 @@ export const ibrGridThree = [
     filter: false,
   },
 ]
+export const ibrGridThreePopUP = [
+  {
+    field: 'id',
+    title: 'id',
+    hidden: true,
+  },
+  {
+    field: 'month_',
+    title: 'Month',
+    type: 'string',
+    width: 80,
+    headerAlign: 'left',
+    editable: false,
+    isDisabled: true,
+    filter: true,
+  },
+  {
+    field: 'date',
+    title: 'Date',
+    type: 'date',
+    format: '{0:dd-MMM-yy}',
+    width: 100,
+    headerAlign: 'left',
+    editable: false,
+    isDisabled: true,
+    filter: false,
+  },
+
+  {
+    field: 'tenProposed',
+    title: 'H10 Proposed AOP',
+    width: 120,
+    editable: true,
+    filter: false,
+  },
+
+  {
+    field: 'elevenProposed',
+    title: 'H11 Proposed AOP',
+    width: 120,
+    editable: true,
+    filter: false,
+  },
+
+  {
+    field: 'twelveProposed',
+    title: 'H12 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'thirteenProposed',
+    title: 'H13 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'fourteenProposed',
+    title: 'H14 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+  {
+    field: 'demo',
+    title: 'DEMO',
+    type: 'string',
+    width: 80,
+    headerAlign: 'center',
+    editable: true,
+    filter: false,
+  },
+]
+
+export const singleRowColumn = [
+  {
+    field: 'month_',
+    title: 'Month',
+    type: 'string',
+    width: 80,
+    headerAlign: 'left',
+    editable: false,
+    isDisabled: true,
+    filter: true,
+  },
+  {
+    field: 'date',
+    title: 'Date',
+    type: 'date',
+    format: '{0:dd-MMM-yy}',
+    width: 100,
+    headerAlign: 'left',
+    editable: false,
+    isDisabled: true,
+    filter: false,
+  },
+
+  {
+    field: 'tenProposed',
+    title: 'H10 Proposed AOP',
+    width: 120,
+    editable: true,
+    filter: false,
+  },
+
+  {
+    field: 'elevenProposed',
+    title: 'H11 Proposed AOP',
+    width: 120,
+    editable: true,
+    filter: false,
+  },
+
+  {
+    field: 'twelveProposed',
+    title: 'H12 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'thirteenProposed',
+    title: 'H13 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'fourteenProposed',
+    title: 'H14 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+  {
+    field: 'demo',
+    title: 'DEMO',
+    type: 'string',
+    width: 80,
+    headerAlign: 'center',
+    editable: true,
+    filter: false,
+  },
+]
+
+export const calculateForNextYear = [
+  {
+    field: 'id',
+    title: 'id',
+    hidden: true,
+  },
+  {
+    field: 'month_',
+    title: 'Month',
+    type: 'string',
+    width: 80,
+    headerAlign: 'left',
+    editable: false,
+    isDisabled: true,
+    filter: true,
+  },
+  {
+    field: 'date',
+    title: 'Date',
+    type: 'date',
+    format: '{0:dd-MMM-yy}',
+    width: 100,
+    headerAlign: 'left',
+    editable: false,
+    isDisabled: true,
+    filter: false,
+  },
+
+  {
+    field: 'tenProposed',
+    title: 'H10 Proposed AOP',
+    width: 120,
+    editable: true,
+    filter: false,
+  },
+
+  {
+    field: 'elevenProposed',
+    title: 'H11 Proposed AOP',
+    width: 120,
+    editable: true,
+    filter: false,
+  },
+
+  {
+    field: 'twelveProposed',
+    title: 'H12 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'thirteenProposed',
+    title: 'H13 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'fourteenProposed',
+    title: 'H14 Proposed AOP',
+    filter: false,
+    width: 120,
+    editable: true,
+  },
+
+  {
+    field: 'demo',
+    title: 'DEMO',
+    type: 'string',
+    width: 80,
+    headerAlign: 'center',
+    editable: true,
+    filter: false,
+  },
+]
+
 export const runningDurationColumns = [
   { field: 'month', title: 'Month', editable: false },
   { field: 'ibr', title: 'IBR', editable: true, type: 'number' },

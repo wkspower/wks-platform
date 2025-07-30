@@ -1,14 +1,17 @@
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box } from '@mui/material'
 import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { styled } from '@mui/material/styles'
+import AopTabs from 'components/AopTabs'
+import Notification from 'components/Utilities/Notification'
+import { verticalEnums } from 'enums/verticalEnums'
+import { usePermissions } from 'hooks/usePermissions'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import { styled } from '@mui/material/styles'
-import Notification from 'components/Utilities/Notification'
 import {
   Backdrop,
   Button,
@@ -96,6 +99,10 @@ const ConfigurationTable = () => {
     useState([])
   const [isEdited, setIsEdited] = useState(false)
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
+
+  const { isReadOnly, isReadWrite, isFullAccess, isApproveOnly } =
+    usePermissions()
+
   const handleOpenDialog = () => {
     setOpenConfirmDialog(true)
   }
@@ -114,7 +121,7 @@ const ConfigurationTable = () => {
     try {
       setLoading(true)
       var data = await DataService.getCatalystSelectivityData(keycloak)
-      if (lowerVertName == 'meg') {
+      if (lowerVertName == 'meg' || lowerVertName == verticalEnums.CRACKER) {
         data = data?.filter((item) => item.normType !== 'Report Manual Entry')
         const formattedData = data.map((item, index) => ({
           ...item,
@@ -552,6 +559,172 @@ const ConfigurationTable = () => {
       setTabIndex(0)
     }
   }, [tabs])
+
+  const one = configurationExecutionDetails.find(
+    (item) => item.Name === 'StartDate',
+  )
+  const two = configurationExecutionDetails.find(
+    (item) => item.Name === 'EndDate',
+  )
+  const startDate1 = new Date(one?.AttributeValue)
+  const endDate1 = new Date(two?.AttributeValue)
+
+  const ConfigurationAccordian = useMemo(() => {
+    return (
+      <Box sx={{ mb: '0px' }}>
+        <CustomAccordion defaultExpanded disableGutters>
+          <CustomAccordionSummary
+            aria-controls='meg-grid-content'
+            id='meg-grid-header'
+          >
+            <Typography className='grid-title'>
+              AOP Historical Period Basis
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end',
+                mt: 0,
+              }}
+            >
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  marginTop: '10px',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    className='grid-title'
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    Start Date
+                  </Typography>
+                  <DatePicker
+                    id='start-date'
+                    format='dd-MM-yyyy'
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.value)}
+                    style={{ height: '80px' }}
+                    size={'large'}
+                  />
+                  <Typography
+                    className='grid-title'
+                    sx={{ whiteSpace: 'nowrap' }}
+                  >
+                    End Date
+                  </Typography>
+                  <DatePicker
+                    id='end-date'
+                    format='dd-MM-yyyy'
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.value)}
+                    style={{ height: '80px' }}
+                    size={'large'}
+                  />
+                </Box>
+                {/* Load Button */}
+                {!isOldYearFlag && (
+                  <Button
+                    variant='contained'
+                    // onClick={onLoad}
+                    onClick={handleOpenDialog}
+                    className='btn-load'
+                    // disabled={!isLoadEnabled}
+                    sx={{ alignSelf: 'flex-end' }}
+                  >
+                    Load
+                  </Button>
+                )}
+                {configurationExecutionDetails[0]?.ModifiedOn && (
+                  <Typography
+                    className='summary-title'
+                    sx={{ whiteSpace: 'normal' }}
+                  >
+                    {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+            <TextField
+              label='AOP Design Basis'
+              multiline
+              // minRows={isAccordionExpanded ? 4 : 20}
+              minRows={2}
+              fullWidth
+              margin='normal'
+              variant='outlined'
+              disabled={isOldYear == 1}
+              value={summary}
+              onChange={(e) => {
+                setSummary(e.target.value)
+                setSummaryEdited(true)
+              }}
+              sx={{
+                '& .MuiInputBase-root': {
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                  padding: '8px',
+                },
+                '& label': {
+                  fontSize: '1rem',
+                  color: '#666',
+                  lineHeight: '1.2',
+                  transform: 'translate(14px, 12px) scale(1)',
+                },
+                '& .MuiInputLabel-shrink': {
+                  transform: 'translate(14px, -6px) scale(0.75)',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#ccc',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#999',
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#1976d2',
+                },
+                '& .MuiInputBase-input': {
+                  resize: 'vertical',
+                },
+              }}
+            />
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      </Box>
+    )
+  }, [startDate, endDate, summary, startDate1, endDate1])
+
+  const ConfigurationDialog = useMemo(() => {
+    return (
+      <Dialog
+        open={openConfirmDialog}
+        onClose={handleCloseDialog}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleConfirmLoad} autoFocus>
+            Load
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }, [openConfirmDialog])
+
   if (lowerVertName == 'elastomer') {
     return (
       <SelectivityData
@@ -565,14 +738,7 @@ const ConfigurationTable = () => {
       />
     )
   }
-  const one = configurationExecutionDetails.find(
-    (item) => item.Name === 'StartDate',
-  )
-  const two = configurationExecutionDetails.find(
-    (item) => item.Name === 'EndDate',
-  )
-  const startDate1 = new Date(one?.AttributeValue)
-  const endDate1 = new Date(two?.AttributeValue)
+
   if (lowerVertName == 'meg' && lowerVertName !== 'cracker') {
     const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')
@@ -589,162 +755,16 @@ const ConfigurationTable = () => {
         >
           <CircularProgress color='inherit' />
         </Backdrop>
-        <Box sx={{ mb: '0px' }}>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography className='grid-title'>
-                AOP Historical Period Basis
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-end',
-                  mt: 0,
-                }}
-              >
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1,
-                    marginTop: '10px',
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                      className='grid-title'
-                      sx={{ whiteSpace: 'nowrap' }}
-                    >
-                      Start Date
-                    </Typography>
-                    <DatePicker
-                      id='start-date'
-                      format='dd-MM-yyyy'
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.value)}
-                      style={{ height: '80px' }}
-                      size={'large'}
-                    />
-                    <Typography
-                      className='grid-title'
-                      sx={{ whiteSpace: 'nowrap' }}
-                    >
-                      End Date
-                    </Typography>
-                    <DatePicker
-                      id='end-date'
-                      format='dd-MM-yyyy'
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.value)}
-                      style={{ height: '80px' }}
-                      size={'large'}
-                    />
-                  </Box>
-                  {/* Load Button */}
-                  {!isOldYearFlag && (
-                  <Button
-                    variant='contained'
-                    // onClick={onLoad}
-                    onClick={handleOpenDialog}
-                    className='btn-load'
-                    // disabled={!isLoadEnabled}
-                    sx={{ alignSelf: 'flex-end' }}
-                  >
-                    Load
-                  </Button>
-                  )}
-                  {configurationExecutionDetails[0]?.ModifiedOn && (
-                    <Typography
-                      className='summary-title'
-                      sx={{ whiteSpace: 'normal' }}
-                    >
-                      {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
-                    </Typography>
-                  )}
-                </Box>
-              </Box>
-              <TextField
-                label='AOP Design Basis'
-                multiline
-                // minRows={isAccordionExpanded ? 4 : 20}
-                minRows={2}
-                fullWidth
-                margin='normal'
-                variant='outlined'
-                disabled={isOldYear == 1}
-                value={summary}
-                onChange={(e) => {
-                  setSummary(e.target.value)
-                  setSummaryEdited(true)
-                }}
-                sx={{
-                  '& .MuiInputBase-root': {
-                    backgroundColor: '#ffffff',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                    padding: '8px',
-                  },
-                  '& label': {
-                    fontSize: '1rem',
-                    color: '#666',
-                    lineHeight: '1.2',
-                    transform: 'translate(14px, 12px) scale(1)',
-                  },
-                  '& .MuiInputLabel-shrink': {
-                    transform: 'translate(14px, -6px) scale(0.75)',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#ccc',
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#999',
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#1976d2',
-                  },
-                  '& .MuiInputBase-input': {
-                    resize: 'vertical',
-                  },
-                }}
-              />
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </Box>
+        {ConfigurationAccordian}
         <Box>
-          <Tabs
-            value={tabIndex}
-            onChange={(e, newIndex) => setTabIndex(newIndex)}
-            sx={{
-              borderBottom: '0px solid #ccc',
-              '.MuiTabs-indicator': { display: 'none' },
-              margin: '0px 0px 0px 0px',
-              minHeight: '32px', // reduce tab bar height
-            }}
-            textColor='primary'
-            indicatorColor='primary'
-          >
-            {megTabs.map((tab) => (
-              <Tab
-                key={tab}
-                label={
-                  tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab
-                }
-                sx={{
-                  border: '1px solid #ADD8E6',
-                  borderBottom: '1px solid #ADD8E6',
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={megTabs.map((tab) =>
+              tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
+            )}
+          />
 
-                  padding: '9px',
-                  minHeight: '10px',
-                }}
-              />
-            ))}
-          </Tabs>
           {(() => {
             const currentTab = megTabs[tabIndex]?.toLowerCase()
             switch (currentTab) {
@@ -804,25 +824,80 @@ const ConfigurationTable = () => {
           severity={snackbarData?.severity || 'info'}
           onClose={() => setSnackbarOpen(false)}
         />
-        <Dialog
-          open={openConfirmDialog}
-          onClose={handleCloseDialog}
-          aria-labelledby='alert-dialog-title'
-          aria-describedby='alert-dialog-description'
+        {ConfigurationDialog}
+      </div>
+    )
+  }
+  if (lowerVertName === 'cracker') {
+    const crackerTabs = ['Configuration', 'Constants']
+    const auditYear = localStorage.getItem('year')
+    let displayYear = ''
+    if (auditYear) {
+      const [start, end] = auditYear.split('-').map(Number)
+      displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
+    }
+    return (
+      <div>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={!!loading1}
         >
-          <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id='alert-dialog-description'>
-              {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog}>Cancel</Button>
-            <Button onClick={handleConfirmLoad} autoFocus>
-              Load
-            </Button>
-          </DialogActions>
-        </Dialog>
+          <CircularProgress color='inherit' />
+        </Backdrop>
+        {ConfigurationAccordian}
+        <Box>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={crackerTabs}
+          />
+          {(() => {
+            const currentTab = crackerTabs[tabIndex]?.toLowerCase()
+            console.log('?? ~ (() => { ~ currentTab:', currentTab)
+            switch (currentTab) {
+              case 'configuration':
+                return (
+                  <SelectivityData
+                    rows={productionRows}
+                    loading={loading}
+                    fetchData={fetchData}
+                    setRows={setProductionRows}
+                    configType='cracker_configuration'
+                    // groupBy='Particulars'
+                    summary={debouncedSummary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='0'
+                  />
+                )
+              case 'constants':
+                return (
+                  <SelectivityData
+                    rows={productionRowsConstants}
+                    loading={loading}
+                    fetchData={fetchDataConstants}
+                    setRows={setProductionRowsConstants}
+                    configType='cracker_constants'
+                    // groupBy='Particulars'
+                    summaryEdited={summaryEdited}
+                    summary={debouncedSummary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='1'
+                  />
+                )
+
+              default:
+                return null
+            }
+          })()}
+        </Box>
+        <Notification
+          open={snackbarOpen}
+          message={snackbarData?.message || ''}
+          severity={snackbarData?.severity || 'info'}
+          onClose={() => setSnackbarOpen(false)}
+        />
+        {ConfigurationDialog}
       </div>
     )
   }
@@ -834,167 +909,14 @@ const ConfigurationTable = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <Box sx={{ mb: '0px' }}>
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary
-            aria-controls='meg-grid-content'
-            id='meg-grid-header'
-          >
-            <Typography className='grid-title'>
-              AOP Historical Period Basis
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-                mt: 0,
-              }}
-            >
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  marginTop: '0px',
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography
-                    className='grid-title'
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    Start Date
-                  </Typography>
-                  <DatePicker
-                    id='start-date'
-                    format='dd-MM-yyyy'
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.value)}
-                    style={{ height: '80px' }}
-                    size={'large'}
-                  />
-                  <Typography
-                    className='grid-title'
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    End Date
-                  </Typography>
-                  <DatePicker
-                    id='end-date'
-                    format='dd-MM-yyyy'
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.value)}
-                    style={{ height: '80px' }}
-                    size={'large'}
-                  />
-                </Box>
-                {/* Load Button */}
-                {!isOldYearFlag && (
-                <Button
-                  variant='contained'
-                  // onClick={onLoad}
-                  onClick={handleOpenDialog}
-                  className='btn-load'
-                  // disabled={startDate > endDate}
-                  sx={{ alignSelf: 'flex-end' }}
-                >
-                  Load
-                </Button>
-                )}
-                {configurationExecutionDetails[0]?.ModifiedOn && (
-                  <Typography
-                    className='summary-title'
-                    sx={{ whiteSpace: 'normal' }}
-                  >
-                    {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDate1)} to ${formatDateForText(endDate1)})`}
-                  </Typography>
-                )}
-              </Box>
-              {/* Right Side: Save Button */}
-              {/* <Button
-                  variant='contained'
-                  onClick={saveSummary}
-                  className='btn-save'
-                  disabled={!isEdited}
-                >
-                  Save Summary
-                </Button> */}
-            </Box>
-            <TextField
-              label='AOP Design Basis'
-              multiline
-              // minRows={isAccordionExpanded ? 4 : 20}
-              minRows={2}
-              fullWidth
-              margin='normal'
-              variant='outlined'
-              disabled={isOldYear == 1}
-              value={summary}
-              onChange={(e) => {
-                setSummary(e.target.value)
-                setSummaryEdited(true)
-              }}
-              sx={{
-                '& .MuiInputBase-root': {
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  padding: '8px',
-                },
-                '& label': {
-                  fontSize: '1rem',
-                  color: '#666',
-                  lineHeight: '1.2',
-                  transform: 'translate(14px, 12px) scale(1)',
-                },
-                '& .MuiInputLabel-shrink': {
-                  transform: 'translate(14px, -6px) scale(0.75)',
-                },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#ccc',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#999',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#1976d2',
-                },
-                '& .MuiInputBase-input': {
-                  resize: 'vertical',
-                },
-              }}
-            />
-          </CustomAccordionDetails>
-        </CustomAccordion>
-      </Box>
+      {ConfigurationAccordian}
       <Notification
         open={snackbarOpen}
         message={snackbarData?.message || ''}
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
       />
-      <Dialog
-        open={openConfirmDialog}
-        onClose={handleCloseDialog}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button onClick={handleConfirmLoad} autoFocus>
-            Load
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {ConfigurationDialog}
 
       <div
         style={{
@@ -1002,35 +924,17 @@ const ConfigurationTable = () => {
           flexDirection: 'column',
         }}
       >
-        <Tabs
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-          }}
-          textColor='primary'
-          indicatorColor='primary'
-          value={tabIndex}
-          onChange={(e, newIndex) => setTabIndex(newIndex)}
-        >
-          {tabs.map((tabId) => {
+        <AopTabs
+          tabIndex={tabIndex}
+          setTabIndex={setTabIndex}
+          tabs={tabs.map((tabId) => {
             const tabInfo = availableTabs.find(
               (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
             )
-            return (
-              <Tab
-                key={tabId}
-                sx={{
-                  border: '1px solid #ADD8E6',
-                  borderBottom: '1px solid #ADD8E6',
-
-                  padding: '9px',
-                  minHeight: '10px',
-                }}
-                label={tabInfo?.displayName || 'loading..'}
-              />
-            )
+            return tabInfo?.displayName || 'loading..'
           })}
-        </Tabs>
+        />
+
         <Box>
           {(() => {
             const currentTabId = tabs[tabIndex]?.toLowerCase()

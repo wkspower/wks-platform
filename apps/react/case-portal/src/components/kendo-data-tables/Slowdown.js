@@ -275,16 +275,11 @@ const SlowDown = ({ permissions }) => {
             ? requiredFieldsForMeg
         : requiredFields
 
-    // 🔹 New addition: track missing required fields
+    // ?? New addition: track missing required fields
     const rowsWithErrors = new Set()
     for (const record of data) {
       for (const field of chosenFields) {
-        const value = record[field]
-        if (
-          value === null ||
-          value === undefined ||
-          (typeof value === 'string' && value.trim() === '')
-        ) {
+        if (!record[field] || record[field].trim?.() === '') {
           rowsWithErrors.add(record.id)
           break // exit once we know this record has missing field
         }
@@ -293,7 +288,7 @@ const SlowDown = ({ permissions }) => {
 
     const validationMessage = validateFields(data, chosenFields)
       if (validationMessage) {
-      if (rowsWithErrors.size > 0) setErrorRows(rowsWithErrors)
+      setErrorRows(rowsWithErrors) // highlight error rows
         setSnackbarOpen(true)
         setSnackbarData({
           message: validationMessage,
@@ -302,7 +297,7 @@ const SlowDown = ({ permissions }) => {
         return
       }
 
-    // 🔹 Duplicate check
+    // ?? Duplicate check
     const duplicateRows = new Set()
       const allDescriptions = rows.map((r) =>
         (r.discription || '').trim().toLowerCase(),
@@ -317,19 +312,19 @@ const SlowDown = ({ permissions }) => {
           duplicateRows.add(row.id)
         }
       })
-      if (duplicateRows.size > 0) setErrorRows(duplicateRows)
+      setErrorRows(duplicateRows)
         setSnackbarOpen(true)
         setSnackbarData({
-        message: `The description "${duplicate}" already exists. Please enter a unique description.`,
+          message: `The description "${duplicate}" already exists in the list. Please enter a unique description to avoid duplication.`,
           severity: 'error',
         })
         return
       }
 
-    // 🔹 Time validation
+    // ?? Time validation
     const timeErrorRows = new Set()
       for (const record of data) {
-        // 🔹 Required Date Validation
+        // ?? Required Date Validation
           const dateRequiredRows = new Set()
           for (const record of data) {
             if (!record.maintStartDateTime || !record.maintEndDateTime) {
@@ -346,31 +341,33 @@ const SlowDown = ({ permissions }) => {
             })
             return
           }
-      if (
-        record.maintStartDateTime &&
-        record.maintEndDateTime &&
-        record.maintStartDateTime.getTime() >= record.maintEndDateTime.getTime()
-      ) {
+
+        if (
+          record.maintStartDateTime &&
+          record.maintEndDateTime &&
+          record.maintStartDateTime.getTime() >=
+            record.maintEndDateTime.getTime()
+        ) {
         timeErrorRows.add(record.id)
         setErrorRows(timeErrorRows)
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: `Start time must be before end time for "${
-            record.discription || 'this record'
-          }".`,
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
             severity: 'error',
           })
           return
         }
       }
 
-    // ✅ MEG-specific checks
-    if (lowerVertName === 'meg') {
+    // ?? MEG specific checks
+      if (lowerVertName == 'meg') {
       const monthSpanRows = new Set()
-      for (const row of rows) {
+        for (const row of allRecords) {
           const start = new Date(row.maintStartDateTime)
           const end = new Date(row.maintEndDateTime)
-        if (isNaN(start) || isNaN(end)) continue
+
+          if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
+
           const formatDate = (date) =>
             date.toLocaleDateString('en-GB', {
               day: '2-digit',
@@ -387,7 +384,7 @@ const SlowDown = ({ permissions }) => {
           setErrorRows(monthSpanRows)
             setSnackbarOpen(true)
             setSnackbarData({
-            message: `The slowdown timeframe for '${row.discription}' spans multiple months. Please split into separate entries.`,
+              message: `The slowdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
               severity: 'error',
             })
             return
@@ -396,15 +393,15 @@ const SlowDown = ({ permissions }) => {
 
       // Overlap within Slowdown
       const overlapRows = new Set()
-      for (let i = 0; i < rows.length; i++) {
-        const a = rows[i]
+        for (let i = 0; i < allRecords.length; i++) {
+          const a = allRecords[i]
           const aStart = new Date(a.maintStartDateTime).getTime()
           const aEnd = new Date(a.maintEndDateTime).getTime()
 
           if (isNaN(aStart) || isNaN(aEnd)) continue
 
-        for (let j = i + 1; j < rows.length; j++) {
-          const b = rows[j]
+          for (let j = i + 1; j < allRecords.length; j++) {
+            const b = allRecords[j]
             const bStart = new Date(b.maintStartDateTime).getTime()
             const bEnd = new Date(b.maintEndDateTime).getTime()
 

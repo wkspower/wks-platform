@@ -218,3 +218,7 @@ main.MuiBox-root.css-vognfw {
   color: green;
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
 }
+.k-animation-container,
+.k-popup {
+  z-index: 5500 !important; /* or higher if needed */
+}

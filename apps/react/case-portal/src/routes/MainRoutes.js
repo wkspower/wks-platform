@@ -14,7 +14,6 @@ import ConsumptionNorms from 'components/kendo-data-tables/ConsumptionNorms'
 import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
 import CrackerConfig from 'components/kendo-data-tables/KendoConfigCrackerInput'
 import CrackerConfigOutput from 'components/kendo-data-tables/KendoConfigCrackerOutput'
-import ConfigurationTable from 'components/kendo-data-tables/KendoConfigurationTable'
 import MaintenanceTable from 'components/kendo-data-tables/MaintenanceTable'
 import NormalOpNormsScreen from 'components/kendo-data-tables/NormalOpNorms'
 import ProductionNorms from 'components/kendo-data-tables/ProductionNorms'
@@ -39,7 +38,9 @@ import { TaskList } from 'views/taskList/taskList'
 // import ProductionVolumeDataBasisPe from 'components/data-tables/Reports-kendo/kendo-ProductionVolumeDataBasisPe'
 import ProductionVolumeDataBasisPe from 'components/data-tables/Reports-kendo/ProductionVolumeDataBasisPe'
 import NormsHistorianBasisPe from 'components/data-tables/Reports/NormsHistorianBasisPe'
+import ConfigurationTable from 'components/kendo-data-tables/KendoConfigurationTable'
 import { Navigate } from '../../node_modules/react-router-dom/dist/index'
+import PrivateRoute from './PrivateRoutes'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -73,61 +74,57 @@ export const MainRoutes = (
 
       {
         path: 'home',
-        element: <DashboardDefault />,
+        element: (
+          <PrivateRoute routeId='home'>
+            <DashboardDefault />
+          </PrivateRoute>
+        ),
       },
-      // {
-      //   path: 'case-list',
-      //   children: [
-      //     {
-      //       path: 'cases',
-      //       element: <CaseList />,
-      //     },
-      //     {
-      //       path: 'wip-cases',
-      //       element: <CaseList status={CaseStatus.WipCaseStatus.description} />,
-      //     },
-      //     {
-      //       path: 'closed-cases',
-      //       element: (
-      //         <CaseList status={CaseStatus.ClosedCaseStatus.description} />
-      //       ),
-      //     },
-      //     {
-      //       path: 'archived-cases',
-      //       element: (
-      //         <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
-      //       ),
-      //     },
-      //   ],
-      // },
+
       {
         path: 'case-list',
         children: [
           {
             path: 'cases',
-            element: <CaseList />,
+            element: (
+              <PrivateRoute routeId='case-list'>
+                <CaseList />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'wip-cases',
-            element: <CaseList status={CaseStatus.WipCaseStatus.description} />,
+            element: (
+              <PrivateRoute routeId='case-list'>
+                <CaseList status={CaseStatus.WipCaseStatus.description} />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'closed-cases',
             element: (
-              <CaseList status={CaseStatus.ClosedCaseStatus.description} />
+              <PrivateRoute routeId='case-list'>
+                <CaseList status={CaseStatus.ClosedCaseStatus.description} />
+              </PrivateRoute>
             ),
           },
           {
             path: 'archived-cases',
             element: (
-              <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
+              <PrivateRoute routeId='case-list'>
+                <CaseList status={CaseStatus.ArchivedCaseStatus.description} />
+              </PrivateRoute>
             ),
           },
         ],
       },
       {
         path: 'task-list',
-        element: <TaskList />,
+        element: (
+          <PrivateRoute routeId='task-list'>
+            <TaskList />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'system',
@@ -144,23 +141,43 @@ export const MainRoutes = (
         children: [
           {
             path: 'process-definition',
-            element: <ProcessDefList />,
+            element: (
+              <PrivateRoute routeId='process-definition'>
+                <ProcessDefList />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'case-definition',
-            element: <CaseDefList />,
+            element: (
+              <PrivateRoute routeId='case-definition'>
+                <CaseDefList />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'record-type',
-            element: <RecordTypeList />,
+            element: (
+              <PrivateRoute routeId='record-type'>
+                <RecordTypeList />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'form',
-            element: <FormList />,
+            element: (
+              <PrivateRoute routeId='form'>
+                <FormList />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'queue',
-            element: <QueueList />,
+            element: (
+              <PrivateRoute routeId='queue'>
+                <QueueList />
+              </PrivateRoute>
+            ),
           },
         ],
       },
@@ -170,11 +187,20 @@ export const MainRoutes = (
         children: [
           {
             path: 'business-demand',
-            element: <BusinessDemand />,
+            element: (
+              <PrivateRoute routeId='business-demand'>
+                <BusinessDemand />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'configuration',
-            element: <ConfigurationTable />,
+            element: (
+              <PrivateRoute routeId='configuration'>
+                <ConfigurationTable />
+                {/* <Configuration /> */}
+              </PrivateRoute>
+            ),
             // element: <SelectivityData />,
           },
           {
@@ -182,45 +208,85 @@ export const MainRoutes = (
             children: [
               {
                 path: 'spyro-input',
-                element: <CrackerConfig keycloak={keycloak} />,
+                element: (
+                  <PrivateRoute routeId='spyro-input'>
+                    <CrackerConfig keycloak={keycloak} />
+                  </PrivateRoute>
+                ),
               },
               {
                 path: 'spyro-output',
-                element: <CrackerConfigOutput />,
+                element: (
+                  <PrivateRoute routeId='spyro-output'>
+                    <CrackerConfigOutput />
+                  </PrivateRoute>
+                ),
               },
               {
                 path: 'decoking-activities',
-                element: <DecokingConfig />,
+                element: (
+                  <PrivateRoute routeId='decoking-activities'>
+                    <DecokingConfig />
+                  </PrivateRoute>
+                ),
               },
             ],
           },
           {
             path: 'production-volume-data',
-            element: <ProductionvolumeData />,
+            element: (
+              <PrivateRoute routeId='production-volume-data'>
+                <ProductionvolumeData />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'maintenance-details',
-            element: <MaintenanceTable />,
+            element: (
+              <PrivateRoute routeId='maintenance-details'>
+                <MaintenanceTable />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'consumption-aop',
-            element: <ConsumptionNorms />,
+            element: (
+              <PrivateRoute routeId='consumption-aop'>
+                <ConsumptionNorms />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'production-aop',
-            element: <ProductionNorms />,
+            element: (
+              <PrivateRoute routeId='production-aop'>
+                <ProductionNorms />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'normal-op-norms',
-            element: <NormalOpNormsScreen />,
+            element: (
+              <PrivateRoute routeId='normal-op-norms'>
+                <NormalOpNormsScreen />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'shutdown-norms',
-            element: <ShutdownNorms />,
+            element: (
+              <PrivateRoute routeId='shutdown-norms'>
+                <ShutdownNorms />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'slowdown-norms',
-            element: <SlowdownNorms />,
+            element: (
+              <PrivateRoute routeId='slowdown-norms'>
+                <SlowdownNorms />
+              </PrivateRoute>
+            ),
           },
           // {
           //   path: 'slowdown-norms',
@@ -229,19 +295,35 @@ export const MainRoutes = (
 
           {
             path: 'shutdown-plan',
-            element: <ShutDown />,
+            element: (
+              <PrivateRoute routeId='shutdown-plan'>
+                <ShutDown />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'slowdown-plan',
-            element: <SlowDown />,
+            element: (
+              <PrivateRoute routeId='slowdown-plan'>
+                <SlowDown />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'turnaround-plan',
-            element: <TurnaroundPlanTable />,
+            element: (
+              <PrivateRoute routeId='turnaround-plan'>
+                <TurnaroundPlanTable />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'feed-stock-availability',
-            element: <FeedStockAvailability />,
+            element: (
+              <PrivateRoute routeId='feed-stock-availability'>
+                <FeedStockAvailability />
+              </PrivateRoute>
+            ),
           },
         ],
       },
@@ -256,40 +338,77 @@ export const MainRoutes = (
       {
         path: 'reports',
         children: [
-          { path: 'aop-annual-cost-report', element: <AnnualAopCost /> },
+          {
+            path: 'aop-annual-cost-report',
+            element: (
+              <PrivateRoute routeId='aop-annual-cost-report'>
+                <AnnualAopCost />
+              </PrivateRoute>
+            ),
+          },
           {
             path: 'production-volume-basis',
-            element: ProductionVolumeDataBasisElement,
+            element: (
+              <PrivateRoute routeId='production-volume-basis'>
+                {ProductionVolumeDataBasisElement}
+              </PrivateRoute>
+            ),
           },
           {
             path: 'norms-historian-basis',
-            element: NormsHistorianBasisElement,
+            element: (
+              <PrivateRoute routeId='norms-historian-basis'>
+                {NormsHistorianBasisElement}
+              </PrivateRoute>
+            ),
           },
           {
             path: 'plants-production',
-            element: <PlantsProductionSummary />,
+            element: (
+              <PrivateRoute routeId='plants-production'>
+                <PlantsProductionSummary />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'monthwise-production',
-            element: <MonthwiseProduction />,
+            element: (
+              <PrivateRoute routeId='monthwise-production'>
+                <MonthwiseProduction />
+              </PrivateRoute>
+            ),
           },
           {
             path: 'monthwise-raw-material',
             element: <MonthwiseRawMaterial />,
           },
           { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
-          { path: 'previous-fy-aop-result', element: <DashboardDefault /> },
-          { path: 'mat-bal-sheet', element: <DashboardDefault /> },
+          {
+            path: 'mat-bal-sheet',
+            element: (
+              <PrivateRoute routeId='mat-bal-sheet'>
+                <DashboardDefault />
+              </PrivateRoute>
+            ),
+          },
         ],
       },
       {
         path: 'workflow',
-        element: <WorkFlowMerge />,
+        element: (
+          <PrivateRoute routeId='workflow'>
+            <WorkFlowMerge />
+          </PrivateRoute>
+        ),
         // element: <FiveTables />,
       },
       {
         path: 'user-management',
-        element: <UserManagementTable keycloak={keycloak} />,
+        element: (
+          <PrivateRoute routeId='user-management'>
+            <UserManagementTable keycloak={keycloak} />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'user-form',
@@ -297,7 +416,11 @@ export const MainRoutes = (
       },
       {
         path: 'assessment-form',
-        element: <AssessmentForm />,
+        element: (
+          <PrivateRoute routeId='assessment-form'>
+            <AssessmentForm />
+          </PrivateRoute>
+        ),
       },
     ],
   }

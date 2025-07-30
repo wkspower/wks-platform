@@ -14,9 +14,13 @@ import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { Typography } from '../../../node_modules/@mui/material/index'
 // import TextField from '@mui/material/TextField'
+import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
 
 const ProductionvolumeData = ({ permissions }) => {
+  const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
+    usePermissions()
+
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 

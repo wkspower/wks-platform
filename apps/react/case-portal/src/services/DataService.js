@@ -923,8 +923,11 @@ async function getUserScreen(keycloak, verticalId) {
     return await Promise.reject(e)
   }
 }
-async function getScreenbyPlant(keycloak, verticalId, plantId) {
-  const url = `${Config.CaseEngineUrl}/task/user/screen?verticalId=${verticalId}&plantId=${plantId}`
+async function getScreenbyPlant(keycloak, verticalId, plantId, userId) {
+  let url = `${Config.CaseEngineUrl}/task/user/screen?verticalId=${verticalId}&plantId=${plantId}`
+  if (userId) {
+    url += `&userId=${userId}`
+  }
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2108,13 +2111,6 @@ async function saveSpyroOutput(payload, keycloak, plantId) {
   }
 }
 async function getSpyroOutputData(keycloak, mode, type) {
-  const needsOperationSuffix = ['5F', '4F', '4F+D']
-  const modeForApi =
-    needsOperationSuffix.includes(mode) &&
-    !mode.toLowerCase().includes('operation')
-      ? `${mode} Operation`
-      : mode
-
   const year = localStorage.getItem('year')
   let plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -2127,7 +2123,7 @@ async function getSpyroOutputData(keycloak, mode, type) {
     `${Config.CaseEngineUrl}/task/spyro-output` +
     `?year=${encodeURIComponent(year)}` +
     `&plantId=${encodeURIComponent(plantId)}` +
-    `&Mode=${encodeURIComponent(modeForApi)}` +
+    `&Mode=${encodeURIComponent(mode)}` +
     `&type=${encodeURIComponent(type)}`
 
   const headers = {
@@ -2924,7 +2920,7 @@ async function importSpyroOutputExcel(file, keycloak, mode) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-output-import-excel?plantId=${plantId}&year=${year}&mode=${encodeURIComponent(mode)}`
+  const url = `${Config.CaseEngineUrl}/task/spyro-output-import-excel?plantId=${plantId}&year=${year}&Mode=${encodeURIComponent(mode)}`
   const formData = new FormData()
   formData.append('file', file)
 
@@ -2953,7 +2949,7 @@ async function exportSpyroOutputExcel(keycloak, mode) {
     plantId = parsedPlant.id
   }
 
-const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&mode=${encodeURIComponent(mode)}`;
+  const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
 
   const headers = {
     'Content-Type': 'application/json',
