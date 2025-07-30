@@ -111,8 +111,8 @@ const CrackerConfig = () => {
       saveBtn: true,
       allAction: lowerVertName === 'cracker',
       modes: allModes,
-      uploadExcelBtn: false,
-      downloadExcelBtn: false,
+      uploadExcelBtn: true,
+      downloadExcelBtn: true,
     },
     isOldYear,
   )
@@ -512,7 +512,11 @@ const CrackerConfig = () => {
           severity: 'success',
         })
         setModifiedCells({})
-        fetchAllData?.()
+        if (currentTabDisplay === 'Yield') {
+        fetchCrackerRowsYield(currentTabDisplay, selectMode)
+      } else {
+        fetchCrackerRows(currentTabDisplay, selectMode)
+      }
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = Array.from(byteCharacters, (char) =>
@@ -538,6 +542,11 @@ const CrackerConfig = () => {
           message: 'Partial data saved. Error file downloaded.',
           severity: 'warning',
         })
+        if (currentTabDisplay === 'Yield') {
+        fetchCrackerRowsYield(currentTabDisplay, selectMode)
+      } else {
+        fetchCrackerRows(currentTabDisplay, selectMode)
+      }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({

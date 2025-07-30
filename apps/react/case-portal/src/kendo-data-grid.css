@@ -238,3 +238,58 @@ a.k-grid-header-menu.k-grid-column-menu {
   margin-left: -8px;
   margin-right: 4px;
 }
+/* Add these styles to your ../../kendo-data-grid.css file */
+
+/* Error row highlighting */
+.error-row {
+  background-color: #ffebee !important;
+  border-left: 4px solid #f44336 !important;
+  position: relative;
+}
+
+.error-row:hover {
+  background-color: #ffcdd2 !important;
+}
+
+/* Make sure error highlighting works with existing disabled rows */
+.error-row.custom-disabled-row {
+  background-color: #ffebee !important;
+  opacity: 0.8;
+}
+
+/* Optional: Add animation for better user attention */
+.error-row-animated {
+  background-color: #ffebee !important;
+  border-left: 4px solid #f44336 !important;
+  animation: highlight-error 0.8s ease-in-out;
+}
+
+@keyframes highlight-error {
+  0% { 
+    background-color: #ffffff; 
+    transform: scale(1);
+  }
+  50% { 
+    background-color: #ffcdd2; 
+    transform: scale(1.01);
+  }
+  100% { 
+    background-color: #ffebee;
+    transform: scale(1);
+  }
+}
+
+/* Ensure error styling takes precedence over Kendo default styles */
+.k-grid tbody .error-row td {
+  background-color: inherit !important;
+  border-color: inherit !important;
+}
+
+/* Style for error row cells to maintain consistency */
+.error-row td {
+  background-color: #ffebee !important;
+}
+
+.error-row:hover td {
+  background-color: #ffcdd2 !important;
+}

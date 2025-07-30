@@ -2924,7 +2924,7 @@ async function importSpyroOutputExcel(file, keycloak, mode) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-output-import-excel?plantId=${plantId}&year=${year}&Mode=${encodeURIComponent(mode)}`
+  const url = `${Config.CaseEngineUrl}/task/spyro-output-import-excel?plantId=${plantId}&year=${year}&mode=${encodeURIComponent(mode)}`
   const formData = new FormData()
   formData.append('file', file)
 
@@ -2953,7 +2953,7 @@ async function exportSpyroOutputExcel(keycloak, mode) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&Mode=${encodeURIComponent(mode)}`
+const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&mode=${encodeURIComponent(mode)}`;
 
   const headers = {
     'Content-Type': 'application/json',

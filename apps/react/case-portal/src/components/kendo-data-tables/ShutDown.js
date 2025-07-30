@@ -12,7 +12,7 @@ import KendoDataTables from './index'
 
 const ShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
-
+  const [errorRows, setErrorRows] = useState(new Set())
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -57,6 +57,7 @@ const ShutDown = ({ permissions }) => {
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
+    setErrorRows(new Set()) // Add this line - clear previous errors
 
       if (data.length == 0) {
         setSnackbarOpen(true)
@@ -67,9 +68,23 @@ const ShutDown = ({ permissions }) => {
         return
       }
 
+    // Add error tracking for required fields
       const requiredFields = ['discription', 'remark']
+    const rowsWithErrors = new Set()
+    
+    // Check each record for missing required fields
+    for (const record of data) {
+      for (const field of requiredFields) {
+        if (!record[field] || record[field].trim() === '') {
+          rowsWithErrors.add(record.id)
+          break // Exit inner loop once we find one missing field
+        }
+      }
+    }
+
       const validationMessage = validateFields(data, requiredFields)
       if (validationMessage) {
+      setErrorRows(rowsWithErrors) // Add this line - highlight error rows
         setSnackbarOpen(true)
         setSnackbarData({
           message: validationMessage,
@@ -78,6 +93,8 @@ const ShutDown = ({ permissions }) => {
         return
       }
 
+    // Track duplicate descriptions
+    const duplicateRows = new Set()
       const allDescriptions = rows.map((r) =>
         (r.discription || '').trim().toLowerCase(),
       )
@@ -86,6 +103,14 @@ const ShutDown = ({ permissions }) => {
       )
 
       if (duplicate) {
+      // Find all rows with duplicate descriptions
+      rows.forEach((row, index) => {
+        if ((row.discription || '').trim().toLowerCase() === duplicate) {
+          duplicateRows.add(row.id)
+        }
+      })
+      
+      setErrorRows(duplicateRows) // Add this line - highlight duplicate rows
         setSnackbarOpen(true)
         setSnackbarData({
           message: `The description "${duplicate}" already exists in the list. Please enter a unique description to avoid duplication.`,
@@ -95,14 +120,38 @@ const ShutDown = ({ permissions }) => {
       }
 
       const allRecords = [...rows]
+    const timeErrorRows = new Set() // Add this line
 
       for (const record of data) {
+        // Date required validation (before checking time order)
+const dateRequiredRows = new Set()
+for (const record of data) {
+  const startMissing = !record.maintStartDateTime
+  const endMissing = !record.maintEndDateTime
+
+  if (startMissing || endMissing) {
+    dateRequiredRows.add(record.id)
+  }
+}
+
+if (dateRequiredRows.size > 0) {
+  setErrorRows(dateRequiredRows)
+  setSnackbarOpen(true)
+  setSnackbarData({
+    message: 'Start Date and End Date are required for all records.',
+    severity: 'error',
+  })
+  return
+}
+
         if (
           record.maintStartDateTime &&
           record.maintEndDateTime &&
           record.maintStartDateTime.getTime() >=
             record.maintEndDateTime.getTime()
         ) {
+        timeErrorRows.add(record.id) // Add this line
+        setErrorRows(timeErrorRows) // Add this line - highlight time error rows
           setSnackbarOpen(true)
           setSnackbarData({
             message: `Start time must be before end time for "${record.discription || 'this record'}".`,
@@ -113,6 +162,7 @@ const ShutDown = ({ permissions }) => {
       }
 
       if (lowerVertName == 'meg') {
+      const monthSpanRows = new Set() // Add this line
         for (const row of allRecords) {
           const start = new Date(row.maintStartDateTime)
           const end = new Date(row.maintEndDateTime)
@@ -131,6 +181,8 @@ const ShutDown = ({ permissions }) => {
             start.getFullYear() === end.getFullYear()
 
           if (!isSameMonth) {
+          monthSpanRows.add(row.id) // Add this line
+          setErrorRows(monthSpanRows) // Add this line
             setSnackbarOpen(true)
             setSnackbarData({
               message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
@@ -140,6 +192,7 @@ const ShutDown = ({ permissions }) => {
           }
         }
 
+      const overlappingRows = new Set() // Add this line
         for (let i = 0; i < allRecords.length; i++) {
           const a = allRecords[i]
           const aStart = new Date(a.maintStartDateTime).getTime()
@@ -156,6 +209,9 @@ const ShutDown = ({ permissions }) => {
             if (isNaN(bStart) || isNaN(bEnd)) continue
 
             if (aStart < bEnd && bStart < aEnd) {
+            overlappingRows.add(a.id) // Add this line
+            overlappingRows.add(b.id) // Add this line
+            setErrorRows(overlappingRows) // Add this line
               setSnackbarOpen(true)
               setSnackbarData({
                 message: `The shutdown timeframe for "${a.discription}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
@@ -166,6 +222,7 @@ const ShutDown = ({ permissions }) => {
           }
         }
 
+      const crossOverlapRows = new Set() // Add this line
         //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
         for (let i = 0; i < rows.length; i++) {
           const a = rows[i]
@@ -182,6 +239,8 @@ const ShutDown = ({ permissions }) => {
             if (isNaN(bStart) || isNaN(bEnd)) continue
 
             if (aStart < bEnd && bStart < aEnd) {
+            crossOverlapRows.add(a.id) // Add this line
+            setErrorRows(crossOverlapRows) // Add this line
               setSnackbarOpen(true)
               setSnackbarData({
                 message: `The timeframe for "${a.discription} (Shutdown)" overlaps with "${b.discription} (Slowdown)". Please ensure no overlapping timeframes.`,
@@ -193,11 +252,13 @@ const ShutDown = ({ permissions }) => {
         }
       }
 
+    // If we reach here, all validations passed - clear any error highlighting
+    setErrorRows(new Set())
       saveShutdownData(data)
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [modifiedCells])
+}, [modifiedCells, setErrorRows, rows, rowsSlowdown, lowerVertName]) // Add setErrorRows to dependencies
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -479,6 +540,7 @@ const ShutDown = ({ permissions }) => {
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
+        errorRows={errorRows}
         apiRef={apiRef}
         deleteId={deleteId}
         open1={open1}

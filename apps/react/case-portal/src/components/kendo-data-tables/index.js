@@ -83,7 +83,7 @@ const KendoDataTables = ({
   loading = false,
   typeRank = {},
   permissions = {},
-
+  errorRows = new Set(),
   setSnackbarOpen = () => {},
   snackbarData = { message: '', severity: 'info' },
   snackbarOpen = false,
@@ -388,14 +388,23 @@ const KendoDataTables = ({
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = isDisabled ? `custom-disabled-row` : className
+  // Check if this row has validation errors
+  const hasError = errorRows.has(dataItem.id)
+  // Build the className combining all conditions
+  let rowClassName = className || ''
+  if (isDisabled) {
+    rowClassName += ' custom-disabled-row'
+  }
+  if (hasError) {
+    rowClassName += ' error-row'
+  }
 
     return (
-      <tr {...rest?.trProps} className={rowClassName}>
+    <tr {...rest?.trProps} className={rowClassName.trim()}>
         {rest.children}
       </tr>
     )
-  }, [])
+}, [errorRows])
 
   const toolTipRendererdescLimit = (props) => {
     const value = props.dataItem[props.field]
@@ -828,6 +837,7 @@ const KendoDataTables = ({
             defaultGroup={initialGroup}
             data={rows}
             rows={{ data: CustomRow }}
+            rowRender={CustomRow}
             dataItemKey='id'
             editField='inEdit'
             editable={{ mode: 'incell' }}
