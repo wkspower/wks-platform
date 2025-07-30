@@ -324,6 +324,24 @@ const SlowDown = ({ permissions }) => {
     // 🔹 Time validation
     const timeErrorRows = new Set()
       for (const record of data) {
+        // 🔹 Required Date Validation
+          const dateRequiredRows = new Set()
+          for (const record of data) {
+            if (!record.maintStartDateTime || !record.maintEndDateTime) {
+              dateRequiredRows.add(record.id)
+            }
+          }
+
+          if (dateRequiredRows.size > 0) {
+            setErrorRows(dateRequiredRows)
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'Start Date and End Date are required for all records.',
+              severity: 'error',
+            })
+            return
+          }
+
         if (
           record.maintStartDateTime &&
           record.maintEndDateTime &&
