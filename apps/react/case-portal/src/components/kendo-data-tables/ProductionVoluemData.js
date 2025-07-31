@@ -817,16 +817,8 @@ const ProductionvolumeData = ({ permissions }) => {
         Object.keys(calculationObject || {}).length > 0
           ? true
           : false,
-      downloadExcelBtn: permissions?.hideDownloadExcel
-        ? false
-        : lowerVertName == 'meg'
-          ? true
-          : false,
-      uploadExcelBtn: permissions?.hideUploadExcel
-        ? false
-        : lowerVertName == 'meg'
-          ? true
-          : false,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true
     },
     isOldYear,
   )
