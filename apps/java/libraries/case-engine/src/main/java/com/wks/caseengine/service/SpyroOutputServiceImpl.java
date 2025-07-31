@@ -1,16 +1,30 @@
 package com.wks.caseengine.service;
 
+import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
+import com.wks.caseengine.dto.SpyroInputDTO;
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
@@ -28,6 +42,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.ExcelConstants;
 import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
@@ -60,6 +75,9 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private ExcelUtilityService excelUtilityService;
 
 
 	@Override
@@ -344,8 +362,429 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 			throw new RuntimeException("Failed to update data", ex);
 		}
 	}
+	
+	public byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
+			Map<String, List<SpyroOutputDTO>> mapForExcel) {
+		try {
+			String structureJson = getJson();
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, List<List<Object>>> data = new HashMap<>();
+			Map<String, Object> structure = mapper.readValue(structureJson, Map.class);
+			Map<String, List<Map<String, Object>>> spyroOutputDataListMap = new HashMap<>();
+			if (!isAfterSave) {
+				AOPMessageVM vm = getSpyroOutputData(year, plantId, mode, "Composition");
+				List<Map<String, Object>> spyroOutputDataList = (List<Map<String, Object>>) vm.getData();
+				spyroOutputDataListMap = Utility.groupByNormParameterTypeName(spyroOutputDataList);
+			}
+
+			for (String sheetName : structure.keySet()) {
+				Map<String, Object> sheetData = (Map<String, Object>) structure.get(sheetName);
+				List<Map<String, Object>> tables = (List<Map<String, Object>>) sheetData.get(ExcelConstants.TABLES);
+
+				for (Map<String, Object> table : tables) {
+					String title = (String) table.get(ExcelConstants.TITLE);
+					String tableId = (String) table.get(ExcelConstants.TABLEID);
+					String dataInput = (String) table.get(ExcelConstants.DATA_INPUT);
+					List<String> headers = (List<String>) table.get(ExcelConstants.HEADERS);
+					boolean hideTable = (boolean) table.get(ExcelConstants.HIDE_TABLE);
+					Integer startingIndexofMonths = (Integer) table.get(ExcelConstants.STARTING_INDEX_OF_MONTHS);
+					List<List<String>> headersOuterTitles = (List<List<String>>) table
+							.get(ExcelConstants.HEADERSTITLES);
+					headersOuterTitles.get(0).addAll(startingIndexofMonths,
+							excelUtilityService.getAcademicYearMonths(year));
+					List<List<Object>> dataList = new ArrayList<>();
+					if (isAfterSave) {
+						if(!mapForExcel.containsKey(tableId)){
+							hideTable = true;
+							continue;
+						}
+						headers.add("saveStatus");
+						headers.add("errDescription");
+						headersOuterTitles.get(0).add("SaveStatus");
+						headersOuterTitles.get(0).add("ErrDescription");
 
 
+						for (SpyroOutputDTO dto : mapForExcel.get(tableId)) {
+
+							List<Object> list = new ArrayList<>();
+							for (String fieldName : headers) {
+								String methodName = "get" + capitalize(fieldName);
+								Method method = dto.getClass().getMethod(methodName);
+								Object value = method.invoke(dto);
+								list.add(value);
+							}
+							list.add(tableId);
+							dataList.add(list);
+						}
+
+					} else {
+
+						List<Map<String, Object>> spyroOutputDataList = new ArrayList<>();
+						if (dataInput.equalsIgnoreCase("Composition")) {
+							if(spyroOutputDataListMap.containsKey(title)){
+								spyroOutputDataList = spyroOutputDataListMap.get(title);
+							}else{
+								hideTable = true;
+								continue;
+							}
+						} else {
+							AOPMessageVM vm = getSpyroOutputData(year, plantId, mode, dataInput);
+							spyroOutputDataList = (List<Map<String, Object>>) vm.getData();
+							System.out.println("sheetName " + sheetName + " " + spyroOutputDataList);
+						}
+
+						if(spyroOutputDataList==null ||spyroOutputDataList.isEmpty()){
+							hideTable = true;
+							continue;
+						}
+						// Data rows
+						for (Map<String, Object> map : spyroOutputDataList) {
+							List<Object> list = new ArrayList<>();
+							for (String header : headers) {
+								System.out.println("header " + header);
+								list.add(map.get(header));
+							}
+							list.add(tableId);
+							dataList.add(list);
+						}
+
+					}
+
+					System.out.println("datalist " + dataList);
+					data.put(tableId, dataList);
+				}
+			}
+			System.out.println("data in calling method " + data);
+			return excelUtilityService.generateFlexibleExcel(structure, data);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return null;
+	}
+	
+	@Override
+	public AOPMessageVM importExcel(String year, String plantFKId, String mode, MultipartFile file) {
+		// TODO Auto-generated method stub
+		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
+			throw new IllegalArgumentException("Invalid or empty Excel file.");
+		}
+
+		try {
+
+			System.out.println("started Read spyroOutput in importExcel");
+			Map<String, List<SpyroOutputDTO>> map = readSpyroOutputExcel(file.getInputStream(), year);
+			System.out.println("Ended Read spyroOutput in importExcel");
+			System.out.println("Started Save spyroOutput in importExcel");
+			Map<String, List<SpyroOutputDTO>> mapForExcel = new HashMap<>();
+			List<SpyroOutputDTO> failedRecords = new ArrayList<>();
+			for (String key : map.keySet()) {
+				AOPMessageVM vm = updateSpyroOutputData(year,plantFKId,map.get(key));
+				List<SpyroOutputDTO> failedList = (List<SpyroOutputDTO>) vm.getData();
+				failedRecords.addAll(failedList);
+				mapForExcel.put(key, failedList);
+			}
+
+			System.out.println("Ended Save spyroOutput in importExcel");
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (failedRecords != null && failedRecords.size() > 0) {
+				byte[] fileByteArray = createExcel(year, plantFKId, mode, true, map);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public Map<String, List<SpyroOutputDTO>> readSpyroOutputExcel(InputStream inputStream, String year) {
+
+		Map<String, List<SpyroOutputDTO>> map = new HashMap<>();
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+			
+				Sheet sheet = workbook.getSheetAt(0);
+				Iterator<Row> rowIterator = sheet.iterator();
+				List<SpyroOutputDTO> spyroOutputDTOs = new ArrayList<>();
+				if (rowIterator.hasNext())
+					rowIterator.next(); // Skip header
+
+				while (rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Cell tableIdCell = row.getCell(16, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                	if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
+                    	continue;
+                	}
+
+					SpyroOutputDTO dto = new SpyroOutputDTO();
+
+					try {
+						
+						dto.setParticulars(getStringCellValue(row.getCell(0), dto));
+						dto.setUom(getStringCellValue(row.getCell(1), dto));
+						dto.setAuditYear(year);
+						dto.setApr(getNumericCellValue(row.getCell(2), dto));
+						dto.setMay(getNumericCellValue(row.getCell(3), dto));
+						dto.setJun(getNumericCellValue(row.getCell(4), dto));
+						dto.setJul(getNumericCellValue(row.getCell(5), dto));
+						dto.setAug(getNumericCellValue(row.getCell(6), dto));
+						dto.setSep(getNumericCellValue(row.getCell(7), dto));
+						dto.setOct(getNumericCellValue(row.getCell(8), dto));
+						dto.setNov(getNumericCellValue(row.getCell(9), dto));
+						dto.setDec(getNumericCellValue(row.getCell(10), dto));
+						dto.setJan(getNumericCellValue(row.getCell(11), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(12), dto));
+						dto.setMar(getNumericCellValue(row.getCell(13), dto));
+						dto.setRemarks(getStringCellValue(row.getCell(14), dto));
+						dto.setNormParameterFKID(getStringCellValue(row.getCell(15), dto));
+						dto.setTableId(getStringCellValue(row.getCell(16), dto));
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						dto.setErrDescription(e.getMessage());
+						dto.setSaveStatus("Failed");
+					}
+					map.putIfAbsent(dto.getTableId(), new ArrayList<>());
+
+					map.get(dto.getTableId()).add(dto);
+				}
+
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to read Data", e);
+		}
+
+		return map;
+	}
+	
+	private static String getStringCellValue(Cell cell, SpyroOutputDTO dto) {
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	private static Double getNumericCellValue(Cell cell, SpyroOutputDTO dto) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				dto.setSaveStatus("Failed");
+				dto.setErrDescription("Please enter numeric values");
+			}
+		}
+		return null;
+	}
+
+	public static Boolean getBooleanCellValue(Cell cell) {
+		if (cell == null)
+			return null;
+
+		CellType type = cell.getCellType();
+		if (type == CellType.FORMULA) {
+			type = cell.getCachedFormulaResultType();
+		}
+
+		switch (type) {
+			case BOOLEAN:
+				return cell.getBooleanCellValue();
+			case STRING:
+				String text = cell.getStringCellValue().trim().toLowerCase();
+				if ("true".equals(text))
+					return true;
+				if ("false".equals(text))
+					return false;
+				return null;
+			case NUMERIC:
+				double num = cell.getNumericCellValue();
+				if (num == 1.0)
+					return true;
+				if (num == 0.0)
+					return false;
+				return null;
+			case BLANK:
+			case _NONE:
+			default:
+				return null;
+		}
+	}
+
+	
+	String getJson() {
+		return "{\r\n" + //
+						"    \"SpyroOutput\": {\r\n" + //
+						"        \"columnCount\":13,\r\n" + //
+						"        \"tables\": [\r\n" + //
+						"            {\r\n" + //
+						"                \"startRow\": 0,\r\n" + //
+						"                \"headers\": [\r\n" + //
+						"\t\t\t\t\t \r\n" + //
+						"\t\t\t\t\t\"particulars\", \r\n" + //
+						"\t\t\t\t\t\"uom\", \r\n" + //
+						"\t\t\t\t\t\"apr\", \r\n" + //
+						"\t\t\t\t\t\"may\", \r\n" + //
+						"\t\t\t\t\t\"jun\", \r\n" + //
+						"\t\t\t\t\t\"jul\", \r\n" + //
+						"\t\t\t\t\t\"aug\", \r\n" + //
+						"\t\t\t\t\t\"sep\", \r\n" + //
+						"\t\t\t\t\t\"oct\", \r\n" + //
+						"\t\t\t\t\t\"nov\", \r\n" + //
+						"\t\t\t\t\t\"dec\",\r\n" + //
+						"                    \"jan\", \r\n" + //
+						"\t\t\t\t\t\"feb\", \r\n" + //
+						"\t\t\t\t\t\"mar\", \r\n" + //
+						"\t\t\t\t\t\"remarks\",\r\n" + //
+						"                    \"normParameterFKID\"\r\n" + //
+						"                ],\r\n" + //
+						"                \"startingIndexOfMonths\":2,\r\n" + //
+						"                \"hideTable\":false,\r\n" + //
+						"                \"textBeforeTitle\":\"\",\r\n" + //
+						"                \"title\":\"TotalFeed\",\r\n" + //
+						"                \"tableId\":\"TotalFeed\",\r\n" + //
+						"                \"dataInput\":\"Total Feed\",\r\n" + //
+						"                \"isColumnMergeRequired\":false,\r\n" + //
+						"                \"isRowMergeRequired\":false,\r\n" + //
+						"                \"headersTitles\":[[\r\n" + //
+						"                    \"Particulars\",\r\n" + //
+						"                    \"UOM\",\r\n" + //
+						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+						"                \"rows\": [],\r\n" + //
+						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"styles\": {\r\n" + //
+						"                    \"boldColumns\": [\r\n" + //
+						"                        0\r\n" + //
+						"                    ],\r\n" + //
+						"                    \"borders\": true\r\n" + //
+						"                },\r\n" + //
+						"                \"autoMerge\": {\r\n" + //
+						"                    \"columns\": [],\r\n" + //
+						"                    \"rows\": []\r\n" + //
+						"                }\r\n" + //
+						"            },\r\n" + //
+						"            {\r\n" + //
+						"                \"startRow\": 0,\r\n" + //
+						"                \"headers\": [\r\n" + //
+						"\t\t\t\t\t\"particulars\", \r\n" + //
+						"\t\t\t\t\t\"uom\", \r\n" + //
+						"\t\t\t\t\t\"apr\", \r\n" + //
+						"\t\t\t\t\t\"may\", \r\n" + //
+						"\t\t\t\t\t\"jun\", \r\n" + //
+						"\t\t\t\t\t\"jul\", \r\n" + //
+						"\t\t\t\t\t\"aug\", \r\n" + //
+						"\t\t\t\t\t\"sep\", \r\n" + //
+						"\t\t\t\t\t\"oct\", \r\n" + //
+						"\t\t\t\t\t\"nov\", \r\n" + //
+						"\t\t\t\t\t\"dec\",\r\n" + //
+						"                    \"jan\", \r\n" + //
+						"\t\t\t\t\t\"feb\", \r\n" + //
+						"\t\t\t\t\t\"mar\", \r\n" + //
+						"\t\t\t\t\t\"remarks\",\r\n" + //
+						"                    \"normParameterFKID\"\r\n" + //
+						"                ],\r\n" + //
+						"                \"startingIndexOfMonths\":2,\r\n" + //
+						"                \"hideTable\":false,\r\n" + //
+						"                \"textBeforeTitle\":\"\",\r\n" + //
+						"                \"title\":\"Total Products\",\r\n" + //
+						"                \"tableId\":\"Total_Products\",\r\n" + //
+						"                \"dataInput\":\"Total Products\",\r\n" + //
+						"                \"isColumnMergeRequired\":false,\r\n" + //
+						"                \"isRowMergeRequired\":false,\r\n" + //
+						"                \"headersTitles\":[[\r\n" + //
+						"                    \"Particulars\",\r\n" + //
+						"                    \"UOM\",\r\n" + //
+						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+						"                \"rows\": [],\r\n" + //
+						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"styles\": {\r\n" + //
+						"                    \"boldColumns\": [\r\n" + //
+						"                        0\r\n" + //
+						"                    ],\r\n" + //
+						"                    \"borders\": true\r\n" + //
+						"                },\r\n" + //
+						"                \"autoMerge\": {\r\n" + //
+						"                    \"columns\": [],\r\n" + //
+						"                    \"rows\": []\r\n" + //
+						"                }\r\n" + //
+						"            },\r\n" + //
+						"            {\r\n" + //
+						"                \"startRow\": 0,\r\n" + //
+						"                \"headers\": [\r\n" + //
+						"\t\t\t\t\t\"particulars\", \r\n" + //
+						"\t\t\t\t\t\"uom\", \r\n" + //
+						"\t\t\t\t\t\"apr\", \r\n" + //
+						"\t\t\t\t\t\"may\", \r\n" + //
+						"\t\t\t\t\t\"jun\", \r\n" + //
+						"\t\t\t\t\t\"jul\", \r\n" + //
+						"\t\t\t\t\t\"aug\", \r\n" + //
+						"\t\t\t\t\t\"sep\", \r\n" + //
+						"\t\t\t\t\t\"oct\", \r\n" + //
+						"\t\t\t\t\t\"nov\", \r\n" + //
+						"\t\t\t\t\t\"dec\",\r\n" + //
+						"                    \"jan\", \r\n" + //
+						"\t\t\t\t\t\"feb\", \r\n" + //
+						"\t\t\t\t\t\"mar\", \r\n" + //
+						"\t\t\t\t\t\"remarks\",\r\n" + //
+						"                    \"normParameterFKID\"\r\n" + //
+						"                ],\r\n" + //
+						"                \"startingIndexOfMonths\":2,\r\n" + //
+						"                \"hideTable\":false,\r\n" + //
+						"                \"textBeforeTitle\":\"\",\r\n" + //
+						"                \"title\":\"Miscellaneous Parameters\",\r\n" + //
+						"                \"tableId\":\"Miscellaneous_Parameters\",\r\n" + //
+						"                \"dataInput\":\"Miscellaneous Parameters\",\r\n" + //
+						"                \"isColumnMergeRequired\":false,\r\n" + //
+						"                \"isRowMergeRequired\":false,\r\n" + //
+						"                \"headersTitles\":[[\r\n" + //
+						"                    \"Particulars\",\r\n" + //
+						"                    \"UOM\",\r\n" + //
+						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+						"                \"rows\": [],\r\n" + //
+						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"styles\": {\r\n" + //
+						"                    \"boldColumns\": [\r\n" + //
+						"                        0\r\n" + //
+						"                    ],\r\n" + //
+						"                    \"borders\": true\r\n" + //
+						"                },\r\n" + //
+						"                \"autoMerge\": {\r\n" + //
+						"                    \"columns\": [],\r\n" + //
+						"                    \"rows\": []\r\n" + //
+						"                }\r\n" + //
+						"            }\r\n" + // // Removed the extra malformed object here
+						"\r\n" + //
+						"        ]\r\n" + //
+						"    }\r\n" + //
+						"    \r\n" + //
+						"}";
+	}
+
+	private static String capitalize(String str) {
+		if (str == null || str.isEmpty())
+			return str;
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
+	}
 
 
 }

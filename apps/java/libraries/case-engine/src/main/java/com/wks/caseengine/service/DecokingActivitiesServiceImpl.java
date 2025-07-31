@@ -38,6 +38,8 @@ import com.wks.caseengine.dto.CrackerConfigurationDTO;
 
 import com.wks.caseengine.dto.DecokeRunLengthDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
+import com.wks.caseengine.dto.NextYearConfigurationDTO;
+import com.wks.caseengine.dto.NextYearEntryDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.CrackerConfiguration;
 import com.wks.caseengine.entity.DecokeRunLength;
@@ -938,6 +940,127 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
+	@Override
+	public AOPMessageVM getNextYearEntry(String plantId, String year, String H10, String H11, String H12,String H13, String H14) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<NextYearEntryDTO> nextYearEntryDTOList = new ArrayList<>();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+		String procedureName =  vertical.getName() + "_" + site.getName() + "_DecokingPlanning_NextYearEntry";
+		try {
+			List<Object[]> nextYearEntryList = findNextYearEntry(year, UUID.fromString(plantId),  H10,  H11,  H12, H13,  H14,  procedureName);
+			for (Object[] row : nextYearEntryList) {
+				NextYearEntryDTO dto = new NextYearEntryDTO();
+				dto.setDate(row[0] != null ? row[0].toString() : null);
+				dto.setHTenProposed(row[1] != null ? row[1].toString() : null);
+				dto.setHElevenProposed(row[2] != null ? row[2].toString() : null);
+				dto.setHTwelveProposed(row[3] != null ? row[3].toString() : null);
+				dto.setHThirteenProposed(row[4] != null ? row[4].toString() : null);
+				dto.setHFourteenProposed(row[5] != null ? row[5].toString() : null);
+				dto.setDemo(row[6] != null ? row[6].toString() : null);
+				dto.setAopYear(row[7] != null ? row[7].toString() : null);
+				dto.setPlantId(row[8] != null ? row[8].toString() : null);
+				dto.setMonth(row[9] != null ? row[9].toString() : null);
+				nextYearEntryDTOList.add(dto);
+			}
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(nextYearEntryDTOList);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException iae) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
+		}		
+	}
+	
+	public List<Object[]> findNextYearEntry(String year, UUID plantFkId, String H10, String H11, String H12,String H13, String H14, String procedureName) {
+		try {
+			Plants plant = plantsRepository.findById(plantFkId).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId, @aopYear = :aopYear,@H10 = :H10, @H11 = :H11, @H12 = :H12, @H13 = :H13, @H14 = :H14";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantFkId);
+			query.setParameter("aopYear", year);
+			query.setParameter("H10", H10);
+			query.setParameter("H11", H11);
+			query.setParameter("H12", H12);
+			query.setParameter("H13", H13);
+			query.setParameter("H14", H14);
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Override
+	public AOPMessageVM getNextYearConfiguration(String plantId, String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<NextYearConfigurationDTO> nextYearConfigurationDTOList = new ArrayList<>();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+		String viewName =  "vwScrn"+vertical.getName()+"ConfigurationNextYear";
+		try {
+			List<Object[]> nextYearConfiurationList = findNextYearConfiguration(year, UUID.fromString(plantId),  viewName);
+			for (Object[] row : nextYearConfiurationList) {
+				NextYearConfigurationDTO dto = new NextYearConfigurationDTO();
+				dto.setStartDate(row[0] != null ? row[0].toString() : null);
+				dto.setHTen(row[1] != null ? row[1].toString() : null);
+				dto.setHEleven(row[2] != null ? row[2].toString() : null);
+				dto.setHTwelve(row[3] != null ? row[3].toString() : null);
+				dto.setHThirteen(row[4] != null ? row[4].toString() : null);
+				dto.setHFourteen(row[5] != null ? row[5].toString() : null);
+				dto.setDemo(row[6] != null ? row[6].toString() : null);
+				dto.setAopYear(row[7] != null ? row[7].toString() : null);
+				dto.setPlantId(row[8] != null ? row[8].toString() : null);
+				nextYearConfigurationDTOList.add(dto);
+			}
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(nextYearConfigurationDTOList);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException iae) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
+		}
+
+	}
+	
+	public List<Object[]> findNextYearConfiguration(String aopYear, UUID plantId, String viewName) {
+		try {
+			// 2. Construct SQL with dynamic view name
+						String sql = "SELECT * FROM " + viewName +
+								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear";
+
+						// 3. Create and parameterize the native query
+						Query query = entityManager.createNativeQuery(sql);
+						query.setParameter("plantId", plantId);
+						query.setParameter("aopYear", aopYear);
+
+						// 4. Execute
+						return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+
 
 
 }

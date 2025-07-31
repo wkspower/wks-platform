@@ -42,6 +42,7 @@ public class SpyroOutputDTO {
 
     private String saveStatus;
     private String errDescription;
+    private String tableId;
 
 
 }
