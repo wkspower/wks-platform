@@ -770,24 +770,35 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					failedList.add(decokeRunLengthDTO);
 					continue;
 				}
-
-				Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository
-						.findById(UUID.fromString(decokeRunLengthDTO.getId()));
-				if (decokeRunLengthopt.isPresent()) {
-					DecokeRunLength decokeRunLength = decokeRunLengthopt.get();
-					decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
-					decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
-					decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
-					decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
-					decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
-					decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
-					decokeRunLengthRepository.save(decokeRunLength);
-				} else {
-					decokeRunLengthDTO.setSaveStatus("Failed");
-					decokeRunLengthDTO.setErrDescription("Norm Paramter not found");
-					failedList.add(decokeRunLengthDTO);
-					continue;
-
+				if (decokeRunLengthDTO.getId() != null &&
+					    !decokeRunLengthDTO.getId().trim().isEmpty()) {
+					Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository
+							.findById(UUID.fromString(decokeRunLengthDTO.getId()));
+					if (decokeRunLengthopt.isPresent()) {
+						DecokeRunLength decokeRunLength = decokeRunLengthopt.get();
+						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
+						decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
+						decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
+						decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
+						decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
+						decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
+						decokeRunLengthRepository.save(decokeRunLength);
+					} else {
+						decokeRunLengthDTO.setSaveStatus("Failed");
+						decokeRunLengthDTO.setErrDescription("Norm Paramter not found");
+						failedList.add(decokeRunLengthDTO);
+						continue;
+					}
+				}else {
+						DecokeRunLength decokeRunLength = new DecokeRunLength();
+						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
+						decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
+						decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
+						decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
+						decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
+						decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
+						decokeRunLength.setPlantFkId(UUID.fromString(plantId));
+						decokeRunLengthRepository.save(decokeRunLength);
 				}
 			}
 		} catch (Exception ex) {
