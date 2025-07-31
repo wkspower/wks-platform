@@ -1,22 +1,22 @@
 [
   {
-    "field": "particulars",
+    "field": "DisplayName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 300,
+    "widthT": 220,
     "hidden": false
   },
   {
-    "field": "uom",
+    "field": "UOM",
     "title": "UOM",
     "editable": false,
-    "width": 120
+    "widthT": 100
   },
   {
-    "field": "apr",
+    "field": "ConstantValue",
     "title": "Value",
     "editable": true,
-    "widthT": 200,
+
     "type": "number"
   },
 
@@ -24,7 +24,7 @@
     "field": "remarks",
     "title": "Remark",
     "editable": false,
-    "width": 180,
+    "widthT": 220,
     "type": "string"
   },
   {

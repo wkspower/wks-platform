@@ -15,7 +15,8 @@
   {
     "field": "productName",
     "title": "Particulars",
-    "editable": false
+    "editable": false,
+    "widthT": 300
   },
   {
     "field": "apr",
@@ -31,6 +32,6 @@
     "title": "Remark",
     "editable": true,
     "renderCell": "renderRemarkCell",
-    "width": 400
+    "widthT": 300
   }
 ]

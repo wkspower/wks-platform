@@ -14,7 +14,7 @@
   {
     "field": "productName",
     "title": "Particulars",
-    "widthT": 150,
+    "widthT": 220,
     "editable": false
   },
   {
@@ -98,7 +98,7 @@
   {
     "field": "remarks",
     "title": "Remark",
-    "width": 150,
+    "widthT": 220,
     "editable": true
   },
 

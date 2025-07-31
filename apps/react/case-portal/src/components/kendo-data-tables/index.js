@@ -1025,7 +1025,7 @@ const KendoDataTables = ({
                     key={col?.field}
                     field={col?.field}
                     title={col.title || col.headerName || 'Description'}
-                    width={col.width}
+                    width={col.widthT}
                     editable={true}
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
@@ -1148,8 +1148,7 @@ const KendoDataTables = ({
                     columnMenu={ColumnMenuCheckboxFilter}
                     hidden={col.hidden}
                     headerClassName={isActive ? 'active-column' : ''}
-                    // width={col.widthT || ''}
-                    width={170}
+                    width={col.widthT || ''}
                   />
                 )
               }

@@ -396,6 +396,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'materialFKId',
       title: 'Particulars',
+      widthT: 220,
 
       editable: false,
       hidden: true,
@@ -403,7 +404,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
-
+      widthT: 220,
       editable: false,
     },
     {
@@ -555,6 +556,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'normParametersFKId',
       title: 'Particulars',
+      widthT: 220,
 
       editable: false,
       hidden: true,
@@ -562,6 +564,8 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
+
+      widthT: 220,
 
       editable: false,
     },

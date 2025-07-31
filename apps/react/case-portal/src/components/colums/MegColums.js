@@ -20,7 +20,7 @@ export const BusinessDemandMegColumns = [
     field: 'displayName',
     title: 'Particulars',
     editable: false,
-    width: 150,
+    widthT: 220,
   },
   {
     field: 'UOM',
@@ -141,7 +141,7 @@ export const BusinessDemandMegColumns = [
     field: 'remark',
     title: 'Remark',
     editable: false,
-    width: 180,
+    widthT: 220,
     type: 'string',
   },
   {
@@ -206,6 +206,7 @@ export const SlowDownMegColumns = [
     field: 'remark',
     title: 'Remarks',
     editable: true,
+    widthT: 220,
   },
 ]
 
@@ -213,7 +214,7 @@ export const NormalOpNormMegColumns = [
   {
     field: 'Particulars',
     title: 'Type',
-    width: 110,
+    widthT: 220,
     groupable: true,
     editable: false,
     hidden: true,
@@ -227,13 +228,13 @@ export const NormalOpNormMegColumns = [
   {
     field: 'productName',
     title: 'Particulars',
-    width: 120,
+    widthT: 220,
   },
 
   {
     field: 'UOM',
     title: 'UOM / MT',
-    width: 100,
+    widthT: 60,
     editable: false,
   },
 
@@ -356,7 +357,7 @@ export const NormalOpNormMegColumns = [
   {
     field: 'remarks',
     title: 'Remark',
-    width: 125,
+    widthT: 220,
     editable: true,
   },
 
@@ -390,10 +391,10 @@ export const ShutdownConsumptionMegColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    width: 180,
+    widthT: 220,
     editable: false,
   },
-  { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
+  { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12
@@ -415,7 +416,7 @@ export const ShutdownConsumptionMegColumns = [
   {
     field: 'remarks',
     headerName: 'Remark',
-    width: 120,
+    widthT: 220,
     editable: false,
   },
   {
@@ -443,10 +444,10 @@ export const SlowdownNormsMegColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    width: 180,
+    widthT: 220,
     editable: false,
   },
-  { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
+  { field: 'UOM', headerName: 'UOM', widthT: 220, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12
@@ -468,7 +469,7 @@ export const SlowdownNormsMegColumns = [
   {
     field: 'remarks',
     headerName: 'Remark',
-    width: 120,
+    widthT: 220,
     editable: false,
   },
   {
@@ -495,13 +496,13 @@ export const ConsumptionAopMegColumns = [
     field: 'productName',
     title: 'Particulars',
     editable: false,
-    width: 200,
+    widthT: 220,
   },
   {
     field: 'UOM',
     title: 'UOM / MT',
     editable: false,
-    width: 150,
+    widthT: 60,
   },
   {
     field: 'april',

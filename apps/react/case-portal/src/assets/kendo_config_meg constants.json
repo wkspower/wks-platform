@@ -12,26 +12,30 @@
   {
     "field": "DisplayName",
     "title": "Particulars",
-    "editable": false
+    "editable": false,
+    "widthT": 250
   },
   {
     "field": "UOM",
     "title": "UOM",
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "widthT": 80
   },
   {
     "field": "ConstantValue",
     "title": "Value",
-    "editable": true
+    "editable": true,
+    "type": "number"
   },
 
   {
     "field": "remarks",
     "title": "Remark",
 
-    "editable": true
+    "editable": true,
+    "widthT": 400
   },
 
   {

@@ -199,145 +199,80 @@ const MaintenanceTable = () => {
     fetchData()
   }, [fetchData, oldYear, yearChanged, plantID])
 
-  const productionColumns = [
+  // Helper to generate monthly fields
+  const getMonthlyColumns = () => {
+    const months = [
+      { field: 'April', index: 4 },
+      { field: 'May', index: 5 },
+      { field: 'June', index: 6 },
+      { field: 'July', index: 7 },
+      { field: 'Aug', index: 8 },
+      { field: 'Sep', index: 9 },
+      { field: 'Oct', index: 10 },
+      { field: 'Nov', index: 11 },
+      { field: 'Dec', index: 12 },
+      { field: 'Jan', index: 1 },
+      { field: 'Feb', index: 2 },
+      { field: 'Mar', index: 3 },
+    ]
+
+    return months.map(({ field, index }) => ({
+      field,
+      title: headerMap[index],
+      type: 'number',
+      format: '{0:n2}',
+      editable: false,
+      align: 'right',
+      headerAlign: 'left',
+    }))
+  }
+
+  // Shared editable field
+  const isEditableField = {
+    field: 'isEditable',
+    title: 'isEditable',
+    hidden: true,
+  }
+
+  // Base function to generate column set
+  const generateColumns = (nameWidthT) => [
     {
       field: 'Name',
       title: 'Description',
       align: 'left',
       headerAlign: 'left',
-      width: 400,
+      widthT: nameWidthT,
       editable: false,
     },
-    {
-      field: 'April',
-      title: headerMap[4],
-      align: 'right',
-      headerAlign: 'left',
-      type: 'number',
-      format: '{0:n2}',
-      editable: false,
-    },
-
-    {
-      field: 'May',
-      title: headerMap[5],
-      type: 'number',
-      format: '{0:n2}',
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'June',
-      title: headerMap[6],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'July',
-      title: headerMap[7],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Aug',
-      title: headerMap[8],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Sep',
-      title: headerMap[9],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Oct',
-      title: headerMap[10],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-
-    {
-      field: 'Nov',
-      title: headerMap[11],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Dec',
-      title: headerMap[12],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Jan',
-      title: headerMap[1],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Feb',
-      title: headerMap[2],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-    {
-      field: 'Mar',
-      title: headerMap[3],
-      type: 'number',
-      format: '{0:n2}',
-
-      editable: false,
-      align: 'right',
-      headerAlign: 'left',
-    },
-
-    {
-      field: 'isEditable',
-      title: 'isEditable',
-      hidden: true,
-    },
+    ...getMonthlyColumns(),
+    isEditableField,
   ]
 
-  const basecols =
-    lowerVertName == 'cracker' ? crackercolumns : productionColumns
+  // Column sets
+  const productionColumnsMEG = generateColumns(415)
+  const productionColumnsPE = generateColumns(250)
+  const productionColumnsPP = generateColumns(250)
+
+  // Column selection
+  let basecols
+
+  switch (lowerVertName) {
+    case 'cracker':
+      basecols = crackercolumns
+      break
+    case 'meg':
+      basecols = productionColumnsMEG
+      break
+    case 'pe':
+      basecols = productionColumnsPE
+      break
+    case 'pp':
+      basecols = productionColumnsPP
+      break
+    default:
+      basecols = productionColumnsMEG
+      break
+  }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -533,7 +468,7 @@ export default MaintenanceTable
 //     fetchData()
 //   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
-//   const productionColumns = [
+//   const productionColumnsMEG = [
 //     {
 //       field: 'Name',
 //       title: 'Description',
@@ -670,7 +605,7 @@ export default MaintenanceTable
 //     },
 //   ]
 //   const basecols =
-//     lowerVertName == 'cracker' ? crackercolumns : productionColumns
+//     lowerVertName == 'cracker' ? crackercolumns : productionColumnsMEG
 
 //   const getAdjustedPermissions = (permissions, isOldYear) => {
 //     if (isOldYear != 1) return permissions

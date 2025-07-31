@@ -22,7 +22,7 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "width": 160,
+    "widthT": 220,
     "valueGetter": "defaultValueGetter",
     "valueFormatter": "productDisplayNameFormatter",
     "renderEditCell": "renderNormParameterSelectCell"
@@ -33,7 +33,8 @@
     "title": "UOM",
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "widthT": 60
   },
   {
     "field": "apr",
@@ -148,6 +149,7 @@
     "title": "Remark",
     "width": 150,
     "editable": true,
-    "renderCell": "renderRemarkCell"
+    "renderCell": "renderRemarkCell",
+    "widthT": 220
   }
 ]

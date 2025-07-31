@@ -23,7 +23,7 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "width": 175
+    "widthT": 220
   },
   {
     "field": "april",
@@ -137,7 +137,7 @@
     "field": "remarks",
     "title": "Remark",
     "editable": false,
-    "width": 180
+    "widthT": 220
   },
   {
     "field": "avgTph",

@@ -206,6 +206,8 @@ const SlowdownNormForMeg = () => {
         const dynamicColumns = response.data.map((column) => ({
           field: column.field,
           title: column.title,
+          widthT: column.field === 'particulars' ? 220 : '',
+
           editable:
             column.field === 'particulars' ||
             column.field.toLowerCase() === 'uom'

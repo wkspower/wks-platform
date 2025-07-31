@@ -260,12 +260,12 @@ const NormalOpNormsScreen = () => {
     {
       field: 'ProductName',
       title: 'Particulars',
-      width: 120,
+      widthT: 220,
     },
     {
       field: 'UOM',
       title: 'UOM',
-      width: 80,
+      widthT: 60,
       editable: false,
     },
     {

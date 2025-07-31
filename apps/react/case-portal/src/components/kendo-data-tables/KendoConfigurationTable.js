@@ -853,7 +853,7 @@ const ConfigurationTable = () => {
           />
           {(() => {
             const currentTab = crackerTabs[tabIndex]?.toLowerCase()
-            console.log('?? ~ (() => { ~ currentTab:', currentTab)
+
             switch (currentTab) {
               case 'configuration':
                 return (

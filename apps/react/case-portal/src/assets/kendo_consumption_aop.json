@@ -15,13 +15,13 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "width": 200
+    "widthT": 200
   },
   {
     "field": "UOM",
     "title": "UOM / MT",
     "editable": false,
-    "width": 150
+    "widthT": 60
   },
   {
     "field": "april",
