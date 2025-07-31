@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -797,11 +798,23 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
 						decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
 						decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
+						String dateString = decokeRunLengthDTO.getDate();
+						DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+						LocalDate parsedDate;
+						try {
+						   parsedDate = LocalDate.parse(dateString, fmt);
+						} catch (DateTimeParseException ex) {
+						   // handle error: invalid format
+						   throw new IllegalArgumentException("Invalid date: " + dateString, ex);
+						}
+						decokeRunLength.setDate(parsedDate);
 						decokeRunLength.setPlantFkId(UUID.fromString(plantId));
+						decokeRunLength.setAopYear(year);
 						decokeRunLengthRepository.save(decokeRunLength);
 				}
 			}
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to update data");
 		}
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("Furnace-run-length");
