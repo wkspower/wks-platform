@@ -966,7 +966,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	@Override
-	public AOPMessageVM getNextYearEntry(String plantId, String year, String H10, String H11, String H12,String H13, String H14) {
+	public AOPMessageVM getNextYearEntry(String plantId, String year, String H10, String H11, String H12,String H13, String H14,String startDate) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<NextYearEntryDTO> nextYearEntryDTOList = new ArrayList<>();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
@@ -974,7 +974,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 		String procedureName =  vertical.getName() + "_" + site.getName() + "_DecokingPlanning_NextYearEntry";
 		try {
-			List<Object[]> nextYearEntryList = findNextYearEntry(year, UUID.fromString(plantId),  H10,  H11,  H12, H13,  H14,  procedureName);
+			List<Object[]> nextYearEntryList = findNextYearEntry(year, UUID.fromString(plantId),  H10,  H11,  H12, H13,  H14,  procedureName,startDate);
 			for (Object[] row : nextYearEntryList) {
 				NextYearEntryDTO dto = new NextYearEntryDTO();
 				dto.setDate(row[0] != null ? row[0].toString() : null);
@@ -1002,12 +1002,12 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		}		
 	}
 	
-	public List<Object[]> findNextYearEntry(String year, UUID plantFkId, String H10, String H11, String H12,String H13, String H14, String procedureName) {
+	public List<Object[]> findNextYearEntry(String year, UUID plantFkId, String H10, String H11, String H12,String H13, String H14, String procedureName,String StartDate) {
 		try {
 			Plants plant = plantsRepository.findById(plantFkId).orElseThrow();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 			String sql = "EXEC " + procedureName +
-					" @plantId = :plantId, @aopYear = :aopYear,@H10 = :H10, @H11 = :H11, @H12 = :H12, @H13 = :H13, @H14 = :H14";
+					" @plantId = :plantId, @aopYear = :aopYear,@H10 = :H10, @H11 = :H11, @H12 = :H12, @H13 = :H13, @H14 = :H14, @StartDate = :StartDate";
 
 			Query query = entityManager.createNativeQuery(sql);
 
@@ -1018,6 +1018,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			query.setParameter("H12", H12);
 			query.setParameter("H13", H13);
 			query.setParameter("H14", H14);
+			query.setParameter("StartDate", StartDate);
 			
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
