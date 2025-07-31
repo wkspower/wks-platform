@@ -388,14 +388,20 @@ const KendoDataTables = ({
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = isDisabled ? `custom-disabled-row` : className
+    const hasError = dataItem?.isError
+    const rowClassName = hasError
+      ? 'error-row'
+      : isDisabled
+        ? 'custom-disabled-row'
+        : className
 
     return (
       <tr {...rest?.trProps} className={rowClassName}>
         {rest.children}
       </tr>
-    )
-  }, [])
+  )
+},[])
+
 
   const toolTipRendererdescLimit = (props) => {
     const value = props.dataItem[props.field]
@@ -828,7 +834,6 @@ const KendoDataTables = ({
             defaultGroup={initialGroup}
             data={rows}
             rows={{ data: CustomRow }}
-            // rowRender={CustomRow}
             dataItemKey='id'
             editField='inEdit'
             editable={{ mode: 'incell' }}
