@@ -21,6 +21,6 @@ public interface DecokingActivitiesService {
     public AOPMessageVM importExcel(String year, UUID fromString, String reportType, MultipartFile file);
 	public AOPMessageVM calculateDecokingActivities(String plantId,String year);
 	public AOPMessageVM getNextYearEntry(String plantId,String year, String H10, String H11, String H12,String H13, String H14,String startDate);
-	public AOPMessageVM getNextYearConfiguration(String plantId,String year);
+	public AOPMessageVM getNextYearConfiguration(String plantId,String year,String startDate);
 	
 	}

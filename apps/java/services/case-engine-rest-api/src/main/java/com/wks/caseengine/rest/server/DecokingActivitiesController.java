@@ -98,7 +98,7 @@ public class DecokingActivitiesController {
 		return decokingActivitiesService.getNextYearEntry(plantId,year,h10,h11,h12,h13,h14,startDate);
 	}
 	@GetMapping(value="/next-year/configuration")
-	public AOPMessageVM getNextYearConfiguration(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId) {
-		return decokingActivitiesService.getNextYearConfiguration(plantId,year);
+	public AOPMessageVM getNextYearConfiguration(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "startDate", required = false) String startDate) {
+		return decokingActivitiesService.getNextYearConfiguration(plantId,year,startDate);
 	}
 }

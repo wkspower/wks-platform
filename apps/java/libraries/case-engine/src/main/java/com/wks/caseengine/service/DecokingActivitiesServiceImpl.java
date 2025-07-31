@@ -1029,7 +1029,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	@Override
-	public AOPMessageVM getNextYearConfiguration(String plantId, String year) {
+	public AOPMessageVM getNextYearConfiguration(String plantId, String year,String startDate) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<NextYearConfigurationDTO> nextYearConfigurationDTOList = new ArrayList<>();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
@@ -1037,7 +1037,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 		String viewName =  "vwScrn"+vertical.getName()+"ConfigurationNextYear";
 		try {
-			List<Object[]> nextYearConfiurationList = findNextYearConfiguration(year, UUID.fromString(plantId),  viewName);
+			List<Object[]> nextYearConfiurationList = findNextYearConfiguration(year, UUID.fromString(plantId),  viewName,startDate);
 			for (Object[] row : nextYearConfiurationList) {
 				NextYearConfigurationDTO dto = new NextYearConfigurationDTO();
 				dto.setStartDate(row[0] != null ? row[0].toString() : null);
@@ -1065,16 +1065,17 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	}
 	
-	public List<Object[]> findNextYearConfiguration(String aopYear, UUID plantId, String viewName) {
+	public List<Object[]> findNextYearConfiguration(String aopYear, UUID plantId, String viewName,String StartDate) {
 		try {
 			// 2. Construct SQL with dynamic view name
 						String sql = "SELECT * FROM " + viewName +
-								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear";
+								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear and StartDate = :StartDate";
 
 						// 3. Create and parameterize the native query
 						Query query = entityManager.createNativeQuery(sql);
 						query.setParameter("plantId", plantId);
 						query.setParameter("aopYear", aopYear);
+						query.setParameter("StartDate", StartDate);
 
 						// 4. Execute
 						return query.getResultList();
