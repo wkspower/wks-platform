@@ -126,7 +126,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (ConfigurationDTO dto : dtoList) {
-				if (dto.getIsEditable() == null || dto.getIsEditable()) {
+				 
 					List<Object> list = new ArrayList<>();
 					list.add(dto.getNormType());
 					list.add(dto.getProductName());
@@ -149,7 +149,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						list.add(dto.getErrDescription());
 					}
 					rows.add(list);
-				}
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
@@ -654,6 +653,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					failedList.add(configurationDTO);
 					continue;
 				}
+				if(optionNormParameters.isPresent() && (!optionNormParameters.get().getIsEditable())) {
+					continue;
+				}
 
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(configurationDTO, i);
@@ -842,7 +844,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		NormAttributeTransactions normAttributeTransactions;
 
 		if (existingRecord.isPresent()) {
-
+			
 			normAttributeTransactions = existingRecord.get();
 			normAttributeTransactions.setModifiedOn(new Date());
 		} else {
@@ -857,10 +859,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			//normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
 			normAttributeTransactions.setAuditYear(year);
 		}
+		
+		
 
 		normAttributeTransactions.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
 		normAttributeTransactions.setRemarks(configurationDTO.getRemarks());
-
 		normAttributeTransactionsRepository.save(normAttributeTransactions);
 	}
 

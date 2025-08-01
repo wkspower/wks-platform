@@ -446,6 +446,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					    normAttributeTransactionsList.add(normAttributeTransactionsRepository.save(nat));
 					}
 			}
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("slowdown-configuration");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 		}catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Failed to save/update data", ex);
