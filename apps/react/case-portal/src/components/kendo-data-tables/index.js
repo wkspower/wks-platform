@@ -130,8 +130,8 @@ const KendoDataTables = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
-  const [customModifiedCells, setCustomModifiedCells] = useState({});
- 
+  const [customModifiedCells, setCustomModifiedCells] = useState({})
+
   const initialGroup = groupBy
     ? [
         {
@@ -277,18 +277,17 @@ const KendoDataTables = ({
         })
       }
       setCustomModifiedCells((prev) => ({
-      ...prev,
-      [itemId]: { ...(prev[itemId] || {}), [field]: value }
-    }));
-
+        ...prev,
+        [itemId]: { ...(prev[itemId] || {}), [field]: value },
+      }))
     },
-    [setRows, setModifiedCells, setCustomModifiedCells]
+    [setRows, setModifiedCells, setCustomModifiedCells],
   )
-useEffect(() => {
-  if (Object.keys(modifiedCells).length === 0) {
-    setCustomModifiedCells({});
-  }
-}, [modifiedCells]);
+  useEffect(() => {
+    if (Object.keys(modifiedCells).length === 0) {
+      setCustomModifiedCells({})
+    }
+  }, [modifiedCells])
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
@@ -410,9 +409,8 @@ useEffect(() => {
       <tr {...rest?.trProps} className={rowClassName}>
         {rest.children}
       </tr>
-  )
-},[])
-
+    )
+  }, [])
 
   const toolTipRendererdescLimit = (props) => {
     const value = props.dataItem[props.field]
@@ -433,45 +431,51 @@ useEffect(() => {
     )
   }
   //
-const RedHighlightCell = (props) => {
-  const { dataItem, field, tdProps, children, customModifiedCells, allRedCell } = props;
+  const RedHighlightCell = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+    } = props
 
-  const rowId = dataItem.id;
-  const value = dataItem[field];
+    const rowId = dataItem.id
+    const value = dataItem[field]
 
-  // Check if edited (local edits)
-  const isEdited = Object.prototype.hasOwnProperty.call(
-    customModifiedCells?.[rowId] || {},
-    field
-  );
+    // Check if edited (local edits)
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
 
-  // Backend red highlight (allRedCell logic)
-  const month = field; // Using field name as month
-  const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id;
+    // Backend red highlight (allRedCell logic)
+    const month = field // Using field name as month
+    const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
 
-  const isRedFromAllRedCell = allRedCell?.some(
-    (cell) =>
-      cell.month === month &&
-      cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase()
-  );
+    const isRedFromAllRedCell = allRedCell?.some(
+      (cell) =>
+        cell.month === month &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
 
-  // Final highlight condition
-  const shouldHighlight = isEdited || isRedFromAllRedCell;
+    // Final highlight condition
+    const shouldHighlight = isEdited || isRedFromAllRedCell
 
-  return (
-    <td
-      {...tdProps}
-      title={value}
-      style={{
-        color: shouldHighlight ? 'orange' : undefined,
-        fontWeight: shouldHighlight ? 'bold' : undefined,
-      }}
-    >
-      {children}
-    </td>
-  );
-};
-
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: shouldHighlight ? 'orange' : undefined,
+          fontWeight: shouldHighlight ? 'bold' : undefined,
+        }}
+      >
+        {children}
+      </td>
+    )
+  }
 
   //
   const toolTipRenderer = (props) => {
@@ -897,7 +901,7 @@ const RedHighlightCell = (props) => {
             onItemChange={itemChange}
             resizable={true}
             defaultSkip={0}
-            defaultTake={100}
+            defaultTake={500}
             contextMenu={true}
             grade={grades}
             onRowClick={handleRowClick}
@@ -966,12 +970,12 @@ const RedHighlightCell = (props) => {
                           : DateTimePickerEditor,
                       },
                       data: (props) => (
-      <RedHighlightCell
-        {...props}
-        customModifiedCells={customModifiedCells}
-        allRedCell={allRedCell}
-      />
-    ),
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     format={
@@ -1023,13 +1027,13 @@ const RedHighlightCell = (props) => {
                           ? DateOnlyPicker
                           : DateOnlyPicker,
                       },
-                     data: (props) => (
-      <RedHighlightCell
-        {...props}
-        customModifiedCells={customModifiedCells}
-        allRedCell={allRedCell}
-      />
-    ),
+                      data: (props) => (
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     format={
@@ -1265,12 +1269,12 @@ const RedHighlightCell = (props) => {
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
                       data: (props) => (
-      <RedHighlightCell
-        {...props}
-        customModifiedCells={customModifiedCells}
-        allRedCell={allRedCell}
-      />
-    ),
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     format={col.format}
@@ -1295,17 +1299,17 @@ const RedHighlightCell = (props) => {
                     editable={col?.editable ? true : false}
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
-  edit: { text: NoSpinnerNumericEditor },
-  data: (props) => (
-    <RedHighlightCell
-      {...props}
-      customModifiedCells={customModifiedCells}
-      allRedCell={allRedCell}
-    />
-  ),
-  headerCell: SimpleHeaderWithTooltip,
-}}
-            columnMenu={ColumnMenuCheckboxFilter}
+                      edit: { text: NoSpinnerNumericEditor },
+                      data: (props) => (
+                        <RedHighlightCell
+                          {...props}
+                          customModifiedCells={customModifiedCells}
+                          allRedCell={allRedCell}
+                        />
+                      ),
+                      headerCell: SimpleHeaderWithTooltip,
+                    }}
+                    columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'
                     format={col.format}
                   />
