@@ -69,6 +69,8 @@ const NormsHistorianBasis = () => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [loading, setLoading] = useState(false)
+  const [showGrids, setShowGrids] = useState({})
+
   const units = ['TPH', 'TPD']
   const isOldYear = oldYear?.oldYear === 1
   useEffect(() => {
@@ -154,6 +156,19 @@ const NormsHistorianBasis = () => {
     selectedUnit,
   ])
 
+  useEffect(() => {
+    const timers = [
+      setTimeout(
+        () => setShowGrids((prev) => ({ ...prev, production: true })),
+        0,
+      ),
+      setTimeout(() => setShowGrids((prev) => ({ ...prev, norm: true })), 100),
+      setTimeout(() => setShowGrids((prev) => ({ ...prev, current: true })), 200),
+
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
+
   const year = localStorage.getItem('year')
   const headerMap = generateHeaderNames(year)
 
@@ -214,39 +229,25 @@ const NormsHistorianBasis = () => {
 
       {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        <ExcelExport
-          data={rowsProductionVolumeData}
-          ref={exportRef1}
-          fileName={fileName}
-        >
-          {colsProductionVolumeData.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
+        {[rowsProductionVolumeData, rowsMcuAndNormGrid, rowsHistorianValues].map(
+          (data, i) => (
+            <ExcelExport
+              key={i}
+              data={data}
+              ref={
+                [exportRef1, exportRef2, exportRef3][i]
+              }
+              fileName={fileName}
+            >
+              {[colsProductionVolumeData, colsMcuAndNormGrid, colsHistorianValues][i].map((col) => (
+                <ExcelExportColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title}
+                />
+              ))}
+            </ExcelExport>
           ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsMcuAndNormGrid} ref={exportRef2}>
-          {colsMcuAndNormGrid.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsHistorianValues} ref={exportRef3}>
-          {colsHistorianValues.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
       </div>
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
@@ -257,8 +258,8 @@ const NormsHistorianBasis = () => {
             className='btn-save'
           >
             Export
-        </Button>
-      )}
+          </Button>
+        )}
 
         <TextField
           select
@@ -288,52 +289,44 @@ const NormsHistorianBasis = () => {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {/* Accordion 1 */}
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary>
-            <Typography className='grid-title'>
-              Production Volume Data
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box sx={{ width: '100%' }}>
-              <KendoDataGrid
-                rows={rowsProductionVolumeData}
-                columns={colsProductionVolumeData}
-              />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
-
-        {/* Accordion 2 */}
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary>
-            <Typography className='grid-title'>MCU & Norm</Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box sx={{ width: '100%' }}>
-              <KendoDataGrid
-                rows={rowsMcuAndNormGrid}
-                columns={colsMcuAndNormGrid}
-              />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
-
-        {/* Accordion 3 */}
-        <CustomAccordion defaultExpanded disableGutters>
-          <CustomAccordionSummary>
-            <Typography className='grid-title'>Current Values</Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box sx={{ width: '100%' }}>
-              <KendoDataGrid
-                rows={rowsHistorianValues}
-                columns={colsHistorianValues}
-              />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
+        {
+          [
+            {
+              label: 'Production Volume Data',
+              visible: showGrids.production,
+              rows: rowsProductionVolumeData,
+              cols: colsProductionVolumeData,
+            },
+            {
+              label: 'MCU & Norm',
+              visible: showGrids.norm,
+              rows: rowsMcuAndNormGrid,
+              cols: colsMcuAndNormGrid,
+            },
+            {
+              label: 'Current Values',
+              visible: showGrids.current,
+              rows: rowsHistorianValues,
+              cols: colsHistorianValues,
+            }
+          ].map(
+            (section, index) =>
+              section.visible && (<CustomAccordion key={index} defaultExpanded disableGutters>
+                <CustomAccordionSummary>
+                  <Typography className='grid-title'>
+                    {section.label}
+                  </Typography>
+                </CustomAccordionSummary>
+                <CustomAccordionDetails>
+                  <Box sx={{ width: '100%' }}>
+                    <KendoDataGrid
+                      rows={section.rows}
+                      columns={section.cols}
+                    />
+                  </Box>
+                </CustomAccordionDetails>
+              </CustomAccordion>))
+        }
       </Box>
     </div>
   )

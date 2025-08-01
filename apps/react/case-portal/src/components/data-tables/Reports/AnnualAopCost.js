@@ -1,3 +1,5 @@
+// Full refactored code with setTimeout to show grids progressively and pagination fixed
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
 import MuiAccordion from '@mui/material/Accordion'
@@ -8,7 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -17,9 +19,8 @@ import getKendoColumns from 'components/data-tables/CommonHeader/kendoHeader'
 import {
   ExcelExport,
   ExcelExportColumn,
-} from '../../../../node_modules/@progress/kendo-react-excel-export/index'
-import { Button } from '../../../../node_modules/@mui/material/index'
-import { useRef } from 'react'
+} from '@progress/kendo-react-excel-export'
+import { Button } from '@mui/material'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -58,99 +59,98 @@ const AnnualAopCost = () => {
   const [rowsNormCost, setRowsNormCost] = useState([])
   const [headers2, setHeaders2] = useState([])
   const [keys2, setKeys2] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [showGrids, setShowGrids] = useState({})
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const [loading, setLoading] = useState(false)
   const isOldYear = oldYear?.oldYear === 1
-  const fetchData = async (reportType, setState, selectedDropdown) => {
+
+  const fetchData = async (reportType, setState) => {
     try {
-      selectedDropdown = localStorage.getItem('year')
-      var data = []
-      data = await DataService.getAnnualCostAopReport(
+      const selectedDropdown = localStorage.getItem('year')
+      const data = await DataService.getAnnualCostAopReport(
         keycloak,
         reportType,
         selectedDropdown,
       )
       if (data?.code === 200) {
-        const rowsWithId = data?.data?.map((item, index) => ({
-          ...item,
-          id: index,
-          isEditable: false,
-        }))
-        if (reportType == 'price') {
-          const headers2 = data?.data[0]?.headers
-          setHeaders2(headers2)
-          const keys2 = data?.data[0]?.keys
-          setKeys2(keys2)
-          const rowsWithId2 = data?.data[0]?.results?.map((item, index) => ({
-            ...item,
-            id: index,
-            isEditable: false,
-          }))
-          setState(rowsWithId2)
+        if (reportType === 'price') {
+          setHeaders2(data?.data[0]?.headers)
+          setKeys2(data?.data[0]?.keys)
+          setState(
+            data?.data[0]?.results?.map((item, index) => ({
+              ...item,
+              id: index,
+              isEditable: false,
+            })),
+          )
         } else {
-          setState(rowsWithId)
+          setState(
+            data?.data?.map((item, index) => ({
+              ...item,
+              id: index,
+              isEditable: false,
+            })),
+          )
         }
-      } else {
-        console.error(`Error fetching ${reportType} data`)
-        setLoading(false)
       }
     } catch (error) {
       console.error(`Error fetching ${reportType} data:`, error)
-      setLoading(false)
     }
   }
 
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
-  const colsProduction = getKendoColumns({
-    headerMap,
-    type: 'Production',
-  })
+  const colsProduction = getKendoColumns({ headerMap, type: 'Production' })
   const colsPrice = getKendoColumns({
     headerMap,
     type: 'Price',
     headers2,
     keys2,
   })
-  const colsNorm = getKendoColumns({
-    headerMap,
-    type: 'Norm',
-  })
-  const colsQuantity = getKendoColumns({
-    headerMap,
-    type: 'Quantity',
-  })
-  const colsNormCost = getKendoColumns({
-    headerMap,
-    type: 'NormCost',
-  })
-
-  //useEffect(() => {
-  // fetchData('aopYearFilter', setUnit)
-  //}, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  const colsNorm = getKendoColumns({ headerMap, type: 'Norm' })
+  const colsQuantity = getKendoColumns({ headerMap, type: 'Quantity' })
+  const colsNormCost = getKendoColumns({ headerMap, type: 'NormCost' })
 
   useEffect(() => {
     const fetchAllData = async () => {
       setLoading(true)
-
-      const allFetches = [
+      await Promise.all([
         fetchData('production', setRowsProduction),
         fetchData('price', setRowsPrice),
         fetchData('norm', setRowsNorm),
         fetchData('quantity', setRowsQuantity),
         fetchData('normCost', setRowsNormCost),
-      ]
-
-      await Promise.all(allFetches)
+      ])
       setLoading(false)
     }
 
     fetchAllData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [plantID, yearChanged, keycloak])
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(
+        () => setShowGrids((prev) => ({ ...prev, production: true })),
+        0,
+      ),
+      setTimeout(() => setShowGrids((prev) => ({ ...prev, price: true })), 100),
+      setTimeout(() => setShowGrids((prev) => ({ ...prev, norm: true })), 200),
+      setTimeout(
+        () => setShowGrids((prev) => ({ ...prev, quantity: true })),
+        300,
+      ),
+      setTimeout(
+        () => setShowGrids((prev) => ({ ...prev, normCost: true })),
+        400,
+      ),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
@@ -165,13 +165,11 @@ const AnnualAopCost = () => {
     const options4 = exportRef4.current.workbookOptions()
     const options5 = exportRef5.current.workbookOptions()
 
-    // Add additional sheets to first export
     options1.sheets[1] = options2.sheets[0]
     options1.sheets[2] = options3.sheets[0]
     options1.sheets[3] = options4.sheets[0]
     options1.sheets[4] = options5.sheets[0]
 
-    // Rename sheets
     options1.sheets[0].title = 'Production'
     options1.sheets[1].title = 'Price'
     options1.sheets[2].title = 'Norms'
@@ -181,12 +179,7 @@ const AnnualAopCost = () => {
     exportRef1.current.save(options1)
   }
 
-  const currentDateTime = new Date()
-    .toISOString()
-    .replace(/T/, ' ')
-    .replace(/:/g, '-')
-    .split('.')[0]
-  const fileName = `Annual AOP Cost ${currentDateTime}.xlsx`
+  const fileName = `Annual AOP Cost ${new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').split('.')[0]}.xlsx`
 
   return (
     <div>
@@ -197,56 +190,33 @@ const AnnualAopCost = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        <ExcelExport data={rowsProduction} ref={exportRef1} fileName={fileName}>
-          {colsProduction.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsPrice} ref={exportRef2}>
-          {colsPrice.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsNorm} ref={exportRef3}>
-          {colsNorm.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-        <ExcelExport data={rowsQuantity} ref={exportRef4}>
-          {colsQuantity.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsNormCost} ref={exportRef5}>
-          {colsNormCost.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
+        {[rowsProduction, rowsPrice, rowsNorm, rowsQuantity, rowsNormCost].map(
+          (data, i) => (
+            <ExcelExport
+              key={i}
+              data={data}
+              ref={
+                [exportRef1, exportRef2, exportRef3, exportRef4, exportRef5][i]
+              }
+              fileName={fileName}
+            >
+              {[
+                colsProduction,
+                colsPrice,
+                colsNorm,
+                colsQuantity,
+                colsNormCost,
+              ][i].map((col) => (
+                <ExcelExportColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title}
+                />
+              ))}
+            </ExcelExport>
+          ),
+        )}
       </div>
 
       {!isOldYear && (
@@ -262,101 +232,63 @@ const AnnualAopCost = () => {
       )}
 
       <Box display='flex' flexDirection='column' gap={1}>
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Production
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsProduction}
-                  columns={colsProduction}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Price
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid rows={rowsPrice} columns={colsPrice} />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Norm
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid rows={rowsNorm} columns={colsNorm} />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                {lowerVertName === 'meg'
-                  ? 'Quantity (EOE Production * Individual Particulars Norms Value)'
-                  : 'Quantity (Production * Individual Particulars Norms Value)'}
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid rows={rowsQuantity} columns={colsQuantity} />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Annual AOP Cost ((Total Quantity * AvgPrice)/Total Production)
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid rows={rowsNormCost} columns={colsNormCost} />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
+        {[
+          {
+            label: 'Production123',
+            visible: showGrids.production,
+            rows: rowsProduction,
+            cols: colsProduction,
+          },
+          {
+            label: 'Price',
+            visible: showGrids.price,
+            rows: rowsPrice,
+            cols: colsPrice,
+          },
+          {
+            label: 'Norm',
+            visible: showGrids.norm,
+            rows: rowsNorm,
+            cols: colsNorm,
+          },
+          {
+            label:
+              lowerVertName === 'meg'
+                ? 'Quantity (EOE Production * Individual Particulars Norms Value)'
+                : 'Quantity (Production * Individual Particulars Norms Value)',
+            visible: showGrids.quantity,
+            rows: rowsQuantity,
+            cols: colsQuantity,
+          },
+          {
+            label:
+              'Annual AOP Cost ((Total Quantity * AvgPrice)/Total Production)',
+            visible: showGrids.normCost,
+            rows: rowsNormCost,
+            cols: colsNormCost,
+          },
+        ].map(
+          (section, i) =>
+            section.visible && (
+              <CustomAccordion key={i} defaultExpanded disableGutters>
+                <CustomAccordionSummary>
+                  <Typography component='span' className='grid-title'>
+                    {section.label}
+                  </Typography>
+                </CustomAccordionSummary>
+                <CustomAccordionDetails>
+                  <Box sx={{ width: '100%', margin: 0 }}>
+                    <KendoDataGrid
+                      rows={section.rows}
+                      columns={section.cols}
+                      pageSize={10}
+                      scrollable='none'
+                    />
+                  </Box>
+                </CustomAccordionDetails>
+              </CustomAccordion>
+            ),
+        )}
       </Box>
     </div>
   )
