@@ -435,38 +435,40 @@ useEffect(() => {
   //
 const RedHighlightCell = (props) => {
   const { dataItem, field, tdProps, children, customModifiedCells, allRedCell } = props;
+
   const rowId = dataItem.id;
   const value = dataItem[field];
 
-  // Highlight if edited
-    const isEdited = Object.prototype.hasOwnProperty.call(
+  // Check if edited (local edits)
+  const isEdited = Object.prototype.hasOwnProperty.call(
     customModifiedCells?.[rowId] || {},
     field
   );
 
-  // Highlight if part of allRedCell (MEG logic)
-  const month = monthMap[field?.toLowerCase()];
-  const normId = dataItem.materialFkId?.toLowerCase();
+  // Backend red highlight (allRedCell logic)
+  const month = field; // Using field name as month
+  const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id;
+
   const isRedFromAllRedCell = allRedCell?.some(
     (cell) =>
       cell.month === month &&
-      cell.normParameterFKId?.toLowerCase() === normId
+      cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase()
   );
 
+  // Final highlight condition
   const shouldHighlight = isEdited || isRedFromAllRedCell;
 
   return (
     <td
-  {...tdProps}
-  title={value}
-  style={{
-    color: shouldHighlight ? 'orange' : undefined,
-    fontWeight: shouldHighlight ? 'bold' : undefined
-  }}
->
-  {children}
-</td>
-
+      {...tdProps}
+      title={value}
+      style={{
+        color: shouldHighlight ? 'orange' : undefined,
+        fontWeight: shouldHighlight ? 'bold' : undefined,
+      }}
+    >
+      {children}
+    </td>
   );
 };
 
