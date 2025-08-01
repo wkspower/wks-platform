@@ -771,26 +771,9 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 					failedList.add(decokeRunLengthDTO);
 					continue;
 				}
-				if (decokeRunLengthDTO.getId() != null &&
-					    !decokeRunLengthDTO.getId().trim().isEmpty()) {
-					Optional<DecokeRunLength> decokeRunLengthopt = decokeRunLengthRepository
-							.findById(UUID.fromString(decokeRunLengthDTO.getId()));
-					if (decokeRunLengthopt.isPresent()) {
-						DecokeRunLength decokeRunLength = decokeRunLengthopt.get();
-						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
-						decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
-						decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
-						decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
-						decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
-						decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
-						decokeRunLengthRepository.save(decokeRunLength);
-					} else {
-						decokeRunLengthDTO.setSaveStatus("Failed");
-						decokeRunLengthDTO.setErrDescription("Norm Paramter not found");
-						failedList.add(decokeRunLengthDTO);
-						continue;
-					}
-				}else {
+						String newyear=nextAcademicYear(year);
+						int deletedRecords=decokeRunLengthRepository.deleteByPlantFkIdAndAopYear(UUID.fromString(plantId),newyear);
+						System.out.println(deletedRecords);
 						DecokeRunLength decokeRunLength = new DecokeRunLength();
 						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
 						decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
@@ -809,9 +792,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						}
 						decokeRunLength.setDate(parsedDate);
 						decokeRunLength.setPlantFkId(UUID.fromString(plantId));
-						decokeRunLength.setAopYear(year);
+						decokeRunLength.setAopYear(newyear);
 						decokeRunLengthRepository.save(decokeRunLength);
-				}
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -832,6 +814,17 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		aopMessageVM.setData(failedList);
 		return aopMessageVM;
 	}
+	
+	public static String nextAcademicYear(String yearStr) {
+	    String[] parts = yearStr.split("-");
+	    // e.g. yearStr="2025-26", parts[0]="2025"
+	    int start = Integer.parseInt(parts[0].trim());
+	    int next = start + 1;
+	    // Format next start and next+1
+	    return String.format("%04d-%02d", next, (next + 1) % 100);
+	    
+	}
+
 
 	@Override
 	public AOPMessageVM calculateDecokingActivities(String plantId, String aopYear) {
