@@ -2,39 +2,11 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import NavGroup from './NavGroup'
 
-import { useMenuContext } from 'menu/menuProvider'
-import { useSession } from 'SessionStoreContext'
+import useFilteredMenu from 'hooks/useFilteredMenu'
 
 const Navigation = () => {
   // const menu = useMenu()
-  const keycloak = useSession()
-  const { items: menuItems } = useMenuContext()
-  const menu = { items: [...menuItems] }
-  const isPlantManager = keycloak?.realmAccess?.roles?.includes('plant_manager')
-
-  const filterMenuByRole = (menuItems, hasPlantManagerRole) => {
-    return menuItems.map((item) => {
-      if (item.type === 'group' && item.children) {
-        const filteredChildren = item.children.filter((child) => {
-          if (child.id === 'user-management' && !hasPlantManagerRole) {
-            return false
-          }
-          return true
-        })
-
-        return {
-          ...item,
-          children: filteredChildren,
-        }
-      }
-      return item
-    })
-  }
-
-  const filteredMenu = {
-    ...menu,
-    items: filterMenuByRole(menu?.items || [], isPlantManager),
-  }
+  const filteredMenu = useFilteredMenu()
   const navGroups = filteredMenu?.items?.map((item, index) => {
     switch (item.type) {
       case 'group':

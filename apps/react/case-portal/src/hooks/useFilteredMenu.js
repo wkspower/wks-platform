@@ -1,18 +1,20 @@
+import { IconUserCog } from '@tabler/icons-react'
 import { useMenuContext } from 'menu/menuProvider'
 import { useMemo } from 'react'
 import { useSession } from 'SessionStoreContext'
+import i18n from '../i18n/index'
 
 const useFilteredMenu = () => {
   const keycloak = useSession()
   const { items: menuItems } = useMenuContext()
-  const isPlantManager = keycloak?.realmAccess?.roles?.includes('plant_manager')
+  const isPlantManager = keycloak?.realmAccess?.roles?.includes('cts_admin')
   // const isPlantManager = true
 
-  const filterMenuByRole = (items, hasPlantManagerRole) => {
-    return items.map((item) => {
+  const filterMenuByRole = (items) => {
+    return items.map((item, index) => {
       if (item.type === 'group' && item.children) {
         const filteredChildren = item.children.filter((child) => {
-          return !(child.id === 'user-management' && !hasPlantManagerRole)
+          return child.id !== 'user-management'
         })
 
         return {
@@ -24,11 +26,35 @@ const useFilteredMenu = () => {
     })
   }
 
+  const userManagementRoute = {
+    children: [
+      {
+        id: 'user-management',
+        title: i18n.t('menu.userManage'),
+        type: 'item',
+        url: '/user-management',
+        icon: IconUserCog,
+        breadcrumbs: true,
+      },
+    ],
+    id: 'utilities',
+    title: '',
+    type: 'group',
+    url: '',
+    icon: undefined,
+    breadcrumbs: false,
+  }
+
   const filteredMenu = useMemo(() => {
+    const filteredMenuItem = filterMenuByRole(menuItems || [])
+    const updatedMenu = isPlantManager
+      ? [...filteredMenuItem, userManagementRoute]
+      : filteredMenuItem
+
     return {
-      items: filterMenuByRole(menuItems || [], isPlantManager),
+      items: updatedMenu,
     }
-  }, [menuItems, isPlantManager])
+  }, [menuItems])
 
   return filteredMenu
 }
