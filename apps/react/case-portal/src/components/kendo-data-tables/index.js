@@ -284,6 +284,11 @@ const KendoDataTables = ({
     },
     [setRows, setModifiedCells, setCustomModifiedCells]
   )
+useEffect(() => {
+  if (Object.keys(modifiedCells).length === 0) {
+    setCustomModifiedCells({});
+  }
+}, [modifiedCells]);
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
@@ -434,7 +439,10 @@ const RedHighlightCell = (props) => {
   const value = dataItem[field];
 
   // Highlight if edited
-  const isEdited = !!customModifiedCells?.[rowId]?.hasOwnProperty(field);
+    const isEdited = Object.prototype.hasOwnProperty.call(
+    customModifiedCells?.[rowId] || {},
+    field
+  );
 
   // Highlight if part of allRedCell (MEG logic)
   const month = monthMap[field?.toLowerCase()];
@@ -1293,6 +1301,7 @@ const RedHighlightCell = (props) => {
       allRedCell={allRedCell}
     />
   ),
+  headerCell: SimpleHeaderWithTooltip,
 }}
             columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'
