@@ -370,7 +370,7 @@ const UserManagementTable = ({ keycloak }) => {
               // navigate('/user-form')
               handleAddPlantSite()
             }}
-            style={{ marginTop: '30%', width: '10%', alignSelf: 'flex-end' }}
+            style={{ marginTop: '100px', width: '10%', alignSelf: 'flex-end' }}
             disabled={!selectedUsers.length}
             loading={loading} // Use the loading prop to trigger loading state
             loadingposition='start' // Use loadingPosition to control where the spinner appears
@@ -436,7 +436,7 @@ const UserManagementTable = ({ keycloak }) => {
             variant='contained'
             className='btn-save'
             onClick={handleAddPlantSite}
-            style={{ marginTop: '30%', width: '10%', alignSelf: 'flex-end' }}
+            style={{ marginTop: '100px', width: '10%', alignSelf: 'flex-end' }}
             disabled={!selectedUsers.length}
             loading={loading}
             loadingposition='start'

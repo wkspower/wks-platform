@@ -610,8 +610,8 @@ const NormalOpNormsScreen = () => {
 
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
-      downloadExcelBtn: true,
-      uploadExcelBtn: true
+      downloadExcelBtn: lowerVertName == 'meg' ? true : false,
+      uploadExcelBtn: lowerVertName == 'meg' ? true : false,
     },
     isOldYear,
   )

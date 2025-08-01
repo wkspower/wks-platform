@@ -380,8 +380,10 @@ const SelectivityData = (props) => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn: (lowerVertName == 'meg' || lowerVertName == 'cracker') ? true : false,
-      uploadExcelBtn: (lowerVertName == 'meg' || lowerVertName == 'cracker') ? true : false,
+      downloadExcelBtn:
+        lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
+      uploadExcelBtn:
+        lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
       showLoad: lowerVertName == 'meg' ? true : false,
       allAction: true,
     },

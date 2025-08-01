@@ -1,7 +1,7 @@
 import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Backdrop,
   Box,
@@ -56,8 +56,11 @@ const CustomAccordion = styled((props) => (
 }))
 
 const year = localStorage.getItem('year')
+
 const startYear = parseInt(year?.split('-')[0], 10)
 const nextYear = `${startYear + 1}-${(startYear + 2).toString()?.slice(-2)}`
+const lowerLimit = new Date(year + 1, 3, 1)
+const upperLimit = new Date(year + 2, 2, 31)
 
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
@@ -137,14 +140,37 @@ const KendoDataTablesCrackerRunLength = ({
   const [loading1, setLoading1] = useState(false)
   const [open, setOpen] = useState(false)
   const [startDate, setStartDate] = useState(null)
+
   const [hValues, setHValues] = useState({
-    H10: '10',
-    H11: '11',
-    H12: '12',
-    H13: '13',
-    H14: '14',
-    Demo: '16',
+    H10: '0',
+    H11: '0',
+    H12: '0',
+    H13: '0',
+    H14: '0',
+    Demo: 'SAD',
   })
+  const [snackbarOpen1, setSnackbarOpen1] = useState(false)
+  const [snackbarData1, setSnackbarData1] = useState({
+    message: '',
+    severity: 'info',
+  })
+
+  const [lowerLimitDate, setLowerLimitDate] = useState(null)
+  const [upperLimitDate, setUpperLimitDate] = useState(null)
+
+  useEffect(() => {
+    const year = localStorage.getItem('year')
+    const startYear = parseInt(year?.split('-')[0], 10)
+
+    const lowerLimit = new Date(startYear, 3, 1)
+    const upperLimit = new Date(startYear + 1, 2, 31)
+
+    setLowerLimitDate(lowerLimit)
+    setUpperLimitDate(upperLimit)
+
+    // console.log('Lower Limit:', lowerLimit)
+    // console.log('Upper Limit:', upperLimit)
+  }, []) // ? runs only once after first render
 
   const fileInputRef = useRef(null)
   const handleEditChange = useCallback((e) => {
@@ -474,8 +500,9 @@ const KendoDataTablesCrackerRunLength = ({
     [setSingleRow, setModifiedCellsSingleRow],
   )
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
+  const handleOpen = () => {
+    setOpen(true)
+  }
 
   const handleChange = (key, value) => {
     setHValues((prev) => ({ ...prev, [key]: value }))
@@ -1127,77 +1154,205 @@ const KendoDataTablesCrackerRunLength = ({
     </Grid>
   )
 
-  const handleCalculate2 = (hValues) => {
-    fetchData()
-    // fetchDataNew(startDate, hValues)
-  }
-  const handleSave = () => {
-    console.log('singleRow', singleRow)
+  const handleCalculateData = (hValues) => {
+    fetchDataNextYearCalculate(hValues, startDate)
   }
 
-  const fetchData = useCallback(async () => {
+  const handleSave = () => {
+    saveCrackerRunLength(singleRow)
+  }
+
+  const saveCrackerRunLength = async (singleRow) => {
     setLoading1(true)
     try {
-      const data3 = await DataService.getIbrScreen3(keycloak)
-      const toDateObject = (value) =>
-        value ? moment(value, 'YYYY-MM-DD').toDate() : null
+      var plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      const payload = [
+        {
+          tenProposed: singleRow[0]?.tenProposed || null,
+          elevenProposed: singleRow[0]?.elevenProposed || null,
+          twelveProposed: singleRow[0]?.twelveProposed || null,
+          thirteenProposed: singleRow[0]?.thirteenProposed || null,
+          fourteenProposed: singleRow[0]?.fourteenProposed || null,
+          plantId: plantId,
+          id: null,
+          demo: singleRow[0]?.demo || null,
+          date: moment(singleRow[0]?.date).format('YYYY-MM-DD'),
+        },
+      ]
 
-      if (data3?.code === 200) {
-        const processedData = data3.data?.decokingActivitiesList.map(
-          (item, index) => ({
+      const response = await DataService.saveCrackerRunLength(
+        plantId,
+        payload,
+        keycloak,
+      )
+      if (response?.code == 200) {
+        setSnackbarOpen1(true)
+        setSnackbarData1({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setLoading1(false)
+      } else {
+        setSnackbarOpen1(true)
+        setSnackbarData1({
+          message: 'Data Saved Falied!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
+      setLoading1(false)
+    } finally {
+      // fetchData(3)
+      setLoading1(false)
+    }
+  }
+
+  const fetchDataNextYearParameters = useCallback(
+    async (date) => {
+      setLoading1(true)
+      try {
+        const res = await DataService.getCrackerNextYearParameters(
+          keycloak,
+          moment(date).format('YYYY-MM-DD'),
+        )
+
+        if (
+          res?.code === 200 &&
+          Array.isArray(res.data) &&
+          res.data.length > 0
+        ) {
+          const item = res.data[0]
+
+          const mappedValues = {
+            H10: item.hTen || '0',
+            H11: item.hEleven || '0',
+            H12: item.hTwelve || '0',
+            H13: item.hThirteen || '0',
+            H14: item.hFourteen || '0',
+            Demo: item.demo || '',
+          }
+
+          setHValues(mappedValues)
+          // setStartDate(item.startDate ? new Date(item.startDate) : null)
+
+          // const data4 = await DataService.getCrackerNextYearData(keycloak)
+        }
+      } catch (err) {
+        console.error('Error loading data:', err)
+      } finally {
+        // setLoading(false)
+        setLoading1(false)
+      }
+    },
+    [keycloak],
+  )
+
+  const fetchDataNextYearCalculate = useCallback(
+    async (hValuesParam, startDateParam) => {
+      setLoading1(true)
+      try {
+        const queryParams = {
+          h10: hValuesParam.H10,
+          h11: hValuesParam.H11,
+          h12: hValuesParam.H12,
+          h13: hValuesParam.H13,
+          h14: hValuesParam.H14,
+          startDate: moment(startDateParam).format('YYYY-MM-DD'),
+        }
+
+        const res = await DataService.getCrackerNextYearData(
+          keycloak,
+          queryParams,
+        )
+
+        if (
+          res?.code === 200 &&
+          Array.isArray(res.data) &&
+          res.data.length > 0
+        ) {
+          const toDateObject = (value) =>
+            value ? moment(value, 'YYYY-MM-DD').toDate() : null
+
+          const processedData = res?.data?.map((item, index) => ({
             ...item,
             month_: item?.month,
-            idFromApi: item?.id,
             id: index,
             remarks: item?.remarks || '',
             date: toDateObject(item.date),
-          }),
-        )
+            tenProposed: item.hTenProposed,
+            hElevenActual: '',
+            elevenProposed: item.hElevenProposed,
+            hTwelveActual: '',
+            twelveProposed: item.hTwelveProposed,
+            hThirteenActual: '',
+            thirteenProposed: item.hThirteenProposed,
+            hFourteenActual: '',
+            fourteenProposed: item.hFourteenProposed,
+          }))
 
-        const lastRow = processedData[processedData.length - 1]
+          const lastRow = processedData[processedData.length - 1]
+          const secondLastRow = processedData[processedData.length - 2]
 
-        const incrementIfNumber = (val) =>
-          !isNaN(val) ? (parseInt(val, 10) + 1).toString() : val
+          // Add exactly 1 day (regardless of month/year)
+          const nextDate = toDateObject(moment(lastRow.date).add(1, 'day'))
+          const nextMonthName = moment(nextDate).format('MMMM')
 
-        const nextDate = toDateObject(moment(lastRow.date).add(1, 'month'))
-        const nextMonthName = moment(lastRow.date)
-          .add(1, 'month')
-          ?.format('MMMM')
+          // Generate unique ID
+          const generateRandomId = () =>
+            `${Date.now()}-${Math.floor(Math.random() * 100000)}`
 
-        const generateRandomId = () =>
-          `${Date.now()}-${Math.floor(Math.random() * 100000)}`
+          // Enhanced increment function with SAD check
+          const incrementIfNumberOrZero = (fieldName) => {
+            const lastVal = lastRow[fieldName]
+            const secondLastVal = secondLastRow?.[fieldName]
 
-        const newRow = {
-          ...lastRow,
-          id: lastRow.id + 1,
-          date: nextDate,
-          month: nextMonthName,
-          month_: nextMonthName,
-          hTenActual: incrementIfNumber(lastRow.hTenActual),
-          tenProposed: incrementIfNumber(lastRow.tenProposed),
-          hElevenActual: incrementIfNumber(lastRow.hElevenActual),
-          elevenProposed: incrementIfNumber(lastRow.elevenProposed),
-          hTwelveActual: incrementIfNumber(lastRow.hTwelveActual),
-          twelveProposed: incrementIfNumber(lastRow.twelveProposed),
-          hThirteenActual: incrementIfNumber(lastRow.hThirteenActual),
-          thirteenProposed: incrementIfNumber(lastRow.thirteenProposed),
-          hFourteenActual: incrementIfNumber(lastRow.hFourteenActual),
-          fourteenProposed: incrementIfNumber(lastRow.fourteenProposed),
-          idFromApi: generateRandomId(),
+            if (lastVal === 'SAD' && secondLastVal === 'SAD') return '0'
+
+            return !isNaN(lastVal)
+              ? (parseInt(lastVal, 10) + 1).toString()
+              : lastVal
+          }
+
+          const newRow = {
+            ...lastRow,
+            id: lastRow.id + 1,
+            date: nextDate,
+            month: nextMonthName,
+            month_: nextMonthName,
+            hTenActual: '',
+            tenProposed: incrementIfNumberOrZero('tenProposed'),
+            hElevenActual: '',
+            elevenProposed: incrementIfNumberOrZero('elevenProposed'),
+            hTwelveActual: '',
+            twelveProposed: incrementIfNumberOrZero('twelveProposed'),
+            hThirteenActual: '',
+            thirteenProposed: incrementIfNumberOrZero('thirteenProposed'),
+            hFourteenActual: '',
+            fourteenProposed: incrementIfNumberOrZero('fourteenProposed'),
+            demo: incrementIfNumberOrZero('demo'),
+            idFromApi: generateRandomId(),
+          }
+
+          setRowsPopUp([...processedData, newRow])
+          setSingleRow([newRow])
         }
-
-        setRowsPopUp([...processedData, newRow])
-        setSingleRow([newRow])
-      } else {
+      } catch (err) {
         setRowsPopUp([])
+        console.error('Error loading data:', err)
+      } finally {
+        // setLoading(false)
+        setLoading1(false)
       }
-    } catch (err) {
-      console.error('Error loading data:', err)
-    } finally {
-      // setLoading(false)
-      setLoading1(false)
-    }
-  }, [keycloak])
+    },
+    [keycloak],
+  )
 
   const fetchDataNew = useCallback(
     async (date, hvalues) => {
@@ -1206,6 +1361,42 @@ const KendoDataTablesCrackerRunLength = ({
     },
     [keycloak],
   )
+
+  const handleCancelClick = () => {
+    // console.log('Dialog closed via Cancel')
+    setHValues({})
+    setRowsPopUp([])
+    setSingleRow([])
+    setOpen(false)
+    setStartDate(null)
+  }
+
+  const handleClose = () => {
+    // console.log('1 handle close ')
+
+    setOpen(false)
+  }
+
+  const handleStartDateChange = (e) => {
+    setStartDate(e.value)
+
+    const selectedDate = e.value
+    const year = localStorage.getItem('year')
+
+    if (
+      lowerLimitDate &&
+      upperLimitDate &&
+      (selectedDate < lowerLimitDate || selectedDate > upperLimitDate)
+    ) {
+      setSnackbarOpen1(true)
+      setSnackbarData1({
+        message: `Date must be between 01-Apr and 31-Mar for financial year ${year}.`,
+        severity: 'error',
+      })
+      return
+    }
+    fetchDataNextYearParameters(e.value)
+  }
 
   return (
     <Box>
@@ -1351,10 +1542,10 @@ const KendoDataTablesCrackerRunLength = ({
       </Box>
 
       <Notification
-        open={snackbarOpen}
-        message={snackbarData?.message || ''}
-        severity={snackbarData?.severity || 'info'}
-        onClose={() => setSnackbarOpen(false)}
+        open={snackbarOpen1}
+        message={snackbarData1?.message || ''}
+        severity={snackbarData1?.severity || 'info'}
+        onClose={() => setSnackbarOpen1(false)}
       />
 
       <Dialog
@@ -1451,30 +1642,17 @@ const KendoDataTablesCrackerRunLength = ({
 
       <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth>
         <DialogTitle style={{ padding: '8px 16px', fontSize: '16px' }}>
-          Configuration for Next Year {nextYear}
+          Configuration for Next Year ({nextYear})
         </DialogTitle>
 
         <DialogContent dividers style={{ padding: '8px' }}>
           <div
             style={{
               display: 'flex',
-              justifyContent: 'flex-end', // aligns content to the right
+              justifyContent: 'flex-end',
               alignItems: 'flex-end',
             }}
-          >
-            <button
-              onClick={() => handleCalculate2(hValues)}
-              disabled={
-                !startDate ||
-                Object.values(hValues).some(
-                  (value) => value === null || value === '',
-                )
-              }
-              className='btn-save'
-            >
-              Calculate
-            </button>
-          </div>
+          ></div>
           <div
             style={{
               display: 'grid',
@@ -1490,8 +1668,10 @@ const KendoDataTablesCrackerRunLength = ({
                 id='start-date-1'
                 format='dd-MM-yyyy'
                 value={startDate}
-                onChange={(e) => setStartDate(e.value)}
+                onChange={handleStartDateChange}
                 style={{ width: '100%' }}
+                min={lowerLimitDate}
+                max={upperLimitDate}
                 size='small'
                 popupSettings={{
                   appendTo: document.body,
@@ -1500,7 +1680,7 @@ const KendoDataTablesCrackerRunLength = ({
               />
             </div>
 
-            {['H10', 'H11', 'H12'].map((label) => (
+            {['H10', 'H11'].map((label) => (
               <div key={label}>
                 <label style={{ fontSize: '14px' }}>{label}</label>
                 <input
@@ -1516,9 +1696,26 @@ const KendoDataTablesCrackerRunLength = ({
                 />
               </div>
             ))}
+
+            {/* Calculate button in 4th column of first row */}
+            <div style={{ alignSelf: 'end', justifySelf: 'end' }}>
+              <button
+                onClick={() => handleCalculateData(hValues)}
+                disabled={
+                  !startDate ||
+                  Object.values(hValues).some(
+                    (value) => value === null || value === '',
+                  )
+                }
+                className='btn-save'
+              >
+                Calculate
+              </button>
+            </div>
 
             {/* Second Row */}
-            {['H13', 'H14', 'Demo'].map((label) => (
+            {/* {['H13', 'H14', 'Demo'].map((label) => ( */}
+            {['H12', 'H13', 'H14'].map((label) => (
               <div key={label}>
                 <label style={{ fontSize: '14px' }}>{label}</label>
                 <input
@@ -1534,8 +1731,6 @@ const KendoDataTablesCrackerRunLength = ({
                 />
               </div>
             ))}
-
-            {/* Calculate Button in last column of 2nd row */}
           </div>
 
           <div
@@ -1576,7 +1771,7 @@ const KendoDataTablesCrackerRunLength = ({
         </DialogContent>
 
         <DialogActions style={{ padding: '4px 8px' }}>
-          <Button onClick={() => setOpen(false)} size='small'>
+          <Button onClick={handleCancelClick} size='small'>
             Cancel
           </Button>
         </DialogActions>

@@ -14,6 +14,7 @@ import {
   ListItemText,
   MenuItem,
   Select,
+  Skeleton,
   Stack,
   Typography,
 } from '@mui/material'
@@ -43,6 +44,7 @@ const UserForm = ({ keycloak }) => {
 
   // Loading & Snackbar state
   const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -87,6 +89,7 @@ const UserForm = ({ keycloak }) => {
         result,
         permissions: permissions ? permissions : [],
       }
+      console.log('dynamic', dynamic, result)
       return mergeResult
     } catch (err) {
       const mergeResult = {
@@ -113,8 +116,8 @@ const UserForm = ({ keycloak }) => {
         }
       }
     })
-
     // 2. Remove data for any deselected verticals
+    console.log('fetchPromises', newMap)
     Object.keys(newMap).forEach((vId) => {
       if (!selectedVerticals.includes(vId)) {
         delete newMap[vId]
@@ -123,7 +126,8 @@ const UserForm = ({ keycloak }) => {
 
     // 3. Wait for all fetches to complete, then update state
     await Promise.all(fetchPromises)
-
+    const testing = await Promise.all(fetchPromises)
+    console.log('fetchPromises', testing)
     setScreensByVertical(newMap)
   }
 
@@ -133,7 +137,28 @@ const UserForm = ({ keycloak }) => {
     }
   }, [selectedVerticals, keycloak])
 
+  const getAllScreens = (screens) => {
+    const result = []
+
+    const traverse = (nodes) => {
+      for (const node of nodes) {
+        if (node.type === 'item') {
+          result.push(node.title)
+        } else if (node.children) {
+          traverse(node.children)
+        }
+      }
+    }
+
+    if (Array.isArray(screens)) {
+      traverse(screens)
+    }
+
+    return result
+  }
+
   const getScreensForVerticals = async () => {
+    setIsLoading(true)
     try {
       const plantData = localStorage.getItem('revokeData')
         ? JSON.parse(localStorage.getItem('revokeData'))?.plantData
@@ -145,74 +170,52 @@ const UserForm = ({ keycloak }) => {
       )
 
       setSelectedVerticals(fVerticalIds)
-      const newVerticalSites = {}
-      fVerticalIds.forEach((verticalId) => {
+      let newVerticalSites = {}
+
+      for (const verticalId of fVerticalIds) {
         const vertical = plantSiteData.find((v) => v.id === verticalId)
         const vert = verticalIds.find((v) => v[verticalId])
         const sites = Object.values(vert)[0]
-        const selSites = Object.values(vert)[0].map((s) => Object.keys(s)[0])
-        if (!vertical) return
+        const selSites = sites.map((s) => Object.keys(s)[0])
+        if (!vertical) continue
+
         let siteEntries = []
-        vertical.sites
-          .filter((s) => selSites.some((so) => so === s.id))
-          .forEach((site) => {
-            let sitePlants = []
-            const plants = sites.find((v) => v[site.id])
-            const selPlants = Object.values(plants)[0]
-            site.plants
-              .filter((p) => selPlants.some((sp) => sp === p.id))
-              .forEach(async (plant) => {
-                const fetchScreen = await fetchMenuScreens(verticalId, plant.id)
-                const screens = fetchScreen.result
-                const permissions = fetchScreen.permissions
-                let plantScreens = []
-                if (screens && screens.length > 0) {
-                  if (screens[0].children.length > 0) {
-                    plantScreens = screens[0].children[0].children.map(
-                      (s) => s.title,
-                    )
-                  }
-                }
-                const plantObj = {
-                  plantId: plant.id,
-                  screens: plantScreens,
-                  permissions: permissions,
-                }
-                sitePlants.push(plantObj)
-              })
-            const siteObj = {
-              site: site.id,
-              plants: sitePlants,
-            }
-            siteEntries.push(siteObj)
+
+        for (const site of vertical.sites.filter((s) =>
+          selSites.includes(s.id),
+        )) {
+          let sitePlants = []
+          const plants = sites.find((v) => v[site.id])
+          const selPlants = Object.values(plants)[0]
+
+          for (const plant of site.plants.filter((p) =>
+            selPlants.includes(p.id),
+          )) {
+            const fetchScreen = await fetchMenuScreens(verticalId, plant.id)
+            const screens = fetchScreen.result
+
+            const allScreens = getAllScreens(screens)
+            console.log('allScreens', allScreens)
+            const permissions = fetchScreen.permissions
+            // let plantScreens = []
+            // console.log('fetchScreen', screens)
+
+            // if (screens?.length > 0 && screens[0].children?.length > 0) {
+            //   plantScreens = screens[0].children[0].children.map((s) => s.title)
+            // }
+            sitePlants.push({
+              plantId: plant.id,
+              screens: allScreens,
+              permissions,
+            })
+          }
+
+          siteEntries.push({
+            site: site.id,
+            plants: sitePlants,
           })
-        // `/task/users//revoke-access/{userId} - PUT`
-        // const siteEntries = vertical.sites.reduce((acc, site) => {
-        //   if (
-        //     data.sites &&
-        //     (data.sites.includes(site.displayName) ||
-        //       data.sites.includes(site.name))
-        //     // true
-        //   ) {
-        //     const matchedPlant = site.plants.find(
-        //       (plant) =>
-        //         data.plants &&
-        //         (data.plants.includes(plant.displayName) ||
-        //           data.plants.includes(plant.name)),
-        //     )
-        //     acc.push({
-        //       site: site.id,
-        //       plants: [
-        //         {
-        //           plantId: matchedPlant ? matchedPlant.id : '',
-        //           screens: [],
-        //           permissions: { read: false, write: false, approve: false },
-        //         },
-        //       ],
-        //     })
-        //   }
-        //   return acc
-        // }, [])
+        }
+
         newVerticalSites[verticalId] =
           siteEntries.length > 0
             ? siteEntries
@@ -228,10 +231,14 @@ const UserForm = ({ keycloak }) => {
                   ],
                 },
               ]
-      })
+      }
 
       setVerticalSites(newVerticalSites)
-    } catch (error) {}
+    } catch (error) {
+      setIsLoading(false)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -304,69 +311,70 @@ const UserForm = ({ keycloak }) => {
   }, [plantSiteData, type])
 
   // Prepopulate vertical selections from navigation data if available
-  useEffect(() => {
-    if (plantSiteData.length > 0 && data && data.verticals) {
-      alert('runnn')
-      const newSelectedVerticals = plantSiteData
-        .filter(
-          (vertical) =>
-            data.verticals.includes(vertical.displayName) ||
-            data.verticals.includes(vertical.name),
-        )
-        .map((vertical) => vertical.id)
+  // useEffect(() => {
+  //   if (plantSiteData.length > 0 && data && data.verticals) {
+  //     console.log('type', type)
+  //     alert('runnn')
+  //     const newSelectedVerticals = plantSiteData
+  //       .filter(
+  //         (vertical) =>
+  //           data.verticals.includes(vertical.displayName) ||
+  //           data.verticals.includes(vertical.name),
+  //       )
+  //       .map((vertical) => vertical.id)
 
-      const newVerticalSites = {}
-      newSelectedVerticals.forEach((verticalId) => {
-        const vertical = plantSiteData.find((v) => v.id === verticalId)
-        if (!vertical) return
-        const siteEntries = vertical.sites.reduce((acc, site) => {
-          if (
-            data.sites &&
-            (data.sites.includes(site.displayName) ||
-              data.sites.includes(site.name))
-          ) {
-            const matchedPlant = site.plants.find(
-              (plant) =>
-                data.plants &&
-                (data.plants.includes(plant.displayName) ||
-                  data.plants.includes(plant.name)),
-            )
-            acc.push({
-              site: site.id,
-              plants: [
-                {
-                  plantId: matchedPlant ? matchedPlant.id : '',
-                  screens: [],
-                  permissions: [],
-                },
-              ],
-            })
-          }
-          return acc
-        }, [])
-        newVerticalSites[verticalId] =
-          siteEntries.length > 0
-            ? siteEntries
-            : [
-                {
-                  site: '',
-                  plants: [
-                    {
-                      plantId: '',
-                      screens: [],
-                      permissions: [],
-                    },
-                  ],
-                },
-              ]
-      })
-      setSelectedVerticals(newSelectedVerticals)
-      setVerticalSites(newVerticalSites)
-    } else if (plantSiteData.length > 0 && !data.verticals && type === 0) {
-      setSelectedVerticals([plantSiteData[0].id])
-      setVerticalSites(getInitialVerticalSites(plantSiteData))
-    }
-  }, [plantSiteData, data, type])
+  //     const newVerticalSites = {}
+  //     newSelectedVerticals.forEach((verticalId) => {
+  //       const vertical = plantSiteData.find((v) => v.id === verticalId)
+  //       if (!vertical) return
+  //       const siteEntries = vertical.sites.reduce((acc, site) => {
+  //         if (
+  //           data.sites &&
+  //           (data.sites.includes(site.displayName) ||
+  //             data.sites.includes(site.name))
+  //         ) {
+  //           const matchedPlant = site.plants.find(
+  //             (plant) =>
+  //               data.plants &&
+  //               (data.plants.includes(plant.displayName) ||
+  //                 data.plants.includes(plant.name)),
+  //           )
+  //           acc.push({
+  //             site: site.id,
+  //             plants: [
+  //               {
+  //                 plantId: matchedPlant ? matchedPlant.id : '',
+  //                 screens: [],
+  //                 permissions: [],
+  //               },
+  //             ],
+  //           })
+  //         }
+  //         return acc
+  //       }, [])
+  //       newVerticalSites[verticalId] =
+  //         siteEntries.length > 0
+  //           ? siteEntries
+  //           : [
+  //               {
+  //                 site: '',
+  //                 plants: [
+  //                   {
+  //                     plantId: '',
+  //                     screens: [],
+  //                     permissions: [],
+  //                   },
+  //                 ],
+  //               },
+  //             ]
+  //     })
+  //     setSelectedVerticals(newSelectedVerticals)
+  //     setVerticalSites(newVerticalSites)
+  //   } else if (plantSiteData.length > 0 && !data.verticals && type === 0) {
+  //     setSelectedVerticals([plantSiteData[0].id])
+  //     setVerticalSites(getInitialVerticalSites(plantSiteData))
+  //   }
+  // }, [plantSiteData, data, type])
 
   // Helper: Retrieve a vertical by ID
   const getVerticalById = (id) =>
@@ -638,7 +646,6 @@ const UserForm = ({ keycloak }) => {
         }),
       },
     }
-    console.log('selectedUsers', result)
     try {
       setLoading(true)
       let res = {}
@@ -660,9 +667,11 @@ const UserForm = ({ keycloak }) => {
         severity: 'success',
       })
       closeSaveDialogeBox()
-      navigate('/user-management', {
-        state: 'success',
-      })
+      setTimeout(() => {
+        navigate('/user-management', {
+          state: 'success',
+        })
+      }, 1000)
     } catch (error) {
       console.error('Update failed:', error)
       setSnackbarOpen(true)
@@ -760,6 +769,7 @@ const UserForm = ({ keycloak }) => {
           </Box>
 
           {selectedVerticals.map((verticalId) => {
+            console.log('siteEntry', verticalId)
             const vertical = getVerticalById(verticalId)
             if (!vertical) return null
 
@@ -782,260 +792,321 @@ const UserForm = ({ keycloak }) => {
                     width: '100%',
                   }}
                 >
-                  {verticalSites[verticalId]?.map((siteEntry, siteIndex) => (
-                    <Box key={siteIndex} mb={2}>
-                      <Grid container spacing={2} alignItems='center'>
-                        {/* Site Dropdown */}
-                        <Grid item xs={3} sm={2}>
-                          <Typography variant='h6' gutterBottom>
-                            Site
-                          </Typography>
-                          <FormControl fullWidth size='small'>
-                            <Select
-                              value={siteEntry.site}
-                              sx={{ height: '40px' }}
-                              onChange={(e) =>
-                                handleSiteChange(
-                                  verticalId,
-                                  siteIndex,
-                                  'site',
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              {getAvailableSites(verticalId, siteIndex).map(
-                                (siteOption) => (
-                                  <MenuItem
-                                    key={siteOption.id}
-                                    value={siteOption.id}
-                                  >
-                                    <ListItemText
-                                      primary={siteOption.displayName}
-                                    />
-                                  </MenuItem>
-                                ),
-                              )}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-                        {/* Add/Remove Site Entry */}
-                        <Grid item xs={1}>
-                          {siteIndex === 0 ? (
-                            <IconButton
-                              onClick={() => addSiteEntry(verticalId)}
-                              color='primary'
-                              sx={{ marginTop: '25px' }}
-                            >
-                              <AddIcon sx={{ color: '#0100cb' }} />
-                            </IconButton>
-                          ) : (
-                            <IconButton
-                              onClick={() =>
-                                removeSiteEntry(verticalId, siteIndex)
-                              }
-                              color='secondary'
-                              sx={{ marginTop: '25px' }}
-                            >
-                              <DeleteIcon sx={{ color: 'red' }} />
-                            </IconButton>
-                          )}
-                        </Grid>
-                        {siteEntry.plants.map((plantEntry, plantIndex) => {
-                          console.log('plantEntry', plantEntry)
-                          return (
-                            <Stack
-                              direction='row'
-                              gap={2}
-                              key={plantIndex}
-                              style={{
-                                display: 'flex',
-                                width: '60%',
-                                marginTop: '15px',
-                                marginLeft: plantIndex === 0 ? '12px' : '26%',
-                              }}
-                            >
-                              {/* Plant Dropdown */}
-                              <Grid item xs={4} sm={3}>
+                  {isLoading
+                    ? Array.from({ length: 2 }).map((_, index) => (
+                        <Box key={index} mb={2}>
+                          <Grid container spacing={2}>
+                            <Grid item xs={3} sm={2}>
+                              <Typography variant='h6' gutterBottom>
+                                Site
+                              </Typography>
+                              <Skeleton variant='rectangular' height={40} />
+                            </Grid>
+                            <Grid item xs={1}>
+                              <Skeleton
+                                variant='circular'
+                                width={40}
+                                height={40}
+                                sx={{ mt: 3 }}
+                              />
+                            </Grid>
+                            <Grid item xs={4} sm={3}>
+                              <Typography variant='h6' gutterBottom>
+                                Plant
+                              </Typography>
+                              <Skeleton variant='rectangular' height={40} />
+                            </Grid>
+                            <Grid item xs={1}>
+                              <Skeleton
+                                variant='circular'
+                                width={40}
+                                height={40}
+                                sx={{ mt: 3 }}
+                              />
+                            </Grid>
+                            <Grid item xs={4} sm={3}>
+                              <Typography variant='h6' gutterBottom>
+                                Screens
+                              </Typography>
+                              <Skeleton variant='rectangular' height={40} />
+                            </Grid>
+                          </Grid>
+                        </Box>
+                      ))
+                    : verticalSites[verticalId]?.map((siteEntry, siteIndex) => {
+                        console.log('siteEntry', siteEntry)
+                        return (
+                          <Box key={siteIndex} mb={2}>
+                            <Grid container spacing={2} alignItems='center'>
+                              {/* Site Dropdown */}
+                              <Grid item xs={3} sm={2}>
                                 <Typography variant='h6' gutterBottom>
-                                  Plant
+                                  Site
                                 </Typography>
                                 <FormControl fullWidth size='small'>
                                   <Select
-                                    value={plantEntry.plantId}
+                                    value={siteEntry.site}
                                     sx={{ height: '40px' }}
                                     onChange={(e) =>
-                                      handlePlantChange(
+                                      handleSiteChange(
                                         verticalId,
                                         siteIndex,
-                                        plantIndex,
-                                        'plantId',
+                                        'site',
                                         e.target.value,
                                       )
                                     }
                                   >
-                                    {getAvailablePlants(
-                                      vertical,
-                                      siteEntry,
-                                      plantIndex,
-                                    ).map((plantOption) => (
+                                    {getAvailableSites(
+                                      verticalId,
+                                      siteIndex,
+                                    ).map((siteOption) => (
                                       <MenuItem
-                                        key={plantOption.id}
-                                        value={plantOption.id}
+                                        key={siteOption.id}
+                                        value={siteOption.id}
                                       >
-                                        {plantOption.displayName}
+                                        <ListItemText
+                                          primary={siteOption.displayName}
+                                        />
                                       </MenuItem>
                                     ))}
                                   </Select>
                                 </FormControl>
                               </Grid>
-                              {/* Add or Remove Plant Entry */}
-                              <Grid
-                                item
-                                xs={1}
-                                style={{
-                                  // marginInline: '10px',
-                                  paddingTop: '12px',
-                                  // paddingLeft: '5px',
-                                }}
-                              >
-                                {plantIndex === 0 ? (
+                              {/* Add/Remove Site Entry */}
+                              <Grid item xs={1}>
+                                {siteIndex === 0 ? (
                                   <IconButton
-                                    onClick={() =>
-                                      addPlantEntry(verticalId, siteIndex)
-                                    }
+                                    onClick={() => addSiteEntry(verticalId)}
                                     color='primary'
-                                    sx={{ marginTop: '22px' }}
+                                    sx={{ marginTop: '25px' }}
                                   >
                                     <AddIcon sx={{ color: '#0100cb' }} />
                                   </IconButton>
                                 ) : (
                                   <IconButton
                                     onClick={() =>
-                                      removePlantEntry(
-                                        verticalId,
-                                        siteIndex,
-                                        plantIndex,
-                                      )
+                                      removeSiteEntry(verticalId, siteIndex)
                                     }
                                     color='secondary'
-                                    sx={{ marginTop: '22px' }}
+                                    sx={{ marginTop: '25px' }}
                                   >
                                     <DeleteIcon sx={{ color: 'red' }} />
                                   </IconButton>
                                 )}
                               </Grid>
-                              {/* Screens Dropdown */}
-                              <Grid item xs={4} sm={3}>
-                                <Typography variant='h6' gutterBottom>
-                                  Screens
-                                </Typography>
+                              {siteEntry.plants.map(
+                                (plantEntry, plantIndex) => {
+                                  console.log('plantEntry', plantEntry)
+                                  return (
+                                    <Stack
+                                      direction='row'
+                                      gap={2}
+                                      key={plantIndex}
+                                      style={{
+                                        display: 'flex',
+                                        width: '60%',
+                                        marginTop: '15px',
+                                        marginLeft:
+                                          plantIndex === 0 ? '12px' : '26%',
+                                      }}
+                                    >
+                                      {/* Plant Dropdown */}
+                                      <Grid item xs={4} sm={3}>
+                                        <Typography variant='h6' gutterBottom>
+                                          Plant
+                                        </Typography>
+                                        <FormControl fullWidth size='small'>
+                                          <Select
+                                            value={plantEntry.plantId}
+                                            sx={{ height: '40px' }}
+                                            onChange={(e) =>
+                                              handlePlantChange(
+                                                verticalId,
+                                                siteIndex,
+                                                plantIndex,
+                                                'plantId',
+                                                e.target.value,
+                                              )
+                                            }
+                                          >
+                                            {getAvailablePlants(
+                                              vertical,
+                                              siteEntry,
+                                              plantIndex,
+                                            ).map((plantOption) => (
+                                              <MenuItem
+                                                key={plantOption.id}
+                                                value={plantOption.id}
+                                              >
+                                                {plantOption.displayName}
+                                              </MenuItem>
+                                            ))}
+                                          </Select>
+                                        </FormControl>
+                                      </Grid>
+                                      {/* Add or Remove Plant Entry */}
+                                      <Grid
+                                        item
+                                        xs={1}
+                                        style={{
+                                          // marginInline: '10px',
+                                          paddingTop: '12px',
+                                          // paddingLeft: '5px',
+                                        }}
+                                      >
+                                        {plantIndex === 0 ? (
+                                          <IconButton
+                                            onClick={() =>
+                                              addPlantEntry(
+                                                verticalId,
+                                                siteIndex,
+                                              )
+                                            }
+                                            color='primary'
+                                            sx={{ marginTop: '22px' }}
+                                          >
+                                            <AddIcon
+                                              sx={{ color: '#0100cb' }}
+                                            />
+                                          </IconButton>
+                                        ) : (
+                                          <IconButton
+                                            onClick={() =>
+                                              removePlantEntry(
+                                                verticalId,
+                                                siteIndex,
+                                                plantIndex,
+                                              )
+                                            }
+                                            color='secondary'
+                                            sx={{ marginTop: '22px' }}
+                                          >
+                                            <DeleteIcon sx={{ color: 'red' }} />
+                                          </IconButton>
+                                        )}
+                                      </Grid>
+                                      {/* Screens Dropdown */}
+                                      <Grid item xs={4} sm={3}>
+                                        <Typography variant='h6' gutterBottom>
+                                          Screens
+                                        </Typography>
 
-                                <FormControl fullWidth size='small'>
-                                  <Select
-                                    multiple
-                                    sx={{ height: '40px' }}
-                                    value={plantEntry.screens || []}
-                                    onChange={(e) => {
-                                      const allScreens = getAvailableScreens(
-                                        verticalId,
-                                        siteIndex,
-                                        plantIndex,
-                                      )
-                                      const selected = e.target.value
+                                        <FormControl fullWidth size='small'>
+                                          <Select
+                                            multiple
+                                            sx={{ height: '40px' }}
+                                            value={plantEntry.screens || []}
+                                            onChange={(e) => {
+                                              const allScreens =
+                                                getAvailableScreens(
+                                                  verticalId,
+                                                  siteIndex,
+                                                  plantIndex,
+                                                )
+                                              const selected = e.target.value
 
-                                      let newSelection
-                                      if (selected.includes(SELECT_ALL)) {
-                                        newSelection =
-                                          (plantEntry.screens || []).length ===
-                                          allScreens.length
-                                            ? []
-                                            : allScreens
-                                      } else {
-                                        newSelection = selected
-                                      }
+                                              let newSelection
+                                              if (
+                                                selected.includes(SELECT_ALL)
+                                              ) {
+                                                newSelection =
+                                                  (plantEntry.screens || [])
+                                                    .length ===
+                                                  allScreens.length
+                                                    ? []
+                                                    : allScreens
+                                              } else {
+                                                newSelection = selected
+                                              }
 
-                                      handlePlantChange(
-                                        verticalId,
-                                        siteIndex,
-                                        plantIndex,
-                                        'screens',
-                                        newSelection,
-                                      )
-                                    }}
-                                    renderValue={(selected) =>
-                                      selected
-                                        .map((screen) => i18n.t(screen))
-                                        .join(', ')
-                                    }
-                                  >
-                                    <MenuItem value={SELECT_ALL}>
-                                      <Checkbox
-                                        checked={
-                                          (plantEntry.screens || []).length ===
-                                          getAvailableScreens(
-                                            verticalId,
-                                            siteIndex,
-                                            plantIndex,
-                                          ).length
-                                        }
-                                      />
-                                      <ListItemText primary='Select All' />
-                                    </MenuItem>
+                                              handlePlantChange(
+                                                verticalId,
+                                                siteIndex,
+                                                plantIndex,
+                                                'screens',
+                                                newSelection,
+                                              )
+                                            }}
+                                            renderValue={(selected) =>
+                                              selected
+                                                .map((screen) => i18n.t(screen))
+                                                .join(', ')
+                                            }
+                                          >
+                                            <MenuItem value={SELECT_ALL}>
+                                              <Checkbox
+                                                checked={
+                                                  (plantEntry.screens || [])
+                                                    .length ===
+                                                  getAvailableScreens(
+                                                    verticalId,
+                                                    siteIndex,
+                                                    plantIndex,
+                                                  ).length
+                                                }
+                                              />
+                                              <ListItemText primary='Select All' />
+                                            </MenuItem>
 
-                                    {getAvailableScreens(
-                                      verticalId,
-                                      siteIndex,
-                                      plantIndex,
-                                    ).map((screen) => (
-                                      <MenuItem key={screen} value={screen}>
-                                        <Checkbox
-                                          checked={(
-                                            plantEntry.screens || []
-                                          ).includes(screen)}
-                                        />
-                                        <ListItemText
-                                          primary={i18n.t(screen)}
-                                        />
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </Grid>
-                              {/* Permissions Dropdown */}
-                              <Grid item xs={4} sm={3}>
-                                <Typography variant='h6' gutterBottom>
-                                  Permissions
-                                </Typography>
-
-                                <FormControl fullWidth size='small'>
-                                  <Select
-                                    multiple
-                                    sx={{ height: '40px' }}
-                                    value={plantEntry.permissions || []}
-                                    onChange={(e) => {
-                                      const selected = e.target.value
-
-                                      handlePlantChange(
-                                        verticalId,
-                                        siteIndex,
-                                        plantIndex,
-                                        'permissions',
-                                        selected,
-                                      )
-                                    }}
-                                  >
-                                    <MenuItem value='read'>Read</MenuItem>
-                                    <MenuItem value='write'>Write</MenuItem>
-                                    <MenuItem value='approve'>Approve</MenuItem>
-                                  </Select>
-                                </FormControl>
-                              </Grid>
-                            </Stack>
-                          )
-                        })}
-                      </Grid>
-                    </Box>
-                  ))}
+                                            {getAvailableScreens(
+                                              verticalId,
+                                              siteIndex,
+                                              plantIndex,
+                                            ).map((screen) => (
+                                              <MenuItem
+                                                key={screen}
+                                                value={screen}
+                                              >
+                                                <Checkbox
+                                                  checked={(
+                                                    plantEntry.screens || []
+                                                  ).includes(screen)}
+                                                />
+                                                <ListItemText
+                                                  primary={i18n.t(screen)}
+                                                />
+                                              </MenuItem>
+                                            ))}
+                                          </Select>
+                                        </FormControl>
+                                      </Grid>
+                                      {/* Permissions Dropdown */}
+                                      {/* <Grid item xs={4} sm={3}>
+                                  <Typography variant='h6' gutterBottom>
+                                    Permissions
+                                  </Typography>
+  
+                                  <FormControl fullWidth size='small'>
+                                    <Select
+                                      multiple
+                                      sx={{ height: '40px' }}
+                                      value={plantEntry.permissions || []}
+                                      onChange={(e) => {
+                                        const selected = e.target.value
+  
+                                        handlePlantChange(
+                                          verticalId,
+                                          siteIndex,
+                                          plantIndex,
+                                          'permissions',
+                                          selected,
+                                        )
+                                      }}
+                                    >
+                                      <MenuItem value='read'>Read</MenuItem>
+                                      <MenuItem value='write'>Write</MenuItem>
+                                      <MenuItem value='approve'>Approve</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                </Grid> */}
+                                    </Stack>
+                                  )
+                                },
+                              )}
+                            </Grid>
+                          </Box>
+                        )
+                      })}
                 </Box>
               </Box>
             )

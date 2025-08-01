@@ -18,15 +18,16 @@ const findFirstUrlFromMenu = (menu) => {
 }
 
 const isRouteIdAllowed = (menu, routeId) => {
-  return true
-  // for (const group of menu.items) {
-  //   if (!group.children) continue
-  //   for (const child of group.children || []) {
-  //     if (child.id === routeId) return true
-  //     if (child.children?.map((menu) => menu.id).includes(routeId)) return true
-  //   }
-  // }
-  // return false
+  console.log('menu.items', menu.items)
+  // return true
+  for (const group of menu.items) {
+    if (!group.children) continue
+    for (const child of group.children || []) {
+      if (child.id === routeId) return true
+      if (child.children?.map((menu) => menu.id).includes(routeId)) return true
+    }
+  }
+  return false
 }
 
 const PrivateRoute = ({ children, routeId }) => {
