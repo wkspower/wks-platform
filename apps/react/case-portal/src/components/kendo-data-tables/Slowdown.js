@@ -895,6 +895,7 @@ const SlowDown = ({ permissions }) => {
           handleCancelClick={handleCancelClick}
           focusFirstField={focusFirstField}
           allProducts={allProducts}
+          disableRedHighlight={true}
         />
       )}
 

@@ -552,6 +552,7 @@ const ShutDown = ({ permissions }) => {
         currentRowId={currentRowId}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
+        disableRedHighlight={true}
       />
     </div>
   )

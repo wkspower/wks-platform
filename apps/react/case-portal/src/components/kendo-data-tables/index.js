@@ -115,6 +115,7 @@ const KendoDataTables = ({
   handleExcelUpload = () => {},
   downloadExcelForConfiguration = () => {},
   onLoad = () => {},
+  disableRedHighlight = false,
 }) => {
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -433,10 +434,17 @@ const KendoDataTables = ({
   }
   //
 const RedHighlightCell = (props) => {
-  const { dataItem, field, tdProps, children, customModifiedCells, allRedCell } = props;
+  const { dataItem, field, tdProps, children, customModifiedCells, allRedCell,disableRedHighlight = false, } = props;
 
   const rowId = dataItem.id;
   const value = dataItem[field];
+  if (disableRedHighlight) {
+    return (
+      <td {...tdProps} title={value}>
+        {children}
+      </td>
+    );
+  }
 
   // Check if edited (local edits)
   const isEdited = Object.prototype.hasOwnProperty.call(
@@ -470,8 +478,6 @@ const RedHighlightCell = (props) => {
     </td>
   );
 };
-
-
   //
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
@@ -969,6 +975,7 @@ const RedHighlightCell = (props) => {
         {...props}
         customModifiedCells={customModifiedCells}
         allRedCell={allRedCell}
+        disableRedHighlight={disableRedHighlight}
       />
     ),
                       headerCell: SimpleHeaderWithTooltip,
@@ -1027,6 +1034,7 @@ const RedHighlightCell = (props) => {
         {...props}
         customModifiedCells={customModifiedCells}
         allRedCell={allRedCell}
+        disableRedHighlight={disableRedHighlight}
       />
     ),
                       headerCell: SimpleHeaderWithTooltip,
@@ -1268,6 +1276,7 @@ const RedHighlightCell = (props) => {
         {...props}
         customModifiedCells={customModifiedCells}
         allRedCell={allRedCell}
+        disableRedHighlight={disableRedHighlight}
       />
     ),
                       headerCell: SimpleHeaderWithTooltip,
@@ -1300,6 +1309,7 @@ const RedHighlightCell = (props) => {
       {...props}
       customModifiedCells={customModifiedCells}
       allRedCell={allRedCell}
+      disableRedHighlight={disableRedHighlight}
     />
   ),
   headerCell: SimpleHeaderWithTooltip,

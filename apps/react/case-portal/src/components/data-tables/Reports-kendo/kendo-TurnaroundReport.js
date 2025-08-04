@@ -311,6 +311,7 @@ const TurnaroundReport = () => {
           severity: 'success',
         })
         fetchPreviousYear()
+        setModifiedCells2({})
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
