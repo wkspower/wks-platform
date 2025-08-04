@@ -3705,12 +3705,7 @@ async function saveSpyroOutputYield(payload, keycloak) {
 // }
 
 async function getCrackerNextYearParameters(keycloak, date) {
-  const year = localStorage
-    .getItem('year')
-    ?.replace(
-      /(\d{4})-(\d{2})/,
-      (_, a, b) => `${+a + 1}-${String((+b + 1) % 100).padStart(2, '0')}`,
-    )
+  const year = localStorage.getItem('year')
   let plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
   if (storedPlant) {

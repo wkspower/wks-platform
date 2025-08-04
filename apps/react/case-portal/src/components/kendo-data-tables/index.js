@@ -409,8 +409,9 @@ const KendoDataTables = ({
       <tr {...rest?.trProps} className={rowClassName}>
         {rest.children}
       </tr>
-    )
-  }, [])
+  )
+},[])
+
 
   const toolTipRendererdescLimit = (props) => {
     const value = props.dataItem[props.field]
@@ -431,51 +432,45 @@ const KendoDataTables = ({
     )
   }
   //
-  const RedHighlightCell = (props) => {
-    const {
-      dataItem,
-      field,
-      tdProps,
-      children,
-      customModifiedCells,
-      allRedCell,
-    } = props
+const RedHighlightCell = (props) => {
+  const { dataItem, field, tdProps, children, customModifiedCells, allRedCell } = props;
 
-    const rowId = dataItem.id
-    const value = dataItem[field]
+  const rowId = dataItem.id;
+  const value = dataItem[field];
 
-    // Check if edited (local edits)
-    const isEdited = Object.prototype.hasOwnProperty.call(
-      customModifiedCells?.[rowId] || {},
-      field,
-    )
+  // Check if edited (local edits)
+  const isEdited = Object.prototype.hasOwnProperty.call(
+    customModifiedCells?.[rowId] || {},
+    field
+  );
 
-    // Backend red highlight (allRedCell logic)
-    const month = field // Using field name as month
-    const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
+  // Backend red highlight (allRedCell logic)
+  const month = field; // Using field name as month
+  const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id;
 
-    const isRedFromAllRedCell = allRedCell?.some(
-      (cell) =>
-        cell.month === month &&
-        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
-    )
+  const isRedFromAllRedCell = allRedCell?.some(
+    (cell) =>
+      cell.month === month &&
+      cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase()
+  );
 
-    // Final highlight condition
-    const shouldHighlight = isEdited || isRedFromAllRedCell
+  // Final highlight condition
+  const shouldHighlight = isEdited || isRedFromAllRedCell;
 
-    return (
-      <td
-        {...tdProps}
-        title={value}
-        style={{
-          color: shouldHighlight ? 'orange' : undefined,
-          fontWeight: shouldHighlight ? 'bold' : undefined,
-        }}
-      >
-        {children}
-      </td>
-    )
-  }
+  return (
+    <td
+      {...tdProps}
+      title={value}
+      style={{
+        color: shouldHighlight ? 'orange' : undefined,
+        fontWeight: shouldHighlight ? 'bold' : undefined,
+      }}
+    >
+      {children}
+    </td>
+  );
+};
+
 
   //
   const toolTipRenderer = (props) => {
@@ -970,12 +965,12 @@ const KendoDataTables = ({
                           : DateTimePickerEditor,
                       },
                       data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+      <RedHighlightCell
+        {...props}
+        customModifiedCells={customModifiedCells}
+        allRedCell={allRedCell}
+      />
+    ),
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     format={
@@ -1027,13 +1022,13 @@ const KendoDataTables = ({
                           ? DateOnlyPicker
                           : DateOnlyPicker,
                       },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+                     data: (props) => (
+      <RedHighlightCell
+        {...props}
+        customModifiedCells={customModifiedCells}
+        allRedCell={allRedCell}
+      />
+    ),
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     format={
@@ -1269,12 +1264,12 @@ const KendoDataTables = ({
                     cells={{
                       edit: { text: NoSpinnerNumericEditor },
                       data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
+      <RedHighlightCell
+        {...props}
+        customModifiedCells={customModifiedCells}
+        allRedCell={allRedCell}
+      />
+    ),
                       headerCell: SimpleHeaderWithTooltip,
                     }}
                     format={col.format}
@@ -1299,17 +1294,17 @@ const KendoDataTables = ({
                     editable={col?.editable ? true : false}
                     headerClassName={isActive ? 'active-column' : ''}
                     cells={{
-                      edit: { text: NoSpinnerNumericEditor },
-                      data: (props) => (
-                        <RedHighlightCell
-                          {...props}
-                          customModifiedCells={customModifiedCells}
-                          allRedCell={allRedCell}
-                        />
-                      ),
-                      headerCell: SimpleHeaderWithTooltip,
-                    }}
-                    columnMenu={ColumnMenuCheckboxFilter}
+  edit: { text: NoSpinnerNumericEditor },
+  data: (props) => (
+    <RedHighlightCell
+      {...props}
+      customModifiedCells={customModifiedCells}
+      allRedCell={allRedCell}
+    />
+  ),
+  headerCell: SimpleHeaderWithTooltip,
+}}
+            columnMenu={ColumnMenuCheckboxFilter}
                     filter='numeric'
                     format={col.format}
                   />
