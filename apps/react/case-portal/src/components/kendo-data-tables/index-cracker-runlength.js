@@ -54,13 +54,13 @@ const CustomAccordion = styled((props) => (
     display: 'none',
   },
 }))
-
 const year = localStorage.getItem('year')
 
 const startYear = parseInt(year?.split('-')[0], 10)
-const nextYear = `${startYear + 1}-${(startYear + 2).toString()?.slice(-2)}`
-const lowerLimit = new Date(year + 1, 3, 1)
-const upperLimit = new Date(year + 2, 2, 31)
+const nextYear = `${startYear + 1}-${(startYear + 2).toString().slice(-2)}`
+
+const lowerLimit = new Date(startYear + 1, 3, 1)
+const upperLimit = new Date(startYear + 2, 2, 31)
 
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
