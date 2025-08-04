@@ -48,38 +48,19 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
     )
   }
 
-  const HeaderWithTooltip = (props) => {
-    return (
-      <th {...props.thProps}>
-        <a className='k-link' onClick={props.onClick}>
-          <span title={props.title}>{props.title}</span>
-        </a>
-      </th>
-    )
-  }
-
-  const dateFields = ['endDate', 'startDate', 'dateTime']
-
   const SimpleHeaderWithTooltip = (props) => {
+    const { ariaSort, ...restThProps } = props.thProps || {}
+
     return (
-      // <div
-      //   className='k-header-cell-wrapper'
-      //   title={props.tooltipText || props.title}
-      // >
-      //   {props.children}
-      //   {/* You could implement a custom CSS-only tooltip here if needed */}
-      // </div>
       <th
-        {...props.thProps}
+        {...restThProps}
+        aria-sort={ariaSort}
         title={props.title}
-        style={{
-          padding: '0px',
-          borderRight: '1px solid #ccc',
-        }}
+        style={{ padding: '0px' }}
       >
         <Tooltip
-          position={'top'}
-          anchorElement={props.thProps}
+          position='top'
+          anchorElement='target'
           parentTitle={true}
           className='test'
         >
@@ -130,23 +111,20 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
               widthT,
             } = col
 
-            if (['endDate', 'startDate', 'dateTime'].includes(field)) {
+            if (
+              ['endDate', 'startDate', 'dateTime', 'mcuDate'].includes(field)
+            ) {
               return (
                 <Column
                   key={field}
                   field={field}
                   title={title}
-                  filter='date'
-                  filterable={{
-                    cell: {
-                      operator: 'gte',
-                      showOperators: true,
-                    },
-                  }}
                   cell={cell}
                   cells={{
                     edit: {
-                      date: ['dateTime', 'dateTime'].includes(col.field)
+                      date: ['dateTime', 'dateTime', 'mcuDate'].includes(
+                        col.field,
+                      )
                         ? DateOnlyPicker
                         : DateTimePickerEditor,
                     },

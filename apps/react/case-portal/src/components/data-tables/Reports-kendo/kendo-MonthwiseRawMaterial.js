@@ -1,19 +1,14 @@
 import { Box } from '@mui/material'
-// import DataGridTable from '../ASDataGrid'
-// import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
-import {
-  Backdrop,
-  CircularProgress,
-  // Tooltip,
-  Typography,
-} from '../../../../node_modules/@mui/material/index'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-// import { renderTwoLineEllipsis } from 'components/Utilities/twoLineEllipsisRenderer'
+import {
+  Backdrop,
+  CircularProgress,
+  Typography,
+} from '../../../../node_modules/@mui/material/index'
 import Notification from 'components/Utilities/Notification'
-// import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { validateFields } from 'utils/validationUtils'
 
@@ -29,15 +24,6 @@ const MonthwiseRawMaterial = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-  // const formatValueToThreeDecimals = (params) => {
-  //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-  // }
-  // const formatValueToThreeDecimals4 = (params) => {
-  //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(4) : ''
-  // }
-  // const formatValueToThreeDecimals2 = (params) => {
-  //   return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-  // }
   const columnDefs = [
     { field: 'id', headerName: 'ID', editable: false },
 
@@ -46,6 +32,7 @@ const MonthwiseRawMaterial = () => {
       headerName: 'Particulars',
       flex: 2,
       editable: false,
+      widthT: 250,
     },
     {
       field: 'UOM',
@@ -54,6 +41,7 @@ const MonthwiseRawMaterial = () => {
       align: 'left',
       headerAlign: 'left',
       flex: 1,
+      widthT: 70,
     },
     {
       field: 'spec',
@@ -190,7 +178,8 @@ const MonthwiseRawMaterial = () => {
       headerName: 'Parameters',
       editable: false,
       flex: 2,
-      type: 'number',
+
+      widthT: 380,
     },
     {
       field: 'april',
@@ -328,6 +317,10 @@ const MonthwiseRawMaterial = () => {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
   const [modifiedCells, setModifiedCells] = React.useState({})
+
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
 
   const fetchData = async () => {
     try {
@@ -471,10 +464,6 @@ const MonthwiseRawMaterial = () => {
       setLoading(false)
     }
   }
-
-  const [currentRowId, setCurrentRowId] = useState(null)
-  const [currentRemark, setCurrentRemark] = useState('')
-  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.Remark || '')

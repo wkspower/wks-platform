@@ -22,7 +22,6 @@ import { ibrGridThreePopUP, singleRowColumn } from './columnDefs'
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
 import { trashIcon } from '../../../node_modules/@progress/kendo-svg-icons/dist/index'
-import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MuiAccordion from '@mui/material/Accordion'
@@ -36,11 +35,11 @@ import {
 } from '../../../node_modules/@progress/kendo-react-grid/index'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 
-import { Input } from '@progress/kendo-react-inputs'
-import { Skeleton } from '../../../node_modules/@progress/kendo-react-indicators/index'
 import { DatePicker } from '@progress/kendo-react-dateinputs'
+import { Input } from '@progress/kendo-react-inputs'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import { Skeleton } from '../../../node_modules/@progress/kendo-react-indicators/index'
 import moment from '../../../node_modules/moment/moment'
 
 const CustomAccordion = styled((props) => (
@@ -55,12 +54,8 @@ const CustomAccordion = styled((props) => (
   },
 }))
 const year = localStorage.getItem('year')
-
 const startYear = parseInt(year?.split('-')[0], 10)
 const nextYear = `${startYear + 1}-${(startYear + 2).toString().slice(-2)}`
-
-const lowerLimit = new Date(startYear + 1, 3, 1)
-const upperLimit = new Date(startYear + 2, 2, 31)
 
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
@@ -82,17 +77,12 @@ export const dateFieldsRunLength = ['date']
 
 const KendoDataTablesCrackerRunLength = ({
   rows = [],
-  grades = [],
-  allRedCell = [],
+
   modifiedCells = [],
   setRows,
   columns,
-  summaryEdited,
   loading = false,
   permissions = {},
-  setSnackbarOpen = () => {},
-  snackbarData = { message: '', severity: 'info' },
-  snackbarOpen = false,
   setRemarkDialogOpen = () => {},
   currentRemark = '',
   setCurrentRemark = () => {},
@@ -103,18 +93,13 @@ const KendoDataTablesCrackerRunLength = ({
   saveChanges = () => {},
   deleteRowData = () => {},
   handleCalculate = () => {},
-  handleGradeChange = () => {},
-  handleRemarkCellClick = () => {},
   selectedUsers = [],
-  groupBy = null,
   note = '',
   titleName = '',
-  allProducts = [],
-  allMonths = [],
   handleExcelUpload = () => {},
   downloadExcelForConfiguration = () => {},
-  onLoad = () => {},
 }) => {
+  const fileInputRef = useRef(null)
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
@@ -161,37 +146,18 @@ const KendoDataTablesCrackerRunLength = ({
   useEffect(() => {
     const year = localStorage.getItem('year')
     const startYear = parseInt(year?.split('-')[0], 10)
-
     const lowerLimit = new Date(startYear, 3, 1)
     const upperLimit = new Date(startYear + 1, 2, 31)
-
     setLowerLimitDate(lowerLimit)
     setUpperLimitDate(upperLimit)
-
-    // console.log('Lower Limit:', lowerLimit)
-    // console.log('Upper Limit:', upperLimit)
-  }, []) // ? runs only once after first render
-
-  const fileInputRef = useRef(null)
-  const handleEditChange = useCallback((e) => {
-    setEdit(e.edit)
   }, [])
-  const handleRowClick = (e) => {
-    if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
-      setEdit({})
-      return
-    }
-    setRows(
-      rows.map((r) => ({
-        ...r,
-        inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
-      })),
-    )
-  }
+
   const itemChange = useCallback(
     (e) => {
       const { dataItem, field, value } = e
       const itemId = dataItem.id
+
+      console.log('e', e)
 
       setRows((prevRows) =>
         prevRows.map((row) =>
@@ -206,10 +172,8 @@ const KendoDataTablesCrackerRunLength = ({
           setRows((prevRows) => {
             const editedIndex = prevRows.findIndex((r) => r.id === itemId)
             updatedRows = [...prevRows]
-
             const next = prevRows[editedIndex + 1]?.[field]
             const nextNext = prevRows[editedIndex + 2]?.[field]
-
             const isNextNonNumeric =
               editedIndex + 1 < prevRows.length && isNaN(Number(next))
             const isNextNextNonNumeric =
@@ -319,13 +283,16 @@ const KendoDataTablesCrackerRunLength = ({
 
                 return updatedRow
               })
+            } else {
+              console.log('SAD is Typed but cells are numeric')
+              console.log('updatedRows', updatedRows)
             }
 
             setModifiedCells(() => updatedRows)
             setIsRowEdited(true)
             return updatedRows
           })
-        }, 150) // delay to avoid blocking typing
+        }, 150)
       } else {
         setModifiedCells((prev) => {
           const base = { ...dataItem, [field]: value }
@@ -335,6 +302,7 @@ const KendoDataTablesCrackerRunLength = ({
     },
     [setRows, setModifiedCells],
   )
+
   const itemChangeDayWise = useCallback(
     (e) => {
       const { dataItem, field, value } = e
@@ -571,7 +539,6 @@ const KendoDataTablesCrackerRunLength = ({
   const saveModalOpenSingleRow = async () => {
     setOpenSaveDialogeBoxSingleRow(true)
   }
-  const saveModalOpenForPopup = async () => {}
 
   const handleCalculateBtn = async () => {
     setIsButtonDisabled(true)
@@ -587,26 +554,6 @@ const KendoDataTablesCrackerRunLength = ({
       isColumnMenuSortActive(field, sort)
     )
   }
-  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = isDisabled ? `custom-disabled-row` : className
-    return (
-      <tr {...rest?.trProps} className={rowClassName}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
-
-  const toolTipRenderer = (props) => {
-    const value = props.dataItem[props.field]
-
-    return (
-      <td {...props.tdProps} title={value}>
-        {props.children}
-      </td>
-    )
-  }
 
   const triggerFileUpload = () => {
     if (fileInputRef.current) {
@@ -620,16 +567,6 @@ const KendoDataTablesCrackerRunLength = ({
     handleExcelUpload(file)
     event.target.value = ''
   }
-
-  // const HeaderWithTooltip = (props) => {
-  //   return (
-  //     <th {...props.thProps}>
-  //       <a className='k-link' onClick={props.onClick}>
-  //         <span title={props.title}>{props.title}</span>
-  //       </a>
-  //     </th>
-  //   )
-  // }
 
   const CellWithState = (props) => {
     const field = props.field || ''
@@ -698,60 +635,6 @@ const KendoDataTablesCrackerRunLength = ({
     )
   }
 
-  const CellWithTooltipAndEdit = (props) => {
-    const field = props.field || ''
-    const isEditable = props.editable // assume you pass this in
-    const [inEdit, setInEdit] = React.useState(false)
-    const [value, setValue] = React.useState(props.dataItem[field])
-
-    const handleChange = (event) => {
-      setValue(event.target.value)
-    }
-
-    const handleBlur = (e) => {
-      setInEdit(false)
-
-      if (props.onChange) {
-        props.onChange({
-          dataItem: props.dataItem,
-          field,
-          value,
-          syntheticEvent: e,
-        })
-      }
-    }
-
-    // If editable and in edit mode
-    if (isEditable && inEdit) {
-      return (
-        <td {...props.tdProps}>
-          <Input
-            value={value}
-            style={{ width: '100%' }}
-            onChange={handleChange}
-            onBlur={handleBlur}
-            autoFocus
-          />
-        </td>
-      )
-    }
-
-    // Show tooltip + static text (or trigger edit if editable)
-    return (
-      <td
-        {...props.tdProps}
-        title={value}
-        onClick={() => {
-          if (isEditable) setInEdit(true)
-        }}
-      >
-        {value}
-      </td>
-    )
-  }
-
-  // const [page, setPage] = React.useState({ skip: 0, take: 100 })
-
   const LoadingCell = (props) => {
     const field = props.field || ''
     if (props.dataItem[field] === undefined) {
@@ -773,17 +656,18 @@ const KendoDataTablesCrackerRunLength = ({
   }
 
   const SimpleHeaderWithTooltip = (props) => {
+    const { ariaSort, ...restThProps } = props.thProps || {}
+
     return (
       <th
-        {...props.thProps}
+        {...restThProps}
+        aria-sort={ariaSort}
         title={props.title}
-        style={{
-          padding: '0px',
-        }}
+        style={{ padding: '0px' }}
       >
         <Tooltip
-          position={'top'}
-          anchorElement={props.thProps}
+          position='top'
+          anchorElement='target'
           parentTitle={true}
           className='test'
         >
@@ -792,7 +676,6 @@ const KendoDataTablesCrackerRunLength = ({
       </th>
     )
   }
-
   const renderGrid = () => (
     <Grid
       style={{ height: 600 }}
@@ -1008,59 +891,6 @@ const KendoDataTablesCrackerRunLength = ({
       )}
     </Grid>
   )
-
-  // const renderGrid3 = () => {
-  //   if (!singleRow) return null
-
-  //   return (
-  //     <div style={{ overflowX: 'auto', marginTop: '12px' }}>
-  //       <table
-  //         style={{
-  //           width: '100%',
-  //           borderCollapse: 'collapse',
-  //           fontSize: '13px',
-  //         }}
-  //       >
-  //         <thead>
-  //           <tr style={{ backgroundColor: '#f9f9f9', textAlign: 'left' }}>
-  //             {singleRowColumn.map((col) => (
-  //               <th
-  //                 key={col.field}
-  //                 style={{
-  //                   padding: '8px 10px',
-  //                   border: '1px solid #ddd',
-  //                   whiteSpace: 'nowrap',
-  //                   fontWeight: '500',
-  //                 }}
-  //               >
-  //                 {col.title || col.headerName || col.field}
-  //               </th>
-  //             ))}
-  //           </tr>
-  //         </thead>
-  //         <tbody>
-  //           <tr>
-  //             {singleRowColumn.map((col) => (
-  //               <td
-  //                 key={col.field}
-  //                 style={{
-  //                   padding: '8px 10px',
-  //                   border: '1px solid #ddd',
-  //                   textAlign: 'left',
-  //                   whiteSpace: 'nowrap',
-  //                 }}
-  //               >
-  //                 {col.field === 'date'
-  //                   ? moment(singleRow[col.field]).format('DD-MM-YYYY')
-  //                   : singleRow[col.field] ?? ''}
-  //               </td>
-  //             ))}
-  //           </tr>
-  //         </tbody>
-  //       </table>
-  //     </div>
-  //   )
-  // }
 
   const renderGridSingleRow = () => (
     <Grid
@@ -1354,16 +1184,7 @@ const KendoDataTablesCrackerRunLength = ({
     [keycloak],
   )
 
-  const fetchDataNew = useCallback(
-    async (date, hvalues) => {
-      // console.log('date', date)
-      // console.log('hvalues', hvalues)
-    },
-    [keycloak],
-  )
-
   const handleCancelClick = () => {
-    // console.log('Dialog closed via Cancel')
     setHValues({})
     setRowsPopUp([])
     setSingleRow([])
@@ -1372,8 +1193,6 @@ const KendoDataTablesCrackerRunLength = ({
   }
 
   const handleClose = () => {
-    // console.log('1 handle close ')
-
     setOpen(false)
   }
 
@@ -1508,13 +1327,13 @@ const KendoDataTablesCrackerRunLength = ({
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
-              <Tooltip openDelay={50} position='default' anchorElement='target'>
+              <Tooltip openDelay={50} position='auto' anchorElement='target'>
                 {renderGrid()}
               </Tooltip>
             </CustomAccordionDetails>
           </CustomAccordion>
         ) : (
-          <Tooltip openDelay={50} position='default' anchorElement='target'>
+          <Tooltip openDelay={50} position='auto' anchorElement='target'>
             {renderGrid()}
           </Tooltip>
         )}
@@ -1533,8 +1352,8 @@ const KendoDataTablesCrackerRunLength = ({
             className='btn-save'
             onClick={handleDeleteSelected}
             disabled={isButtonDisabled}
-            loading={loading} // Use the loading prop to trigger loading state
-            loadingposition='start' // Use loadingPosition to control where the spinner appears
+            loading={loading}
+            loadingposition='start'
           >
             Delete
           </Button>
@@ -1751,13 +1570,13 @@ const KendoDataTablesCrackerRunLength = ({
 
           {/* Grid Rendering */}
           <div style={{ marginTop: '12px' }}>
-            <Tooltip openDelay={50} position='default' anchorElement='target'>
+            <Tooltip openDelay={50} position='auto' anchorElement='target'>
               {renderGridSingleRow()}
             </Tooltip>
           </div>
 
           <div style={{ marginTop: '12px' }}>
-            <Tooltip openDelay={50} position='default' anchorElement='target'>
+            <Tooltip openDelay={50} position='auto' anchorElement='target'>
               {renderGridDayWise()}
             </Tooltip>
           </div>

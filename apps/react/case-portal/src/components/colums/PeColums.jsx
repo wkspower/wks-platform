@@ -214,13 +214,13 @@ export const NormalOpNormPeColumns = [
   {
     field: 'productName',
     title: 'Particulars',
-    width: 120,
+    widthT: 220,
   },
 
   {
     field: 'UOM',
     title: 'UOM / MT',
-    width: 100,
+    widthT: 80,
     editable: false,
   },
 

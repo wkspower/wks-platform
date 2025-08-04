@@ -4,14 +4,16 @@
     "headerName": "Type",
     "flex": 2,
     "editable": false,
-    "type": "text"
+    "type": "text",
+    "widthT": 220
   },
   {
     "field": "particulars",
     "headerName": "Particulars",
     "flex": 2,
     "editable": false,
-    "type": "text"
+    "type": "text",
+    "widthT": 220
   },
   {
     "field": "april",

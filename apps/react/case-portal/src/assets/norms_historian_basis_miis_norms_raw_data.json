@@ -31,7 +31,8 @@
     "headerName": "Actual Qty",
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "dateTime",

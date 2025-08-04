@@ -99,7 +99,7 @@ const WorkFlowMerge = () => {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
     dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -109,7 +109,7 @@ const WorkFlowMerge = () => {
   const [status, setStatus] = useState('')
   const [caseId, setCaseId] = useState('')
   const [role, setRole] = useState('')
-  const isOldYear = oldYear?.oldYear === 1 
+  const isOldYear = oldYear?.oldYear === 1
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -126,7 +126,7 @@ const WorkFlowMerge = () => {
   }
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [plantID, yearChanged])
 
   const handleCalculate = () => {
     if (lowerVertName == 'meg') {

@@ -31,12 +31,12 @@ const PlantsProductionSummary = () => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-const isOldYear = (() => {
-  if (!year || !year.includes('-')) return false
-  const currentYear = new Date().getFullYear()
-  const startYear = parseInt(year.split('-')[0])
-  return startYear < currentYear
-})()
+  const isOldYear = (() => {
+    if (!year || !year.includes('-')) return false
+    const currentYear = new Date().getFullYear()
+    const startYear = parseInt(year.split('-')[0])
+    return startYear < currentYear
+  })()
 
   const numberEditor = (cellProps) => {
     const { dataItem, field, onChange } = cellProps
@@ -70,7 +70,7 @@ const isOldYear = (() => {
   }
 
   const apiCols = [
-    { field: 'RowNo', title: 'SL.No', widthT: 100, editable: false },
+    { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
 
     {
       title: 'Item',
@@ -84,7 +84,7 @@ const isOldYear = (() => {
       ],
     },
 
-    { field: 'UOM', title: 'Unit', width: 100, editable: false },
+    { field: 'UOM', title: 'Unit', widthT: 80, editable: false },
 
     {
       title: oldYear || 'Old Year',

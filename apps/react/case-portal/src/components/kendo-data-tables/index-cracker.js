@@ -272,25 +272,18 @@ const KendoDataTablesCracker = ({
   }, [])
 
   const SimpleHeaderWithTooltip = (props) => {
+    const { ariaSort, ...restThProps } = props.thProps || {}
+
     return (
-      // <div
-      //   className='k-header-cell-wrapper'
-      //   title={props.tooltipText || props.title}
-      // >
-      //   {props.children}
-      //   {/* You could implement a custom CSS-only tooltip here if needed */}
-      // </div>
       <th
-        {...props.thProps}
+        {...restThProps}
+        aria-sort={ariaSort}
         title={props.title}
-        style={{
-          padding: '0px',
-          borderRight: '1px solid #ccc',
-        }}
+        style={{ padding: '0px' }}
       >
         <Tooltip
-          position={'top'}
-          anchorElement={props.thProps}
+          position='top'
+          anchorElement='target'
           parentTitle={true}
           className='test'
         >
@@ -368,13 +361,6 @@ const KendoDataTablesCracker = ({
               key={col.field}
               field={col.field}
               title={col.title || col.headerName}
-              filter='date'
-              filterable={{
-                cell: {
-                  operator: 'gte',
-                  showOperators: true,
-                },
-              }}
               cells={{
                 edit: {
                   date: ['fromDate', 'toDate'].includes(col.field)
@@ -459,8 +445,8 @@ const KendoDataTablesCracker = ({
               key={col.field}
               field={col.field}
               title={col.title || col.headerName}
-              editor={true}
-              editable={{ mode: 'popup' }}
+              // editor={true}
+              // editable={{ mode: 'popup' }}
               cells={{
                 data: (cellProps, allRedCell) => (
                   <RemarkCell
@@ -758,17 +744,13 @@ const KendoDataTablesCracker = ({
                 </Typography>
               </CustomAccordionSummary>
               <CustomAccordionDetails>
-                <Tooltip
-                  openDelay={50}
-                  position='default'
-                  anchorElement='target'
-                >
+                <Tooltip openDelay={50} position='auto' anchorElement='target'>
                   {renderGrid()}
                 </Tooltip>
               </CustomAccordionDetails>
             </CustomAccordion>
           ) : (
-            <Tooltip openDelay={50} position='default' anchorElement='target'>
+            <Tooltip openDelay={50} position='auto' anchorElement='target'>
               {renderGrid()}
             </Tooltip>
           )}

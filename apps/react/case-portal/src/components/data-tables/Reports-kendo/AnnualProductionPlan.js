@@ -14,7 +14,7 @@ import Notification from 'components/Utilities/Notification'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import moment from '../../../../node_modules/moment/moment'
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux'
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
 
@@ -60,8 +60,8 @@ const AnnualProductionPlan = () => {
   const [currentRowId3, setCurrentRowId3] = useState(null)
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [rows, setRows] = useState()
-  const { oldYear } = useSelector(s => s.dataGridStore);
-  const isOldYear = oldYear?.oldYear === 1 
+  const { oldYear } = useSelector((s) => s.dataGridStore)
+  const isOldYear = oldYear?.oldYear === 1
   const formatValueToThreeDecimals = (params) => {
     const dateRegex =
       /^(\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{1,2} [a-zA-Z]+ \d{4}|\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
@@ -123,7 +123,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      widthT: 100,
+      widthT: 80,
       align: 'right',
     },
     {
@@ -149,7 +149,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      widthT: 100,
+      widthT: 80,
       align: 'right',
     },
     {
@@ -168,26 +168,12 @@ const AnnualProductionPlan = () => {
       editable: true,
       flex: 1,
       align: 'right',
-      valueFormatter: formatValueToThreeDecimals,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimals(params.value)}</span>
-        </Tooltip>
-      ),
+      widthT: 150,
       type: 'number',
     },
-    { field: 'uom', headerName: 'UOM', editable: true, flex: 1 },
+    { field: 'uom', headerName: 'UOM', editable: true, widthT: 120 },
   ]
-  // {
-  //               "rateValue": 8760.00000000,
-  //               "uom": "Hrs",
-  //               "activity": "Total available hours",
-  //               "sno": 1,
-  //               "id": "56C9D602-C34B-42ED-983D-218C56CD7568"
-  //           },
+
   const columnsOperatingHrs = [
     {
       field: 'sno',
@@ -212,15 +198,7 @@ const AnnualProductionPlan = () => {
       editable: true,
       flex: 1,
       align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      widthT: 150,
       type: 'number',
     },
     {
@@ -229,18 +207,10 @@ const AnnualProductionPlan = () => {
       editable: true,
       flex: 1,
       align: 'right',
+      widthT: 120,
     },
   ]
 
-  //  {
-  //                 "durationHours": 720.00000000,
-  //                 "rateValue": 18.96000000,
-  //                 "periodTo": "30-Jun-25",
-  //                 "activity": "Plant running normal",
-  //                 "sno": 3,
-  //                 "periodFrom": "01-Jun-25",
-  //                 "id": "021CD9C0-2074-4A17-BDAE-88A98A5A0CA9"
-  //             },
   const columnsAverageHourlyRate = [
     {
       field: 'sno',
@@ -265,15 +235,7 @@ const AnnualProductionPlan = () => {
       editable: true,
       flex: 1,
       align: 'right',
-      valueFormatter: formatValueToThreeDecimalsTwo,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsTwo(params.value)}</span>
-        </Tooltip>
-      ),
+      widthT: 150,
       type: 'number',
     },
     {
@@ -282,15 +244,7 @@ const AnnualProductionPlan = () => {
       editable: true,
       flex: 1,
       align: 'right',
-      valueFormatter: formatValueToThreeDecimalsZero,
-      renderCell: (params) => (
-        <Tooltip
-          title={params.value != null ? params.value.toString() : ''}
-          arrow
-        >
-          <span>{formatValueToThreeDecimalsZero(params.value)}</span>
-        </Tooltip>
-      ),
+      widthT: 150,
       type: 'number',
     },
     {
@@ -306,23 +260,13 @@ const AnnualProductionPlan = () => {
   const year3 = `${+year4.split('-')[0] - 1}-${+year4.split('-')[1] - 1}`
   const year2 = `${+year3.split('-')[0] - 1}-${+year3.split('-')[1] - 1}`
   const year1 = `${+year2.split('-')[0] - 1}-${+year2.split('-')[1] - 1}`
-  // {
-  //               "Item": "Operating hours, Hrs",
-  //               "sno": 2,
-  //               "Actual2": 8760.00000000,
-  //               "Actual3": 8760.00000000,
-  //               "Budget4": 8496.00000000,
-  //               "Actual1": 8760.00000000,
-  //               "Budget3": 8760.00000000,
-  //               "Budget2": 8496.00000000,
-  //               "Budget1": 8736.00000000
-  //           },
+
   const columnsProductionPerformance = [
     {
       field: 'sno',
       title: 'SL.No',
       editable: false,
-      widthT: 100,
+      widthT: 80,
       align: 'right',
     },
     {
@@ -330,27 +274,25 @@ const AnnualProductionPlan = () => {
       title: 'Item',
       editable: false,
       flex: 1,
-      // Pass the column's editable state to the cell renderer
+      widthT: 250,
     },
-    // Grouped Columns
+
     {
       title: year1,
       children: [
         {
           field: 'Budget1',
           title: 'Budget',
-          editable: false, // This column is NOT editable
+          editable: false,
           flex: 1,
           align: 'right',
-          // Pass the column's editable state to the cell renderer
         },
         {
           field: 'Actual1',
           title: 'Actual',
-          editable: false, // This column is NOT editable
+          editable: false,
           flex: 1,
           align: 'right',
-          // Pass the column's editable state to the cell renderer
         },
       ],
     },
@@ -405,25 +347,6 @@ const AnnualProductionPlan = () => {
           type: 'number',
         },
       ],
-    },
-  ]
-
-  const columnGroupingModel = [
-    {
-      groupId: year1,
-      children: [{ field: 'Budget1' }, { field: 'Actual1' }],
-    },
-    {
-      groupId: year2,
-      children: [{ field: 'Budget2' }, { field: 'Actual2' }],
-    },
-    {
-      groupId: year3,
-      children: [{ field: 'Budget3' }, { field: 'Actual3' }],
-    },
-    {
-      groupId: year4,
-      children: [{ field: 'Budget4' }],
     },
   ]
 
@@ -830,7 +753,11 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsMaxRate}
         columns={columnsMaxRate}
-        permissions={{ saveBtn: !isOldYear,allAction: true, showReportTitle: true }}
+        permissions={{
+          saveBtn: !isOldYear,
+          allAction: true,
+          showReportTitle: true,
+        }}
         modifiedCells={modifiedCells2}
         setModifiedCells={setModifiedCells2}
         currentRowId={currentRowId2}
@@ -843,7 +770,11 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsOperatingHrs}
         columns={columnsOperatingHrs}
-        permissions={{ saveBtn: !isOldYear, allAction: true, showReportTitle: true }}
+        permissions={{
+          saveBtn: !isOldYear,
+          allAction: true,
+          showReportTitle: true,
+        }}
         modifiedCells={modifiedCells3}
         setModifiedCells={setModifiedCells3}
         currentRowId={currentRowId3}
@@ -856,7 +787,11 @@ const AnnualProductionPlan = () => {
       <KendoDataTables
         rows={rowsAverageHourlyRate}
         columns={columnsAverageHourlyRate}
-        permissions={{ saveBtn: !isOldYear, allAction: true, showReportTitle: true }}
+        permissions={{
+          saveBtn: !isOldYear,
+          allAction: true,
+          showReportTitle: true,
+        }}
         modifiedCells={modifiedCells4}
         setModifiedCells={setModifiedCells4}
         currentRowId={currentRowId4}
@@ -871,7 +806,6 @@ const AnnualProductionPlan = () => {
       <KendoDataTablesReports
         rows={rowsProductionPerformance}
         columns={columnsProductionPerformance}
-        columnGroupingModel={columnGroupingModel}
         setRows={setRowsProductionPerformance}
         permissions={{
           textAlignment: 'center',

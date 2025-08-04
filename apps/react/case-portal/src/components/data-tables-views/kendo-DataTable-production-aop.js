@@ -28,8 +28,7 @@ const ProductionAopView = ({
   const [columns, setColumns] = useState([])
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+  const { oldYear, verticalChange, yearChanged, plantID } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   // remark dialog state
@@ -62,8 +61,6 @@ const ProductionAopView = ({
       }),
     )
   }
-
-
 
   const handleRemarkCellClick = (row) => {
     // do not delete commented code
@@ -144,7 +141,7 @@ const ProductionAopView = ({
 
   useEffect(() => {
     fetchData()
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [plantID, yearChanged])
 
   // const lastColumnField = columns[columns.length - 1]?.field
   const saveChanges = async () => {

@@ -8,7 +8,7 @@ import { Typography } from '../../../../node_modules/@mui/material/index'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import { validateFields } from 'utils/validationUtils'
 import moment from '../../../../node_modules/moment/moment'
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux'
 const TurnaroundReport = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -46,22 +46,16 @@ const TurnaroundReport = () => {
     setCurrentRowId2(row.id)
     setRemarkDialogOpen2(true)
   }
-  const { oldYear } = useSelector(state => state.dataGridStore);
-  const isOldYear = oldYear?.oldYear === 1 
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(3) : ''
-  }
-  const formatValueToThreeDecimalsZero = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-  }
+  const { oldYear } = useSelector((state) => state.dataGridStore)
+  const isOldYear = oldYear?.oldYear === 1
 
   const columns = [
-    { field: 'sno', title: 'SL.No', widthT: 100, editable: false },
+    { field: 'sno', title: 'SL.No', widthT: 70, editable: false },
 
     {
       field: 'activity',
       title: 'Activities',
-      width: 200,
+      widthT: 300,
       editable: false,
     },
 
@@ -76,7 +70,7 @@ const TurnaroundReport = () => {
     {
       field: 'durationInHrs',
       title: 'Duration, hrs',
-      width: 120,
+      widthT: 100,
       editable: false,
       align: 'right',
       headerAlign: 'right',
@@ -86,18 +80,18 @@ const TurnaroundReport = () => {
     {
       field: 'remarks',
       title: 'Remark',
-      width: 200,
+      widthT: 300,
       editable: true,
     },
   ]
 
   const columnsGrid2 = [
-    { field: 'sno', title: 'SL.No', widthT: 100, editable: false },
+    { field: 'sno', title: 'SL.No', widthT: 70, editable: false },
 
     {
       field: 'activity',
       title: 'Activities',
-      width: 250,
+      widthT: 300,
       editable: true,
     },
 
@@ -117,7 +111,7 @@ const TurnaroundReport = () => {
     {
       field: 'durationInHrs1',
       title: 'Duration, hrs',
-      width: 100,
+      widthT: 150,
       type: 'number',
       editable: true,
       align: 'right',
@@ -127,7 +121,7 @@ const TurnaroundReport = () => {
     {
       field: 'periodInMonths',
       title: 'Period in Months',
-      width: 120,
+      widthT: 150,
       type: 'number',
       editable: true,
       align: 'right',
@@ -137,7 +131,7 @@ const TurnaroundReport = () => {
     {
       field: 'remarks',
       title: 'Remark',
-      width: 200,
+      widthT: 300,
       editable: true,
     },
   ]

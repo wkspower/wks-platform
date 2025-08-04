@@ -1,6 +1,4 @@
-// src/utils/getKendoColumns.js
 import NumericInputOnly from 'utils/NumericInputOnly'
-
 export default function getKendoColumns({
   headerMap,
   type,
@@ -8,12 +6,6 @@ export default function getKendoColumns({
   keys2 = [],
 }) {
   let rawCols
-  // const ThreeDecimalCell = (props) => {
-  //   const raw = props.dataItem[props.field]
-  //   const value = raw === 0 ? '0.000' : raw ? parseFloat(raw).toFixed(3) : ''
-
-  //   return <td>{value}</td>
-  // }
 
   switch (type) {
     case 'Production':
@@ -51,6 +43,7 @@ export default function getKendoColumns({
 
         editable: false,
         align: isTextCol ? 'left' : 'right',
+        widthT: isTextCol ? '220' : undefined,
       }
     })
   }
@@ -60,6 +53,7 @@ export default function getKendoColumns({
     // console.log('field', field)
     const title = String(headerMap[colDef.headerName] || colDef.headerName)
     const isTextCol = !(colDef.type == 'number')
+    const widthT = colDef?.widthT
 
     return {
       field,
@@ -69,7 +63,7 @@ export default function getKendoColumns({
       isRightAlligned: isTextCol ? 'text' : 'numeric',
       format: isTextCol ? undefined : '{0:#.###}',
       ...(isTextCol ? {} : { format: '{0:#.###}' }),
-
+      widthT: colDef?.widthT,
       editable: false,
       align: isTextCol ? 'left' : 'right',
     }

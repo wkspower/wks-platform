@@ -129,10 +129,7 @@ const KendoDataTablesReports = ({
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-  // const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
-  // const [group, setGroup] = useState([])
-  // const [expandedState, setExpandedState] = useState({})
-  // const [selectedUnit, setSelectedUnit] = useState()
+
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
@@ -415,25 +412,18 @@ const KendoDataTablesReports = ({
   }, [])
 
   const SimpleHeaderWithTooltip = (props) => {
+    const { ariaSort, ...restThProps } = props.thProps || {}
+
     return (
-      // <div
-      //   className='k-header-cell-wrapper'
-      //   title={props.tooltipText || props.title}
-      // >
-      //   {props.children}
-      //   {/* You could implement a custom CSS-only tooltip here if needed */}
-      // </div>
       <th
-        {...props.thProps}
+        {...restThProps}
+        aria-sort={ariaSort}
         title={props.title}
-        style={{
-          padding: '0px',
-          borderRight: '1px solid #ccc',
-        }}
+        style={{ padding: '0px' }}
       >
         <Tooltip
-          position={'top'}
-          anchorElement={props.thProps}
+          position='top'
+          anchorElement='target'
           parentTitle={true}
           className='test'
         >
@@ -496,8 +486,9 @@ const KendoDataTablesReports = ({
             key={col.field}
             field={col.field}
             title={col.title || col.headerName}
-            editor={true}
-            editable={{ mode: 'popup' }}
+            // editor={true}
+            // editable={{ mode: 'popup' }}
+            width={220}
             cells={{
               data: (cellProps) => (
                 <RemarkCell
@@ -517,13 +508,6 @@ const KendoDataTablesReports = ({
             key={col.field}
             field={col.field}
             title={col.title || col.headerName}
-            filter='date'
-            filterable={{
-              cell: {
-                operator: 'gte',
-                showOperators: true,
-              },
-            }}
             cells={{
               edit: { date: DateOnlyPicker },
               data: toolTipRenderer,
@@ -573,6 +557,7 @@ const KendoDataTablesReports = ({
             columnMenu={ColumnMenuCheckboxFilter}
             filter='numeric'
             format={col.format}
+            width={col?.widthT}
           />
         )
       }
@@ -767,7 +752,7 @@ const KendoDataTablesReports = ({
       )}
 
       <div className='kendo-data-grid'>
-        <Tooltip openDelay={50} position='default' anchorElement='target'>
+        <Tooltip openDelay={50} position='auto' anchorElement='target'>
           <Grid
             modifiedCells={modifiedCells}
             data={rows}

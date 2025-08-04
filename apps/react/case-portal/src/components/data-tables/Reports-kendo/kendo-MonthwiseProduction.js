@@ -70,7 +70,7 @@ const MonthwiseProduction = () => {
     },
 
     {
-      title: oldYear || 'Old Year',
+      title: oldYear,
       children: [
         {
           title: 'Production, MT',
@@ -133,7 +133,7 @@ const MonthwiseProduction = () => {
     },
 
     {
-      title: thisYear || '2024-25',
+      title: thisYear,
       children: [
         {
           field: 'OperatingHours',

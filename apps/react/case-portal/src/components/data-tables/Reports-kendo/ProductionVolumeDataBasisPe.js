@@ -225,6 +225,7 @@ const ProductionVolumeDataBasisPe = () => {
             startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
             endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
             dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
+            mcuDate: item?.mcuDate ? parseDDMMYYYY(item.mcuDate) : null,
           }))
           return rowsWithId
         } else {

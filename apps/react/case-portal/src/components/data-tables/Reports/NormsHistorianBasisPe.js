@@ -63,8 +63,7 @@ const ProductionVolumeDataBasisPe = () => {
   const [rowsBestAchivedNorms, setRowsBestAchivedNorms] = useState([])
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+  const { plantID, verticalChange, yearChanged, oldYear } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -90,6 +89,10 @@ const ProductionVolumeDataBasisPe = () => {
           (d) => d.Name === 'EndDate',
         )?.AttributeValue
 
+        if (!StartDate || !EndDate) {
+          return
+        }
+
         data = await DataService.getProductionVolDataBasisPe(
           keycloak,
           reportType,
@@ -105,6 +108,7 @@ const ProductionVolumeDataBasisPe = () => {
             startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
             endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
             dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
+            mcuDate: item?.mcuDate ? parseDDMMYYYY(item.mcuDate) : null,
           }))
           setLoading(false)
           setState(rowsWithId)
@@ -162,7 +166,7 @@ const ProductionVolumeDataBasisPe = () => {
     fetchData('CONSECUTIVE DAYS', setRowsConsecutiveDays)
     fetchData('MIIS NORMS RAW DATA', setRowsMiisNormsRawData)
     fetchData('BEST ACHIEVED NORMS', setRowsBestAchivedNorms)
-  }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
+  }, [plantID, oldYear, yearChanged, keycloak])
 
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)

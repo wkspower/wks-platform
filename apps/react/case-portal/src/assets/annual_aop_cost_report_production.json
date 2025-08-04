@@ -2,7 +2,7 @@
   {
     "field": "particulars",
     "headerName": "Particulars",
-    "minWidth": 150,
+    "widthT": 220,
     "editable": false,
     "filterType": "text"
   },

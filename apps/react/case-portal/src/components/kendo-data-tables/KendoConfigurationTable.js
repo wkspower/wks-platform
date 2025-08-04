@@ -7,7 +7,7 @@ import { styled } from '@mui/material/styles'
 import AopTabs from 'components/AopTabs'
 import Notification from 'components/Utilities/Notification'
 import { verticalEnums } from 'enums/verticalEnums'
-import { usePermissions } from 'hooks/usePermissions'
+// import { usePermissions } from 'hooks/usePermissions'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
@@ -26,6 +26,7 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import SelectivityData from './SelectivityData'
+import Loader from 'components/Loader'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -100,8 +101,8 @@ const ConfigurationTable = () => {
   const [isEdited, setIsEdited] = useState(false)
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
 
-  const { isReadOnly, isReadWrite, isFullAccess, isApproveOnly } =
-    usePermissions()
+  // const { isReadOnly, isReadWrite, isFullAccess, isApproveOnly } =
+  //   usePermissions()
 
   const handleOpenDialog = () => {
     setOpenConfirmDialog(true)
@@ -113,11 +114,13 @@ const ConfigurationTable = () => {
     setOpenConfirmDialog(false)
     onLoad()
   }
+
   const fetchData = async () => {
     setProductionRows([])
     setProductionRowsConstants([])
     setProductionRowsConstantsMannualEntry([])
     setLoading(true)
+
     try {
       setLoading(true)
       var data = await DataService.getCatalystSelectivityData(keycloak)
@@ -201,6 +204,7 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
+
   const fetchDataConstants = async () => {
     setProductionRowsConstants([])
     try {
@@ -296,9 +300,26 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
+
+  const year = localStorage.getItem('year')
+
   useEffect(() => {
+    if (!plantID || !year) return
+
+    getConfigurationExecutionDetails()
+  }, [plantID, year])
+
+  useEffect(() => {
+    console.log(plantID)
+    console.log(localStorage.getItem('year'))
+
+    if (!plantID || !year) {
+      return
+    }
+
     getConfigurationExecutionDetails()
     getAopSummary()
+
     let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
     let verticalName = vertical?.toLowerCase()
     setTimeout(() => {
@@ -309,16 +330,12 @@ const ConfigurationTable = () => {
         fetchGradeData()
       }
     }, 500)
-    // const today = new Date()
-    // const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
-    // const startDate = new Date(
-    //   today.getFullYear() - 5,
-    //   today.getMonth() - 1 + 1,
-    //   1,
-    // )
-    // setStartDate(startDate)
-    // setEndDate(endDate)
   }, [oldYear, yearChanged, keycloak, plantID])
+
+  if (!plantID || !year) {
+    return <Loader /> // ? Correct — render JSX conditionally
+  }
+
   const computeAndSetDates = useCallback(() => {
     setStartDate('')
     setEndDate('')
@@ -437,9 +454,14 @@ const ConfigurationTable = () => {
     }
   }
   useEffect(() => {
+    if (!plantID || !year) {
+      return
+    }
+
     hasExecutedRef.current = false
     getConfigurationExecutionDetails()
   }, [plantID])
+
   const hasExecutedRef = useRef(false)
   const getConfigurationExecutionDetails = async () => {
     try {
@@ -828,6 +850,7 @@ const ConfigurationTable = () => {
       </div>
     )
   }
+
   if (lowerVertName === 'cracker') {
     const crackerTabs = ['Configuration', 'Constants']
     const auditYear = localStorage.getItem('year')
@@ -901,6 +924,7 @@ const ConfigurationTable = () => {
       </div>
     )
   }
+
   return (
     <div>
       <Backdrop

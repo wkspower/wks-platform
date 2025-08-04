@@ -288,6 +288,9 @@ const BusinessDemand = ({ permissions }) => {
       units: ['TPH', 'TPD'],
       showTitleNameBusiness: true,
       titleName: 'Business Demand Data',
+
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Business Demand Data`,
     },
     isOldYear,
   )

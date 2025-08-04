@@ -23,13 +23,13 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Product name',
               editable: false,
-              width: 200,
+              widthT: 300,
             },
             {
               field: 'Unit',
               title: 'Unit',
               editable: false,
-              width: 100,
+              widthT: 100,
             },
             {
               title: 'Price',
@@ -106,13 +106,13 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'By product name',
               editable: false,
-              width: 200,
+              widthT: 300,
             },
             {
               field: 'Unit',
               title: 'Unit',
               editable: false,
-              width: 100,
+              widthT: 100,
             },
             {
               title: 'Price',
@@ -231,13 +231,13 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Raw material name',
               editable: false,
-              width: 200,
+              widthT: 300,
             },
             {
               field: 'Unit',
               title: 'Unit',
               editable: false,
-              width: 100,
+              widthT: 100,
             },
             {
               title: 'Price',
@@ -356,13 +356,13 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Catalyst name',
               editable: false,
-              width: 200,
+              widthT: 300,
             },
             {
               field: 'Unit',
               title: 'Unit',
               editable: false,
-              width: 100,
+              widthT: 100,
             },
             {
               title: 'Price',
@@ -481,13 +481,13 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Utility name',
               editable: false,
-              width: 200,
+              widthT: 300,
             },
             {
               field: 'Unit',
               title: 'Unit',
               editable: false,
-              width: 100,
+              widthT: 100,
             },
             {
               title: 'Price',
@@ -614,7 +614,7 @@ export const MockReportService = {
             {
               field: 'Unit',
               title: 'Unit',
-              width: 100,
+              widthT: 100,
               editable: false,
             },
             {

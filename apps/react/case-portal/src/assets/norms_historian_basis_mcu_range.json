@@ -9,7 +9,8 @@
     "field": "gradeMaxCap",
     "headerName": "Grade Max Capacity",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "year",
@@ -22,24 +23,28 @@
     "field": "highRange",
     "headerName": "High Range",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "lowRange",
     "headerName": "Low Range",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "lowerLimitPercent",
     "headerName": "Lower Limit Percent",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "upperLimitPercent",
     "headerName": "Upper Limit Percent",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   }
 ]

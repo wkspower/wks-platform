@@ -31,7 +31,7 @@ export default function getKendoNormsHistorianColumns({ headerMap, type }) {
       isRightAlligned: isTextCol ? 'text' : 'numeric',
       format: isTextCol ? undefined : '{0:#.###}',
       ...(isTextCol ? {} : { format: '{0:#.###}' }),
-
+      widthT: colDef.widthT,
       editable: false,
       align: isTextCol ? 'left' : 'right',
     }

@@ -493,6 +493,8 @@ const ShutdownNorms = () => {
       showCalculate: lowerVertName == 'meg' ? false : true,
       // noColor: true,
       allAction: true,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Shutdown Consumption (Quantity)`,
     },
     isOldYear,
   )

@@ -1,5 +1,3 @@
-// Full refactored code with setTimeout to show grids progressively and pagination fixed
-
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
 import MuiAccordion from '@mui/material/Accordion'
@@ -117,19 +115,43 @@ const AnnualAopCost = () => {
   const colsNormCost = getKendoColumns({ headerMap, type: 'NormCost' })
 
   useEffect(() => {
+    let isCancelled = false
+    setRowsProduction([])
+    setRowsPrice([])
+    setRowsNorm([])
+    setRowsQuantity([])
+    setRowsNormCost([])
     const fetchAllData = async () => {
       setLoading(true)
+
       await Promise.all([
-        fetchData('production', setRowsProduction),
-        fetchData('price', setRowsPrice),
-        fetchData('norm', setRowsNorm),
-        fetchData('quantity', setRowsQuantity),
-        fetchData('normCost', setRowsNormCost),
+        fetchData('production', (data) => {
+          if (!isCancelled) setRowsProduction(data)
+        }),
+        fetchData('price', (data) => {
+          if (!isCancelled) setRowsPrice(data)
+        }),
+        fetchData('norm', (data) => {
+          if (!isCancelled) setRowsNorm(data)
+        }),
+        fetchData('quantity', (data) => {
+          if (!isCancelled) setRowsQuantity(data)
+        }),
+        fetchData('normCost', (data) => {
+          if (!isCancelled) setRowsNormCost(data)
+        }),
       ])
-      setLoading(false)
+
+      if (!isCancelled) {
+        setLoading(false)
+      }
     }
 
     fetchAllData()
+
+    return () => {
+      isCancelled = true
+    }
   }, [plantID, yearChanged, keycloak])
 
   useEffect(() => {
@@ -234,7 +256,7 @@ const AnnualAopCost = () => {
       <Box display='flex' flexDirection='column' gap={1}>
         {[
           {
-            label: 'Production123',
+            label: 'Production',
             visible: showGrids.production,
             rows: rowsProduction,
             cols: colsProduction,

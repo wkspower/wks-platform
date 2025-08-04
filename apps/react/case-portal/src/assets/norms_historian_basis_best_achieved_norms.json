@@ -27,72 +27,84 @@
     "field": "april",
     "headerName": "April",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "may",
     "headerName": "May",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "june",
     "headerName": "June",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "july",
     "headerName": "July",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "august",
     "headerName": "August",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "september",
     "headerName": "September",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "october",
     "headerName": "October",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "november",
     "headerName": "November",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "december",
     "headerName": "December",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "january",
     "headerName": "January",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "february",
     "headerName": "February",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   },
   {
     "field": "march",
     "headerName": "March",
     "minWidth": 150,
-    "editable": false
+    "editable": false,
+    "type": "number"
   }
 ]

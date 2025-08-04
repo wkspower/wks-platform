@@ -17,13 +17,15 @@
     "headerName": "Actual Production",
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "gradeMaxCap",
     "headerName": "Max Capacity",
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   }
 ]

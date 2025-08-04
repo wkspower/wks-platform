@@ -24,7 +24,8 @@
     "headerName": "AVG Final Norms",
     "editable": false,
     "align": "left",
-    "headerAlign": "left"
+    "headerAlign": "left",
+    "type": "number"
   },
   {
     "field": "year",

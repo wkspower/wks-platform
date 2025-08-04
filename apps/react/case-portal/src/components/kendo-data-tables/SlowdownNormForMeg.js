@@ -6,7 +6,11 @@ import KendoDataTables from './index'
 
 const SlowdownNormForMeg = () => {
   const keycloak = useSession()
-  const { year, plantID, oldYear } = useSelector((state) => state.dataGridStore)
+  const { year, plantID, oldYear, verticalChange } = useSelector(
+    (state) => state.dataGridStore,
+  )
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
 
   const isOldYear = oldYear?.oldYear
   const plantId = plantID?.plantId
@@ -251,6 +255,8 @@ const SlowdownNormForMeg = () => {
       showCalculate: isCurrentYear,
       allAction: isCurrentYear,
       showCalculateVisibility: hasCalculationResults,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Slowdown Consumption (Norms / Quantity)`,
     }
   }, [isOldYear, tableRows.length, calculationResults.length])
 

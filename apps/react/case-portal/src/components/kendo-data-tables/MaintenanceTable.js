@@ -301,8 +301,9 @@ const MaintenanceTable = () => {
           showUnit: false,
           saveWithRemark: false,
           saveBtn: dataConfig.isCracker,
-          allAction: dataConfig.isCracker,
-
+          allAction: true,
+          downloadExcelBtnFromUI: true,
+          ExcelName: `${lowerVertName}_Maintenance Details`,
           //allAction: false,
           showRefresh: false,
         },

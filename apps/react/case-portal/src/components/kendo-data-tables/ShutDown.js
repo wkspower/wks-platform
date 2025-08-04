@@ -512,6 +512,8 @@ const ShutDown = ({ permissions }) => {
       saveBtn: permissions?.saveBtn ?? true,
       customHeight: permissions?.customHeight,
       allAction: true,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Shutdown Activities`,
     },
     isOldYear,
   )

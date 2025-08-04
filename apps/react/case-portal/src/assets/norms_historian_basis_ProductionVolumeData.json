@@ -3,7 +3,8 @@
     "field": "material",
     "headerName": "Particulars",
     "flex": 2,
-    "editable": false
+    "editable": false,
+    "widthT": 220
   },
   {
     "field": "april",

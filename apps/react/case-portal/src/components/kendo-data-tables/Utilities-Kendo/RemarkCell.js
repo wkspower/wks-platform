@@ -14,7 +14,7 @@ export const RemarkCell = ({
   const month = monthMap[field.toLowerCase()]
   const normId = dataItem.materialFkId
 
-  // Ensure we always work with an array:
+  // Ensure we always work with an array
   const redCells = Array.isArray(allRedCell) ? allRedCell : []
 
   const isRed = redCells.some(
@@ -23,9 +23,27 @@ export const RemarkCell = ({
       cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
   )
 
+  // Whitelist only valid HTML <td> attributes from tdProps
+  const {
+    className,
+    colSpan,
+    rowSpan,
+    headers,
+    style: extraStyle,
+    id,
+    role,
+    'data-testid': dataTestId,
+  } = tdProps || {}
+
   return (
     <td
-      {...tdProps}
+      className={className}
+      colSpan={colSpan}
+      rowSpan={rowSpan}
+      headers={headers}
+      id={id}
+      role={role}
+      data-testid={dataTestId}
       title={rawValue || 'Click to add remark'}
       style={{
         cursor: 'pointer',
@@ -33,6 +51,7 @@ export const RemarkCell = ({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
+        ...extraStyle,
       }}
       onClick={(e) => {
         e.preventDefault()

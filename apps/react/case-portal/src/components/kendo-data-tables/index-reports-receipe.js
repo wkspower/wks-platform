@@ -333,25 +333,18 @@ const KendoDataTablesReciepe = ({
   }
 
   const SimpleHeaderWithTooltip = (props) => {
+    const { ariaSort, ...restThProps } = props.thProps || {}
+
     return (
-      // <div
-      //   className='k-header-cell-wrapper'
-      //   title={props.tooltipText || props.title}
-      // >
-      //   {props.children}
-      //   {/* You could implement a custom CSS-only tooltip here if needed */}
-      // </div>
       <th
-        {...props.thProps}
+        {...restThProps}
+        aria-sort={ariaSort}
         title={props.title}
-        style={{
-          padding: '0px',
-          borderRight: '1px solid #ccc',
-        }}
+        style={{ padding: '0px' }}
       >
         <Tooltip
-          position={'top'}
-          anchorElement={props.thProps}
+          position='top'
+          anchorElement='target'
           parentTitle={true}
           className='test'
         >
@@ -542,7 +535,7 @@ const KendoDataTablesReciepe = ({
       )}
 
       <div className='kendo-data-grid'>
-        <Tooltip openDelay={50} position='default' anchorElement='target'>
+        <Tooltip openDelay={50} position='auto' anchorElement='target'>
           <Grid
             modifiedCells={modifiedCells}
             data={rows}

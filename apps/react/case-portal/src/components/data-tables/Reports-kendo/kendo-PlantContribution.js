@@ -8,7 +8,9 @@ import { DataService } from 'services/DataService'
 import { MockReportService } from './mockPlantContributionAPI'
 
 const categories = () => {
-  const verticalName = JSON.parse(localStorage.getItem('selectedVertical'))?.name?.toLowerCase()
+  const verticalName = JSON.parse(
+    localStorage.getItem('selectedVertical'),
+  )?.name?.toLowerCase()
 
   return [
     {
@@ -31,18 +33,14 @@ export default function PlantContribution() {
   const keycloak = useSession()
   const year = localStorage.getItem('year')
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
-
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
   const [rows, setRows] = useState()
-  // const currFY = localStorage.getItem('year') || ''
 
   const loadAll = async () => {
     setLoading(true)
@@ -59,8 +57,7 @@ export default function PlantContribution() {
           keycloak,
           key,
         )
-        let rows = apiResp.data?.plantProductionData || [] // adapt if resp shape differs
-        // console.log(apiResp)
+        let rows = apiResp.data?.plantProductionData || []
         if (apiResp?.code == 200) {
           rows = apiResp?.data?.plantProductionData.map((item, index) => ({
             ...item,
@@ -70,8 +67,6 @@ export default function PlantContribution() {
               key == 'OtherVariableCost' && [1, 2, 3, 0].includes(index)
                 ? true
                 : false,
-            // isEditable: [1, 2, 3, 0].includes(index),
-            // isEditable: false,
           }))
           if (key == 'OtherVariableCost') setRows(rows)
         } else {
@@ -167,6 +162,7 @@ export default function PlantContribution() {
         prevYearActual: row.PrevYearActual,
         PrevYearBudget: row.PrevYearBudget,
         CurrentYearBudget: row.CurrentYearBudget,
+
         remark: row.remarks || '',
       }))
       const res = await DataService.savePlantContributionData(

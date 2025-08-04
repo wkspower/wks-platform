@@ -63,8 +63,7 @@ const NormsHistorianBasis = () => {
   const [rowsProductionVolumeData, setProductionVolumeData] = useState([])
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+  const { plantID, verticalChange, yearChanged, oldYear } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -72,14 +71,21 @@ const NormsHistorianBasis = () => {
   const [showGrids, setShowGrids] = useState({})
 
   const units = ['TPH', 'TPD']
+
   const isOldYear = oldYear?.oldYear === 1
+
   useEffect(() => {
+    let isCancelled = false
+    setProductionVolumeData([])
+    setMcuAndNormGrid([])
+    setHistorianValues([])
     const fetchAllData = async (selectedUnit) => {
       if (!selectedUnit) return
       setLoading(true)
+      let apiCount = 0
 
       try {
-        const results = await Promise.all([
+        const results = await Promise.allSettled([
           DataService.getNormsHistorianBasis(
             keycloak,
             'HistorianValues',
@@ -90,7 +96,6 @@ const NormsHistorianBasis = () => {
             'McuAndNormGrid',
             selectedUnit,
           ),
-
           DataService.getNormsHistorianBasis(
             keycloak,
             'ProductionVolumeData',
@@ -98,10 +103,15 @@ const NormsHistorianBasis = () => {
           ),
         ])
 
-        const [historianRes, mcuRes, prodRes] = results
+        if (isCancelled) return
 
-        if (historianRes?.code === 200) {
-          const rows = historianRes.data.normHistoricBasisData.map(
+        const [historianResult, mcuResult, prodResult] = results
+
+        if (
+          historianResult.status === 'fulfilled' &&
+          historianResult.value?.code === 200
+        ) {
+          const rows = historianResult.value.data.normHistoricBasisData.map(
             (item, index) => ({
               ...item,
               id: index,
@@ -112,22 +122,29 @@ const NormsHistorianBasis = () => {
             }),
           )
           setHistorianValues(rows)
+          apiCount++
         }
 
-        if (mcuRes?.code === 200) {
-          const rows = mcuRes.data.normHistoricBasisData.map((item, index) => ({
-            ...item,
-            id: index,
-            isEditable: false,
-            dateTime: item?.dateTime
-              ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
-              : null,
-          }))
+        if (mcuResult.status === 'fulfilled' && mcuResult.value?.code === 200) {
+          const rows = mcuResult.value.data.normHistoricBasisData.map(
+            (item, index) => ({
+              ...item,
+              id: index,
+              isEditable: false,
+              dateTime: item?.dateTime
+                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
+                : null,
+            }),
+          )
           setMcuAndNormGrid(rows)
+          apiCount++
         }
 
-        if (prodRes?.code === 200) {
-          const rows = prodRes.data.normHistoricBasisData.map(
+        if (
+          prodResult.status === 'fulfilled' &&
+          prodResult.value?.code === 200
+        ) {
+          const rows = prodResult.value.data.normHistoricBasisData.map(
             (item, index) => ({
               ...item,
               id: index,
@@ -138,23 +155,24 @@ const NormsHistorianBasis = () => {
             }),
           )
           setProductionVolumeData(rows)
+          // apiCount++
         }
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error('Unexpected error:', error)
       } finally {
-        setLoading(false)
+        if (!isCancelled) {
+          // console.log('loading false apiCount', apiCount)
+          setLoading(false)
+        }
       }
     }
 
     fetchAllData(selectedUnit)
-  }, [
-    sitePlantChange,
-    oldYear,
-    yearChanged,
-    keycloak,
-    lowerVertName,
-    selectedUnit,
-  ])
+
+    return () => {
+      isCancelled = true
+    }
+  }, [yearChanged, keycloak, plantID, selectedUnit])
 
   useEffect(() => {
     const timers = [
@@ -163,8 +181,10 @@ const NormsHistorianBasis = () => {
         0,
       ),
       setTimeout(() => setShowGrids((prev) => ({ ...prev, norm: true })), 100),
-      setTimeout(() => setShowGrids((prev) => ({ ...prev, current: true })), 200),
-
+      setTimeout(
+        () => setShowGrids((prev) => ({ ...prev, current: true })),
+        200,
+      ),
     ]
     return () => timers.forEach(clearTimeout)
   }, [])
@@ -229,25 +249,30 @@ const NormsHistorianBasis = () => {
 
       {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        {[rowsProductionVolumeData, rowsMcuAndNormGrid, rowsHistorianValues].map(
-          (data, i) => (
-            <ExcelExport
-              key={i}
-              data={data}
-              ref={
-                [exportRef1, exportRef2, exportRef3][i]
-              }
-              fileName={fileName}
-            >
-              {[colsProductionVolumeData, colsMcuAndNormGrid, colsHistorianValues][i].map((col) => (
-                <ExcelExportColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title}
-                />
-              ))}
-            </ExcelExport>
-          ))}
+        {[
+          rowsProductionVolumeData,
+          rowsMcuAndNormGrid,
+          rowsHistorianValues,
+        ].map((data, i) => (
+          <ExcelExport
+            key={i}
+            data={data}
+            ref={[exportRef1, exportRef2, exportRef3][i]}
+            fileName={fileName}
+          >
+            {[
+              colsProductionVolumeData,
+              colsMcuAndNormGrid,
+              colsHistorianValues,
+            ][i].map((col) => (
+              <ExcelExportColumn
+                key={col.field}
+                field={col.field}
+                title={col.title}
+              />
+            ))}
+          </ExcelExport>
+        ))}
       </div>
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
@@ -274,10 +299,10 @@ const NormsHistorianBasis = () => {
             marginLeft: '12px',
           }}
           variant='outlined'
-          label='Select UOM'
+          label='Select UOM.'
         >
           <MenuItem value='' disabled>
-            Select UOM
+            Select UOM.
           </MenuItem>
 
           {units.map((unit) => (
@@ -289,29 +314,29 @@ const NormsHistorianBasis = () => {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {
-          [
-            {
-              label: 'Production Volume Data',
-              visible: showGrids.production,
-              rows: rowsProductionVolumeData,
-              cols: colsProductionVolumeData,
-            },
-            {
-              label: 'MCU & Norm',
-              visible: showGrids.norm,
-              rows: rowsMcuAndNormGrid,
-              cols: colsMcuAndNormGrid,
-            },
-            {
-              label: 'Current Values',
-              visible: showGrids.current,
-              rows: rowsHistorianValues,
-              cols: colsHistorianValues,
-            }
-          ].map(
-            (section, index) =>
-              section.visible && (<CustomAccordion key={index} defaultExpanded disableGutters>
+        {[
+          {
+            label: 'Production Volume Data',
+            visible: showGrids.production,
+            rows: rowsProductionVolumeData,
+            cols: colsProductionVolumeData,
+          },
+          {
+            label: 'MCU & Norm',
+            visible: showGrids.norm,
+            rows: rowsMcuAndNormGrid,
+            cols: colsMcuAndNormGrid,
+          },
+          {
+            label: 'Current Values',
+            visible: showGrids.current,
+            rows: rowsHistorianValues,
+            cols: colsHistorianValues,
+          },
+        ].map(
+          (section, index) =>
+            section.visible && (
+              <CustomAccordion key={index} defaultExpanded disableGutters>
                 <CustomAccordionSummary>
                   <Typography className='grid-title'>
                     {section.label}
@@ -319,14 +344,12 @@ const NormsHistorianBasis = () => {
                 </CustomAccordionSummary>
                 <CustomAccordionDetails>
                   <Box sx={{ width: '100%' }}>
-                    <KendoDataGrid
-                      rows={section.rows}
-                      columns={section.cols}
-                    />
+                    <KendoDataGrid rows={section.rows} columns={section.cols} />
                   </Box>
                 </CustomAccordionDetails>
-              </CustomAccordion>))
-        }
+              </CustomAccordion>
+            ),
+        )}
       </Box>
     </div>
   )
