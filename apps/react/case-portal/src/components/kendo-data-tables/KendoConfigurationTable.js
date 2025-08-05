@@ -332,9 +332,9 @@ const ConfigurationTable = () => {
     }, 500)
   }, [oldYear, yearChanged, keycloak, plantID])
 
-  if (!plantID || !year) {
-    return <Loader /> // ? Correct — render JSX conditionally
-  }
+  // if (!plantID || !year) {
+  //   return <Loader /> // ? Correct - render JSX conditionally
+  // }
 
   const computeAndSetDates = useCallback(() => {
     setStartDate('')

@@ -15,7 +15,7 @@ import DateTimePickerEditor from 'components/kendo-data-tables/Utilities-Kendo/D
 import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 import DateOnlyPicker from 'components/kendo-data-tables/Utilities-Kendo/DatePicker'
 
-const KendoDataGrid = ({ rows, columns, onRowChange }) => {
+const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
@@ -74,7 +74,11 @@ const KendoDataGrid = ({ rows, columns, onRowChange }) => {
     <div className='kendo-data-grid'>
       <Tooltip openDelay={50} position='bottom' anchorElement='target'>
         <Grid
-          style={{ flex: 1, overflow: 'auto' }}
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            ...(permissions?.isHeight ? { height: 500 } : {}),
+          }}
           data={rows}
           dataItemKey='id'
           autoProcessData={true}

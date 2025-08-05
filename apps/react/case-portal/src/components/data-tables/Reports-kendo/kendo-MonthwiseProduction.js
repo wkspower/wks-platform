@@ -464,6 +464,7 @@ const MonthwiseProduction = () => {
           roundOffDecimals: true,
           hideByProducts: true,
           hideNoteText: true,
+          hideExportBtn: true,
         }}
       />
       <Notification

@@ -344,7 +344,13 @@ const NormsHistorianBasis = () => {
                 </CustomAccordionSummary>
                 <CustomAccordionDetails>
                   <Box sx={{ width: '100%' }}>
-                    <KendoDataGrid rows={section.rows} columns={section.cols} />
+                    <KendoDataGrid
+                      rows={section.rows}
+                      columns={section.cols}
+                      permissions={{
+                        isHeight: section.label === 'MCU & Norm',
+                      }}
+                    />
                   </Box>
                 </CustomAccordionDetails>
               </CustomAccordion>

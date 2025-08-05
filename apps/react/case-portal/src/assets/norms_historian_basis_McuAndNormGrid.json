@@ -4,7 +4,7 @@
     "headerName": "SL No.",
     "flex": 1,
     "editable": false,
-    "widthT": 50
+    "widthT": 70
   },
   {
     "field": "norms",
