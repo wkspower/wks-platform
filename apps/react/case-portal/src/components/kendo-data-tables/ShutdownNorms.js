@@ -325,8 +325,7 @@ const ShutdownNorms = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-
-      // Fetch data from API
+      setRows([])
       const data = await DataService.getShutdownNormsData(keycloak)
       const isTPD = selectedUnit === 'TPD'
 

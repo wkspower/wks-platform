@@ -242,8 +242,14 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       itemContent = null
     }
 
+    // console.log('keycloak?.realmAccess?.roles', keycloak?.idTokenParsed)
+
     // main
-    if (item.breadcrumbs !== false) {
+    if (
+      item.breadcrumbs !== false &&
+      location?.pathname !== '/user-management' &&
+      location?.pathname !== '/user-form'
+    ) {
       breadcrumbContent = (
         <MainCard
           border={false}

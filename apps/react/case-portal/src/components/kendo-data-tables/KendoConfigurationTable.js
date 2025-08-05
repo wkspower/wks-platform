@@ -139,17 +139,20 @@ const ConfigurationTable = () => {
           setLoading(false)
         }
         // setRows(formattedData)
-      } else if (lowerVertName == 'elastomer') {
-        const formattedData = data.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          srNo: index + 1,
-          Particulars: item.normType,
-        }))
-        setElastomerRows(formattedData)
-      } else {
+      }
+
+      // else if (lowerVertName == 'elastomer') {
+      //   const formattedData = data.map((item, index) => ({
+      //     ...item,
+      //     idFromApi: item.id,
+      //     id: index,
+      //     originalRemark: item.remarks,
+      //     srNo: index + 1,
+      //     Particulars: item.normType,
+      //   }))
+      //   setElastomerRows(formattedData)
+      // }
+      else {
         const groups = new Map()
         data.forEach((item) => {
           const ConfigTypeName = item.ConfigTypeName
@@ -253,7 +256,7 @@ const ConfigurationTable = () => {
     setLoading(true)
     try {
       var data = await DataService.getPeConfigData(keycloak)
-      const formattedData = data.map((item, index) => ({
+      const formattedData = data?.map((item, index) => ({
         ...item,
         id: index,
       }))
@@ -333,7 +336,7 @@ const ConfigurationTable = () => {
   }, [oldYear, yearChanged, keycloak, plantID])
 
   // if (!plantID || !year) {
-  //   return <Loader /> // ? Correct - render JSX conditionally
+  //   return <Loader /> //
   // }
 
   const computeAndSetDates = useCallback(() => {
@@ -342,10 +345,6 @@ const ConfigurationTable = () => {
     // if (!configurationExecutionDetails.length) return
     const hasModifiedOn = configurationExecutionDetails[0]?.ModifiedOn
     if (hasModifiedOn) {
-      // console.log(
-      //   'configurationExecutionDetails',
-      //   configurationExecutionDetails,
-      // )
       const getDateValue = (name) =>
         new Date(
           configurationExecutionDetails.find(
@@ -747,19 +746,19 @@ const ConfigurationTable = () => {
     )
   }, [openConfirmDialog])
 
-  if (lowerVertName == 'elastomer') {
-    return (
-      <SelectivityData
-        rows={elastomerRows}
-        loading={loading}
-        fetchData={fetchData}
-        setRows={setElastomerRows}
-        configType='meg'
-        groupBy='Particulars'
-        summary={debouncedSummary}
-      />
-    )
-  }
+  // if (lowerVertName == 'elastomer') {
+  //   return (
+  //     <SelectivityData
+  //       rows={elastomerRows}
+  //       loading={loading}
+  //       fetchData={fetchData}
+  //       setRows={setElastomerRows}
+  //       configType='meg'
+  //       groupBy='Particulars'
+  //       summary={debouncedSummary}
+  //     />
+  //   )
+  // }
 
   if (lowerVertName == 'meg' && lowerVertName !== 'cracker') {
     const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']

@@ -256,7 +256,12 @@ const ProductionVolumeDataBasisPe = () => {
           (d) => d.Name === 'EndDate',
         )?.AttributeValue
 
+        if (!StartDate || !EndDate) {
+          updateData({ loading: false })
+          return
+        }
         // Fetch all data in parallel
+
         const [
           rawMcuData,
           mcuWithinRangeData,

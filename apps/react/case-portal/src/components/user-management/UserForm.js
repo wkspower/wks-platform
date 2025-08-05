@@ -28,6 +28,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { DataService } from 'services/DataService'
 import i18n from '../../i18n'
+import { Chip } from '../../../node_modules/@mui/material/index'
 
 const UserForm = ({ keycloak }) => {
   const location = useLocation()
@@ -89,7 +90,7 @@ const UserForm = ({ keycloak }) => {
         result,
         permissions: permissions ? permissions : [],
       }
-      console.log('dynamic', dynamic, result)
+
       return mergeResult
     } catch (err) {
       const mergeResult = {
@@ -117,7 +118,7 @@ const UserForm = ({ keycloak }) => {
       }
     })
     // 2. Remove data for any deselected verticals
-    console.log('fetchPromises', newMap)
+    // console.log('fetchPromises', newMap)
     Object.keys(newMap).forEach((vId) => {
       if (!selectedVerticals.includes(vId)) {
         delete newMap[vId]
@@ -127,7 +128,7 @@ const UserForm = ({ keycloak }) => {
     // 3. Wait for all fetches to complete, then update state
     await Promise.all(fetchPromises)
     const testing = await Promise.all(fetchPromises)
-    console.log('fetchPromises', testing)
+    // console.log('fetchPromises', testing)
     setScreensByVertical(newMap)
   }
 
@@ -195,7 +196,7 @@ const UserForm = ({ keycloak }) => {
             const screens = fetchScreen.result
 
             const allScreens = getAllScreens(screens)
-            console.log('allScreens', allScreens)
+            // console.log('allScreens', allScreens)
             const permissions = fetchScreen.permissions
             // let plantScreens = []
             // console.log('fetchScreen', screens)
@@ -424,7 +425,7 @@ const UserForm = ({ keycloak }) => {
   // Retrieve available screens for a given plant block (per vertical)
   const getAvailableScreens = (verticalId, siteIndex, plantIndex) => {
     const verticalScreens = screensByVertical[verticalId] || screenOptions
-    console.log('verticalScreens', verticalScreens)
+    // console.log('verticalScreens', verticalScreens)
     const verticalData = verticalSites[verticalId]
     if (!verticalData) return verticalScreens
 
@@ -710,7 +711,13 @@ const UserForm = ({ keycloak }) => {
     return <div>Loading...</div>
   }
   const SELECT_ALL = '__SELECT_ALL__'
-  console.log('verticalSites[verticalId]', verticalSites)
+  // console.log('verticalSites[verticalId]', verticalSites)
+  // console.log('userDetails', data)
+
+  const data1 = Array.from({ length: 50 }, (_, i) => ({
+    username: `user${i + 1}`,
+  }))
+
   return (
     <Container
       sx={{
@@ -730,8 +737,43 @@ const UserForm = ({ keycloak }) => {
       ) : (
         <>
           <Box py={3}>
+            <Box>
+              <Typography
+                variant='h6'
+                gutterBottom
+                sx={{ fontWeight: 600, marginBottom: 1 }}
+              >
+                {data?.length > 1 ? 'Selected Users' : 'Selected User'}
+              </Typography>
+
+              <Box
+                sx={{
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  padding: 1,
+                  marginBottom: 1,
+                }}
+              >
+                <Typography
+                  variant='body1'
+                  sx={{
+                    color: '#333',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  <Stack direction='row' flexWrap='wrap' gap={1}>
+                    {data?.length
+                      ? data.map((user, index) => (
+                          <Chip key={index} label={user.username} />
+                        ))
+                      : 'No user selected'}
+                  </Stack>
+                </Typography>
+              </Box>
+            </Box>
+
             <Grid container spacing={2} alignItems='center'>
-              {/* Vertical Dropdown */}
               <Grid item xs={12} sm={4}>
                 <Typography
                   variant='h6'
@@ -769,7 +811,7 @@ const UserForm = ({ keycloak }) => {
           </Box>
 
           {selectedVerticals.map((verticalId) => {
-            console.log('siteEntry', verticalId)
+            // console.log('siteEntry', verticalId)
             const vertical = getVerticalById(verticalId)
             if (!vertical) return null
 
@@ -834,7 +876,7 @@ const UserForm = ({ keycloak }) => {
                         </Box>
                       ))
                     : verticalSites[verticalId]?.map((siteEntry, siteIndex) => {
-                        console.log('siteEntry', siteEntry)
+                        // console.log('siteEntry', siteEntry)
                         return (
                           <Box key={siteIndex} mb={2}>
                             <Grid container spacing={2} alignItems='center'>
@@ -896,7 +938,7 @@ const UserForm = ({ keycloak }) => {
                               </Grid>
                               {siteEntry.plants.map(
                                 (plantEntry, plantIndex) => {
-                                  console.log('plantEntry', plantEntry)
+                                  // console.log('plantEntry', plantEntry)
                                   return (
                                     <Stack
                                       direction='row'

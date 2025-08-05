@@ -90,6 +90,7 @@ const ProductionVolumeDataBasisPe = () => {
         )?.AttributeValue
 
         if (!StartDate || !EndDate) {
+          setLoading(false)
           return
         }
 
@@ -112,6 +113,8 @@ const ProductionVolumeDataBasisPe = () => {
           }))
           setLoading(false)
           setState(rowsWithId)
+        } else {
+          setLoading(false)
         }
       } else {
         console.error(`Error fetching ${reportType} data`)

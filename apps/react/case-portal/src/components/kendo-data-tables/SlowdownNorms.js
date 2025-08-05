@@ -514,6 +514,8 @@ const SlowdownNorms = () => {
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : false,
       allAction: true,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Slowdown Consumption (Norms/Quantity)`,
     },
     isOldYear,
   )
@@ -521,7 +523,6 @@ const SlowdownNorms = () => {
     const productId = props.dataItem.materialFkId
     const product = allProducts.find((p) => p.id === productId)
     const displayName = product?.displayName || ''
-    // console.log(displayName)
     return <td>{displayName}</td>
   }
 

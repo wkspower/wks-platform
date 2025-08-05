@@ -298,11 +298,16 @@ const KendoDataTables = ({
     },
     [setRows, setModifiedCells, setCustomModifiedCells],
   )
+
   useEffect(() => {
-    if (Object.keys(modifiedCells).length === 0) {
+    const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
+    const isCustomModifiedCellsEmpty =
+      Object.keys(customModifiedCells).length === 0
+
+    if (isModifiedCellsEmpty && !isCustomModifiedCellsEmpty) {
       setCustomModifiedCells({})
     }
-  }, [modifiedCells])
+  }, [modifiedCells, customModifiedCells])
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
@@ -456,15 +461,15 @@ const KendoDataTables = ({
       allRedCell,
     } = props
 
-  const rowId = dataItem.id;
-  const value = dataItem[field];
-  if (disableRedHighlight) {
-    return (
-      <td {...tdProps} title={value}>
-        {children}
-      </td>
-    );
-  }
+    const rowId = dataItem.id
+    const value = dataItem[field]
+    if (disableRedHighlight) {
+      return (
+        <td {...tdProps} title={value}>
+          {children}
+        </td>
+      )
+    }
 
     // Check if edited (local edits)
     const isEdited = Object.prototype.hasOwnProperty.call(
@@ -849,6 +854,7 @@ const KendoDataTables = ({
                   variant='contained'
                   className='btn-save'
                   onClick={excelExport}
+                  disabled={rows?.length === 0}
                 >
                   Export
                 </Button>
@@ -999,7 +1005,7 @@ const KendoDataTables = ({
                             {...props}
                             customModifiedCells={customModifiedCells}
                             allRedCell={allRedCell}
-        disableRedHighlight={disableRedHighlight}
+                            disableRedHighlight={disableRedHighlight}
                           />
                         ),
                         headerCell: SimpleHeaderWithTooltip,
@@ -1051,7 +1057,7 @@ const KendoDataTables = ({
                             {...props}
                             customModifiedCells={customModifiedCells}
                             allRedCell={allRedCell}
-        disableRedHighlight={disableRedHighlight}
+                            disableRedHighlight={disableRedHighlight}
                           />
                         ),
                         headerCell: SimpleHeaderWithTooltip,
@@ -1296,7 +1302,7 @@ const KendoDataTables = ({
                             {...props}
                             customModifiedCells={customModifiedCells}
                             allRedCell={allRedCell}
-        disableRedHighlight={disableRedHighlight}
+                            disableRedHighlight={disableRedHighlight}
                           />
                         ),
                         headerCell: SimpleHeaderWithTooltip,
@@ -1329,7 +1335,7 @@ const KendoDataTables = ({
                             {...props}
                             customModifiedCells={customModifiedCells}
                             allRedCell={allRedCell}
-      disableRedHighlight={disableRedHighlight}
+                            disableRedHighlight={disableRedHighlight}
                           />
                         ),
                         headerCell: SimpleHeaderWithTooltip,
