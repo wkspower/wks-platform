@@ -204,7 +204,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 				MCUNormsValue value = optionalValue.get();
 				Optional<NormParameters> normParametersOpt =normParametersRepository.findById(value.getMaterialFkId());
-				if(!normParametersOpt.isEmpty() && normParametersOpt.get().getIsEditable()) {
+				if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
 					continue;
 				}
 				
@@ -253,6 +253,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 								.findById(UUID.fromString(mCUNormsValueDTO.getId()));
 						if (optionalNormsValue.isPresent()) {
 							mCUNormsValueGrade = optionalNormsValue.get();
+							if(mCUNormsValueGrade.getMaterialFkId()!=null) {
+								Optional<NormParameters> normParametersOpt =normParametersRepository.findById(mCUNormsValueGrade.getMaterialFkId());
+								if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
+									continue;
+								}
+							}
+							
 							mCUNormsValueGrade.setId(UUID.fromString(mCUNormsValueDTO.getId()));
 							mCUNormsValueGrade.setModifiedOn(new Date());
 							mCUNormsValueGrade.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0));
@@ -317,6 +324,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 								.findById(UUID.fromString(mCUNormsValueDTO.getId()));
 						if (normsValue.isPresent()) {
 							mCUNormsValue = normsValue.get();
+							if(mCUNormsValue.getMaterialFkId()!=null) {
+								Optional<NormParameters> normParametersOpt =normParametersRepository.findById(mCUNormsValue.getMaterialFkId());
+								if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
+									continue;
+								}
+							}
+							
 							mCUNormsValue.setId(UUID.fromString(mCUNormsValueDTO.getId()));
 							mCUNormsValue.setModifiedOn(new Date());
 							mCUNormsValue.setApril(Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0));
