@@ -19,6 +19,7 @@ import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.MCUNormsValueGrade;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.NormsTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
@@ -28,6 +29,7 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueGradeRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
 import com.wks.caseengine.repository.NormsTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -74,6 +76,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	private MCUNormsValueGradeRepository mcuNormsValueGradeRepository;
 
 	private DataSource dataSource;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public NormalOperationNormsServiceImpl(DataSource dataSource) {
@@ -198,6 +203,11 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				}
 
 				MCUNormsValue value = optionalValue.get();
+				Optional<NormParameters> normParametersOpt =normParametersRepository.findById(value.getMaterialFkId());
+				if(!normParametersOpt.isEmpty() && normParametersOpt.get().getIsEditable()) {
+					continue;
+				}
+				
 
 				for (int month = 1; month <= 12; month++) {
 					Double oldVal = getMonthlyValue(value, month);
@@ -713,7 +723,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (MCUNormsValueDTO dto : dtoList) {
-				if ((dto.getIsEditable() != null && dto.getIsEditable()) || isAfterSave) {
+				//if (isAfterSave) {
 					List<Object> list = new ArrayList<>();
 					list.add(dto.getNormParameterTypeDisplayName());
 					list.add(dto.getProductName());
@@ -739,7 +749,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 						list.add(dto.getErrDescription());
 					}
 					rows.add(list);
-				}
+				//}
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
