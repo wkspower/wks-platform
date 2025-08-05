@@ -122,29 +122,32 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     int startDataRow = currentRow;
 
                     // Write structure rows
-                    for (List<Object> rowData : rows) {
-                        Row row = sheet.createRow(currentRow++);
-                        for (int col = 0; col < rowData.size(); col++) {
-                            Cell cell = row.createCell(col);
-                            Object value = rowData.get(col);
+                    if(rows!=null) {
+                    	for (List<Object> rowData : rows) {
+                            Row row = sheet.createRow(currentRow++);
+                            for (int col = 0; col < rowData.size(); col++) {
+                                Cell cell = row.createCell(col);
+                                Object value = rowData.get(col);
 
-                            if (value instanceof Number) {
-                                cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
-                            } else if (value instanceof Boolean) {
-                                cell.setCellValue((Boolean) value);
-                            } else if (value != null) {
-                                cell.setCellValue(value.toString());
-                            } else {
-                                cell.setCellValue("");
+                                if (value instanceof Number) {
+                                    cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+                                } else if (value instanceof Boolean) {
+                                    cell.setCellValue((Boolean) value);
+                                } else if (value != null) {
+                                    cell.setCellValue(value.toString());
+                                } else {
+                                    cell.setCellValue("");
+                                }
+
+                                if (boldCols.contains(col))
+                                    cell.setCellStyle(boldStyle);
+                                if (borders)
+                                    cell.setCellStyle(borderStyle);
                             }
-
-                            if (boldCols.contains(col))
-                                cell.setCellStyle(boldStyle);
-                            if (borders)
-                                cell.setCellStyle(borderStyle);
                         }
-                    }
 
+                    }
+                    
                     if (isColumnMergeRequired) {
                         // Auto merge rows
                         // Auto merge rows (vertical merge across rows in specific columns)
