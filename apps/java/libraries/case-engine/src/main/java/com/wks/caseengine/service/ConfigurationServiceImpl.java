@@ -109,11 +109,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		this.dataSource = dataSource;
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
+	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> dtoList,String mode) {
 		try {
 			System.out.println("Started the createExcel");
 			if (!isAfterSave) {
-				dtoList = getConfigurationData(year, plantFKId);
+				dtoList = getConfigurationData(year, plantFKId,mode);
 			}
 
 			Workbook workbook = new XSSFWorkbook();
@@ -262,15 +262,19 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return style;
 	}
 
-	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId) {
+	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId,String mode) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") || verticalName.equalsIgnoreCase("CRACKER")) {
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")) {
 
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
+			}else if (verticalName.equalsIgnoreCase("CRACKER")) {
+
+				String procedureName = verticalName + "_GetConfiguration";
+				obj = findByYearAndPlantFkIdCracker(year, plantFKId, procedureName,mode);
 			} else {
 				obj = findByYearAndPlantFkId(year, plantFKId, viewName);
 			}
@@ -1109,6 +1113,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<Object[]> findByYearAndPlantFkIdCracker(String aopYear, UUID plantId, String procedureName,String mode) {
+		try {
+
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @aopYear = :aopYear, @mode = :mode";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("mode", mode);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 	public List<Object[]> findConstantsByYearAndPlantFkId(String aopYear, String plantId, String procedureName) {
 		try {
@@ -1188,7 +1212,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file,String mode) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -1204,7 +1228,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords);
+				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords,mode);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);

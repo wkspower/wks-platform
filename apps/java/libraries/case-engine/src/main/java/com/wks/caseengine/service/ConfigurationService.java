@@ -17,16 +17,16 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ConfigurationService {
 	
-	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId);
+	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId,String mode);
 	public AOPMessageVM getConfigurationConstants(String year,String plantFKId);
 	public AOPMessageVM getConfigurationIntermediateValues(String year, UUID plantFKId);
     public List<ConfigurationDTO> saveConfigurationData( String year, String plantFKId, List<ConfigurationDTO> configurationDTOList);
     public   List<Map<String, Object>>  getNormAttributeTransactionReceipe(String year, String plantId);
     public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists);
     public AOPMessageVM getConfigurationIntermediateValuesData(String year, String plantId);
-    public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> list);
+    public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> list,String mode);
     public byte[] createConfigurationConstantsExcel(String year, UUID plantFKId);
-    public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file);
+    public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file,String mode);
     public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId, MultipartFile file);
 	public AOPMessageVM getConfigurationExecution( String year, String plantId);
     public AOPMessageVM saveConfigurationExecution( List<ExecutionDetailDto> executionDetailDtoList);
