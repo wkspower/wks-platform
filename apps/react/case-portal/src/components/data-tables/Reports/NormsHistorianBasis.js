@@ -55,6 +55,10 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 }))
 
 const NormsHistorianBasis = () => {
+  let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
+let verticalName = vertical?.toLowerCase()
+const year = localStorage.getItem('year')
+  const headerMap = generateHeaderNames(year)
   const keycloak = useSession()
   const [selectedUnit, setSelectedUnit] = useState('TPH')
 
@@ -66,6 +70,13 @@ const NormsHistorianBasis = () => {
   const { plantID, verticalChange, yearChanged, oldYear } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const [rowsBestAchieved, setRowsBestAchieved] = useState([])
+const [rowsExpressionBased, setRowsExpressionBased] = useState([])
+const [rowsCurrentYear, setRowsCurrentYear] = useState([])
+
+const colsBestAchieved = getKendoNormsHistorianColumns({ headerMap, type: 'BestAchieved' })
+const colsExpressionBased = getKendoNormsHistorianColumns({ headerMap, type: 'ExpressionBased' })
+const colsCurrentYear = getKendoNormsHistorianColumns({ headerMap, type: 'CurrentYear' })
 
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
@@ -73,8 +84,22 @@ const NormsHistorianBasis = () => {
   const units = ['TPH', 'TPD']
 
   const isOldYear = oldYear?.oldYear === 1
-
+const filterHiddenColumns = cols => cols.filter(col => !col.hidden && col.field !== 'idFromApi' && col.field !== 'isEditable'&&col.field !== 'NormParameterFKId');
   useEffect(() => {
+    if (verticalName === 'cracker') {
+    setLoading(true)
+    Promise.all([
+      DataService.getBestAchieved(keycloak, selectedUnit),
+      DataService.getExpressionBased(keycloak, selectedUnit),
+      DataService.getCurrentYear(keycloak, selectedUnit),
+    ])
+      .then(([bestAchieved, expressionBased, currentYear]) => {
+        setRowsBestAchieved(bestAchieved?.data || [])
+        setRowsExpressionBased(expressionBased?.data || [])
+        setRowsCurrentYear(currentYear?.data || [])
+      })
+      .finally(() => setLoading(false))
+  }
     let isCancelled = false
     setProductionVolumeData([])
     setMcuAndNormGrid([])
@@ -189,8 +214,6 @@ const NormsHistorianBasis = () => {
     return () => timers.forEach(clearTimeout)
   }, [])
 
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
 
   const colsHistorianValues = getKendoNormsHistorianColumns({
     headerMap,
@@ -314,49 +337,73 @@ const NormsHistorianBasis = () => {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {[
-          {
-            label: 'Production Volume Data',
-            visible: showGrids.production,
-            rows: rowsProductionVolumeData,
-            cols: colsProductionVolumeData,
-          },
-          {
-            label: 'MCU & Norm',
-            visible: showGrids.norm,
-            rows: rowsMcuAndNormGrid,
-            cols: colsMcuAndNormGrid,
-          },
-          {
-            label: 'Current Values',
-            visible: showGrids.current,
-            rows: rowsHistorianValues,
-            cols: colsHistorianValues,
-          },
-        ].map(
-          (section, index) =>
-            section.visible && (
-              <CustomAccordion key={index} defaultExpanded disableGutters>
-                <CustomAccordionSummary>
-                  <Typography className='grid-title'>
-                    {section.label}
-                  </Typography>
-                </CustomAccordionSummary>
-                <CustomAccordionDetails>
-                  <Box sx={{ width: '100%' }}>
-                    <KendoDataGrid
-                      rows={section.rows}
-                      columns={section.cols}
-                      permissions={{
-                        isHeight: section.label === 'MCU & Norm',
-                      }}
-                    />
-                  </Box>
-                </CustomAccordionDetails>
-              </CustomAccordion>
-            ),
-        )}
-      </Box>
+  {verticalName === 'cracker' ? (
+    [
+      {
+        label: 'Best Achieved',
+        rows: rowsBestAchieved,
+        cols: colsBestAchieved,
+      },
+      {
+        label: 'Expression Based',
+        rows: rowsExpressionBased,
+        cols: colsExpressionBased,
+      },
+      {
+        label: 'Current Year',
+        rows: rowsCurrentYear,
+        cols: colsCurrentYear,
+      },
+    ].map((section, index) => (
+      <CustomAccordion key={index} defaultExpanded disableGutters>
+        <CustomAccordionSummary>
+          <Typography className='grid-title'>{section.label}</Typography>
+        </CustomAccordionSummary>
+        <CustomAccordionDetails>
+          <Box sx={{ width: '100%' }}>
+            <KendoDataGrid rows={section.rows} columns={filterHiddenColumns(section.cols)} />
+          </Box>
+        </CustomAccordionDetails>
+      </CustomAccordion>
+    ))
+  ) : (
+    [
+      {
+        label: 'Production Volume Data',
+        visible: showGrids.production,
+        rows: rowsProductionVolumeData,
+        cols: colsProductionVolumeData,
+      },
+      {
+        label: 'MCU & Norm',
+        visible: showGrids.norm,
+        rows: rowsMcuAndNormGrid,
+        cols: colsMcuAndNormGrid,
+      },
+      {
+        label: 'Current Values',
+        visible: showGrids.current,
+        rows: rowsHistorianValues,
+        cols: colsHistorianValues,
+      },
+    ]
+      .filter(section => section.visible)
+      .map((section, index) => (
+        <CustomAccordion key={index} defaultExpanded disableGutters>
+          <CustomAccordionSummary>
+            <Typography className='grid-title'>
+            {section.label}
+            </Typography>
+          </CustomAccordionSummary>
+          <CustomAccordionDetails>
+            <Box sx={{ width: '100%' }}>
+              <KendoDataGrid rows={section.rows} columns={section.cols} />
+            </Box>
+          </CustomAccordionDetails>
+        </CustomAccordion>
+      ))
+  )}
+</Box>
     </div>
   )
 }

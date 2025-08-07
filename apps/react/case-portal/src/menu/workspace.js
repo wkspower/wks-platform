@@ -141,6 +141,14 @@ const workspace = {
       breadcrumbs: true,
     },
     {
+      id: 'remark-history',
+      title: i18n.t('management'),
+      type: 'item',
+      url: '/remark-history',
+      icon: icons.IconFileText,
+      breadcrumbs: true,
+    },
+    {
       id: 'user-management',
       title: i18n.t('menu.userManage'),
       type: 'item',

@@ -166,6 +166,38 @@ const planCracker = {
         },
       ],
     },
+   {
+         id: 'reports',
+         title: i18n.t('menu.reports'),
+         type: 'collapse',
+         icon: icons.IconReport, // You can choose an appropriate icon
+         children: [
+          //  {
+          //    id: 'aop-annual-cost-report',
+          //    title: i18n.t('menu.annualAopCostReport'),
+          //    type: 'item',
+          //    url: '/reports/aop-annual-cost-report',
+          //    icon: icons.IconFile,
+          //    breadcrumbs: true,
+          //  },
+          //  {
+          //    id: 'production-volume-basis',
+          //    title: i18n.t('menu.productionVolumeDataBasis'),
+          //    type: 'item',
+          //    url: '/reports/production-volume-basis',
+          //    icon: icons.IconFileText,
+          //    breadcrumbs: true,
+          //  },
+           {
+             id: 'norms-historian-basis',
+             title: i18n.t('menu.normsHistorianBasis'),
+             type: 'item',
+             url: '/reports/norms-historian-basis',
+             icon: icons.IconReport,
+             breadcrumbs: true,
+           },
+         ],
+       },
   ],
 }
 

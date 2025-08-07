@@ -1,0 +1,144 @@
+[
+  {
+    "field": "Particulars",
+    "headerName": "Type",
+    "width": 110,
+    "groupable": true,
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "NormParameterFKId",
+    "headerName": "Particulars",
+    "hidden": true
+  },
+  {
+    "field": "ProductName",
+    "headerName": "Particulars",
+    "widthT": 220
+  },
+  {
+    "field": "UOM",
+    "headerName": "UOM",
+    "widthT": 60,
+    "editable": false
+  },
+  {
+    "field": "Apr",
+    "headerName": 4,
+    "editable": false,
+    "width": 120,
+    "align": "right",
+    "format": "{0:#.#####}",
+    "type": "number"
+  },
+  {
+    "field": "May",
+    "headerName": 5,
+    "editable": false,
+    "width": 120,
+    "align": "right",
+    "format": "{0:#.#####}",
+    "type": "number"
+  },
+  {
+    "field": "Jun",
+    "headerName": 6,
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "align": "right",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Jul",
+    "headerName": 7,
+    "editable": false,
+    "type": "number",
+    "width": 120,
+    "align": "right",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Aug",
+    "headerName": 8,
+    "editable": false,
+    "width": 120,
+    "type": "number",
+    "align": "right",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Sep",
+    "headerName": 9,
+    "editable": false,
+    "width": 120,
+    "align": "right",
+    "type": "number",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Oct",
+    "headerName": 10,
+    "editable": false,
+    "width": 120,
+    "type": "number",
+    "align": "right",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Nov",
+    "headerName": 11,
+    "editable": false,
+    "width": 120,
+    "align": "right",
+    "type": "number",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Dec",
+    "headerName": 12,
+    "editable": false,
+    "width": 120,
+    "align": "right",
+    "type": "number",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Jan",
+    "headerName": 1,
+    "editable": false,
+    "width": 120,
+    "align": "right",
+    "type": "number",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Feb",
+    "headerName": 2,
+    "editable": false,
+    "width": 120,
+    "type": "number",
+    "align": "right",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "Mar",
+    "headerName": 3,
+    "editable": false,
+    "width": 120,
+    "type": "number",
+    "align": "right",
+    "format": "{0:#.#####}"
+  },
+  {
+    "field": "idFromApi",
+    "headerName": "idFromApi",
+    "hidden": true
+  },
+  {
+    "field": "isEditable",
+    "headerName": "isEditable",
+    "hidden": true
+  }
+]

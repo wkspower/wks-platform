@@ -13,6 +13,15 @@ export default function getKendoNormsHistorianColumns({ headerMap, type }) {
     case 'ProductionVolumeData':
       rawCols = require('../../../assets/norms_historian_basis_ProductionVolumeData.json')
       break
+      case 'BestAchieved':
+      rawCols = require('../../../assets/norms_historian_basis_BestAchieved.json')
+      break
+    case 'ExpressionBased':
+      rawCols = require('../../../assets/norms_historian_basis_ExpressionBased.json')
+      break
+    case 'CurrentYear':
+      rawCols = require('../../../assets/norms_historian_basis_CurrentYear.json')
+      break
     default:
       throw new Error(`Unknown type "${type}"`)
   }

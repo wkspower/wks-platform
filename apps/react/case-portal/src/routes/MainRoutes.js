@@ -41,6 +41,7 @@ import NormsHistorianBasisPe from 'components/data-tables/Reports/NormsHistorian
 import ConfigurationTable from 'components/kendo-data-tables/KendoConfigurationTable'
 import { Navigate } from '../../node_modules/react-router-dom/dist/index'
 import PrivateRoute from './PrivateRoutes'
+import RemarkHistoryReport from 'components/kendo-data-tables/reamrkhistory'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -401,6 +402,14 @@ export const MainRoutes = (
           </PrivateRoute>
         ),
         // element: <FiveTables />,
+      },
+      {
+        path: 'remark-history',
+        element: (
+          <PrivateRoute routeId='remark-history'>
+            <RemarkHistoryReport />
+          </PrivateRoute>
+        ),
       },
       {
         path: 'user-management',
