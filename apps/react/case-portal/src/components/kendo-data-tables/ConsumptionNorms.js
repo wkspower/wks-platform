@@ -544,6 +544,7 @@ const ConsumptionNorms = () => {
       noColor: false,
       customHeight: defaultCustomHeight,
       showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      dropdownLabel: 'Select Grade',
       downloadExcelBtnFromUI: true,
       // ExcelName: `${lowerVertName}${gradeId ? `_${gradeId}` : ''}_Overall AOP Consumption`,
       ExcelName: `${lowerVertName}_Overall AOP Consumption`,

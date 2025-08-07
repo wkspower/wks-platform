@@ -3,6 +3,7 @@ import productionColumns from '../../../assets/kendo_config_meg.json'
 import productionColumnsPE1 from '../../../assets/kendo_config_pe1.json'
 import productionColumnsPE2 from '../../../assets/kendo_config_pe2.json'
 import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
+import productionColumnsPE5 from '../../../assets/kendo_config_pe5.json'
 // import productionColumnsPE4 from '../../../assets/kendo_config_pe4.json'
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
 import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
@@ -23,6 +24,8 @@ const getConfigByType = (configType) => {
       return productionColumnsPE2
     case 'ShutdownNorms':
       return productionColumnsPE3
+    case 'Constants':
+      return productionColumnsPE5
     // case 'grades':
     //   return productionColumnsPE4
     case 'production':

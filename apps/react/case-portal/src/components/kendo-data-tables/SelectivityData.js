@@ -38,6 +38,30 @@ const SelectivityData = (props) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [allProducts, setAllProducts] = useState([])
+  const [gradeId, setGradeId] = useState(null)
+
+  const [grades, setGrades] = useState([
+    {
+      name: 'Monthly',
+      displayName: 'Monthly',
+      gradeId: 'Monthly',
+    },
+    {
+      name: '4F',
+      displayName: '4F',
+      gradeId: '4F',
+    },
+    {
+      name: '5F',
+      displayName: '5F',
+      gradeId: '5F',
+    },
+    {
+      name: '4F+D',
+      displayName: '4F+D',
+      gradeId: '4F+D',
+    },
+  ])
 
   const currentYear = localStorage.getItem('year')
 
@@ -47,6 +71,11 @@ const SelectivityData = (props) => {
   const headerMap = generateHeaderNames(currentYear)
   const headerMapForPrevYear = generateHeaderNames(prevYearFormatted)
   const [isEdited, setIsEdited] = useState(false)
+
+  const handleGradeChange = (gradeId) => {
+    setGradeId(gradeId)
+    props.setGradeId(gradeId)
+  }
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -202,7 +231,7 @@ const SelectivityData = (props) => {
         props?.onSummaryEditChange(false)
 
         if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-          props?.fetchData()
+          props?.fetchData(gradeId)
         }
       } else {
         setSnackbarOpen(true)
@@ -309,7 +338,7 @@ const SelectivityData = (props) => {
       getAllGrades()
 
     if (props?.configType !== 'grades') {
-      props?.fetchData()
+      props?.fetchData(gradeId)
     }
 
     getConfigurationExecutionDetails()
@@ -321,6 +350,7 @@ const SelectivityData = (props) => {
     keycloak,
     lowerVertName,
     props?.configType,
+    gradeId,
   ])
 
   const fetchConfigData = async () => {
@@ -377,15 +407,20 @@ const SelectivityData = (props) => {
       addButton: false,
       deleteButton: false,
       editButton: false,
-      showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn:
-        lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
-      uploadExcelBtn:
-        lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
-      showLoad: lowerVertName == 'meg' ? true : false,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
+
+      // downloadExcelBtn:
+      //   lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
+      // uploadExcelBtn:
+      //   lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
+      showLoad: true,
       allAction: true,
+      showG: props?.configType === 'cracker_configuration' ? true : false,
+      dropdownLabel: 'Select Mode',
+      marginTop: props?.configType === 'cracker_configuration' ? true : false,
     },
     isOldYear,
   )
@@ -410,7 +445,7 @@ const SelectivityData = (props) => {
 
     try {
       if (props?.tabIndex != 1) {
-        await DataService.getConfigurationExcel(keycloak)
+        await DataService.getConfigurationExcel(keycloak, gradeId)
       } else {
         await DataService.getConfigurationExcelConstants(keycloak)
       }
@@ -485,7 +520,7 @@ const SelectivityData = (props) => {
         setLoading(false)
 
         if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-          props?.fetchData()
+          props?.fetchData(gradeId)
         }
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
@@ -519,8 +554,8 @@ const SelectivityData = (props) => {
           severity: 'error',
         })
       }
-      if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-        props?.fetchData()
+      if (props?.configType !== 'grades') {
+        props?.fetchData(gradeId)
       }
 
       return response
@@ -590,6 +625,7 @@ const SelectivityData = (props) => {
           <CircularProgress color='inherit' />
         </Backdrop>
         <KendoDataTables
+          grades={grades}
           handleRemarkCellClick={handleRemarkCellClick}
           NormParameterIdCell={NormParameterIdCell}
           modifiedCells={modifiedCells}
@@ -620,6 +656,7 @@ const SelectivityData = (props) => {
           groupBy={props?.groupBy}
           handleExcelUpload={handleExcelUpload}
           downloadExcelForConfiguration={downloadExcelForConfiguration}
+          handleGradeChange={handleGradeChange}
         />
       </Box>
     </div>

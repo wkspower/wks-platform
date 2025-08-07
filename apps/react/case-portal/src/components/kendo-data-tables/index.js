@@ -689,6 +689,7 @@ const KendoDataTables = ({
               alignItems: 'center',
               justifyContent: 'space-between',
               width: '100%',
+              ...(permissions?.marginTop && { marginTop: '10px' }),
             }}
           >
             {/* Left side - Note */}
@@ -729,10 +730,10 @@ const KendoDataTables = ({
                   }}
                   sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
                   variant='outlined'
-                  label='Select Grade'
+                  label={permissions?.dropdownLabel}
                 >
                   <MenuItem value='' disabled>
-                    Select Grade
+                    {permissions?.dropdownLabel}
                   </MenuItem>
 
                   {grades?.map((unit) => (

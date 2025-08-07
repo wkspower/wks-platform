@@ -513,10 +513,10 @@ const CrackerConfig = () => {
         })
         setModifiedCells({})
         if (currentTabDisplay === 'Yield') {
-        fetchCrackerRowsYield(currentTabDisplay, selectMode)
-      } else {
-        fetchCrackerRows(currentTabDisplay, selectMode)
-      }
+          fetchCrackerRowsYield(currentTabDisplay, selectMode)
+        } else {
+          fetchCrackerRows(currentTabDisplay, selectMode)
+        }
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = Array.from(byteCharacters, (char) =>
@@ -543,10 +543,10 @@ const CrackerConfig = () => {
           severity: 'warning',
         })
         if (currentTabDisplay === 'Yield') {
-        fetchCrackerRowsYield(currentTabDisplay, selectMode)
-      } else {
-        fetchCrackerRows(currentTabDisplay, selectMode)
-      }
+          fetchCrackerRowsYield(currentTabDisplay, selectMode)
+        } else {
+          fetchCrackerRows(currentTabDisplay, selectMode)
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -585,15 +585,17 @@ const CrackerConfig = () => {
       const response = await DataService.exportSpyroOutputExcel(keycloak, mode)
 
       if (response?.code === 200) {
-        setSnackbarData({
-          message: 'Excel download completed successfully!',
-          severity: 'success',
-        })
+        // setSnackbarOpen(true)
+        // setSnackbarData({
+        //   message: 'Excel download completed successfully!',
+        //   severity: 'success',
+        // })
       } else {
-        setSnackbarData({
-          message: 'Failed to download Excel.',
-          severity: 'error',
-        })
+        // setSnackbarOpen(true)
+        // setSnackbarData({
+        //   message: 'Failed to download Excel1.',
+        //   severity: 'error',
+        // })
       }
     } catch (error) {
       console.error('Error downloading Excel:', error)

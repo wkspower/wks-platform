@@ -601,6 +601,7 @@ const NormalOpNormsScreen = () => {
       saveBtn: true,
       showCalculate: true,
       showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      dropdownLabel: 'Select Grade',
 
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,

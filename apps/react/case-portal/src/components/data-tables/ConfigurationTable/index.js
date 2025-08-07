@@ -21,6 +21,7 @@ const ConfigurationTable = () => {
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
+  const [constantsRows, setConstantsRows] = useState([])
   const [productionRows, setProductionRows] = useState([])
   const [gradeData, setGradeData] = useState([])
   const [continiousGradeData, setContiniousGradeData] = useState([])
@@ -83,6 +84,7 @@ const ConfigurationTable = () => {
         let otherLossRows = []
         let continiousGradeRows = []
         let discontiniousGradeRows = []
+        let constantsRows = []
         groups.forEach((normGroup, ConfigTypeName) => {
           let rowsForThisCategory = []
           if (ConfigTypeName === 'ShutdownNorms') {
@@ -124,6 +126,8 @@ const ConfigurationTable = () => {
             continiousGradeRows = rowsForThisCategory
           } else if (ConfigTypeName == 'DisContineGradeChange') {
             discontiniousGradeRows = rowsForThisCategory
+          } else if (ConfigTypeName == 'Constants') {
+            constantsRows = rowsForThisCategory
           }
         })
         setShutdownRows(shutdownRows)
@@ -131,6 +135,7 @@ const ConfigurationTable = () => {
         setOtherLossRows(otherLossRows)
         setContiniousGradeData(continiousGradeRows)
         setDiscontiniousGradeData(discontiniousGradeRows)
+        setConstantsRows(constantsRows)
       }
       setLoading(false)
     } catch (error) {
@@ -289,6 +294,16 @@ const ConfigurationTable = () => {
                   setRows={setShutdownRows}
                   fetchData={fetchData}
                   configType='ShutdownNorms'
+                />
+              )
+            case getTheId('Constants'): // ConstantsRows
+              return (
+                <SelectivityData
+                  rows={shutdownNormsRows}
+                  loading={loading}
+                  setRows={setConstantsRows}
+                  fetchData={fetchData}
+                  configType='Constants'
                 />
               )
             case getTheId('Receipe'): // Receipe
