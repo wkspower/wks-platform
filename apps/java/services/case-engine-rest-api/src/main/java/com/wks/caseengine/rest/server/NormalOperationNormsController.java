@@ -32,8 +32,8 @@ public class NormalOperationNormsController {
 	public AOPMessageVM getNormalOperationNormsData(
 	        @RequestParam String year,
 	        @RequestParam String plantId,
-	        @RequestParam(required = false) String gradeId) {
-	    return normalOperationNormsService.getNormalOperationNormsData(year, plantId, gradeId);
+	        @RequestParam(required = false) String gradeId,@RequestParam(required = false) String mode) {
+	    return normalOperationNormsService.getNormalOperationNormsData(year, plantId, gradeId,mode);
 	}
 	
 	@GetMapping(value="/normal-operation/norms/grades")
@@ -73,11 +73,11 @@ public class NormalOperationNormsController {
 	@GetMapping(value = "/norms-export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year
+            @RequestParam("year") String year,@RequestParam(required = false) String mode
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null,mode); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -100,9 +100,9 @@ public class NormalOperationNormsController {
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
             @RequestParam(required = false) String gradeId,
-			@RequestParam("file") MultipartFile file
+			@RequestParam("file") MultipartFile file,@RequestParam(required = false) String mode
 	        ) {
-			return	normalOperationNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
+			return	normalOperationNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file,mode); 
 	}
 	
 }

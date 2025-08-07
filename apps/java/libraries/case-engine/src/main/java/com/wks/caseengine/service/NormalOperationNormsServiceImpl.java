@@ -86,10 +86,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public AOPMessageVM getNormalOperationNormsData(String year, String plantId, String gradeId) {
+	public AOPMessageVM getNormalOperationNormsData(String year, String plantId, String gradeId,String mode) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId), gradeId);
+			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId), gradeId,mode);
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
 
 			for (Object[] row : obj) {
@@ -490,7 +490,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Transactional
-	public List<Object[]> getNormalOperationNormsDataFromView(String financialYear, UUID plantId, String gradeId) {
+	public List<Object[]> getNormalOperationNormsDataFromView(String financialYear, UUID plantId, String gradeId,String mode) {
 		try {
 			Plants plant = plantsRepository.findById(plantId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
@@ -502,6 +502,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 				sql = "SELECT * FROM " + viewName
 						+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND Grade_FK_Id = :gradeId";
+			}else if (vertical.getName().equalsIgnoreCase("Cracker")) {
+				sql = "SELECT * FROM " + viewName + " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND mode = :mode";
 			} else {
 				sql = "SELECT * FROM " + viewName + " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId";
 			}
@@ -511,6 +513,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			query.setParameter("plantId", plantId);
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
 				query.setParameter("gradeId", gradeId);
+			}
+			if (vertical.getName().equalsIgnoreCase("Cracker")) {
+				query.setParameter("mode", mode);
 			}
 
 			return query.getResultList(); // You can cast this to a DTO later
@@ -577,7 +582,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId, String gradeId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId, String gradeId, MultipartFile file,String mode) {
 		// TODO Auto-generated method stub
 		try {
 			List<MCUNormsValueDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
@@ -585,7 +590,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords);
+				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords,mode);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
@@ -719,9 +724,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList) {
+	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList,String mode) {
 		try {
-			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString(), "");
+			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString(), "",mode);
 
 			if (!isAfterSave) {
 				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
