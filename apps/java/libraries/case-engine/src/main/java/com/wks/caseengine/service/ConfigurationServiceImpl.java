@@ -115,6 +115,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			if (!isAfterSave) {
 				dtoList = getConfigurationData(year, plantFKId);
 			}
+			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 
 			Workbook workbook = new XSSFWorkbook();
 			CellStyle borderStyle = createBorderedStyle(workbook);
@@ -126,9 +127,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (ConfigurationDTO dto : dtoList) {
-				 
+				 if(dto.getConfigTypeName().equalsIgnoreCase("ShutdownNorms")) {
+					 continue;
+				 }
 					List<Object> list = new ArrayList<>();
-					list.add(dto.getTypeName());
+					
+					if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+						list.add(dto.getConfigTypeDisplayName());
+						
+					}
+					
+					list.add(dto.getTypeDisplayName());
 					list.add(dto.getProductName());
 					list.add(dto.getApr());
 					list.add(dto.getMay());
@@ -152,6 +161,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+				innerHeaders.add("Category");
+				
+			}
+			
 			innerHeaders.add("Type");
 			innerHeaders.add("Particulars");
 			List<String> monthsList = getAcademicYearMonths(year);
@@ -192,7 +206,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				}
 			}
-			sheet.setColumnHidden(15, true);
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+				sheet.setColumnHidden(16, true);
+			}else {
+				sheet.setColumnHidden(15, true);
+			}
+			
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1228,7 +1247,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	public List<ConfigurationDTO> readConfigurations(InputStream inputStream, UUID plantFKId, String year) {
 		List<ConfigurationDTO> configList = new ArrayList<>();
-
+		String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 			Sheet sheet = workbook.getSheetAt(0);
 			Iterator<Row> rowIterator = sheet.iterator();
@@ -1242,23 +1261,45 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				ConfigurationDTO dto = new ConfigurationDTO();
 
 				try {
-					dto.setNormType(getStringCellValue(row.getCell(0), dto));
-					dto.setProductName(getStringCellValue(row.getCell(1), dto));
-					dto.setAuditYear(year);
-					dto.setApr(getNumericCellValue(row.getCell(2), dto));
-					dto.setMay(getNumericCellValue(row.getCell(3), dto));
-					dto.setJun(getNumericCellValue(row.getCell(4), dto));
-					dto.setJul(getNumericCellValue(row.getCell(5), dto));
-					dto.setAug(getNumericCellValue(row.getCell(6), dto));
-					dto.setSep(getNumericCellValue(row.getCell(7), dto));
-					dto.setOct(getNumericCellValue(row.getCell(8), dto));
-					dto.setNov(getNumericCellValue(row.getCell(9), dto));
-					dto.setDec(getNumericCellValue(row.getCell(10), dto));
-					dto.setJan(getNumericCellValue(row.getCell(11), dto));
-					dto.setFeb(getNumericCellValue(row.getCell(12), dto));
-					dto.setMar(getNumericCellValue(row.getCell(13), dto));
-					dto.setRemarks(getStringCellValue(row.getCell(14), dto));
-					dto.setNormParameterFKId(getStringCellValue(row.getCell(15), dto));
+					if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+						dto.setConfigTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+						dto.setTypeDisplayName(getStringCellValue(row.getCell(1), dto));
+						dto.setProductName(getStringCellValue(row.getCell(2), dto));
+						dto.setAuditYear(year);
+						dto.setApr(getNumericCellValue(row.getCell(3), dto));
+						dto.setMay(getNumericCellValue(row.getCell(4), dto));
+						dto.setJun(getNumericCellValue(row.getCell(5), dto));
+						dto.setJul(getNumericCellValue(row.getCell(6), dto));
+						dto.setAug(getNumericCellValue(row.getCell(7), dto));
+						dto.setSep(getNumericCellValue(row.getCell(8), dto));
+						dto.setOct(getNumericCellValue(row.getCell(9), dto));
+						dto.setNov(getNumericCellValue(row.getCell(10), dto));
+						dto.setDec(getNumericCellValue(row.getCell(11), dto));
+						dto.setJan(getNumericCellValue(row.getCell(12), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(13), dto));
+						dto.setMar(getNumericCellValue(row.getCell(14), dto));
+						dto.setRemarks(getStringCellValue(row.getCell(15), dto));
+						dto.setNormParameterFKId(getStringCellValue(row.getCell(16), dto));
+					}else {
+						dto.setTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+						dto.setProductName(getStringCellValue(row.getCell(1), dto));
+						dto.setAuditYear(year);
+						dto.setApr(getNumericCellValue(row.getCell(2), dto));
+						dto.setMay(getNumericCellValue(row.getCell(3), dto));
+						dto.setJun(getNumericCellValue(row.getCell(4), dto));
+						dto.setJul(getNumericCellValue(row.getCell(5), dto));
+						dto.setAug(getNumericCellValue(row.getCell(6), dto));
+						dto.setSep(getNumericCellValue(row.getCell(7), dto));
+						dto.setOct(getNumericCellValue(row.getCell(8), dto));
+						dto.setNov(getNumericCellValue(row.getCell(9), dto));
+						dto.setDec(getNumericCellValue(row.getCell(10), dto));
+						dto.setJan(getNumericCellValue(row.getCell(11), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(12), dto));
+						dto.setMar(getNumericCellValue(row.getCell(13), dto));
+						dto.setRemarks(getStringCellValue(row.getCell(14), dto));
+						dto.setNormParameterFKId(getStringCellValue(row.getCell(15), dto));
+					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 					dto.setErrDescription(e.getMessage());
