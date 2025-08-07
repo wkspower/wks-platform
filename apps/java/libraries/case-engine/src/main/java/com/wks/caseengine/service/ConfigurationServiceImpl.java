@@ -128,7 +128,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (ConfigurationDTO dto : dtoList) {
 				 
 					List<Object> list = new ArrayList<>();
-					list.add(dto.getNormType());
+					list.add(dto.getTypeName());
 					list.add(dto.getProductName());
 					list.add(dto.getApr());
 					list.add(dto.getMay());

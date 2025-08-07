@@ -35,7 +35,7 @@ public interface AOPRepository extends JpaRepository<AOP, UUID>{
 		FROM vwScrnAOP
 		WHERE AOPYear = :AOPYear 
 		AND Plant_FK_Id = :Plant_FK_Id 
-		AND NormParameterName = :NormParameterName
+		AND NormParameterName = :NormParameterName AND IsVisible = 1
 		ORDER BY DisplayOrder;
  	        """, nativeQuery = true)
  	    List<Object[]> findByAOPYearAndPlantFkId(@Param("AOPYear") String AOPYear, @Param("Plant_FK_Id") UUID Plant_FK_Id,@Param("NormParameterName") String NormParameterName);
