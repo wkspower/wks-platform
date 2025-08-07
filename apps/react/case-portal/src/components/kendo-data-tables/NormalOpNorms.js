@@ -138,6 +138,33 @@ const NormalOpNormsScreen = () => {
   const fetchGradeDropdowns = async () => {
     try {
       setGrades([])
+
+      if (lowerVertName === 'cracker') {
+        setGrades([
+          {
+            name: 'Monthly',
+            displayName: 'Monthly',
+            gradeId: 'Monthly',
+          },
+          {
+            name: '4F',
+            displayName: '4F',
+            gradeId: '4F',
+          },
+          {
+            name: '5F',
+            displayName: '5F',
+            gradeId: '5F',
+          },
+          {
+            name: '4F+D',
+            displayName: '4F+D',
+            gradeId: '4F+D',
+          },
+        ])
+        return
+      }
+
       const response = await DataService.getNormalOperationNormsGrades(keycloak)
 
       if (response?.code == 200) {
@@ -160,7 +187,7 @@ const NormalOpNormsScreen = () => {
       // ])
     } catch (error) {
       setGrades([])
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching data:', error)
     }
   }
 
@@ -214,7 +241,11 @@ const NormalOpNormsScreen = () => {
       if (lowerVertName === 'meg') {
         promises.push(fetchDataIntermediateValues())
       }
-      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+      if (
+        lowerVertName === 'pe' ||
+        lowerVertName === 'pp' ||
+        lowerVertName === 'cracker'
+      ) {
         promises.push(fetchGradeDropdowns())
       }
 
@@ -600,8 +631,16 @@ const NormalOpNormsScreen = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
-      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
-      dropdownLabel: 'Select Grade',
+      showG:
+        lowerVertName === 'pe' ||
+        lowerVertName === 'pp' ||
+        lowerVertName === 'cracker'
+          ? true
+          : false,
+      dropdownLabel:
+        lowerVertName === 'pe' || lowerVertName === 'pp'
+          ? 'Select Grade'
+          : 'Select Mode',
 
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
