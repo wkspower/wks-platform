@@ -34,8 +34,8 @@ public class ConfigurationController {
 	private ConfigurationService configurationService;
 	
 	@GetMapping(value="/getConfigurationData")
-	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId,@RequestParam(name = "mode", required = false) String mode) {
-		return configurationService.getConfigurationData(year,plantFKId,mode);
+	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
+		return configurationService.getConfigurationData(year,plantFKId);
 	}
 	
 	@GetMapping(value="/configuration/intermediate-values")
@@ -97,11 +97,11 @@ public class ConfigurationController {
 	@GetMapping(value = "/configuration-export-excel")
 	public ResponseEntity<byte[]> exportConfigurationReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,@RequestParam(name = "mode", required = false) String mode
+            @RequestParam("year") String year
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId), false,null,mode); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId), false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -122,9 +122,9 @@ public class ConfigurationController {
 	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
-			@RequestParam("file") MultipartFile file,@RequestParam(name = "mode", required = false) String mode
+			@RequestParam("file") MultipartFile file
 	        ) {
-			return	configurationService.importExcel(year,UUID.fromString(plantId), file,mode); 
+			return	configurationService.importExcel(year,UUID.fromString(plantId), file); 
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
