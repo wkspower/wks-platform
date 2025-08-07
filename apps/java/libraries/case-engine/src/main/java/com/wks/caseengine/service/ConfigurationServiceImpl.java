@@ -127,17 +127,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<List<Object>> rows = new ArrayList<>();
 			// Data rows
 			for (ConfigurationDTO dto : dtoList) {
-				 if(dto.getConfigTypeName().equalsIgnoreCase("ShutdownNorms")) {
+				 if(dto.getConfigTypeName()!=null && dto.getConfigTypeName().equalsIgnoreCase("ShutdownNorms")) {
 					 continue;
 				 }
 					List<Object> list = new ArrayList<>();
 					
 					if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
 						list.add(dto.getConfigTypeDisplayName());
-						
+						list.add(dto.getTypeDisplayName());
 					}
 					
-					list.add(dto.getTypeDisplayName());
+					
 					list.add(dto.getProductName());
 					list.add(dto.getApr());
 					list.add(dto.getMay());
@@ -163,10 +163,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<String> innerHeaders = new ArrayList<>();
 			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
 				innerHeaders.add("Category");
+				innerHeaders.add("Type");
 				
 			}
 			
-			innerHeaders.add("Type");
+			
 			innerHeaders.add("Particulars");
 			List<String> monthsList = getAcademicYearMonths(year);
 			innerHeaders.addAll(monthsList);
@@ -209,7 +210,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
 				sheet.setColumnHidden(16, true);
 			}else {
-				sheet.setColumnHidden(15, true);
+				sheet.setColumnHidden(14, true);
 			}
 			
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
@@ -375,6 +376,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
@@ -763,6 +765,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			} catch (IllegalArgumentException e) {
 				throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 			} catch (Exception ex) {
+				ex.printStackTrace();
 				throw new RuntimeException("Failed to fetch data", ex);
 			}
 		} catch (Exception e) {
@@ -1281,23 +1284,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 						dto.setNormParameterFKId(getStringCellValue(row.getCell(16), dto));
 					}else {
-						dto.setTypeDisplayName(getStringCellValue(row.getCell(0), dto));
-						dto.setProductName(getStringCellValue(row.getCell(1), dto));
+						
+						dto.setProductName(getStringCellValue(row.getCell(0), dto));
 						dto.setAuditYear(year);
-						dto.setApr(getNumericCellValue(row.getCell(2), dto));
-						dto.setMay(getNumericCellValue(row.getCell(3), dto));
-						dto.setJun(getNumericCellValue(row.getCell(4), dto));
-						dto.setJul(getNumericCellValue(row.getCell(5), dto));
-						dto.setAug(getNumericCellValue(row.getCell(6), dto));
-						dto.setSep(getNumericCellValue(row.getCell(7), dto));
-						dto.setOct(getNumericCellValue(row.getCell(8), dto));
-						dto.setNov(getNumericCellValue(row.getCell(9), dto));
-						dto.setDec(getNumericCellValue(row.getCell(10), dto));
-						dto.setJan(getNumericCellValue(row.getCell(11), dto));
-						dto.setFeb(getNumericCellValue(row.getCell(12), dto));
-						dto.setMar(getNumericCellValue(row.getCell(13), dto));
-						dto.setRemarks(getStringCellValue(row.getCell(14), dto));
-						dto.setNormParameterFKId(getStringCellValue(row.getCell(15), dto));
+						dto.setApr(getNumericCellValue(row.getCell(1), dto));
+						dto.setMay(getNumericCellValue(row.getCell(2), dto));
+						dto.setJun(getNumericCellValue(row.getCell(3), dto));
+						dto.setJul(getNumericCellValue(row.getCell(4), dto));
+						dto.setAug(getNumericCellValue(row.getCell(5), dto));
+						dto.setSep(getNumericCellValue(row.getCell(6), dto));
+						dto.setOct(getNumericCellValue(row.getCell(7), dto));
+						dto.setNov(getNumericCellValue(row.getCell(8), dto));
+						dto.setDec(getNumericCellValue(row.getCell(9), dto));
+						dto.setJan(getNumericCellValue(row.getCell(10), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(11), dto));
+						dto.setMar(getNumericCellValue(row.getCell(12), dto));
+						dto.setRemarks(getStringCellValue(row.getCell(13), dto));
+						dto.setNormParameterFKId(getStringCellValue(row.getCell(14), dto));
 					}
 					
 				} catch (Exception e) {
