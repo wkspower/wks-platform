@@ -226,9 +226,11 @@ public class BasisReportServiceImpl implements BasisReportService {
 				basisReportDTO.setProductName(row[14] != null ? row[14].toString() : null);
 				basisReportDTOList.add(basisReportDTO);
 			}
+			Map<String, Object> finalResult = new HashMap<>();
+            finalResult.put("normHistoricBasisData", basisReportDTOList);
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("SP Executed successfully");
-			aopMessageVM.setData(basisReportDTOList);
+			aopMessageVM.setData(finalResult);
 			return aopMessageVM;
 		}
 
