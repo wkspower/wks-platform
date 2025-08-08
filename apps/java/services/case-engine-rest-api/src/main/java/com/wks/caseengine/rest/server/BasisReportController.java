@@ -25,5 +25,11 @@ public class BasisReportController {
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
+	@GetMapping(value="/report/norms-basis/mode")
+	public ResponseEntity<AOPMessageVM> getNormBasisReportCracker(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="type", required=false) String type,@RequestParam(value="mode", required=false) String mode){
+		AOPMessageVM response	=basisReportService.getNormBasisReportCracker(plantId,year,type,mode);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+	
 	
 }
