@@ -52,7 +52,6 @@ const defs = {
     previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
     matBalSheet: 'Balanço de MAT', // New addition
     workflow: 'Fluxo de Trabalho', // New addition
-    remarkHistory: 'Histórico de Observações', // New addition
   },
   pages: {
     dashboard: {
@@ -208,7 +207,6 @@ const defs = {
         previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
         matBalSheet: 'Balanço de MAT', // New addition
         workflow: 'Fluxo de Trabalho', // New addition
-        remarkHistory: 'Histórico de Observações', // New addition
       },
     },
   },

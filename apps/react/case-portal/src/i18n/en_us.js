@@ -65,8 +65,8 @@ const defs = {
     previousFYAOPResult: 'Previous FY AOP Result', // New addition
     matBalSheet: 'MAT Bal Sheet', // New addition
     workflow: 'AOP Approval Flow', // New addition
-    remarkHistory: 'Management', // New addition
     userManage: 'User Management', // New addition
+    valueHistory: 'Value History', // New addition
   },
   pages: {
     dashboard: {
@@ -230,7 +230,7 @@ const defs = {
         matBalSheet: 'MAT Bal Sheet', // New addition
         userManage: 'User Management', // New addition
         workflow: 'AOP Approval Flow', // New addition
-        remarkHistory: 'Management', // New addition
+        valueHistory: 'Value History', // New addition
       },
     },
   },

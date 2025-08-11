@@ -1,30 +1,17 @@
 [
   {
-    "field": "Particulars",
-    "headerName": "Type",
-    "width": 110,
-    "groupable": true,
-    "editable": false,
-    "hidden": true
-  },
-  {
-    "field": "NormParameterFKId",
-    "headerName": "Particulars",
-    "hidden": true
-  },
-  {
-    "field": "ProductName",
+    "field": "normParameterDisplayName",
     "headerName": "Particulars",
     "widthT": 220
   },
   {
-    "field": "UOM",
+    "field": "uom",
     "headerName": "UOM",
     "widthT": 60,
     "editable": false
   },
   {
-    "field": "Apr",
+    "field": "april",
     "headerName": 4,
     "editable": false,
     "width": 120,
@@ -33,7 +20,7 @@
     "type": "number"
   },
   {
-    "field": "May",
+    "field": "may",
     "headerName": 5,
     "editable": false,
     "width": 120,
@@ -42,7 +29,7 @@
     "type": "number"
   },
   {
-    "field": "Jun",
+    "field": "june",
     "headerName": 6,
     "editable": false,
     "type": "number",
@@ -51,7 +38,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Jul",
+    "field": "july",
     "headerName": 7,
     "editable": false,
     "type": "number",
@@ -60,7 +47,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Aug",
+    "field": "august",
     "headerName": 8,
     "editable": false,
     "width": 120,
@@ -69,7 +56,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Sep",
+    "field": "september",
     "headerName": 9,
     "editable": false,
     "width": 120,
@@ -78,7 +65,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Oct",
+    "field": "october",
     "headerName": 10,
     "editable": false,
     "width": 120,
@@ -87,7 +74,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Nov",
+    "field": "november",
     "headerName": 11,
     "editable": false,
     "width": 120,
@@ -96,7 +83,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Dec",
+    "field": "december",
     "headerName": 12,
     "editable": false,
     "width": 120,
@@ -105,7 +92,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Jan",
+    "field": "january",
     "headerName": 1,
     "editable": false,
     "width": 120,
@@ -114,7 +101,7 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Feb",
+    "field": "february",
     "headerName": 2,
     "editable": false,
     "width": 120,
@@ -123,22 +110,12 @@
     "format": "{0:#.#####}"
   },
   {
-    "field": "Mar",
+    "field": "march",
     "headerName": 3,
     "editable": false,
     "width": 120,
     "type": "number",
     "align": "right",
     "format": "{0:#.#####}"
-  },
-  {
-    "field": "idFromApi",
-    "headerName": "idFromApi",
-    "hidden": true
-  },
-  {
-    "field": "isEditable",
-    "headerName": "isEditable",
-    "hidden": true
   }
 ]

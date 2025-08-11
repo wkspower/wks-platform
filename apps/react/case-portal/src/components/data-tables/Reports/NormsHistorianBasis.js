@@ -1,116 +1,103 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import { Box } from '@mui/material'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@mui/material/CircularProgress'
-import { styled } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useState, useRef } from 'react'
-import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
-import { useSession } from 'SessionStoreContext'
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  TextField,
+  Typography,
+} from '@mui/material'
 import {
   ExcelExport,
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
+import moment from 'moment'
+import { useEffect, useRef, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
+import { useSession } from 'SessionStoreContext'
 
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import {
-  Button,
-  MenuItem,
-  TextField,
-} from '../../../../node_modules/@mui/material/index'
-import moment from '../../../../node_modules/moment/moment'
-
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
 
 const NormsHistorianBasis = () => {
-  let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-let verticalName = vertical?.toLowerCase()
-const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
   const keycloak = useSession()
-  const [selectedUnit, setSelectedUnit] = useState('TPH')
 
   const [rowsHistorianValues, setHistorianValues] = useState([])
   const [rowsMcuAndNormGrid, setMcuAndNormGrid] = useState([])
   const [rowsProductionVolumeData, setProductionVolumeData] = useState([])
 
+  const [rowsBestAchieved, setRowsBestAchieved] = useState([])
+  const [rowsExpressionBased, setRowsExpressionBased] = useState([])
+  const [rowsCurrentYear, setRowsCurrentYear] = useState([])
+
+  const [colsBestAchieved, setColsBestAchieved] = useState([])
+  const [colsExpressionBased, setColsExpressionBased] = useState([])
+  const [colsCurrentYear, setColsCurrentYear] = useState([])
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantID, verticalChange, yearChanged, oldYear } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const [rowsBestAchieved, setRowsBestAchieved] = useState([])
-const [rowsExpressionBased, setRowsExpressionBased] = useState([])
-const [rowsCurrentYear, setRowsCurrentYear] = useState([])
-
-const colsBestAchieved = getKendoNormsHistorianColumns({ headerMap, type: 'BestAchieved' })
-const colsExpressionBased = getKendoNormsHistorianColumns({ headerMap, type: 'ExpressionBased' })
-const colsCurrentYear = getKendoNormsHistorianColumns({ headerMap, type: 'CurrentYear' })
 
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
 
-  const units = ['TPH', 'TPD']
+  const [selectedUnit, setSelectedUnit] = useState('')
+  const [units, setUnits] = useState([])
 
   const isOldYear = oldYear?.oldYear === 1
-const filterHiddenColumns = cols => cols.filter(col => !col.hidden && col.field !== 'idFromApi' && col.field !== 'isEditable'&&col.field !== 'NormParameterFKId');
-  useEffect(() => {
-    if (verticalName === 'cracker') {
-    setLoading(true)
-    Promise.all([
-      DataService.getBestAchieved(keycloak, selectedUnit),
-      DataService.getExpressionBased(keycloak, selectedUnit),
-      DataService.getCurrentYear(keycloak, selectedUnit),
-    ])
-      .then(([bestAchieved, expressionBased, currentYear]) => {
-        setRowsBestAchieved(bestAchieved?.data || [])
-        setRowsExpressionBased(expressionBased?.data || [])
-        setRowsCurrentYear(currentYear?.data || [])
-      })
-      .finally(() => setLoading(false))
-  }
-    let isCancelled = false
-    setProductionVolumeData([])
-    setMcuAndNormGrid([])
-    setHistorianValues([])
-    const fetchAllData = async (selectedUnit) => {
-      if (!selectedUnit) return
-      setLoading(true)
-      let apiCount = 0
 
-      try {
-        const results = await Promise.allSettled([
+  const year = localStorage.getItem('year')
+  const headerMap = generateHeaderNames(year)
+
+  const exportRef1 = useRef(null)
+  const exportRef2 = useRef(null)
+  const exportRef3 = useRef(null)
+
+  const generateColumns = (type) =>
+    getKendoNormsHistorianColumns({ headerMap, type })
+
+  const fetchAllData = async (selectedUnit) => {
+    if (!selectedUnit) return
+    setLoading(true)
+    let isCancelled = false
+
+    try {
+      let results = []
+
+      if (lowerVertName === 'cracker') {
+        results = await Promise.allSettled([
+          DataService.getProductionVolDataBasisMode(
+            keycloak,
+            'bestachieved',
+            undefined,
+            undefined,
+            selectedUnit,
+          ),
+          DataService.getProductionVolDataBasisMode(
+            keycloak,
+            'expessionbased',
+            undefined,
+            undefined,
+            selectedUnit,
+          ),
+          DataService.getProductionVolDataBasisMode(
+            keycloak,
+            'currentyear',
+            undefined,
+            undefined,
+            selectedUnit,
+          ),
+        ])
+      } else {
+        results = await Promise.allSettled([
           DataService.getNormsHistorianBasis(
             keycloak,
             'HistorianValues',
@@ -127,77 +114,63 @@ const filterHiddenColumns = cols => cols.filter(col => !col.hidden && col.field 
             selectedUnit,
           ),
         ])
-
-        if (isCancelled) return
-
-        const [historianResult, mcuResult, prodResult] = results
-
-        if (
-          historianResult.status === 'fulfilled' &&
-          historianResult.value?.code === 200
-        ) {
-          const rows = historianResult.value.data.normHistoricBasisData.map(
-            (item, index) => ({
-              ...item,
-              id: index,
-              isEditable: false,
-              dateTime: item?.dateTime
-                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
-                : null,
-            }),
-          )
-          setHistorianValues(rows)
-          apiCount++
-        }
-
-        if (mcuResult.status === 'fulfilled' && mcuResult.value?.code === 200) {
-          const rows = mcuResult.value.data.normHistoricBasisData.map(
-            (item, index) => ({
-              ...item,
-              id: index,
-              isEditable: false,
-              dateTime: item?.dateTime
-                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
-                : null,
-            }),
-          )
-          setMcuAndNormGrid(rows)
-          apiCount++
-        }
-
-        if (
-          prodResult.status === 'fulfilled' &&
-          prodResult.value?.code === 200
-        ) {
-          const rows = prodResult.value.data.normHistoricBasisData.map(
-            (item, index) => ({
-              ...item,
-              id: index,
-              isEditable: false,
-              dateTime: item?.dateTime
-                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
-                : null,
-            }),
-          )
-          setProductionVolumeData(rows)
-          // apiCount++
-        }
-      } catch (error) {
-        console.error('Unexpected error:', error)
-      } finally {
-        if (!isCancelled) {
-          // console.log('loading false apiCount', apiCount)
-          setLoading(false)
-        }
       }
-    }
 
+      const processData = (result) =>
+        result?.status === 'fulfilled' && result?.value?.code === 200
+          ? result.value.data.normHistoricBasisData.map((item, index) => ({
+              ...item,
+              id: index,
+              isEditable: false,
+              dateTime: item?.dateTime
+                ? moment(item.dateTime, 'DD-MM-YYYY').toDate()
+                : null,
+            }))
+          : []
+
+      if (lowerVertName === 'cracker') {
+        const [best, expr, current] = results
+        const bestRows = processData(best)
+        const exprRows = processData(expr)
+        const currRows = processData(current)
+
+        setRowsBestAchieved(bestRows)
+        setRowsExpressionBased(exprRows)
+        setRowsCurrentYear(currRows)
+
+        setColsBestAchieved(generateColumns('bestachieved'))
+        setColsExpressionBased(generateColumns('expessionbased'))
+        setColsCurrentYear(generateColumns('currentyear'))
+      } else {
+        const [historian, mcu, prod] = results
+        const historianRows = processData(historian)
+        const mcuRows = processData(mcu)
+        const prodRows = processData(prod)
+
+        setHistorianValues(historianRows)
+        setMcuAndNormGrid(mcuRows)
+        setProductionVolumeData(prodRows)
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchAllData(selectedUnit)
-
-    return () => {
-      isCancelled = true
-    }
   }, [yearChanged, keycloak, plantID, selectedUnit])
+
+  useEffect(() => {
+    if (lowerVertName == 'cracker') {
+      setUnits(['Monthly', '4F', '5F', '4F+D'])
+      setSelectedUnit('Monthly')
+    } else {
+      setUnits(['TPH', 'TPD'])
+      setSelectedUnit('TPH')
+    }
+  }, [yearChanged, keycloak, plantID, lowerVertName])
 
   useEffect(() => {
     const timers = [
@@ -214,80 +187,101 @@ const filterHiddenColumns = cols => cols.filter(col => !col.hidden && col.field 
     return () => timers.forEach(clearTimeout)
   }, [])
 
-
-  const colsHistorianValues = getKendoNormsHistorianColumns({
-    headerMap,
-    type: 'HistorianValues',
-  })
-
-  const colsMcuAndNormGrid = getKendoNormsHistorianColumns({
-    headerMap,
-    type: 'McuAndNormGrid',
-  })
-
-  const colsProductionVolumeData = getKendoNormsHistorianColumns({
-    headerMap,
-    type: 'ProductionVolumeData',
-  })
-
-  const exportRef1 = useRef(null)
-  const exportRef2 = useRef(null)
-  const exportRef3 = useRef(null)
+  const colsHistorianValues = generateColumns('HistorianValues')
+  const colsMcuAndNormGrid = generateColumns('McuAndNormGrid')
+  const colsProductionVolumeData = generateColumns('ProductionVolumeData')
 
   const exportAllGrids = () => {
-    const options1 = exportRef1.current.workbookOptions()
-    const options2 = exportRef2.current.workbookOptions()
-    const options3 = exportRef3.current.workbookOptions()
+    const refs = [exportRef1, exportRef2, exportRef3]
+    const options = refs.map((ref) => ref.current.workbookOptions())
 
-    options1.sheets[1] = options2.sheets[0]
-    options1.sheets[2] = options3.sheets[0]
+    options[0].sheets[1] = options[1].sheets[0]
+    options[0].sheets[2] = options[2].sheets[0]
 
-    options1.sheets[0].title = 'Production Volume'
-    options1.sheets[1].title = 'MCU & Norm'
-    options1.sheets[2].title = 'Current Values'
+    options[0].sheets[0].title =
+      lowerVertName === 'cracker' ? 'Best Achieved' : 'Production Volume'
+    options[0].sheets[1].title =
+      lowerVertName === 'cracker' ? 'Expression Based' : 'MCU & Norm'
+    options[0].sheets[2].title =
+      lowerVertName === 'cracker' ? 'Current Year' : 'Current Values'
 
-    exportRef1.current.save(options1)
+    exportRef1.current.save(options[0])
   }
 
-  const currentDateTime = new Date()
-    .toISOString()
-    .replace(/T/, ' ')
-    .replace(/:/g, '-')
-    .split('.')[0]
-  const fileName = `Norms Historian Basis ${currentDateTime}.xlsx`
+  const fileName = `Norms Historian Basis ${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.xlsx`
 
   const handleUnitChange = (unit) => {
     setLoading(true)
     setSelectedUnit(unit)
   }
 
+  const gridData =
+    lowerVertName === 'cracker'
+      ? [
+          {
+            label: 'Best Achieved',
+            rows: rowsBestAchieved,
+            cols: colsBestAchieved,
+          },
+          {
+            label: 'Expression Based',
+            rows: rowsExpressionBased,
+            cols: colsExpressionBased,
+          },
+          {
+            label: 'Current Year',
+            rows: rowsCurrentYear,
+            cols: colsCurrentYear,
+          },
+        ]
+      : [
+          {
+            label: 'Production Volume Data',
+            visible: showGrids.production,
+            rows: rowsProductionVolumeData,
+            cols: colsProductionVolumeData,
+          },
+          {
+            label: 'MCU & Norm',
+            visible: showGrids.norm,
+            rows: rowsMcuAndNormGrid,
+            cols: colsMcuAndNormGrid,
+          },
+          {
+            label: 'Current Values',
+            visible: showGrids.current,
+            rows: rowsHistorianValues,
+            cols: colsHistorianValues,
+          },
+        ]
+
   return (
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+        open={loading}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Export hidden ExcelExport instances */}
       <div style={{ display: 'none' }}>
-        {[
-          rowsProductionVolumeData,
-          rowsMcuAndNormGrid,
-          rowsHistorianValues,
-        ].map((data, i) => (
+        {(lowerVertName === 'cracker'
+          ? [rowsBestAchieved, rowsExpressionBased, rowsCurrentYear]
+          : [rowsProductionVolumeData, rowsMcuAndNormGrid, rowsHistorianValues]
+        ).map((data, i) => (
           <ExcelExport
             key={i}
             data={data}
             ref={[exportRef1, exportRef2, exportRef3][i]}
             fileName={fileName}
           >
-            {[
-              colsProductionVolumeData,
-              colsMcuAndNormGrid,
-              colsHistorianValues,
-            ][i].map((col) => (
+            {(lowerVertName === 'cracker'
+              ? [colsBestAchieved, colsExpressionBased, colsCurrentYear]
+              : [
+                  colsProductionVolumeData,
+                  colsMcuAndNormGrid,
+                  colsHistorianValues,
+                ])[i].map((col) => (
               <ExcelExportColumn
                 key={col.field}
                 field={col.field}
@@ -308,24 +302,20 @@ const filterHiddenColumns = cols => cols.filter(col => !col.hidden && col.field 
             Export
           </Button>
         )}
-
         <TextField
           select
-          value={selectedUnit || 'TPH'}
-          onChange={(e) => {
-            setSelectedUnit(e.target.value)
-            handleUnitChange(e.target.value)
-          }}
+          value={selectedUnit}
+          onChange={(e) => handleUnitChange(e.target.value)}
           sx={{
             width: '150px',
             backgroundColor: '#FFFFFF',
             marginLeft: '12px',
           }}
           variant='outlined'
-          label='Select UOM.'
+          label={lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
         >
           <MenuItem value='' disabled>
-            Select UOM.
+            {lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
           </MenuItem>
 
           {units.map((unit) => (
@@ -337,73 +327,29 @@ const filterHiddenColumns = cols => cols.filter(col => !col.hidden && col.field 
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-  {verticalName === 'cracker' ? (
-    [
-      {
-        label: 'Best Achieved',
-        rows: rowsBestAchieved,
-        cols: colsBestAchieved,
-      },
-      {
-        label: 'Expression Based',
-        rows: rowsExpressionBased,
-        cols: colsExpressionBased,
-      },
-      {
-        label: 'Current Year',
-        rows: rowsCurrentYear,
-        cols: colsCurrentYear,
-      },
-    ].map((section, index) => (
-      <CustomAccordion key={index} defaultExpanded disableGutters>
-        <CustomAccordionSummary>
-          <Typography className='grid-title'>{section.label}</Typography>
-        </CustomAccordionSummary>
-        <CustomAccordionDetails>
-          <Box sx={{ width: '100%' }}>
-            <KendoDataGrid rows={section.rows} columns={filterHiddenColumns(section.cols)} />
-          </Box>
-        </CustomAccordionDetails>
-      </CustomAccordion>
-    ))
-  ) : (
-    [
-      {
-        label: 'Production Volume Data',
-        visible: showGrids.production,
-        rows: rowsProductionVolumeData,
-        cols: colsProductionVolumeData,
-      },
-      {
-        label: 'MCU & Norm',
-        visible: showGrids.norm,
-        rows: rowsMcuAndNormGrid,
-        cols: colsMcuAndNormGrid,
-      },
-      {
-        label: 'Current Values',
-        visible: showGrids.current,
-        rows: rowsHistorianValues,
-        cols: colsHistorianValues,
-      },
-    ]
-      .filter(section => section.visible)
-      .map((section, index) => (
-        <CustomAccordion key={index} defaultExpanded disableGutters>
-          <CustomAccordionSummary>
-            <Typography className='grid-title'>
-            {section.label}
-            </Typography>
-          </CustomAccordionSummary>
-          <CustomAccordionDetails>
-            <Box sx={{ width: '100%' }}>
-              <KendoDataGrid rows={section.rows} columns={section.cols} />
-            </Box>
-          </CustomAccordionDetails>
-        </CustomAccordion>
-      ))
-  )}
-</Box>
+        {gridData.map(
+          (section, index) =>
+            (section.visible ?? true) && (
+              <CustomAccordion key={index} defaultExpanded disableGutters>
+                <CustomAccordionSummary>
+                  <Typography className='grid-title'>
+                    {section.label}
+                  </Typography>
+                </CustomAccordionSummary>
+                <CustomAccordionDetails>
+                  <Box sx={{ width: '100%' }}>
+                    <KendoDataGrid
+                      rows={section.rows}
+                      loading={loading}
+                      columns={section.cols}
+                      permissions={{ isHeight: section.label === 'MCU & Norm' }}
+                    />
+                  </Box>
+                </CustomAccordionDetails>
+              </CustomAccordion>
+            ),
+        )}
+      </Box>
     </div>
   )
 }

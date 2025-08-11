@@ -1,19 +1,17 @@
-import { useEffect, useState } from 'react'
 import {
+  GridColumn as Column,
   Grid,
   isColumnMenuFilterActive,
   isColumnMenuSortActive,
-  GridColumn as Column,
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import '../../kendo-data-grid.css'
-import { filterIcon } from '@progress/kendo-svg-icons'
-import { ColumnMenu } from 'components/data-tables/Reports/columnMenu'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
-import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
+import DateOnlyPicker from 'components/kendo-data-tables/Utilities-Kendo/DatePicker'
 import DateTimePickerEditor from 'components/kendo-data-tables/Utilities-Kendo/DatePickeronSelectedYr'
 import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
-import DateOnlyPicker from 'components/kendo-data-tables/Utilities-Kendo/DatePicker'
+import { useState } from 'react'
+import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
+import '../../kendo-data-grid.css'
 
 const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })

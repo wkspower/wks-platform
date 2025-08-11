@@ -19,6 +19,7 @@ const ConfigurationTable = () => {
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [startUpRows, setStartUpRows] = useState([])
+  const [configurationRows, setConfigurationRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
   const [shutdownNormsRows, setShutdownRows] = useState([])
   const [constantsRows, setConstantsRows] = useState([])
@@ -38,7 +39,6 @@ const ConfigurationTable = () => {
 
       if (tabs.length == 0) {
         setLoading(true)
-        // data = data.sort((a, b) => b.normType.localeCompare(a.normType))
         const groupedRows = []
         const groups = new Map()
         let groupId = 0
@@ -79,6 +79,7 @@ const ConfigurationTable = () => {
           normGroup.get(TypeName).push(item)
         })
         let groupId = 0
+        let configurationRows = []
         let shutdownRows = []
         let startUpRows = []
         let otherLossRows = []
@@ -116,7 +117,10 @@ const ConfigurationTable = () => {
               })
             })
           })
-          if (ConfigTypeName == 'ShutdownNorms') {
+
+          if (ConfigTypeName == 'Configuration') {
+            configurationRows = rowsForThisCategory
+          } else if (ConfigTypeName == 'ShutdownNorms') {
             shutdownRows = rowsForThisCategory
           } else if (ConfigTypeName == 'StartupLosses') {
             startUpRows = rowsForThisCategory
@@ -130,6 +134,7 @@ const ConfigurationTable = () => {
             constantsRows = rowsForThisCategory
           }
         })
+        setConfigurationRows(configurationRows)
         setShutdownRows(shutdownRows)
         setStartUpRows(startUpRows)
         setOtherLossRows(otherLossRows)
@@ -265,7 +270,17 @@ const ConfigurationTable = () => {
         {(() => {
           const currentTabId = tabs[tabIndex]?.toLowerCase()
           switch (currentTabId) {
-            // case 'ac3c9ad7-82b5-4550-b04d-fed0f1fb4908': // StartupLosses
+            // case 'ac3c9ad7-82b5-4550-b04d-fed0f1fb4908': // Configuration
+            case getTheId('Configuration'):
+              return (
+                <SelectivityData
+                  rows={configurationRows}
+                  loading={loading}
+                  fetchData={fetchData}
+                  setRows={setConfigurationRows}
+                  configType='Configuration'
+                />
+              )
             case getTheId('StartupLosses'):
               return (
                 <SelectivityData
@@ -299,7 +314,7 @@ const ConfigurationTable = () => {
             case getTheId('Constants'): // ConstantsRows
               return (
                 <SelectivityData
-                  rows={shutdownNormsRows}
+                  rows={constantsRows}
                   loading={loading}
                   setRows={setConstantsRows}
                   fetchData={fetchData}

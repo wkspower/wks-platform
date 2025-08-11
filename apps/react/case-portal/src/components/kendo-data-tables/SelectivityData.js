@@ -409,10 +409,8 @@ const SelectivityData = (props) => {
       editButton: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn:
-        lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
-      uploadExcelBtn:
-        lowerVertName == 'meg' || lowerVertName == 'cracker' ? true : false,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
       showLoad: true,
       allAction: true,
       // showG: props?.configType === 'cracker_configuration' ? true : false,

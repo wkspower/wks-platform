@@ -26,6 +26,7 @@ import Loadable from 'components/Loadable'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
+
 import MainLayout from 'layout/MainLayout'
 import { lazy } from 'react'
 import { CaseList } from 'views/caseList/caseList'
@@ -41,7 +42,7 @@ import NormsHistorianBasisPe from 'components/data-tables/Reports/NormsHistorian
 import ConfigurationTable from 'components/kendo-data-tables/KendoConfigurationTable'
 import { Navigate } from '../../node_modules/react-router-dom/dist/index'
 import PrivateRoute from './PrivateRoutes'
-import RemarkHistoryReport from 'components/kendo-data-tables/reamrkhistory'
+
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -404,14 +405,6 @@ export const MainRoutes = (
         // element: <FiveTables />,
       },
       {
-        path: 'remark-history',
-        element: (
-          <PrivateRoute routeId='remark-history'>
-            <RemarkHistoryReport />
-          </PrivateRoute>
-        ),
-      },
-      {
         path: 'user-management',
         element: (
           <PrivateRoute routeId='user-management'>
@@ -419,6 +412,7 @@ export const MainRoutes = (
           </PrivateRoute>
         ),
       },
+
       {
         path: 'user-form',
         element: <UserForm keycloak={keycloak} />,

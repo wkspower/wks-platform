@@ -17,6 +17,8 @@ const getConfigByType = (configType) => {
       return productionColumns
     case 'StartupLosses':
       return productionColumnsPE1
+    case 'Configuration':
+      return productionColumnsPE1
     case 'Otherlosses':
       return productionColumnsPE2
     case 'ShutdownNorms':

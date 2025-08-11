@@ -1,22 +1,15 @@
-// import Tooltip from '@mui/material/Tooltip'
-// import { truncateRemarks } from 'utils/remarksUtils'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-// import NumericInputOnly from 'utils/NumericInputOnly'
-//import DataGridTable from '../ASDataGrid'
 import KendoDataTables from './index'
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
-// import TextField from '@mui/material/TextField'
-
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import MuiAccordion from '@mui/material/Accordion'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
@@ -24,32 +17,11 @@ import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import { styled } from '@mui/material/styles'
 import getNormalOpNormColDef from 'components/data-tables/CommonHeader/getNormalOpNormColDef'
 import { Box, Typography } from '../../../node_modules/@mui/material/index'
-
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
 
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -91,26 +63,19 @@ const NormalOpNormsScreen = () => {
   const keycloak = useSession()
 
   const fetchData = async (gradeId) => {
-    if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
-
+    const verticalsRequiringGrade = ['pe', 'pp', 'cracker']
+    if (verticalsRequiringGrade.includes(lowerVertName) && !gradeId) return
     setLoading(true)
-
-    // // Wait 500ms before continuing
-    // await new Promise((resolve) => setTimeout(resolve, 500))
-
     try {
       const response = await DataService.getNormalOperationNormsData(
         keycloak,
         gradeId,
+        lowerVertName === 'cracker' ? true : false,
       )
 
       if (response?.code !== 200) {
         setRows([])
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Error fetching data. Please try again.',
-          severity: 'error',
-        })
+
         return
       }
 
@@ -137,54 +102,11 @@ const NormalOpNormsScreen = () => {
 
   const fetchGradeDropdowns = async () => {
     try {
-      setGrades([])
-
-      if (lowerVertName === 'cracker') {
-        setGrades([
-          {
-            name: 'Monthly',
-            displayName: 'Monthly',
-            gradeId: 'Monthly',
-          },
-          {
-            name: '4F',
-            displayName: '4F',
-            gradeId: '4F',
-          },
-          {
-            name: '5F',
-            displayName: '5F',
-            gradeId: '5F',
-          },
-          {
-            name: '4F+D',
-            displayName: '4F+D',
-            gradeId: '4F+D',
-          },
-        ])
-        return
-      }
-
       const response = await DataService.getNormalOperationNormsGrades(keycloak)
 
       if (response?.code == 200) {
         setGrades(response?.data)
       }
-
-      // setGrades([
-      //   {
-      //     Grade_FK_Id: '0E39FD68-D4DC-4FA9-A686-6A265BC35580',
-      //     DisplayName: '1020FA20',
-      //   },
-      //   {
-      //     Grade_FK_Id: '6851C7E9-EF06-44E0-AE44-8790FD7B5AF4',
-      //     DisplayName: '1070LA17',
-      //   },
-      //   {
-      //     Grade_FK_Id: 'EA27B6FC-F31F-4381-ABA4-E697F57C46DD',
-      //     DisplayName: '1005FY20',
-      //   },
-      // ])
     } catch (error) {
       setGrades([])
       console.error('Error fetching data:', error)
@@ -229,11 +151,12 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  const fetchAllData = async () => {
+  const fetchAllData = async (gradeId) => {
     setLoading(true)
     setRows([])
     setRowsIntermediateValues([])
     setAllRedCell([])
+    setGrades([])
 
     try {
       const promises = [fetchData(gradeId), getNormTransactions()]
@@ -241,25 +164,45 @@ const NormalOpNormsScreen = () => {
       if (lowerVertName === 'meg') {
         promises.push(fetchDataIntermediateValues())
       }
-      if (
-        lowerVertName === 'pe' ||
-        lowerVertName === 'pp' ||
-        lowerVertName === 'cracker'
-      ) {
+      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
         promises.push(fetchGradeDropdowns())
+      }
+      if (lowerVertName === 'cracker') {
+        setGrades([
+          {
+            name: '4F',
+            displayName: '4F',
+            gradeId: '4F',
+          },
+          {
+            name: '5F',
+            displayName: '5F',
+            gradeId: '5F',
+          },
+          {
+            name: '4F+D',
+            displayName: '4F+D',
+            gradeId: '4F+D',
+          },
+          {
+            name: 'Monthly',
+            displayName: 'Monthly',
+            gradeId: 'Monthly',
+          },
+        ])
       }
 
       await Promise.all(promises)
     } catch (error) {
       console.error('Error during data fetching:', error)
     } finally {
-      setLoading(false)
+      // setLoading(false)
       // console.log(2)
     }
   }
 
   useEffect(() => {
-    fetchAllData()
+    fetchAllData(gradeId)
   }, [oldYear, yearChanged, keycloak, gradeId, plantID])
 
   const colDefs = getNormalOpNormColDef({
@@ -618,8 +561,6 @@ const NormalOpNormsScreen = () => {
     }
   }
 
-  // console.log('calculationObject', calculationObject)
-
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -695,7 +636,7 @@ const NormalOpNormsScreen = () => {
     })
 
     try {
-      await DataService.getNormalOpsNormsExcel(keycloak)
+      await DataService.getNormalOpsNormsExcel(keycloak, gradeId)
 
       setSnackbarData({
         message: 'Excel download completed successfully!',
@@ -736,7 +677,7 @@ const NormalOpNormsScreen = () => {
         setModifiedCells({})
         // setLoading(false)
 
-        fetchAllData()
+        fetchAllData(gradeId)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -790,7 +731,7 @@ const NormalOpNormsScreen = () => {
         setOpen1={setOpen1}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        fetchData={fetchData}
+        // fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -804,6 +745,7 @@ const NormalOpNormsScreen = () => {
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
         handleGradeChange={handleGradeChange}
+        plantID={plantID}
       />
 
       {lowerVertName === 'meg' && (

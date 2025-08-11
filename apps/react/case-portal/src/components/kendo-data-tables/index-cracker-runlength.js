@@ -2,6 +2,7 @@ import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+
 import {
   Backdrop,
   Box,
@@ -41,6 +42,8 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { Skeleton } from '../../../node_modules/@progress/kendo-react-indicators/index'
 import moment from '../../../node_modules/moment/moment'
+import { ExcelExport } from '../../../node_modules/@progress/kendo-react-excel-export/index'
+import { useSelector } from 'react-redux'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -53,9 +56,9 @@ const CustomAccordion = styled((props) => (
     display: 'none',
   },
 }))
+
 const year = localStorage.getItem('year')
 const startYear = parseInt(year?.split('-')[0], 10)
-const nextYear = `${startYear + 1}-${(startYear + 2).toString().slice(-2)}`
 
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
@@ -100,6 +103,9 @@ const KendoDataTablesCrackerRunLength = ({
   downloadExcelForConfiguration = () => {},
 }) => {
   const fileInputRef = useRef(null)
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { yearChanged } = dataGridStore
+
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const showDeleteAll = permissions?.deleteAllBtn && selectedUsers.length > 1
@@ -117,6 +123,7 @@ const KendoDataTablesCrackerRunLength = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
   const [rowsPopUp, setRowsPopUp] = useState([])
+  const ColumnMenuCheckboxFilter1 = getColumnMenuCheckboxFilter(rowsPopUp)
   const [singleRow, setSingleRow] = useState([])
   const [modifiedCellsSingleRow, setModifiedCellsSingleRow] = useState([])
   const [modifiedCellsDayWise, setModifiedCellsDayWise] = useState([])
@@ -144,20 +151,32 @@ const KendoDataTablesCrackerRunLength = ({
   const [upperLimitDate, setUpperLimitDate] = useState(null)
 
   useEffect(() => {
+    setHValues({})
+    setRowsPopUp([])
+    setSingleRow([])
+
+    setStartDate(null)
+  }, [yearChanged])
+
+  useEffect(() => {
     const year = localStorage.getItem('year')
     const startYear = parseInt(year?.split('-')[0], 10)
     const lowerLimit = new Date(startYear, 3, 1)
     const upperLimit = new Date(startYear + 1, 2, 31)
+
+    // console.log(lowerLimit)
+    // console.log(upperLimit)
+
     setLowerLimitDate(lowerLimit)
     setUpperLimitDate(upperLimit)
-  }, [])
+  }, [yearChanged])
 
   const itemChange = useCallback(
     (e) => {
       const { dataItem, field, value } = e
       const itemId = dataItem.id
 
-      console.log('e', e)
+      // console.log('e', e)
 
       setRows((prevRows) =>
         prevRows.map((row) =>
@@ -284,8 +303,8 @@ const KendoDataTablesCrackerRunLength = ({
                 return updatedRow
               })
             } else {
-              console.log('SAD is Typed but cells are numeric')
-              console.log('updatedRows', updatedRows)
+              // console.log('SAD is Typed but cells are numeric')
+              // console.log('updatedRows', updatedRows)
             }
 
             setModifiedCells(() => updatedRows)
@@ -785,111 +804,124 @@ const KendoDataTablesCrackerRunLength = ({
   )
 
   const renderGridDayWise = () => (
-    <Grid
-      style={{ height: 500 }}
-      scrollable={'virtual'}
-      rowHeight={40}
-      data={rowsPopUp}
-      total={rowsPopUp?.length}
-      sortable={{
-        mode: 'multiple',
-      }}
-      sort={sort}
-      defaultSkip={0}
-      defaultTake={100}
-      onItemChange={itemChangeDayWise}
-      dataItemKey='id'
-      size='small'
-      autoProcessData={true}
-      cells={{
-        data: LoadingCell,
-      }}
-      pageable={{
-        buttonCount: 4,
-        pageSizes: [10, 50, 100, 366],
-      }}
-    >
-      {ibrGridThreePopUP.map((col) => {
-        const isActive = isColumnActive(col.field, filter, sort)
-
-        if (
-          dateFields1.includes(col.field) ||
-          dateFieldsRunLength.includes(col.field)
-        ) {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              format='{0:dd-MM-yyyy}'
-              editor='date'
-              hidden={col.hidden}
-              sortable={false}
-              cells={{
-                headerCell: SimpleHeaderWithTooltip,
-              }}
-              className={
-                dateFieldsRunLength.includes(col.field)
-                  ? 'k-right-disabled'
-                  : ''
-              }
-            />
-          )
-        }
-
-        if (!col.editable) {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              hidden={col.hidden}
-              headerClassName={isActive ? 'active-column' : ''}
-              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
-              sortable={!!col.filter}
-              className={col.isDisabled ? 'k-right-disabled' : ''}
-              cells={{
-                headerCell: SimpleHeaderWithTooltip,
-              }}
-            />
-          )
-        }
-
-        return (
-          <GridColumn
-            key={col.field}
-            field={col.field}
-            title={col.title || col.headerName}
-            // width={col.widthT}
-            hidden={col.hidden}
-            headerClassName={isActive ? 'active-column' : ''}
-            columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
-            sortable={!!col.filter}
-            className={col.isDisabled ? 'k-right-disabled' : ''}
-            cells={
-              col.editable
-                ? { data: CellWithState, headerCell: SimpleHeaderWithTooltip }
-                : { headerCell: SimpleHeaderWithTooltip }
-            }
-          />
-        )
-      })}
-
-      {permissions?.deleteButton && (
-        <GridColumn
-          key='actions'
-          field='actions'
-          title='Action'
-          width={80}
-          className='k-text-center'
-          filterable={false}
-          editable={false}
-          cells={{
-            data: ActionsCell,
+    <Tooltip openDelay={50} position='auto' anchorElement='target'>
+      <ExcelExport
+        data={rowsPopUp}
+        ref={_export}
+        fileName={`Cracker-runlength.xlsx`}
+      >
+        <Grid
+          style={{ height: 630 }}
+          scrollable={'virtual'}
+          rowHeight={40}
+          data={rowsPopUp}
+          total={rowsPopUp?.length}
+          sortable={{
+            mode: 'multiple',
           }}
-        />
-      )}
-    </Grid>
+          sort={sort}
+          defaultSkip={0}
+          defaultTake={100}
+          onItemChange={itemChangeDayWise}
+          dataItemKey='id'
+          size='small'
+          autoProcessData={true}
+          cells={{
+            data: LoadingCell,
+          }}
+          pageable={{
+            buttonCount: 4,
+            pageSizes: [10, 50, 100, 366],
+          }}
+        >
+          {ibrGridThreePopUP.map((col) => {
+            const isActive = isColumnActive(col.field, filter, sort)
+
+            if (
+              dateFields1.includes(col.field) ||
+              dateFieldsRunLength.includes(col.field)
+            ) {
+              return (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  format='{0:dd-MM-yyyy}'
+                  editor='date'
+                  hidden={col.hidden}
+                  sortable={false}
+                  cells={{
+                    headerCell: SimpleHeaderWithTooltip,
+                  }}
+                  className={
+                    dateFieldsRunLength.includes(col.field)
+                      ? 'k-right-disabled'
+                      : ''
+                  }
+                />
+              )
+            }
+
+            if (!col.editable) {
+              return (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  hidden={col.hidden}
+                  headerClassName={isActive ? 'active-column' : ''}
+                  columnMenu={
+                    col.filter ? ColumnMenuCheckboxFilter1 : undefined
+                  }
+                  sortable={!!col.filter}
+                  className={col.isDisabled ? 'k-right-disabled' : ''}
+                  cells={{
+                    headerCell: SimpleHeaderWithTooltip,
+                  }}
+                />
+              )
+            }
+
+            return (
+              <GridColumn
+                key={col.field}
+                field={col.field}
+                title={col.title || col.headerName}
+                // width={col.widthT}
+                hidden={col.hidden}
+                headerClassName={isActive ? 'active-column' : ''}
+                columnMenu={col.filter ? ColumnMenuCheckboxFilter1 : undefined}
+                sortable={!!col.filter}
+                className={col.isDisabled ? 'k-right-disabled' : ''}
+                cells={
+                  col.editable
+                    ? {
+                        data: CellWithState,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }
+                    : { headerCell: SimpleHeaderWithTooltip }
+                }
+              />
+            )
+          })}
+
+          {permissions?.deleteButton && (
+            <GridColumn
+              key='actions'
+              field='actions'
+              title='Action'
+              width={80}
+              className='k-text-center'
+              filterable={false}
+              editable={false}
+              cells={{
+                data: ActionsCell,
+              }}
+            />
+          )}
+        </Grid>
+      </ExcelExport>
+    </Tooltip>
   )
 
   const renderGridSingleRow = () => (
@@ -1217,6 +1249,14 @@ const KendoDataTablesCrackerRunLength = ({
     fetchDataNextYearParameters(e.value)
   }
 
+  const _export = useRef(null)
+
+  const excelExport = () => {
+    if (_export.current !== null) {
+      _export.current.save()
+    }
+  }
+
   return (
     <Box>
       {(permissions?.allAction ?? false) && (
@@ -1459,36 +1499,47 @@ const KendoDataTablesCrackerRunLength = ({
         </DialogActions>
       </Dialog>
 
-      <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        maxWidth='xl'
+        fullWidth
+        PaperProps={{
+          style: {
+            height: '100vh', // full screen height
+            maxHeight: '100vh', // prevent scroll beyond viewport
+            display: 'flex',
+            flexDirection: 'column',
+          },
+        }}
+      >
         <DialogTitle style={{ padding: '8px 16px', fontSize: '16px' }}>
-          Configuration for Next Year ({nextYear})
+          Configuration for Next Year (
+          {`${parseInt(localStorage.getItem('year')?.split('-')[0], 10) + 1}-${(parseInt(localStorage.getItem('year')?.split('-')[0], 10) + 2).toString().slice(-2)}`}
+          )
         </DialogTitle>
 
         <DialogContent dividers style={{ padding: '8px' }}>
           <div
             style={{
               display: 'flex',
-              justifyContent: 'flex-end',
-              alignItems: 'flex-end',
-            }}
-          ></div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              rowGap: '8px',
-              columnGap: '6px',
+              flexWrap: 'wrap',
+              gap: '16px',
+              alignItems: 'center',
+              marginBottom: '16px',
             }}
           >
-            {/* First Row */}
-            <div>
-              <label style={{ fontSize: '14px' }}>Start Date</label>
+            {/* Start Date */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label style={{ fontSize: '14px', marginBottom: '4px' }}>
+                Start Date
+              </label>
               <DatePicker
                 id='start-date-1'
                 format='dd-MM-yyyy'
                 value={startDate}
                 onChange={handleStartDateChange}
-                style={{ width: '100%' }}
+                style={{ width: '160px' }}
                 min={lowerLimitDate}
                 max={upperLimitDate}
                 size='small'
@@ -1499,15 +1550,24 @@ const KendoDataTablesCrackerRunLength = ({
               />
             </div>
 
-            {['H10', 'H11'].map((label) => (
-              <div key={label}>
-                <label style={{ fontSize: '14px' }}>{label}</label>
+            {/* H Inputs */}
+            {['H10', 'H11', 'H12', 'H13', 'H14'].map((label) => (
+              <div
+                key={label}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  minWidth: '80px',
+                }}
+              >
+                <label style={{ fontSize: '14px', marginBottom: '4px' }}>
+                  {label}
+                </label>
                 <input
                   type='text'
                   value={hValues[label]}
                   onChange={(e) => handleChange(label, e.target.value)}
                   style={{
-                    width: '100%',
                     height: '30px',
                     padding: '2px 6px',
                     fontSize: '14px',
@@ -1516,8 +1576,8 @@ const KendoDataTablesCrackerRunLength = ({
               </div>
             ))}
 
-            {/* Calculate button in 4th column of first row */}
-            <div style={{ alignSelf: 'end', justifySelf: 'end' }}>
+            {/* Calculate Button */}
+            <div style={{ alignSelf: 'flex-end' }}>
               <button
                 onClick={() => handleCalculateData(hValues)}
                 disabled={
@@ -1527,45 +1587,24 @@ const KendoDataTablesCrackerRunLength = ({
                   )
                 }
                 className='btn-save'
+                style={{
+                  height: '34px',
+                  padding: '0 16px',
+                  fontSize: '14px',
+                  marginRight: '10px',
+                }}
               >
                 Calculate
               </button>
+
+              <button
+                onClick={saveModalOpenSingleRow}
+                disabled={singleRow?.length === 0}
+                className='btn-save'
+              >
+                Save
+              </button>
             </div>
-
-            {/* Second Row */}
-            {/* {['H13', 'H14', 'Demo'].map((label) => ( */}
-            {['H12', 'H13', 'H14'].map((label) => (
-              <div key={label}>
-                <label style={{ fontSize: '14px' }}>{label}</label>
-                <input
-                  type='text'
-                  value={hValues[label]}
-                  onChange={(e) => handleChange(label, e.target.value)}
-                  style={{
-                    width: '100%',
-                    height: '30px',
-                    padding: '2px 6px',
-                    fontSize: '14px',
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end', // aligns content to the right
-              alignItems: 'flex-end',
-            }}
-          >
-            <button
-              onClick={saveModalOpenSingleRow}
-              disabled={singleRow?.length === 0}
-              className='btn-save'
-            >
-              Save
-            </button>
           </div>
 
           {/* Grid Rendering */}
@@ -1574,12 +1613,23 @@ const KendoDataTablesCrackerRunLength = ({
               {renderGridSingleRow()}
             </Tooltip>
           </div>
-
-          <div style={{ marginTop: '12px' }}>
-            <Tooltip openDelay={50} position='auto' anchorElement='target'>
-              {renderGridDayWise()}
-            </Tooltip>
+          {/* Export button aligned right */}
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '8px',
+            }}
+          >
+            <button
+              className='btn-save'
+              onClick={excelExport}
+              disabled={rowsPopUp?.length === 0}
+            >
+              Export
+            </button>
           </div>
+          <div style={{ marginTop: '12px' }}>{renderGridDayWise()}</div>
 
           <Backdrop
             sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}

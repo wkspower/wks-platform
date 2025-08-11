@@ -32,6 +32,7 @@ const icons = {
   IconSquareAsterisk,
   IconList,
   IconUserCog,
+
   IconSettingsAutomation,
   IconDatabase,
   IconChartBar,
@@ -132,20 +133,13 @@ const workspace = {
         },
       ],
     },
+
     {
       id: 'workflow',
       title: i18n.t('menu.workflow'),
       type: 'item',
       url: '/workflow',
       icon: icons?.IconSettingsAutomation,
-      breadcrumbs: true,
-    },
-    {
-      id: 'remark-history',
-      title: i18n.t('management'),
-      type: 'item',
-      url: '/remark-history',
-      icon: icons.IconFileText,
       breadcrumbs: true,
     },
     {

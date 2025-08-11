@@ -18,7 +18,7 @@ const findFirstUrlFromMenu = (menu) => {
 }
 
 const isRouteIdAllowed = (menu, routeId) => {
-  console.log('menu.items', menu.items)
+  // console.log('menu.items', menu.items)
   // return true
   for (const group of menu.items) {
     if (!group.children) continue

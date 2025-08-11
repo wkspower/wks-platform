@@ -25,7 +25,6 @@ import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
 import MonthCell from './Utilities-Kendo/MonthCell'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 import ProductCell from './Utilities-Kendo/ProductCell'
-import DropdownCellEditor from './Utilities-Kendo/DropdownCellEditor'; 
 import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
@@ -79,6 +78,7 @@ export const monthMap = {
 
 const KendoDataTables = ({
   rows = [],
+  plantID = null,
   grades = [],
   allRedCell = [],
   modifiedCells = [],
@@ -660,6 +660,9 @@ const KendoDataTables = ({
       handleGradeChange(firstGrade.gradeId)
     }
   }, [grades, permissions?.showG, selectedGrade])
+  useEffect(() => {
+    setSelectedGrade(null)
+  }, [plantID])
 
   useEffect(() => {
     if (
@@ -729,12 +732,12 @@ const KendoDataTables = ({
                     setSelectedGrade(selectedGradeId)
                     handleGradeChange(selectedGradeObj?.gradeId)
                   }}
-                  sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                  sx={{ width: '165px', backgroundColor: '#FFFFFF' }}
                   variant='outlined'
-                  label={permissions?.dropdownLabel}
+                  label={permissions?.dropdownLabel || 'Select'}
                 >
                   <MenuItem value='' disabled>
-                    {permissions?.dropdownLabel}
+                    {permissions?.dropdownLabel || 'Select'}
                   </MenuItem>
 
                   {grades?.map((unit) => (
@@ -1104,34 +1107,6 @@ const KendoDataTables = ({
                     />
                   )
                 }
-                // if (col?.field === 'Plant_FK_Id'||col?.field === 'IsHistorical' || col?.field === 'IsVisible' || col?.field === 'IsEditables') {
-                if (
-                  ['NormType_FK_Id','NormParameterType_FK_Id', 'Plant_FK_Id', 'IsHistorical', 'IsVisible', 'IsEditables'].includes(
-                    col?.field,
-                  )
-                ) {
-              return (
-                <GridColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title || col.headerName || col.field}
-                  editable={col.editable || true}
-                  hidden={col.hidden}
-                  editField="inEdit"
-                  cells={{
-                    data: (cellProps) => (
-                      <DropdownCellEditor
-                        {...cellProps}
-                        options={col.options}
-                        onChange={itemChange}
-                      />
-                    ),
-                    headerCell: SimpleHeaderWithTooltip,
-                  }}
-                  columnMenu={ColumnMenuCheckboxFilter}
-                />
-              )
-            }
                 if (col?.field === 'month') {
                   return (
                     <GridColumn

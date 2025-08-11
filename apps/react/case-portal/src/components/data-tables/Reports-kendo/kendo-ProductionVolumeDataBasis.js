@@ -1,13 +1,7 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-// import AopCostReportView from 'components/data-tables-views/ReportDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -15,68 +9,38 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
-import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
 import {
-  ExcelExport,
-  ExcelExportColumn,
-} from '../../../../node_modules/@progress/kendo-react-excel-export/index'
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
 import {
   Button,
   MenuItem,
   TextField,
 } from '../../../../node_modules/@mui/material/index'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '../../../../node_modules/@progress/kendo-react-excel-export/index'
 import moment from '../../../../node_modules/moment/moment'
-
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
+import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
 
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
   const units = ['TPH', 'TPD']
   const [selectedUnit, setSelectedUnit] = useState('TPH')
-
   const [rowsMC, setRowsMC] = useState([])
   const [rowsMCYearWise, setRowsMCYearWise] = useState([])
   const [rowsCalculatedData, setRowsCalculatedData] = useState([])
   const [rowsRawData, setRowsRowData] = useState([])
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { yearChanged, oldYear, plantID } = dataGridStore
-
   const isOldYear = oldYear?.oldYear === 1
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
-
-  function parseDDMMYYYY(dateStr) {
-    if (!dateStr) return null
-    const [day, month, year] = dateStr.split('-')
-    return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
-  }
+  const year = localStorage.getItem('year')
+  const headerMap = generateHeaderNames(year)
 
   const fetchData = async (reportType, setState, selectedUnit) => {
     if (!selectedUnit) return
@@ -120,9 +84,6 @@ const ProductionVolumeDataBasis = () => {
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
-
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
 
   const colsMC = getKendoProductionColumns({
     headerMap,
@@ -196,11 +157,6 @@ const ProductionVolumeDataBasis = () => {
     exportRef1.current.save(options1)
   }
 
-  const currentDateTime = new Date()
-    .toISOString()
-    .replace(/T/, ' ')
-    .replace(/:/g, '-')
-    .split('.')[0]
   const fileName = `Production Volume Data Basis ${new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').split('.')[0]}.xlsx`
   return (
     <div>

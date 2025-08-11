@@ -181,14 +181,6 @@ const workspacePe = {
       breadcrumbs: true,
     },
     {
-      id: 'remark-history',
-      title: i18n.t('menu.remarkHistory'),
-      type: 'item',
-      url: '/remark-history',
-      icon: icons.IconFileText,
-      breadcrumbs: true,
-    },
-    {
       id: 'user-management',
       title: i18n.t('menu.userManage'),
       type: 'item',

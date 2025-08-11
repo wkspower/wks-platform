@@ -1,11 +1,6 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { useGridApiRef } from '@mui/x-data-grid'
 import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
@@ -14,47 +9,24 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
-
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
 
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const keycloak = useSession()
-  const [allProducts, setAllProducts] = useState([])
+
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -74,13 +46,6 @@ const BusinessDemand = ({ permissions }) => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-
-  const [_plantID, set_PlantID] = useState('')
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
 
   const fetchData = async () => {
     setLoading(true)
