@@ -211,17 +211,17 @@ export const MainRoutes = (
               {
                 path: 'spyro-input',
                 element: (
-                  // <PrivateRoute routeId='spyro-input'>
-                  <CrackerConfig keycloak={keycloak} />
-                  // </PrivateRoute>
+                  <PrivateRoute routeId='spyro-input'>
+                    <CrackerConfig keycloak={keycloak} />
+                  </PrivateRoute>
                 ),
               },
               {
                 path: 'spyro-output',
                 element: (
-                  // <PrivateRoute routeId='spyro-output'>
-                  <CrackerConfigOutput />
-                  // </PrivateRoute>
+                  <PrivateRoute routeId='spyro-output'>
+                    <CrackerConfigOutput />
+                  </PrivateRoute>
                 ),
               },
               {

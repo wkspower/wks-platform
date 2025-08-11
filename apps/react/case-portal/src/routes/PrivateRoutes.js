@@ -17,21 +17,36 @@ const findFirstUrlFromMenu = (menu) => {
   return '/not-found'
 }
 
+// const isRouteIdAllowed = (menu, routeId) => {
+//   for (const group of menu.items) {
+//     if (!group.children) continue
+//     for (const child of group.children || []) {
+//       if (child.id === routeId) return true
+//       if (child.children?.map((menu) => menu.id).includes(routeId)) return true
+//     }
+//   }
+//   return false
+// }
+
 const isRouteIdAllowed = (menu, routeId) => {
-  // console.log('menu.items', menu.items)
-  // return true
   for (const group of menu.items) {
     if (!group.children) continue
-    for (const child of group.children || []) {
-      if (child.id === routeId) return true
-      if (child.children?.map((menu) => menu.id).includes(routeId)) return true
+    const search = (items) => {
+      for (const item of items || []) {
+        if (item.id === routeId) return true
+        if (item.children && search(item.children)) return true
+      }
+      return false
     }
+    const result = search(group.children)
+    if (result) return true
   }
   return false
 }
 
 const PrivateRoute = ({ children, routeId }) => {
   const filteredMenu = useFilteredMenu()
+  console.log('🚀 ~ PrivateRoute ~ filteredMenu:', filteredMenu)
   if (isRouteIdAllowed(filteredMenu, routeId)) {
     return children
   }
