@@ -2,9 +2,17 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import javax.sql.DataSource;
+import java.sql.CallableStatement;
+import java.sql.SQLException;
+import java.sql.Connection;
+import jakarta.persistence.Query;
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +25,7 @@ import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -51,11 +60,18 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 	
+	private DataSource dataSource;
+
+	// Inject or set your DataSource (e.g., via constructor or setter)
+	public ShutdownNormsServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+	
 	
 
 
 	@Override
-	public List<ShutdownNormsValueDTO> getShutdownNormsData(String year, String plantId) {
+	public AOPMessageVM getShutdownNormsData(String year, String plantId) {
 		try {
 			List<Object[]> objList = null;
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
@@ -106,8 +122,19 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				shutdownNormsValueDTO.setProductName(row[30] != null ? row[30].toString() : null);
 				shutdownNormsValueDTOList.add(shutdownNormsValueDTO);
 			}
+			Map<String, Object> map = new HashMap<>();
 
-			return shutdownNormsValueDTOList;
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "shutdown-norms");
+			map.put("mcuNormsValueDTOList", shutdownNormsValueDTOList);
+			map.put("aopCalculation", aopCalculation);
+			
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -209,43 +236,24 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	@Override
 	@Transactional
-	public List<ShutdownNormsValueDTO> getShutdownNormsSPData(String year, String plantId) {
+	public AOPMessageVM getShutdownNormsSPData(String year, String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String storedProcedure = vertical.getName() + "_"+site.getName()+"_CalculateShutdownNorms";
-			List<Object[]> list = getCalculatedShutdownNormsSP(storedProcedure, year, plant.getId().toString(),
+			Integer rowsAffected = getCalculatedShutdownNormsSP(storedProcedure, year, plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString());
-			List<ShutdownNormsValueDTO> shutdownNormsValueDTOList = new ArrayList<>();
-			for (Object[] row : list) {
-				ShutdownNormsValueDTO shutdownNormsValueDTO = new ShutdownNormsValueDTO();
-				shutdownNormsValueDTO.setNormParameterTypeDisplayName(row[0] != null ? row[0].toString() : null);
-				shutdownNormsValueDTO.setUOM(row[1] != null ? row[1].toString() : null);
-				shutdownNormsValueDTO.setSiteFkId(row[2] != null ? row[2].toString() : null);
-				shutdownNormsValueDTO.setVerticalFkId(row[3] != null ? row[3].toString() : null);
-				shutdownNormsValueDTO.setAOPCaseId(row[4] != null ? row[4].toString() : null);
-				shutdownNormsValueDTO.setAOPStatus(row[5] != null ? row[5].toString() : null);
-				shutdownNormsValueDTO.setRemarks(row[6] != null ? row[6].toString() : "");
-				shutdownNormsValueDTO.setMaterialFkId(row[7] != null ? row[7].toString() : null);
-				shutdownNormsValueDTO.setJanuary(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
-				shutdownNormsValueDTO.setFebruary(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
-				shutdownNormsValueDTO.setMarch(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
-				shutdownNormsValueDTO.setApril(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
-				shutdownNormsValueDTO.setMay(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
-				shutdownNormsValueDTO.setJune(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
-				shutdownNormsValueDTO.setJuly(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
-				shutdownNormsValueDTO.setAugust(row[15] != null ? Double.parseDouble(row[15].toString()) : null);
-				shutdownNormsValueDTO.setSeptember(row[16] != null ? Double.parseDouble(row[16].toString()) : null);
-				shutdownNormsValueDTO.setOctober(row[17] != null ? Double.parseDouble(row[17].toString()) : null);
-				shutdownNormsValueDTO.setNovember(row[18] != null ? Double.parseDouble(row[18].toString()) : null);
-				shutdownNormsValueDTO.setDecember(row[19] != null ? Double.parseDouble(row[19].toString()) : null);
-				shutdownNormsValueDTO.setFinancialYear(row[20] != null ? row[20].toString() : null);
-				shutdownNormsValueDTO.setPlantFkId(row[21] != null ? row[21].toString() : null);
-				shutdownNormsValueDTOList.add(shutdownNormsValueDTO);
-			}
+			
+			
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
+					"shutdown-norms");
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(rowsAffected);
+			aopMessageVM.setMessage("SP executed successfully");
 
-			return shutdownNormsValueDTOList;
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -254,22 +262,38 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	}
 
 	@Transactional
-	public List<Object[]> getCalculatedShutdownNormsSP(String procedureName, String finYear, String plantId,
+	public Integer getCalculatedShutdownNormsSP(String procedureName, String finYear, String plantId,
 			String siteId, String verticalId) {
 		try {
-			// Create a native query to execute the stored procedure
-			String sql = "EXEC " + procedureName
-					+ " @plantId = :plantId, @siteId = :siteId, @verticalId = :verticalId, @finYear = :finYear";
+						
 
-			Query query = entityManager.createNativeQuery(sql);
+			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
-			// Set parameters
-			query.setParameter("plantId", plantId);
-			query.setParameter("siteId", siteId);
-			query.setParameter("verticalId", verticalId);
-			query.setParameter("finYear", finYear);
+			try (Connection connection = dataSource.getConnection();
+					CallableStatement stmt = connection.prepareCall(callSql)) {
 
-			return query.getResultList(); // Fetch results instead of executing an update
+				// Set parameters in the correct order
+				stmt.setString(1, plantId); // @finYear
+				stmt.setString(2, siteId.toString()); // @plantId
+				stmt.setString(3, verticalId.toString()); // @verticalId
+				stmt.setString(4, finYear); // @siteId
+
+				// Execute the stored procedure
+				int rowsAffected = stmt.executeUpdate();
+
+				// Optional: commit if auto-commit is off
+				if (!connection.getAutoCommit()) {
+					connection.commit();
+				}
+
+				return rowsAffected;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return 0;
+			}
+
+
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format", e);
 		} catch (Exception ex) {

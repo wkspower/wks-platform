@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.ShutdownNormsService;
 
 @RestController
@@ -21,8 +22,8 @@ public class ShutdownNormsController {
 	private ShutdownNormsService shutdownNormsService;
 	
 	@GetMapping(value="/shutdownNorms")
-	public List<ShutdownNormsValueDTO> getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	shutdownNormsService.getShutdownNormsData(year, plantId);
+	public AOPMessageVM getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
+		return	shutdownNormsService.getShutdownNormsData(year,plantId);
 	}
 	
 	@PostMapping(value="/shutdownNorms")
@@ -31,8 +32,8 @@ public class ShutdownNormsController {
 	}
 	
 	@GetMapping(value="/getShutdownNormsSPData")
-	public List<ShutdownNormsValueDTO> getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
-		return	shutdownNormsService.getShutdownNormsSPData(year, plantId);
+	public AOPMessageVM getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
+		return	shutdownNormsService.getShutdownNormsSPData(year,plantId);
 	}
 
 }
