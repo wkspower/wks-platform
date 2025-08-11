@@ -100,7 +100,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
               : false
           }
         >
-          {columns.map((col) => {
+          {columns?.map((col) => {
             const {
               field,
               title,
@@ -111,11 +111,10 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
               isRightAlligned,
               hidden,
               widthT,
+              type,
             } = col
 
-            if (
-              ['endDate', 'startDate', 'dateTime', 'mcuDate'].includes(field)
-            ) {
+            if (['endDate', 'startDate', 'dateTime'].includes(field)) {
               return (
                 <Column
                   key={field}
@@ -129,6 +128,36 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
                       )
                         ? DateOnlyPicker
                         : DateTimePickerEditor,
+                    },
+                    data: toolTipRenderer,
+                    headerCell: SimpleHeaderWithTooltip,
+                  }}
+                  editor='date'
+                  format='{0:dd-MM-yyyy}'
+                  hidden={hidden}
+                  className={
+                    isRightAlligned === 'numeric'
+                      ? 'k-number-right-disabled'
+                      : 'non-editable-cell'
+                  }
+                  headerClassName={
+                    isColumnActive(field, filter, sort) ? 'active-column' : ''
+                  }
+                  columnMenu={DateColumnMenu}
+                />
+              )
+            }
+
+            if (col.type === 'date') {
+              return (
+                <Column
+                  key={field}
+                  field={field}
+                  title={title}
+                  cell={cell}
+                  cells={{
+                    edit: {
+                      DateOnlyPicker,
                     },
                     data: toolTipRenderer,
                     headerCell: SimpleHeaderWithTooltip,

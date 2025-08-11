@@ -1,174 +1,204 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
-// import AopCostReportView from 'components/data-tables-views/ReportDataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
-
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
+import { Button } from '../../../../node_modules/@mui/material/index'
 import {
   ExcelExport,
   ExcelExportColumn,
 } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
-import { Button } from '../../../../node_modules/@mui/material/index'
-import getKendoNormsHistorianBasisPe from '../CommonHeader/KendoNormsHistorianBasisPe'
 
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-}))
+const CALL_DELAY_MS = 200
 
 const ProductionVolumeDataBasisPe = () => {
   const keycloak = useSession()
 
-  const [rowsRawMcu, setRowsRawMcu] = useState([])
-  const [rowsMcuWithInRange, setRowsMcuWithInRange] = useState([])
-  const [rowsMcuRange, setRowsMcuRange] = useState([])
-  const [rowsAvgAnnualNorms, setRowsAvgAnnualNorms] = useState([])
-  const [rowsConsecutiveDays, setRowsConsecutiveDays] = useState([])
-  const [rowsMiisNormsRawData, setRowsMiisNormsRawData] = useState([])
-  const [rowsBestAchivedNorms, setRowsBestAchivedNorms] = useState([])
+  const [rawMcuData, setRawMcuData] = useState({ rows: [], columns: [] })
+  const [mcuWithInRangeData, setMcuWithInRangeData] = useState({
+    rows: [],
+    columns: [],
+  })
+  const [mcuRangeData, setMcuRangeData] = useState({ rows: [], columns: [] })
+
+  const [avgAnnualNormsData, setAvgAnnualNormsData] = useState({
+    rows: [],
+    columns: [],
+  })
+  const [consecutiveDaysData, setConsecutiveDaysData] = useState({
+    rows: [],
+    columns: [],
+  })
+  const [miisNormsRawData, setMiisNormsRawData] = useState({
+    rows: [],
+    columns: [],
+  })
+  const [bestAchievedNormsData, setBestAchievedNormsData] = useState({
+    rows: [],
+    columns: [],
+  })
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, verticalChange, yearChanged, oldYear } = dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const { plantID, yearChanged, oldYear } = dataGridStore
 
   const [loading, setLoading] = useState(false)
+
+  const timeoutIdsRef = useRef([])
+  const activeRequestsRef = useRef(0)
+  const isMountedRef = useRef(true)
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+      timeoutIdsRef.current = []
+    }
+  }, [])
 
   function parseDDMMYYYY(dateStr) {
     if (!dateStr) return null
     const [day, month, year] = dateStr.split('-')
-    return new Date(`${year}-${month}-${day}`) // YYYY-MM-DD (ISO format)
+    return new Date(`${year}-${month}-${day}`)
   }
 
-  const fetchData = async (reportType, setState) => {
+  const fetchDataNoLoader = async (reportType, setState) => {
     try {
-      setLoading(true)
-      var data = []
       const configData =
         await DataService.getConfigurationExecutionDetails(keycloak)
-      if (configData.code === 200) {
-        const StartDate = configData.data.find(
-          (d) => d.Name === 'StartDate',
-        )?.AttributeValue
-        const EndDate = configData.data.find(
-          (d) => d.Name === 'EndDate',
-        )?.AttributeValue
+      if (configData.code !== 200) return
 
-        if (!StartDate || !EndDate) {
-          setLoading(false)
-          return
-        }
+      const StartDate = configData.data.find(
+        (d) => d.Name === 'StartDate',
+      )?.AttributeValue
+      const EndDate = configData.data.find(
+        (d) => d.Name === 'EndDate',
+      )?.AttributeValue
+      if (!StartDate || !EndDate) {
+        setState([])
+        return
+      }
 
-        data = await DataService.getProductionVolDataBasisPe(
-          keycloak,
-          reportType,
-          StartDate,
-          EndDate,
-        )
+      const apiResponse = await DataService.getProductionVolDataBasisPe(
+        keycloak,
+        reportType,
+        StartDate,
+        EndDate,
+      )
 
-        if (data?.code === 200) {
-          const rowsWithId = data?.data?.map((item, index) => ({
-            ...item,
+      if (apiResponse?.code === 200) {
+        const backendCols = apiResponse.data.columns || []
+
+        const enrichedCols = backendCols.map((col) => {
+          const isTextCol = col.type === 'string'
+          const isNumberCol = col.type === 'number'
+          const isDateCol = col.type === 'date'
+
+          return {
+            ...col,
+            filterable: true,
+            filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+            align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+            ...(isNumberCol ? { format: '{0:#.###}' } : {}),
+            editable: false,
+            isRightAlligned: isNumberCol ? 'numeric' : undefined,
+          }
+        })
+
+        const dateFields = enrichedCols
+          .filter((col) => col.type === 'date')
+          .map((col) => col.field)
+
+        const numberFields = enrichedCols
+          .filter((col) => col.type === 'number')
+          .map((col) => col.field)
+
+        const rowsWithId = (apiResponse.data.data || []).map((item, index) => {
+          let parsedItem = { ...item }
+
+          dateFields.forEach((field) => {
+            parsedItem[field] = item?.[field]
+              ? parseDDMMYYYY(item[field])
+              : null
+          })
+
+          numberFields.forEach((field) => {
+            parsedItem[field] =
+              item?.[field] !== undefined && item?.[field] !== null
+                ? Number(item[field])
+                : null
+          })
+
+          return {
+            ...parsedItem,
             id: index,
             isEditable: false,
-            startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
-            endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
-            dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
-            mcuDate: item?.mcuDate ? parseDDMMYYYY(item.mcuDate) : null,
-          }))
-          setLoading(false)
-          setState(rowsWithId)
-        } else {
-          setLoading(false)
+          }
+        })
+
+        if (isMountedRef.current) {
+          setState({ rows: rowsWithId, columns: enrichedCols })
         }
-      } else {
-        console.error(`Error fetching ${reportType} data`)
-        setLoading(false)
       }
-    } catch (error) {
-      console.error(`Error fetching ${reportType} data:`, error)
-      setLoading(false)
+    } catch (err) {
+      console.error(`Error fetching ${reportType}:`, err)
     }
   }
 
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
+  const scheduleAndRunFetch = (reportType, setState, delayMs) => {
+    const id = setTimeout(async () => {
+      activeRequestsRef.current += 1
+      if (isMountedRef.current) setLoading(true)
 
-  const colsRawMcu = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'RAW MCU',
-  })
+      try {
+        await fetchDataNoLoader(reportType, setState)
+      } finally {
+        activeRequestsRef.current -= 1
+        if (activeRequestsRef.current <= 0 && isMountedRef.current) {
+          activeRequestsRef.current = 0
+          setLoading(false)
+        }
+      }
+    }, delayMs)
 
-  const colsMcuWithInRange = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'MCU WITHIN RANGE',
-  })
-
-  const colsMcuRange = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'MCU RANGE',
-  })
-
-  const colsAvgAnnualNorms = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'AVG ANNUAL NORMS',
-  })
-  const colsConsecutiveDays = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'CONSECUTIVE DAYS',
-  })
-  const colsMiisNormsRawData = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'MIIS NORMS RAW DATA',
-  })
-  const colsBestAchivedNorms = getKendoNormsHistorianBasisPe({
-    headerMap,
-    type: 'BEST ACHIEVED NORMS',
-  })
+    timeoutIdsRef.current.push(id)
+  }
 
   useEffect(() => {
-    fetchData('RAW MCU', setRowsRawMcu)
-    fetchData('MCU WITHIN RANGE', setRowsMcuWithInRange)
-    fetchData('MCU RANGE', setRowsMcuRange)
-    fetchData('AVG ANNUAL NORMS', setRowsAvgAnnualNorms)
-    fetchData('CONSECUTIVE DAYS', setRowsConsecutiveDays)
-    fetchData('MIIS NORMS RAW DATA', setRowsMiisNormsRawData)
-    fetchData('BEST ACHIEVED NORMS', setRowsBestAchivedNorms)
+    timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+    timeoutIdsRef.current = []
+
+    const yearNow = localStorage.getItem('year')
+    const headerMap = generateHeaderNames(yearNow)
+
+    const reports = [
+      { name: 'RAW MCU', setter: setRawMcuData },
+      { name: 'MCU WITHIN RANGE', setter: setMcuWithInRangeData },
+      { name: 'MCU RANGE', setter: setMcuRangeData },
+      { name: 'AVG ANNUAL NORMS', setter: setAvgAnnualNormsData },
+      { name: 'CONSECUTIVE DAYS', setter: setConsecutiveDaysData },
+      { name: 'MIIS NORMS RAW DATA', setter: setMiisNormsRawData },
+      { name: 'BEST ACHIEVED NORMS', setter: setBestAchievedNormsData },
+    ]
+
+    reports.forEach((r, idx) => {
+      const delay = idx * CALL_DELAY_MS
+      scheduleAndRunFetch(r.name, r.setter, delay)
+    })
+
+    return () => {
+      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+      timeoutIdsRef.current = []
+    }
   }, [plantID, oldYear, yearChanged, keycloak])
 
   const exportRef1 = useRef(null)
@@ -215,6 +245,49 @@ const ProductionVolumeDataBasisPe = () => {
     .split('.')[0]
   const fileName = `Norms Historian Data Basis ${currentDateTime}.xlsx`
 
+  // define this just above the return() in your component
+  const reports = [
+    { key: 'RAW_MCU', title: 'Raw MCU', data: rawMcuData, ref: exportRef1 },
+    {
+      key: 'MCU_WITHIN_RANGE',
+      title: 'MCU within Range',
+      data: mcuWithInRangeData,
+      ref: exportRef2,
+    },
+    {
+      key: 'MCU_RANGE',
+      title: 'MCU Range',
+      data: mcuRangeData,
+      ref: exportRef3,
+    },
+    {
+      key: 'CONSECUTIVE_DAYS',
+      title: 'CONSECUTIVE DAYS',
+      data: consecutiveDaysData,
+      ref: exportRef5,
+    },
+    {
+      key: 'MIIS_NORMS_RAW',
+      title: 'MIIS NORMS RAW DATA',
+      data: miisNormsRawData,
+      ref: exportRef6,
+    },
+    {
+      key: 'AVG_ANNUAL',
+      title: 'AVG NORMS',
+      data: avgAnnualNormsData,
+      ref: exportRef4,
+    },
+    {
+      key: 'BEST_ACHIEVED',
+      title: 'BEST ACHIEVED NORMS',
+      data: bestAchievedNormsData,
+      ref: exportRef7,
+    },
+  ]
+
+  /* ---------- Then in JSX replace the repeated parts with: ---------- */
+
   return (
     <div>
       <Backdrop
@@ -224,73 +297,24 @@ const ProductionVolumeDataBasisPe = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Export hidden ExcelExport instances */}
+      {/* Export hidden ExcelExport instances (generated) */}
       <div style={{ display: 'none' }}>
-        <ExcelExport data={rowsRawMcu} ref={exportRef1} fileName={fileName}>
-          {colsRawMcu.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsMcuWithInRange} ref={exportRef2}>
-          {colsMcuWithInRange.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-
-        <ExcelExport data={rowsMcuRange} ref={exportRef3}>
-          {colsMcuRange.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-        <ExcelExport data={rowsAvgAnnualNorms} ref={exportRef4}>
-          {colsAvgAnnualNorms.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-        <ExcelExport data={rowsConsecutiveDays} ref={exportRef5}>
-          {colsConsecutiveDays.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-        <ExcelExport data={rowsMiisNormsRawData} ref={exportRef6}>
-          {colsMiisNormsRawData.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
-        <ExcelExport data={rowsBestAchivedNorms} ref={exportRef7}>
-          {colsBestAchivedNorms.map((col) => (
-            <ExcelExportColumn
-              key={col.field}
-              field={col.field}
-              title={col.title}
-            />
-          ))}
-        </ExcelExport>
+        {reports.map((r) => (
+          <ExcelExport
+            key={r.key}
+            data={r.data.rows}
+            ref={r.ref}
+            fileName={fileName}
+          >
+            {(r.data.columns || []).map((col) => (
+              <ExcelExportColumn
+                key={col.field}
+                field={col.field}
+                title={col.title}
+              />
+            ))}
+          </ExcelExport>
+        ))}
       </div>
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
@@ -304,158 +328,29 @@ const ProductionVolumeDataBasisPe = () => {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Raw MCU
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsRawMcu}
-                  columns={colsRawMcu}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                MCU within Range
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsMcuWithInRange}
-                  columns={colsMcuWithInRange}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                MCU Range
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsMcuRange}
-                  columns={colsMcuRange}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                CONSECUTIVE DAYS
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsConsecutiveDays}
-                  columns={colsConsecutiveDays}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                MIIS NORMS RAW DATA
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsMiisNormsRawData}
-                  columns={colsMiisNormsRawData}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                AVG NORMS
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsAvgAnnualNorms}
-                  columns={colsAvgAnnualNorms}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
-
-        <div>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                BEST ACHIEVED NORMS
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid
-                  rows={rowsBestAchivedNorms}
-                  columns={colsBestAchivedNorms}
-                  permissions={{ allAction: false }}
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </div>
+        {reports.map((r) => (
+          <div key={r.key}>
+            <CustomAccordion defaultExpanded disableGutters>
+              <CustomAccordionSummary
+                aria-controls='meg-grid-content'
+                id='meg-grid-header'
+              >
+                <Typography component='span' className='grid-title'>
+                  {r.title}
+                </Typography>
+              </CustomAccordionSummary>
+              <CustomAccordionDetails>
+                <Box sx={{ width: '100%', margin: 0 }}>
+                  <KendoDataGrid
+                    rows={r.data.rows}
+                    columns={r.data.columns}
+                    permissions={{ allAction: false }}
+                  />
+                </Box>
+              </CustomAccordionDetails>
+            </CustomAccordion>
+          </div>
+        ))}
       </Box>
     </div>
   )

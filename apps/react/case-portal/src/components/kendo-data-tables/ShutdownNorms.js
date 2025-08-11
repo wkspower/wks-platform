@@ -288,7 +288,7 @@ const ShutdownNorms = () => {
 
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `Shutdown Norms Saved Successfully!`,
+          message: `Data Saved Successfully!`,
           severity: 'success',
         })
         setModifiedCells({})
@@ -301,19 +301,18 @@ const ShutdownNorms = () => {
         setLoading(false)
         setCalculatebtnClicked(false)
 
-        // fetchData()
         return response
       } else {
         setSnackbarOpen(true)
         setLoading(false)
         setSnackbarData({
-          message: `Shutdown Norms not saved!`,
+          message: `Data not saved!`,
           severity: 'error',
         })
         setCalculatebtnClicked(false)
       }
     } catch (error) {
-      console.error(`Error saving Shutdown Norms`, error)
+      console.error(`Error saving Data`, error)
       setLoading(false)
     } finally {
       fetchData()
@@ -322,49 +321,62 @@ const ShutdownNorms = () => {
     }
   }
 
+  const [calculationObject, setCalculationObject] = useState([])
+
   const fetchData = async () => {
     try {
       setLoading(true)
       setRows([])
       const data = await DataService.getShutdownNormsData(keycloak)
+
+      if (data?.code != 200) {
+        setRows([])
+        setLoading(false)
+        return
+      }
+
+      setCalculationObject(data?.data?.aopCalculation)
+
       const isTPD = selectedUnit === 'TPD'
 
-      const formattedData = data.map((item, index) => {
-        const baseItem = {
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          remarks: item?.remarks?.trim() || null,
-          originalRemark: item?.remarks?.trim(),
-          materialFkId: item?.materialFkId?.toLowerCase(),
-          Particulars: item.normParameterTypeDisplayName || 'By Products',
-          isEditable: true,
-        }
+      const formattedData = data?.data?.mcuNormsValueDTOList?.map(
+        (item, index) => {
+          const baseItem = {
+            ...item,
+            idFromApi: item.id,
+            id: index,
+            remarks: item?.remarks?.trim() || null,
+            originalRemark: item?.remarks?.trim(),
+            materialFkId: item?.materialFkId?.toLowerCase(),
+            Particulars: item.normParameterTypeDisplayName || 'By Products',
+            isEditable: true,
+          }
 
-        if (isTPD) {
-          const months = [
-            'april',
-            'may',
-            'june',
-            'july',
-            'august',
-            'september',
-            'october',
-            'november',
-            'december',
-            'january',
-            'february',
-            'march',
-          ]
+          if (isTPD) {
+            const months = [
+              'april',
+              'may',
+              'june',
+              'july',
+              'august',
+              'september',
+              'october',
+              'november',
+              'december',
+              'january',
+              'february',
+              'march',
+            ]
 
-          months.forEach((month) => {
-            const value = item[month]
-            baseItem[month] = value ? (value / 24).toFixed(2) : value || null
-          })
-        }
+            months.forEach((month) => {
+              const value = item[month]
+              baseItem[month] = value ? (value / 24).toFixed(2) : value || null
+            })
+          }
 
-        return baseItem
-      })
+          return baseItem
+        },
+      )
 
       setRows(formattedData)
       setLoading(false)
@@ -394,50 +406,24 @@ const ShutdownNorms = () => {
       }
 
       var plantId = plantId
-      const data = await DataService.handleCalculateShutdownNorms(
+      const responce = await DataService.handleCalculateShutdownNorms(
         plantId,
         year,
         keycloak,
       )
 
-      if (data) {
-        const groupedRows = []
-        const groups = new Map()
-        let groupId = 0
-
-        data.forEach((item) => {
-          const groupKey = item.normParameterTypeDisplayName
-
-          if (!groups.has(groupKey)) {
-            groups.set(groupKey, [])
-            groupedRows.push({
-              id: groupId++,
-              Particulars: groupKey,
-              isGroupHeader: true,
-            })
-          }
-          const formattedItem = {
-            ...item,
-            idFromApi: item.id,
-            // NormParametersId: item.materialFkId.toLowerCase(),
-            materialFkId: item?.materialFkId.toLowerCase(),
-            id: groupId++,
-            remarks: item?.remarks?.trim() || null,
-          }
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Data refreshed successfully!',
-            severity: 'success',
-          })
-
-          groups.get(groupKey).push(formattedItem)
-          groupedRows.push(formattedItem)
+      if (responce?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
         })
-
-        setRows(groupedRows)
-        // dispatch(setIsBlocked(true))
         setLoading(false)
-      } else {
+        fetchData()
+      }
+
+      // dispatch(setIsBlocked(true))
+      else {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data Refresh Falied!',
@@ -445,8 +431,6 @@ const ShutdownNorms = () => {
         })
         setLoading(false)
       }
-
-      return data
     } catch (error) {
       console.error('Error saving refresh data:', error)
       setLoading(false)
@@ -490,6 +474,11 @@ const ShutdownNorms = () => {
       saveWithRemark: false,
       saveBtn: true,
       showCalculate: lowerVertName == 'meg' ? false : true,
+      showCalculateVisibility:
+        lowerVertName != 'meg' &&
+        Object.keys(calculationObject || {}).length > 0
+          ? true
+          : false,
       // noColor: true,
       allAction: true,
       downloadExcelBtnFromUI: true,
@@ -497,13 +486,7 @@ const ShutdownNorms = () => {
     },
     isOldYear,
   )
-  const NormParameterIdCell = (props) => {
-    const productId = props.dataItem.materialFkId
-    const product = allProducts.find((p) => p.id === productId)
-    const displayName = product?.displayName || ''
-    // console.log(displayName)
-    return <td>{displayName}</td>
-  }
+
   return (
     <div>
       <Backdrop
@@ -513,7 +496,6 @@ const ShutdownNorms = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
-        NormParameterIdCell={NormParameterIdCell}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         isCellEditable={isCellEditable}
@@ -548,17 +530,6 @@ const ShutdownNorms = () => {
         handleRemarkCellClick={handleRemarkCellClick}
         handleCalculate={handleCalculate}
         groupBy='Particulars'
-        // permissions={{
-        //   showAction: false,
-        //   addButton: false,
-        //   deleteButton: false,
-        //   editButton: false,
-        //   showUnit: false,
-        //   units: ['TPH', 'TPD'],
-        //   saveWithRemark: false,
-        //   saveBtn: true,
-        //   showCalculate: lowerVertName == 'meg' ? false : true,
-        // }}
         permissions={adjustedPermissions}
       />
     </div>

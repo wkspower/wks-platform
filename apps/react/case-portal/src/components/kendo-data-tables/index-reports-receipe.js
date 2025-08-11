@@ -142,6 +142,15 @@ const KendoDataTablesReciepe = ({
   const [sort, setSort] = useState([]) // or
   const [issRowEdited, setIsRowEdited] = useState(false)
 
+  const initialGroup = groupBy
+    ? [
+        {
+          field: groupBy,
+          dir: undefined,
+        },
+      ]
+    : []
+
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
     // }
@@ -543,6 +552,7 @@ const KendoDataTablesReciepe = ({
             sortable={{
               mode: 'multiple',
             }}
+            defaultGroup={initialGroup}
             autoProcessData={true}
             dataItemKey='id'
             editField='inEdit'

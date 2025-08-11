@@ -22,23 +22,12 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import getKendoNormsHistorianBasisPe from '../CommonHeader/KendoNormsHistorianBasisPe'
-
-// Constants
-
-const MONTH_NAMES = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-]
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
+import moment from 'moment'
 
 const REPORT_TYPES = {
   RAW_MCU: 'RAW MCU',
@@ -47,39 +36,11 @@ const REPORT_TYPES = {
   PRODUCTION_VOLUME_BASIS: 'PRODUCTION VOLUME BASIS',
 }
 
-// Styled Components
-const CustomAccordion = styled(Accordion)({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-})
-
-const CustomAccordionSummary = styled(AccordionSummary)({
-  backgroundColor: '#fff',
-  padding: '0px 12px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-})
-
-const CustomAccordionDetails = styled(AccordionDetails)({
-  padding: '0px 0px 12px',
-  backgroundColor: '#F2F3F8',
-})
-
-// Utility Functions
 const parseDDMMYYYY = (dateStr) => {
   if (!dateStr) return null
   const [day, month, year] = dateStr.split('-')
   return new Date(`${year}-${month}-${day}`)
 }
-
-const getMonthName = (monthNo) => MONTH_NAMES[monthNo - 1] || monthNo
 
 const formatCurrentDateTime = () => {
   return new Date()
@@ -89,7 +50,6 @@ const formatCurrentDateTime = () => {
     .split('.')[0]
 }
 
-// Custom Hook for Data Management
 const useDataState = () => {
   const [state, setState] = useState({
     rowsRawMcu: [],
@@ -161,8 +121,7 @@ const ProductionVolumeDataBasisPe = () => {
   }
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = useMemo(
@@ -172,40 +131,27 @@ const ProductionVolumeDataBasisPe = () => {
   const isOldYear = useMemo(() => oldYear?.oldYear === 1, [oldYear])
   const year = useMemo(
     () => localStorage.getItem('year'),
-    [sitePlantChange, yearChanged],
+    [plantID, yearChanged],
   )
   const headerMap = useMemo(() => generateHeaderNames(year), [year])
 
-  const columns = useMemo(
-    () => ({
-      rawMcu: getKendoNormsHistorianBasisPe({
-        headerMap,
-        type: REPORT_TYPES.RAW_MCU,
-      }),
-      mcuWithinRange: getKendoNormsHistorianBasisPe({
-        headerMap,
-        type: REPORT_TYPES.MCU_WITHIN_RANGE,
-      }),
-      mcuRange: getKendoNormsHistorianBasisPe({
-        headerMap,
-        type: REPORT_TYPES.MCU_RANGE,
-      }),
-      productionVolume: getKendoNormsHistorianBasisPe({
-        headerMap,
-        type: REPORT_TYPES.PRODUCTION_VOLUME_BASIS,
-      }),
-    }),
-    [headerMap],
-  )
+  // const columns = useMemo(
+  //   () => ({
 
-  const formattedProductionVolDataBasis = useMemo(
-    () =>
-      data.rowsProductionVolDataBasis.map((row) => ({
-        ...row,
-        monthNumber: getMonthName(row.monthNumber),
-      })),
-    [data.rowsProductionVolDataBasis],
-  )
+  //     rawMcu :
+  //     mcuWithinRange :
+  //     mcuRange  :
+  //     productionVolume :
+  //   }),
+  //   [headerMap],
+  // )
+
+  const [columnsMap, setColumnsMap] = useState({
+    [REPORT_TYPES.RAW_MCU]: [],
+    [REPORT_TYPES.MCU_WITHIN_RANGE]: [],
+    [REPORT_TYPES.MCU_RANGE]: [],
+    [REPORT_TYPES.PRODUCTION_VOLUME_BASIS]: [],
+  })
 
   const fetchData = useCallback(
     async (reportType, StartDate, EndDate) => {
@@ -218,15 +164,65 @@ const ProductionVolumeDataBasisPe = () => {
         )
 
         if (result?.code === 200) {
-          const rowsWithId = result.data.map((item, index) => ({
-            ...item,
-            id: index,
-            isEditable: false,
-            startDate: item?.startDate ? parseDDMMYYYY(item.startDate) : null,
-            endDate: item?.endDate ? parseDDMMYYYY(item.endDate) : null,
-            dateTime: item?.dateTime ? parseDDMMYYYY(item.dateTime) : null,
-            mcuDate: item?.mcuDate ? parseDDMMYYYY(item.mcuDate) : null,
+          const backendCols = result.data.columns || []
+
+          // Enrich backend columns with UI props
+          const enrichedCols = backendCols.map((col) => {
+            const isTextCol = col.type === 'string'
+            const isNumberCol = col.type === 'number'
+            const isDateCol = col.type === 'date'
+
+            return {
+              ...col,
+              filterable: true,
+              filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+              align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+              ...(isNumberCol ? { format: '{0:#.###}' } : {}),
+              editable: false,
+              isRightAlligned: isNumberCol ? 'numeric' : undefined,
+            }
+          })
+
+          setColumnsMap((prev) => ({
+            ...prev,
+            [reportType]: enrichedCols,
           }))
+
+          // Detect fields by type
+          const dateFields = enrichedCols
+            .filter((col) => col.type === 'date')
+            .map((col) => col.field)
+
+          const numberFields = enrichedCols
+            .filter((col) => col.type === 'number')
+            .map((col) => col.field)
+
+          // Parse rows
+          const rowsWithId = (result.data.data || []).map((item, index) => {
+            let parsedItem = { ...item }
+
+            // Date parsing
+            dateFields.forEach((field) => {
+              parsedItem[field] = item?.[field]
+                ? parseDDMMYYYY(item[field])
+                : null
+            })
+
+            // Number parsing
+            numberFields.forEach((field) => {
+              parsedItem[field] =
+                item?.[field] !== undefined && item?.[field] !== null
+                  ? Number(item[field])
+                  : null
+            })
+
+            return {
+              ...parsedItem,
+              id: index,
+              isEditable: false,
+            }
+          })
+
           return rowsWithId
         } else {
           console.error(`Error fetching ${reportType} data`)
@@ -257,11 +253,17 @@ const ProductionVolumeDataBasisPe = () => {
         )?.AttributeValue
 
         if (!StartDate || !EndDate) {
-          updateData({ loading: false })
+          updateData({
+            loading: false,
+            rowsRawMcu: [],
+            rowsMcuWithInRange: [],
+            rowsMcuRange: [],
+            rowsProductionVolDataBasis: [],
+          })
           return
         }
-        // Fetch all data in parallel
 
+        // Fetch all datasets in parallel
         const [
           rawMcuData,
           mcuWithinRangeData,
@@ -312,7 +314,7 @@ const ProductionVolumeDataBasisPe = () => {
   // Effects
   useEffect(() => {
     fetchAllData()
-  }, [fetchAllData, sitePlantChange, oldYear, yearChanged, lowerVertName])
+  }, [fetchAllData, plantID, oldYear, yearChanged, lowerVertName])
 
   // Memoized filename
   const fileName = useMemo(
@@ -333,23 +335,23 @@ const ProductionVolumeDataBasisPe = () => {
       <div style={{ display: 'none' }}>
         <ExcelExportComponent
           data={data.rowsRawMcu}
-          columns={columns.rawMcu}
+          columns={columnsMap[REPORT_TYPES.RAW_MCU]}
           exportRef={exportRefs.rawMcu}
           fileName={fileName}
         />
         <ExcelExportComponent
           data={data.rowsMcuWithInRange}
-          columns={columns.mcuWithinRange}
+          columns={columnsMap[REPORT_TYPES.MCU_WITHIN_RANGE]}
           exportRef={exportRefs.mcuWithinRange}
         />
         <ExcelExportComponent
           data={data.rowsMcuRange}
-          columns={columns.mcuRange}
+          columns={columnsMap[REPORT_TYPES.MCU_RANGE]}
           exportRef={exportRefs.mcuRange}
         />
         <ExcelExportComponent
           data={data.rowsProductionVolDataBasis}
-          columns={columns.productionVolume}
+          columns={columnsMap[REPORT_TYPES.PRODUCTION_VOLUME_BASIS]}
           exportRef={exportRefs.productionVolume}
         />
       </div>
@@ -372,25 +374,25 @@ const ProductionVolumeDataBasisPe = () => {
         <DataAccordion
           title='Raw MCU'
           rows={data.rowsRawMcu}
-          columns={columns.rawMcu}
+          columns={columnsMap[REPORT_TYPES.RAW_MCU]}
         />
 
         <DataAccordion
           title='MCU within Range'
           rows={data.rowsMcuWithInRange}
-          columns={columns.mcuWithinRange}
+          columns={columnsMap[REPORT_TYPES.MCU_WITHIN_RANGE]}
         />
 
         <DataAccordion
           title='MCU Range'
           rows={data.rowsMcuRange}
-          columns={columns.mcuRange}
+          columns={columnsMap[REPORT_TYPES.MCU_RANGE]}
         />
 
         <DataAccordion
           title='Production Volume Basis'
-          rows={formattedProductionVolDataBasis}
-          columns={columns.productionVolume}
+          rows={data.rowsProductionVolDataBasis}
+          columns={columnsMap[REPORT_TYPES.PRODUCTION_VOLUME_BASIS]}
         />
       </Box>
     </div>

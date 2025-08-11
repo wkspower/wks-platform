@@ -46,7 +46,6 @@ const isRouteIdAllowed = (menu, routeId) => {
 
 const PrivateRoute = ({ children, routeId }) => {
   const filteredMenu = useFilteredMenu()
-  console.log('🚀 ~ PrivateRoute ~ filteredMenu:', filteredMenu)
   if (isRouteIdAllowed(filteredMenu, routeId)) {
     return children
   }

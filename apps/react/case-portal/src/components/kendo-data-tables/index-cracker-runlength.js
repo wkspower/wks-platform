@@ -720,7 +720,7 @@ const KendoDataTablesCrackerRunLength = ({
         pageSizes: [10, 50, 100, 366],
       }}
     >
-      {columns.map((col) => {
+      {columns?.map((col) => {
         const isActive = isColumnActive(col.field, filter, sort)
 
         if (

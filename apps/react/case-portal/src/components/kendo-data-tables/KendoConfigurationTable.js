@@ -26,31 +26,12 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import SelectivityData from './SelectivityData'
-const CustomAccordion = styled((props) => (
-  <MuiAccordion disableGutters elevation={0} square {...props} />
-))(() => ({
-  position: 'unset',
-  border: 'none',
-  boxShadow: 'none',
-  margin: '0px',
-  '&:before': {
-    display: 'none',
-  },
-}))
-const CustomAccordionSummary = styled((props) => (
-  <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
-))(() => ({
-  backgroundColor: '#fff',
-  padding: '0px 0px',
-  minHeight: '40px',
-  '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
-  },
-}))
-const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
-  padding: '0px 0px 0px',
-  backgroundColor: '#F2F3F8',
-}))
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
+
 const ConfigurationTable = () => {
   const year = localStorage.getItem('year')
   const hasExecutedRef = useRef(false)
@@ -263,6 +244,9 @@ const ConfigurationTable = () => {
       const formattedData = data?.map((item, index) => ({
         ...item,
         id: index,
+        TypeDisplayName: item?.TypeDisplayName
+          ? item?.TypeDisplayName
+          : 'Recipe',
       }))
       setGradeData(formattedData)
       setLoading(false)
@@ -1021,6 +1005,7 @@ const ConfigurationTable = () => {
                     fetchData={fetchGradeData}
                     setRows={setGradeData}
                     configType='grades'
+                    groupBy='TypeDisplayName'
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}

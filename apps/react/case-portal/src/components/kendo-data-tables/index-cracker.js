@@ -353,7 +353,7 @@ const KendoDataTablesCracker = ({
       allRedCell={allRedCell}
       size='small'
     >
-      {columns.map((col) => {
+      {columns?.map((col) => {
         const isActive = isColumnActive(col?.field, filter, sort)
         if (dateFields.includes(col.field)) {
           return (
