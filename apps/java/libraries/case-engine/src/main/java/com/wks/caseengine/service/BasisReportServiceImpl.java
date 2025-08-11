@@ -2,12 +2,18 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.Session;
+
+import java.sql.*;
 
 import com.wks.caseengine.dto.BasisReportDTO;
 import com.wks.caseengine.entity.Plants;
@@ -18,9 +24,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+
 
 @Service
 public class BasisReportServiceImpl implements BasisReportService {
@@ -41,100 +45,34 @@ public class BasisReportServiceImpl implements BasisReportService {
 	public AOPMessageVM getNormBasisReportForPE(String plantId, String aopYear, String type, String periodFrom,
 			String periodTo) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, Object>> normBasisList = new ArrayList<>();
 		try {
 
 			List<Object[]> obj = getReportDataForPE(plantId, aopYear, type, periodFrom, periodTo);
-			for (Object[] row : obj) {
-				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+			
+            // Get column names
+            
+            List<String> columnNames = getColumnNames(plantId, aopYear, type, periodFrom, periodTo);
+            
+            
+            
+            List<Map<String, Object>> resultList = new ArrayList<>();
 
-				if (type.equalsIgnoreCase("BEST ACHIEVED NORMS")) {
+            for (Object[] row : obj) {
+                Map<String, Object> rowMap = new LinkedHashMap<>();
+                for (int i = 0; i < columnNames.size(); i++) {
+                    rowMap.put(columnNames.get(i), row[i]);
+                }
+                resultList.add(rowMap);
+            }
+            
+            Map<String, Object> data = new HashMap<>();
+            data.put("data", resultList);
+            data.put("columns", getColumnMetadata(plantId, aopYear, type, periodFrom, periodTo));
 
-					map.put("account", row[0]);
-					map.put("uom", row[1]);
-					map.put("material", row[2]);
-					map.put("grade", row[3]);
-					map.put("january", row[4]);
-					map.put("february", row[5]);
-					map.put("march", row[6]);
-					map.put("april", row[7]);
-					map.put("may", row[8]);
-					map.put("june", row[9]);
-					map.put("july", row[10]);
-					map.put("august", row[11]);
-					map.put("september", row[12]);
-					map.put("october", row[13]);
-					map.put("november", row[14]);
-					map.put("december", row[15]);
-					normBasisList.add(map); // Add the map to the list here
-
-				}
-				if (type.equalsIgnoreCase("RAW MCU")) {
-					map.put("gradeCode", row[0]);
-					map.put("gradeMaxCap", row[1]);
-					map.put("mcuDate", row[2]);
-					map.put("gradeACTProd", row[3]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-				if (type.equalsIgnoreCase("MCU RANGE")) {
-					map.put("gradeCode", row[0]);
-					map.put("gradeMaxCap", row[1]);
-					map.put("year", row[2]);
-					map.put("highRange", row[3]);
-					map.put("lowRange", row[4]);
-					map.put("lowerLimitPercent", row[5]);
-					map.put("upperLimitPercent", row[6]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-				if (type.equalsIgnoreCase("MCU WITHIN RANGE")) {
-					map.put("grade", row[0]);
-					map.put("gradeMaxCap", row[1]);
-					map.put("dateTime", row[2]);
-					map.put("gradeACTProd", row[3]);
-					map.put("highRange", row[4]);
-					map.put("lowRange", row[5]);
-					map.put("year", row[6]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-				if (type.equalsIgnoreCase("MIIS NORMS RAW DATA")) {
-					map.put("material", row[0]);
-					map.put("grade", row[1]);
-					map.put("account", row[2]);
-					map.put("uom", row[3]);
-					map.put("actualQty", row[4]);
-					map.put("dateTime", row[5]);
-					map.put("contributionType", row[6]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-				if (type.equalsIgnoreCase("CONSECUTIVE DAYS")) {
-					map.put("noOfConsecutiveDays", row[0]);
-					map.put("grade", row[1]);
-					map.put("dateTime", row[2]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-				if (type.equalsIgnoreCase("AVG ANNUAL NORMS")) {
-					map.put("account", row[0]);
-					map.put("grade", row[1]);
-					map.put("material", row[2]);
-					map.put("avgFinalNorms", row[3]);
-					map.put("year", row[4]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-				if (type.equalsIgnoreCase("PRODUCTION VOLUME BASIS")) {
-					map.put("productName", row[0]);
-					map.put("aopYear", row[1]);
-					map.put("monthNumber", row[2]);
-					map.put("operatingHrs", row[3]);
-					map.put("avgMCU", row[4]);
-					map.put("monthlyBudgetedProduction", row[5]);
-					map.put("demand", row[6]);
-					map.put("productionValue", row[7]);
-					normBasisList.add(map); // Add the map to the list here
-				}
-			}
+			
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("SP Executed successfully");
-			aopMessageVM.setData(normBasisList);
+			aopMessageVM.setData(data);
 			return aopMessageVM;
 
 		} catch (Exception e) {
@@ -172,6 +110,115 @@ public class BasisReportServiceImpl implements BasisReportService {
 
 		return query.getResultList();
 	}
+	
+	public List<String> getColumnNames(String plantId, String aopYear, String reportType, String PeriodFrom,
+			String PeriodTo) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<String> columnNames = new ArrayList<>();
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			UUID siteId = site.getId();
+			UUID verticalId = vertical.getId();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
+	        String sql = "EXEC " + storedProcedure + " @plantId = ?, @aopYear = ?, @Type = ?, @PeriodFrom = ?, @PeriodTo = ?, @siteId = ?, @verticalId = ?";
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setString(1, plantId);
+	            ps.setString(2, aopYear);
+	            ps.setString(3, reportType);
+	            ps.setString(4, PeriodFrom);
+	            ps.setString(5, PeriodTo);
+	            ps.setString(6, siteId.toString());
+	            ps.setString(7, verticalId.toString());
+	            
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData rsMetaData = rs.getMetaData();
+	                for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                    columnNames.add(rsMetaData.getColumnLabel(i));
+	                }
+	            }
+	        }
+	        return columnNames;
+	    });
+	}
+	
+	public List<Map<String, Object>> getColumnMetadata(String plantId, String aopYear, String reportType, String PeriodFrom,
+	        String PeriodTo) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<Map<String, Object>> columnMetadata = new ArrayList<>();
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	        Sites site = siteRepository.findById(plant.getSiteFkId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+	        UUID siteId = site.getId();
+	        UUID verticalId = vertical.getId();
+	        String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
+	        String sql = "EXEC " + storedProcedure + " @plantId = ?, @aopYear = ?, @Type = ?, @PeriodFrom = ?, @PeriodTo = ?, @siteId = ?, @verticalId = ?";
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setString(1, plantId);
+	            ps.setString(2, aopYear);
+	            ps.setString(3, reportType);
+	            ps.setString(4, PeriodFrom);
+	            ps.setString(5, PeriodTo);
+	            ps.setString(6, siteId.toString());
+	            ps.setString(7, verticalId.toString());
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData rsMetaData = rs.getMetaData();
+	                for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                    Map<String, Object> columnInfo = new HashMap<>();
+	                    String columnName = rsMetaData.getColumnLabel(i);
+	                    String columnType = rsMetaData.getColumnTypeName(i);
+
+	                    columnInfo.put("field", columnName);
+	                    columnInfo.put("title", formatTitle(columnName));
+	                    columnInfo.put("editable", false);
+	                    columnInfo.put("type", getFrontendType(columnType));
+	                    columnMetadata.add(columnInfo);
+	                }
+	            }
+	        }
+	        return columnMetadata;
+	    });
+	}
+
+	// Helper method to format column titles
+	private String formatTitle(String columnName) {
+	    return columnName.replace("_", " ");
+	}
+
+	// Helper method to map SQL data types to frontend types
+	private String getFrontendType(String sqlTypeName) {
+	    switch (sqlTypeName.toUpperCase()) {
+	        case "VARCHAR":
+	        case "NVARCHAR":
+	        case "CHAR":
+	            return "string";
+	        case "INT":
+	        case "TINYINT":
+	        case "BIGINT":
+	        case "SMALLINT":
+	        case "DECIMAL":
+	        case "FLOAT":
+	        case "DOUBLE":
+	        case "NUMERIC":
+	            return "number";
+	        case "DATE":
+	        case "DATETIME":
+	        case "DATETIME2":
+	            return "date";
+	        default:
+	            return "string";
+	    }
+	}
+
 
 	public List<Object[]> getReportDataForCracker(String plantId, String aopYear, String Type, String mode) {
 
