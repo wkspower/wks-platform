@@ -727,6 +727,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList,String mode) {
 		try {
 			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString(), "",mode);
+			List<Boolean> isEditable = new ArrayList<>();
 
 			if (!isAfterSave) {
 				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
@@ -740,6 +741,15 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			// List<List<Object>> rows = new ArrayList<>();
 
 			List<List<Object>> rows = new ArrayList<>();
+			
+			// Create styles for locking/unlocking cells
+			CellStyle lockedStyle = workbook.createCellStyle();
+			lockedStyle.setLocked(true);
+			lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+			CellStyle unlockedStyle = workbook.createCellStyle();
+			unlockedStyle.setLocked(false);
 			// Data rows
 			for (MCUNormsValueDTO dto : dtoList) {
 				//if (isAfterSave) {
@@ -761,8 +771,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					list.add(dto.getMarch());
 					list.add(dto.getRemarks());
 					list.add(dto.getId());
+					isEditable.add(dto.getIsEditable());
 					// list.add(dto.getMaterialFkId());
-					// list.add(dto.getIsEditable());
+					 //list.add(dto.getIsEditable());
 					if (isAfterSave) {
 						list.add(dto.getSaveStatus());
 						list.add(dto.getErrDescription());
@@ -780,7 +791,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			innerHeaders.add("Remarks");
 			innerHeaders.add("Id");
 			// innerHeaders.add("NormParamterId");
-			// innerHeaders.add("IsEditable");
+			 //innerHeaders.add("IsEditable");
 			if (isAfterSave) {
 				innerHeaders.add("Status");
 				innerHeaders.add("Error Description");
@@ -797,6 +808,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				}
 			}
 			for (List<Object> rowData : rows) {
+				boolean isRowEditable = isEditable.get(currentRow-1);
 				Row row = sheet.createRow(currentRow++);
 				for (int col = 0; col < rowData.size(); col++) {
 					Cell cell = row.createCell(col);
@@ -811,11 +823,15 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					} else {
 						cell.setCellValue("");
 					}
+					if (isRowEditable) {
+                        cell.setCellStyle(unlockedStyle);
+                    } else {
+                        cell.setCellStyle(lockedStyle);
+                    }
 
 				}
 			}
 			sheet.setColumnHidden(16, true);
-			//sheet.setColumnHidden(17, true);
 			//sheet.setColumnHidden(18, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 

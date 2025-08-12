@@ -116,6 +116,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				dtoList = getConfigurationData(year, plantFKId);
 			}
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
+			List<Boolean> isEditable = new ArrayList<>();
 
 			Workbook workbook = new XSSFWorkbook();
 			CellStyle borderStyle = createBorderedStyle(workbook);
@@ -125,6 +126,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			// List<List<Object>> rows = new ArrayList<>();
 
 			List<List<Object>> rows = new ArrayList<>();
+			CellStyle lockedStyle = workbook.createCellStyle();
+			lockedStyle.setLocked(true);
+			lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+			CellStyle unlockedStyle = workbook.createCellStyle();
+			unlockedStyle.setLocked(false);
+			sheet.setDefaultColumnStyle(1, unlockedStyle);
 			// Data rows
 			for (ConfigurationDTO dto : dtoList) {
 				 if(dto.getConfigTypeName()!=null && dto.getConfigTypeName().equalsIgnoreCase("ShutdownNorms")) {
@@ -153,6 +162,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					list.add(dto.getMar());
 					list.add(dto.getRemarks());
 					list.add(dto.getNormParameterFKId());
+					isEditable.add(dto.getIsEditable());
+					//list.add(dto.getIsEditable());
 					if (isAfterSave) {
 						list.add(dto.getSaveStatus());
 						list.add(dto.getErrDescription());
@@ -173,6 +184,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.addAll(monthsList);
 			innerHeaders.add("Remarks");
 			innerHeaders.add("NormParameterId");
+			//innerHeaders.add("IsEditable");
+			
 			if (isAfterSave) {
 				innerHeaders.add("Status");
 				innerHeaders.add("Error Description");
@@ -183,6 +196,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 			for (List<String> headerRowData : headers) {
 				Row headerRow = sheet.createRow(currentRow++);
+				
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
@@ -190,6 +204,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 			}
 			for (List<Object> rowData : rows) {
+				boolean isRowEditable = isEditable.get(currentRow-1);
 				Row row = sheet.createRow(currentRow++);
 				for (int col = 0; col < rowData.size(); col++) {
 					Cell cell = row.createCell(col);
@@ -204,9 +219,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					} else {
 						cell.setCellValue("");
 					}
+					if (isRowEditable) {
+                        cell.setCellStyle(unlockedStyle);
+                    } else {
+                        cell.setCellStyle(lockedStyle);
+                    }
 
 				}
 			}
+			
 			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
 				sheet.setColumnHidden(16, true);
 			}else {
