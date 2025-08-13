@@ -204,7 +204,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 			}
 			for (List<Object> rowData : rows) {
-				boolean isRowEditable = isEditable.get(currentRow-1);
+				boolean isRowEditable=true;
+				if(isEditable.get(currentRow-1)!=null) {
+					isRowEditable= isEditable.get(currentRow-1);
+				}
+					 
 				Row row = sheet.createRow(currentRow++);
 				for (int col = 0; col < rowData.size(); col++) {
 					Cell cell = row.createCell(col);
