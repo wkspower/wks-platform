@@ -366,17 +366,27 @@ const KendoDataTablesReports = ({
 
   const renderColumns = (cols, filter, sort) =>
     cols.map((col, idx) => {
+      const isEditable = col.editable === true
+      const isActive = isColumnActive(col.field, filter, sort)
+
+      const headerColorClass =
+        col?.parent === 'Procurment Budget'
+          ? 'header-procurment-budget'
+          : col?.parent === 'Consumption Budget'
+            ? 'header-consumption-budget'
+            : undefined
+
       if (col.children) {
         return (
-          <GridColumn key={col.title || idx} title={col.title}>
+          <GridColumn
+            key={col.title || idx}
+            title={col.title}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+          >
             {renderColumns(col.children, filter, sort)}
           </GridColumn>
         )
       }
-
-      const isEditable = col.editable === true
-      const isActive = isColumnActive(col.field, filter, sort)
-      const headerColorClass = idx % 2 === 0 ? 'header-red' : 'header-green'
 
       if (['aopRemarks', 'remarks', 'remark', 'Remark'].includes(col.field)) {
         return (
@@ -481,7 +491,6 @@ const KendoDataTablesReports = ({
       }
 
       if (col.type === 'number1') {
-        production
         return (
           <GridColumn
             key={col.field}
@@ -489,7 +498,8 @@ const KendoDataTablesReports = ({
             title={col.title || col.headerName}
             hidden={col.hidden}
             editable={col?.editable ? true : false}
-            headerClassName={isActive ? 'active-column' : ''}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
               edit: { text: NoSpinnerNumericEditor },
               data: toolTipRenderer,
@@ -516,7 +526,7 @@ const KendoDataTablesReports = ({
           }}
           className={!isEditable ? 'non-editable-cell' : ''}
           columnMenu={ColumnMenuCheckboxFilter}
-          headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+          headerClassName={isActive ? 'active-column' : ''}
           width={col?.widthT}
         />
       )

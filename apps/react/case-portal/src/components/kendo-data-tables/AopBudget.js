@@ -53,6 +53,7 @@ export default function AopBudget() {
         width: 120,
         editable: false,
         type: 'number1',
+        parent: 'Consumption Budget',
       },
       {
         field: 'CB_MaterialCost',
@@ -60,10 +61,12 @@ export default function AopBudget() {
         width: 120,
         editable: true,
         type: 'number1',
+        parent: 'Consumption Budget',
       },
 
       {
         title: 'Consumption Budget',
+        parent: 'Consumption Budget',
         children: [
           {
             field: 'CB_ServiceCost',
@@ -71,6 +74,7 @@ export default function AopBudget() {
             width: 120,
             editable: true,
             type: 'number1',
+            parent: 'Consumption Budget',
           },
         ],
       },
@@ -81,6 +85,7 @@ export default function AopBudget() {
         width: 120,
         editable: false,
         type: 'number1',
+        parent: 'Consumption Budget',
       },
       {
         field: 'CB_Months',
@@ -88,6 +93,7 @@ export default function AopBudget() {
         width: 120,
         editable: false,
         type: 'number1',
+        parent: 'Consumption Budget',
       },
 
       {
@@ -96,9 +102,11 @@ export default function AopBudget() {
         width: 120,
         editable: true,
         type: 'number1',
+        parent: 'Procurment Budget',
       },
       {
         title: 'Procurment Budget',
+        parent: 'Procurment Budget',
         children: [
           {
             field: 'PB_MaterialCost',
@@ -106,6 +114,7 @@ export default function AopBudget() {
             width: 120,
             editable: true,
             type: 'number1',
+            parent: 'Procurment Budget',
           },
         ],
       },
@@ -116,6 +125,7 @@ export default function AopBudget() {
         width: 120,
         editable: false,
         type: 'number1',
+        parent: 'Procurment Budget',
       },
 
       {

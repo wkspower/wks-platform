@@ -220,5 +220,12 @@ main.MuiBox-root.css-vognfw {
 }
 .k-animation-container,
 .k-popup {
-  z-index: 5500 !important; /* or higher if needed */
+  z-index: 5500 !important;
+}
+.header-consumption-budget {
+  background-color: #d6e9ec;
+}
+
+.header-procurment-budget {
+  background-color: #e8dad8;
 }

@@ -400,10 +400,6 @@ export const MainRoutes = (
         ],
       },
 
-      //  url: '/functional-aop/aop-budget',
-      //   url: '/functional-aop/monthly-template-plants',
-      //   url: '/functional-aop/aop-summary',
-
       {
         path: 'functional-aop',
         children: [
