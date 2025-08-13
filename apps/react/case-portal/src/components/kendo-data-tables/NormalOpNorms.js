@@ -655,45 +655,66 @@ const NormalOpNormsScreen = () => {
   }
 
   const saveExcelFile = async (rawFile) => {
-    setLoading(true)
-    try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+  setLoading(true)
+  try {
+    var plantId = ''
+    const storedPlant = localStorage.getItem('selectedPlant')
+    if (storedPlant) {
+      const parsedPlant = JSON.parse(storedPlant)
+      plantId = parsedPlant.id
+    }
 
-      const response = await DataService.saveNormalOpsNormsExcel(
-        rawFile,
-        keycloak,
-      )
-      if (response) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Uploaded Successfully!',
-          severity: 'success',
-        })
-        setModifiedCells({})
-        // setLoading(false)
-
-        fetchAllData(gradeId)
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Saved Falied!',
-          severity: 'error',
-        })
+    const response = await DataService.saveNormalOpsNormsExcel(
+      rawFile,
+      keycloak,
+    )
+    if (response?.code === 200) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Uploaded Successfully!',
+        severity: 'success',
+      })
+      setModifiedCells({})
+      fetchAllData(gradeId)
+    } else if (response?.code === 400 && response?.data) {
+      // Partial save, error file download
+      const byteCharacters = atob(response.data)
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
       }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'Error File Steady state Norms.xlsx')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Partial data saved. Error file downloaded.',
+        severity: 'warning',
+      })
+    } else {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Data Save Failed!',
+        severity: 'error',
+      })
+    }
 
       return response
     } catch (error) {
       console.error('Error saving data:', error)
       setLoading(false)
-      // console.log(4)
     } finally {
       // fetchData()
-      // setLoading(false)
+      setLoading(false)
     }
   }
   const handleGradeChange = (gradeId) => {
