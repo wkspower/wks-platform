@@ -274,7 +274,7 @@ const ProductionVolumeDataBasis = () => {
                         columns={section.cols}
                         permissions={{
                           allAction: false,
-                          isHeight: section?.rows?.length > 10,
+                          isHeight: section?.rows?.length > 15,
                         }}
                       />
                     </Box>

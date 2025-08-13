@@ -950,7 +950,26 @@ const ProductionvolumeData = ({ permissions }) => {
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
 
       showTitleNameBusiness: true,
-      titleName: 'Max Achieved Capacity',
+      titleName: 'Max Capacity',
+    },
+    isOldYear,
+  )
+  const adjustedPermissionsGrid2 = getAdjustedPermissions(
+    {
+      showAction: permissions?.showAction ?? false,
+      allAction: permissions?.allAction ?? true,
+      addButton: permissions?.addButton ?? false,
+      deleteButton: permissions?.deleteButton ?? false,
+      editButton: permissions?.editButton ?? false,
+      showUnit: permissions?.showUnit ?? true,
+      saveWithRemark: permissions?.saveWithRemark ?? true,
+      showRefreshBtn: permissions?.showRefreshBtn ?? true,
+      saveBtn: permissions?.saveBtn ?? true,
+      units: ['TPH', 'TPD'],
+      customHeight: permissions?.customHeight ?? defaultCustomHeight,
+      downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
+      showTitleNameBusiness: true,
+      titleName: 'Design Capacity',
     },
     isOldYear,
   )
@@ -976,7 +995,7 @@ const ProductionvolumeData = ({ permissions }) => {
           : false,
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       uploadExcelBtn: permissions?.hideUploadExcel ? false : true,
-      showTitleNameBusiness: lowerVertName === 'meg' ? false : true,
+      showTitleNameBusiness: true,
       titleName: 'Current Operating Capacity',
     },
     isOldYear,
@@ -984,7 +1003,6 @@ const ProductionvolumeData = ({ permissions }) => {
 
   var cols = permissions?.hideSummary ? colDefs1233 : productionColumns
   var rows1 = permissions?.hideSummary ? rows500 : rows
-  var rowsMaxCapacity = rows500
 
   const handleExcelUpload = (rawFile) => {
     saveExcelFile(rawFile)
@@ -1080,8 +1098,6 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const conditionForFirst = false
-
   return (
     <div>
       <Backdrop
@@ -1091,25 +1107,21 @@ const ProductionvolumeData = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {conditionForFirst && (
-        <KendoDataTables
-          setRows={setRows2}
-          columns={colDefsDesignCapacity}
-          rows={rows1}
-          fetchData={fetchData}
-          permissions={adjustedPermissionsGrid2}
-        />
-      )}
+      <KendoDataTables
+        setRows={setRows2}
+        columns={colDefsDesignCapacity}
+        rows={rows1}
+        fetchData={fetchData}
+        permissions={adjustedPermissionsGrid2}
+      />
 
-      {conditionForFirst && (
-        <KendoDataTables
-          setRows={setRows2}
-          columns={colDefsDesignCapacity}
-          rows={rowsMaxCapacity}
-          fetchData={fetchData}
-          permissions={adjustedPermissionsGrid1}
-        />
-      )}
+      <KendoDataTables
+        setRows={setRows2}
+        columns={colDefsDesignCapacity}
+        rows={rows1}
+        fetchData={fetchData}
+        permissions={adjustedPermissionsGrid1}
+      />
 
       <KendoDataTables
         modifiedCells={modifiedCells}

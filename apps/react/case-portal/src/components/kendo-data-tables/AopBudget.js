@@ -45,26 +45,26 @@ export default function AopBudget() {
     }
   }, [])
 
-  const filteredColumns = useMemo(
+  const columns = useMemo(
     () => [
+      {
+        field: 'CB_MaintenanceCostType',
+        title: 'Maintenance Cost Type',
+        width: 120,
+        editable: false,
+        type: 'number1',
+      },
+      {
+        field: 'CB_MaterialCost',
+        title: 'Material Cost',
+        width: 120,
+        editable: true,
+        type: 'number1',
+      },
+
       {
         title: 'Consumption Budget',
         children: [
-          {
-            field: 'CB_MaintenanceCostType',
-            title: 'Maintenance Cost Type',
-            width: 120,
-            editable: false,
-            type: 'number1',
-          },
-          {
-            field: 'CB_MaterialCost',
-            title: 'Material Cost',
-            width: 120,
-            editable: true,
-            type: 'number1',
-          },
-
           {
             field: 'CB_ServiceCost',
             title: 'Service Cost',
@@ -72,32 +72,34 @@ export default function AopBudget() {
             editable: true,
             type: 'number1',
           },
-          {
-            field: 'CB_TotalCost',
-            title: 'Total Cost',
-            width: 120,
-            editable: true,
-            type: 'number1',
-          },
-          {
-            field: 'CB_Months',
-            title: 'Months',
-            width: 120,
-            editable: false,
-            type: 'number1',
-          },
         ],
+      },
+
+      {
+        field: 'CB_TotalCost',
+        title: 'Total Cost',
+        width: 120,
+        editable: false,
+        type: 'number1',
+      },
+      {
+        field: 'CB_Months',
+        title: 'Months',
+        width: 120,
+        editable: false,
+        type: 'number1',
+      },
+
+      {
+        field: 'CB_MaintenanceCostType',
+        title: 'Maintenance Cost Type',
+        width: 120,
+        editable: true,
+        type: 'number1',
       },
       {
         title: 'Procurment Budget',
         children: [
-          {
-            field: 'CB_MaintenanceCostType',
-            title: 'Maintenance Cost Type',
-            width: 120,
-            editable: true,
-            type: 'number1',
-          },
           {
             field: 'PB_MaterialCost',
             title: 'Material Cost',
@@ -105,15 +107,22 @@ export default function AopBudget() {
             editable: true,
             type: 'number1',
           },
-
-          {
-            field: 'PB_Months',
-            title: 'Months',
-            width: 120,
-            editable: false,
-            type: 'number1',
-          },
         ],
+      },
+
+      {
+        field: 'PB_Months',
+        title: 'Months',
+        width: 120,
+        editable: false,
+        type: 'number1',
+      },
+
+      {
+        field: 'remarks',
+        title: 'Remark',
+        width: 120,
+        editable: false,
       },
     ],
     [verticalName],
@@ -742,7 +751,7 @@ export default function AopBudget() {
         title='Budget Upload'
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        columns={filteredColumns}
+        columns={columns}
         permissions={{
           showCalculate: false,
           saveBtnForRemark: true,

@@ -11,12 +11,17 @@ import {
 import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { validateFields } from 'utils/validationUtils'
+import dataGridStore from 'store/reducers/dataGridStore'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [normRows, setNormRows] = useState({})
   const [rows, setRows] = useState()
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -326,25 +331,33 @@ const MonthwiseRawMaterial = () => {
     try {
       setLoading(true)
       var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
-      var res2 = await DataService.getMonthwiseRawData(keycloak, 'Selectivity')
 
-      if (res2?.code == 200) {
-        res2 = res2?.data?.consumptionSummary.map((item, index) => ({
-          ...item,
-          id: index,
-          idFromApi: item.id,
-          isEditable: true,
-          originalRemark: item.Remark || '',
-        }))
-        // console.log("data is ",res2);
-        setRow2(res2)
+      if (lowerVertName != 'pe' || lowerVertName != 'pp') {
+        var res2 = await DataService.getMonthwiseRawData(
+          keycloak,
+          'Selectivity',
+        )
+
+        if (res2?.code == 200) {
+          res2 = res2?.data?.consumptionSummary.map((item, index) => ({
+            ...item,
+            id: index,
+            idFromApi: item.id,
+            isEditable: true,
+            originalRemark: item.Remark || '',
+          }))
+
+          setRow2(res2)
+        }
+      } else {
+        setRow2([])
       }
 
       if (res?.code == 200) {
         res = res?.data?.consumptionSummary.map((item, index) => ({
           ...item,
           id: index,
-          //idFromApi: item.id,
+
           originalRemark: item.Remark || '',
         }))
 
@@ -419,9 +432,10 @@ const MonthwiseRawMaterial = () => {
       setLoading(false)
     }
   }
+
   useEffect(() => {
     fetchData()
-  }, [year, plantId])
+  }, [yearChanged, plantID])
 
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()
@@ -558,35 +572,35 @@ const MonthwiseRawMaterial = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <KendoDataTablesReports
-        rows={row2}
-        columns={columns}
-        setRows={setRow2}
-        loading={loading}
-        handleCalculate={handleCalculate}
-        title='Monthwise Consumption (T-18)'
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={{
-          // customHeight: defaultCustomHeight,
-          // showWorkFlowBtns: flase,
-          showCalculate: false,
-          allAction: true,
-          showTitle: true,
-          // saveBtn: true,
-          saveBtn: false,
-          textAlignment: 'center',
-          remarksEditable: true,
-        }}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
-        saveChanges={saveChanges}
-        handleRemarkCellClick={handleRemarkCellClick}
-      />
+      {lowerVertName != 'pe' ||
+        (lowerVertName != 'pp' && (
+          <KendoDataTablesReports
+            rows={row2}
+            columns={columns}
+            setRows={setRow2}
+            loading={loading}
+            handleCalculate={handleCalculate}
+            title='Monthwise Consumption (T-18)'
+            modifiedCells={modifiedCells}
+            setModifiedCells={setModifiedCells}
+            permissions={{
+              showCalculate: false,
+              allAction: true,
+              showTitle: true,
+              saveBtn: false,
+              textAlignment: 'center',
+              remarksEditable: true,
+            }}
+            remarkDialogOpen={remarkDialogOpen}
+            setRemarkDialogOpen={setRemarkDialogOpen}
+            currentRemark={currentRemark}
+            setCurrentRemark={setCurrentRemark}
+            currentRowId={currentRowId}
+            setCurrentRowId={setCurrentRowId}
+            saveChanges={saveChanges}
+            handleRemarkCellClick={handleRemarkCellClick}
+          />
+        ))}
 
       {Object.entries(normRows).map(([normName, rows]) => (
         <div key={normName}>

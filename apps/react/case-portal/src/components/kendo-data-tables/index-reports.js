@@ -99,7 +99,6 @@ const KendoDataTablesReports = ({
   setRows,
   columns,
   loading = false,
-  // typeRank = {},
   permissions = {},
   setSnackbarOpen = () => {},
   snackbarData = { message: '', severity: 'info' },
@@ -108,33 +107,24 @@ const KendoDataTablesReports = ({
   currentRemark = '',
   setCurrentRemark = () => {},
   currentRowId = null,
-  // NormParameterIdCell = () => {},
   setModifiedCells = () => {},
   remarkDialogOpen = false,
-  // handleDeleteSelected = () => {},
   saveChanges = () => {},
   fetchData = () => {},
   deleteRowData = () => {},
-  // handleAddPlantSite = () => {},
   handleCalculate = () => {},
   handleUnitChange = () => {},
   handleRemarkCellClick = () => {},
-  // selectedUsers = [],
-  // groupBy = null,
-  // allProducts = [],
-  // selectMode,
-  // setSelectMode = () => {},
   handleExport = () => {},
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
-
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const [edit, setEdit] = useState({})
-  const [sort, setSort] = useState([]) // or
+  const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
 
   const handleEditChange = useCallback((e) => {
@@ -157,17 +147,6 @@ const KendoDataTablesReports = ({
   }
   const itemChange = useCallback(
     (e) => {
-      // const changedDataItem = e.dataItem
-      // const changedField = e.field
-      // const newValue = e.value
-
-      // const originalDataItem = rows.find(
-      //   (item) => item.id === changedDataItem.id,
-      // )
-      // const originalValue = originalDataItem
-      //   ? originalDataItem[changedField]
-      //   : undefined
-
       setIsRowEdited(true)
 
       const { dataItem, field, value } = e
@@ -312,18 +291,11 @@ const KendoDataTablesReports = ({
       console.error('Error saving refresh data:', error)
     }
   }
-  // console.log('22', e.dataItem.isEditable)
-  // console.log('Rendering with title:', title, 'type:', typeof title)
 
   const RemarkCell = (props) => {
     const { dataItem, field, onRemarkClick, ...tdProps } = props
-
     const rawValue = dataItem[field]
-    // const displayText = truncateRemarks(rawValue)
     const displayText = String(rawValue ?? '')
-
-    // const editable = Boolean(dataItem.isEditable)
-
     return (
       <td
         {...tdProps}
@@ -349,55 +321,6 @@ const KendoDataTablesReports = ({
       </td>
     )
   }
-
-  // useEffect(() => {
-  //   if (Array.isArray(rows) && rows.length > 0 && groupBy) {
-  //     if (typeRank) {
-  //       setGroup([
-  //         {
-  //           field: groupBy,
-  //           dir: 'asc',
-  //           compare: (a, b) => {
-  //             const rankA = typeRank[a.value] ?? 99
-  //             const rankB = typeRank[b.value] ?? 99
-  //             return rankA - rankB
-  //           },
-  //         },
-  //       ])
-  // setGroup([{ field: groupBy }])
-  //     }
-  //     const initialExpandedState = {}
-  //     const uniqueValues = [...new Set(rows.map((row) => row[groupBy]))]
-  //     uniqueValues.forEach((value) => {
-  //       initialExpandedState[`${groupBy}_${value}`] = true
-  //     })
-  //     setExpandedState(initialExpandedState)
-  //   } else {
-  //     setGroup([])
-  //     setExpandedState({})
-  //   }
-  // }, [rows, groupBy])
-
-  // const processedData = useMemo(() => {
-  //   if (!Array.isArray(rows) || rows.length === 0) return []
-
-  //   if (group.length > 0) {
-  //     const result = process(rows, { group })
-  //     const applyExpandedState = (items) => {
-  //       return items.map((item) => {
-  //         if (item.items) {
-  //           const key = `${item.field}_${item.value}`
-  //           item.expanded = expandedState[key] !== false // default to expanded
-  //           item.items = applyExpandedState(item.items)
-  //         }
-  //         return item
-  //       })
-  //     }
-  //     return applyExpandedState(result.data)
-  //   }
-
-  //   return rows
-  // }, [rows, group, expandedState])
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
@@ -434,31 +357,6 @@ const KendoDataTablesReports = ({
 
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
-  const NumberEditor = (props) => {
-    const { dataItem, field, onChange } = props
-
-    const handleChange = (event) => {
-      const value = event.target.value
-      onChange({
-        dataItem,
-        field,
-        value: value === '' ? null : Number(value),
-      })
-    }
-
-    return (
-      <td>
-        <input
-          type='number'
-          step='any'
-          value={dataItem[field] ?? ''}
-          onChange={handleChange}
-          style={{ width: '100%' }}
-        />
-      </td>
-    )
-  }
-
   const isColumnActive = (field, filter, sort) => {
     return (
       isColumnMenuFilterActive(field, filter) ||
@@ -478,6 +376,7 @@ const KendoDataTablesReports = ({
 
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
+      const headerColorClass = idx % 2 === 0 ? 'header-red' : 'header-green'
 
       if (['aopRemarks', 'remarks', 'remark', 'Remark'].includes(col.field)) {
         return (
@@ -582,6 +481,7 @@ const KendoDataTablesReports = ({
       }
 
       if (col.type === 'number1') {
+        production
         return (
           <GridColumn
             key={col.field}
@@ -616,7 +516,7 @@ const KendoDataTablesReports = ({
           }}
           className={!isEditable ? 'non-editable-cell' : ''}
           columnMenu={ColumnMenuCheckboxFilter}
-          headerClassName={isActive ? 'active-column' : ''}
+          headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
           width={col?.widthT}
         />
       )

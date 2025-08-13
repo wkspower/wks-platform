@@ -54,7 +54,7 @@ const defs = {
     workflow: 'Fluxo de Trabalho', // New addition
     //FUNCTIONAL AOP
     functionalAop: 'Functional AOP',
-    monthlyAop: 'Monthly Template (Plants)',
+    monthlyAop: 'Monthly Budget',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
   },
@@ -215,7 +215,7 @@ const defs = {
 
         //FUNCTIONAL AOP
         functionalAop: 'Functional AOP',
-        monthlyAop: 'Monthly Template (Plants)',
+        monthlyAop: 'Monthly Budget',
         siteWiseAop: 'Consumption Summary (Sites)',
         allSiteSummaryAop: 'Summary',
       },

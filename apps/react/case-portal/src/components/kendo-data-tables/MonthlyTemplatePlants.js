@@ -30,25 +30,27 @@ export default function MonthlyTemplatePlants() {
       return ''
     }
   }, [])
+
   const columns = useMemo(
     () => [
       {
+        field: 'CB_MaintenanceCostType',
+        title: 'Maintenance Cost Type',
+        width: 120,
+        editable: false,
+        type: 'number1',
+      },
+      {
+        field: 'CB_MaterialCost',
+        title: 'Material Cost',
+        width: 120,
+        editable: true,
+        type: 'number1',
+      },
+
+      {
         title: 'Consumption Budget',
         children: [
-          {
-            field: 'CB_MaintenanceCostType',
-            title: 'Maintenance Cost Type',
-            width: 120,
-            editable: false,
-            type: 'number1',
-          },
-          {
-            field: 'CB_MaterialCost',
-            title: 'Material Cost',
-            width: 120,
-            editable: true,
-            type: 'number1',
-          },
           {
             field: 'CB_ServiceCost',
             title: 'Service Cost',
@@ -56,32 +58,34 @@ export default function MonthlyTemplatePlants() {
             editable: true,
             type: 'number1',
           },
-          {
-            field: 'CB_TotalCost',
-            title: 'Total Cost',
-            width: 120,
-            editable: true,
-            type: 'number1',
-          },
-          {
-            field: 'CB_Months',
-            title: 'Months',
-            width: 120,
-            editable: false,
-            type: 'number1',
-          },
         ],
+      },
+
+      {
+        field: 'CB_TotalCost',
+        title: 'Total Cost',
+        width: 120,
+        editable: true,
+        type: 'number1',
+      },
+      {
+        field: 'CB_Months',
+        title: 'Months',
+        width: 120,
+        editable: false,
+        type: 'number1',
+      },
+
+      {
+        field: 'CB_MaintenanceCostType',
+        title: 'Maintenance Cost Type',
+        width: 120,
+        editable: true,
+        type: 'number1',
       },
       {
         title: 'Procurment Budget',
         children: [
-          {
-            field: 'CB_MaintenanceCostType',
-            title: 'Maintenance Cost Type',
-            width: 120,
-            editable: true,
-            type: 'number1',
-          },
           {
             field: 'PB_MaterialCost',
             title: 'Material Cost',
@@ -89,14 +93,15 @@ export default function MonthlyTemplatePlants() {
             editable: true,
             type: 'number1',
           },
-          {
-            field: 'PB_Months',
-            title: 'Months',
-            width: 120,
-            editable: false,
-            type: 'number1',
-          },
         ],
+      },
+
+      {
+        field: 'PB_Months',
+        title: 'Months',
+        width: 120,
+        editable: false,
+        type: 'number1',
       },
     ],
     [verticalName],
@@ -664,43 +669,44 @@ export default function MonthlyTemplatePlants() {
   }, [])
 
   return (
-    <Box>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
-      <KendoDataTablesReports
-        rows={rows}
-        setRows={setRows}
-        title='Budget Upload'
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        columns={columns}
-        permissions={{
-          showCalculate: false,
-          saveBtnForRemark: true,
-          saveBtn: !isOldYear,
-          showWorkFlowBtns: true,
-          showTitle: true,
-        }}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
-        enableSaveAddBtn={enableSaveAddBtn}
-        saveChanges={saveChanges}
-        handleRemarkCellClick={handleRemarkCellClick}
-      />
-      <Notification
-        open={snackbarOpen}
-        message={snackbarData.message}
-        severity={snackbarData.severity}
-        onClose={() => setSnackbarOpen(false)}
-      />
-    </Box>
+    // <Box>
+    //   <Backdrop
+    //     sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+    //     open={!!loading}
+    //   >
+    //     <CircularProgress color='inherit' />
+    //   </Backdrop>
+    //   <KendoDataTablesReports
+    //     rows={rows}
+    //     setRows={setRows}
+    //     title='Budget Upload'
+    //     modifiedCells={modifiedCells}
+    //     setModifiedCells={setModifiedCells}
+    //     columns={columns}
+    //     permissions={{
+    //       showCalculate: false,
+    //       saveBtnForRemark: true,
+    //       saveBtn: !isOldYear,
+    //       showWorkFlowBtns: true,
+    //       showTitle: true,
+    //     }}
+    //     remarkDialogOpen={remarkDialogOpen}
+    //     setRemarkDialogOpen={setRemarkDialogOpen}
+    //     currentRemark={currentRemark}
+    //     setCurrentRemark={setCurrentRemark}
+    //     currentRowId={currentRowId}
+    //     setCurrentRowId={setCurrentRowId}
+    //     enableSaveAddBtn={enableSaveAddBtn}
+    //     saveChanges={saveChanges}
+    //     handleRemarkCellClick={handleRemarkCellClick}
+    //   />
+    //   <Notification
+    //     open={snackbarOpen}
+    //     message={snackbarData.message}
+    //     severity={snackbarData.severity}
+    //     onClose={() => setSnackbarOpen(false)}
+    //   />
+    // </Box>
+    <div>Templates All Sites</div>
   )
 }

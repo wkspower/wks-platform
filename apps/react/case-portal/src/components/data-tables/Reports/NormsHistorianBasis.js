@@ -342,7 +342,7 @@ const NormsHistorianBasis = () => {
                       rows={section.rows}
                       loading={loading}
                       columns={section.cols}
-                      permissions={{ isHeight: section.label === 'MCU & Norm' }}
+                      permissions={{ isHeight: section?.rows?.length > 15 }}
                     />
                   </Box>
                 </CustomAccordionDetails>
