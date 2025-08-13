@@ -62,7 +62,7 @@ const getEnhancedAOPColDefs = ({
     config = [
       {
         field: 'ReceipeName',
-        title: 'Receipe',
+        title: 'Recipe',
         editable: false,
         width1: 200,
       },

@@ -42,6 +42,9 @@ import NormsHistorianBasisPe from 'components/data-tables/Reports/NormsHistorian
 import ConfigurationTable from 'components/kendo-data-tables/KendoConfigurationTable'
 import { Navigate } from '../../node_modules/react-router-dom/dist/index'
 import PrivateRoute from './PrivateRoutes'
+import AopBudget from 'components/kendo-data-tables/AopBudget'
+import MonthlyTemplatePlants from 'components/kendo-data-tables/MonthlyTemplatePlants'
+import AopSummary from 'components/kendo-data-tables/AopSummary'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -337,6 +340,7 @@ export const MainRoutes = (
           { path: 'reliability', element: <TextSubmitComponent /> },
         ],
       },
+
       {
         path: 'reports',
         children: [
@@ -395,6 +399,41 @@ export const MainRoutes = (
           },
         ],
       },
+
+      //  url: '/functional-aop/aop-budget',
+      //   url: '/functional-aop/monthly-template-plants',
+      //   url: '/functional-aop/aop-summary',
+
+      {
+        path: 'functional-aop',
+        children: [
+          {
+            path: 'aop-budget',
+            element: (
+              <PrivateRoute routeId='aop-budget'>
+                <AopBudget />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'monthly-template-plants',
+            element: (
+              <PrivateRoute routeId='monthly-template-plants'>
+                <MonthlyTemplatePlants />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'aop-summary',
+            element: (
+              <PrivateRoute routeId='aop-summary'>
+                <AopSummary />
+              </PrivateRoute>
+            ),
+          },
+        ],
+      },
+
       {
         path: 'workflow',
         element: (

@@ -67,6 +67,12 @@ const defs = {
     workflow: 'AOP Approval Flow', // New addition
     userManage: 'User Management', // New addition
     valueHistory: 'Value History', // New addition
+
+    //FUNCTIONAL AOP
+    functionalAop: 'Functional AOP',
+    monthlyAop: 'Monthly Template (Plants)',
+    siteWiseAop: 'Consumption Summary (Sites)',
+    allSiteSummaryAop: 'Summary',
   },
   pages: {
     dashboard: {
@@ -231,6 +237,12 @@ const defs = {
         userManage: 'User Management', // New addition
         workflow: 'AOP Approval Flow', // New addition
         valueHistory: 'Value History', // New addition
+
+        //FUNCTIONAL AOP
+        functionalAop: 'Functional AOP',
+        monthlyAop: 'Monthly Template (Plants)',
+        siteWiseAop: 'Consumption Summary (Sites)',
+        allSiteSummaryAop: 'Summary',
       },
     },
   },

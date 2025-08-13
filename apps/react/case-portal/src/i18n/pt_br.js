@@ -52,6 +52,11 @@ const defs = {
     previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
     matBalSheet: 'Balanço de MAT', // New addition
     workflow: 'Fluxo de Trabalho', // New addition
+    //FUNCTIONAL AOP
+    functionalAop: 'Functional AOP',
+    monthlyAop: 'Monthly Template (Plants)',
+    siteWiseAop: 'Consumption Summary (Sites)',
+    allSiteSummaryAop: 'Summary',
   },
   pages: {
     dashboard: {
@@ -207,6 +212,12 @@ const defs = {
         previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
         matBalSheet: 'Balanço de MAT', // New addition
         workflow: 'Fluxo de Trabalho', // New addition
+
+        //FUNCTIONAL AOP
+        functionalAop: 'Functional AOP',
+        monthlyAop: 'Monthly Template (Plants)',
+        siteWiseAop: 'Consumption Summary (Sites)',
+        allSiteSummaryAop: 'Summary',
       },
     },
   },

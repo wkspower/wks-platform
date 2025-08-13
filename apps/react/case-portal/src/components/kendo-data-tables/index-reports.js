@@ -143,7 +143,6 @@ const KendoDataTablesReports = ({
   }, [])
 
   const handleRowClick = (e) => {
-    console.log(e.dataItem)
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return
@@ -486,8 +485,6 @@ const KendoDataTablesReports = ({
             key={col.field}
             field={col.field}
             title={col.title || col.headerName}
-            // editor={true}
-            // editable={{ mode: 'popup' }}
             width={220}
             cells={{
               data: (cellProps) => (
@@ -583,6 +580,28 @@ const KendoDataTablesReports = ({
           />
         )
       }
+
+      if (col.type === 'number1') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            headerClassName={isActive ? 'active-column' : ''}
+            cells={{
+              edit: { text: NoSpinnerNumericEditor },
+              data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+          />
+        )
+      }
+
       return (
         <GridColumn
           key={col.field}
@@ -614,11 +633,6 @@ const KendoDataTablesReports = ({
         cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
     )
 
-    // const isRedFromEdit =
-    //   editedCellMap?.[rowId]?.[props.field] !== undefined &&
-    //   editedCellMap?.[rowId]?.[props.field]?.toString() === value?.toString()
-
-    // const isRed = isRedFromAllRedCell || isRedFromEdit
     const isRed = isRedFromAllRedCell
 
     return (

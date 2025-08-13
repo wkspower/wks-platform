@@ -2845,39 +2845,7 @@ async function getTurnaroundReportData(keycloak, type) {
     return await Promise.reject(e)
   }
 }
-// async function saveConfigurationExcel(file, keycloak) {
-//   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-//   const year = localStorage.getItem('year')
-//   const url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${plantId}&year=${year}`
-//   const formData = new FormData()
-//   formData.append('file', file)
-//   const headers = {
-//     Accept: 'application/json',
-//     Authorization: `Bearer ${keycloak.token}`,
-//   }
-//   try {
-//     const resp = await fetch(url, {
-//       method: 'POST',
-//       headers,
-//       body: formData,
-//     })
-//     if (!resp.ok) {
-//       throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
-//     }
-//     const blob = await resp.blob()
-//     const urlBlob = window.URL.createObjectURL(blob)
-//     const a = document.createElement('a')
-//     a.href = urlBlob
-//     a.download = 'ConfigurationResponse.xlsx' // Filename to save
-//     document.body.appendChild(a)
-//     a.click()
-//     a.remove()
-//     window.URL.revokeObjectURL(urlBlob)
-//   } catch (e) {
-//     console.error('Error Editing Config data:', e)
-//     return Promise.reject(e)
-//   }
-// }
+
 async function saveConfigurationExcel(file, keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
@@ -2903,39 +2871,7 @@ async function saveConfigurationExcel(file, keycloak) {
     return Promise.reject(e)
   }
 }
-// async function saveConfigurationExcelConstants(file, keycloak) {
-//   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-//   const year = localStorage.getItem('year')
-//   const url = `${Config.CaseEngineUrl}/task/configuration-constants-import-excel?plantFKId=${plantId}&year=${year}`
-//   const formData = new FormData()
-//   formData.append('file', file)
-//   const headers = {
-//     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-//     Authorization: `Bearer ${keycloak.token}`,
-//   }
-//   try {
-//     const resp = await fetch(url, {
-//       method: 'POST',
-//       headers,
-//       body: formData,
-//     })
-//     if (!resp.ok) {
-//       throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
-//     }
-//     const blob = await resp.blob()
-//     const urlBlob = window.URL.createObjectURL(blob)
-//     const a = document.createElement('a')
-//     a.href = urlBlob
-//     a.download = 'ConfigurationResponse.xlsx' // Filename to save
-//     document.body.appendChild(a)
-//     a.click()
-//     a.remove()
-//     window.URL.revokeObjectURL(urlBlob)
-//   } catch (e) {
-//     console.error('Error Editing Config data:', e)
-//     return Promise.reject(e)
-//   }
-// }
+
 async function saveNormalOpsNormsExcel(file, keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
@@ -3036,7 +2972,7 @@ async function exportSpyroOutputExcel(keycloak, mode) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `SpyroOutput_${mode || 'Export'}.xlsx` // mode as filename suffix
+    a.download = `SpyroOutput_${mode || 'Export'}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3102,7 +3038,7 @@ async function exportSpyroInputExcel(keycloak, mode) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `SpyroInput_${mode || 'Export'}.xlsx` // mode as filename suffix
+    a.download = `SpyroInput_${mode || 'Export'}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3123,7 +3059,7 @@ async function getConfigurationExcel(keycloak) {
     plantId = parsedPlant.id
   }
   const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${year}&plantId=${plantId}`
-  //const url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
+
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -3141,7 +3077,7 @@ async function getConfigurationExcel(keycloak) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Configuration.xlsx' // Filename to save
+    a.download = 'Production & Norms Basis.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3160,7 +3096,7 @@ async function getConfigurationExcelConstants(keycloak) {
     plantId = parsedPlant.id
   }
   const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${year}&plantFKId=${plantId}`
-  //const url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
+
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -3178,7 +3114,7 @@ async function getConfigurationExcelConstants(keycloak) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis.xlsx' // Filename to save
+    a.download = 'Production & Norms Basis - Constants.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3196,7 +3132,7 @@ async function getNormalOpsNormsExcel(keycloak, gradeId) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  // const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${year}&plantId=${plantId}`
+
   var url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
 
   if (gradeId) {

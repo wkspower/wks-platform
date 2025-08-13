@@ -157,7 +157,7 @@ const ProductionVolumeDataBasis = () => {
     exportRef1.current.save(options1)
   }
 
-  const fileName = `Production Volume Data Basis ${new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').split('.')[0]}.xlsx`
+  const fileName = `Production Volume Data ${new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').split('.')[0]}.xlsx`
   return (
     <div>
       <Backdrop
@@ -274,7 +274,7 @@ const ProductionVolumeDataBasis = () => {
                         columns={section.cols}
                         permissions={{
                           allAction: false,
-                          isHeight: section.label === 'Calculated Data',
+                          isHeight: section?.rows?.length > 10,
                         }}
                       />
                     </Box>

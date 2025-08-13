@@ -463,15 +463,16 @@ const ConfigurationTable = () => {
     }
   }
   const onLoad = async () => {
-    setLoading1(true)
     if (startDate && endDate && startDate > endDate) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Please Choose Valid Dates!',
         severity: 'warning',
       })
+
       return
     }
+    setLoading1(true)
     const startDateObj = configurationExecutionDetails.find(
       (item) => item.Name === 'StartDate',
     )

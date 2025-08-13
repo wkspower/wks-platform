@@ -135,6 +135,39 @@ const workspace = {
     },
 
     {
+      id: 'functional-aop',
+      title: i18n.t('menu.functionalAop'),
+      type: 'collapse',
+      icon: icons.IconReport,
+      children: [
+        {
+          id: 'aop-budget',
+          title: i18n.t('menu.monthlyAop'),
+          type: 'item',
+          url: '/functional-aop/aop-budget',
+          icon: icons.IconFile,
+          breadcrumbs: true,
+        },
+        {
+          id: 'monthly-template-plants',
+          title: i18n.t('menu.siteWiseAop'),
+          type: 'item',
+          url: '/functional-aop/monthly-template-plants',
+          icon: icons.IconFileText,
+          breadcrumbs: true,
+        },
+        {
+          id: 'aop-summary',
+          title: i18n.t('menu.allSiteSummaryAop'),
+          type: 'item',
+          url: '/functional-aop/aop-summary',
+          icon: icons.IconReport,
+          breadcrumbs: true,
+        },
+      ],
+    },
+
+    {
       id: 'workflow',
       title: i18n.t('menu.workflow'),
       type: 'item',

@@ -83,7 +83,10 @@ const DataAccordion = React.memo(
           <KendoDataGrid
             rows={rows}
             columns={columns}
-            permissions={{ allAction: false }}
+            permissions={{
+              allAction: false,
+              isHeight: rows?.length > 10,
+            }}
           />
         </Box>
       </CustomAccordionDetails>
