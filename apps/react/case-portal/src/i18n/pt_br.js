@@ -222,6 +222,7 @@ const defs = {
         manufacturingDivision: 'Manufacturing Division',
         plantSafetyPerformanceTarget: 'S&OR',
         plantTeam: 'People',
+        reliabilityPerformance: 'Reliability Performance',
       },
     },
   },

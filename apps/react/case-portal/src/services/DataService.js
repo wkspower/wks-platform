@@ -3136,7 +3136,7 @@ async function getNormalOpsNormsExcel(keycloak, gradeId) {
   var url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
 
   if (gradeId) {
-    url.append('gradeId', gradeId)
+     url += `&gradeId=${gradeId}`
   }
   const headers = {
     'Content-Type': 'application/json',

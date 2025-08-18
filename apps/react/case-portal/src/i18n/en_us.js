@@ -76,6 +76,7 @@ const defs = {
     allSiteSummaryAop: 'Summary',
 
     plantTeam: 'People',
+    reliabilityPerformance: 'Reliability Performance',
     plantSafetyPerformanceTarget: 'S&OR',
   },
   pages: {
@@ -252,6 +253,7 @@ const defs = {
         manufacturingDivision: 'Manufacturing Division',
         plantSafetyPerformanceTarget: 'S&OR',
         plantTeam: 'People',
+        reliabilityPerformance: 'Reliability Performance',
       },
     },
   },

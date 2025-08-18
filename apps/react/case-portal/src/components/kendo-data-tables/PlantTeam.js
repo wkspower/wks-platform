@@ -36,7 +36,13 @@ export default function PlantTeam() {
   const [currentRowIdP, setCurrentRowIdP] = useState(null)
   const [modifiedCellsP, setModifiedCellsP] = useState({})
   const [enableSaveAddBtnP, setEnableSaveAddBtnP] = useState(false)
-
+  //---
+const [peopleInitiativeRows, setPeopleInitiativeRows] = useState([])
+const [modifiedPeopleCells, setModifiedPeopleCells] = useState({})
+const [remarkDialogOpenPeople, setRemarkDialogOpenPeople] = useState(false)
+const [currentRemarkPeople, setCurrentRemarkPeople] = useState('')
+const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
+//-
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -105,6 +111,14 @@ export default function PlantTeam() {
   )
 
   const year = thisYear
+  const peopleInitiativeColumns = [
+  { field: 'serialNumber', title: 'S.No.', widthT: 70, editable: false, type: 'number' },
+  { field: 'initiative', title: 'Initiative', editable: true },
+  { field: 'outcome', title: 'Outcome', editable: true },
+  { field: 'recommendation', title: 'Recommendation', editable: true },
+  { field: 'targetDate', title: 'Target Date', editable: true, widthT: 120 },
+  { field: 'responsible', title: 'Resp.', editable: true, widthT: 120 }
+]
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -271,6 +285,17 @@ export default function PlantTeam() {
             isEditable: false,
           },
         ],
+        peopleInitiative: [
+        {
+          serialNumber: 1,
+          initiative: '',
+          outcome: '',
+          recommendation: '',
+          targetDate: '',
+          responsible: '',
+          id: 0
+        },
+      ]
       }
 
       if (res?.code === 200) {
@@ -286,16 +311,23 @@ export default function PlantTeam() {
           isEditable: item?.isEditable,
           originalRemark: item.remarks,
         }))
+        const peopleInitiativeMapped = res?.peopleInitiative?.map((item, index) => ({
+          ...item,
+          id: index
+        }))
         setRows(mapped)
         setRowsP(mapped1)
+        setPeopleInitiativeRows(peopleInitiativeMapped)
       } else {
         setRows([])
         setRowsP([])
+        setPeopleInitiativeRows([])
       }
     } catch (err) {
       console.error('fetchData error', err)
       setRows([])
       setRowsP([])
+      setPeopleInitiativeRows([])
     } finally {
       setLoading(false)
     }
@@ -410,6 +442,31 @@ export default function PlantTeam() {
     },
     isOldYear,
   )
+  const getAdjustedPermissionsPeople = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+
+  const peopleInitiativePermissions = getAdjustedPermissionsPeople({
+    saveBtn: true,
+    allAction: true,
+    showTitleNameBusiness: true,
+    titleName: 'People Initiative',
+    adjustedPermissions: true,
+  downloadExcelBtn: true,
+  uploadExcelBtn: true,
+  ExcelName: `${lowerVertName}_People_Initiative`,
+})
 
   const commonGridProps = {
     columns,
@@ -444,6 +501,21 @@ export default function PlantTeam() {
         // groupBy='Particulars'
         {...commonGridProps}
       />
+      <KendoDataTables
+  rows={peopleInitiativeRows}
+  setRows={setPeopleInitiativeRows}
+  title='People Initiative'
+  modifiedCells={modifiedPeopleCells}
+  setModifiedCells={setModifiedPeopleCells}
+  remarkDialogOpen={remarkDialogOpenPeople}
+  setRemarkDialogOpen={setRemarkDialogOpenPeople}
+  currentRemark={currentRemarkPeople}
+  setCurrentRemark={setCurrentRemarkPeople}
+  currentRowId={currentRowIdPeople}
+  setCurrentRowId={setCurrentRowIdPeople}
+  permissions={peopleInitiativePermissions}
+  columns={peopleInitiativeColumns}
+/>
 
       {/* <KendoDataTables
         rows={rowsP}
