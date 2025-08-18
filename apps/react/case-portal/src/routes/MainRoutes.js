@@ -46,6 +46,7 @@ import AopBudget from 'components/kendo-data-tables/AopBudget'
 import MonthlyTemplatePlants from 'components/kendo-data-tables/MonthlyTemplatePlants'
 import AopSummary from 'components/kendo-data-tables/AopSummary'
 import PlantTeam from 'components/kendo-data-tables/PlantTeam'
+import RelPerf from 'components/kendo-data-tables/RelPerf'
 import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafetyPerformanceTarget'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
@@ -471,7 +472,14 @@ export const MainRoutes = (
           </PrivateRoute>
         ),
       },
-
+      {
+        path: 'reliability-performance',
+        element: (
+          <PrivateRoute routeId='reliability-performance'>
+            <RelPerf />
+          </PrivateRoute>
+        ),
+      },
       {
         path: 'plant-safety-performance-target',
         element: (

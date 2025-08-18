@@ -227,6 +227,14 @@ const workspace = {
       icon: icons.IconFile,
       breadcrumbs: true,
     },
+    {
+      id: 'reliability-performance',
+      title: i18n.t('menu.reliabilityPerformance'),
+      type: 'item',
+      url: '/reliability-performance',
+      icon: icons.IconFileText,
+      breadcrumbs: true,
+    },
   ],
 }
 
