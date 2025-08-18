@@ -5,7 +5,7 @@
     "flex": 2,
     "editable": false,
     "type": "text",
-    "widthT": 220
+    "widthT": 130
   },
   {
     "field": "particulars",
@@ -13,7 +13,7 @@
     "flex": 2,
     "editable": false,
     "type": "text",
-    "widthT": 220
+    "widthT": 130
   },
   {
     "field": "april",

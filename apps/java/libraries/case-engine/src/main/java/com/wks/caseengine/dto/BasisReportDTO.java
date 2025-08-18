@@ -15,19 +15,19 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class BasisReportDTO {
-	
-	private String january;
-    private String february;
-    private String march;
-    private String april;
-    private String may;
-    private String june;
-    private String july;
-    private String august;
-    private String september;
-    private String october;
-    private String november;
-    private String december;
+
+    private Double january;
+    private Double february;
+    private Double march;
+    private Double april;
+    private Double may;
+    private Double june;
+    private Double july;
+    private Double august;
+    private Double september;
+    private Double october;
+    private Double november;
+    private Double december;
     private String normParameterDisplayName;
     private String productName;
     private String uom;

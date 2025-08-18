@@ -43,7 +43,7 @@ export default function getKendoColumns({
 
         editable: false,
         align: isTextCol ? 'left' : 'right',
-        widthT: isTextCol ? '220' : undefined,
+        // widthT: isTextCol ? '220' : undefined,
       }
     })
   }

@@ -15,7 +15,7 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 200
+    "widthT": 130
   },
   {
     "field": "UOM",

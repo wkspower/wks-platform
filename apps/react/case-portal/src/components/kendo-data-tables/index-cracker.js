@@ -279,7 +279,7 @@ const KendoDataTablesCracker = ({
         {...restThProps}
         aria-sort={ariaSort}
         title={props.title}
-        style={{ padding: '0px' }}
+        style={{ padding: '0px', borderRight: '1px solid #b4b4b4ff' }}
       >
         <Tooltip
           position='top'

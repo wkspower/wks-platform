@@ -161,7 +161,7 @@ const NormalOpNormsScreen = () => {
     try {
       const promises = [fetchData(gradeId), getNormTransactions()]
 
-      if (lowerVertName === 'meg') {
+      if (lowerVertName === 'meg' || lowerVertName === 'cracker') {
         promises.push(fetchDataIntermediateValues())
       }
       if (lowerVertName === 'pe' || lowerVertName === 'pp') {
@@ -228,7 +228,7 @@ const NormalOpNormsScreen = () => {
     {
       field: 'ProductName',
       title: 'Particulars',
-      widthT: 220,
+      widthT: 130,
     },
     {
       field: 'UOM',
@@ -655,58 +655,58 @@ const NormalOpNormsScreen = () => {
   }
 
   const saveExcelFile = async (rawFile) => {
-  setLoading(true)
-  try {
-    var plantId = ''
-    const storedPlant = localStorage.getItem('selectedPlant')
-    if (storedPlant) {
-      const parsedPlant = JSON.parse(storedPlant)
-      plantId = parsedPlant.id
-    }
-
-    const response = await DataService.saveNormalOpsNormsExcel(
-      rawFile,
-      keycloak,
-    )
-    if (response?.code === 200) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Uploaded Successfully!',
-        severity: 'success',
-      })
-      setModifiedCells({})
-      fetchAllData(gradeId)
-    } else if (response?.code === 400 && response?.data) {
-      // Partial save, error file download
-      const byteCharacters = atob(response.data)
-      const byteNumbers = new Array(byteCharacters.length)
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i)
+    setLoading(true)
+    try {
+      var plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
       }
-      const byteArray = new Uint8Array(byteNumbers)
-      const blob = new Blob([byteArray], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', 'Error File Steady state Norms.xlsx')
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Partial data saved. Error file downloaded.',
-        severity: 'warning',
-      })
-    } else {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data Save Failed!',
-        severity: 'error',
-      })
-    }
+
+      const response = await DataService.saveNormalOpsNormsExcel(
+        rawFile,
+        keycloak,
+      )
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchAllData(gradeId)
+      } else if (response?.code === 400 && response?.data) {
+        // Partial save, error file download
+        const byteCharacters = atob(response.data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File Steady state Norms.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
 
       return response
     } catch (error) {
@@ -769,33 +769,34 @@ const NormalOpNormsScreen = () => {
         plantID={plantID}
       />
 
-      {lowerVertName === 'meg' && (
-        <Box sx={{ width: '100%', marginTop: 1 }}>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='meg-grid-content'
-              id='meg-grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Intermediate Values
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataTables
-                  title='Intermediate Values'
-                  columns={colDefsIntermediateValues}
-                  setRows={setRowsIntermediateValues}
-                  rows={rowsIntermediateValues}
-                  paginationOptions={[100, 200, 300]}
-                  permissions={adjustedPermissionsIV}
-                  groupBy='NormTypeName'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
-        </Box>
-      )}
+      {lowerVertName === 'cracker' ||
+        (lowerVertName === 'meg' && (
+          <Box sx={{ width: '100%', marginTop: 1 }}>
+            <CustomAccordion defaultExpanded disableGutters>
+              <CustomAccordionSummary
+                aria-controls='meg-grid-content'
+                id='meg-grid-header'
+              >
+                <Typography component='span' className='grid-title'>
+                  Intermediate Values
+                </Typography>
+              </CustomAccordionSummary>
+              <CustomAccordionDetails>
+                <Box sx={{ width: '100%', margin: 0 }}>
+                  <KendoDataTables
+                    title='Intermediate Values'
+                    columns={colDefsIntermediateValues}
+                    setRows={setRowsIntermediateValues}
+                    rows={rowsIntermediateValues}
+                    paginationOptions={[100, 200, 300]}
+                    permissions={adjustedPermissionsIV}
+                    groupBy='NormTypeName'
+                  />
+                </Box>
+              </CustomAccordionDetails>
+            </CustomAccordion>
+          </Box>
+        ))}
     </div>
   )
 }

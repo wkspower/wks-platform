@@ -15,7 +15,7 @@
     "field": "normParametersFKId",
     "title": "Particulars",
     "editable": false,
-    "width": 175,
+    "widthT": 175,
     "hidden": true
   },
 
@@ -23,7 +23,7 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 220
+    "widthT": 120
   },
   {
     "field": "april",

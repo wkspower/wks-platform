@@ -1,14 +1,16 @@
 [
   {
-    "field": "normParameterDisplayName",
+    "field": "productName",
     "headerName": "Particulars",
-    "widthT": 220
+    "widthT": 220,
+    "type": "text"
   },
   {
     "field": "uom",
     "headerName": "UOM",
     "widthT": 60,
-    "editable": false
+    "editable": false,
+    "type": "text"
   },
   {
     "field": "april",

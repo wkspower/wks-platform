@@ -122,7 +122,6 @@ const KendoDataTables = ({
   onLoad = () => {},
   disableRedHighlight = false,
 }) => {
-  // const _export = (React.useRef < ExcelExport) | (null > null)
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
 
@@ -179,41 +178,9 @@ const KendoDataTables = ({
 
   const itemChange = useCallback(
     (e) => {
-      // const changedDataItem = e.dataItem
-      // const changedField = e.field
-      // // const newValue = e.value
-
-      // const originalDataItem = rows.find(
-      //   (item) => item.id === changedDataItem.id,
-      // )
-      // const originalValue = originalDataItem
-      //   ? originalDataItem[changedField]
-      //   : undefined
-
-      // setEditedCellMap((prev) => ({
-      //   ...prev,
-      //   [rowId]: {
-      //     ...(prev[rowId] || {}),
-      //     [changedField]: newValue,
-      //   },
-      // }))
-
-      //console.log('--- Cell Value Changed ---')
-      //console.log('Row ID:', changedDataItem.id)
-      //console.log('Field (Column Name):', changedField)
-      //console.log('Original Value:', originalValue)
-      //console.log('New Value:', newValue)
-      //console.log('Full Changed Data Item:', changedDataItem)
-
-      // setEditedId(changedDataItem.id)
-      // setEditedValue(changedField)
-
       setIsRowEdited(true)
 
-      // console.log(e)
-
       const { dataItem, field, value } = e
-      // console.log('e', e)
 
       if (dataItem?.field === 'Particulars') return
       if (dataItem?.field === 'ParticularsType') return
@@ -553,7 +520,7 @@ const KendoDataTables = ({
         {...restThProps}
         aria-sort={ariaSort}
         title={props.title}
-        style={{ padding: '0px' }}
+        style={{ padding: '0px', borderRight: '1px solid #b4b4b4ff' }}
       >
         <Tooltip
           position='top'

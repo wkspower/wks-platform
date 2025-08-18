@@ -2,13 +2,13 @@
   {
     "field": "norm",
     "headerName": "Type",
-    "minWidth": 125,
+    "widthT": 120,
     "editable": false
   },
   {
     "field": "particulars",
     "headerName": "Particulars",
-    "widthT": 220,
+    "widthT": 130,
     "editable": false
   },
 

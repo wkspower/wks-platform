@@ -20,13 +20,13 @@ export const BusinessDemandMegColumns = [
     field: 'displayName',
     title: 'Particulars',
     editable: false,
-    widthT: 220,
+    widthT: 120,
   },
   {
     field: 'UOM',
     title: 'UOM',
     editable: false,
-    width: 120,
+    widthT: 75,
   },
   {
     field: 'april',
@@ -228,7 +228,7 @@ export const NormalOpNormMegColumns = [
   {
     field: 'productName',
     title: 'Particulars',
-    widthT: 220,
+    widthT: 130,
   },
 
   {
@@ -391,7 +391,7 @@ export const ShutdownConsumptionMegColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    widthT: 220,
+    widthT: 130,
     editable: false,
   },
   { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },

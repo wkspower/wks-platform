@@ -395,7 +395,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'materialFKId',
       title: 'Particulars',
-      widthT: 220,
+      widthT: 120,
 
       editable: false,
       hidden: true,
@@ -403,7 +403,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
-      widthT: 220,
+      widthT: 120,
       editable: false,
     },
     {
@@ -544,7 +544,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'materialFKId',
       title: 'Particulars',
-      widthT: 220,
+      widthT: 120,
 
       editable: true,
       hidden: true,
@@ -552,7 +552,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
-      widthT: 220,
+      widthT: 120,
       editable: true,
     },
     {
@@ -700,7 +700,7 @@ const ProductionvolumeData = ({ permissions }) => {
       field: 'productName',
       title: 'Particulars',
 
-      widthT: 220,
+      widthT: 120,
 
       editable: false,
     },

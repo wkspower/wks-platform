@@ -81,6 +81,7 @@ const NormsHistorianBasis = () => {
             undefined,
             selectedUnit,
           ),
+
           DataService.getProductionVolDataBasisMode(
             keycloak,
             'expessionbased',
@@ -302,28 +303,31 @@ const NormsHistorianBasis = () => {
             Export
           </Button>
         )}
-        <TextField
-          select
-          value={selectedUnit}
-          onChange={(e) => handleUnitChange(e.target.value)}
-          sx={{
-            width: '150px',
-            backgroundColor: '#FFFFFF',
-            marginLeft: '12px',
-          }}
-          variant='outlined'
-          label={lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
-        >
-          <MenuItem value='' disabled>
-            {lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
-          </MenuItem>
 
-          {units.map((unit) => (
-            <MenuItem key={unit} value={unit}>
-              {unit}
+        {lowerVertName !== 'cracker' && (
+          <TextField
+            select
+            value={selectedUnit}
+            onChange={(e) => handleUnitChange(e.target.value)}
+            sx={{
+              width: '150px',
+              backgroundColor: '#FFFFFF',
+              marginLeft: '12px',
+            }}
+            variant='outlined'
+            label={lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
+          >
+            <MenuItem value='' disabled>
+              {lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
             </MenuItem>
-          ))}
-        </TextField>
+
+            {units.map((unit) => (
+              <MenuItem key={unit} value={unit}>
+                {unit}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>

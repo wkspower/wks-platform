@@ -341,7 +341,7 @@ const KendoDataTablesReports = ({
         {...restThProps}
         aria-sort={ariaSort}
         title={props.title}
-        style={{ padding: '0px' }}
+        style={{ padding: '0px', borderRight: '1px solid #b4b4b4ff' }}
       >
         <Tooltip
           position='top'
@@ -369,19 +369,18 @@ const KendoDataTablesReports = ({
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
-      const headerColorClass =
-        col?.parent === 'Procurment Budget'
-          ? 'header-procurment-budget'
-          : col?.parent === 'Consumption Budget'
-            ? 'header-consumption-budget'
-            : undefined
+      const headerColorClass = undefined
+
+      const budgetDividerClass =
+        col.parent === 'Procurment Budget' && idx === 0 ? 'budget-divider' : ''
 
       if (col.children) {
         return (
           <GridColumn
             key={col.title || idx}
             title={col.title}
-            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            // headerClassName={`center-group-header ${isActive ? 'active-column' : ''} ${headerColorClass} ${budgetDividerClass}`}
+            headerClassName='center-group-header'
           >
             {renderColumns(col.children, filter, sort)}
           </GridColumn>

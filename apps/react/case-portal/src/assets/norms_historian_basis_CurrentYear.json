@@ -1,8 +1,8 @@
 [
   {
-    "field": "normParameterDisplayName",
+    "field": "productName",
     "headerName": "Particulars",
-    "widthT": 220
+    "widthT": 130
   },
   {
     "field": "uom",
