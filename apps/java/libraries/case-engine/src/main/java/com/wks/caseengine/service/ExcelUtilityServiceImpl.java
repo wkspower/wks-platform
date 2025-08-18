@@ -16,8 +16,10 @@ import java.util.stream.Collectors;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
@@ -39,6 +41,13 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
             Workbook workbook = new XSSFWorkbook();
             CellStyle borderStyle = createBorderedStyle(workbook);
             CellStyle boldStyle = createBoldStyle(workbook);
+            CellStyle lockedStyle = workbook.createCellStyle();
+            lockedStyle.setLocked(true);
+            lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+            lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+            CellStyle unlockedStyle = workbook.createCellStyle();
+            unlockedStyle.setLocked(false);
 
             System.out.println("postman structure" + structure);
 
@@ -67,7 +76,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     List<List<Object>> rows = new ArrayList<>();
 
                     title = (String) table.get(ExcelConstants.TITLE);
-                   String textBeforeTitle = (String) table.get(ExcelConstants.TEXT_BEFORE_TITLE);
+                    String textBeforeTitle = (String) table.get(ExcelConstants.TEXT_BEFORE_TITLE);
                     String tableId = (String) table.get(ExcelConstants.TABLEID);
                     rows = data.get(tableId);
                     System.out.println("rows " + rows);
@@ -124,8 +133,11 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     // Write structure rows
                     if(rows!=null) {
                     	for (List<Object> rowData : rows) {
+                    		boolean greyOut = rowData.size() > 0 && rowData.get(rowData.size() - 1).toString().trim().equalsIgnoreCase("false");
                             Row row = sheet.createRow(currentRow++);
-                            for (int col = 0; col < rowData.size(); col++) {
+                            
+                            for (int col = 0; col < rowData.size()-1; col++) {
+                            	
                                 Cell cell = row.createCell(col);
                                 Object value = rowData.get(col);
 
@@ -138,11 +150,16 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                                 } else {
                                     cell.setCellValue("");
                                 }
+                                
 
                                 if (boldCols.contains(col))
                                     cell.setCellStyle(boldStyle);
                                 if (borders)
                                     cell.setCellStyle(borderStyle);
+                                if(greyOut){
+                                	cell.setCellStyle(lockedStyle);
+                                }
+
                             }
                         }
 

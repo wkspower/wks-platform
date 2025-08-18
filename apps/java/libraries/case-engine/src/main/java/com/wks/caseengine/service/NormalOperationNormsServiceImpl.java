@@ -512,7 +512,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			query.setParameter("financialYear", financialYear);
 			query.setParameter("plantId", plantId);
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
-				query.setParameter("gradeId", gradeId);
+				query.setParameter("gradeId", UUID.fromString(gradeId));
 			}
 			if (vertical.getName().equalsIgnoreCase("Cracker")) {
 				query.setParameter("mode", mode);
@@ -590,7 +590,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords,mode);
+				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords,mode,gradeId);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
@@ -724,9 +724,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList,String mode) {
+	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList,String mode,String gradeId) {
 		try {
-			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString(), "",mode);
+			AOPMessageVM aopMessageVM = getNormalOperationNormsData(year, plantFKId.toString(), gradeId,mode);
 			List<Boolean> isEditable = new ArrayList<>();
 
 			if (!isAfterSave) {
