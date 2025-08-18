@@ -11,12 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.TurnAroundPlanReportDTO;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.TurnAroundPlan;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.TurnAroundPlanReportRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -30,6 +35,13 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
 
     @Autowired
     private PlantsRepository plantsRepository;
+    
+    
+	@Autowired
+	private VerticalsRepository verticalRepository;
+
+	@Autowired
+	private SiteRepository siteRepository;
     
     @Autowired
     private TurnAroundPlanReportRepository turnAroundPlanReportRepository;
@@ -99,7 +111,13 @@ public class TurnAroundDataReportServiceImpl implements TurnAroundDataReportServ
     public List<Object[]> getPlantTurnAroundData(String plantId, String aopYear, String reportType) {
         try {
             String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+            Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
             String storedProcedure = "TurnAroundPlanReport";
+            if (!"MEG".equalsIgnoreCase(verticalName)) {
+            	storedProcedure = verticalName +"_"+site.getName()+ "_TurnAroundPlanReport";
+            }
             String sql = "EXEC " + storedProcedure
                     + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
