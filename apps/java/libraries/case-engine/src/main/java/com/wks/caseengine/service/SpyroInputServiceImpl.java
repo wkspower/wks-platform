@@ -160,6 +160,8 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		}
 
 	}
+	
+	
 
 	public List<Object[]> getData(String plantId, String AopYear, String siteId,
 			String verticalId, String Mode, String procedureName) {
@@ -207,6 +209,10 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 					failedList.add(spyroInputDTO);
 					continue;
 				}
+				if (optionNormParameters.isPresent() && !optionNormParameters.get().getIsEditable()) {
+					continue;
+				}
+				
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(spyroInputDTO, i);
 
@@ -347,6 +353,12 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 								list.add(value);
 							}
 							list.add(tableId);
+							UUID normParameterFKId = UUID.fromString(dto.getNormParameterFKID());
+							Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
+							if(optionNormParameters.isPresent()) {
+								list.add(optionNormParameters.get().getIsEditable());
+							}
+							
 							dataList.add(list);
 						}
 
@@ -378,6 +390,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 								list.add(map.get(header));
 							}
 							list.add(tableId);
+							list.add(map.get("isEditable"));
 							dataList.add(list);
 						}
 

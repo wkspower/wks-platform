@@ -73,11 +73,11 @@ public class NormalOperationNormsController {
 	@GetMapping(value = "/norms-export-excel")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,@RequestParam(required = false) String mode
+            @RequestParam("year") String year,@RequestParam(required = false) String mode, @RequestParam(required = false) String gradeId
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null,mode); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = normalOperationNormsService.createExcel(year,UUID.fromString(plantId),false,null,mode,gradeId); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
