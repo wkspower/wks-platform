@@ -134,38 +134,55 @@ const workspace = {
       ],
     },
 
-    {
-      id: 'functional-aop',
-      title: i18n.t('menu.functionalAop'),
-      type: 'collapse',
-      icon: icons.IconReport,
-      children: [
-        {
-          id: 'aop-budget',
-          title: i18n.t('menu.monthlyAop'),
-          type: 'item',
-          url: '/functional-aop/aop-budget',
-          icon: icons.IconFile,
-          breadcrumbs: true,
-        },
-        {
-          id: 'monthly-template-plants',
-          title: i18n.t('menu.siteWiseAop'),
-          type: 'item',
-          url: '/functional-aop/monthly-template-plants',
-          icon: icons.IconFileText,
-          breadcrumbs: true,
-        },
-        {
-          id: 'aop-summary',
-          title: i18n.t('menu.allSiteSummaryAop'),
-          type: 'item',
-          url: '/functional-aop/aop-summary',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-      ],
-    },
+    // {
+    //   id: 'functional-aop',
+    //   title: i18n.t('menu.functionalAop'),
+    //   type: 'collapse',
+    //   icon: icons.IconReport,
+    //   children: [
+    //     {
+    //       id: 'monthly-template-plants',
+    //       title: i18n.t('menu.siteWiseAop'),
+    //       type: 'item',
+    //       url: '/functional-aop/monthly-template-plants',
+    //       icon: icons.IconFileText,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'aop-summary',
+    //       title: i18n.t('menu.allSiteSummaryAop'),
+    //       type: 'item',
+    //       ul: '/functional-aop/aop-summary',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
+    //   ],
+    // },
+
+    // {
+    //   id: 'manufacturing-division',
+    //   title: i18n.t('menu.manufacturingDivision'),
+    //   type: 'collapse',
+    //   icon: icons.IconReport,
+    //   children: [
+    //     {
+    //       id: 'plant-team',
+    //       title: i18n.t('menu.plantTeam'),
+    //       type: 'item',
+    //       url: '/manufacturing-division/plant-team',
+    //       icon: icons.IconFile,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'plant-safety-performance-target',
+    //       title: i18n.t('menu.plantSafetyPerformanceTarget'),
+    //       type: 'item',
+    //       url: '/manufacturing-division/plant-safety-performance-target',
+    //       icon: icons.IconFile,
+    //       breadcrumbs: true,
+    //     },
+    //   ],
+    // },
 
     {
       id: 'workflow',
@@ -181,6 +198,33 @@ const workspace = {
       type: 'item',
       url: '/user-management',
       icon: icons?.IconUserCog,
+      breadcrumbs: true,
+    },
+
+    {
+      id: 'plant-team',
+      title: i18n.t('menu.plantTeam'),
+      type: 'item',
+      url: '/plant-team',
+      icon: icons.IconUserCog,
+      breadcrumbs: true,
+    },
+
+    {
+      id: 'plant-safety-performance-target',
+      title: i18n.t('menu.plantSafetyPerformanceTarget'),
+      type: 'item',
+      url: '/plant-safety-performance-target',
+      icon: icons.IconFileText,
+      breadcrumbs: true,
+    },
+
+    {
+      id: 'aop-budget',
+      title: i18n.t('menu.monthlyAop'),
+      type: 'item',
+      url: '/aop-budget',
+      icon: icons.IconFile,
       breadcrumbs: true,
     },
   ],

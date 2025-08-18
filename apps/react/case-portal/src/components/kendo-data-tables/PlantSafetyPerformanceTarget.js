@@ -8,7 +8,7 @@ import KendoDataTables from './index'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 
-export default function AopBudget() {
+export default function PlantSafetyPerformanceTarget() {
   const keycloak = useSession()
   const thisYear = localStorage.getItem('year')
 
@@ -37,6 +37,22 @@ export default function AopBudget() {
   const [modifiedCellsP, setModifiedCellsP] = useState({})
   const [enableSaveAddBtnP, setEnableSaveAddBtnP] = useState(false)
 
+  const [rows3, setRows3] = useState([])
+
+  const [remarkDialogOpen3, setRemarkDialogOpen3] = useState(false)
+  const [currentRemark3, setCurrentRemark3] = useState('')
+  const [currentRowId3, setCurrentRowId3] = useState(null)
+  const [modifiedCells3, setModifiedCells3] = useState({})
+  const [enableSaveAddBtn3, setEnableSaveAddBtn3] = useState(false)
+
+  const [rows4, setRows4] = useState([])
+
+  const [enableSaveAddBtn4, setEnableSaveAddBtn4] = useState(false)
+  const [remarkDialogOpen4, setRemarkDialogOpen4] = useState(false)
+  const [currentRemark4, setCurrentRemark4] = useState('')
+  const [currentRowId4, setCurrentRowId4] = useState(null)
+  const [modifiedCells4, setModifiedCells4] = useState({})
+
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -63,108 +79,126 @@ export default function AopBudget() {
   const columns = useMemo(
     () => [
       {
-        field: 'Cost',
-        title: 'Cost',
-        widthT: 100,
+        field: 'serialNumber',
+        title: 'S.No',
+        widthT: 70,
         editable: false,
       },
       {
-        field: 'April',
-        title: headerMap[4],
-
+        field: 'kpi',
+        title: 'KPI',
         editable: true,
-        type: 'number',
-        format: '{0:#.###}',
+        widthT: 300,
       },
       {
-        field: 'May',
-        title: headerMap[5],
-
+        field: 'uom',
+        title: 'UOM',
+        widthT: 80,
         editable: true,
-        type: 'number',
-        format: '{0:#.###}',
       },
       {
-        field: 'June',
-        title: headerMap[6],
+        field: 'bestAchived',
+        title: 'Best Achived',
 
         editable: true,
-        type: 'number',
-        format: '{0:#.###}',
       },
       {
-        field: 'July',
-        title: headerMap[7],
+        field: 'fyAop',
+        title: 'FY25 AOP',
 
         editable: true,
-        type: 'number',
-        format: '{0:#.###}',
       },
       {
-        field: 'August',
-        title: headerMap[8],
+        field: 'fyActual',
+        title: 'FY25 Actual',
 
         editable: true,
-        type: 'number',
-        format: '{0:#.###}',
       },
       {
-        field: 'September',
-        title: headerMap[9],
+        field: 'fyActual',
+        title: 'FY26 Plan',
 
         editable: true,
-        type: 'number',
-        format: '{0:#.###}',
       },
-      {
-        field: 'October',
-        title: headerMap[10],
 
-        editable: true,
-        type: 'number',
-        format: '{0:#.###}',
-      },
-      {
-        field: 'November',
-        title: headerMap[11],
-
-        editable: true,
-        type: 'number',
-        format: '{0:#.###}',
-      },
-      {
-        field: 'December',
-        title: headerMap[12],
-
-        editable: true,
-        type: 'number',
-        format: '{0:#.###}',
-      },
-      {
-        field: 'January',
-        title: headerMap[1],
-
-        editable: true,
-        type: 'number',
-        format: '{0:#.###}',
-      },
-      {
-        field: 'February',
-        title: headerMap[2],
-
-        editable: true,
-        type: 'number',
-        format: '{0:#.###}',
-      },
-      {
-        field: 'March',
-        title: headerMap[3],
-
-        editable: true,
-        type: 'number',
-        format: '{0:#.###}',
-      },
       { field: 'remarks', title: 'Remark', widthT: 220, editable: false },
+    ],
+    [plantID, yearChanged],
+  )
+  const columns4 = useMemo(
+    () => [
+      {
+        field: 'serialNumber',
+        title: 'S.No',
+        widthT: 70,
+        editable: false,
+      },
+      {
+        field: 'initiative',
+        title: 'Initiative',
+        editable: true,
+        widthT: 250,
+      },
+      {
+        field: 'outcome',
+        title: 'Outcome',
+        editable: true,
+      },
+      {
+        field: 'recommendation',
+        title: 'Recommendation',
+        editable: true,
+      },
+      {
+        field: 'targetDate',
+        title: 'Target Date',
+        editable: true,
+      },
+      {
+        field: 'responsible',
+        title: 'Resp.',
+        editable: true,
+        widthT: 120,
+      },
+    ],
+    [plantID, yearChanged],
+  )
+
+  const columns3 = useMemo(
+    () => [
+      {
+        field: 'serialNumber',
+        title: 'S.No',
+        widthT: 70,
+        editable: false,
+      },
+      {
+        field: 'incidentDescription',
+        title: 'Incident Description',
+        editable: true,
+        widthT: 250,
+      },
+      {
+        field: 'rootCauses',
+        title: 'Root Causes',
+        editable: true,
+      },
+      {
+        field: 'recommendation',
+        title: 'Recommendation',
+        editable: true,
+      },
+      {
+        field: 'targetDate',
+        title: 'Target Date',
+        editable: true,
+      },
+      {
+        field: 'responsible',
+        title: 'Resp.',
+        editable: true,
+        widthT: 120,
+      },
     ],
     [plantID, yearChanged],
   )
@@ -179,165 +213,106 @@ export default function AopBudget() {
         code: 200,
         data: [
           {
-            Particulars: 'Routine',
-            Cost: 'Material Cost',
-            April: 1900,
-            May: 1534,
-            June: 1956,
-            July: 887,
-            August: 713,
-            September: 647,
-            October: 1875,
-            November: 1942,
-            December: 1510,
-            January: 1287,
-            February: 1398,
-            March: 1944,
-            remarks: 'Regular service checks',
+            serialNumber: 1,
+            kpi: 'Fatality',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
           {
-            Particulars: 'Routine',
-            Cost: 'Service Cost',
-            April: 1432,
-            May: 1123,
-            June: 1800,
-            July: 1674,
-            August: 1766,
-            September: 1640,
-            October: 1203,
-            November: 933,
-            December: 1880,
-            January: 1922,
-            February: 691,
-            March: 1187,
-            remarks: 'Regular service checks',
+            serialNumber: 2,
+            kpi: 'LWC',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
           {
-            Particulars: 'Routine',
-            Cost: 'Total Cost',
-            April: 5086,
-            May: 4089,
-            June: 5688,
-            July: 3649,
-            August: 3917,
-            September: 3813,
-            October: 4678,
-            November: 4774,
-            December: 5034,
-            January: 3808,
-            February: 4071,
-            March: 4612,
-            remarks: 'Total',
-            isEditable: false,
-          },
-
-          {
-            Particulars: 'One time',
-            Cost: 'Material Cost',
-            April: 1337,
-            May: 1382,
-            June: 1975,
-            July: 932,
-            August: 1866,
-            September: 1291,
-            October: 828,
-            November: 1057,
-            December: 1046,
-            January: 1698,
-            February: 1104,
-            March: 1538,
-            remarks: 'Regular service checks',
+            serialNumber: 3,
+            kpi: 'Total Recordable Cases Frequency Rate (TRCFR)',
+            uom: 'Rate',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
           {
-            Particulars: 'One time',
-            Cost: 'Service Cost',
-            April: 769,
-            May: 1761,
-            June: 1217,
-            July: 1877,
-            August: 1274,
-            September: 1811,
-            October: 1643,
-            November: 989,
-            December: 1242,
-            January: 1963,
-            February: 1695,
-            March: 944,
-            remarks: 'Regular service checks',
+            serialNumber: 4,
+            kpi: 'PSE Tier-1',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
           {
-            Particulars: 'One time',
-            Cost: 'Total Cost',
-            April: 4061,
-            May: 4041,
-            June: 4349,
-            July: 4629,
-            August: 3787,
-            September: 4731,
-            October: 4081,
-            November: 2735,
-            December: 4014,
-            January: 5625,
-            February: 4429,
-            March: 3902,
-            remarks: 'Total',
-            isEditable: false,
-          },
-
-          {
-            Particulars: 'Shutdown',
-            Cost: 'Material Cost',
-            April: 1654,
-            May: 1088,
-            June: 1490,
-            July: 1721,
-            August: 1299,
-            September: 1960,
-            October: 1106,
-            November: 1930,
-            December: 1778,
-            January: 1022,
-            February: 1419,
-            March: 1661,
-            remarks: 'Regular service checks',
+            serialNumber: 5,
+            kpi: 'PSE Tier-2',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
           {
-            Particulars: 'Shutdown',
-            Cost: 'Service Cost',
-            April: 1327,
-            May: 1503,
-            June: 943,
-            July: 1868,
-            August: 1724,
-            September: 700,
-            October: 1720,
-            November: 1066,
-            December: 1041,
-            January: 1873,
-            February: 1100,
-            March: 1309,
-            remarks: 'Regular service checks',
+            serialNumber: 6,
+            kpi: 'Process Fire',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
           {
-            Particulars: 'Shutdown',
-            Cost: 'Total Cost',
-            April: 4103,
-            May: 4441,
-            June: 4319,
-            July: 5304,
-            August: 3844,
-            September: 4656,
-            October: 4318,
-            November: 4663,
-            December: 4531,
-            January: 3872,
-            February: 3851,
-            March: 3806,
-            remarks: 'Total',
-            isEditable: false,
+            serialNumber: 7,
+            kpi: 'Non-Process Fire',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
+          },
+          {
+            serialNumber: 8,
+            kpi: 'Electrical Fire',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
+          },
+          {
+            serialNumber: 9,
+            kpi: 'Overdue Investigation',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
+          },
+          {
+            serialNumber: 10,
+            kpi: 'Overdue IM Recommendation',
+            uom: 'Nos',
+            bestAchived: '',
+            fyAop: '',
+            fyActual: '',
+            fy26Plan: '',
+            remarks: '',
           },
         ],
-
         data1: [
           {
             Particulars: 'Routine',
@@ -356,95 +331,43 @@ export default function AopBudget() {
             March: 1944,
             remarks: 'Regular service checks',
           },
-          {
-            Particulars: 'Routine',
-            Cost: 'Total Cost',
-            April: 3654,
-            May: 2966,
-            June: 3888,
-            July: 1975,
-            August: 2151,
-            September: 2173,
-            October: 3475,
-            November: 3841,
-            December: 3154,
-            January: 1886,
-            February: 3380,
-            March: 3425,
-            remarks: 'Total',
-            isEditable: false,
-          },
+        ],
 
+        data2: [
           {
-            Particulars: 'One time',
-            Cost: 'Material Cost',
-            April: 1337,
-            May: 1382,
-            June: 1975,
-            July: 932,
-            August: 1866,
-            September: 1291,
-            October: 828,
-            November: 1057,
-            December: 1046,
-            January: 1698,
-            February: 1104,
-            March: 1538,
-            remarks: 'Regular service checks',
+            serialNumber: 1,
+            incidentDescription: '',
+            rootCauses: '',
+            recommendation: '',
+            targetDate: '',
+            responsible: '',
           },
           {
-            Particulars: 'One time',
-            Cost: 'Total Cost',
-            April: 3292,
-            May: 2280,
-            June: 3132,
-            July: 2753,
-            August: 2513,
-            September: 2920,
-            October: 2438,
-            November: 1746,
-            December: 2772,
-            January: 3662,
-            February: 2734,
-            March: 2958,
-            remarks: 'Total',
-            isEditable: false,
+            serialNumber: '',
+            incidentDescription: '',
+            rootCauses: '',
+            recommendation: '',
+            targetDate: '',
+            responsible: '',
           },
+        ],
 
+        data3: [
           {
-            Particulars: 'Shutdown',
-            Cost: 'Material Cost',
-            April: 1654,
-            May: 1088,
-            June: 1490,
-            July: 1721,
-            August: 1299,
-            September: 1960,
-            October: 1106,
-            November: 1930,
-            December: 1778,
-            January: 1022,
-            February: 1419,
-            March: 1661,
-            remarks: 'Regular service checks',
+            serialNumber: 1,
+            initiative: '',
+            outcome: '',
+            recommendation: '',
+            targetDate: '',
+            responsible: '',
           },
           {
-            Particulars: 'Shutdown',
-            Cost: 'Total Cost',
-            April: 2776,
-            May: 2938,
-            June: 3376,
-            July: 3436,
-            August: 2120,
-            September: 3956,
-            October: 2598,
-            November: 3597,
-            December: 3490,
-            January: 1999,
-            February: 2751,
-            March: 2497,
-            remarks: 'Total',
-            isEditable: false,
+            serialNumber: '',
+            initiative: '',
+            outcome: '',
+            recommendation: '',
+            targetDate: '',
+            responsible: '',
           },
         ],
       }
@@ -462,8 +385,22 @@ export default function AopBudget() {
           isEditable: item?.isEditable,
           originalRemark: item.remarks,
         }))
+        const mapped3 = res?.data2?.map((item, index) => ({
+          ...item,
+          id: index,
+          isEditable: item?.isEditable,
+          originalRemark: item.remarks,
+        }))
+        const mapped4 = res?.data3?.map((item, index) => ({
+          ...item,
+          id: index,
+          isEditable: item?.isEditable,
+          originalRemark: item.remarks,
+        }))
         setRows(mapped)
         setRowsP(mapped1)
+        setRows3(mapped3)
+        setRows4(mapped4)
       } else {
         setRows([])
         setRowsP([])
@@ -542,6 +479,34 @@ export default function AopBudget() {
       isOldYear: isOldYear,
     }
   }
+  const getAdjustedPermissions3 = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
+  const getAdjustedPermissions4 = (permissions, isOldYear) => {
+    if (isOldYear != 1) return permissions
+    return {
+      ...permissions,
+      showAction: false,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: false,
+      saveBtn: false,
+      isOldYear: isOldYear,
+    }
+  }
 
   const adjustedPermissionsP = getAdjustedPermissionsP(
     {
@@ -554,6 +519,35 @@ export default function AopBudget() {
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Monthly Procurment Budget`,
+    },
+    isOldYear,
+  )
+  const adjustedPermissions3 = getAdjustedPermissions3(
+    {
+      saveBtn: true,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName:
+        'Major Incidents FY25 (Fatality, PSE Tier 1 & 2, LWC, High Severity, Process Fires)',
+      adjustedPermissions: true,
+      // downloadExcelBtnFromUI: true,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
+      // ExcelName: `${lowerVertName}_Monthly Procurment Budget`,
+    },
+    isOldYear,
+  )
+  const adjustedPermissions4 = getAdjustedPermissions4(
+    {
+      saveBtn: true,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: 'Safety Improvement Initiative',
+      adjustedPermissions: true,
+      // downloadExcelBtnFromUI: true,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
+      // ExcelName: `${lowerVertName}_Monthly Procurment Budget`,
     },
     isOldYear,
   )
@@ -577,14 +571,12 @@ export default function AopBudget() {
       allAction: true,
       saveBtn: true,
       showTitleNameBusiness: true,
-      showReportTitleMain: true,
-      titleName: 'Consumption Budget',
-      titleNameMain: 'Monthly Budget',
+      titleName: 'Plant Safety Performance & Targets',
       adjustedPermissions: true,
       // downloadExcelBtnFromUI: true,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
-      ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
+      ExcelName: `${lowerVertName}_Plant Safety Performance & Targets`,
     },
     isOldYear,
   )
@@ -606,7 +598,6 @@ export default function AopBudget() {
         rows={rows}
         setRows={setRows}
         title='Consumption Budget'
-        titleMain='Monthly Budget'
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         remarkDialogOpen={remarkDialogOpen}
@@ -620,11 +611,11 @@ export default function AopBudget() {
         handleCalculate={handleCalculate}
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={adjustedPermissionsC}
-        groupBy='Particulars'
+        // groupBy='Particulars'
         {...commonGridProps}
       />
 
-      <KendoDataTables
+      {/* <KendoDataTables
         rows={rowsP}
         setRows={setRowsP}
         title='Procurement Budget'
@@ -641,8 +632,46 @@ export default function AopBudget() {
         handleCalculate={handleCalculateP}
         handleRemarkCellClick={handleRemarkCellClickP}
         permissions={adjustedPermissionsP}
-        {...commonGridProps}
-        groupBy='Particulars'
+        columns={columns3}
+      /> */}
+      <KendoDataTables
+        rows={rows3}
+        setRows={setRows3}
+        title='Procurement Budget'
+        modifiedCells={modifiedCells3}
+        setModifiedCells={setModifiedCells3}
+        remarkDialogOpen={remarkDialogOpen3}
+        setRemarkDialogOpen={setRemarkDialogOpen3}
+        currentRemark={currentRemark3}
+        setCurrentRemark={setCurrentRemark3}
+        currentRowId={currentRowId3}
+        setCurrentRowId={setCurrentRowId3}
+        enableSaveAddBtn={enableSaveAddBtn3}
+        // saveChanges={saveChanges3}
+        // handleCalculate={handleCalculate3}
+        // handleRemarkCellClick={handleRemarkCellClick3}
+        permissions={adjustedPermissions3}
+        columns={columns3}
+      />
+
+      <KendoDataTables
+        rows={rows4}
+        setRows={setRows4}
+        title='Procurement Budget'
+        modifiedCells={modifiedCells4}
+        setModifiedCells={setModifiedCells4}
+        remarkDialogOpen={remarkDialogOpen4}
+        setRemarkDialogOpen={setRemarkDialogOpen4}
+        currentRemark={currentRemark4}
+        setCurrentRemark={setCurrentRemark4}
+        currentRowId={currentRowId4}
+        setCurrentRowId={setCurrentRowId4}
+        enableSaveAddBtn={enableSaveAddBtn4}
+        // saveChanges={saveChanges4}
+        // handleCalculate={handleCalculate4}
+        // handleRemarkCellClick={handleRemarkCellClick4}
+        permissions={adjustedPermissions4}
+        columns={columns4}
       />
 
       <Notification

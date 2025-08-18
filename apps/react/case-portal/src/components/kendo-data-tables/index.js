@@ -113,6 +113,7 @@ const KendoDataTables = ({
   groupBy = null,
   note = '',
   titleName = '',
+
   allProducts = [],
   allMonths = [],
   selectMode,
@@ -650,6 +651,12 @@ const KendoDataTables = ({
           <div className='k-loading-image' />
           <div className='k-loading-color' />
         </div>
+      )}
+
+      {permissions?.showReportTitleMain && (
+        <Typography component='div' className='grid-title'>
+          {permissions?.titleNameMain}
+        </Typography>
       )}
 
       {(permissions?.allAction ?? false) && (

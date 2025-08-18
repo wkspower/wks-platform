@@ -70,9 +70,13 @@ const defs = {
 
     //FUNCTIONAL AOP
     functionalAop: 'Functional AOP',
-    monthlyAop: 'Monthly Budget',
+    manufacturingDivision: 'Manufacturing Division',
+    monthlyAop: 'Maintenance',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
+
+    plantTeam: 'People',
+    plantSafetyPerformanceTarget: 'S&OR',
   },
   pages: {
     dashboard: {
@@ -240,9 +244,14 @@ const defs = {
 
         //FUNCTIONAL AOP
         functionalAop: 'Functional AOP',
-        monthlyAop: 'Monthly Budget',
+
+        monthlyAop: 'Maintenance',
         siteWiseAop: 'Consumption Summary (Sites)',
         allSiteSummaryAop: 'Summary',
+
+        manufacturingDivision: 'Manufacturing Division',
+        plantSafetyPerformanceTarget: 'S&OR',
+        plantTeam: 'People',
       },
     },
   },
