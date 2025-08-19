@@ -29,6 +29,12 @@ public class AOPReportController {
 		AOPMessageVM response	=aopReportService.getReportForProductionVolumnData(plantId,year,reportType,uom);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
+	
+	@GetMapping(value="/handle/calculate/miis-contribution")
+	public ResponseEntity<AOPMessageVM> getHandleCalculateMIISContribution(@RequestParam String plantId,@RequestParam String year){
+		AOPMessageVM response	=aopReportService.getHandleCalculateMIISContribution(plantId,year);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
 
 
 }
