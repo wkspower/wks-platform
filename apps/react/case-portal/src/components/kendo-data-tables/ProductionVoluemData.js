@@ -945,7 +945,6 @@ const ProductionvolumeData = ({ permissions }) => {
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: false,
       units: ['TPH', 'TPD'],
-      customHeight: permissions?.customHeight ?? defaultCustomHeight,
 
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
 
@@ -967,7 +966,6 @@ const ProductionvolumeData = ({ permissions }) => {
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       units: ['TPH', 'TPD'],
-      customHeight: permissions?.customHeight ?? defaultCustomHeight,
       showCalculate: permissions?.hideSummary ? false : lowerVertName === 'meg',
       showCalculateVisibility:
         lowerVertName === 'meg' &&

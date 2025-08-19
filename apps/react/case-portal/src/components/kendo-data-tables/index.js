@@ -649,17 +649,16 @@ const KendoDataTables = ({
     }
   }, [permissions])
 
-  const rowHeightVH = 3 // each row ~4vh
-  const headerVH = 8 // grid’s own header/filter area
-  const pageHeaderVH = 15 // top app bar + stepper + controls
+  const rowHeightVH = 5 // each row ~4vh
+  const headerVH = 10 // grid’s own header/filter area
+  const pageHeaderVH = 20 // top app bar + stepper + controls
   const maxVH = 60 // cap grid height
 
   const calculatedVH = React.useMemo(() => {
-    if (!rows || rows?.length === 0) return 20 // safe default for empty
+    if (!rows || rows?.length === 0) return 20
     const needed = rows?.length * rowHeightVH + headerVH
-    // total space available = 100vh - pageHeaderVH
     const available = 100 - pageHeaderVH
-    return Math.min(needed, maxVH, available)
+    return Math.round(Math.min(needed, maxVH, available))
   }, [rows?.length])
 
   return (
@@ -927,6 +926,7 @@ const KendoDataTables = ({
                 // height: permissions?.isHeight ? '60vh' : '60vh',
                 // height: '60vh',
                 // height: `${gridHeight}px`,
+
                 height:
                   lowerVertName === 'meg'
                     ? undefined

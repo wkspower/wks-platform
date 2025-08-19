@@ -305,6 +305,10 @@ const AnnualAopCost = () => {
                       columns={section.cols}
                       pageSize={10}
                       scrollable='none'
+                      permissions={{
+                        allAction: false,
+                        isHeight: section?.rows?.length > 15,
+                      }}
                     />
                   </Box>
                 </CustomAccordionDetails>
