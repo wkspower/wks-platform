@@ -137,7 +137,7 @@
     "field": "remarks",
     "title": "Remark",
     "editable": false,
-    "widthT": 220
+    "widthT": 150
   },
   {
     "field": "avgTph",

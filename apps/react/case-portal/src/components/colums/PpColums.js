@@ -147,6 +147,7 @@ export const SlowDownPpColumns = [
     field: 'discription',
     title: 'Slowdown Desc',
     editable: true,
+    widthT: 130,
   },
 
   {
@@ -160,6 +161,7 @@ export const SlowDownPpColumns = [
     field: 'productName1',
     title: 'Particulars',
     editable: true,
+    widthT: 130,
   },
 
   {
@@ -214,7 +216,7 @@ export const NormalOpNormPpColumns = [
   {
     field: 'productName',
     title: 'Particulars',
-    widthT: 220,
+    widthT: 130,
   },
 
   {

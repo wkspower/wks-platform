@@ -256,6 +256,7 @@ const BusinessDemand = ({ permissions }) => {
 
       downloadExcelBtnFromUI: true,
       ExcelName: `${lowerVertName}_Business Demand Data`,
+      isHeight: lowerVertName !== 'meg' && rows?.length > 10,
     },
     isOldYear,
   )

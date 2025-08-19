@@ -19,7 +19,7 @@ export const BusinessDemandPeColumns = [
     field: 'displayName',
     title: 'Particulars',
     editable: false,
-    widthT: 220,
+    widthT: 110,
   },
   {
     field: 'april',
@@ -132,7 +132,7 @@ export const BusinessDemandPeColumns = [
   {
     field: 'remark',
     title: 'Remark',
-    width: 180,
+    widthT: 180,
     editable: false,
   },
   {
@@ -147,6 +147,7 @@ export const SlowDownPeColumns = [
     field: 'discription',
     title: 'Slowdown Desc',
     editable: true,
+    widthT: 130,
   },
 
   {
@@ -159,7 +160,7 @@ export const SlowDownPeColumns = [
   {
     field: 'productName1',
     title: 'Particulars',
-    widthT: 220,
+    widthT: 160,
     editable: true,
   },
 
@@ -201,7 +202,7 @@ export const NormalOpNormPeColumns = [
   {
     field: 'Particulars',
     title: 'Type',
-    widthT: 220,
+    widthT: 160,
     groupable: true,
     editable: false,
     hidden: true,
@@ -209,13 +210,13 @@ export const NormalOpNormPeColumns = [
   {
     field: 'materialFkId',
     title: 'Particulars',
-    widthT: 220,
+    widthT: 160,
     hidden: true,
   },
   {
     field: 'productName',
     title: 'Particulars',
-    widthT: 220,
+    widthT: 160,
   },
 
   {
@@ -344,7 +345,7 @@ export const NormalOpNormPeColumns = [
   {
     field: 'remarks',
     title: 'Remark',
-    width: 125,
+    widthT: 160,
     editable: true,
   },
 
@@ -378,7 +379,7 @@ export const ShutdownConsumptionPeColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    widthT: 220,
+    widthT: 140,
     editable: false,
   },
   { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
@@ -403,7 +404,7 @@ export const ShutdownConsumptionPeColumns = [
   {
     field: 'remarks',
     headerName: 'Remark',
-    width: 120,
+    widthT: 120,
     editable: false,
   },
   {
@@ -430,7 +431,7 @@ export const SlowdownNormsPeColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    widthT: 220,
+    widthT: 160,
     editable: false,
   },
   { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
@@ -481,7 +482,7 @@ export const ConsumptionAopPeColumns = [
     field: 'productName',
     title: 'Particulars',
     editable: false,
-    widthT: 220,
+    widthT: 160,
   },
   {
     field: 'UOM',

@@ -577,9 +577,9 @@ export default function AopBudget() {
       allAction: true,
       saveBtn: true,
       showTitleNameBusiness: true,
-      showReportTitleMain: true,
+
       titleName: 'Consumption Budget',
-      titleNameMain: 'Monthly Budget',
+
       adjustedPermissions: true,
       // downloadExcelBtnFromUI: true,
       downloadExcelBtn: true,

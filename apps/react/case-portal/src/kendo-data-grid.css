@@ -146,7 +146,7 @@
 }
 /* Increase the font-size inside the input */
 .k-custom-dtp .k-input {
-  font-size: 1.5rem;
+  font-size: 1rem;
   /* If you want it truly read-only (no caret), you could also do pointer-events: none; but usually you just suppress typing via onKeyDown in props. */
 }
 
@@ -232,11 +232,11 @@ a.k-grid-header-menu.k-grid-column-menu {
 
 .k-column-title {
   overflow: visible !important;
-  font-size: 12px;
-  /* font-family: 'Arial Narrow', sans-serif; */
+  font-size: 11px;
   letter-spacing: -0.3px;
   margin-left: -8px;
   margin-right: 4px;
+  line-height: 1.3;
 }
 /* Add these styles to your ../../kendo-data-grid.css file */
 
@@ -265,15 +265,15 @@ a.k-grid-header-menu.k-grid-column-menu {
 }
 
 @keyframes highlight-error {
-  0% { 
-    background-color: #ffffff; 
+  0% {
+    background-color: #ffffff;
     transform: scale(1);
   }
-  50% { 
-    background-color: #ffcdd2; 
+  50% {
+    background-color: #ffcdd2;
     transform: scale(1.01);
   }
-  100% { 
+  100% {
     background-color: #ffebee;
     transform: scale(1);
   }
@@ -292,4 +292,18 @@ a.k-grid-header-menu.k-grid-column-menu {
 
 .error-row:hover td {
   background-color: #ffcdd2 !important;
+}
+
+.k-grid-sm .k-table-td {
+  font-size: 12px !important; /* smaller text when size="small" */
+}
+.k-grid-md .k-table-td {
+  font-size: 12px !important; /* default */
+}
+
+.k-grid-edit-cell .k-input {
+  font-size: 8px !important; /* control font */
+  padding: 4px 6px; /* control spacing */
+  border-radius: 4px; /* round corners */
+  border: 1px solid #ccc; /* custom border */
 }

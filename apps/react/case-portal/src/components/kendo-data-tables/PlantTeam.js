@@ -37,12 +37,12 @@ export default function PlantTeam() {
   const [modifiedCellsP, setModifiedCellsP] = useState({})
   const [enableSaveAddBtnP, setEnableSaveAddBtnP] = useState(false)
   //---
-const [peopleInitiativeRows, setPeopleInitiativeRows] = useState([])
-const [modifiedPeopleCells, setModifiedPeopleCells] = useState({})
-const [remarkDialogOpenPeople, setRemarkDialogOpenPeople] = useState(false)
-const [currentRemarkPeople, setCurrentRemarkPeople] = useState('')
-const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
-//-
+  const [peopleInitiativeRows, setPeopleInitiativeRows] = useState([])
+  const [modifiedPeopleCells, setModifiedPeopleCells] = useState({})
+  const [remarkDialogOpenPeople, setRemarkDialogOpenPeople] = useState(false)
+  const [currentRemarkPeople, setCurrentRemarkPeople] = useState('')
+  const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
+  //-
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -97,7 +97,7 @@ const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
         title: 'Age',
         editable: true,
         type: 'number',
-        widthT: 70,
+        widthT: 100,
       },
       {
         field: 'teamSize',
@@ -112,13 +112,19 @@ const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
 
   const year = thisYear
   const peopleInitiativeColumns = [
-  { field: 'serialNumber', title: 'S.No.', widthT: 70, editable: false, type: 'number' },
-  { field: 'initiative', title: 'Initiative', editable: true },
-  { field: 'outcome', title: 'Outcome', editable: true },
-  { field: 'recommendation', title: 'Recommendation', editable: true },
-  { field: 'targetDate', title: 'Target Date', editable: true, widthT: 120 },
-  { field: 'responsible', title: 'Resp.', editable: true, widthT: 120 }
-]
+    {
+      field: 'serialNumber',
+      title: 'S.No.',
+      widthT: 70,
+      editable: false,
+      type: 'number',
+    },
+    { field: 'initiative', title: 'Initiative', editable: true },
+    { field: 'outcome', title: 'Outcome', editable: true },
+    { field: 'recommendation', title: 'Recommendation', editable: true },
+    { field: 'targetDate', title: 'Target Date', editable: true, widthT: 180 },
+    { field: 'responsible', title: 'Resp.', editable: true, widthT: 120 },
+  ]
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -286,16 +292,16 @@ const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
           },
         ],
         peopleInitiative: [
-        {
-          serialNumber: 1,
-          initiative: '',
-          outcome: '',
-          recommendation: '',
-          targetDate: '',
-          responsible: '',
-          id: 0
-        },
-      ]
+          {
+            serialNumber: 1,
+            initiative: '',
+            outcome: '',
+            recommendation: '',
+            targetDate: '',
+            responsible: '',
+            id: 0,
+          },
+        ],
       }
 
       if (res?.code === 200) {
@@ -311,10 +317,12 @@ const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
           isEditable: item?.isEditable,
           originalRemark: item.remarks,
         }))
-        const peopleInitiativeMapped = res?.peopleInitiative?.map((item, index) => ({
-          ...item,
-          id: index
-        }))
+        const peopleInitiativeMapped = res?.peopleInitiative?.map(
+          (item, index) => ({
+            ...item,
+            id: index,
+          }),
+        )
         setRows(mapped)
         setRowsP(mapped1)
         setPeopleInitiativeRows(peopleInitiativeMapped)
@@ -463,10 +471,10 @@ const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
     showTitleNameBusiness: true,
     titleName: 'People Initiative',
     adjustedPermissions: true,
-  downloadExcelBtn: true,
-  uploadExcelBtn: true,
-  ExcelName: `${lowerVertName}_People_Initiative`,
-})
+    downloadExcelBtn: true,
+    uploadExcelBtn: true,
+    ExcelName: `${lowerVertName}_People_Initiative`,
+  })
 
   const commonGridProps = {
     columns,
@@ -502,20 +510,20 @@ const [currentRowIdPeople, setCurrentRowIdPeople] = useState(null)
         {...commonGridProps}
       />
       <KendoDataTables
-  rows={peopleInitiativeRows}
-  setRows={setPeopleInitiativeRows}
-  title='People Initiative'
-  modifiedCells={modifiedPeopleCells}
-  setModifiedCells={setModifiedPeopleCells}
-  remarkDialogOpen={remarkDialogOpenPeople}
-  setRemarkDialogOpen={setRemarkDialogOpenPeople}
-  currentRemark={currentRemarkPeople}
-  setCurrentRemark={setCurrentRemarkPeople}
-  currentRowId={currentRowIdPeople}
-  setCurrentRowId={setCurrentRowIdPeople}
-  permissions={peopleInitiativePermissions}
-  columns={peopleInitiativeColumns}
-/>
+        rows={peopleInitiativeRows}
+        setRows={setPeopleInitiativeRows}
+        title='People Initiative'
+        modifiedCells={modifiedPeopleCells}
+        setModifiedCells={setModifiedPeopleCells}
+        remarkDialogOpen={remarkDialogOpenPeople}
+        setRemarkDialogOpen={setRemarkDialogOpenPeople}
+        currentRemark={currentRemarkPeople}
+        setCurrentRemark={setCurrentRemarkPeople}
+        currentRowId={currentRowIdPeople}
+        setCurrentRowId={setCurrentRowIdPeople}
+        permissions={peopleInitiativePermissions}
+        columns={peopleInitiativeColumns}
+      />
 
       {/* <KendoDataTables
         rows={rowsP}

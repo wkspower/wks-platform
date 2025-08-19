@@ -548,6 +548,7 @@ const ConsumptionNorms = () => {
       downloadExcelBtnFromUI: true,
       // ExcelName: `${lowerVertName}${gradeId ? `_${gradeId}` : ''}_Overall AOP Consumption`,
       ExcelName: `${lowerVertName}_Overall AOP Consumption`,
+      isHeight: lowerVertName !== 'meg' && rows?.length > 10,
     },
     isOldYear,
   )

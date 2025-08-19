@@ -422,7 +422,7 @@ const ShutDown = ({ permissions }) => {
     {
       field: 'discription',
       title: 'Shutdown Desc',
-      width: 250,
+      widthT: 250,
       editable: true,
       type: 'descLimit',
     },
@@ -436,11 +436,13 @@ const ShutDown = ({ permissions }) => {
       field: 'maintStartDateTime',
       title: 'SD - From',
       editable: true,
+      widthT: 130,
     },
     {
       field: 'maintEndDateTime',
       title: 'SD - To',
       editable: true,
+      widthT: 130,
     },
     {
       field: 'durationInHrs',

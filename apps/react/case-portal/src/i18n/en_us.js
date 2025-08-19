@@ -69,14 +69,14 @@ const defs = {
     valueHistory: 'Value History', // New addition
 
     //FUNCTIONAL AOP
-    functionalAop: 'Functional AOP',
+    functionalAop: 'Maintenance',
     manufacturingDivision: 'Manufacturing Division',
-    monthlyAop: 'Maintenance',
+    reliabilityPerformance: 'Reliability Performance',
+    monthlyAop: 'Monthly Budget',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
 
     plantTeam: 'People',
-    reliabilityPerformance: 'Reliability Performance',
     plantSafetyPerformanceTarget: 'S&OR',
   },
   pages: {
@@ -244,16 +244,16 @@ const defs = {
         valueHistory: 'Value History', // New addition
 
         //FUNCTIONAL AOP
-        functionalAop: 'Functional AOP',
+        functionalAop: 'Maintenance',
 
-        monthlyAop: 'Maintenance',
+        monthlyAop: 'Monthly Budget',
+        reliabilityPerformance: 'Reliability Performance',
         siteWiseAop: 'Consumption Summary (Sites)',
         allSiteSummaryAop: 'Summary',
 
         manufacturingDivision: 'Manufacturing Division',
         plantSafetyPerformanceTarget: 'S&OR',
         plantTeam: 'People',
-        reliabilityPerformance: 'Reliability Performance',
       },
     },
   },

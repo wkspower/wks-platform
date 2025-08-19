@@ -418,6 +418,7 @@ const SelectivityData = (props) => {
       dropdownLabel: 'Select Mode',
       // marginTop: props?.configType === 'cracker_configuration' ? true : false,
       marginTop: false,
+      isHeight: lowerVertName !== 'meg' && props?.rows?.length > 10,
     },
     isOldYear,
   )
@@ -484,10 +485,6 @@ const SelectivityData = (props) => {
       // optional cleanup or logging
     }
   }
-
-  // useEffect(() => {
-  //   getAopSummary()
-  // }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
 
   const saveExcelFile = async (rawFile) => {
     setLoading(true)

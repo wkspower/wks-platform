@@ -72,6 +72,7 @@ export const DataService = {
   handleCalculateonsumptionNorms,
   handleCalculateProductionVolData,
   handleCalculateProductionVolData2,
+  handleCalculateAnnualAopCostMiisContribution,
   handleCalculateMonthwiseAndTurnaround,
   handleCalculatePlantProductionData,
   handleCalculateMonthwiseProduction,
@@ -413,6 +414,32 @@ async function handleCalculateProductionVolData(plantId, year, keycloak) {
 async function handleCalculateProductionVolData2(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
   const url = `${Config.CaseEngineUrl}/task/handle/calculate/work-flow?year=${year1}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json() // Parse JSON response
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
+    return Promise.reject(e)
+  }
+}
+async function handleCalculateAnnualAopCostMiisContribution(
+  plantId,
+  year,
+  keycloak,
+) {
+  const year1 = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/handle/calculate/miis-contribution?year=${year1}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -3136,7 +3163,7 @@ async function getNormalOpsNormsExcel(keycloak, gradeId) {
   var url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
 
   if (gradeId) {
-     url += `&gradeId=${gradeId}`
+    url += `&gradeId=${gradeId}`
   }
   const headers = {
     'Content-Type': 'application/json',

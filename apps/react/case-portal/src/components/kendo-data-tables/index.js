@@ -47,6 +47,7 @@ import {
   ExcelExport,
   ExcelExportColumn,
 } from '../../../node_modules/@progress/kendo-react-excel-export/index'
+import { useSelector } from 'react-redux'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -141,6 +142,11 @@ const KendoDataTables = ({
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
   const [customModifiedCells, setCustomModifiedCells] = useState({})
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+
+  const { verticalChange } = dataGridStore
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
 
   const initialGroup = groupBy
     ? [
@@ -643,6 +649,19 @@ const KendoDataTables = ({
     }
   }, [permissions])
 
+  const rowHeightVH = 3 // each row ~4vh
+  const headerVH = 8 // grid’s own header/filter area
+  const pageHeaderVH = 15 // top app bar + stepper + controls
+  const maxVH = 60 // cap grid height
+
+  const calculatedVH = React.useMemo(() => {
+    if (!rows || rows?.length === 0) return 20 // safe default for empty
+    const needed = rows?.length * rowHeightVH + headerVH
+    // total space available = 100vh - pageHeaderVH
+    const available = 100 - pageHeaderVH
+    return Math.min(needed, maxVH, available)
+  }, [rows?.length])
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -901,6 +920,23 @@ const KendoDataTables = ({
             fileName={`${permissions?.ExcelName}.xlsx`}
           >
             <Grid
+              style={{
+                flex: 1,
+                overflow: 'auto',
+                // height: 'auto',
+                // height: permissions?.isHeight ? '60vh' : '60vh',
+                // height: '60vh',
+                // height: `${gridHeight}px`,
+                height:
+                  lowerVertName === 'meg'
+                    ? undefined
+                    : rows?.length > 10
+                      ? `${calculatedVH}vh`
+                      : undefined,
+
+                // height: rows?.length > 10 ? '60vh' : `${calculatedVH}vh`,
+                // height: `${calculatedVH}vh`,
+              }}
               modifiedCells={modifiedCells}
               autoProcessData={true}
               defaultGroup={initialGroup}
@@ -1004,6 +1040,7 @@ const KendoDataTables = ({
                       editor='date'
                       hidden={col.hidden}
                       columnMenu={DateColumnMenu}
+                      width={col?.widthT}
                       headerClassName={
                         isDateFilterActive.includes(col.field)
                           ? 'active-column'
@@ -1240,7 +1277,7 @@ const KendoDataTables = ({
                       key={col.field}
                       field={col.field}
                       title={col.title || col.headerName}
-                      // width={col.width}
+                      width={col.widthT}
                       editable={true}
                       columnMenu={ColumnMenuCheckboxFilter}
                       hidden={col.hidden}

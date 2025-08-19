@@ -53,8 +53,8 @@ const defs = {
     matBalSheet: 'Balanço de MAT', // New addition
     workflow: 'Fluxo de Trabalho', // New addition
     //FUNCTIONAL AOP
-    functionalAop: 'Functional AOP',
-    monthlyAop: 'Maintenance',
+    functionalAop: 'Maintenance',
+    monthlyAop: 'Monthly Budget',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
   },
@@ -214,15 +214,14 @@ const defs = {
         workflow: 'Fluxo de Trabalho', // New addition
 
         //FUNCTIONAL AOP
-        functionalAop: 'Functional AOP',
-        monthlyAop: 'Maintenance',
+        functionalAop: 'Maintenance',
+        monthlyAop: 'Monthly Budget',
         siteWiseAop: 'Consumption Summary (Sites)',
         allSiteSummaryAop: 'Summary',
 
         manufacturingDivision: 'Manufacturing Division',
         plantSafetyPerformanceTarget: 'S&OR',
         plantTeam: 'People',
-        reliabilityPerformance: 'Reliability Performance',
       },
     },
   },

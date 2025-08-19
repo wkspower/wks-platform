@@ -403,6 +403,20 @@ export const MainRoutes = (
         ],
       },
 
+      {
+        path: 'functional-aop',
+        children: [
+          {
+            path: 'aop-budget',
+            element: (
+              <PrivateRoute routeId='aop-budget'>
+                <AopBudget />
+              </PrivateRoute>
+            ),
+          },
+        ],
+      },
+
       // {
       //   path: 'functional-aop',
       //   children: [
@@ -454,15 +468,6 @@ export const MainRoutes = (
       //     },
       //   ],
       // },
-
-      {
-        path: 'aop-budget',
-        element: (
-          <PrivateRoute routeId='aop-budget'>
-            <AopBudget />
-          </PrivateRoute>
-        ),
-      },
 
       {
         path: 'plant-team',

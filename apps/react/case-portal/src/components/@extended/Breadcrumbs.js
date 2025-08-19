@@ -253,7 +253,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       breadcrumbContent = (
         <MainCard
           border={false}
-          sx={{ mb: 3, bgcolor: 'transparent' }}
+          sx={{ bgcolor: 'transparent' }}
           {...others}
           content={false}
         >
@@ -314,7 +314,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     textDecoration: 'none',
                     fontWeight: 800,
                     color: 'black',
-                    fontSize: '0.8rem',
+                    fontSize: '0.7rem',
                     display: 'flex',
                     alignItems: 'center',
                   }}

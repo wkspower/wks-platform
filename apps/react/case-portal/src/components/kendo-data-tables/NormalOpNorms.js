@@ -104,8 +104,11 @@ const NormalOpNormsScreen = () => {
     try {
       const response = await DataService.getNormalOperationNormsGrades(keycloak)
 
-      if (response?.code == 200) {
+      if (response?.code === 200) {
         setGrades(response?.data)
+        if (Array.isArray(response?.data) && response?.data?.length === 0) {
+          setLoading(false)
+        }
       }
     } catch (error) {
       setGrades([])
@@ -587,6 +590,7 @@ const NormalOpNormsScreen = () => {
         Object.keys(calculationObject || {}).length > 0 ? true : false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
+      isHeight: lowerVertName !== 'meg' && rows?.length > 10,
     },
     isOldYear,
   )

@@ -13,7 +13,7 @@
     "field": "DisplayName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 250
+    "widthT": 130
   },
   {
     "field": "UOM",

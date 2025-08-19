@@ -22,7 +22,7 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 220,
+    "widthT": 130,
     "valueGetter": "defaultValueGetter",
     "valueFormatter": "productDisplayNameFormatter",
     "renderEditCell": "renderNormParameterSelectCell"
@@ -150,6 +150,6 @@
     "width": 150,
     "editable": true,
     "renderCell": "renderRemarkCell",
-    "widthT": 220
+    "widthT": 150
   }
 ]

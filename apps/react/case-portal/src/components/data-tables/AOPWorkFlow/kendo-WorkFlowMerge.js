@@ -132,7 +132,7 @@ const WorkFlowMerge = () => {
     if (lowerVertName == 'meg') {
       handleCalculateMeg()
     } else {
-      // handleCalculatePe()
+      handleCalculateMeg()
     }
   }
   const handleExport = () => {
@@ -161,6 +161,11 @@ const WorkFlowMerge = () => {
 
       // Wait for all API calls to complete
       const [data, res1, res2, res3, res4, res5, res6] = await Promise.all([
+        DataService.handleCalculateAnnualAopCostMiisContribution(
+          plantId,
+          year,
+          keycloak,
+        ),
         DataService.handleCalculateProductionVolData2(plantId, year, keycloak),
         DataService.handleCalculatePlantProductionData(plantId, year, keycloak),
         DataService.handleCalculateMonthwiseProduction(plantId, year, keycloak),
@@ -196,6 +201,7 @@ const WorkFlowMerge = () => {
           message: 'Data Refresh Failed!',
           severity: 'error',
         })
+        setLoadingCalculate(false)
       }
 
       return data

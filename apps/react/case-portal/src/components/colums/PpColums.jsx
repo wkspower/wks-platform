@@ -214,7 +214,7 @@ export const NormalOpNormPpColumns = [
   {
     field: 'productName',
     title: 'Particulars',
-    widthT: 220,
+    widthT: 130,
   },
 
   {
