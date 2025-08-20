@@ -661,6 +661,20 @@ const KendoDataTables = ({
     return Math.round(Math.min(needed, maxVH, available))
   }, [rows?.length])
 
+  // when a single checkbox changes
+  // const handleSelectionChange = (event) => {
+  //   const selectedRow = event.dataItem
+  //   const isSelected = event.nativeEvent.target.checked
+
+  //   console.log('Row changed:', selectedRow, 'Checked:', isSelected)
+  // }
+
+  // when header (select all) checkbox changes
+  // const handleHeaderSelectionChange = (event) => {
+  //   const checked = event.nativeEvent.target.checked
+  //   console.log('Header checkbox changed. Checked:', checked)
+  // }
+
   return (
     <div style={{ position: 'relative' }}>
       {loading && (
@@ -711,6 +725,34 @@ const KendoDataTables = ({
                   {permissions?.titleName}
                 </Typography>
               )}
+              {/* {permissions?.showMonthlyDropdown && (
+                <TextField
+                  select
+                  // value={selectedMonthly || ''}
+                  onChange={(e) => {
+                    const selectedValue = e.target.value
+                    // setSelectedMonthly(selectedValue)
+                    // optional: if you need a callback
+                    // handleMonthlyChange?.(selectedValue)
+                  }}
+                  sx={{
+                    width: '250px',
+                    backgroundColor: '#FFFFFF',
+                    mr: 1, // ✅ margin-left using theme spacing (2 = 16px)
+                  }}
+                  variant='outlined'
+                  label='Type'
+                >
+                  <MenuItem value='' disabled>
+                    Select
+                  </MenuItem>
+                  <MenuItem value='monthly1'>
+                    Best Acieved With Minimum CC
+                  </MenuItem>
+                  <MenuItem value='monthly2'>Individual Best Acieved</MenuItem>
+                  <MenuItem value='monthly3'>Expression Norms</MenuItem>
+                </TextField>
+              )} */}
 
               {permissions?.showG && (
                 <TextField
@@ -937,6 +979,12 @@ const KendoDataTables = ({
                 // height: rows?.length > 10 ? '60vh' : `${calculatedVH}vh`,
                 // height: `${calculatedVH}vh`,
               }}
+              // selectable={{
+              //   enabled: true,
+              //   drag: false,
+              //   cell: false,
+              //   mode: 'multiple',
+              // }}
               modifiedCells={modifiedCells}
               autoProcessData={true}
               defaultGroup={initialGroup}
@@ -969,8 +1017,13 @@ const KendoDataTables = ({
                     }
                   : false
               }
+              // onSelectionChange={handleSelectionChange}
             >
-              {groupBy && <ExcelExportColumn field={groupBy} title='Type' />}
+              {/* {groupBy && <ExcelExportColumn field={groupBy} title='Type' />} */}
+
+              {/* {permissions?.showMonthlyDropdown && (
+                <GridColumn columnType='checkbox' width='50px' />
+              )} */}
 
               {columns?.map((col) => {
                 const isActive = isColumnActive(col?.field, filter, sort)

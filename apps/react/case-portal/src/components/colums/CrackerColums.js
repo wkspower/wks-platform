@@ -381,11 +381,7 @@ export const CrackerColums = [
     editable: false,
     hidden: true,
   },
-  {
-    widthT: 220,
 
-    columnType: 'checkbox',
-  },
   {
     field: 'materialFkId',
     title: 'Particulars',

@@ -575,6 +575,7 @@ const NormalOpNormsScreen = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
+      // showMonthlyDropdown: lowerVertName === 'cracker' ? true : false,
       showG:
         lowerVertName === 'pe' ||
         lowerVertName === 'pp' ||
@@ -773,34 +774,33 @@ const NormalOpNormsScreen = () => {
         plantID={plantID}
       />
 
-      {lowerVertName === 'cracker' ||
-        (lowerVertName === 'meg' && (
-          <Box sx={{ width: '100%', marginTop: 1 }}>
-            <CustomAccordion defaultExpanded disableGutters>
-              <CustomAccordionSummary
-                aria-controls='meg-grid-content'
-                id='meg-grid-header'
-              >
-                <Typography component='span' className='grid-title'>
-                  Intermediate Values
-                </Typography>
-              </CustomAccordionSummary>
-              <CustomAccordionDetails>
-                <Box sx={{ width: '100%', margin: 0 }}>
-                  <KendoDataTables
-                    title='Intermediate Values'
-                    columns={colDefsIntermediateValues}
-                    setRows={setRowsIntermediateValues}
-                    rows={rowsIntermediateValues}
-                    paginationOptions={[100, 200, 300]}
-                    permissions={adjustedPermissionsIV}
-                    groupBy='NormTypeName'
-                  />
-                </Box>
-              </CustomAccordionDetails>
-            </CustomAccordion>
-          </Box>
-        ))}
+      {(lowerVertName === 'cracker' || lowerVertName === 'meg') && (
+        <Box sx={{ width: '100%', marginTop: 1 }}>
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='grid-content'
+              id='grid-header'
+            >
+              <Typography component='span' className='grid-title'>
+                Intermediate Values
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <KendoDataTables
+                  title='Intermediate Values'
+                  columns={colDefsIntermediateValues}
+                  setRows={setRowsIntermediateValues}
+                  rows={rowsIntermediateValues}
+                  paginationOptions={[100, 200, 300]}
+                  permissions={adjustedPermissionsIV}
+                  groupBy='NormTypeName'
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        </Box>
+      )}
     </div>
   )
 }

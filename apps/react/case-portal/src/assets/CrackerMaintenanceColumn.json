@@ -51,7 +51,7 @@
   },
   {
     "field": "demoHSS",
-    "title": "Demo HHS",
+    "title": "Demo HSS",
     "editable": false,
     "isDisabled": true,
     "type": "number",
