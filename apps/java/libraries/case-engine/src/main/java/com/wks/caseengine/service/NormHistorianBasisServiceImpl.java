@@ -172,7 +172,7 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetNormHistorianValue";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetNormsHistorianValue";
 			System.out.println(storedProcedure);
 			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year,periodFrom,periodTo);
 			
@@ -187,7 +187,9 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
 	}
 	
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
-			String aopYear,String periodFrom, String periodTo) {
+			String aopYear,String PeriodFrom, String PeriodTo) {
+		System.out.println("PeriodFrom="+PeriodFrom);
+		System.out.println("PeriodTo="+PeriodTo);
 		try {
 			
 			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
@@ -198,8 +200,8 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
 	            // Set parameters in the correct order
 	            stmt.setString(1, plantId); // @finYear
 	            stmt.setString(2, aopYear); // @siteId
-	            stmt.setString(3, periodFrom);
-	            stmt.setString(4, periodTo);
+	            stmt.setString(3, PeriodFrom);
+	            stmt.setString(4, PeriodTo);
 
 	            // Execute the stored procedure
 	            int rowsAffected = stmt.executeUpdate();
