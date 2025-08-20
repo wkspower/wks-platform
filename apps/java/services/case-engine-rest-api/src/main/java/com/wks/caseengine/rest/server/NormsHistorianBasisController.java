@@ -26,4 +26,11 @@ public class NormsHistorianBasisController {
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
     
+    @GetMapping(value="/calculate-norms-historian-values")
+	public ResponseEntity<AOPMessageVM> calculateNormsHistorianValues(@RequestParam String plantId,@RequestParam String aopYear,@RequestParam String periodFrom, @RequestParam String periodTo){
+		AOPMessageVM response	=normHistorianBasisService.calculateNormsHistorianValues(plantId,aopYear,periodFrom,periodTo);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+
+    
 }

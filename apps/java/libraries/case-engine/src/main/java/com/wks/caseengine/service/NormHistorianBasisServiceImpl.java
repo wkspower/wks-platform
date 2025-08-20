@@ -6,13 +6,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.sql.DataSource;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -25,9 +38,19 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
     
 	@PersistenceContext
 	private EntityManager entityManager;
+	
+	@Autowired
+	private DataSource dataSource;
 
 	@Autowired
 	private PlantsRepository plantsRepository;
+
+	@Autowired
+	private SiteRepository siteRepository;
+
+	@Autowired
+	private VerticalsRepository verticalRepository;
+
 
     @Override
     public AOPMessageVM getNormHistorianBasisData(String plantId, String year, String reportType,String uom) {
@@ -142,8 +165,62 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
         }
     }
 
+	@Override
+	public AOPMessageVM calculateNormsHistorianValues(String plantId, String year, String periodFrom, String periodTo) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetNormHistorianValue";
+			System.out.println(storedProcedure);
+			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year,periodFrom,periodTo);
+			
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return aopMessageVM;
+	}
+	
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String aopYear,String periodFrom, String periodTo) {
+		try {
+			
+			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
-    
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
 
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); // @finYear
+	            stmt.setString(2, aopYear); // @siteId
+	            stmt.setString(3, periodFrom);
+	            stmt.setString(4, periodTo);
+
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
+
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 
 }
