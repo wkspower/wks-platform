@@ -14,7 +14,7 @@ public interface AOPMCCalculatedDataService {
 	public  AOPMessageVM getAOPMCCalculatedData(String plantId, String year);
 	public  AOPMessageVM getMaxAchievedCapacity(String plantId, String year);
 	public  AOPMessageVM getDesignCapacity(String plantId, String year);
-	public  AOPMessageVM updateDesignCapacity(String plantId, String year,AOPMCCalculatedDataDTO aopMCCalculatedDataDTO);
+	public  AOPMessageVM updateDesignCapacity(String plantId, String year,List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTO);
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantFKId);
 	public  AOPMessageVM getAOPMCCalculatedDataSP(String plantId, String year);
 	public byte[] createExcel(String year, String plantFKId, boolean isAfterSave,List<AOPMCCalculatedDataDTO> dtoList);

@@ -39,6 +39,7 @@ import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 
 import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.MCUValueCapacity;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
@@ -47,6 +48,7 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.MCUValueCapacityRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -81,6 +83,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private MCUValueCapacityRepository mcuValueCapacityRepository;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public AOPMCCalculatedDataServiceImpl(DataSource dataSource) {
@@ -675,9 +680,41 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Override
 	public AOPMessageVM updateDesignCapacity(String plantId, String year,
-			AOPMCCalculatedDataDTO aopMCCalculatedDataDTO) {
+			List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOList) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<MCUValueCapacity> mcuValueCapacityList= new ArrayList<>();
+			for(AOPMCCalculatedDataDTO aopMCCalculatedDataDTO:aopMCCalculatedDataDTOList) {
+				Optional<MCUValueCapacity> optMCUValueCapacity=mcuValueCapacityRepository.findById(UUID.fromString(aopMCCalculatedDataDTO.getId()));
+				if(optMCUValueCapacity.isPresent()) {
+					MCUValueCapacity mcuValueCapacity=	optMCUValueCapacity.get();
+					mcuValueCapacity.setApril(aopMCCalculatedDataDTO.getApril());
+					mcuValueCapacity.setMay(aopMCCalculatedDataDTO.getMay());
+					mcuValueCapacity.setJune(aopMCCalculatedDataDTO.getJune());
+					mcuValueCapacity.setJuly(aopMCCalculatedDataDTO.getJuly());
+					mcuValueCapacity.setAugust(aopMCCalculatedDataDTO.getAugust());
+					mcuValueCapacity.setSeptember(aopMCCalculatedDataDTO.getSeptember());
+					mcuValueCapacity.setOctober(aopMCCalculatedDataDTO.getOctober());
+					mcuValueCapacity.setNovember(aopMCCalculatedDataDTO.getNovember());
+					mcuValueCapacity.setDecember(aopMCCalculatedDataDTO.getDecember());
+					mcuValueCapacity.setJanuary(aopMCCalculatedDataDTO.getJanuary());
+					mcuValueCapacity.setFebruary(aopMCCalculatedDataDTO.getFebruary());
+					mcuValueCapacity.setMarch(aopMCCalculatedDataDTO.getMarch());
+					mcuValueCapacity.setModifiedOn(new Date());
+					mcuValueCapacity.setRemarks(aopMCCalculatedDataDTO.getRemarks());
+					mcuValueCapacity.setUpdatedBy(Utility.getUserName());
+					mcuValueCapacityList.add(mcuValueCapacityRepository.save(mcuValueCapacity));
+				}
+			
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(mcuValueCapacityList);
+			aopMessageVM.setMessage("Data Updated Successfully");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
 		// TODO Auto-generated method stub
-		return null;
+		return aopMessageVM;
 	}
 
 }

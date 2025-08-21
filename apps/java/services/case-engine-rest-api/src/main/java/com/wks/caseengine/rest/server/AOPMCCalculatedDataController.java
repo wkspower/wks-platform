@@ -45,8 +45,8 @@ public class AOPMCCalculatedDataController {
 	}
 	
 	@PostMapping(value = "/design/capacity")
-	public AOPMessageVM updateDesignCapacity(@RequestParam String plantId,@RequestParam String year, @RequestBody AOPMCCalculatedDataDTO aopMCCalculatedDataDTO) {
-		return aOPMCCalculatedDataService.updateDesignCapacity(plantId,year, aopMCCalculatedDataDTO);
+	public AOPMessageVM updateDesignCapacity(@RequestParam String plantId,@RequestParam String year, @RequestBody List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOList) {
+		return aOPMCCalculatedDataService.updateDesignCapacity(plantId,year, aopMCCalculatedDataDTOList);
 	}
 
 	@PutMapping(value = "/editAOPMCCalculatedData")
