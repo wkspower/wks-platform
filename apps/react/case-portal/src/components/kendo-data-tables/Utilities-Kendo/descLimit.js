@@ -27,6 +27,12 @@ export const descLimit = (props) => {
         onChange={handleChange}
         maxLength={250}
         disabled={isDisabled}
+        style={{
+          fontSize: '0.8rem',
+          padding: '2px 2px',
+          height: '22px',
+          lineHeight: '1rem',
+        }}
       />
     </td>
   )

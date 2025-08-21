@@ -595,7 +595,7 @@ const ConfigurationTable = () => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1,
-                  marginTop: '10px',
+                  marginTop: '5px',
                 }}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -611,7 +611,7 @@ const ConfigurationTable = () => {
                     value={startDate}
                     onChange={(e) => setStartDate(e.value)}
                     style={{ height: '80px' }}
-                    size={'large'}
+                    size={'medium'}
                   />
                   <Typography
                     className='grid-title'
@@ -625,7 +625,7 @@ const ConfigurationTable = () => {
                     value={endDate}
                     onChange={(e) => setEndDate(e.value)}
                     style={{ height: '80px' }}
-                    size={'large'}
+                    size={'medium'}
                   />
                 </Box>
                 {/* Load Button */}

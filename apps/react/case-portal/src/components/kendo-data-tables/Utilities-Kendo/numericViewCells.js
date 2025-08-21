@@ -19,7 +19,19 @@ export const DurationEditor = (props) => {
     }
   }
 
-  return <Input value={raw} onChange={handleChange} placeholder='HH:MM' />
+  return (
+    <Input
+      value={raw}
+      style={{
+        fontSize: '0.8rem',
+        padding: '2px 2px',
+        height: '22px',
+        lineHeight: '1rem',
+      }}
+      onChange={handleChange}
+      placeholder='HH:MM'
+    />
+  )
 }
 export const DurationDisplayWithTooltipCell = (props) => {
   const value = props?.dataItem[props.field]

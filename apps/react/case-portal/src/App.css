@@ -117,6 +117,7 @@ header {
   color: black;
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
   margin: 12px;
+  font-size: 0.8rem;
 }
 
 .grid-title {
@@ -126,6 +127,7 @@ header {
   margin-left: 5px;
   /* margin-top: 25px; */
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+  font-size: 0.8rem;
 }
 
 .grid-header {
@@ -221,4 +223,28 @@ main.MuiBox-root.css-vognfw {
 .k-animation-container,
 .k-popup {
   z-index: 5500 !important;
+}
+
+.dropdown-select {
+  width: 120px;
+  background-color: #ffffff;
+}
+
+.dropdown-select .MuiInputBase-root {
+  font-size: 0.75rem;
+  height: 30px;
+}
+
+.dropdown-select .MuiInputLabel-root {
+  font-size: 0.75rem;
+}
+
+.dropdown-select .MuiMenuItem-root {
+  font-size: 0.75rem;
+}
+
+.MuiPaper-root .MuiMenuItem-root {
+  font-size: 0.75rem !important;
+  min-height: 28px;
+  padding: 2px 8px;
 }

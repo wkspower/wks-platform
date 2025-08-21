@@ -18,7 +18,7 @@ const config = {
 //     font-weight: 400;
 
 export default config
-export const drawerWidth = 240
+export const drawerWidth = 200
 
 export const twitterColor = '#1DA1F2'
 export const facebookColor = '#3b5998'

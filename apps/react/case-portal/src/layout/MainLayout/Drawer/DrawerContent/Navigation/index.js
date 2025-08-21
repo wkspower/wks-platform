@@ -40,7 +40,6 @@ const Navigation = () => {
           overflowY: 'auto',
           overflowX: 'hidden',
           flex: 1,
-          pr: 1,
         }}
       >
         {navGroups}

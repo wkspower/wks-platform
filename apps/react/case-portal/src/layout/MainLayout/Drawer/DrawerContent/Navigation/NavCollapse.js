@@ -61,14 +61,14 @@ const NavCollapse = ({ menu, level }) => {
   const menuIcon = menu.icon ? (
     <Icon
       strokeWidth={1.5}
-      size='1.3rem'
+      size='1.2rem'
       style={{ marginTop: 'auto', marginBottom: 'auto' }}
     />
   ) : (
     <FiberManualRecordIcon
       sx={{
-        width: selected === menu.id ? 8 : 6,
-        height: selected === menu.id ? 8 : 6,
+        width: selected === menu.id ? 6 : 5,
+        height: selected === menu.id ? 6 : 5,
       }}
       fontSize={level > 0 ? 'inherit' : 'medium'}
     />
@@ -78,17 +78,16 @@ const NavCollapse = ({ menu, level }) => {
     <>
       <ListItemButton
         sx={{
-          borderRadius: '12px',
-          mb: 0.5,
+          mb: 0.1,
           alignItems: 'flex-start',
           backgroundColor: level > 1 ? 'transparent !important' : 'inherit',
           py: level > 1 ? 1 : 1.25,
-          pl: `${level * 24}px`,
+          pl: 1,
         }}
         selected={selected === menu.id}
         onClick={handleClick}
       >
-        <ListItemIcon sx={{ my: 'auto', minWidth: !menu.icon ? 18 : 36 }}>
+        <ListItemIcon sx={{ my: 'auto', minWidth: !menu.icon ? 8 : 26 }}>
           {menuIcon}
         </ListItemIcon>
         <ListItemText
@@ -96,7 +95,10 @@ const NavCollapse = ({ menu, level }) => {
             <Typography
               variant={selected === menu.id ? 'h6' : 'body1'}
               color='inherit'
-              sx={{ my: 'auto' }}
+              sx={{
+                my: 'auto',
+                fontSize: '0.80rem',
+              }}
             >
               {menu.title}
             </Typography>
@@ -137,7 +139,7 @@ const NavCollapse = ({ menu, level }) => {
             '&:after': {
               content: "''",
               position: 'absolute',
-              left: '32px',
+              left: '10px',
               top: 0,
               height: '100%',
               width: '1px',

@@ -18,7 +18,7 @@ import workspace from './workspace'
 const MenuContext = createContext()
 const STATIC_MENU_DEFAULT = [plan, workspace]
 const STATIC_MENU_CRACKER = [planCracker]
-const USE_STATIC_MENU = true
+const USE_STATIC_MENU = false
 
 export function MenuProvider({ children }) {
   // const navigate = useNavigate()

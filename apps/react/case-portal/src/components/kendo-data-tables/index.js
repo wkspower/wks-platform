@@ -661,19 +661,17 @@ const KendoDataTables = ({
     return Math.round(Math.min(needed, maxVH, available))
   }, [rows?.length])
 
-  // when a single checkbox changes
-  // const handleSelectionChange = (event) => {
-  //   const selectedRow = event.dataItem
-  //   const isSelected = event.nativeEvent.target.checked
+  const handleSelectionChange = (event) => {
+    const selectedRow = event.dataItem
+    const isSelected = event.nativeEvent.target.checked
 
-  //   console.log('Row changed:', selectedRow, 'Checked:', isSelected)
-  // }
+    console.log('Row changed:', selectedRow, 'Checked:', isSelected)
+  }
 
-  // when header (select all) checkbox changes
-  // const handleHeaderSelectionChange = (event) => {
-  //   const checked = event.nativeEvent.target.checked
-  //   console.log('Header checkbox changed. Checked:', checked)
-  // }
+  const handleHeaderSelectionChange = (event) => {
+    const checked = event.nativeEvent.target.checked
+    console.log('Header checkbox changed. Checked:', checked)
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -725,7 +723,8 @@ const KendoDataTables = ({
                   {permissions?.titleName}
                 </Typography>
               )}
-              {/* {permissions?.showMonthlyDropdown && (
+
+              {permissions?.showMonthlyDropdown && (
                 <TextField
                   select
                   // value={selectedMonthly || ''}
@@ -736,23 +735,23 @@ const KendoDataTables = ({
                     // handleMonthlyChange?.(selectedValue)
                   }}
                   sx={{
-                    width: '250px',
+                    width: '220px',
                     backgroundColor: '#FFFFFF',
-                    mr: 1, // ✅ margin-left using theme spacing (2 = 16px)
+                    mr: 1,
                   }}
                   variant='outlined'
-                  label='Type'
+                  label='Norm Type'
                 >
                   <MenuItem value='' disabled>
-                    Select
+                    Select Norm Type
                   </MenuItem>
-                  <MenuItem value='monthly1'>
-                    Best Acieved With Minimum CC
+                  <MenuItem value='monthly1'>Best Achieved (Min CC)</MenuItem>
+                  <MenuItem value='monthly2'>
+                    Best Achieved (Individual)
                   </MenuItem>
-                  <MenuItem value='monthly2'>Individual Best Acieved</MenuItem>
-                  <MenuItem value='monthly3'>Expression Norms</MenuItem>
+                  <MenuItem value='monthly3'>Expression (Norms)</MenuItem>
                 </TextField>
-              )} */}
+              )}
 
               {permissions?.showG && (
                 <TextField
@@ -766,7 +765,7 @@ const KendoDataTables = ({
                     setSelectedGrade(selectedGradeId)
                     handleGradeChange(selectedGradeObj?.gradeId)
                   }}
-                  sx={{ width: '165px', backgroundColor: '#FFFFFF' }}
+                  className='dropdown-select'
                   variant='outlined'
                   label={permissions?.dropdownLabel || 'Select'}
                 >
@@ -907,7 +906,7 @@ const KendoDataTables = ({
                     setSelectedUnit(e.target.value)
                     handleUnitChange(e.target.value)
                   }}
-                  sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                  className='dropdown-select'
                   variant='outlined'
                   label='Select UOM'
                 >
@@ -979,12 +978,12 @@ const KendoDataTables = ({
                 // height: rows?.length > 10 ? '60vh' : `${calculatedVH}vh`,
                 // height: `${calculatedVH}vh`,
               }}
-              // selectable={{
-              //   enabled: true,
-              //   drag: false,
-              //   cell: false,
-              //   mode: 'multiple',
-              // }}
+              selectable={{
+                enabled: true,
+                drag: false,
+                cell: false,
+                mode: 'multiple',
+              }}
               modifiedCells={modifiedCells}
               autoProcessData={true}
               defaultGroup={initialGroup}
@@ -1017,13 +1016,13 @@ const KendoDataTables = ({
                     }
                   : false
               }
-              // onSelectionChange={handleSelectionChange}
+              onSelectionChange={handleSelectionChange}
             >
-              {/* {groupBy && <ExcelExportColumn field={groupBy} title='Type' />} */}
+              {groupBy && <ExcelExportColumn field={groupBy} title='Type' />}
 
-              {/* {permissions?.showMonthlyDropdown && (
+              {permissions?.showMonthlyDropdown && (
                 <GridColumn columnType='checkbox' width='50px' />
-              )} */}
+              )}
 
               {columns?.map((col) => {
                 const isActive = isColumnActive(col?.field, filter, sort)

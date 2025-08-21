@@ -17,7 +17,13 @@ export const TextCellEditor = (props) => {
       <Input
         value={rawValue}
         onChange={handleChange}
-        style={{ width: '100%' }}
+        style={{
+          fontSize: '0.8rem',
+          padding: '2px 2px',
+          height: '22px',
+          lineHeight: '1rem',
+          width: '100%',
+        }}
       />
     </td>
   )

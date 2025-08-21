@@ -55,9 +55,7 @@ const NavItem = ({ item, level }) => {
   // }
 
   const Icon = item.icon
-  const itemIcon = Icon ? (
-    <Icon style={{ fontSize: drawerOpen ? '1rem' : '1.25rem' }} />
-  ) : null
+  const itemIcon = Icon ? <Icon fontSize='small' /> : null
 
   const isSelected = openItem.findIndex((id) => id === item.id) > -1
 
@@ -74,7 +72,6 @@ const NavItem = ({ item, level }) => {
 
   useEffect(() => {
     // runs on every URL change
-
 
     if (location.pathname.split('/').includes(item.id)) {
       dispatch(activeItem({ openItem: [item.id] }))
@@ -95,9 +92,9 @@ const NavItem = ({ item, level }) => {
         selected={isSelected}
         sx={{
           zIndex: 1201,
-          pl: drawerOpen ? `${level * 28}px` : 1.5,
+          pl: drawerOpen ? `${level * 8}px` : 1.5,
           // pl: 2.5,
-          py: !drawerOpen && level === 1 ? 1.25 : 1,
+          py: !drawerOpen && level === 1 ? 1 : 1,
           ...(drawerOpen && {
             '&:hover': {
               bgcolor: '#0100cb',
@@ -130,7 +127,13 @@ const NavItem = ({ item, level }) => {
         {itemIcon && (
           <ListItemIcon
             sx={{
-              minWidth: 28,
+              minWidth: 20,
+              '& svg': {
+                fontSize: '18px',
+                width: '18px',
+                height: '18px',
+              },
+
               color: isSelected ? 'white' : textColor,
               ...(!drawerOpen && {
                 borderRadius: 1.5,
@@ -166,10 +169,11 @@ const NavItem = ({ item, level }) => {
                     color: 'white',
                     bgcolor: '#0100cb',
                   },
+                  fontSize: '0.75rem', // force ~12px
                   whiteSpace: 'normal', // Allows the text to wrap
                   wordBreak: 'break-word', // Breaks long words
                   display: '-webkit-box', // Uses a flexible box layout for text
-                  WebkitLineClamp: 2, // Limits to 2 lines of text
+                  WebkitLineClamp: 3, // Limits to 2 lines of text
                   WebkitBoxOrient: 'vertical', // Makes the text vertical
                   overflow: 'hidden', // Hides overflowing text
                   textOverflow: 'ellipsis', // Adds ellipsis (...) for overflowed text

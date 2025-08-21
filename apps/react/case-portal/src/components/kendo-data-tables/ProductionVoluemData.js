@@ -57,6 +57,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
   const dispatch = useDispatch()
   // const unsavedChangesRef = React.useRef({
   //   unsavedRows: {},
@@ -153,17 +155,30 @@ const ProductionvolumeData = ({ permissions }) => {
         aopmccCalculatedData,
         keycloak,
       )
-      // console.log(response)
+
       if (response) {
         dispatch(setIsBlocked(false))
-
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Saved Successfully!',
           severity: 'success',
         })
-        setLoading(false)
         setModifiedCells({})
+
+        if (lowerVertName == 'meg') {
+          const responseForNorms =
+            await DataService.calculateNormsHistorianValues(
+              plantId,
+              localStorage.getItem('year'),
+              startDate,
+              endDate,
+              keycloak,
+            )
+
+          if (responseForNorms?.code == 200) setLoading(false)
+        } else {
+          setLoading(false)
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -261,6 +276,9 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchData = async () => {
     try {
       setLoading(true)
+      // setStartDate(null)
+      // setEndDate(null)
+
       const response = await DataService.getAOPMCCalculatedData(keycloak)
 
       if (response?.code != 200) {
@@ -337,6 +355,46 @@ const ProductionvolumeData = ({ permissions }) => {
       setRows2(nonEditableRows)
       setRows(formattedData)
       setRows500(formattedDataNONEDITABLE)
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
+  }
+
+  function formatDate(date) {
+    if (!date) return ''
+    const year = date?.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const fetchConfiguration = async () => {
+    try {
+      setLoading(true)
+      const configData =
+        await DataService.getConfigurationExecutionDetails(keycloak)
+      if (configData?.code !== 200) return
+
+      const StartDate = configData.data.find(
+        (d) => d.Name === 'StartDate',
+      )?.AttributeValue
+      const EndDate = configData.data.find(
+        (d) => d.Name === 'EndDate',
+      )?.AttributeValue
+
+      if (!StartDate || !EndDate) {
+        const today = new Date()
+        const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
+        const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
+
+        setStartDate(formatDate(startDate))
+        setEndDate(formatDate(endDate))
+      } else {
+        setStartDate(StartDate)
+        setEndDate(EndDate)
+      }
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -853,6 +911,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
+
+    if (lowerVertName == 'meg') fetchConfiguration()
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const productionColumns = getEnhancedProductionColDefs({

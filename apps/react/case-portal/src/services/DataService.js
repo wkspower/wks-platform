@@ -161,6 +161,7 @@ export const DataService = {
   saveSpyroOutputYield,
   getCrackerNextYearParameters,
   getCrackerNextYearData,
+  calculateNormsHistorianValues,
 }
 async function handleRefresh(year, plantId, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/handleRefresh?year=${year}&plantId=${plantId}`
@@ -277,6 +278,7 @@ async function handleCalculateNormalOperationNormsPe(
     return Promise.reject(e)
   }
 }
+
 async function handleCalculateShutdownNorms(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
   //  const url = `${Config.CaseEngineUrl}/task/getCalculatedShutdownNorms?year=${year1}&plantId=${plantId}`
@@ -3802,6 +3804,34 @@ async function getCrackerNextYearData(keycloak, qParams) {
     return json(keycloak, resp)
   } catch (e) {
     console.error('Failed to fetch next-year data', e)
+    return Promise.reject(e)
+  }
+}
+
+async function calculateNormsHistorianValues(
+  plantId,
+  year,
+  periodFrom,
+  periodTo,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-norms-historian-values?plantId=${plantId}&aopYear=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
     return Promise.reject(e)
   }
 }
