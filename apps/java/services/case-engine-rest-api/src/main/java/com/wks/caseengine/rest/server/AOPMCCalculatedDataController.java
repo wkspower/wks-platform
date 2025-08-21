@@ -33,6 +33,21 @@ public class AOPMCCalculatedDataController {
 	public AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId, year);
 	}
+	
+	@GetMapping(value = "/max-achieved/capacity")
+	public AOPMessageVM getMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year) {
+		return aOPMCCalculatedDataService.getMaxAchievedCapacity(plantId, year);
+	}
+	
+	@GetMapping(value = "/design/capacity")
+	public AOPMessageVM getDesignCapacity(@RequestParam String plantId, @RequestParam String year) {
+		return aOPMCCalculatedDataService.getDesignCapacity(plantId, year);
+	}
+	
+	@PostMapping(value = "/design/capacity")
+	public AOPMessageVM updateDesignCapacity(@RequestParam String plantId,@RequestParam String year, @RequestBody AOPMCCalculatedDataDTO aopMCCalculatedDataDTO) {
+		return aOPMCCalculatedDataService.updateDesignCapacity(plantId,year, aopMCCalculatedDataDTO);
+	}
 
 	@PutMapping(value = "/editAOPMCCalculatedData")
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(

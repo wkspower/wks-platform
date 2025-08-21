@@ -38,9 +38,13 @@ public interface AOPMCCalculatedDataRepository extends JpaRepository<AOPMCCalcul
 	        nativeQuery = true)
 	List<Object[]> getDataMCUValuesAllData(@Param("year") String year, @Param("plantId") String plantId);
 
- 			   
- 			  
+	@Query(value = "SELECT TOP (1000) [Id], [Material_FK_Id], [MaterialDisplayName], [April], [May], [June], [July], [August], [September], [October], [November], [December], [January], [February], [March], [FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [UpdatedBy],[PlantId] FROM [dbo].[vwAOPMCValuesMaxAchivedCapacity] WHERE PlantId = :plantId AND FinancialYear = :year",
+	        nativeQuery = true)
+	List<Object[]> getMaxAchievedCapacityData(@Param("year") String year, @Param("plantId") String plantId);
+	
+	
+	@Query(value = "SELECT TOP (1000) [Id], [Material_FK_Id], [MaterialDisplayName], [April], [May], [June], [July], [August], [September], [October], [November], [December], [January], [February], [March], [FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [UpdatedBy],[PlantId] FROM [dbo].[vwAOPMCValuesDesignCapacity] WHERE PlantId = :plantId AND FinancialYear = :year",
+    nativeQuery = true)
+	List<Object[]> getDesignCapacityData(@Param("year") String year, @Param("plantId") String plantId);
 
- 			 
-
-}
+ }

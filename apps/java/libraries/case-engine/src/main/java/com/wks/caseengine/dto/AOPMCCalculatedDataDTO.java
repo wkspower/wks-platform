@@ -42,4 +42,5 @@ public class AOPMCCalculatedDataDTO {
     private String productName;
     private String saveStatus;
     private String errDescription;
+    private String materialDisplayName;
 }
