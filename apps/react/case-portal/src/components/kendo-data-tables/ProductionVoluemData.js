@@ -23,8 +23,10 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
-  const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] = React.useState({})
-  const [enableSaveAddBtnDesignCapacity, setEnableSaveAddBtnDesignCapacity] = useState(false)
+  const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
+    React.useState({})
+  const [enableSaveAddBtnDesignCapacity, setEnableSaveAddBtnDesignCapacity] =
+    useState(false)
   const [_plantID, set_PlantID] = useState('')
 
   const keycloak = useSession()
@@ -51,9 +53,9 @@ const ProductionvolumeData = ({ permissions }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
- const [unitDesignCapacity, setUnitDesignCapacity] = useState('TPH')
-const [unitMaxCapacity, setUnitMaxCapacity] = useState('TPH')
-const [selectedUnit, setSelectedUnit] = useState('TPH') 
+  const [unitDesignCapacity, setUnitDesignCapacity] = useState('TPH')
+  const [unitMaxCapacity, setUnitMaxCapacity] = useState('TPH')
+  const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [loading, setLoading] = useState(false)
 
   // States for the Remark Dialog
@@ -64,7 +66,7 @@ const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [endDate, setEndDate] = useState(null)
   const dispatch = useDispatch()
   const [rowsDesignCapacity, setRowsDesignCapacity] = useState([])
-const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
+  const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
   // const unsavedChangesRef = React.useRef({
   //   unsavedRows: {},
   //   rowsBeforeChange: {},
@@ -74,11 +76,11 @@ const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-const handleRemarkCellClickDesignCapacity = (row) => {
-  setCurrentRemark(row.remark || row.remarks || '')
-  setCurrentRowId(row.idFromApi || row.id)
-  setRemarkDialogOpen(true)
-}
+  const handleRemarkCellClickDesignCapacity = (row) => {
+    setCurrentRemark(row.remark || row.remarks || '')
+    setCurrentRowId(row.idFromApi || row.id)
+    setRemarkDialogOpen(true)
+  }
   useEffect(() => {
     if (plantID?.plantId) {
       set_PlantID(plantID?.plantId)
@@ -206,119 +208,122 @@ const handleRemarkCellClickDesignCapacity = (row) => {
     }
   }
 
-const editDesignCapacityData = async (newRows) => {
-  setLoading(true)
-  try {
-    let plantId = ''
-    const isTPH = unitDesignCapacity === 'TPD' // match third grid logic!
-    const storedPlant = localStorage.getItem('selectedPlant')
-    if (storedPlant) {
-      const parsedPlant = JSON.parse(storedPlant)
-      plantId = parsedPlant.id
-    }
+  const editDesignCapacityData = async (newRows) => {
+    setLoading(true)
+    try {
+      let plantId = ''
+      const isTPH = unitDesignCapacity === 'TPD' // match third grid logic!
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
 
-    const months = [
-      'april', 'may', 'june', 'july', 'august', 'september',
-      'october', 'november', 'december', 'january', 'february', 'march'
-    ]
+      const months = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december',
+        'january',
+        'february',
+        'march',
+      ]
 
-    const designCapacityData = newRows.map((row) => {
-      const mapped = { id: row.idFromApi || row.id || null }
-      months.forEach(month => {
-        mapped[month] = isTPH && row[month] ? row[month] / 24 : row[month] || null
+      const designCapacityData = newRows.map((row) => {
+        const mapped = { id: row.idFromApi || row.id || null }
+        months.forEach((month) => {
+          mapped[month] =
+            isTPH && row[month] ? row[month] / 24 : row[month] || null
+        })
+        mapped.remarks = row.remarks || row.remark || ''
+        mapped.materialFKId = row.normParametersFKId || row.materialFKId || null
+        mapped.productName = row.productName || row.materialDisplayName || null
+        return mapped
       })
-      mapped.remarks = row.remarks || row.remark || ''
-      mapped.materialFKId = row.normParametersFKId || row.materialFKId || null
-      mapped.productName = row.productName || row.materialDisplayName || null
-      // add other required fields here
-      return mapped
-    })
 
-    // Validation (optional, like third grid)
-    const invalidRows = designCapacityData.filter(row =>
-      !row.materialFKId ||
-      months.some(month => row[month] === 0 || row[month] === null)
-    )
-    if (invalidRows.length > 0) {
+      const response = await DataService.editDesignCapacityData(
+        plantId,
+        designCapacityData,
+        keycloak,
+      )
+
+      if (response && response.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Design Capacity Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCellsDesignCapacity({})
+        setEnableSaveAddBtnDesignCapacity(false)
+        fetchDesignCapacityData(unitDesignCapacity)
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Please fill all fields, try again!',
+          severity: 'error',
+        })
+      }
+      setLoading(false)
+      return response
+    } catch (error) {
+      console.error('Error saving Design Capacity:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Please fill all fields in edited row and update the Remark!',
+        message: 'Error saving Design Capacity!',
         severity: 'error',
       })
       setLoading(false)
-      return
     }
-
-    const response = await DataService.editDesignCapacityData(
-      plantId,
-      designCapacityData,
-      keycloak,
-    )
-
-    if (response && response.code === 200) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Design Capacity Saved Successfully!',
-        severity: 'success',
-      })
-      setModifiedCellsDesignCapacity({})
-      setEnableSaveAddBtnDesignCapacity(false)
-      fetchDesignCapacityData(unitDesignCapacity)
-    } else {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Please fill all fields, try again!',
-        severity: 'error',
-      })
-    }
-    setLoading(false)
-    return response
-  } catch (error) {
-    console.error('Error saving Design Capacity:', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error saving Design Capacity!',
-      severity: 'error',
-    })
-    setLoading(false)
   }
-}
   const saveChangesDesignCapacity = React.useCallback(async () => {
-  try {
-    const data = Object.values(modifiedCellsDesignCapacity)
-    console.log('Edited rows:', data)
-    if (data.length === 0) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'No Records to Save!',
-        severity: 'info',
-      })
-      return
+    try {
+      const data = Object.values(modifiedCellsDesignCapacity)
+      console.log('Edited rows:', data)
+      if (data.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
+      }
+
+      const months = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december',
+        'january',
+        'february',
+        'march',
+      ]
+
+      // if (invalidRows.length > 0) {
+      //   setSnackbarData({
+      //     message: 'Please fill all fields in edited row and update the Remark!',
+      //     severity: 'error',
+      //   })
+      //   setSnackbarOpen(true)
+      //   return
+      // } else {
+      //   await editDesignCapacityData(data)
+      // }
+      await editDesignCapacityData(data)
+      setEnableSaveAddBtnDesignCapacity(false)
+    } catch (error) {
+      console.log('Facing issue at saving data', error)
     }
-
-    const months = [
-      'april', 'may', 'june', 'july', 'august', 'september',
-      'october', 'november', 'december', 'january', 'february', 'march'
-    ]
-
-  
-
-    // if (invalidRows.length > 0) {
-    //   setSnackbarData({
-    //     message: 'Please fill all fields in edited row and update the Remark!',
-    //     severity: 'error',
-    //   })
-    //   setSnackbarOpen(true)
-    //   return
-    // } else {
-    //   await editDesignCapacityData(data)
-    // }
-    await editDesignCapacityData(data)
-    setEnableSaveAddBtnDesignCapacity(false)
-  } catch (error) {
-    console.log('Facing issue at saving data', error)
-  }
-}, [modifiedCellsDesignCapacity, unitDesignCapacity])
+  }, [modifiedCellsDesignCapacity, unitDesignCapacity])
 
   //
   const saveChanges = React.useCallback(async () => {
@@ -857,12 +862,12 @@ const editDesignCapacityData = async (newRows) => {
       type: 'number',
     },
     {
-  field:'remark',
-  title: 'Remark',
-  editable: true,
-  align: 'left',
-  headerAlign: 'left',
-}
+      field: 'remark',
+      title: 'Remark',
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+    },
   ]
   const max_achieved_capacity = [
     {
@@ -1186,16 +1191,16 @@ const editDesignCapacityData = async (newRows) => {
   })
 
   const handleUnitChangeDesignCapacity = (unit) => {
-  setUnitDesignCapacity(unit)
-}
+    setUnitDesignCapacity(unit)
+  }
 
-const handleUnitChangeMaxCapacity = (unit) => {
-  setUnitMaxCapacity(unit) 
-}
+  const handleUnitChangeMaxCapacity = (unit) => {
+    setUnitMaxCapacity(unit)
+  }
 
-const handleUnitChangeMain = (unit) => {
-  setSelectedUnit(unit)
-}
+  const handleUnitChangeMain = (unit) => {
+    setSelectedUnit(unit)
+  }
 
   const handleCalculate = () => {
     if (lowerVertName == 'meg') {
@@ -1205,118 +1210,186 @@ const handleUnitChangeMain = (unit) => {
     }
   }
 
-const formatCapacityData = (data) => {
-  return data?.map((item, index) => ({
-    ...item,
-    idFromApi: item?.id,
-    productName: item?.materialDisplayName,
-    remarks: item?.remarks?.trim() || null,
-    originalRemark: item?.remarks?.trim() || null,
-    id: index,
-  }))
-}
+  const formatCapacityData = (data) => {
+    return data?.map((item, index) => ({
+      ...item,
+      idFromApi: item?.id,
+      productName: item?.materialDisplayName,
+      remarks: item?.remarks?.trim() || null,
+      originalRemark: item?.remarks?.trim() || null,
+      id: index,
+    }))
+  }
 
+  const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
+    setLoading(true)
+    try {
+      const response = await DataService.getDesignCapacityData(keycloak, unit)
+      let data = response?.data?.aopMCCalculatedDataDTOList
+      if (data && !Array.isArray(data)) {
+        data = [data]
+      }
+      if (response?.code === 200 && data) {
+        // Conversion logic
+        const isTPD = unit === 'TPD'
+        const formatted = data.map((item, index) => ({
+          ...item,
+          id: item?.id,
+          productName: item?.materialDisplayName,
+          remarks: item?.remarks?.trim() || null,
+          originalRemark: item?.remarks?.trim() || null,
+          remark: item.remarks || '',
 
-const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
-  setLoading(true)
-  try {
-    const response = await DataService.getDesignCapacityData(keycloak, unit)
-    let data = response?.data?.aopMCCalculatedDataDTOList
-    if (data && !Array.isArray(data)) {
-      data = [data]
-    }
-    if (response?.code === 200 && data) {
-      // Conversion logic
-      const isTPD = unit === 'TPD'
-      const formatted = data.map((item, index) => ({
-        ...item,
-        id: item?.id,
-        productName: item?.materialDisplayName,
-        remarks: item?.remarks?.trim() || null,
-        originalRemark: item?.remarks?.trim() || null,
-       remark: item.remarks || '',
-       originalRemark: item.remarks || '',
-        // Convert TPH to TPD if needed
-        april: isTPD && item.april ? (item.april * 24).toFixed(2) : item.april || null,
-        may: isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
-        june: isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null,
-        july: isTPD && item.july ? (item.july * 24).toFixed(2) : item.july || null,
-        august: isTPD && item.august ? (item.august * 24).toFixed(2) : item.august || null,
-        september: isTPD && item.september ? (item.september * 24).toFixed(2) : item.september || null,
-        october: isTPD && item.october ? (item.october * 24).toFixed(2) : item.october || null,
-        november: isTPD && item.november ? (item.november * 24).toFixed(2) : item.november || null,
-        december: isTPD && item.december ? (item.december * 24).toFixed(2) : item.december || null,
-        january: isTPD && item.january ? (item.january * 24).toFixed(2) : item.january || null,
-        february: isTPD && item.february ? (item.february * 24).toFixed(2) : item.february || null,
-        march: isTPD && item.march ? (item.march * 24).toFixed(2) : item.march || null,
-        remark: item.remarks || '',
-        originalRemark: item.remarks || '',
-      }))
-      setRowsDesignCapacity(formatted)
-    } else {
+          // Convert TPH to TPD if needed
+          april:
+            isTPD && item.april
+              ? (item.april * 24).toFixed(2)
+              : item.april || null,
+          may:
+            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
+          june:
+            isTPD && item.june
+              ? (item.june * 24).toFixed(2)
+              : item.june || null,
+          july:
+            isTPD && item.july
+              ? (item.july * 24).toFixed(2)
+              : item.july || null,
+          august:
+            isTPD && item.august
+              ? (item.august * 24).toFixed(2)
+              : item.august || null,
+          september:
+            isTPD && item.september
+              ? (item.september * 24).toFixed(2)
+              : item.september || null,
+          october:
+            isTPD && item.october
+              ? (item.october * 24).toFixed(2)
+              : item.october || null,
+          november:
+            isTPD && item.november
+              ? (item.november * 24).toFixed(2)
+              : item.november || null,
+          december:
+            isTPD && item.december
+              ? (item.december * 24).toFixed(2)
+              : item.december || null,
+          january:
+            isTPD && item.january
+              ? (item.january * 24).toFixed(2)
+              : item.january || null,
+          february:
+            isTPD && item.february
+              ? (item.february * 24).toFixed(2)
+              : item.february || null,
+          march:
+            isTPD && item.march
+              ? (item.march * 24).toFixed(2)
+              : item.march || null,
+        }))
+        setRowsDesignCapacity(formatted)
+      } else {
+        setRowsDesignCapacity([])
+      }
+    } catch (error) {
+      console.error('Error fetching Design Capacity:', error)
       setRowsDesignCapacity([])
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Error fetching Design Capacity:', error)
-    setRowsDesignCapacity([])
-  } finally {
-    setLoading(false)
   }
-}
-const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
-  setLoading(true)
-  try {
-    const response = await DataService.getMaxAchievedCapacityData(keycloak, unit)
-    let data = response?.data?.aopMCCalculatedDataDTOList
-    if (data && !Array.isArray(data)) {
-      data = [data]
-    }
-    if (response?.code === 200 && data) {
-      // Conversion logic
-      const isTPD = unit === 'TPD'
-      const formatted = data.map((item, index) => ({
-        ...item,
-        idFromApi: item?.id,
-        productName: item?.materialDisplayName,
-        april: isTPD && item.april ? (item.april * 24).toFixed(2) : item.april || null,
-        may: isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
-        june: isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null,
-        july: isTPD && item.july ? (item.july * 24).toFixed(2) : item.july || null,
-        august: isTPD && item.august ? (item.august * 24).toFixed(2) : item.august || null,
-        september: isTPD && item.september ? (item.september * 24).toFixed(2) : item.september || null,
-        october: isTPD && item.october ? (item.october * 24).toFixed(2) : item.october || null,
-        november: isTPD && item.november ? (item.november * 24).toFixed(2) : item.november || null,
-        december: isTPD && item.december ? (item.december * 24).toFixed(2) : item.december || null,
-        january: isTPD && item.january ? (item.january * 24).toFixed(2) : item.january || null,
-        february: isTPD && item.february ? (item.february * 24).toFixed(2) : item.february || null,
-        march: isTPD && item.march ? (item.march * 24).toFixed(2) : item.march || null,
-        isEditable: false
-      }))
-      setRowsMaxCapacity(formatted)
-    } else {
+  const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
+    setLoading(true)
+    try {
+      const response = await DataService.getMaxAchievedCapacityData(
+        keycloak,
+        unit,
+      )
+      let data = response?.data?.aopMCCalculatedDataDTOList
+      if (data && !Array.isArray(data)) {
+        data = [data]
+      }
+      if (response?.code === 200 && data) {
+        // Conversion logic
+        const isTPD = unit === 'TPD'
+        const formatted = data.map((item, index) => ({
+          ...item,
+          idFromApi: item?.id,
+          productName: item?.materialDisplayName,
+          april:
+            isTPD && item.april
+              ? (item.april * 24).toFixed(2)
+              : item.april || null,
+          may:
+            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
+          june:
+            isTPD && item.june
+              ? (item.june * 24).toFixed(2)
+              : item.june || null,
+          july:
+            isTPD && item.july
+              ? (item.july * 24).toFixed(2)
+              : item.july || null,
+          august:
+            isTPD && item.august
+              ? (item.august * 24).toFixed(2)
+              : item.august || null,
+          september:
+            isTPD && item.september
+              ? (item.september * 24).toFixed(2)
+              : item.september || null,
+          october:
+            isTPD && item.october
+              ? (item.october * 24).toFixed(2)
+              : item.october || null,
+          november:
+            isTPD && item.november
+              ? (item.november * 24).toFixed(2)
+              : item.november || null,
+          december:
+            isTPD && item.december
+              ? (item.december * 24).toFixed(2)
+              : item.december || null,
+          january:
+            isTPD && item.january
+              ? (item.january * 24).toFixed(2)
+              : item.january || null,
+          february:
+            isTPD && item.february
+              ? (item.february * 24).toFixed(2)
+              : item.february || null,
+          march:
+            isTPD && item.march
+              ? (item.march * 24).toFixed(2)
+              : item.march || null,
+          isEditable: false,
+        }))
+        setRowsMaxCapacity(formatted)
+      } else {
+        setRowsMaxCapacity([])
+      }
+    } catch (error) {
+      console.error('Error fetching Max Achieved Capacity:', error)
       setRowsMaxCapacity([])
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Error fetching Max Achieved Capacity:', error)
-    setRowsMaxCapacity([])
-  } finally {
-    setLoading(false)
   }
-}
 
-// Fetch both on mount or when needed
-useEffect(() => {
-  fetchDesignCapacityData(unitDesignCapacity)
-}, [unitDesignCapacity, plantID, yearChanged, keycloak])
+  // Fetch both on mount or when needed
+  useEffect(() => {
+    fetchDesignCapacityData(unitDesignCapacity)
+  }, [unitDesignCapacity, plantID, yearChanged, keycloak])
 
-useEffect(() => {
-  fetchMaxCapacityData(unitMaxCapacity)
-}, [unitMaxCapacity, plantID, yearChanged, keycloak])
+  useEffect(() => {
+    fetchMaxCapacityData(unitMaxCapacity)
+  }, [unitMaxCapacity, plantID, yearChanged, keycloak])
 
-useEffect(() => {
-  fetchData()
-  if (lowerVertName == 'meg') fetchConfiguration()
-}, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+  useEffect(() => {
+    fetchData()
+    if (lowerVertName == 'meg') fetchConfiguration()
+  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const handleCalculateMeg = async () => {
     try {
@@ -1454,34 +1527,34 @@ useEffect(() => {
     saveExcelFile(rawFile)
   }
   const downloadExcelForConfiguration = async (gridType) => {
-  setSnackbarOpen(true)
-  setSnackbarData({
-    message: 'Excel download started!',
-    severity: 'success',
-  })
-
-  try {
-    if (gridType === 'design') {
-      await DataService.getDesignCapacityExcel(keycloak)
-    } else if (gridType === 'max') {
-      await DataService.getMaxAchievedCapacityExcel(keycloak)
-    } else {
-      await DataService.getProductionVolExcel(keycloak)
-    }
-
-    setSnackbarData({
-      message: 'Excel download completed successfully!',
-      severity: 'success',
-    })
-  } catch (error) {
-    console.error('Error!', error)
     setSnackbarOpen(true)
     setSnackbarData({
-      message: 'Failed to download Excel.',
-      severity: 'error',
+      message: 'Excel download started!',
+      severity: 'success',
     })
+
+    try {
+      if (gridType === 'design') {
+        await DataService.getDesignCapacityExcel(keycloak)
+      } else if (gridType === 'max') {
+        await DataService.getMaxAchievedCapacityExcel(keycloak)
+      } else {
+        await DataService.getProductionVolExcel(keycloak)
+      }
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error!', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      })
+    }
   }
-}
   const saveExcelFile = async (rawFile) => {
     setLoading(true)
     try {
@@ -1503,7 +1576,22 @@ useEffect(() => {
           severity: 'success',
         })
         setModifiedCells({})
-        setLoading(false)
+        if (lowerVertName == 'meg') {
+          const responseForNorms =
+            await DataService.calculateNormsHistorianValues(
+              plantId,
+              localStorage.getItem('year'),
+              startDate,
+              endDate,
+              keycloak,
+            )
+
+          if (responseForNorms?.code == 200) setLoading(false)
+        } else {
+          setLoading(false)
+        }
+
+        // setLoading(false)
 
         fetchData()
       } else if (response?.code === 400 && response?.data) {
@@ -1557,7 +1645,7 @@ useEffect(() => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      
+
       {conditionForFirst && (
         <KendoDataTables
           modifiedCells={modifiedCellsDesignCapacity}
@@ -1573,7 +1661,9 @@ useEffect(() => {
           selectedUnit={unitDesignCapacity}
           setSelectedUnit={setUnitDesignCapacity}
           handleUnitChange={handleUnitChangeDesignCapacity}
-          downloadExcelForConfiguration={() => downloadExcelForConfiguration('design')}
+          downloadExcelForConfiguration={() =>
+            downloadExcelForConfiguration('design')
+          }
           remarkDialogOpen={remarkDialogOpen}
           setRemarkDialogOpen={setRemarkDialogOpen}
           currentRemark={currentRemark}
@@ -1593,7 +1683,9 @@ useEffect(() => {
           selectedUnit={unitMaxCapacity}
           setSelectedUnit={setUnitMaxCapacity}
           handleUnitChange={handleUnitChangeMaxCapacity}
-          downloadExcelForConfiguration={() => downloadExcelForConfiguration('max')}
+          downloadExcelForConfiguration={() =>
+            downloadExcelForConfiguration('max')
+          }
         />
       )}
 
@@ -1626,7 +1718,9 @@ useEffect(() => {
         selectedUnit={selectedUnit}
         setSelectedUnit={setSelectedUnit}
         handleExcelUpload={handleExcelUpload}
-        downloadExcelForConfiguration={() => downloadExcelForConfiguration('main')}
+        downloadExcelForConfiguration={() =>
+          downloadExcelForConfiguration('main')
+        }
       />
 
       {!permissions?.hideSummary && (

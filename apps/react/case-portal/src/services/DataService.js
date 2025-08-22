@@ -2321,7 +2321,7 @@ async function editDesignCapacityData(plantId, designCapacityData, keycloak) {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify(designCapacityData[0]),
+      body: JSON.stringify(designCapacityData),
     })
     return json(keycloak, resp)
   } catch (e) {
