@@ -931,7 +931,7 @@ const KendoDataTables = ({
                     setSelectMode(e.target.value)
                     // fetchData()
                   }}
-                  sx={{ width: '150px', backgroundColor: '#FFFFFF' }}
+                  className='dropdown-select'
                   variant='outlined'
                   label='Select Modes'
                 >
@@ -999,7 +999,7 @@ const KendoDataTables = ({
               onItemChange={itemChange}
               resizable={true}
               defaultSkip={0}
-              defaultTake={500}
+              defaultTake={200}
               contextMenu={true}
               grade={grades}
               onRowClick={handleRowClick}

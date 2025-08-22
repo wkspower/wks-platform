@@ -324,122 +324,131 @@ export default function HeaderContent({ keycloak }) {
 
   return (
     <>
-      <Box sx={{ ml: 3, mt: 0 }}>
-        {true && <img src={Logo} alt='RIL Logo' style={{ height: 40 }} />}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+        }}
+      >
+        {/* LEFT SIDE: Logo + Title */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ ml: 2 }}>
+            <img src={Logo} alt='RIL Logo' style={{ height: 40 }} />
+          </Box>
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant='body1'
+              color='white'
+              className='custom-title-font'
+            >
+              {screenTitleName}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* RIGHT SIDE: Dropdowns */}
+        <Stack direction='row' spacing={1} alignItems='center'>
+          {/* Year */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant='body1' className='custom-title-dropdown'>
+              Year:
+            </Typography>
+            {headerLoading ? (
+              <Skeleton variant='rectangle' width={100} height={40} />
+            ) : (
+              <FormControl sx={{ minWidth: 100 }}>
+                <Select
+                  value={selectedYear}
+                  onChange={handleYearChange}
+                  className='custom-title-dropdown-content'
+                >
+                  {aopYears.map((y) => (
+                    <MenuItem key={y.AOPYear} value={y.AOPYear}>
+                      {y.AOPDisplayYear}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+
+          {/* Vertical */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant='body1' className='custom-title-dropdown'>
+              Vertical:
+            </Typography>
+            {headerLoading ? (
+              <Skeleton variant='rectangle' width={100} height={40} />
+            ) : (
+              <FormControl sx={{ minWidth: 100 }}>
+                <Select
+                  value={selectedVertical}
+                  onChange={handleVertChange}
+                  className='custom-title-dropdown-content'
+                >
+                  {verticals.map((v) => (
+                    <MenuItem key={v.id} value={v.id}>
+                      {v.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+
+          {/* Site */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant='body1' className='custom-title-dropdown'>
+              Site:
+            </Typography>
+            {headerLoading ? (
+              <Skeleton variant='rectangle' width={100} height={40} />
+            ) : (
+              <FormControl sx={{ minWidth: 100 }}>
+                <Select
+                  value={selectedSite}
+                  onChange={handleSiteChange}
+                  disabled={!sites.length}
+                  className='custom-title-dropdown-content'
+                >
+                  {sites.map((s) => (
+                    <MenuItem key={s.id} value={s.id}>
+                      {s.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+
+          {/* Plant */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant='body1' className='custom-title-dropdown'>
+              Plant:
+            </Typography>
+            {headerLoading ? (
+              <Skeleton variant='rectangle' width={100} height={40} />
+            ) : (
+              <FormControl sx={{ minWidth: 100 }}>
+                <Select
+                  value={selectedPlant}
+                  onChange={handlePlantChange}
+                  disabled={!plants.length}
+                  className='custom-title-dropdown-content'
+                >
+                  {plants.map((p) => (
+                    <MenuItem key={p.id} value={p.id}>
+                      {p.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+        </Stack>
       </Box>
-      <Box sx={{ ml: 1, mt: 0 }}>
-        {true && (
-          <Typography
-            variant='body1'
-            color='white'
-            className='custom-title-font'
-          >
-            {screenTitleName}
-          </Typography>
-        )}
-      </Box>
-
-      {matchesXs ? <Search /> : <Box sx={{ width: '100%', ml: 1 }} />}
-
-      <Stack direction='row' spacing={2} alignItems='center'>
-        {/* Year Selector */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' className='custom-title-dropdown'>
-            Year:
-          </Typography>
-          {headerLoading ? (
-            <Skeleton variant='rectangle' width={100} height={40} />
-          ) : (
-            <FormControl sx={{ minWidth: 100 }}>
-              <Select
-                value={selectedYear}
-                onChange={handleYearChange}
-                className='custom-title-dropdown-content'
-              >
-                {aopYears.map((y) => (
-                  <MenuItem key={y.AOPYear} value={y.AOPYear}>
-                    {y.AOPDisplayYear}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Box>
-
-        {/* Vertical */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' className='custom-title-dropdown'>
-            Vertical:
-          </Typography>
-          {headerLoading ? (
-            <Skeleton variant='rectangle' width={100} height={40} />
-          ) : (
-            <FormControl sx={{ minWidth: 100 }}>
-              <Select
-                value={selectedVertical}
-                onChange={handleVertChange}
-                className='custom-title-dropdown-content'
-              >
-                {verticals.map((v) => (
-                  <MenuItem key={v.id} value={v.id}>
-                    {v.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Box>
-
-        {/* Site */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' className='custom-title-dropdown'>
-            Site:
-          </Typography>
-          {headerLoading ? (
-            <Skeleton variant='rectangle' width={100} height={40} />
-          ) : (
-            <FormControl sx={{ minWidth: 100 }}>
-              <Select
-                value={selectedSite}
-                onChange={handleSiteChange}
-                disabled={!sites.length}
-                className='custom-title-dropdown-content'
-              >
-                {sites.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Box>
-
-        {/* Plant */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Typography variant='body1' className='custom-title-dropdown'>
-            Plant:
-          </Typography>
-          {headerLoading ? (
-            <Skeleton variant='rectangle' width={100} height={40} />
-          ) : (
-            <FormControl sx={{ minWidth: 100 }}>
-              <Select
-                value={selectedPlant}
-                onChange={handlePlantChange}
-                disabled={!plants.length}
-                className='custom-title-dropdown-content'
-              >
-                {plants.map((p) => (
-                  <MenuItem key={p.id} value={p.id}>
-                    {p.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
-        </Box>
-      </Stack>
 
       {!matchesXs ? <Profile keycloak={keycloak} /> : <MobileSection />}
     </>

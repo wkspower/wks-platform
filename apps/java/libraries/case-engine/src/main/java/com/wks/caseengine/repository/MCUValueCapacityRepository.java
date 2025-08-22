@@ -1,16 +1,14 @@
 package com.wks.caseengine.repository;
 
-
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.stereotype.Repository;
 
-import com.wks.caseengine.entity.MCUValueCapacity;
+import com.wks.caseengine.entity.MCUDesignCapacity;
 
 @Repository
-public interface MCUValueCapacityRepository extends JpaRepository<MCUValueCapacity,UUID>{
-	
-	
+public interface MCUValueCapacityRepository extends JpaRepository<MCUDesignCapacity, UUID> {
+
 }

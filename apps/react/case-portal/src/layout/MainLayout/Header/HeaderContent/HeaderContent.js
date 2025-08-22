@@ -363,7 +363,7 @@ export default function HeaderContent({ keycloak }) {
       )}
     </Box>
   )
-  console.log('selectedYear', selectedYear)
+  // console.log('selectedYear', selectedYear)
   return (
     <>
       <Box sx={{ ml: 3, mt: 0 }}>

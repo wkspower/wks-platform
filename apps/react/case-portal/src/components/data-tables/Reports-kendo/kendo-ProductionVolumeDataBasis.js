@@ -191,7 +191,7 @@ const ProductionVolumeDataBasis = () => {
         )}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      <Box display='flex' justifyContent='flex-end' gap={1}>
         {!isOldYear && (
           <Button
             variant='contained'
@@ -208,11 +208,7 @@ const ProductionVolumeDataBasis = () => {
             setSelectedUnit(e.target.value)
             handleUnitChange(e.target.value)
           }}
-          sx={{
-            width: '150px',
-            backgroundColor: '#FFFFFF',
-            marginLeft: '12px',
-          }}
+          className='dropdown-select'
           variant='outlined'
           label='Select UOM'
         >

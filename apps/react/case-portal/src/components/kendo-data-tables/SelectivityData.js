@@ -361,6 +361,9 @@ const SelectivityData = (props) => {
       data = data.map((item, index) => ({
         ...item,
         id: index,
+        TypeDisplayName: item?.TypeDisplayName
+          ? item?.TypeDisplayName
+          : 'Recipe',
       }))
 
       props?.setRows(data)

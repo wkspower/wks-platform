@@ -292,8 +292,9 @@ const UserManagementTable = ({ keycloak }) => {
             sx={{
               border: '1px solid #ADD8E6',
               borderBottom: '1px solid #ADD8E6',
+              fontSize: '0.75rem',
               padding: '9px',
-              minHeight: '10px',
+              minHeight: '12px',
             }}
             label={tabId}
           />

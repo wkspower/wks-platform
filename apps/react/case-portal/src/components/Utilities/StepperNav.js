@@ -101,7 +101,10 @@ export default function StepperNav() {
             color: '#000',
           },
           '& .MuiStepLabel-alternativeLabel': {
-            marginTop: '3px !important',
+            marginTop: '2px !important',
+          },
+          '& .MuiStepConnector-alternativeLabel': {
+            top: '16px',
           },
         }}
       >

@@ -844,8 +844,9 @@ const SlowDown = ({ permissions }) => {
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
-                padding: '6px',
-                minHeight: '8px',
+                fontSize: '0.75rem',
+                padding: '9px',
+                minHeight: '12px',
               }}
             />
 
@@ -854,8 +855,9 @@ const SlowDown = ({ permissions }) => {
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
-                padding: '6px',
-                minHeight: '8px',
+                fontSize: '0.75rem',
+                padding: '9px',
+                minHeight: '12px',
               }}
             />
           </Tabs>

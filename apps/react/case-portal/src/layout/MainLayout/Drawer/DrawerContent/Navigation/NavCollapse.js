@@ -95,10 +95,7 @@ const NavCollapse = ({ menu, level }) => {
             <Typography
               variant={selected === menu.id ? 'h6' : 'body1'}
               color='inherit'
-              sx={{
-                my: 'auto',
-                fontSize: '0.80rem',
-              }}
+              className='side-menu'
             >
               {menu.title}
             </Typography>

@@ -163,21 +163,7 @@ const NavItem = ({ item, level }) => {
               // <Tooltip title={item.title} arrow>
               <Typography
                 variant='h6'
-                sx={{
-                  color: isSelected ? 'white' : textColor,
-                  '&:hover': {
-                    color: 'white',
-                    bgcolor: '#0100cb',
-                  },
-                  fontSize: '0.75rem', // force ~12px
-                  whiteSpace: 'normal', // Allows the text to wrap
-                  wordBreak: 'break-word', // Breaks long words
-                  display: '-webkit-box', // Uses a flexible box layout for text
-                  WebkitLineClamp: 3, // Limits to 2 lines of text
-                  WebkitBoxOrient: 'vertical', // Makes the text vertical
-                  overflow: 'hidden', // Hides overflowing text
-                  textOverflow: 'ellipsis', // Adds ellipsis (...) for overflowed text
-                }}
+                className={`sub-side-menu ${isSelected ? 'active' : ''}`}
               >
                 {item.title}
               </Typography>

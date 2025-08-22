@@ -21,6 +21,11 @@ const DateOnlyPicker = ({ dataItem, field, onChange }) => {
         onChange={handleChange}
         width='100%'
         size='small'
+        style={{
+          width: '100%',
+          fontSize: '0.75rem',
+          height: '28px',
+        }}
       />
     </td>
   )

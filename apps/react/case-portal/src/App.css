@@ -96,7 +96,7 @@ header {
   font-family: 'Roboto', sans-serif !important;
   font-weight: bold;
   white-space: nowrap;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .custom-title-dropdown {
@@ -104,11 +104,24 @@ header {
   font-weight: bold;
   white-space: nowrap;
   color: white;
+  font-size: 0.8rem;
 }
 .custom-title-dropdown-content {
   font-family: 'Roboto', sans-serif !important;
   white-space: nowrap;
   color: white;
+}
+
+.custom-title-dropdown-content .MuiSelect-select {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  min-height: unset;
+  line-height: 2.5;
+}
+
+.custom-title-dropdown-content .MuiMenuItem-root {
+  font-size: 0.8rem;
+  padding: 4px 8px;
 }
 
 .role-name {
@@ -248,3 +261,87 @@ main.MuiBox-root.css-vognfw {
   min-height: 28px;
   padding: 2px 8px;
 }
+
+.sub-side-menu {
+  font-size: 0.75rem;
+  color: white;
+  white-space: normal;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--menu-text-color, #333);
+  transition: all 0.2s ease;
+}
+
+.sub-side-menu:hover {
+  color: white;
+  background-color: #0100cb;
+}
+.sub-side-menu.active {
+  color: white;
+  background-color: #0100cb;
+  font-weight: 600;
+}
+
+.side-menu {
+  font-size: 0.8rem;
+  white-space: normal;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.aop-design-basis .MuiInputBase-root {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+}
+
+.aop-design-basis label {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1.2;
+  transform: translate(14px, 12px) scale(1);
+}
+
+.aop-design-basis .MuiInputLabel-shrink {
+  transform: translate(14px, -6px) scale(0.75);
+}
+
+.aop-design-basis .MuiOutlinedInput-notchedOutline {
+  border-color: #ccc;
+}
+
+.aop-design-basis:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #999;
+}
+
+.aop-design-basis.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2;
+}
+
+.aop-design-basis .MuiInputBase-input {
+  resize: vertical;
+  font-size: 0.75rem;
+}
+/* 
+.k-filter-menu-container {
+  font-size: 12px !important;
+  padding: 4px 6px !important;
+  max-height: 250px !important;
+  overflow-y: auto !important;
+}
+
+.k-column-menu-filter-search {
+  min-height: unset !important;
+  margin-bottom: 6px;
+} */

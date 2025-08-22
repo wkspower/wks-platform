@@ -16,7 +16,12 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
   const iconBackColor = 'grey.100'
   const iconBackColorOpen = 'grey.200'
   const mainHeader = (
-    <Toolbar>
+    <Toolbar
+      sx={{
+        minHeight: '48px !important',
+        py: 0.5,
+      }}
+    >
       <IconButton
         disableRipple
         aria-label='open drawer'

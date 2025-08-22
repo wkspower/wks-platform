@@ -1,7 +1,5 @@
 package com.wks.caseengine.entity;
 
-
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,15 +11,15 @@ import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "MCUValueCapacity")
+@Table(name = "MCUDesignCapacity")
 // Lombok annotations
 @Getter
 @Setter
 @NoArgsConstructor
 @ToString
-public class MCUValueCapacity {
+public class MCUDesignCapacity {
 
-	@Id
+    @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "Id", nullable = false, updatable = false)
@@ -86,4 +84,3 @@ public class MCUValueCapacity {
     @Column(name = "PlantId")
     private UUID plantId;
 }
-

@@ -11,7 +11,7 @@ const AopTabs = ({ tabIndex, setTabIndex, tabs }) => {
           borderBottom: '0px solid #ccc',
           '.MuiTabs-indicator': { display: 'none' },
           margin: '0px 0px 0px 0px',
-          minHeight: '28px',
+          minHeight: '25px',
         }}
         textColor='primary'
         indicatorColor='primary'
@@ -23,8 +23,9 @@ const AopTabs = ({ tabIndex, setTabIndex, tabs }) => {
             sx={{
               border: '1px solid #ADD8E6',
               borderBottom: '1px solid #ADD8E6',
-              padding: '6px',
-              minHeight: '8px',
+              fontSize: '0.75rem',
+              padding: '9px',
+              minHeight: '12px',
             }}
           />
         ))}

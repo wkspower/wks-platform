@@ -24,9 +24,9 @@ export const CustomAccordionSummary = styled((props) => (
 ))(() => ({
   backgroundColor: '#fff',
   padding: '0px 12px',
-  minHeight: '40px',
+  minHeight: '36px',
   '& .MuiAccordionSummary-content': {
-    margin: '8px 0',
+    margin: '4px 0',
   },
 }))
 

@@ -16,6 +16,7 @@ import { Typography } from '../../../node_modules/@mui/material/index'
 // import TextField from '@mui/material/TextField'
 // import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
+import { validateFields } from 'utils/validationUtils'
 
 const ProductionvolumeData = ({ permissions }) => {
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
@@ -60,8 +61,14 @@ const ProductionvolumeData = ({ permissions }) => {
 
   // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [remarkDialogOpenDesignCapacity, setRemarkDialogOpenDesignCapacity] =
+    useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRemarkDesignCapacity, setCurrentRemarkDesignCapacity] =
+    useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [currentRowIdDesignCapacity, setCurrentRowIdDesignCapacity] =
+    useState(null)
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
   const dispatch = useDispatch()
@@ -77,9 +84,9 @@ const ProductionvolumeData = ({ permissions }) => {
     setRemarkDialogOpen(true)
   }
   const handleRemarkCellClickDesignCapacity = (row) => {
-    setCurrentRemark(row.remark || row.remarks || '')
-    setCurrentRowId(row.idFromApi || row.id)
-    setRemarkDialogOpen(true)
+    setCurrentRemarkDesignCapacity(row.remarks || '')
+    setCurrentRowIdDesignCapacity(row.id)
+    setRemarkDialogOpenDesignCapacity(true)
   }
   useEffect(() => {
     if (plantID?.plantId) {
@@ -255,7 +262,7 @@ const ProductionvolumeData = ({ permissions }) => {
       if (response && response.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Design Capacity Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
         setModifiedCellsDesignCapacity({})
@@ -283,7 +290,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const saveChangesDesignCapacity = React.useCallback(async () => {
     try {
       const data = Object.values(modifiedCellsDesignCapacity)
-      console.log('Edited rows:', data)
+
       if (data.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -293,32 +300,19 @@ const ProductionvolumeData = ({ permissions }) => {
         return
       }
 
-      const months = [
-        'april',
-        'may',
-        'june',
-        'july',
-        'august',
-        'september',
-        'october',
-        'november',
-        'december',
-        'january',
-        'february',
-        'march',
-      ]
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
 
-      // if (invalidRows.length > 0) {
-      //   setSnackbarData({
-      //     message: 'Please fill all fields in edited row and update the Remark!',
-      //     severity: 'error',
-      //   })
-      //   setSnackbarOpen(true)
-      //   return
-      // } else {
-      //   await editDesignCapacityData(data)
-      // }
-      await editDesignCapacityData(data)
+      editDesignCapacityData(data)
       setEnableSaveAddBtnDesignCapacity(false)
     } catch (error) {
       console.log('Facing issue at saving data', error)
@@ -405,19 +399,13 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchData = async (unit = selectedUnit) => {
     try {
       setLoading(true)
-      // setStartDate(null)
-      // setEndDate(null)
-
       const response = await DataService.getAOPMCCalculatedData(keycloak)
-
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
         return
       }
-
       setCalculationObject(response?.data?.aopCalculation)
-
       var formattedData = response?.data?.aopMCCalculatedDataDTOList.map(
         (item, index) => {
           const isTPH = selectedUnit == 'TPD'
@@ -582,7 +570,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'materialFKId',
       title: 'Particulars',
-      widthT: 120,
+      widthT: 100,
 
       editable: false,
       hidden: true,
@@ -590,7 +578,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
-      widthT: 120,
+      widthT: 100,
       editable: false,
     },
     {
@@ -731,7 +719,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'materialFKId',
       title: 'Particulars',
-      widthT: 120,
+      widthT: 100,
 
       editable: true,
       hidden: true,
@@ -739,7 +727,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
-      widthT: 120,
+      widthT: 100,
       editable: true,
     },
     {
@@ -862,18 +850,19 @@ const ProductionvolumeData = ({ permissions }) => {
       type: 'number',
     },
     {
-      field: 'remark',
+      field: 'remarks',
       title: 'Remark',
       editable: true,
       align: 'left',
       headerAlign: 'left',
+      widthT: 150,
     },
   ]
   const max_achieved_capacity = [
     {
       field: 'materialFKId',
       title: 'Particulars',
-      widthT: 120,
+      widthT: 100,
 
       editable: true,
       hidden: true,
@@ -881,7 +870,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'productName',
       title: 'Particulars',
-      widthT: 120,
+      widthT: 100,
       editable: true,
     },
     {
@@ -1029,7 +1018,7 @@ const ProductionvolumeData = ({ permissions }) => {
       field: 'productName',
       title: 'Particulars',
 
-      widthT: 120,
+      widthT: 100,
 
       editable: false,
     },
@@ -1210,17 +1199,6 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const formatCapacityData = (data) => {
-    return data?.map((item, index) => ({
-      ...item,
-      idFromApi: item?.id,
-      productName: item?.materialDisplayName,
-      remarks: item?.remarks?.trim() || null,
-      originalRemark: item?.remarks?.trim() || null,
-      id: index,
-    }))
-  }
-
   const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
     setLoading(true)
     try {
@@ -1230,7 +1208,6 @@ const ProductionvolumeData = ({ permissions }) => {
         data = [data]
       }
       if (response?.code === 200 && data) {
-        // Conversion logic
         const isTPD = unit === 'TPD'
         const formatted = data.map((item, index) => ({
           ...item,
@@ -1238,9 +1215,8 @@ const ProductionvolumeData = ({ permissions }) => {
           productName: item?.materialDisplayName,
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
-          remark: item.remarks || '',
+          remark: item.remarks?.trim() || '',
 
-          // Convert TPH to TPD if needed
           april:
             isTPD && item.april
               ? (item.april * 24).toFixed(2)
@@ -1377,7 +1353,6 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  // Fetch both on mount or when needed
   useEffect(() => {
     fetchDesignCapacityData(unitDesignCapacity)
   }, [unitDesignCapacity, plantID, yearChanged, keycloak])
@@ -1434,8 +1409,6 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const defaultCustomHeight = { mainBox: '36vh', otherBox: '112%' }
-
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -1465,14 +1438,16 @@ const ProductionvolumeData = ({ permissions }) => {
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: false,
       units: ['TPH', 'TPD'],
-
-      downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-
+      // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       showTitleNameBusiness: true,
       titleName: 'Max Achieved Capacity',
+
+      downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
+      ExcelName: `${lowerVertName}_Max Achieved Capacity`,
     },
     isOldYear,
   )
+
   const adjustedPermissionsGrid2 = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -1486,7 +1461,9 @@ const ProductionvolumeData = ({ permissions }) => {
       saveBtn: true,
       units: ['TPH', 'TPD'],
 
-      downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
+      // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
+      downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
+      ExcelName: `${lowerVertName}_Design Capacity`,
 
       showTitleNameBusiness: true,
       titleName: 'Design Capacity',
@@ -1514,7 +1491,7 @@ const ProductionvolumeData = ({ permissions }) => {
           : false,
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       uploadExcelBtn: permissions?.hideUploadExcel ? false : true,
-      showTitleNameBusiness: lowerVertName === 'meg' ? false : true,
+      showTitleNameBusiness: true,
       titleName: 'Current Operating Capacity',
     },
     isOldYear,
@@ -1635,7 +1612,7 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const conditionForFirst = true
+  const conditionForFirst = lowerVertName == 'meg' && !permissions?.hideSummary
 
   return (
     <div>
@@ -1651,25 +1628,32 @@ const ProductionvolumeData = ({ permissions }) => {
           modifiedCells={modifiedCellsDesignCapacity}
           setModifiedCells={setModifiedCellsDesignCapacity}
           enableSaveAddBtn={enableSaveAddBtnDesignCapacity}
-          setEnableSaveAddBtn={setEnableSaveAddBtnDesignCapacity}
-          saveChanges={saveChangesDesignCapacity}
           setRows={setRowsDesignCapacity}
           columns={colDefsDesignCapacity}
           rows={rowsDesignCapacity}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={saveChangesDesignCapacity}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          apiRef={apiRef}
           fetchData={fetchDesignCapacityData}
+          handleUnitChange={handleUnitChangeDesignCapacity}
+          handleRemarkCellClick={handleRemarkCellClickDesignCapacity}
+          experimentalFeatures={{ newEditingApi: true }}
+          remarkDialogOpen={remarkDialogOpenDesignCapacity}
+          setRemarkDialogOpen={setRemarkDialogOpenDesignCapacity}
+          currentRemark={currentRemarkDesignCapacity}
+          setCurrentRemark={setCurrentRemarkDesignCapacity}
+          currentRowId={currentRowIdDesignCapacity}
+          setEnableSaveAddBtn={setEnableSaveAddBtnDesignCapacity}
           permissions={adjustedPermissionsGrid2}
           selectedUnit={unitDesignCapacity}
           setSelectedUnit={setUnitDesignCapacity}
-          handleUnitChange={handleUnitChangeDesignCapacity}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
-          remarkDialogOpen={remarkDialogOpen}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
-          currentRowId={currentRowId}
-          handleRemarkCellClick={handleRemarkCellClickDesignCapacity}
         />
       )}
 
@@ -1696,7 +1680,6 @@ const ProductionvolumeData = ({ permissions }) => {
         setRows={setRows}
         columns={cols}
         rows={rows1}
-        title='Production Volume Data'
         paginationOptions={[100, 200, 300]}
         saveChanges={saveChanges}
         snackbarData={snackbarData}

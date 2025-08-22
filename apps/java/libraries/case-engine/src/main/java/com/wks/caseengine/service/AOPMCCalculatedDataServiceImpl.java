@@ -39,7 +39,7 @@ import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 
 import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.AopCalculation;
-import com.wks.caseengine.entity.MCUValueCapacity;
+import com.wks.caseengine.entity.MCUDesignCapacity;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
@@ -83,7 +83,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
-	
+
 	@Autowired
 	private MCUValueCapacityRepository mcuValueCapacityRepository;
 
@@ -180,7 +180,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
 	@Override
 	public AOPMessageVM getDesignCapacity(String plantId, String year) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -221,7 +221,6 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
 
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
@@ -282,7 +281,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
 				aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
 				aOPMCCalculatedData.setUpdatedBy(Utility.getUserName());
-				
+
 				aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
 
 				AOPMCCalculatedData saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
@@ -683,11 +682,12 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOList) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<MCUValueCapacity> mcuValueCapacityList= new ArrayList<>();
-			for(AOPMCCalculatedDataDTO aopMCCalculatedDataDTO:aopMCCalculatedDataDTOList) {
-				Optional<MCUValueCapacity> optMCUValueCapacity=mcuValueCapacityRepository.findById(UUID.fromString(aopMCCalculatedDataDTO.getId()));
-				if(optMCUValueCapacity.isPresent()) {
-					MCUValueCapacity mcuValueCapacity=	optMCUValueCapacity.get();
+			List<MCUDesignCapacity> mcuValueCapacityList = new ArrayList<>();
+			for (AOPMCCalculatedDataDTO aopMCCalculatedDataDTO : aopMCCalculatedDataDTOList) {
+				Optional<MCUDesignCapacity> optMCUValueCapacity = mcuValueCapacityRepository
+						.findById(UUID.fromString(aopMCCalculatedDataDTO.getId()));
+				if (optMCUValueCapacity.isPresent()) {
+					MCUDesignCapacity mcuValueCapacity = optMCUValueCapacity.get();
 					mcuValueCapacity.setApril(aopMCCalculatedDataDTO.getApril());
 					mcuValueCapacity.setMay(aopMCCalculatedDataDTO.getMay());
 					mcuValueCapacity.setJune(aopMCCalculatedDataDTO.getJune());
@@ -705,12 +705,12 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					mcuValueCapacity.setUpdatedBy(Utility.getUserName());
 					mcuValueCapacityList.add(mcuValueCapacityRepository.save(mcuValueCapacity));
 				}
-			
+
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setData(mcuValueCapacityList);
 			aopMessageVM.setMessage("Data Updated Successfully");
-		}catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		// TODO Auto-generated method stub

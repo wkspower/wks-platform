@@ -621,7 +621,8 @@ const CrackerConfig = () => {
           sx={{
             borderBottom: '0px solid #ccc',
             '.MuiTabs-indicator': { display: 'none' },
-            minWidth: 'max-content',
+            margin: '0px 0px 0px 0px',
+            minHeight: '28px',
           }}
           textColor='primary'
           indicatorColor='primary'
@@ -643,8 +644,9 @@ const CrackerConfig = () => {
                 sx={{
                   border: '1px solid #ADD8E6',
                   borderBottom: '1px solid #ADD8E6',
+                  fontSize: '0.75rem',
                   padding: '9px',
-                  minHeight: '10px',
+                  minHeight: '12px',
                 }}
                 label={label}
               />

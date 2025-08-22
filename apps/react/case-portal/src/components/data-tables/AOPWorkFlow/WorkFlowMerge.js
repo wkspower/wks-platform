@@ -558,12 +558,27 @@ const WorkFlowMerge = () => {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '5px',
+        // gap: '5px',
         marginTop: '0px',
       }}
     >
       <Box>
-        <Stepper activeStep={activeStep} alternativeLabel>
+        <Stepper
+          activeStep={activeStep}
+          alternativeLabel
+          sx={{
+            '& .MuiStepLabel-label': {
+              fontWeight: 'normal',
+            },
+            '& .MuiStepLabel-label.Mui-active': {
+              fontWeight: 'bold',
+              color: '#000',
+            },
+            '& .MuiStepLabel-alternativeLabel': {
+              marginTop: '3px !important',
+            },
+          }}
+        >
           {masterSteps?.map((step) => (
             <Step
               key={step.displayName}
@@ -603,9 +618,10 @@ const WorkFlowMerge = () => {
             variant='scrollable'
             scrollButtons='auto'
             sx={{
-              borderBottom: 0,
+              borderBottom: '0px solid #ccc',
               '.MuiTabs-indicator': { display: 'none' },
-              maxWidth: '100%',
+              margin: '0px 0px 0px 0px',
+              minHeight: '28px',
             }}
             textColor='primary'
             indicatorColor='primary'

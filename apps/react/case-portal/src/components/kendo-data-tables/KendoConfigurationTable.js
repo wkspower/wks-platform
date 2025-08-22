@@ -112,7 +112,11 @@ const ConfigurationTable = () => {
 
       data = await DataService.getCatalystSelectivityData(keycloak, gradeId)
 
-      if (lowerVertName == 'meg' || lowerVertName == verticalEnums.CRACKER) {
+      if (
+        lowerVertName == verticalEnums.MEG ||
+        lowerVertName == verticalEnums.CRACKER ||
+        lowerVertName == verticalEnums.ELASTOMER
+      ) {
         data = data?.filter((item) => item.normType !== 'Report Manual Entry')
         const formattedData = data.map((item, index) => ({
           ...item,
@@ -307,7 +311,11 @@ const ConfigurationTable = () => {
     let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
     let verticalName = vertical?.toLowerCase()
     setTimeout(() => {
-      if (verticalName != 'cracker' && verticalName != 'meg') {
+      if (
+        verticalName != 'cracker' &&
+        verticalName != 'meg' &&
+        verticalName != 'elastomer'
+      ) {
         getConfigurationTabsMatrix()
         getConfigurationAvailableTabs()
         fetchGradeData()
@@ -665,35 +673,7 @@ const ConfigurationTable = () => {
                 setSummary(e.target.value)
                 setSummaryEdited(true)
               }}
-              sx={{
-                '& .MuiInputBase-root': {
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                  padding: '8px',
-                },
-                '& label': {
-                  fontSize: '1rem',
-                  color: '#666',
-                  lineHeight: '1.2',
-                  transform: 'translate(14px, 12px) scale(1)',
-                },
-                '& .MuiInputLabel-shrink': {
-                  transform: 'translate(14px, -6px) scale(0.75)',
-                },
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#ccc',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#999',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#1976d2',
-                },
-                '& .MuiInputBase-input': {
-                  resize: 'vertical',
-                },
-              }}
+              className='aop-design-basis'
             />
           </CustomAccordionDetails>
         </CustomAccordion>
@@ -725,7 +705,11 @@ const ConfigurationTable = () => {
     )
   }, [openConfirmDialog])
 
-  if (lowerVertName == 'meg' && lowerVertName !== 'cracker') {
+  if (
+    lowerVertName == 'meg' &&
+    lowerVertName !== 'cracker' &&
+    lowerVertName !== 'elastomer'
+  ) {
     const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')
     let displayYear = ''
@@ -815,7 +799,7 @@ const ConfigurationTable = () => {
     )
   }
 
-  if (lowerVertName === 'cracker') {
+  if (lowerVertName === 'cracker' || lowerVertName === 'elastomer') {
     const crackerTabs = ['Configuration', 'Constants']
     const auditYear = localStorage.getItem('year')
     let displayYear = ''
