@@ -587,7 +587,7 @@ const ProductionvolumeData = ({ permissions }) => {
       editable: false,
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
     {
@@ -597,13 +597,13 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
     {
       field: 'june',
       title: headerMap[6],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -612,7 +612,7 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     {
       field: 'july',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       title: headerMap[7],
       editable: false,
 
@@ -623,7 +623,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'august',
       title: headerMap[8],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -633,7 +633,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'september',
       title: headerMap[9],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -643,7 +643,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'october',
       title: headerMap[10],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -653,7 +653,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'november',
       title: headerMap[11],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -663,7 +663,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'december',
       title: headerMap[12],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -673,7 +673,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'january',
       title: headerMap[1],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -683,7 +683,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'february',
       title: headerMap[2],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -693,7 +693,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'march',
       title: headerMap[3],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: false,
 
       align: 'left',
@@ -736,7 +736,7 @@ const ProductionvolumeData = ({ permissions }) => {
       editable: true,
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
     {
@@ -746,13 +746,13 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
     {
       field: 'june',
       title: headerMap[6],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -761,7 +761,7 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     {
       field: 'july',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       title: headerMap[7],
       editable: true,
 
@@ -772,7 +772,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'august',
       title: headerMap[8],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -782,7 +782,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'september',
       title: headerMap[9],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -792,7 +792,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'october',
       title: headerMap[10],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -802,7 +802,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'november',
       title: headerMap[11],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -812,7 +812,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'december',
       title: headerMap[12],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -822,7 +822,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'january',
       title: headerMap[1],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -832,7 +832,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'february',
       title: headerMap[2],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -842,7 +842,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'march',
       title: headerMap[3],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -879,7 +879,7 @@ const ProductionvolumeData = ({ permissions }) => {
       editable: true,
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
     {
@@ -889,13 +889,13 @@ const ProductionvolumeData = ({ permissions }) => {
 
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
     {
       field: 'june',
       title: headerMap[6],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -904,7 +904,7 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     {
       field: 'july',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       title: headerMap[7],
       editable: true,
 
@@ -915,7 +915,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'august',
       title: headerMap[8],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -925,7 +925,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'september',
       title: headerMap[9],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -935,7 +935,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'october',
       title: headerMap[10],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -945,7 +945,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'november',
       title: headerMap[11],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -955,7 +955,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'december',
       title: headerMap[12],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -965,7 +965,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'january',
       title: headerMap[1],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -975,7 +975,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'february',
       title: headerMap[2],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -985,7 +985,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'march',
       title: headerMap[3],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       editable: true,
 
       align: 'left',
@@ -1029,14 +1029,14 @@ const ProductionvolumeData = ({ permissions }) => {
       editable: false,
       align: 'left',
       headerAlign: 'left',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       type: 'number',
     },
     {
       field: 'may',
       title: headerMap[5],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1047,7 +1047,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'june',
       title: headerMap[6],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1058,7 +1058,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'july',
       title: headerMap[7],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1069,7 +1069,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'august',
       title: headerMap[8],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1080,7 +1080,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'september',
       title: headerMap[9],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1091,7 +1091,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'october',
       title: headerMap[10],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1102,7 +1102,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'november',
       title: headerMap[11],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1113,7 +1113,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'december',
       title: headerMap[12],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1124,7 +1124,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'january',
       title: headerMap[1],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1135,7 +1135,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'february',
       title: headerMap[2],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
@@ -1146,7 +1146,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'march',
       title: headerMap[3],
-      format: '{0:#.###}',
+      format: '{0:#.##}',
 
       editable: false,
 
