@@ -1218,9 +1218,12 @@ const ProductionvolumeData = ({ permissions }) => {
           remark: item.remarks?.trim() || '',
 
           april:
-            isTPD && item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
+  isTPD && typeof item.april === 'number'
+    ? (item.april * 24).toFixed(2)
+    : typeof item.april === 'number'
+    ? item.april
+    : null,
+
           may:
             isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
           june:
@@ -1294,9 +1297,11 @@ const ProductionvolumeData = ({ permissions }) => {
           idFromApi: item?.id,
           productName: item?.materialDisplayName,
           april:
-            isTPD && item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
+  isTPD && item.april !== undefined && item.april !== null
+    ? (item.april * 24).toFixed(2)
+    : item.april !== undefined && item.april !== null
+    ? item.april
+    : null,
           may:
             isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
           june:
