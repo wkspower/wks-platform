@@ -3,18 +3,22 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.ModeWiseNormsDTO;
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -42,6 +46,9 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 	
 	@Autowired
 	private MCUNormsValueRepository mcuNormsValueRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
 	@Override
 	public AOPMessageVM getModeWiseNormsData(String year, String plantId, String mode, String method) {
@@ -83,10 +90,17 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 				modeWiseNormsDTOList.add(modeWiseNormsDTO); // Add the map to the list here
 		    }
 			
+			Map<String, Object> map = new HashMap<>();
+
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "normal-op-norms");
+			map.put("mcuNormsValueDTOList", modeWiseNormsDTOList);
+			map.put("aopCalculation", aopCalculation);
 			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
 			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(modeWiseNormsDTOList);
 			return aopMessageVM;
+
 
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
@@ -151,6 +165,7 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 					mcuNormsValue.setFebruary(modeWiseNormsDTO.getFebruary());
 					mcuNormsValue.setMarch(modeWiseNormsDTO.getMarch());
 					mcuNormsValue.setUpdatedBy(Utility.getUserName());
+					mcuNormsValue.setIsChecked(modeWiseNormsDTO.getIsChecked());
 					mcuNormsValueList.add(mcuNormsValueRepository.save(mcuNormsValue));
 				}
 
