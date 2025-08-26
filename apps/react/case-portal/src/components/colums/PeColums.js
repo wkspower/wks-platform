@@ -216,7 +216,7 @@ export const NormalOpNormPeColumns = [
   {
     field: 'productName',
     title: 'Particulars',
-    widthT: 160,
+    widthT: 120,
   },
 
   {
@@ -345,7 +345,7 @@ export const NormalOpNormPeColumns = [
   {
     field: 'remarks',
     title: 'Remark',
-    widthT: 160,
+    widthT: 140,
     editable: true,
   },
 
@@ -379,7 +379,7 @@ export const ShutdownConsumptionPeColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    widthT: 140,
+    widthT: 120,
     editable: false,
   },
   { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
@@ -431,7 +431,7 @@ export const SlowdownNormsPeColumns = [
   {
     field: 'productName',
     headerName: 'Particulars',
-    widthT: 160,
+    widthT: 120,
     editable: false,
   },
   { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
@@ -456,7 +456,7 @@ export const SlowdownNormsPeColumns = [
   {
     field: 'remarks',
     headerName: 'Remark',
-    width: 120,
+    width: 100,
     editable: false,
   },
   {
@@ -482,7 +482,7 @@ export const ConsumptionAopPeColumns = [
     field: 'productName',
     title: 'Particulars',
     editable: false,
-    widthT: 160,
+    widthT: 140,
   },
   {
     field: 'UOM',

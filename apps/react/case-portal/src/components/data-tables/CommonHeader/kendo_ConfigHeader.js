@@ -28,8 +28,7 @@ const getConfigByType = (configType) => {
       return productionColumnsPE3
     case 'Constants':
       return productionColumnsPE5
-    // case 'grades':
-    //   return productionColumnsPE4
+
     case 'production':
       return productionColumns
     case 'consumption':

@@ -20,13 +20,13 @@ export const BusinessDemandMegColumns = [
     field: 'displayName',
     title: 'Particulars',
     editable: false,
-    widthT: 120,
+    widthT: 80,
   },
   {
     field: 'UOM',
     title: 'UOM',
     editable: false,
-    widthT: 75,
+    widthT: 55,
   },
   {
     field: 'april',
@@ -141,7 +141,7 @@ export const BusinessDemandMegColumns = [
     field: 'remark',
     title: 'Remark',
     editable: false,
-    widthT: 160,
+    widthT: 135,
     type: 'string',
   },
   {

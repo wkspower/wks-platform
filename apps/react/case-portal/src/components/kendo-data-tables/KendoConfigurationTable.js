@@ -298,6 +298,7 @@ const ConfigurationTable = () => {
 
   useEffect(() => {
     if (!plantID || !year) return
+    setTabIndex(0)
 
     getConfigurationExecutionDetails()
   }, [plantID, year])

@@ -244,7 +244,9 @@ const KendoDataTables = ({
           return result
         })
       } else {
-        const uniqueItemId = gridName ? `${gridName}-${itemId}` : itemId
+        const uniqueItemId = permissions?.showCheckbox
+          ? `${gridName}-${itemId}`
+          : itemId
 
         setModifiedCells((prev) => {
           const base = {
@@ -548,6 +550,19 @@ const KendoDataTables = ({
       </th>
     )
   }
+  const BlankHeader = (props) => {
+    const { ariaSort, ...restThProps } = props.thProps || {}
+
+    return (
+      <th
+        {...restThProps}
+        aria-sort={ariaSort}
+        title=''
+        style={{ padding: '0px', borderRight: '1px solid #b4b4b4ff' }}
+      ></th>
+    )
+  }
+
   const triggerFileUpload = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click()
@@ -1460,7 +1475,7 @@ const KendoDataTables = ({
                             />
                           </td>
                         ),
-                        headerCell: SimpleHeaderWithTooltip,
+                        headerCell: BlankHeader,
                       }}
                     />
                   )

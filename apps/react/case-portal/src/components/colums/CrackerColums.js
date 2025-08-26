@@ -8,7 +8,7 @@ export const CrackerColums = [
   {
     field: 'materialDisplayName',
     title: 'Particulars',
-    widthT: 130,
+    widthT: 120,
   },
 
   {

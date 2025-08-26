@@ -112,16 +112,25 @@ const NormalOpNormsScreen = () => {
       let mappedData2 = response2?.data?.mcuNormsValueDTOList
       let mappedData3 = response3?.data?.mcuNormsValueDTOList
 
-      let formattedData = mappedData?.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: `main-${index}`,
-        originalRemark: item.remarks,
-        Particulars:
-          lowerVertName === 'cracker'
-            ? item.normType
-            : item.normParameterTypeDisplayName,
-      }))
+      let formattedData
+
+      if (lowerVertName === 'cracker') {
+        formattedData = mappedData?.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: `main-${index}`,
+          originalRemark: item.remarks,
+          Particulars: item.normType,
+        }))
+      } else {
+        formattedData = mappedData?.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: `${index}`,
+          originalRemark: item.remarks,
+          Particulars: item.normParameterTypeDisplayName,
+        }))
+      }
 
       let formattedData2 = mappedData2?.map((item, index) => ({
         ...item,
@@ -464,7 +473,7 @@ const NormalOpNormsScreen = () => {
         return
       }
 
-      const requiredFields = ['materialFkId', 'remarks']
+      const requiredFields = ['remarks']
       const validationMessage = validateFields(data, requiredFields)
       if (validationMessage) {
         setSnackbarOpen(true)
