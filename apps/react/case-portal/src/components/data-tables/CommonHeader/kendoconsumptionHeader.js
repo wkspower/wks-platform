@@ -7,7 +7,7 @@ const getEnhancedColDefs = ({ headerMap }) => {
         ...col,
         title: headerMap[col.headerName],
         type: 'number',
-        format: '{0:#.#####}',
+        format: '{0:#.###}',
         editable: false,
         width: 120,
       }

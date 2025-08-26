@@ -224,7 +224,7 @@ export const NormalOpNormElastomerColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -234,7 +234,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -244,7 +244,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -254,7 +254,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
 
@@ -265,7 +265,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -275,7 +275,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -285,7 +285,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -295,7 +295,7 @@ export const NormalOpNormElastomerColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -304,7 +304,7 @@ export const NormalOpNormElastomerColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -313,7 +313,7 @@ export const NormalOpNormElastomerColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -322,7 +322,7 @@ export const NormalOpNormElastomerColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -331,7 +331,7 @@ export const NormalOpNormElastomerColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -386,7 +386,7 @@ export const ShutdownConsumptionElastomerColumns = [
       field: monthField,
       width: 120,
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,
@@ -438,7 +438,7 @@ export const SlowdownNormsElastomerColumns = [
       field: monthField,
       width: 120,
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,

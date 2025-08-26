@@ -183,20 +183,16 @@ const ProductionvolumeData = ({ permissions }) => {
         })
         setModifiedCells({})
 
-        if (lowerVertName == 'meg') {
-          const responseForNorms =
-            await DataService.calculateNormsHistorianValues(
-              plantId,
-              localStorage.getItem('year'),
-              startDate,
-              endDate,
-              keycloak,
-            )
+        const responseForNorms =
+          await DataService.calculateNormsHistorianValues(
+            plantId,
+            localStorage.getItem('year'),
+            startDate,
+            endDate,
+            keycloak,
+          )
 
-          if (responseForNorms?.code == 200) setLoading(false)
-        } else {
-          setLoading(false)
-        }
+        setLoading(false)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -1172,7 +1168,7 @@ const ProductionvolumeData = ({ permissions }) => {
   useEffect(() => {
     fetchData()
 
-    if (lowerVertName == 'meg') fetchConfiguration()
+    fetchConfiguration()
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const productionColumns = getEnhancedProductionColDefs({
@@ -1218,11 +1214,11 @@ const ProductionvolumeData = ({ permissions }) => {
           remark: item.remarks?.trim() || '',
 
           april:
-  isTPD && typeof item.april === 'number'
-    ? (item.april * 24).toFixed(2)
-    : typeof item.april === 'number'
-    ? item.april
-    : null,
+            isTPD && typeof item.april === 'number'
+              ? (item.april * 24).toFixed(2)
+              : typeof item.april === 'number'
+                ? item.april
+                : null,
 
           may:
             isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
@@ -1297,11 +1293,11 @@ const ProductionvolumeData = ({ permissions }) => {
           idFromApi: item?.id,
           productName: item?.materialDisplayName,
           april:
-  isTPD && item.april !== undefined && item.april !== null
-    ? (item.april * 24).toFixed(2)
-    : item.april !== undefined && item.april !== null
-    ? item.april
-    : null,
+            isTPD && item.april !== undefined && item.april !== null
+              ? (item.april * 24).toFixed(2)
+              : item.april !== undefined && item.april !== null
+                ? item.april
+                : null,
           may:
             isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
           june:
@@ -1368,7 +1364,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-    if (lowerVertName == 'meg') fetchConfiguration()
+    fetchConfiguration()
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const handleCalculateMeg = async () => {
@@ -1558,20 +1554,17 @@ const ProductionvolumeData = ({ permissions }) => {
           severity: 'success',
         })
         setModifiedCells({})
-        if (lowerVertName == 'meg') {
-          const responseForNorms =
-            await DataService.calculateNormsHistorianValues(
-              plantId,
-              localStorage.getItem('year'),
-              startDate,
-              endDate,
-              keycloak,
-            )
 
-          if (responseForNorms?.code == 200) setLoading(false)
-        } else {
-          setLoading(false)
-        }
+        const responseForNorms =
+          await DataService.calculateNormsHistorianValues(
+            plantId,
+            localStorage.getItem('year'),
+            startDate,
+            endDate,
+            keycloak,
+          )
+
+        setLoading(false)
 
         // setLoading(false)
 
@@ -1617,7 +1610,7 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const conditionForFirst = lowerVertName == 'meg' && !permissions?.hideSummary
+  const conditionForFirst = !permissions?.hideSummary
 
   return (
     <div>

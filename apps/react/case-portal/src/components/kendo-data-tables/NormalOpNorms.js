@@ -1,6 +1,6 @@
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -16,7 +16,12 @@ import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import MuiAccordionSummary from '@mui/material/AccordionSummary'
 import { styled } from '@mui/material/styles'
 import getNormalOpNormColDef from 'components/data-tables/CommonHeader/getNormalOpNormColDef'
-import { Box, Typography } from '../../../node_modules/@mui/material/index'
+import {
+  Box,
+  Typography,
+  Tab,
+  Tabs,
+} from '../../../node_modules/@mui/material/index'
 import {
   CustomAccordion,
   CustomAccordionDetails,
@@ -33,6 +38,9 @@ const NormalOpNormsScreen = () => {
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
+  const [defaultSelect, setDefaultSelect] = useState()
+  const [rowsBestAchivedIndividual, setRowsBestAchivedIndividual] = useState()
+  const [rowsExpression, setRowsExpression] = useState()
   const [rowsIntermediateValues, setRowsIntermediateValues] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -63,40 +71,87 @@ const NormalOpNormsScreen = () => {
   const keycloak = useSession()
 
   const fetchData = async (gradeId) => {
+    setRows([])
+    setRowsExpression([])
+    setRowsBestAchivedIndividual([])
+
     const verticalsRequiringGrade = ['pe', 'pp', 'cracker']
     if (verticalsRequiringGrade.includes(lowerVertName) && !gradeId) return
     setLoading(true)
+    let response
+    let response2
+    let response3
     try {
-      const response = await DataService.getNormalOperationNormsData(
-        keycloak,
-        gradeId,
-        lowerVertName === 'cracker' ? true : false,
-      )
-
-      if (response?.code !== 200) {
-        setRows([])
-
-        return
+      if (lowerVertName === 'cracker') {
+        response = await DataService.getCrackerOperationNormsData(
+          keycloak,
+          gradeId,
+          'Best Achieved',
+        )
+        response2 = await DataService.getCrackerOperationNormsData(
+          keycloak,
+          gradeId,
+          'Expression',
+        )
+        response3 = await DataService.getCrackerOperationNormsData(
+          keycloak,
+          gradeId,
+          'Yearly Norms',
+        )
+      } else {
+        response = await DataService.getNormalOperationNormsData(
+          keycloak,
+          gradeId,
+          false,
+        )
       }
 
       setCalculationObject(response?.data?.aopCalculation)
 
-      const formattedData = response?.data?.mcuNormsValueDTOList.map(
-        (item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          Particulars: item.normParameterTypeDisplayName,
-        }),
-      )
+      let mappedData = response?.data?.mcuNormsValueDTOList
+      let mappedData2 = response2?.data?.mcuNormsValueDTOList
+      let mappedData3 = response3?.data?.mcuNormsValueDTOList
+
+      let formattedData = mappedData?.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: `main-${index}`,
+        originalRemark: item.remarks,
+        Particulars:
+          lowerVertName === 'cracker'
+            ? item.normType
+            : item.normParameterTypeDisplayName,
+      }))
+
+      let formattedData2 = mappedData2?.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: `expression-${index}`,
+        originalRemark: item.remarks,
+        Particulars:
+          lowerVertName === 'cracker'
+            ? item.normType
+            : item.normParameterTypeDisplayName,
+      }))
+
+      let formattedData3 = mappedData3?.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: `best-${index}`,
+        originalRemark: item.remarks,
+        Particulars:
+          lowerVertName === 'cracker'
+            ? item.normType
+            : item.normParameterTypeDisplayName,
+      }))
 
       setRows(formattedData)
+      setRowsExpression(formattedData2)
+      setRowsBestAchivedIndividual(formattedData3)
     } catch (error) {
       console.error('Error fetching Data:', error)
     } finally {
       setLoading(false)
-      // console.log(1)
     }
   }
 
@@ -245,7 +300,7 @@ const NormalOpNormsScreen = () => {
       editable: false,
       width: 120,
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       type: 'number',
     },
 
@@ -255,7 +310,7 @@ const NormalOpNormsScreen = () => {
       editable: false,
       width: 120,
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       type: 'number',
     },
     {
@@ -265,7 +320,7 @@ const NormalOpNormsScreen = () => {
       type: 'number',
       width: 120,
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Jul',
@@ -274,7 +329,7 @@ const NormalOpNormsScreen = () => {
       type: 'number',
       width: 120,
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
 
     {
@@ -284,7 +339,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Sep',
@@ -293,7 +348,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Oct',
@@ -302,7 +357,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Nov',
@@ -311,7 +366,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Dec',
@@ -320,7 +375,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Jan',
@@ -329,7 +384,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Feb',
@@ -338,7 +393,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'Mar',
@@ -347,7 +402,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'idFromApi',
@@ -358,6 +413,35 @@ const NormalOpNormsScreen = () => {
       field: 'isEditable',
       title: 'isEditable',
       hidden: true,
+    },
+  ]
+
+  const colDefs2 = [
+    {
+      field: 'isChecked',
+      type: 'switch',
+      widthT: 30,
+      filter: false,
+    },
+    {
+      field: 'materialDisplayName',
+      title: 'Particulars',
+    },
+
+    {
+      field: 'uom',
+      title: 'UOM / MT',
+
+      editable: false,
+    },
+
+    {
+      field: 'april',
+      title: 'Value',
+      editable: true,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
     },
   ]
 
@@ -526,7 +610,8 @@ const NormalOpNormsScreen = () => {
         if (lowerVertName == 'pe' || lowerVertName == 'pp')
           fetchGradeDropdowns()
         fetchData(gradeId)
-        if (lowerVertName == 'meg') fetchDataIntermediateValues()
+        if (lowerVertName == 'meg' || lowerVertName == 'cracker')
+          fetchDataIntermediateValues()
         getNormTransactions()
       } else {
         setSnackbarOpen(true)
@@ -574,8 +659,9 @@ const NormalOpNormsScreen = () => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate: true,
-      // showMonthlyDropdown: lowerVertName === 'cracker' ? true : false,
+      showCalculate: lowerVertName === 'cracker' ? false : true,
+      showCheckbox: lowerVertName === 'cracker' ? true : false,
+      marginBottom: lowerVertName === 'cracker' ? true : false,
       showG:
         lowerVertName === 'pe' ||
         lowerVertName === 'pp' ||
@@ -589,30 +675,39 @@ const NormalOpNormsScreen = () => {
 
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
-      downloadExcelBtn: true,
-      uploadExcelBtn: true,
+
+      // showTitleNameBusiness: lowerVertName === 'cracker' ? true : false,
+      titleName: 'Best Achieved (Min CC)',
+
+      downloadExcelBtn: lowerVertName === 'cracker' ? false : true,
+      uploadExcelBtn: lowerVertName === 'cracker' ? false : true,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
     },
     isOldYear,
   )
-
-  const getAdjustedPermissionsIV = (permissions, isOldYear) => {
-    if (isOldYear != 1) return permissions
-    return {
-      ...permissions,
+  const adjustedPermissionsExpression = getAdjustedPermissions(
+    {
       showAction: false,
-      addButton: false,
-      deleteButton: false,
-      editButton: false,
-      showUnit: false,
-      saveWithRemark: false,
-      saveBtn: false,
-      isOldYear: isOldYear,
-      showCalculate: false,
-    }
-  }
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: 'Expression (Norms)',
+      showCheckbox: lowerVertName === 'cracker' ? true : false,
+    },
+    isOldYear,
+  )
 
-  const adjustedPermissionsIV = getAdjustedPermissionsIV(
+  const adjustedPermissionsBestAchivedIndividual = getAdjustedPermissions(
+    {
+      showAction: false,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: 'Best Achieved (Individual)',
+      showCheckbox: lowerVertName === 'cracker' ? true : false,
+    },
+    isOldYear,
+  )
+
+  const adjustedPermissionsIV = getAdjustedPermissions(
     {
       showAction: false,
       addButton: false,
@@ -726,6 +821,216 @@ const NormalOpNormsScreen = () => {
     setGradeId(gradeId)
   }
 
+  const [selectedTab, setSelectedTab] = useState(0)
+  const handleTabChange = (event, newValue) => {
+    setModifiedCells({})
+    setSelectedTab(newValue)
+
+    if (newValue === 0) {
+      setModifiedCells({})
+      fetchAllData(gradeId)
+    } else if (newValue === 1) {
+      // fetchAllData(gradeId)
+    }
+  }
+  const saveNormalOperationNormsDataCracker = async (newRows) => {
+    setLoading(true)
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      const payload = newRows.map((row) => ({
+        april: row.april || 0,
+        may: row.may || 0,
+        june: row.june || 0,
+        july: row.july || 0,
+        august: row.august || 0,
+        september: row.september || 0,
+        october: row.october || 0,
+        november: row.november || 0,
+        december: row.december || 0,
+        january: row.january || 0,
+        february: row.february || 0,
+        march: row.march || 0,
+        remark: row.remark || row.remarks || '',
+        isChecked: row.isChecked || false,
+        id: row.idFromApi || row.id || null,
+        materialFKId: row.materialFKId || row.materialFkId || null,
+      }))
+
+      // console.log('payload', payload)
+      setLoading(false)
+
+      if (payload.length > 0) {
+        const response = await DataService.updateCrackerOperationNormsData(
+          keycloak,
+          gradeId,
+          payload,
+        )
+
+        if (response?.code == 200) {
+          dispatch(setIsBlocked(false))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Saved Successfully!`,
+            severity: 'success',
+          })
+
+          setModifiedCells({})
+          unsavedChangesRef.current = {
+            unsavedRows: {},
+            rowsBeforeChange: {},
+          }
+
+          fetchData(gradeId)
+          if (lowerVertName == 'meg') fetchDataIntermediateValues()
+          getNormTransactions()
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Data not saved!`,
+            severity: 'error',
+          })
+        }
+        return response
+      }
+    } catch (error) {
+      console.error(`Error saving Data`, error)
+    } finally {
+      // fetchData()
+      // setLoading(false)
+    }
+  }
+
+  const saveChangesCracker = React.useCallback(async () => {
+    try {
+      const data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
+      }
+      saveNormalOperationNormsDataCracker(data)
+    } catch (error) {
+      console.error('Error saving Cracker Data:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Error saving Cracker Data!',
+        severity: 'error',
+      })
+    }
+  }, [modifiedCells])
+
+  // BACKUP CODE
+
+  //   const handleGlobalCheckboxChange = (
+  //   gridName,
+  //   id,
+  //   materialName,
+  //   field,
+  //   value,
+  //   dataItem,
+  //   itemId,
+  // ) => {
+  //   const uniqueItemId = `${gridName}-${id}` // unique per row per grid
+
+  //   // Helper to update rows in a grid
+  //   const updateGridRows = (setRowsFunc, currentGridName) => {
+  //     setRowsFunc((prev) =>
+  //       prev.map((row) =>
+  //         row.id === id && gridName === currentGridName
+  //           ? { ...row, [field]: value }
+  //           : row.materialName === materialName &&
+  //               !(row.id === id && gridName === currentGridName)
+  //             ? { ...row, [field]: false }
+  //             : row,
+  //       ),
+  //     )
+  //   }
+
+  //   // Update all grids
+  //   updateGridRows(setRows, 'main')
+  //   updateGridRows(setRowsExpression, 'expression')
+  //   updateGridRows(setRowsBestAchivedIndividual, 'best')
+
+  //   // Merge changes into modifiedCells for all rows
+  //   setModifiedCells((prev) => ({
+  //     ...prev,
+  //     [uniqueItemId]: {
+  //       ...(prev[uniqueItemId] || {}),
+  //       ...dataItem,
+  //       [field]: value,
+  //     },
+  //   }))
+  // }
+
+  const handleGlobalCheckboxChange = (
+    gridName,
+    id,
+    materialName,
+    field,
+    value,
+    dataItem,
+    itemId,
+  ) => {
+    const uniqueItemId = `${gridName}-${id}` // clicked row
+    const uncheckedRows = [] // store rows that get unchecked automatically
+
+    // Helper to update rows in a grid
+    const updateGridRows = (setRowsFunc, currentGridName) => {
+      setRowsFunc((prev) =>
+        prev.map((row) => {
+          if (row.id === id && gridName === currentGridName) {
+            return { ...row, [field]: value } // clicked row
+          }
+          if (
+            row.materialName === materialName &&
+            !(row.id === id && gridName === currentGridName)
+          ) {
+            uncheckedRows.push({ row, gridName: currentGridName }) // collect unchecked rows
+            return { ...row, [field]: false } // keep your uncheck logic
+          }
+          return row
+        }),
+      )
+    }
+
+    // Update all grids
+    updateGridRows(setRows, 'main')
+    updateGridRows(setRowsExpression, 'expression')
+    updateGridRows(setRowsBestAchivedIndividual, 'best')
+
+    // Merge clicked row + unchecked rows into modifiedCells
+    setModifiedCells((prev) => {
+      const updated = {
+        ...prev,
+        [uniqueItemId]: {
+          ...(prev[uniqueItemId] || {}),
+          ...dataItem,
+          [field]: value,
+        },
+      }
+
+      uncheckedRows.forEach(({ row, gridName }) => {
+        const rowUniqueId = `${gridName}-${row.id}`
+        updated[rowUniqueId] = {
+          ...(prev[rowUniqueId] || {}),
+          ...row,
+          [field]: false && prevValue === true,
+        }
+      })
+
+      return updated
+    })
+  }
+
   return (
     <div>
       <Backdrop
@@ -735,72 +1040,214 @@ const NormalOpNormsScreen = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <KendoDataTables
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        title='Normal Operations Norms'
-        columns={colDefs}
-        setRows={setRows}
-        rows={rows}
-        grades={grades}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        saveChanges={saveChanges}
-        isCellEditable={isCellEditable}
-        snackbarData={snackbarData}
-        handleCalculate={handleCalculate}
-        snackbarOpen={snackbarOpen}
-        apiRef={apiRef}
-        open1={open1}
-        setOpen1={setOpen1}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        // fetchData={fetchData}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
-        handleRemarkCellClick={handleRemarkCellClick}
-        permissions={adjustedPermissions}
-        allRedCell={allRedCell}
-        groupBy='Particulars'
-        handleExcelUpload={handleExcelUpload}
-        downloadExcelForConfiguration={downloadExcelForConfiguration}
-        handleGradeChange={handleGradeChange}
-        plantID={plantID}
-      />
+      {lowerVertName === 'cracker' && (
+        <Box style={{ margin: 0, padding: 0 }}>
+          <Tabs
+            value={selectedTab}
+            onChange={handleTabChange}
+            sx={{
+              borderBottom: '0px solid #ccc',
+              '.MuiTabs-indicator': { display: 'none' },
+              margin: '0px 0px 0px 0px',
+              minHeight: '28px',
+            }}
+          >
+            <Tab
+              label='Mode wise selection'
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                fontSize: '0.75rem',
+                padding: '9px',
+                minHeight: '12px',
+              }}
+            />
 
-      {(lowerVertName === 'cracker' || lowerVertName === 'meg') && (
-        <Box sx={{ width: '100%', marginTop: 1 }}>
-          <CustomAccordion defaultExpanded disableGutters>
-            <CustomAccordionSummary
-              aria-controls='grid-content'
-              id='grid-header'
-            >
-              <Typography component='span' className='grid-title'>
-                Intermediate Values
-              </Typography>
-            </CustomAccordionSummary>
-            <CustomAccordionDetails>
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataTables
-                  title='Intermediate Values'
-                  columns={colDefsIntermediateValues}
-                  setRows={setRowsIntermediateValues}
-                  rows={rowsIntermediateValues}
-                  paginationOptions={[100, 200, 300]}
-                  permissions={adjustedPermissionsIV}
-                  groupBy='NormTypeName'
-                />
-              </Box>
-            </CustomAccordionDetails>
-          </CustomAccordion>
+            <Tab
+              label='Final monthly norms preview'
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                fontSize: '0.75rem',
+                padding: '9px',
+                minHeight: '12px',
+              }}
+            />
+          </Tabs>
         </Box>
       )}
+
+      {lowerVertName === 'cracker' && selectedTab == 0 && (
+        <Typography
+          component='div'
+          className='grid-title'
+          sx={{
+            marginBottom: '10px',
+          }}
+        >
+          Best Achieved (Min CC)
+        </Typography>
+      )}
+
+      {selectedTab === 0 && (
+        <KendoDataTables
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          columns={colDefs}
+          setRows={setRows}
+          rows={rows}
+          grades={grades}
+          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+          onDeleteRow={(id) => console.log('Row Deleted:', id)}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={
+            lowerVertName === 'cracker' ? saveChangesCracker : saveChanges
+          }
+          isCellEditable={isCellEditable}
+          snackbarData={snackbarData}
+          handleCalculate={handleCalculate}
+          snackbarOpen={snackbarOpen}
+          apiRef={apiRef}
+          open1={open1}
+          setOpen1={setOpen1}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          unsavedChangesRef={unsavedChangesRef}
+          handleRemarkCellClick={handleRemarkCellClick}
+          permissions={adjustedPermissions}
+          allRedCell={allRedCell}
+          groupBy='Particulars'
+          handleExcelUpload={handleExcelUpload}
+          downloadExcelForConfiguration={downloadExcelForConfiguration}
+          handleGradeChange={handleGradeChange}
+          plantID={plantID}
+          onGlobalCheckboxChange={handleGlobalCheckboxChange}
+          gridName='main'
+        />
+      )}
+
+      {selectedTab === 0 && lowerVertName === 'cracker' && (
+        <KendoDataTables
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          title='Normal Operations Norms'
+          columns={colDefs}
+          setRows={setRowsExpression}
+          rows={rowsExpression}
+          grades={grades}
+          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+          onDeleteRow={(id) => console.log('Row Deleted:', id)}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={
+            lowerVertName === 'cracker' ? saveChangesCracker : saveChanges
+          }
+          isCellEditable={isCellEditable}
+          snackbarData={snackbarData}
+          handleCalculate={handleCalculate}
+          snackbarOpen={snackbarOpen}
+          apiRef={apiRef}
+          open1={open1}
+          setOpen1={setOpen1}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          unsavedChangesRef={unsavedChangesRef}
+          handleRemarkCellClick={handleRemarkCellClick}
+          permissions={adjustedPermissionsExpression}
+          allRedCell={allRedCell}
+          groupBy='Particulars'
+          handleExcelUpload={handleExcelUpload}
+          downloadExcelForConfiguration={downloadExcelForConfiguration}
+          handleGradeChange={handleGradeChange}
+          plantID={plantID}
+          onGlobalCheckboxChange={handleGlobalCheckboxChange}
+          gridName='expression'
+        />
+      )}
+
+      {selectedTab === 0 && lowerVertName === 'cracker' && (
+        <KendoDataTables
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          title='Normal Operations Norms'
+          columns={colDefs2}
+          setRows={setRowsBestAchivedIndividual}
+          rows={rowsBestAchivedIndividual}
+          grades={grades}
+          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+          onDeleteRow={(id) => console.log('Row Deleted:', id)}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={
+            lowerVertName === 'cracker' ? saveChangesCracker : saveChanges
+          }
+          isCellEditable={isCellEditable}
+          snackbarData={snackbarData}
+          handleCalculate={handleCalculate}
+          snackbarOpen={snackbarOpen}
+          apiRef={apiRef}
+          open1={open1}
+          setOpen1={setOpen1}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          unsavedChangesRef={unsavedChangesRef}
+          handleRemarkCellClick={handleRemarkCellClick}
+          permissions={adjustedPermissionsBestAchivedIndividual}
+          allRedCell={allRedCell}
+          groupBy='Particulars'
+          handleExcelUpload={handleExcelUpload}
+          downloadExcelForConfiguration={downloadExcelForConfiguration}
+          handleGradeChange={handleGradeChange}
+          plantID={plantID}
+          onGlobalCheckboxChange={handleGlobalCheckboxChange}
+          gridName='best'
+        />
+      )}
+
+      {selectedTab === 0 &&
+        (lowerVertName === 'cracker' || lowerVertName === 'meg') && (
+          <Box sx={{ width: '100%', marginTop: 1 }}>
+            <CustomAccordion defaultExpanded disableGutters>
+              <CustomAccordionSummary
+                aria-controls='grid-content'
+                id='grid-header'
+              >
+                <Typography component='span' className='grid-title'>
+                  Intermediate Values
+                </Typography>
+              </CustomAccordionSummary>
+              <CustomAccordionDetails>
+                <Box sx={{ width: '100%', margin: 0 }}>
+                  <KendoDataTables
+                    title='Intermediate Values'
+                    columns={colDefsIntermediateValues}
+                    setRows={setRowsIntermediateValues}
+                    rows={rowsIntermediateValues}
+                    paginationOptions={[100, 200, 300]}
+                    permissions={adjustedPermissionsIV}
+                    groupBy='NormTypeName'
+                  />
+                </Box>
+              </CustomAccordionDetails>
+            </CustomAccordion>
+          </Box>
+        )}
     </div>
   )
 }

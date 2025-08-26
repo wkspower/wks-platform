@@ -18,7 +18,7 @@
     "editable": false,
     "width": 120,
     "align": "right",
-    "format": "{0:#.#####}",
+    "format": "{0:#.###}",
     "type": "number"
   },
   {
@@ -27,7 +27,7 @@
     "editable": false,
     "width": 120,
     "align": "right",
-    "format": "{0:#.#####}",
+    "format": "{0:#.###}",
     "type": "number"
   },
   {
@@ -37,7 +37,7 @@
     "type": "number",
     "width": 120,
     "align": "right",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "july",
@@ -46,7 +46,7 @@
     "type": "number",
     "width": 120,
     "align": "right",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "august",
@@ -55,7 +55,7 @@
     "width": 120,
     "type": "number",
     "align": "right",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "september",
@@ -64,7 +64,7 @@
     "width": 120,
     "align": "right",
     "type": "number",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "october",
@@ -73,7 +73,7 @@
     "width": 120,
     "type": "number",
     "align": "right",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "november",
@@ -82,7 +82,7 @@
     "width": 120,
     "align": "right",
     "type": "number",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "december",
@@ -91,7 +91,7 @@
     "width": 120,
     "align": "right",
     "type": "number",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "january",
@@ -100,7 +100,7 @@
     "width": 120,
     "align": "right",
     "type": "number",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "february",
@@ -109,7 +109,7 @@
     "width": 120,
     "type": "number",
     "align": "right",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   },
   {
     "field": "march",
@@ -118,6 +118,6 @@
     "width": 120,
     "type": "number",
     "align": "right",
-    "format": "{0:#.#####}"
+    "format": "{0:#.###}"
   }
 ]

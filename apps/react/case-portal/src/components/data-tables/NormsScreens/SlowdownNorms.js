@@ -232,7 +232,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(4),
       isDisabled: !slowdownMonths?.includes(4),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
 
     {
@@ -241,7 +241,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(5),
       isDisabled: !slowdownMonths?.includes(5),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
 
     {
@@ -250,7 +250,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(6),
       isDisabled: !slowdownMonths?.includes(6),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'july',
@@ -258,7 +258,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(7),
       isDisabled: !slowdownMonths?.includes(7),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
 
     {
@@ -267,7 +267,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(8),
       isDisabled: !slowdownMonths?.includes(8),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'september',
@@ -275,7 +275,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(9),
       isDisabled: !slowdownMonths?.includes(9),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'october',
@@ -283,7 +283,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(10),
       isDisabled: !slowdownMonths?.includes(10),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'november',
@@ -291,7 +291,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(11),
       isDisabled: !slowdownMonths?.includes(11),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'december',
@@ -299,7 +299,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(12),
       isDisabled: !slowdownMonths?.includes(12),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'january',
@@ -307,7 +307,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(1),
       isDisabled: !slowdownMonths?.includes(1),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'february',
@@ -315,7 +315,7 @@ const SlowdownNorms = () => {
       editable: slowdownMonths?.includes(2),
       isDisabled: !slowdownMonths?.includes(2),
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
     },
     {
       field: 'march',
@@ -478,7 +478,7 @@ const SlowdownNorms = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      // const data = await DataService.getShutdownNormsData(keycloak)
+
       const data = await DataService.getSlowdownNormsData(keycloak)
 
       // const customOrder = [

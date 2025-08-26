@@ -343,7 +343,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
-          format: '{0:#.#####}',
+          format: '{0:#.###}',
           type: 'number',
         },
       ],

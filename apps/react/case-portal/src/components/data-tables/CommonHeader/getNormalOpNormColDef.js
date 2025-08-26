@@ -1,6 +1,7 @@
 import { NormalOpNormElastomerColumns } from 'components/colums/ElastomerColums'
 import { NormalOpNormMegColumns } from 'components/colums/MegColums'
 import { CrackerColums } from 'components/colums/CrackerColums'
+import { CrackerColumsForYearlyNorms } from 'components/colums/CrackerColums'
 import { NormalOpNormPeColumns } from 'components/colums/PeColums'
 import { NormalOpNormPpColumns } from 'components/colums/PpColums'
 import { NormalOpNormPtaColumns } from 'components/colums/PtaColums'

@@ -240,7 +240,7 @@ export const NormalOpNormMegColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -250,7 +250,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -260,7 +260,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -270,7 +270,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
 
@@ -281,7 +281,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -291,7 +291,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -301,7 +301,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -311,7 +311,7 @@ export const NormalOpNormMegColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -320,7 +320,7 @@ export const NormalOpNormMegColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -329,7 +329,7 @@ export const NormalOpNormMegColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -338,7 +338,7 @@ export const NormalOpNormMegColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -347,7 +347,7 @@ export const NormalOpNormMegColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -402,7 +402,7 @@ export const ShutdownConsumptionMegColumns = [
       field: monthField,
       width: 120,
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,
@@ -455,7 +455,7 @@ export const SlowdownNormsMegColumns = [
       field: monthField,
       width: 120,
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,

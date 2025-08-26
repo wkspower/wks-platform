@@ -83,6 +83,8 @@ export const DataService = {
   calculatePlantContributionReportData,
   handleCalculateMaintenance,
   getNormalOperationNormsData,
+  getCrackerOperationNormsData,
+  updateCrackerOperationNormsData,
   getIntermediateValues,
   getShutdownNormsData,
   getSlowdownNormsData,
@@ -1364,6 +1366,68 @@ async function getNormalOperationNormsData(
     return await Promise.reject(e)
   }
 }
+async function getCrackerOperationNormsData(keycloak, gradeId, method) {
+  const year = localStorage.getItem('year') || ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
+
+  const baseUrl = `${Config.CaseEngineUrl}/task/mode-wise/norms`
+  const queryParams = new URLSearchParams({
+    year,
+    plantId,
+  })
+
+  if (gradeId) {
+    queryParams.append('mode', gradeId)
+    queryParams.append('method', encodeURIComponent(method))
+  }
+
+  const url = `${baseUrl}?${queryParams.toString()}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error(e)
+    return Promise.reject(e)
+  }
+}
+
+async function updateCrackerOperationNormsData(keycloak, gradeId, payload) {
+  const baseUrl = `${Config.CaseEngineUrl}/task/mode-wise/norms`
+  const year = localStorage.getItem('year') || ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
+
+  const queryParams = new URLSearchParams({
+    year,
+    plantId,
+  })
+  const url = `${baseUrl}?${queryParams.toString()}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 async function getIntermediateValues(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''

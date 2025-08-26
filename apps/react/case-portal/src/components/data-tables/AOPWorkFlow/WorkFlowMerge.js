@@ -332,7 +332,7 @@ const WorkFlowMerge = () => {
         }),
         ...(numericKeys.includes(key) && {
           align: 'right',
-          format: '{0:#.#####}',
+          format: '{0:#.###}',
         }),
       }
     })

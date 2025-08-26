@@ -232,7 +232,7 @@ export const NormalOpNormPeColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -242,7 +242,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -252,7 +252,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -262,7 +262,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
 
@@ -273,7 +273,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -283,7 +283,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -293,7 +293,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -303,7 +303,7 @@ export const NormalOpNormPeColumns = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -312,7 +312,7 @@ export const NormalOpNormPeColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -321,7 +321,7 @@ export const NormalOpNormPeColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -330,7 +330,7 @@ export const NormalOpNormPeColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -339,7 +339,7 @@ export const NormalOpNormPeColumns = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.#####}',
+    format: '{0:#.###}',
     type: 'number',
   },
   {
@@ -394,7 +394,7 @@ export const ShutdownConsumptionPeColumns = [
       field: monthField,
       width: 120,
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,
@@ -446,7 +446,7 @@ export const SlowdownNormsPeColumns = [
       field: monthField,
       width: 120,
       type: 'number',
-      format: '{0:#.#####}',
+      format: '{0:#.###}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,
