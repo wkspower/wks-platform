@@ -27,7 +27,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'Unit',
+              title: 'UOM',
               editable: false,
               widthT: 100,
             },
@@ -36,7 +36,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'Rs/MT',
+                  title: 'RS/UOM',
                   editable: false,
                   align: 'right',
                   width: 120,
@@ -110,7 +110,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'Unit',
+              title: 'UOM',
               editable: false,
               widthT: 100,
             },
@@ -119,7 +119,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'Rs/MT',
+                  title: 'RS/UOM',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -235,7 +235,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'Unit',
+              title: 'UOM',
               editable: false,
               widthT: 100,
             },
@@ -244,7 +244,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'Rs/MT',
+                  title: 'RS/UOM',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -360,7 +360,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'Unit',
+              title: 'UOM',
               editable: false,
               widthT: 100,
             },
@@ -369,7 +369,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'Rs/MT',
+                  title: 'RS/UOM',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -485,7 +485,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'Unit',
+              title: 'UOM',
               editable: false,
               widthT: 100,
             },
@@ -494,7 +494,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'Rs/MT',
+                  title: 'Rs/UOM',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -613,7 +613,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'Unit',
+              title: 'UOM',
               widthT: 100,
               editable: false,
             },

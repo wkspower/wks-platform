@@ -220,17 +220,17 @@ const NormsHistorianBasis = () => {
     lowerVertName === 'cracker'
       ? [
           {
-            label: 'Best Achieved',
+            label: 'Norms (Best Achieved-Min CC)',
             rows: rowsBestAchieved,
             cols: colsBestAchieved,
           },
           {
-            label: 'Expression Based',
+            label: 'Norms (Expression)',
             rows: rowsExpressionBased,
             cols: colsExpressionBased,
           },
           {
-            label: 'Current Year',
+            label: 'Norms (Individual Best Achieved)',
             rows: rowsCurrentYear,
             cols: colsCurrentYear,
           },
