@@ -1,6 +1,6 @@
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -27,6 +27,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
+import { unstable_batchedUpdates } from 'react-dom'
 
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -439,7 +440,7 @@ const NormalOpNormsScreen = () => {
 
     {
       field: 'uom',
-      title: 'UOM / MT',
+      title: 'UOM',
 
       editable: false,
     },
@@ -486,7 +487,6 @@ const NormalOpNormsScreen = () => {
 
       saveNormalOperationNormsData(data)
     } catch (error) {
-      /* empty */
       console.log(error)
     }
   }, [modifiedCells])
@@ -980,65 +980,67 @@ const NormalOpNormsScreen = () => {
   //   }))
   // }
 
-  const handleGlobalCheckboxChange = (
-    gridName,
-    id,
-    materialName,
-    field,
-    value,
-    dataItem,
-    itemId,
-  ) => {
-    const uniqueItemId = `${gridName}-${id}` // clicked row
-    const uncheckedRows = [] // store rows that get unchecked automatically
+  const handleGlobalCheckboxChange = useCallback(
+    (gridName, id, materialName, field, value, dataItem) => {
+      const uniqueItemId = `${gridName}-${id}`
+      const uncheckedRows = []
 
-    // Helper to update rows in a grid
-    const updateGridRows = (setRowsFunc, currentGridName) => {
-      setRowsFunc((prev) =>
-        prev.map((row) => {
-          if (row.id === id && gridName === currentGridName) {
-            return { ...row, [field]: value } // clicked row
-          }
-          if (
+      // Helper to update one grid only at the affected indices
+      const updateGridRows = (setRowsFunc, currentGridName, prevRows) => {
+        const indexMap = new Map()
+        prevRows.forEach((row, i) => {
+          if (row.id === id && gridName === currentGridName)
+            indexMap.set(i, { ...row, [field]: value })
+          else if (
             row.materialName === materialName &&
             !(row.id === id && gridName === currentGridName)
           ) {
-            uncheckedRows.push({ row, gridName: currentGridName }) // collect unchecked rows
-            return { ...row, [field]: false } // keep your uncheck logic
+            indexMap.set(i, { ...row, [field]: false })
+            uncheckedRows.push({ row, gridName: currentGridName })
           }
-          return row
-        }),
-      )
-    }
-
-    // Update all grids
-    updateGridRows(setRows, 'main')
-    updateGridRows(setRowsExpression, 'expression')
-    updateGridRows(setRowsBestAchivedIndividual, 'best')
-
-    // Merge clicked row + unchecked rows into modifiedCells
-    setModifiedCells((prev) => {
-      const updated = {
-        ...prev,
-        [uniqueItemId]: {
-          ...(prev[uniqueItemId] || {}),
-          ...dataItem,
-          [field]: value,
-        },
+        })
+        if (indexMap.size === 0) return prevRows
+        const newRows = prevRows.slice() // shallow copy
+        indexMap.forEach((row, i) => (newRows[i] = row))
+        return newRows
       }
 
-      uncheckedRows.forEach(({ row, gridName }) => {
-        const rowUniqueId = `${gridName}-${row.id}`
-        updated[rowUniqueId] = {
-          ...(prev[rowUniqueId] || {}),
-          ...row,
-          [field]: false && prevValue === true,
-        }
-      })
+      unstable_batchedUpdates(() => {
+        setRows((prev) => updateGridRows(setRows, 'main', prev))
+        setRowsExpression((prev) =>
+          updateGridRows(setRowsExpression, 'expression', prev),
+        )
+        setRowsBestAchivedIndividual((prev) =>
+          updateGridRows(setRowsBestAchivedIndividual, 'best', prev),
+        )
 
-      return updated
-    })
-  }
+        setModifiedCells((prev) => {
+          const updated = { ...prev }
+          updated[uniqueItemId] = {
+            ...(prev[uniqueItemId] || {}),
+            ...dataItem,
+            [field]: value,
+          }
+
+          uncheckedRows.forEach(({ row, gridName }) => {
+            const rowUniqueId = `${gridName}-${row.id}`
+            updated[rowUniqueId] = {
+              ...(prev[rowUniqueId] || {}),
+              ...row,
+              [field]: false,
+            }
+          })
+          return updated
+        })
+      })
+    },
+    [
+      setRows,
+      setRowsExpression,
+      setRowsBestAchivedIndividual,
+      setModifiedCells,
+    ],
+  )
 
   return (
     <div>
@@ -1229,34 +1231,33 @@ const NormalOpNormsScreen = () => {
         />
       )}
 
-      {selectedTab === 0 &&
-        (lowerVertName === 'cracker' || lowerVertName === 'meg') && (
-          <Box sx={{ width: '100%', marginTop: 1 }}>
-            <CustomAccordion defaultExpanded disableGutters>
-              <CustomAccordionSummary
-                aria-controls='grid-content'
-                id='grid-header'
-              >
-                <Typography component='span' className='grid-title'>
-                  Intermediate Values
-                </Typography>
-              </CustomAccordionSummary>
-              <CustomAccordionDetails>
-                <Box sx={{ width: '100%', margin: 0 }}>
-                  <KendoDataTables
-                    title='Intermediate Values'
-                    columns={colDefsIntermediateValues}
-                    setRows={setRowsIntermediateValues}
-                    rows={rowsIntermediateValues}
-                    paginationOptions={[100, 200, 300]}
-                    permissions={adjustedPermissionsIV}
-                    groupBy='NormTypeName'
-                  />
-                </Box>
-              </CustomAccordionDetails>
-            </CustomAccordion>
-          </Box>
-        )}
+      {selectedTab === 0 && lowerVertName === 'meg' && (
+        <Box sx={{ width: '100%', marginTop: 1 }}>
+          <CustomAccordion defaultExpanded disableGutters>
+            <CustomAccordionSummary
+              aria-controls='grid-content'
+              id='grid-header'
+            >
+              <Typography component='span' className='grid-title'>
+                Intermediate Values
+              </Typography>
+            </CustomAccordionSummary>
+            <CustomAccordionDetails>
+              <Box sx={{ width: '100%', margin: 0 }}>
+                <KendoDataTables
+                  title='Intermediate Values'
+                  columns={colDefsIntermediateValues}
+                  setRows={setRowsIntermediateValues}
+                  rows={rowsIntermediateValues}
+                  paginationOptions={[100, 200, 300]}
+                  permissions={adjustedPermissionsIV}
+                  groupBy='NormTypeName'
+                />
+              </Box>
+            </CustomAccordionDetails>
+          </CustomAccordion>
+        </Box>
+      )}
     </div>
   )
 }

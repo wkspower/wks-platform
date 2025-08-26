@@ -345,3 +345,12 @@ main.MuiBox-root.css-vognfw {
   min-height: unset !important;
   margin-bottom: 6px;
 } */
+.fast-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 2px solid #555;
+  background-color: #fff;
+  accent-color: #111;
+}

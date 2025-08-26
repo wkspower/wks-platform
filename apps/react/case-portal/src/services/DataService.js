@@ -1371,33 +1371,21 @@ async function getCrackerOperationNormsData(keycloak, gradeId, method) {
   const storedPlant = localStorage.getItem('selectedPlant')
   const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
 
-  const baseUrl = `${Config.CaseEngineUrl}/task/mode-wise/norms`
-  const queryParams = new URLSearchParams({
-    year,
-    plantId,
-  })
+  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms?year=${year}&plantId=${plantId}&mode=${gradeId}&method=${method}`
 
-  if (gradeId) {
-    queryParams.append('mode', gradeId)
-    queryParams.append('method', encodeURIComponent(method))
-  }
-
-  const url = `${baseUrl}?${queryParams.toString()}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
-
   try {
     const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
-    console.error(e)
-    return Promise.reject(e)
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
-
 async function updateCrackerOperationNormsData(keycloak, gradeId, payload) {
   const baseUrl = `${Config.CaseEngineUrl}/task/mode-wise/norms`
   const year = localStorage.getItem('year') || ''
