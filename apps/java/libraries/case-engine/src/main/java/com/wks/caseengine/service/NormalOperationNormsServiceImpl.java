@@ -191,45 +191,88 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					failedList.add(dto);
 					continue;
 				}
+				if(gradeId!=null) {
+					Optional<MCUNormsValueGrade> optionalValue = mcuNormsValueGradeRepository
+							.findById(UUID.fromString(dto.getId()));
 
-				Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository
-						.findById(UUID.fromString(dto.getId()));
-
-				if (optionalValue.isEmpty()) {
-					dto.setErrDescription("No record found with this id" + dto.getId());
-					dto.setSaveStatus("Failed");
-					failedList.add(dto);
-					continue; // or handle accordingly
-				}
-
-				MCUNormsValue value = optionalValue.get();
-				Optional<NormParameters> normParametersOpt =normParametersRepository.findById(value.getMaterialFkId());
-				if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
-					continue;
-				}
-				
-
-				for (int month = 1; month <= 12; month++) {
-					Double oldVal = getMonthlyValue(value, month);
-					Double newVal = getMonthlyValue(dto, month);
-
-					if (newVal != null && !Objects.equals(oldVal, newVal)) {
-						NormsTransactions normsTransactions = new NormsTransactions();
-						normsTransactions.setAopMonth(month);
-						normsTransactions.setAopYear(value.getFinancialYear());
-						normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
-						normsTransactions.setNormParameterFkId(value.getMaterialFkId());
-						normsTransactions.setPlantFkId(plantFKId);
-						normsTransactions.setRemark(dto.getRemarks());
-						normsTransactions.setVersion(1);
-						normsTransactions.setCreatedDateTime(new Date());
-
-						normsTransactions.setCreatedBy(Utility.getUserName());
-						normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));
-
-						transactionsToSave.add(normsTransactions);
+					if (optionalValue.isEmpty()) {
+						dto.setErrDescription("No record found with this id" + dto.getId());
+						dto.setSaveStatus("Failed");
+						failedList.add(dto);
+						continue; // or handle accordingly
 					}
+
+					MCUNormsValueGrade value = optionalValue.get();
+					Optional<NormParameters> normParametersOpt =normParametersRepository.findById(value.getMaterialFkId());
+					if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
+						continue;
+					}
+					
+
+					for (int month = 1; month <= 12; month++) {
+						Double oldVal = getMonthlyValue(value, month);
+						Double newVal = getMonthlyValue(dto, month);
+
+						if (newVal != null && !Objects.equals(oldVal, newVal)) {
+							NormsTransactions normsTransactions = new NormsTransactions();
+							normsTransactions.setAopMonth(month);
+							normsTransactions.setAopYear(value.getFinancialYear());
+							normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
+							normsTransactions.setNormParameterFkId(value.getMaterialFkId());
+							normsTransactions.setPlantFkId(plantFKId);
+							normsTransactions.setRemark(dto.getRemarks());
+							normsTransactions.setVersion(1);
+							normsTransactions.setCreatedDateTime(new Date());
+
+							normsTransactions.setCreatedBy(Utility.getUserName());
+							normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));
+
+							transactionsToSave.add(normsTransactions);
+						}
+					}
+
+				}else {
+					Optional<MCUNormsValue> optionalValue = normalOperationNormsRepository
+							.findById(UUID.fromString(dto.getId()));
+
+					if (optionalValue.isEmpty()) {
+						dto.setErrDescription("No record found with this id" + dto.getId());
+						dto.setSaveStatus("Failed");
+						failedList.add(dto);
+						continue; // or handle accordingly
+					}
+
+					MCUNormsValue value = optionalValue.get();
+					Optional<NormParameters> normParametersOpt =normParametersRepository.findById(value.getMaterialFkId());
+					if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
+						continue;
+					}
+					
+
+					for (int month = 1; month <= 12; month++) {
+						Double oldVal = getMonthlyValue(value, month);
+						Double newVal = getMonthlyValue(dto, month);
+
+						if (newVal != null && !Objects.equals(oldVal, newVal)) {
+							NormsTransactions normsTransactions = new NormsTransactions();
+							normsTransactions.setAopMonth(month);
+							normsTransactions.setAopYear(value.getFinancialYear());
+							normsTransactions.setAttributeValue(newVal != null ? newVal.doubleValue() : null);
+							normsTransactions.setNormParameterFkId(value.getMaterialFkId());
+							normsTransactions.setPlantFkId(plantFKId);
+							normsTransactions.setRemark(dto.getRemarks());
+							normsTransactions.setVersion(1);
+							normsTransactions.setCreatedDateTime(new Date());
+
+							normsTransactions.setCreatedBy(Utility.getUserName());
+							normsTransactions.setMcuNormsValueFkId((UUID.fromString(dto.getId())));
+
+							transactionsToSave.add(normsTransactions);
+						}
+					}
+
 				}
+
 			}
 
 			normsTransactionRepository.saveAll(transactionsToSave);
