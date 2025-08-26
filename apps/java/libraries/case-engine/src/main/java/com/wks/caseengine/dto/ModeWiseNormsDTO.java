@@ -40,5 +40,7 @@ public class ModeWiseNormsDTO {
     private Boolean isEditable;
     private Boolean isChecked;
     private String materialDisplayName;
+    private String uom;
+   
     
 }
