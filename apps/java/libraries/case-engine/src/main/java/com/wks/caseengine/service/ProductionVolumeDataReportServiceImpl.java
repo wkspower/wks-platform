@@ -151,26 +151,46 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> typeOneDataList = new ArrayList<>();
 			List<Map<String, Object>> typeSecondDataList = new ArrayList<>();
-
-			List<Object[]> obj = getMonthWiseProductionData(plantId, year);
+			List<Object[]> obj=null;
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			obj = getMonthWiseProductionData(plantId, year);
+			
 			for (Object[] row : obj) {
 				Map<String, Object> map = new HashMap<>();
-				map.put("RowNo", row[0]);
-				map.put("Month", row[1]);
-				map.put("EOEProdBudget", row[2]);
-				map.put("EOEProdActual", row[3]);
-				map.put("OpHrsBudget", row[4]);
-				map.put("OpHrsActual", row[5]);
-				map.put("ThroughputBudget", row[6]);
-				map.put("ThroughputActual", row[7]);
-				map.put("OperatingHours", row[8]);
-				map.put("MEGThroughput", row[9]);
-				map.put("EOThroughput", row[10]);
-				map.put("EOEThroughput", row[11]);
-				map.put("TotalEOE", row[12]);
-				// map.put("Remark", row[13]);
-				map.put("Remark", row[13] != null ? row[13] : "");
-				map.put("Id", row[14]);
+				if ("MEG".equalsIgnoreCase(verticalName)) {
+					map.put("RowNo", row[0]);
+					map.put("Month", row[1]);
+					map.put("EOEProdBudget", row[2]);
+					map.put("EOEProdActual", row[3]);
+					map.put("OpHrsBudget", row[4]);
+					map.put("OpHrsActual", row[5]);
+					map.put("ThroughputBudget", row[6]);
+					map.put("ThroughputActual", row[7]);
+					map.put("OperatingHours", row[8]);
+					map.put("MEGThroughput", row[9]);
+					map.put("EOThroughput", row[10]);
+					map.put("EOEThroughput", row[11]);
+					map.put("TotalEOE", row[12]);
+					// map.put("Remark", row[13]);
+					map.put("Remark", row[13] != null ? row[13] : "");
+					map.put("Id", row[14]);
+				}else {
+					map.put("RowNo", row[0]);
+					map.put("Month", row[1]);
+					map.put("ProdActual", row[2]);
+					map.put("ProdBudget", row[3]);
+					map.put("OpHrsActual", row[4]);
+					map.put("OpHrsBudget", row[5]);
+					map.put("ThroughputActual", row[6]);
+					map.put("ThroughputBudget", row[7]);
+					map.put("Throughput", row[8]);
+					map.put("Total", row[9]);
+					map.put("OperatingHours", row[10]);
+					map.put("Remark", row[11]);
+					map.put("Id", row[12]);
+					map.put("PlantFKId", row[13]);
+					map.put("AOPYear", row[14]);
+				}
 				typeOneDataList.add(map);
 			}
 
@@ -198,12 +218,12 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			String storedProcedure = "MonthWiseProductionPlanReport";
+			
 			if (!"MEG".equalsIgnoreCase(verticalName)) {
-				storedProcedure = verticalName + "_" + site.getName() + "_MonthWiseProductionPlanReport";
-			}
+				storedProcedure = verticalName + "_"+site.getName()+"_MonthWiseProductionPlanReport";	 
+		    }
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = :plantId, @aopYear = :aopYear";
-
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
@@ -634,18 +654,34 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@Transactional
 	public AOPMessageVM saveMonthWiseProductionPlanData(String plantId, String year,
 			List<MonthWiseProductionPlanDTO> dataList) {
-		for (MonthWiseProductionPlanDTO dto : dataList) {
-			Optional<MonthWiseProductionPlan> optional = monthWiseProductionPlanRepository
-					.findById(UUID.fromString(dto.getId()));
-			optional.get().setRemark(dto.getRemark());
-			System.out.println("dto.getOpHrsActual()" + dto.getOpHrsActual());
-			if (dto.getOpHrsActual() != null) {
-				optional.get().setOpHrsActual(dto.getOpHrsActual());
+		String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		String tableName=verticalName + "_" + site.getName() + "_MonthWiseProductionPlan";
+		if ("MEG".equalsIgnoreCase(verticalName)) {
+			for (MonthWiseProductionPlanDTO dto : dataList) {
+				Optional<MonthWiseProductionPlan> optional = monthWiseProductionPlanRepository
+						.findById(UUID.fromString(dto.getId()));
+				optional.get().setRemark(dto.getRemark());
+				System.out.println("dto.getOpHrsActual()" + dto.getOpHrsActual());
+				if (dto.getOpHrsActual() != null) {
+					optional.get().setOpHrsActual(dto.getOpHrsActual());
+				}
+				monthWiseProductionPlanRepository.save(optional.get());
 			}
-			monthWiseProductionPlanRepository.save(optional.get());
+		}else {
+			for (MonthWiseProductionPlanDTO dto : dataList) {
+				String sql = "UPDATE " + tableName + " SET Remark = :Remark WHERE Id = :Id";              
+	            Query q = entityManager.createNativeQuery(sql);
+	            q.setParameter("Remark", dto.getRemark());
+	            q.setParameter("Id", UUID.fromString(dto.getId()));
+	            q.executeUpdate();
+	        
+			}
 		}
 		AOPMessageVM response = new AOPMessageVM();
 		response.setCode(200);
+		
 		response.setMessage("Remarks updated successfully.");
 		return response;
 	}
