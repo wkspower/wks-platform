@@ -1,5 +1,5 @@
 export const MockReportService = {
-  async getReport({ category, year }) {
+  async getReport({ category, year, verticalName }) {
     const currFY = year || ''
 
     let prevFY = ''
@@ -27,7 +27,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
               widthT: 100,
             },
@@ -36,7 +36,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'RS/UOM',
+                  title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   align: 'right',
                   width: 120,
@@ -110,7 +110,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
               widthT: 100,
             },
@@ -119,7 +119,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'RS/UOM',
+                  title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -235,7 +235,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
               widthT: 100,
             },
@@ -244,7 +244,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'RS/UOM',
+                  title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -360,7 +360,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
               widthT: 100,
             },
@@ -369,7 +369,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'RS/UOM',
+                  title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -485,7 +485,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
               widthT: 100,
             },
@@ -494,7 +494,7 @@ export const MockReportService = {
               children: [
                 {
                   field: 'Price',
-                  title: 'Rs/UOM',
+                  title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   width: 120,
                   align: 'right',
@@ -613,7 +613,7 @@ export const MockReportService = {
             },
             {
               field: 'Unit',
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               widthT: 100,
               editable: false,
             },

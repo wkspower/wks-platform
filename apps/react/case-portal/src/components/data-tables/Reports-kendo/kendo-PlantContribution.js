@@ -41,7 +41,7 @@ export default function PlantContribution() {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [rows, setRows] = useState()
-
+  const verticalName = JSON.parse(localStorage.getItem('selectedVertical'))?.name?.toLowerCase()
   const loadAll = async () => {
     setLoading(true)
     const out = {}
@@ -51,6 +51,7 @@ export default function PlantContribution() {
         const { columns, columnGrouping } = await MockReportService.getReport({
           category: key,
           year,
+          verticalName,
         })
 
         const apiResp = await DataService.getPlantContributionYearWisePlan(
