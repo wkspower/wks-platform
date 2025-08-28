@@ -92,6 +92,7 @@ const MaintenanceTable = () => {
       if (storedPlant) plantId = JSON.parse(storedPlant)?.id
       year = localStorage.getItem('year') || ''
 
+
       const decokePlanningDTOList = newRows.map((row) => ({
         id: row?.idFromApi,
         monthName: row.monthName ?? null,
