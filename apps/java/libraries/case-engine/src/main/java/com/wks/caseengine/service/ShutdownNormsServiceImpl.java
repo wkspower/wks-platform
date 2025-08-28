@@ -366,13 +366,14 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
-			List<UUID> grades=fetchUniqueGradeFkIds(viewName,UUID.fromString(plantId),year);
-			List<Map<UUID, String>> listOfMaps = new ArrayList<>();
+			List<String> grades=fetchUniqueGradeFkIds(viewName,UUID.fromString(plantId),year);
+			List<Map<String, String>> listOfMaps = new ArrayList<>();
 
-			for (UUID grade : grades) {
-			    String productName = normParametersRepository.findNormParameterIdByGrade(grade);
-			    Map<UUID, String> singleEntryMap = new HashMap<>();
-			    singleEntryMap.put(grade, productName);
+			for (String grade : grades) {
+			    String productName = normParametersRepository.findNormParameterIdByGrade(UUID.fromString(grade));
+			    Map<String, String> singleEntryMap = new HashMap<>();
+			    singleEntryMap.put("gradeId", grade);
+			    singleEntryMap.put("displayName", productName);
 			    listOfMaps.add(singleEntryMap);
 			}
 			
@@ -387,7 +388,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		return aopMessageVM;
 	}
 	
-	 public List<UUID> fetchUniqueGradeFkIds(String viewName, UUID plantFkId, String financialYear) {
+	 public List<String> fetchUniqueGradeFkIds(String viewName, UUID plantFkId, String financialYear) {
 	        // Build SQL with safe view injection (ensure viewName is validated)
 	        String sql = "SELECT DISTINCT Grade_Fk_Id FROM " + viewName +
 	                     " WHERE Plant_Fk_Id = :plantFkId AND FinancialYear = :financialYear";
@@ -397,7 +398,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	        query.setParameter("financialYear", financialYear);
 
 	        @SuppressWarnings("unchecked")
-	        List<UUID> results = query.getResultList();
+	        List<String> results = query.getResultList();
 	        return results;
 	    }
 
