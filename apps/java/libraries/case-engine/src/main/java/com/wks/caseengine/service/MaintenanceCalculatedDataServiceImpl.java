@@ -207,6 +207,21 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 					DecokePlanning decokePlanning = decokePlanningop.get();
 					decokePlanning.setMnt(decokePlanningDTO.getMnt());
 					decokePlanning.setRemarks(decokePlanningDTO.getRemarks());
+					decokePlanning.setBbd(decokePlanningDTO.getBbd());
+					decokePlanning.setBbu(decokePlanningDTO.getBbu());
+					decokePlanning.setDemoBbu(decokePlanningDTO.getDemoBBU());
+					decokePlanning.setDemoHss(decokePlanningDTO.getDemoHSS());
+					decokePlanning.setDemoSad(decokePlanningDTO.getDemoSAD());
+					decokePlanning.setDemoSd(decokePlanningDTO.getDemoSD());
+					decokePlanning.setFiveF(decokePlanningDTO.getFiveF());
+					decokePlanning.setFourF(decokePlanningDTO.getFourF());
+					decokePlanning.setFourFd(decokePlanningDTO.getFourFD());
+					decokePlanning.setFourFHours(decokePlanningDTO.getFourFHours());
+					decokePlanning.setIbr(decokePlanningDTO.getIbr());
+					decokePlanning.setShoutdown(decokePlanningDTO.getShutdown());
+					decokePlanning.setSad(decokePlanningDTO.getSad());
+					decokePlanning.setSlowdown(decokePlanningDTO.getSlowdown());
+					decokePlanning.setTotal(decokePlanningDTO.getTotal());
 					decokePlanningList.add(decokePlanningRepository.save(decokePlanning));
 				}
 			}
