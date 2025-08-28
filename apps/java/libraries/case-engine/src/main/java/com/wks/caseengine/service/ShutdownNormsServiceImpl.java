@@ -154,26 +154,27 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	@Override
 	public AOPMessageVM saveShutDownNorms(String plantId,List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
-		List<ShutdownNormsValueDTO> shutdownNormsValueDTOs=null;
+		
+		Map<String,Object> map=null;
 		// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		if(vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PE")) {
-			 shutdownNormsValueDTOs=	savePPShutdownNormsData(shutdownNormsValueDTOList);
+			 map=	savePPShutdownNormsData(shutdownNormsValueDTOList);
 		}else {
-			 shutdownNormsValueDTOs= saveShutdownNormsData(shutdownNormsValueDTOList);
+			 map= saveShutdownNormsData(shutdownNormsValueDTOList);
 		}
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		aopMessageVM.setCode(200);
-		aopMessageVM.setData(shutdownNormsValueDTOs);
+		aopMessageVM.setData(map);
 		aopMessageVM.setMessage("data updated successfully");
 		return aopMessageVM;
 	}
 
 	
-	public List<ShutdownNormsValueDTO> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
+	public Map<String,Object> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		String year=null;
 		UUID plantId=null;
-		
+		List<ShutdownNormsValue> shutdownNormsValueList = new ArrayList<>();
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
 				year=shutdownNormsValueDTO.getFinancialYear();
@@ -241,7 +242,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				shutdownNormsValue.setUpdatedBy(Utility.getUserName());
 
 				System.out.println("Data Saved Succussfully");
-				shutdownNormsRepository.save(shutdownNormsValue);
+				shutdownNormsValueList.add(shutdownNormsRepository.save(shutdownNormsValue));
 			}
 			
 			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-norms");
@@ -254,17 +255,20 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
+			Map<String,Object> map=new HashMap<>();
+			map.put("data", shutdownNormsValueList);
 			// TODO Auto-generated method stub
-			return shutdownNormsValueDTOList;
+			return map;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
 	}
 	
 	
-	public List<ShutdownNormsValueDTO> savePPShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
+	public Map<String,Object> savePPShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		String year=null;
 		UUID plantId=null;
+		List<GradeShutdownNormsValue> gradeShutdownNormsValueList=new ArrayList<>();
 		
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
@@ -290,7 +294,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					if (shutdownNormsValueDTO.getMaterialFkId() != null) {
 						materialId = UUID.fromString(shutdownNormsValueDTO.getMaterialFkId());
 					}
-					UUID Id = shutdownNormsRepository.findIdByFilters(plantId, siteId, verticalId, materialId,
+					UUID Id = gradeShutdownNormsValueRepository.findIdByFilters(plantId, siteId, verticalId, materialId,
 							shutdownNormsValueDTO.getFinancialYear());
 					if (Id != null) {
 						gradeShutdownNormsValue.setId(Id);
@@ -335,7 +339,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					gradeShutdownNormsValue.setGradeFkId(UUID.fromString(shutdownNormsValueDTO.getGradeFkId()));
 				}
 				System.out.println("Data Saved Succussfully");
-				gradeShutdownNormsValueRepository.save(gradeShutdownNormsValue);
+				gradeShutdownNormsValueList.add(gradeShutdownNormsValueRepository.save(gradeShutdownNormsValue));
 			}
 			
 			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-norms");
@@ -348,8 +352,10 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
+			Map<String,Object> map=new HashMap<>();
+			map.put("data", gradeShutdownNormsValueList);
 			// TODO Auto-generated method stub
-			return shutdownNormsValueDTOList;
+			return map;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
