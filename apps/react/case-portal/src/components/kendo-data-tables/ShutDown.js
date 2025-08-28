@@ -1,5 +1,5 @@
 import { useGridApiRef } from '@mui/x-data-grid'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -7,13 +7,15 @@ import { useSession } from 'SessionStoreContext'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
-
+import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
-
+import { ShutDownPeColumns } from 'components/colums/ShutdownColumn'
+import { ShutDownPpColumns } from 'components/colums/ShutdownColumn'
+import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
 const ShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
-
+  const [allProducts, setAllProducts] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
 
@@ -276,20 +278,31 @@ const ShutDown = ({ permissions }) => {
       }
 
       const shutdownDetails = newRow.map((row) => ({
-        productId: row.product,
-        discription: row.discription,
-        durationInHrs: (() => {
-          const v = findDuration('1', row)
-          if (!v) return null
-          const [h = '00', m = '00'] = String(v).split('.')
-          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
-        })(),
-        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-        audityear: localStorage.getItem('year'),
-        id: row.idFromApi || null,
-        remark: row.remark || 'null',
-      }))
+  productId: (() => {
+    if (lowerVertName === verticalEnums.PE || lowerVertName === verticalEnums.PP) {
+      const matched = allProducts.find(
+        (p) => p.displayName === row.productName1
+      )
+      return matched?.realId || null
+    }
+    return null
+  })(),
+  productName: (lowerVertName === verticalEnums.PE || lowerVertName === verticalEnums.PP)
+    ? row.productName1
+    : null,
+  discription: row.discription,
+  durationInHrs: (() => {
+    const v = findDuration('1', row)
+    if (!v) return null
+    const [h = '00', m = '00'] = String(v).split('.')
+    return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+  })(),
+  maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+  maintStartDateTime: addTimeOffset(row.maintStartDateTime),
+  audityear: localStorage.getItem('year'),
+  id: row.idFromApi || null,
+  remark: row.remark || 'null',
+}))
 
       const response = await DataService.saveShutdownData(
         plantId,
@@ -377,15 +390,20 @@ const ShutDown = ({ permissions }) => {
 
       setRowsSlowdown(formattedDataSlowDown)
 
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        idFromApi: item?.id,
-        id: index,
-        originalRemark: item.remark,
-        inEdit: false,
-        maintStartDateTime: new Date(item?.maintStartDateTime),
-        maintEndDateTime: new Date(item?.maintEndDateTime),
-      }))
+      const formattedData = data.map((item, index) => {
+  // Find the product display name from allProducts using the product ID
+  const productObj = allProducts.find(p => p.realId === item.product)
+  return {
+    ...item,
+    idFromApi: item?.id,
+    id: index,
+    originalRemark: item.remark,
+    inEdit: false,
+    maintStartDateTime: new Date(item?.maintStartDateTime),
+    maintEndDateTime: new Date(item?.maintEndDateTime),
+    productName1: productObj ? productObj.displayName : '', // <-- Fix here
+  }
+})
 
       setRows(formattedData)
       setLoading(false)
@@ -398,6 +416,7 @@ const ShutDown = ({ permissions }) => {
   useEffect(() => {
     fetchData()
   }, [oldYear, yearChanged, keycloak, _plantID])
+  
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -417,43 +436,55 @@ const ShutDown = ({ permissions }) => {
 
     return ''
   }
+useEffect(() => {
+  const getAllProducts = async () => {
+    try {
+      let data = []
+      if (lowerVertName === 'meg') {
+        data = await DataService.getAllProducts(keycloak, null)
+      } else {
+        data = await DataService.getAllProductsAll(keycloak, 'Production')
+      }
+      let productList = []
+      if (lowerVertName === 'meg') {
+        productList = data
+          .filter((product) => ['EO', 'EOE'].includes(product.displayName))
+          .map((product) => ({
+            id: product.displayName,
+            displayName: product.displayName,
+            realId: product.id,
+          }))
+      } else {
+        productList = data.map((product) => ({
+          id: product.displayName, // fixed typo: displayName not displayname
+          displayName: product.displayName,
+          realId: product.id,
+        }))
+      }
+      setAllProducts(productList)
+    } catch (error) {
+      console.error('Error fetching products', error)
+    }
+  }
 
-  const colDefs = [
-    {
-      field: 'discription',
-      title: 'Shutdown Desc',
+  getAllProducts()
+}, [oldYear, yearChanged, keycloak, _plantID, lowerVertName])
+useEffect(() => {
+  if (allProducts.length > 0) {
+    fetchData()
+  }
+}, [allProducts, oldYear, yearChanged, keycloak, _plantID, lowerVertName])
 
-      editable: true,
-      type: 'descLimit',
-    },
-    {
-      field: 'maintenanceId',
-      title: 'Maintenance ID',
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'maintStartDateTime',
-      title: 'SD - From',
-      editable: true,
-    },
-    {
-      field: 'maintEndDateTime',
-      title: 'SD - To',
-      editable: true,
-    },
-    {
-      field: 'durationInHrs',
-      title: 'Duration (hrs)',
-      editable: true,
-    },
-    {
-      field: 'remark',
-      title: 'Shutdown Basis',
-      editable: true,
-    },
-  ]
-
+  const colDefs = useMemo(() => {
+      switch (lowerVertName) {
+        case verticalEnums.PE:
+          return ShutDownPeColumns
+        case verticalEnums.PP:
+          return ShutDownPpColumns
+        default:
+          return ShutDownAllColumns
+      }
+    }, [lowerVertName])
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
 
@@ -555,6 +586,7 @@ const ShutDown = ({ permissions }) => {
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
         disableRedHighlight={true}
+        allProducts={allProducts}
       />
     </div>
   )
