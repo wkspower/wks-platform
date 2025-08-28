@@ -269,24 +269,48 @@ const handleGradeChange = (gradeId) => {
 //     console.error('Error fetching grades:', error);
 //   }
 // };
-const fetchGradeDropdowns = async () => {
-    try {
-      const response =
-        await NormalOperationNormsApiService.getShutdownNormsGrades(
-          keycloak,
-        )
+// const fetchGradeDropdowns = async () => {
+//     try {
+//       const response =
+//         await NormalOperationNormsApiService.getShutdownNormsGrades(
+//           keycloak,
+//         )
 
-      if (response?.code === 200) {
-        setGrades(response?.data)
-        if (Array.isArray(response?.data) && response?.data?.length === 0) {
-          setLoading(false)
-        }
-      }
-    } catch (error) {
-      setGrades([])
-      console.error('Error fetching data:', error)
+//       if (response?.code === 200) {
+//         setGrades(response?.data)
+//         if (Array.isArray(response?.data) && response?.data?.length === 0) {
+//           setLoading(false)
+//         }
+//       }
+//     } catch (error) {
+//       setGrades([])
+//       console.error('Error fetching data:', error)
+//     }
+//   }
+const fetchGradeDropdowns = async () => {
+  try {
+    const response = await NormalOperationNormsApiService.getShutdownNormsGrades(keycloak);
+    const dummyGrades = [
+      { gradeId: 'D54626d65d56d65', displayName: 'GradeType1' }
+    ];
+    if (response?.code === 200 && Array.isArray(response?.data)) {
+      // Merge dummy grade with backend grades, avoiding duplicates
+      const mergedGrades = [
+        ...dummyGrades,
+        ...response.data.filter(g => !dummyGrades.some(dg => dg.gradeId === g.gradeId))
+      ];
+      setGrades(mergedGrades);
+      if (mergedGrades.length === 0) setLoading(false);
+    } else {
+      setGrades(dummyGrades);
     }
+  } catch (error) {
+    setGrades([
+      { gradeId: 'D54626d65d56d65', displayName: 'Dummy Type 1' }
+    ]);
+    console.error('Error fetching data:', error);
   }
+}
   const saveShutDownNormsData = async (newRows) => {
     setLoading(true)
     try {
