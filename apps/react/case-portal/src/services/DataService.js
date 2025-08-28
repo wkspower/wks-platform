@@ -148,6 +148,7 @@ export const DataService = {
   // saveConfigurationExcelConstants,
   // getConfigurationExcelConstants,
 
+  getShutdownNormsGrades,
   deleteTurnArondReportItem,
   getIbr,
   getConsumptionAOPNormsGrades,
@@ -3298,6 +3299,28 @@ async function saveCrackerMaintenance(
       headers,
       body: JSON.stringify(decokePlanningDTOList),
     })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getShutdownNormsGrades(keycloak) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+  const url = `${Config.CaseEngineUrl}/task/unique/grades?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

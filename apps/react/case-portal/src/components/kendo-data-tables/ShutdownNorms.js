@@ -56,7 +56,8 @@ const ShutdownNorms = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
+  const [grades, setGrades] = useState([])
+  const [gradeId, setGradeId] = useState(null);
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -73,7 +74,9 @@ const ShutdownNorms = () => {
   //   const product = allProducts.find((p) => p.id === id)
   //   return product ? product.displayName : ''
   // }
-
+const handleGradeChange = (gradeId) => {
+    setGradeId(gradeId)
+  }
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
@@ -182,10 +185,11 @@ const ShutdownNorms = () => {
         // handleMenuClose();
       }
     }
-    fetchData()
+    fetchData(gradeId)
     getAllProducts()
     getShutdownMonths()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+    fetchGradeDropdowns();
+  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID, gradeId])
 
   const isCellEditable = (params) => {
     return params.row.isEditable
@@ -234,6 +238,55 @@ const ShutdownNorms = () => {
     return newRow
   }, [])
 
+//   const fetchGradeDropdowns = async () => {
+//   try {
+//     const response = await DataService.getShutdownNormsGrades(keycloak);
+//     const dummyGrades = [
+//       { gradeId: 'G1', displayName: 'Grade 1' },
+//       { gradeId: 'G2', displayName: 'Grade 2' },
+//       { gradeId: 'G3', displayName: 'Grade 3' },
+//       { gradeId: 'D54626d65d56d65', displayName: 'type1' }, // Dummy grade
+//     ];
+//     if (response?.code === 200 && Array.isArray(response?.data)) {
+//       // Merge dummy grades with backend grades, avoiding duplicates
+//       const mergedGrades = [
+//         ...dummyGrades,
+//         ...response.data.filter(
+//           g => !dummyGrades.some(dg => dg.gradeId === g.gradeId)
+//         ),
+//       ];
+//       setGrades(mergedGrades);
+//     } else {
+//       setGrades(dummyGrades);
+//     }
+//   } catch (error) {
+//     setGrades([
+//       { gradeId: 'G1', displayName: 'Grade 1' },
+//       { gradeId: 'G2', displayName: 'Grade 2' },
+//       { gradeId: 'G3', displayName: 'Grade 3' },
+//       { gradeId: 'D54626d65d56d65', displayName: 'type1' },
+//     ]);
+//     console.error('Error fetching grades:', error);
+//   }
+// };
+const fetchGradeDropdowns = async () => {
+    try {
+      const response =
+        await DataService.getShutdownNormsGrades(
+          keycloak,
+        )
+
+      if (response?.code === 200) {
+        setGrades(response?.data)
+        if (Array.isArray(response?.data) && response?.data?.length === 0) {
+          setLoading(false)
+        }
+      }
+    } catch (error) {
+      setGrades([])
+      console.error('Error fetching data:', error)
+    }
+  }
   const saveShutDownNormsData = async (newRows) => {
     setLoading(true)
     try {
@@ -315,7 +368,7 @@ const ShutdownNorms = () => {
       console.error(`Error saving Data`, error)
       setLoading(false)
     } finally {
-      fetchData()
+      fetchData(gradeId)
       setCalculatebtnClicked(false)
       setLoading(false)
     }
@@ -323,11 +376,11 @@ const ShutdownNorms = () => {
 
   const [calculationObject, setCalculationObject] = useState([])
 
-  const fetchData = async () => {
+  const fetchData = async (gradeId) => {
     try {
       setLoading(true)
       setRows([])
-      const data = await DataService.getShutdownNormsData(keycloak)
+      const data = await DataService.getShutdownNormsData(keycloak,gradeId)
 
       if (data?.code != 200) {
         setRows([])
@@ -444,7 +497,7 @@ const ShutdownNorms = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
-
+ 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -460,6 +513,8 @@ const ShutdownNorms = () => {
       showCalculate: false,
       // noColor: true,
       allAction: true,
+      showG: true,
+
     }
   }
 
@@ -483,6 +538,15 @@ const ShutdownNorms = () => {
       allAction: true,
       downloadExcelBtnFromUI: true,
       ExcelName: `${lowerVertName}_Shutdown Consumption (Quantity)`,
+      showG:
+        lowerVertName === 'pe' ||
+        lowerVertName === 'pp'
+          ? true
+          : false,
+      dropdownLabel:
+        lowerVertName === 'pe' || lowerVertName === 'pp'
+          ? 'Select Grade'
+          : 'Select Mode',
     },
     isOldYear,
   )
@@ -531,6 +595,9 @@ const ShutdownNorms = () => {
         handleCalculate={handleCalculate}
         groupBy='Particulars'
         permissions={adjustedPermissions}
+        grades={grades}
+        gradeId={gradeId}
+        handleGradeChange={handleGradeChange}
       />
     </div>
   )
