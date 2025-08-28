@@ -26,10 +26,16 @@ public class BasisReportController {
 	}
 	
 	@GetMapping(value="/report/norms-basis/mode")
-	public ResponseEntity<AOPMessageVM> getNormBasisReportCracker(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="type", required=false) String type,@RequestParam(value="mode", required=false) String mode){
-		AOPMessageVM response	=basisReportService.getNormBasisReportCracker(plantId,year,type,mode);
-		return ResponseEntity.status(response.getCode()).body(response);
+	public AOPMessageVM getNormBasisReportCracker(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="type", required=false) String type,@RequestParam(value="mode", required=false) String mode){
+		return basisReportService.getNormBasisReportCracker(plantId,year,type,mode);
 	}
+	
+	@GetMapping(value="/report/best-achieved")
+	public AOPMessageVM getBestAchievedCracker(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="reportType", required=false) String reportType){
+		return basisReportService.getBestAchievedCracker(plantId,year,reportType);
+	}
+	
+	
 	
 	
 }
