@@ -58,7 +58,8 @@ const defs = {
     reports: 'Data Set', // New addition
     annualAopCostReport: 'Annual AOP Cost', // New addition
     productionVolumeDataBasis: 'Production Volume Data', // New addition
-    normsHistorianBasis: 'Norms Historian', // New addition
+    normsHistorianBasis: 'Norms Historian',
+    bestAchievedBasis: 'Best Achieved Basis (Min CC)',
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     monthwiseRawMaterial: 'Monthwise Raw Material',
@@ -75,7 +76,6 @@ const defs = {
     monthlyAop: 'Monthly Budget',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
-
     plantTeam: 'People',
     plantSafetyPerformanceTarget: 'S&OR',
   },

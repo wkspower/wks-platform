@@ -8,6 +8,7 @@ import PlantsProductionSummary from 'components/data-tables/Reports-kendo/kendo-
 import ProductionVolumeDataBasis from 'components/data-tables/Reports-kendo/kendo-ProductionVolumeDataBasis'
 import AnnualAopCost from 'components/data-tables/Reports/AnnualAopCost'
 import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBasis'
+import BestAchievedNorms from 'components/data-tables/Reports/BestAchievedNorms'
 import TurnaroundPlanTable from 'components/data-tables/TurnaroundPlanTable'
 import BusinessDemand from 'components/kendo-data-tables/BusinessDemand'
 import ConsumptionNorms from 'components/kendo-data-tables/ConsumptionNorms'
@@ -368,6 +369,14 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='norms-historian-basis'>
                 {NormsHistorianBasisElement}
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'best-achieved-basis',
+            element: (
+              <PrivateRoute routeId='best-achieved-basis'>
+                <BestAchievedNorms />
               </PrivateRoute>
             ),
           },

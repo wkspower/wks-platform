@@ -48,7 +48,7 @@ import {
   ExcelExportColumn,
 } from '../../../node_modules/@progress/kendo-react-excel-export/index'
 import { useSelector } from 'react-redux'
-import toggleCheckbox from 'utils/checkboxUtils'
+import { Checkbox } from '../../../node_modules/@progress/kendo-react-inputs/index'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -129,7 +129,6 @@ const KendoDataTables = ({
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
-  const lastClickTime = useRef(0)
 
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -712,28 +711,6 @@ const KendoDataTables = ({
     //   },
     // }))
   }
-
-  const OptimizedCheckboxCell = React.memo(
-    ({ dataItem, field, onGlobalCheckboxChange, gridName }) => {
-      const checked = !!dataItem[field]
-
-      return (
-        <td style={{ textAlign: 'center' }}>
-          <input
-            type='checkbox'
-            checked={checked}
-            onChange={() =>
-              toggleCheckbox(dataItem, field, gridName, onGlobalCheckboxChange)
-            }
-            className='fast-checkbox'
-          />
-        </td>
-      )
-    },
-    (prev, next) => prev.dataItem[prev.field] === next.dataItem[next.field], // only re-render if checkbox value changes
-  )
-
-  OptimizedCheckboxCell.displayName = 'OptimizedCheckboxCell'
 
   return (
     <div style={{ position: 'relative' }}>
@@ -1449,21 +1426,41 @@ const KendoDataTables = ({
                   )
                 }
 
+                // ...
+
                 if (col.type === 'switch') {
+                  const handleCheckboxChange = (props, value) => {
+                    const { dataItem, field } = props
+                    const { materialName, id } = dataItem
+
+                    onGlobalCheckboxChange(
+                      gridName,
+                      id,
+                      materialName,
+                      field,
+                      value,
+                      dataItem,
+                    )
+                  }
+
                   return (
                     <GridColumn
-                      key={`${col.field}-switch`}
+                      key={col.field}
                       field={col.field}
+                      title='.'
                       width={col.widthT}
+                      hidden={col.hidden}
                       editable={true}
                       cells={{
-                        data: ({ dataItem }) => (
-                          <OptimizedCheckboxCell
-                            dataItem={dataItem}
-                            field={col.field}
-                            onGlobalCheckboxChange={onGlobalCheckboxChange}
-                            gridName={gridName}
-                          />
+                        data: (props) => (
+                          <td style={{ textAlign: 'center' }}>
+                            <Checkbox
+                              checked={!!props.dataItem[props.field]}
+                              onChange={(e) =>
+                                handleCheckboxChange(props, e.value)
+                              }
+                            />
+                          </td>
                         ),
                         headerCell: BlankHeader,
                       }}
