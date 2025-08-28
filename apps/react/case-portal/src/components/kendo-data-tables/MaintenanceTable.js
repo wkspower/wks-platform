@@ -93,26 +93,32 @@ const MaintenanceTable = () => {
       year = localStorage.getItem('year') || ''
 
 
-      const decokePlanningDTOList = newRows.map((row) => ({
-        id: row?.idFromApi,
-        monthName: row.monthName ?? null,
-        ibr: row.ibr,
-        mnt: row.mnt,
-        shutdown: row.shutdown,
-        sad: row.sad,
-        bud: row.bud,
-        demoHSS: row.demoHHS,
-        demoBBU: row.demoBBU,
-        demoSAD: row.demoSAD,
-        fourFD: row['fourFD'],
-        fourF: row['fourF'],
-        fiveF: row['5F'],
-        total: row.total,
-        fourFHours: row['fourFHours'],
-        aopYear: year,
-        plantId: plantId,
-        remarks: row.remarks ?? row.remark ?? '',
-      }))
+const decokePlanningDTOList = newRows.map((row) => ({
+  fourFD: row.fourFD,
+  aopYear: year,
+  totalSAD: row.totalSAD,
+  monthName: row.monthName ?? null,
+  plantId: plantId,
+  numberOfDays: row.numberOfDays,
+  demoBBU: row.demoBBU,
+  coilReplacement: row.coilReplacement,
+  demoSAD: row.demoSAD,
+  demoSD: row.demoSD,//demoSD
+  fourF: row.fourF,
+  mnt: row.mnt,
+  total: row.total,
+  fourFHours: row.fourFHours,
+  bbu: row.bbu,
+  bbd: row.bbd,
+  sad: row.sad,//sad
+  demoHSS: row.demoHSS,
+  fiveF: row.fiveF, 
+  id: row.idFromApi || row.id,
+  shutdown: row.shutdown,
+  slowdown: row.slowdown,
+  totalSAD: row.totalSAD,
+  remarks: row.remarks ?? row.remark ?? '',
+}))
 
       const response = await DataService.saveCrackerMaintenance(
         {
