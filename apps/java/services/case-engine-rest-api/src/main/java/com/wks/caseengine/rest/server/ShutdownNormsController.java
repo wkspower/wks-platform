@@ -22,8 +22,8 @@ public class ShutdownNormsController {
 	private ShutdownNormsService shutdownNormsService;
 	
 	@GetMapping(value="/shutdownNorms")
-	public AOPMessageVM getShutdownNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	shutdownNormsService.getShutdownNormsData(year,plantId);
+	public AOPMessageVM getShutdownNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String gradeId){
+		return	shutdownNormsService.getShutdownNormsData(year,plantId,gradeId);
 	}
 	
 	@PostMapping(value="/shutdownNorms")
@@ -34,6 +34,11 @@ public class ShutdownNormsController {
 	@GetMapping(value="/getShutdownNormsSPData")
 	public AOPMessageVM getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
 		return	shutdownNormsService.getShutdownNormsSPData(year,plantId);
+	}
+	
+	@GetMapping(value="/unique/grades")
+	public AOPMessageVM getUniqueGrades(@RequestParam String year,@RequestParam String plantId){
+		return	shutdownNormsService.getUniqueGrades(year,plantId);
 	}
 
 }

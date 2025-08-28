@@ -27,6 +27,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutdownNormsRepository;
@@ -60,6 +61,9 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
 	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
+	
 	private DataSource dataSource;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
@@ -71,17 +75,17 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 
 	@Override
-	public AOPMessageVM getShutdownNormsData(String year, String plantId) {
+	public AOPMessageVM getShutdownNormsData(String year, String plantId,String gradeId) {
 		try {
 			List<Object[]> objList = null;
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			if (vertical.getName().equalsIgnoreCase("MEG")) {
-				objList = getShutdownNorms(year, plant.getId(), "vwScrnShutdownNorms");
+				objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
 			}else {
 				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
-				objList = getShutdownNorms(year, plant.getId(), viewName);
+				objList = getShutdownNorms(year, plant.getId(), viewName,UUID.fromString(gradeId));
 			} 
 			// List<Object[]> objList = shutdownNormsRepository.findByYearAndPlantFkId(year,
 			// UUID.fromString(plantId));
@@ -301,7 +305,32 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		}
 	}
 
-	public List<Object[]> getShutdownNorms(String year, UUID plantId, String viewName) {
+	public List<Object[]> getShutdownNorms(String year, UUID plantId, String viewName,UUID gradeId) {
+		try {
+			String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], "
+					+ "[Material_FK_Id], [April], [May], [June], [July], [August], [September], "
+					+ "[October], [November], [December], [January], [February], [March], "
+					+ "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], "
+					+ "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], "
+					+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable],[DisplayName] "
+					+ "FROM " + viewName + " "
+					+ "WHERE Plant_FK_Id = :plantId AND Grade_FK_Id = :gradeId AND (FinancialYear = :year OR FinancialYear IS NULL) "
+					+ "ORDER BY NormTypeDisplayOrder";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
+			query.setParameter("gradeId", gradeId);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> getShutdownNormsMEG(String year, UUID plantId, String viewName) {
 		try {
 			String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], "
 					+ "[Material_FK_Id], [April], [May], [June], [July], [August], [September], "
@@ -316,6 +345,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantId", plantId);
 			query.setParameter("year", year);
+			
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -324,5 +354,51 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
+
+
+
+	@Override
+	public AOPMessageVM getUniqueGrades(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
+			List<UUID> grades=fetchUniqueGradeFkIds(viewName,UUID.fromString(plantId),year);
+			List<Map<UUID, String>> listOfMaps = new ArrayList<>();
+
+			for (UUID grade : grades) {
+			    String productName = normParametersRepository.findNormParameterIdByGrade(grade);
+			    Map<UUID, String> singleEntryMap = new HashMap<>();
+			    singleEntryMap.put(grade, productName);
+			    listOfMaps.add(singleEntryMap);
+			}
+			
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(listOfMaps);
+			aopMessageVM.setMessage("Data fetched successfully");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	 public List<UUID> fetchUniqueGradeFkIds(String viewName, UUID plantFkId, String financialYear) {
+	        // Build SQL with safe view injection (ensure viewName is validated)
+	        String sql = "SELECT DISTINCT Grade_Fk_Id FROM " + viewName +
+	                     " WHERE Plant_Fk_Id = :plantFkId AND FinancialYear = :financialYear";
+
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantFkId", plantFkId);
+	        query.setParameter("financialYear", financialYear);
+
+	        @SuppressWarnings("unchecked")
+	        List<UUID> results = query.getResultList();
+	        return results;
+	    }
 
 }
