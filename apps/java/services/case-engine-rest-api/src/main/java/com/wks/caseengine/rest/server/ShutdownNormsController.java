@@ -27,8 +27,8 @@ public class ShutdownNormsController {
 	}
 	
 	@PostMapping(value="/shutdownNorms")
-	public List<ShutdownNormsValueDTO> saveShutdownNormsData(@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
-		return	shutdownNormsService.saveShutdownNormsData(shutdownNormsValueDTOList);
+	public AOPMessageVM saveShutdownNormsData(@RequestParam String plantId,@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
+		return	shutdownNormsService.saveShutDownNorms(plantId,shutdownNormsValueDTOList);
 	}
 	
 	@GetMapping(value="/getShutdownNormsSPData")

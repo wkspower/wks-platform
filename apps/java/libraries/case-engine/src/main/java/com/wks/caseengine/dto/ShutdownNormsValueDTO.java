@@ -47,5 +47,6 @@ public class ShutdownNormsValueDTO {
     private String aOPStatus;
     private Boolean isEditable;
     private String productName;
+    private String gradeFkId;
 }
 

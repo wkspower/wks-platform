@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.GradeShutdownNormsValue;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownNormsValue;
@@ -27,6 +28,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.GradeShutdownNormsValueRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -63,6 +65,9 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private GradeShutdownNormsValueRepository gradeShutdownNormsValueRepository;
 	
 	private DataSource dataSource;
 
@@ -145,8 +150,26 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
+	
 	@Override
+	public AOPMessageVM saveShutDownNorms(String plantId,List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		List<ShutdownNormsValueDTO> shutdownNormsValueDTOs=null;
+		// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		if(vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PE")) {
+			 shutdownNormsValueDTOs=	savePPShutdownNormsData(shutdownNormsValueDTOList);
+		}else {
+			 shutdownNormsValueDTOs= saveShutdownNormsData(shutdownNormsValueDTOList);
+		}
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(shutdownNormsValueDTOs);
+		aopMessageVM.setMessage("data updated successfully");
+		return aopMessageVM;
+	}
+
+	
 	public List<ShutdownNormsValueDTO> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		String year=null;
 		UUID plantId=null;
@@ -237,6 +260,101 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			throw new RuntimeException("Failed to save data", ex);
 		}
 	}
+	
+	
+	public List<ShutdownNormsValueDTO> savePPShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
+		String year=null;
+		UUID plantId=null;
+		
+		try {
+			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
+				year=shutdownNormsValueDTO.getFinancialYear();
+				plantId=UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
+				GradeShutdownNormsValue gradeShutdownNormsValue = new GradeShutdownNormsValue();
+				if (shutdownNormsValueDTO.getId() != null && !shutdownNormsValueDTO.getId().isEmpty()) {
+					gradeShutdownNormsValue.setId(UUID.fromString(shutdownNormsValueDTO.getId()));
+					gradeShutdownNormsValue.setModifiedOn(new Date());
+				} else {
+					UUID siteId = null;
+					UUID verticalId = null;
+					UUID materialId = null;
+					if (shutdownNormsValueDTO.getSiteFkId() != null) {
+						siteId = UUID.fromString(shutdownNormsValueDTO.getSiteFkId());
+					}
+					if (shutdownNormsValueDTO.getPlantFkId() != null) {
+						plantId = UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
+					}
+					if (shutdownNormsValueDTO.getVerticalFkId() != null) {
+						verticalId = UUID.fromString(shutdownNormsValueDTO.getVerticalFkId());
+					}
+					if (shutdownNormsValueDTO.getMaterialFkId() != null) {
+						materialId = UUID.fromString(shutdownNormsValueDTO.getMaterialFkId());
+					}
+					UUID Id = shutdownNormsRepository.findIdByFilters(plantId, siteId, verticalId, materialId,
+							shutdownNormsValueDTO.getFinancialYear());
+					if (Id != null) {
+						gradeShutdownNormsValue.setId(Id);
+					}
+
+					gradeShutdownNormsValue.setCreatedOn(new Date());
+				}
+				gradeShutdownNormsValue.setApril(Optional.ofNullable(shutdownNormsValueDTO.getApril()).orElse(0.0));
+				gradeShutdownNormsValue.setMay(Optional.ofNullable(shutdownNormsValueDTO.getMay()).orElse(0.0));
+				gradeShutdownNormsValue.setJune(Optional.ofNullable(shutdownNormsValueDTO.getJune()).orElse(0.0));
+				gradeShutdownNormsValue.setJuly(Optional.ofNullable(shutdownNormsValueDTO.getJuly()).orElse(0.0));
+				gradeShutdownNormsValue.setAugust(Optional.ofNullable(shutdownNormsValueDTO.getAugust()).orElse(0.0));
+				gradeShutdownNormsValue.setSeptember(Optional.ofNullable(shutdownNormsValueDTO.getSeptember()).orElse(0.0));
+				gradeShutdownNormsValue.setOctober(Optional.ofNullable(shutdownNormsValueDTO.getOctober()).orElse(0.0));
+				gradeShutdownNormsValue.setNovember(Optional.ofNullable(shutdownNormsValueDTO.getNovember()).orElse(0.0));
+				gradeShutdownNormsValue.setDecember(Optional.ofNullable(shutdownNormsValueDTO.getDecember()).orElse(0.0));
+				gradeShutdownNormsValue.setJanuary(Optional.ofNullable(shutdownNormsValueDTO.getJanuary()).orElse(0.0));
+				gradeShutdownNormsValue.setFebruary(Optional.ofNullable(shutdownNormsValueDTO.getFebruary()).orElse(0.0));
+				gradeShutdownNormsValue.setMarch(Optional.ofNullable(shutdownNormsValueDTO.getMarch()).orElse(0.0));
+				if (shutdownNormsValueDTO.getSiteFkId() != null) {
+					gradeShutdownNormsValue.setSiteFkId(UUID.fromString(shutdownNormsValueDTO.getSiteFkId()));
+				}
+				if (shutdownNormsValueDTO.getPlantFkId() != null) {
+					gradeShutdownNormsValue.setPlantFkId(UUID.fromString(shutdownNormsValueDTO.getPlantFkId()));
+				}
+				if (shutdownNormsValueDTO.getVerticalFkId() != null) {
+					gradeShutdownNormsValue.setVerticalFkId(UUID.fromString(shutdownNormsValueDTO.getVerticalFkId()));
+				}
+				if (shutdownNormsValueDTO.getMaterialFkId() != null) {
+					gradeShutdownNormsValue.setMaterialFkId(UUID.fromString(shutdownNormsValueDTO.getMaterialFkId()));
+				}
+				if (shutdownNormsValueDTO.getNormParameterTypeId() != null) {
+					gradeShutdownNormsValue
+							.setNormParameterTypeFkId(UUID.fromString(shutdownNormsValueDTO.getNormParameterTypeId()));
+				}
+
+				gradeShutdownNormsValue.setFinancialYear(shutdownNormsValueDTO.getFinancialYear());
+				gradeShutdownNormsValue.setRemarks(shutdownNormsValueDTO.getRemarks());
+				gradeShutdownNormsValue.setMcuVersion("V1");
+				gradeShutdownNormsValue.setUpdatedBy(Utility.getUserName());
+				if(shutdownNormsValueDTO.getGradeFkId()!=null) {
+					gradeShutdownNormsValue.setGradeFkId(UUID.fromString(shutdownNormsValueDTO.getGradeFkId()));
+				}
+				System.out.println("Data Saved Succussfully");
+				gradeShutdownNormsValueRepository.save(gradeShutdownNormsValue);
+			}
+			
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-norms");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			// TODO Auto-generated method stub
+			return shutdownNormsValueDTOList;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save data", ex);
+		}
+	}
+
 
 	@Override
 	@Transactional
@@ -354,9 +472,6 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
-
-
 
 	@Override
 	public AOPMessageVM getUniqueGrades(String year, String plantId) {
