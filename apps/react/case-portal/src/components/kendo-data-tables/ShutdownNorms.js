@@ -16,7 +16,7 @@ import { validateFields } from 'utils/validationUtils'
 // import { setIsBlocked } from 'store/reducers/dataGridStore'
 import getShutdownConsumptionColDef from 'components/data-tables/CommonHeader/getShutdownConsumptionColDef'
 import KendoDataTables from './index'
-
+import { NormalOperationNormsApiService } from 'services/NormalOperationNormsApiService'
 const ShutdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
@@ -272,7 +272,7 @@ const handleGradeChange = (gradeId) => {
 const fetchGradeDropdowns = async () => {
     try {
       const response =
-        await DataService.getShutdownNormsGrades(
+        await NormalOperationNormsApiService.getShutdownNormsGrades(
           keycloak,
         )
 
