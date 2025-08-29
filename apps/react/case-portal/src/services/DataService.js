@@ -1308,7 +1308,7 @@ async function getMaintenanceData(keycloak) {
   }
 }
 
-async function getShutdownNormsData(keycloak) {
+async function getShutdownNormsData(keycloak, gradeId) {
   var year = localStorage.getItem('year')
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -1318,7 +1318,14 @@ async function getShutdownNormsData(keycloak) {
   }
   // let siteID =
   //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-  const url = `${Config.CaseEngineUrl}/task/shutdownNorms?year=${year}&plantId=${plantId}`
+
+  let url
+  if (gradeId) {
+    url = `${Config.CaseEngineUrl}/task/shutdownNorms?year=${year}&plantId=${plantId}&gradeId=${gradeId}`
+  } else {
+    url = `${Config.CaseEngineUrl}/task/shutdownNorms?year=${year}&plantId=${plantId}`
+  }
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2160,7 +2167,15 @@ async function getSpyroOutputData(keycloak, mode, type) {
 }
 
 async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/shutdownNorms`
+  const year = localStorage.getItem('year')
+
+  let plantId1 = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId1 = parsedPlant.id
+  }
+  const url = `${Config.CaseEngineUrl}/task/shutdownNorms?plantId=${plantId1}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

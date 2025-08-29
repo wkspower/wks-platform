@@ -25,6 +25,9 @@ import KendoDataTables from './index'
 
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [modifiedCellsFinalNorms, setModifiedCellsFinalNorms] = React.useState(
+    {},
+  )
   const [allProducts, setAllProducts] = useState([])
   const [allRedCell, setAllRedCell] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -35,6 +38,7 @@ const NormalOpNormsScreen = () => {
   const [rows, setRows] = useState()
   const [defaultSelect, setDefaultSelect] = useState()
   const [rowsBestAchivedIndividual, setRowsBestAchivedIndividual] = useState()
+  const [rowsBestFinalNorms, setRowsBestFinalNorms] = useState()
   const [rowsExpression, setRowsExpression] = useState()
   const [rowsIntermediateValues, setRowsIntermediateValues] = useState()
   const [snackbarData, setSnackbarData] = useState({
@@ -43,8 +47,12 @@ const NormalOpNormsScreen = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [remarkDialogOpenFinalNorms, setRemarkDialogOpenFinalNorms] =
+    useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRemarkFinalNorms, setCurrentRemarkFinalNorms] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [currentRowIdFinalNorms, setCurrentRowIdFinalNorms] = useState(null)
   const [loading, setLoading] = useState(false)
   const [gradeId, setGradeId] = useState(null)
   const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
@@ -57,8 +65,13 @@ const NormalOpNormsScreen = () => {
   const lowerVertName = vertName?.toLowerCase()
   const dispatch = useDispatch()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const [selectedTab, setSelectedTab] = useState(0)
 
   const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
+  const unsavedChangesRefFinalNorms = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
@@ -71,7 +84,7 @@ const NormalOpNormsScreen = () => {
     try {
       response = await NormalOperationNormsApiService.getfinalNorms(keycloak)
       if (response?.code !== 200) {
-        setRowsFinalNorms([])
+        setRowsBestFinalNorms([])
         return
       }
       let mappedData = response?.data?.mcuNormsValueDTOList
@@ -83,10 +96,10 @@ const NormalOpNormsScreen = () => {
         idFromApi: item.id,
         id: `${index}`,
         originalRemark: item.remarks,
-        Particulars: item.normParameterTypeDisplayName,
+        Particulars: item.normType,
       }))
 
-      setRowsFinalNorms(formattedData)
+      setRowsBestFinalNorms(formattedData)
     } catch (error) {
       console.error('Error fetching Data:', error)
     } finally {
@@ -95,7 +108,7 @@ const NormalOpNormsScreen = () => {
   }
 
   const fetchData = async (gradeId) => {
-    if (selectedTab == 2) {
+    if (selectedTab == 1) {
       fetchFinalNorms()
       return
     }
@@ -305,7 +318,7 @@ const NormalOpNormsScreen = () => {
 
   useEffect(() => {
     fetchAllData(gradeId)
-  }, [oldYear, yearChanged, keycloak, gradeId, plantID])
+  }, [oldYear, yearChanged, keycloak, gradeId, plantID, selectedTab])
 
   const colDefs = getNormalOpNormColDef({
     headerMap,
@@ -489,33 +502,153 @@ const NormalOpNormsScreen = () => {
     },
   ]
 
-  const colDefsCrackerFinalNormsTabTwo = [
+  const colDefsFinalNorms = [
     {
       field: 'materialDisplayName',
       title: 'Particulars',
+      widthT: 130,
     },
-
     {
       field: 'uom',
       title: 'UOM',
+      widthT: 60,
       editable: false,
+    },
+    {
+      field: 'april',
+      title: headerMap[4],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: '{0:#.##}',
+      type: 'number',
     },
 
     {
-      field: 'april',
-      title: 'Value',
+      field: 'may',
+      title: headerMap[5],
       editable: true,
+      width: 120,
       align: 'right',
-      format: '{0:#.###}',
+      format: '{0:#.##}',
       type: 'number',
     },
-  ]
+    {
+      field: 'june',
+      title: headerMap[6],
+      editable: true,
+      type: 'number',
+      width: 120,
+      align: 'right',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'july',
+      title: headerMap[7],
+      editable: true,
+      type: 'number',
+      width: 120,
+      align: 'right',
+      format: '{0:#.##}',
+    },
 
+    {
+      field: 'august',
+      title: headerMap[8],
+      editable: true,
+      width: 120,
+      type: 'number',
+      align: 'right',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'september',
+      title: headerMap[9],
+      editable: true,
+      width: 120,
+      align: 'right',
+      type: 'number',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'october',
+      title: headerMap[10],
+      editable: true,
+      width: 120,
+      type: 'number',
+      align: 'right',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'november',
+      title: headerMap[11],
+      editable: true,
+      width: 120,
+      align: 'right',
+      type: 'number',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'december',
+      title: headerMap[12],
+      editable: true,
+      width: 120,
+      align: 'right',
+      type: 'number',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'january',
+      title: headerMap[1],
+      editable: true,
+      width: 120,
+      align: 'right',
+      type: 'number',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'february',
+      title: headerMap[2],
+      editable: true,
+      width: 120,
+      type: 'number',
+      align: 'right',
+      format: '{0:#.##}',
+    },
+    {
+      field: 'march',
+      title: headerMap[3],
+      editable: true,
+      width: 120,
+      type: 'number',
+      align: 'right',
+      format: '{0:#.##}',
+    },
+
+    {
+      field: 'isEditable',
+      title: 'isEditable',
+      hidden: true,
+    },
+
+    {
+      field: 'remarks',
+      title: 'Remark',
+      widthT: 140,
+      editable: true,
+    },
+  ]
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+  }
+  const handleRemarkCellClickFinalNorms = (row) => {
+    if (!row?.isEditable) return
+    setCurrentRemarkFinalNorms(row.remarks || '')
+    setCurrentRowIdFinalNorms(row.id)
+    setRemarkDialogOpenFinalNorms(true)
   }
 
   const saveChanges = React.useCallback(async () => {
@@ -700,6 +833,72 @@ const NormalOpNormsScreen = () => {
       console.error('Error!', error)
     }
   }
+  const handleCalculateFinalNorms = async () => {
+    setLoading(true)
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      var plantId = plantId
+      var data = null
+      let siteID =
+        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
+      let verticalId = localStorage.getItem('verticalId')
+
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+        data =
+          await NormalOperationNormsApiService.handleCalculateNormalOperationNormsPe(
+            plantId,
+            siteID,
+            verticalId,
+            year,
+            keycloak,
+          )
+      } else {
+        data =
+          await NormalOperationNormsApiService.handleCalculateNormalOperationNorms(
+            plantId,
+            year,
+            keycloak,
+          )
+      }
+
+      if (data == 0 || data) {
+        // dispatch(setIsBlocked(true))
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+
+        if (lowerVertName == 'pe' || lowerVertName == 'pp')
+          fetchGradeDropdowns()
+        fetchData(gradeId)
+        if (lowerVertName == 'meg' || lowerVertName == 'cracker')
+          fetchDataIntermediateValues()
+        getNormTransactions()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Refresh Falied!',
+          severity: 'error',
+        })
+      }
+
+      return data
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'An error occurred',
+        severity: 'error',
+      })
+
+      console.error('Error!', error)
+    }
+  }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -754,6 +953,17 @@ const NormalOpNormsScreen = () => {
     isOldYear,
   )
   const adjustedPermissionsExpression = getAdjustedPermissions(
+    {
+      showAction: false,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: 'Expression (Norms)',
+      showCheckbox: lowerVertName === 'cracker' ? true : false,
+    },
+    isOldYear,
+  )
+
+  const adjustedPermissionsFinalNorms = getAdjustedPermissions(
     {
       showAction: false,
       allAction: true,
@@ -893,7 +1103,6 @@ const NormalOpNormsScreen = () => {
     setGradeId(gradeId)
   }
 
-  const [selectedTab, setSelectedTab] = useState(0)
   const handleTabChange = (event, newValue) => {
     setModifiedCells({})
     setSelectedTab(newValue)
@@ -1000,6 +1209,27 @@ const NormalOpNormsScreen = () => {
       })
     }
   }, [modifiedCells])
+  const saveChangesCrackerFinalNorms = React.useCallback(async () => {
+    try {
+      const data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
+      }
+      saveNormalOperationNormsDataCracker(data)
+    } catch (error) {
+      console.error('Error saving Cracker Data:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Error saving Cracker Data!',
+        severity: 'error',
+      })
+    }
+  }, [modifiedCellsFinalNorms])
 
   const handleGlobalCheckboxChange = (
     gridName,
@@ -1010,6 +1240,7 @@ const NormalOpNormsScreen = () => {
     dataItem,
     itemId,
   ) => {
+    unsavedChangesRefFinalNorms
     const uniqueItemId = `${gridName}-${id}`
     const uncheckedRows = []
 
@@ -1280,7 +1511,7 @@ const NormalOpNormsScreen = () => {
           modifiedCells={modifiedCellsFinalNorms}
           setModifiedCells={setModifiedCellsFinalNorms}
           columns={colDefsFinalNorms}
-          setRows={setRowsFinalNorms}
+          setRows={setRowsBestFinalNorms}
           rows={rowsBestFinalNorms}
           onAddRow={(newRow) => console.log('New Row Added:', newRow)}
           onDeleteRow={(id) => console.log('Row Deleted:', id)}

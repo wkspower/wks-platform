@@ -17,12 +17,16 @@ import { validateFields } from 'utils/validationUtils'
 import getShutdownConsumptionColDef from 'components/data-tables/CommonHeader/getShutdownConsumptionColDef'
 import KendoDataTables from './index'
 import { NormalOperationNormsApiService } from 'services/NormalOperationNormsApiService'
+import { GradientRounded } from '../../../node_modules/@mui/icons-material/index'
+
 const ShutdownNorms = () => {
+  const [gradeId, setGradeId] = useState(null)
+
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
-  const [allProducts, setAllProducts] = useState([])
+  // const [allProducts, setAllProducts] = useState([])
   const [shutdownMonths, setShutdownMonths] = useState([])
   const { sitePlantChange, yearChanged, oldYear, plantID } = menu
 
@@ -56,8 +60,7 @@ const ShutdownNorms = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [grades, setGrades] = useState([])
-  const [gradeId, setGradeId] = useState(null);
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -74,9 +77,7 @@ const ShutdownNorms = () => {
   //   const product = allProducts.find((p) => p.id === id)
   //   return product ? product.displayName : ''
   // }
-const handleGradeChange = (gradeId) => {
-    setGradeId(gradeId)
-  }
+
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
@@ -159,37 +160,59 @@ const handleGradeChange = (gradeId) => {
     }
   }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
 
+  // 1) Load grades list if vertical requires it
   useEffect(() => {
-    const getAllProducts = async () => {
-      try {
-        const data = await DataService.getAllProducts(keycloak, null)
-        const productList = data.map((product) => ({
-          id: product.id.toLowerCase(),
-          displayName: product.displayName,
-        }))
-        setAllProducts(productList)
-      } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
+    const loadGrades = async () => {
+      if (['pe', 'pp'].includes(lowerVertName)) {
+        try {
+          const response =
+            await NormalOperationNormsApiService.getGradesForShutdownNorms(
+              keycloak,
+            )
+
+          if (response?.code === 200) {
+            setGrades(response?.data)
+            if (Array.isArray(response?.data) && response?.data?.length === 0) {
+              setLoading(false)
+            }
+          }
+        } catch (error) {
+          setGrades([])
+          console.error('Error fetching grades:', error)
+        }
       }
     }
-    const getShutdownMonths = async () => {
+    loadGrades()
+  }, [plantID, yearChanged, keycloak])
+
+  // 2) Fetch main data when gradeId or other deps change
+  useEffect(() => {
+    const loadData = async () => {
       try {
+        if (['pe', 'pp'].includes(lowerVertName)) {
+          if (!gradeId) return // wait until user selects grade
+          await fetchData(gradeId)
+        } else {
+          await fetchData()
+        }
+
         const data = await DataService.getShutdownMonths(keycloak, null)
         setShutdownMonths(data)
-        // console.log('setShutdownMonths', data)
       } catch (error) {
-        console.error('Error fetching months:', error)
-      } finally {
-        // handleMenuClose();
+        console.error('Error in loadData:', error)
       }
     }
-    fetchData(gradeId)
-    getAllProducts()
-    getShutdownMonths()
-    fetchGradeDropdowns();
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID, gradeId])
+
+    loadData()
+  }, [
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    plantID,
+    gradeId,
+    lowerVertName,
+  ])
 
   const isCellEditable = (params) => {
     return params.row.isEditable
@@ -238,79 +261,6 @@ const handleGradeChange = (gradeId) => {
     return newRow
   }, [])
 
-//   const fetchGradeDropdowns = async () => {
-//   try {
-//     const response = await DataService.getShutdownNormsGrades(keycloak);
-//     const dummyGrades = [
-//       { gradeId: 'G1', displayName: 'Grade 1' },
-//       { gradeId: 'G2', displayName: 'Grade 2' },
-//       { gradeId: 'G3', displayName: 'Grade 3' },
-//       { gradeId: 'D54626d65d56d65', displayName: 'type1' }, // Dummy grade
-//     ];
-//     if (response?.code === 200 && Array.isArray(response?.data)) {
-//       // Merge dummy grades with backend grades, avoiding duplicates
-//       const mergedGrades = [
-//         ...dummyGrades,
-//         ...response.data.filter(
-//           g => !dummyGrades.some(dg => dg.gradeId === g.gradeId)
-//         ),
-//       ];
-//       setGrades(mergedGrades);
-//     } else {
-//       setGrades(dummyGrades);
-//     }
-//   } catch (error) {
-//     setGrades([
-//       { gradeId: 'G1', displayName: 'Grade 1' },
-//       { gradeId: 'G2', displayName: 'Grade 2' },
-//       { gradeId: 'G3', displayName: 'Grade 3' },
-//       { gradeId: 'D54626d65d56d65', displayName: 'type1' },
-//     ]);
-//     console.error('Error fetching grades:', error);
-//   }
-// };
-// const fetchGradeDropdowns = async () => {
-//     try {
-//       const response =
-//         await NormalOperationNormsApiService.getShutdownNormsGrades(
-//           keycloak,
-//         )
-
-//       if (response?.code === 200) {
-//         setGrades(response?.data)
-//         if (Array.isArray(response?.data) && response?.data?.length === 0) {
-//           setLoading(false)
-//         }
-//       }
-//     } catch (error) {
-//       setGrades([])
-//       console.error('Error fetching data:', error)
-//     }
-//   }
-const fetchGradeDropdowns = async () => {
-  try {
-    const response = await NormalOperationNormsApiService.getShutdownNormsGrades(keycloak);
-    const dummyGrades = [
-      { gradeId: 'D54626d65d56d65', displayName: 'GradeType1' }
-    ];
-    if (response?.code === 200 && Array.isArray(response?.data)) {
-      // Merge dummy grade with backend grades, avoiding duplicates
-      const mergedGrades = [
-        ...dummyGrades,
-        ...response.data.filter(g => !dummyGrades.some(dg => dg.gradeId === g.gradeId))
-      ];
-      setGrades(mergedGrades);
-      if (mergedGrades.length === 0) setLoading(false);
-    } else {
-      setGrades(dummyGrades);
-    }
-  } catch (error) {
-    setGrades([
-      { gradeId: 'D54626d65d56d65', displayName: 'Dummy Type 1' }
-    ]);
-    console.error('Error fetching data:', error);
-  }
-}
   const saveShutDownNormsData = async (newRows) => {
     setLoading(true)
     try {
@@ -352,6 +302,7 @@ const fetchGradeDropdowns = async () => {
         verticalFkId: row.verticalFkId || null,
         unit: row.unit || null,
         normParameterTypeId: row.normParameterTypeId || null,
+        gradeFkId: gradeId || null,
       }))
       if (businessData.length > 0) {
         // console.log(title)
@@ -401,10 +352,23 @@ const fetchGradeDropdowns = async () => {
   const [calculationObject, setCalculationObject] = useState([])
 
   const fetchData = async (gradeId) => {
+    console.log('gradeID', gradeId)
     try {
       setLoading(true)
       setRows([])
-      const data = await DataService.getShutdownNormsData(keycloak,gradeId)
+
+      const verticalsRequiringGrade = ['pe', 'pp']
+      if (verticalsRequiringGrade.includes(lowerVertName) && !gradeId) {
+        setLoading(false)
+        return
+      }
+
+      // let gradeId = null
+      // if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+      //   gradeId = '0E39FD68-D4DC-4FA9-A686-6A265BC35580'
+      // }
+
+      const data = await DataService.getShutdownNormsData(keycloak, gradeId)
 
       if (data?.code != 200) {
         setRows([])
@@ -462,6 +426,7 @@ const fetchGradeDropdowns = async () => {
       setLoading(false)
     }
   }
+  const [grades, setGrades] = useState([])
 
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
@@ -496,7 +461,7 @@ const fetchGradeDropdowns = async () => {
           severity: 'success',
         })
         setLoading(false)
-        fetchData()
+        fetchData(gradeId)
       }
 
       // dispatch(setIsBlocked(true))
@@ -521,7 +486,7 @@ const fetchGradeDropdowns = async () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
- 
+
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -537,8 +502,6 @@ const fetchGradeDropdowns = async () => {
       showCalculate: false,
       // noColor: true,
       allAction: true,
-      showG: true,
-
     }
   }
 
@@ -559,21 +522,24 @@ const fetchGradeDropdowns = async () => {
           ? true
           : false,
       // noColor: true,
-      allAction: true,
-      downloadExcelBtnFromUI: true,
-      ExcelName: `${lowerVertName}_Shutdown Consumption (Quantity)`,
-      showG:
-        lowerVertName === 'pe' ||
-        lowerVertName === 'pp'
-          ? true
-          : false,
+
+      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       dropdownLabel:
         lowerVertName === 'pe' || lowerVertName === 'pp'
           ? 'Select Grade'
           : 'Select Mode',
+      allAction: true,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Shutdown Consumption (Quantity)`,
     },
     isOldYear,
   )
+
+  const handleGradeChange = (gradeId) => {
+    console.log('gradeIdgradeId', gradeId)
+
+    setGradeId(gradeId)
+  }
 
   return (
     <div>
@@ -608,7 +574,7 @@ const fetchGradeDropdowns = async () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         onProcessRowUpdateError={onProcessRowUpdateError}
-        fetchData={fetchData}
+        // fetchData={fetchData}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -619,9 +585,9 @@ const fetchGradeDropdowns = async () => {
         handleCalculate={handleCalculate}
         groupBy='Particulars'
         permissions={adjustedPermissions}
-        grades={grades}
-        gradeId={gradeId}
         handleGradeChange={handleGradeChange}
+        plantID={plantID}
+        grades={grades}
       />
     </div>
   )

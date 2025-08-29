@@ -5,7 +5,7 @@ export const NormalOperationNormsApiService = {
   updateModeWiseNormsData,
   getNormalOperationNormsData,
   getNormalOperationNormsGrades,
-  getShutdownNormsGrades,
+  getGradesForShutdownNorms,
   getIntermediateValues,
   getNormTransactions,
   saveNormalOperationNormsData,
@@ -22,7 +22,7 @@ async function getfinalNorms(keycloak, gradeId, method) {
   const storedPlant = localStorage.getItem('selectedPlant')
   const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
 
-  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms?year=${year}&plantId=${plantId}&mode=${gradeId}&method=${method}`
+  const url = `${Config.CaseEngineUrl}/task/final-norms?year=${year}&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',
@@ -141,7 +141,7 @@ async function getNormalOperationNormsGrades(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getShutdownNormsGrades(keycloak) {
+async function getGradesForShutdownNorms(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')

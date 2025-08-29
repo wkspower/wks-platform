@@ -67,9 +67,12 @@ const ShutDown = ({ permissions }) => {
         })
         return
       }
-
-      // Add error tracking for required fields
-      const requiredFields = ['discription', 'remark']
+      let requiredFields
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+        requiredFields = ['discription', 'remark', 'productName1']
+      } else {
+        requiredFields = ['discription', 'remark']
+      }
       const rowsWithErrors = new Set()
 
       // Check each record for missing required fields
@@ -278,31 +281,36 @@ const ShutDown = ({ permissions }) => {
       }
 
       const shutdownDetails = newRow.map((row) => ({
-  productId: (() => {
-    if (lowerVertName === verticalEnums.PE || lowerVertName === verticalEnums.PP) {
-      const matched = allProducts.find(
-        (p) => p.displayName === row.productName1
-      )
-      return matched?.realId || null
-    }
-    return null
-  })(),
-  productName: (lowerVertName === verticalEnums.PE || lowerVertName === verticalEnums.PP)
-    ? row.productName1
-    : null,
-  discription: row.discription,
-  durationInHrs: (() => {
-    const v = findDuration('1', row)
-    if (!v) return null
-    const [h = '00', m = '00'] = String(v).split('.')
-    return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
-  })(),
-  maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-  maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-  audityear: localStorage.getItem('year'),
-  id: row.idFromApi || null,
-  remark: row.remark || 'null',
-}))
+        productId: (() => {
+          if (
+            lowerVertName === verticalEnums.PE ||
+            lowerVertName === verticalEnums.PP
+          ) {
+            const matched = allProducts.find(
+              (p) => p.displayName === row.productName1,
+            )
+            return matched?.realId || null
+          }
+          return null
+        })(),
+        productName:
+          lowerVertName === verticalEnums.PE ||
+          lowerVertName === verticalEnums.PP
+            ? row.productName1
+            : null,
+        discription: row.discription,
+        durationInHrs: (() => {
+          const v = findDuration('1', row)
+          if (!v) return null
+          const [h = '00', m = '00'] = String(v).split('.')
+          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+        })(),
+        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
+        audityear: localStorage.getItem('year'),
+        id: row.idFromApi || null,
+        remark: row.remark || 'null',
+      }))
 
       const response = await DataService.saveShutdownData(
         plantId,
@@ -391,19 +399,19 @@ const ShutDown = ({ permissions }) => {
       setRowsSlowdown(formattedDataSlowDown)
 
       const formattedData = data.map((item, index) => {
-  // Find the product display name from allProducts using the product ID
-  const productObj = allProducts.find(p => p.realId === item.product)
-  return {
-    ...item,
-    idFromApi: item?.id,
-    id: index,
-    originalRemark: item.remark,
-    inEdit: false,
-    maintStartDateTime: new Date(item?.maintStartDateTime),
-    maintEndDateTime: new Date(item?.maintEndDateTime),
-    productName1: productObj ? productObj.displayName : '', // <-- Fix here
-  }
-})
+        // Find the product display name from allProducts using the product ID
+        const productObj = allProducts.find((p) => p.realId === item.product)
+        return {
+          ...item,
+          idFromApi: item?.id,
+          id: index,
+          originalRemark: item.remark,
+          inEdit: false,
+          maintStartDateTime: new Date(item?.maintStartDateTime),
+          maintEndDateTime: new Date(item?.maintEndDateTime),
+          productName1: productObj ? productObj.displayName : '', // <-- Fix here
+        }
+      })
 
       setRows(formattedData)
       setLoading(false)
@@ -416,7 +424,6 @@ const ShutDown = ({ permissions }) => {
   useEffect(() => {
     fetchData()
   }, [oldYear, yearChanged, keycloak, _plantID])
-  
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -436,55 +443,55 @@ const ShutDown = ({ permissions }) => {
 
     return ''
   }
-useEffect(() => {
-  const getAllProducts = async () => {
-    try {
-      let data = []
-      if (lowerVertName === 'meg') {
-        data = await DataService.getAllProducts(keycloak, null)
-      } else {
-        data = await DataService.getAllProductsAll(keycloak, 'Production')
-      }
-      let productList = []
-      if (lowerVertName === 'meg') {
-        productList = data
-          .filter((product) => ['EO', 'EOE'].includes(product.displayName))
-          .map((product) => ({
+  useEffect(() => {
+    const getAllProducts = async () => {
+      try {
+        let data = []
+        if (lowerVertName === 'meg') {
+          data = await DataService.getAllProducts(keycloak, null)
+        } else {
+          data = await DataService.getAllProductsAll(keycloak, 'Production')
+        }
+        let productList = []
+        if (lowerVertName === 'meg') {
+          productList = data
+            .filter((product) => ['EO', 'EOE'].includes(product.displayName))
+            .map((product) => ({
+              id: product.displayName,
+              displayName: product.displayName,
+              realId: product.id,
+            }))
+        } else {
+          productList = data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
             realId: product.id,
           }))
-      } else {
-        productList = data.map((product) => ({
-          id: product.displayName, // fixed typo: displayName not displayname
-          displayName: product.displayName,
-          realId: product.id,
-        }))
+        }
+        setAllProducts(productList)
+      } catch (error) {
+        console.error('Error fetching products', error)
       }
-      setAllProducts(productList)
-    } catch (error) {
-      console.error('Error fetching products', error)
     }
-  }
 
-  getAllProducts()
-}, [oldYear, yearChanged, keycloak, _plantID, lowerVertName])
-useEffect(() => {
-  if (allProducts.length > 0) {
-    fetchData()
-  }
-}, [allProducts, oldYear, yearChanged, keycloak, _plantID, lowerVertName])
+    getAllProducts()
+  }, [oldYear, yearChanged, keycloak, _plantID, lowerVertName])
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      fetchData()
+    }
+  }, [allProducts, oldYear, yearChanged, keycloak, _plantID, lowerVertName])
 
   const colDefs = useMemo(() => {
-      switch (lowerVertName) {
-        case verticalEnums.PE:
-          return ShutDownPeColumns
-        case verticalEnums.PP:
-          return ShutDownPpColumns
-        default:
-          return ShutDownAllColumns
-      }
-    }, [lowerVertName])
+    switch (lowerVertName) {
+      case verticalEnums.PE:
+        return ShutDownPeColumns
+      case verticalEnums.PP:
+        return ShutDownPpColumns
+      default:
+        return ShutDownAllColumns
+    }
+  }, [lowerVertName])
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
 
