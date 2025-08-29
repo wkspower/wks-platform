@@ -15,12 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
+import com.wks.caseengine.entity.DecokeMaintenance;
 import com.wks.caseengine.entity.DecokePlanning;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.DecokeMaintenanceRepository;
 import com.wks.caseengine.repository.DecokePlanningRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -43,6 +45,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	@Autowired
 	private DecokePlanningRepository decokePlanningRepository;
+	
+	@Autowired
+	private DecokeMaintenanceRepository decokeMaintenanceRepository;
 
 	@Override
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId, String year) {
@@ -198,31 +203,31 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
 			List<DecokePlanningDTO> decokePlanningDTOList) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<DecokePlanning> decokePlanningList = new ArrayList<>();
+		List<DecokeMaintenance> decokeMaintenanceList = new ArrayList<>();
 		try {
 			for (DecokePlanningDTO decokePlanningDTO : decokePlanningDTOList) {
-				Optional<DecokePlanning> decokePlanningop = decokePlanningRepository
+				Optional<DecokeMaintenance> decokePlanningop = decokeMaintenanceRepository
 						.findById(decokePlanningDTO.getId());
 				if (decokePlanningop.isPresent()) {
-					DecokePlanning decokePlanning = decokePlanningop.get();
-					decokePlanning.setMnt(decokePlanningDTO.getMnt());
-					decokePlanning.setRemarks(decokePlanningDTO.getRemarks());
-					decokePlanning.setBbd(decokePlanningDTO.getBbd());
-					decokePlanning.setBbu(decokePlanningDTO.getBbu());
-					decokePlanning.setDemoBbu(decokePlanningDTO.getDemoBBU());
-					decokePlanning.setDemoHss(decokePlanningDTO.getDemoHSS());
-					decokePlanning.setDemoSad(decokePlanningDTO.getDemoSAD());
-					decokePlanning.setDemoSd(decokePlanningDTO.getDemoSD());
-					decokePlanning.setFiveF(decokePlanningDTO.getFiveF());
-					decokePlanning.setFourF(decokePlanningDTO.getFourF());
-					decokePlanning.setFourFd(decokePlanningDTO.getFourFD());
-					decokePlanning.setFourFHours(decokePlanningDTO.getFourFHours());
-					decokePlanning.setIbr(decokePlanningDTO.getIbr());
-					decokePlanning.setShoutdown(decokePlanningDTO.getShutdown());
-					decokePlanning.setSad(decokePlanningDTO.getSad());
-					decokePlanning.setSlowdown(decokePlanningDTO.getSlowdown());
-					decokePlanning.setTotal(decokePlanningDTO.getTotal());
-					decokePlanningList.add(decokePlanningRepository.save(decokePlanning));
+					DecokeMaintenance decokeMaintenance = decokePlanningop.get();
+					decokeMaintenance.setMnt(decokePlanningDTO.getMnt());
+					decokeMaintenance.setRemarks(decokePlanningDTO.getRemarks());
+					decokeMaintenance.setBbd(decokePlanningDTO.getBbd());
+					decokeMaintenance.setBbu(decokePlanningDTO.getBbu());
+					decokeMaintenance.setDemoBbu(decokePlanningDTO.getDemoBBU());
+					decokeMaintenance.setDemoHss(decokePlanningDTO.getDemoHSS());
+					decokeMaintenance.setDemoSad(decokePlanningDTO.getDemoSAD());
+					decokeMaintenance.setDemoSd(decokePlanningDTO.getDemoSD());
+					decokeMaintenance.setFiveF(decokePlanningDTO.getFiveF());
+					decokeMaintenance.setFourF(decokePlanningDTO.getFourF());
+					decokeMaintenance.setFourFd(decokePlanningDTO.getFourFD());
+					decokeMaintenance.setFourFHours(decokePlanningDTO.getFourFHours());
+					decokeMaintenance.setIbr(decokePlanningDTO.getIbr());
+					decokeMaintenance.setShoutdown(decokePlanningDTO.getShutdown());
+					decokeMaintenance.setSad(decokePlanningDTO.getSad());
+					decokeMaintenance.setSlowdown(decokePlanningDTO.getSlowdown());
+					decokeMaintenance.setTotal(decokePlanningDTO.getTotal());
+					decokeMaintenanceList.add(decokeMaintenanceRepository.save(decokeMaintenance));
 				}
 			}
 		} catch (IllegalArgumentException e) {
@@ -232,7 +237,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data updated successfully");
-		aopMessageVM.setData(decokePlanningList);
+		aopMessageVM.setData(decokeMaintenanceList);
 		return aopMessageVM;
 
 	}
