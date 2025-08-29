@@ -160,28 +160,29 @@ const ShutdownNorms = () => {
     }
   }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
 
-  // 1) Load grades list if vertical requires it
-  useEffect(() => {
-    const loadGrades = async () => {
-      if (['pe', 'pp'].includes(lowerVertName)) {
-        try {
-          const response =
-            await NormalOperationNormsApiService.getGradesForShutdownNorms(
-              keycloak,
-            )
+  const loadGrades = async () => {
+    if (['pe', 'pp'].includes(lowerVertName)) {
+      try {
+        const response =
+          await NormalOperationNormsApiService.getGradesForShutdownNorms(
+            keycloak,
+          )
 
-          if (response?.code === 200) {
-            setGrades(response?.data)
-            if (Array.isArray(response?.data) && response?.data?.length === 0) {
-              setLoading(false)
-            }
+        if (response?.code === 200) {
+          setGrades(response?.data)
+          if (Array.isArray(response?.data) && response?.data?.length === 0) {
+            setLoading(false)
           }
-        } catch (error) {
-          setGrades([])
-          console.error('Error fetching grades:', error)
         }
+      } catch (error) {
+        setGrades([])
+        console.error('Error fetching grades:', error)
       }
     }
+  }
+
+  // 1) Load grades list if vertical requires it
+  useEffect(() => {
     loadGrades()
   }, [plantID, yearChanged, keycloak])
 
@@ -196,7 +197,14 @@ const ShutdownNorms = () => {
           await fetchData()
         }
 
-        const data = await DataService.getShutdownMonths(keycloak, null)
+        if (['pe', 'pp'].includes(lowerVertName)) {
+          if (!gradeId) return
+          let data
+          data = await DataService.getShutdownMonths(keycloak, gradeId)
+        } else {
+          data = await DataService.getShutdownMonths(keycloak)
+        }
+
         setShutdownMonths(data)
       } catch (error) {
         console.error('Error in loadData:', error)
@@ -461,6 +469,8 @@ const ShutdownNorms = () => {
           severity: 'success',
         })
         setLoading(false)
+
+        loadGrades()
         fetchData(gradeId)
       }
 

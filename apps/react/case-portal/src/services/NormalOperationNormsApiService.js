@@ -368,7 +368,8 @@ async function getFinalNormsData(keycloak, gradeId, method) {
   }
 }
 async function updateFinalNormsData(keycloak, gradeId, payload) {
-  const baseUrl = `${Config.CaseEngineUrl}/task/mode-wise/norms`
+  const baseUrl = `${Config.CaseEngineUrl}/task/final-norms`
+
   const year = localStorage.getItem('year') || ''
   const storedPlant = localStorage.getItem('selectedPlant')
   const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''

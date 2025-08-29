@@ -2362,13 +2362,16 @@ async function getAllProducts(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getShutdownMonths(keycloak) {
+async function getShutdownMonths(keycloak, gradeId) {
   var year = localStorage.getItem('year')
   const storedPlant = localStorage.getItem('selectedPlant')
   const parsedPlant = JSON.parse(storedPlant)
-  // const url = `${Config.CaseEngineUrl}/task/getAllProducts?normParameterTypeName=${type}&plantId=${parsedPlant.id}`
-  // http://localhost:8080/task/shutdown-months?plantId=AACDBE12-C5F6-4B79-9C88-751169815B42&MaintenanceName=Shutdown
-  const url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown&year=${year}`
+  let url
+  if (gradeId) {
+    url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown&year=${year}&gradeId=${gradeId}`
+  } else {
+    url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown&year=${year}`
+  }
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

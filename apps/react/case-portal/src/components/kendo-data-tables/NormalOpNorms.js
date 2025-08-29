@@ -95,7 +95,8 @@ const NormalOpNormsScreen = () => {
         ...item,
         idFromApi: item.id,
         id: `${index}`,
-        originalRemark: item.remarks,
+        remarks: item?.remarks || '',
+        originalRemark: item?.remarks || '',
         Particulars: item.normType,
       }))
 
@@ -958,6 +959,10 @@ const NormalOpNormsScreen = () => {
       allAction: true,
       showTitleNameBusiness: true,
       titleName: 'Expression (Norms)',
+      downloadExcelBtnFromUI: true,
+
+      ExcelName: `${lowerVertName}_Expression_(Norms)`,
+
       showCheckbox: lowerVertName === 'cracker' ? true : false,
     },
     isOldYear,
@@ -968,8 +973,11 @@ const NormalOpNormsScreen = () => {
       showAction: false,
       allAction: true,
       showTitleNameBusiness: true,
-      titleName: 'Expression (Norms)',
-      showCheckbox: lowerVertName === 'cracker' ? true : false,
+      titleName: 'Final (Norms)',
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Final_Norms`,
+      saveWithRemark: true,
+      saveBtn: true,
     },
     isOldYear,
   )
@@ -981,6 +989,8 @@ const NormalOpNormsScreen = () => {
       showTitleNameBusiness: true,
       titleName: 'Best Achieved (Individual)',
       showCheckbox: lowerVertName === 'cracker' ? true : false,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Best Achieved (Norms)`,
     },
     isOldYear,
   )
@@ -1187,6 +1197,81 @@ const NormalOpNormsScreen = () => {
       // setLoading(false)
     }
   }
+  const saveNormalOperationFinalNorms = async (newRows) => {
+    setLoading(true)
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      const payload = newRows.map((row) => ({
+        april: row.april || 0,
+        may: row.may || 0,
+        june: row.june || 0,
+        july: row.july || 0,
+        august: row.august || 0,
+        september: row.september || 0,
+        october: row.october || 0,
+        november: row.november || 0,
+        december: row.december || 0,
+        january: row.january || 0,
+        february: row.february || 0,
+        march: row.march || 0,
+        isChecked: row.isChecked || false,
+        id: row.idFromApi || row.id || null,
+        materialFKId: row.materialFKId || row.materialFkId || null,
+        remarks: row.remarks || row.remarks || '',
+        remark: row.remarks || row.remarks || '',
+      }))
+
+      // console.log('payload', payload)
+
+      if (payload.length > 0) {
+        const response =
+          await NormalOperationNormsApiService.updateFinalNormsData(
+            keycloak,
+            gradeId,
+            payload,
+          )
+
+        if (response?.code == 200) {
+          dispatch(setIsBlocked(false))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Saved Successfully!`,
+            severity: 'success',
+          })
+
+          setLoading(false)
+
+          setModifiedCellsFinalNorms({})
+          unsavedChangesRefFinalNorms.current = {
+            unsavedRows: {},
+            rowsBeforeChange: {},
+          }
+          fetchData(gradeId)
+          if (lowerVertName == 'meg') fetchDataIntermediateValues()
+          getNormTransactions()
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Data not saved!`,
+            severity: 'error',
+          })
+          setLoading(false)
+        }
+        return response
+      }
+    } catch (error) {
+      console.error(`Error saving Data`, error)
+    } finally {
+      // fetchData()
+      setLoading(false)
+    }
+  }
 
   const saveChangesCracker = React.useCallback(async () => {
     try {
@@ -1211,7 +1296,7 @@ const NormalOpNormsScreen = () => {
   }, [modifiedCells])
   const saveChangesCrackerFinalNorms = React.useCallback(async () => {
     try {
-      const data = Object.values(modifiedCells)
+      const data = Object.values(modifiedCellsFinalNorms)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -1220,7 +1305,7 @@ const NormalOpNormsScreen = () => {
         })
         return
       }
-      saveNormalOperationNormsDataCracker(data)
+      saveNormalOperationFinalNorms(data)
     } catch (error) {
       console.error('Error saving Cracker Data:', error)
       setSnackbarOpen(true)
