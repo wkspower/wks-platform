@@ -54,10 +54,15 @@ public class PlantServiceImpl implements PlantService {
 	}
 	@Override
 	@Transactional
-     public List getShutdownMonths(UUID plantId,String maintenanceName,String year){
-	    	 return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
-	    	
-	    }
+     public List getShutdownMonths(UUID plantId,String maintenanceName,String year,String gradeId){
+		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
+		if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {	
+			return	plantsRepository.getShutdownMonthsWithGrades(plantId,maintenanceName,year,UUID.fromString(gradeId));
+		}else {
+			return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
+		}
+	    	  	
+   }
 
 	
 

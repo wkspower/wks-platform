@@ -32,8 +32,8 @@ public class SiteAndPlantController {
     }
 
     @GetMapping("/shutdown-months")
-    public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName,@RequestParam String year){
-        List data = plantService.getShutdownMonths(plantId, maintenanceName,year);
+    public ResponseEntity<List> getShutdownMonths(@RequestParam UUID plantId,@RequestParam String maintenanceName,@RequestParam String year,@RequestParam(required=false) String gradeId){
+        List data = plantService.getShutdownMonths(plantId, maintenanceName,year,gradeId);
         return ResponseEntity.ok(data);
     }
 

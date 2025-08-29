@@ -21,7 +21,8 @@ public interface PlantsRepository extends JpaRepository<Plants, UUID>{
       @Query(value = "SELECT  DISTINCT MaintForMonth  FROM vwGetShutdownMonths WHERE PlantId = :plantId AND MaintenanceName = :maintenanceName AND AuditYear = :AuditYear", nativeQuery = true)
  	List getShutdownMonths(@Param("plantId") UUID plantId, @Param("maintenanceName") String maintenanceName,@Param("AuditYear") String AuditYear);
 	
-	
+      @Query(value = "SELECT  DISTINCT MaintForMonth  FROM vwGetShutdownMonths WHERE PlantId = :plantId AND MaintenanceName = :maintenanceName AND AuditYear = :AuditYear AND NormParametersId = :gradeId", nativeQuery = true)
+   	List getShutdownMonthsWithGrades(@Param("plantId") UUID plantId, @Param("maintenanceName") String maintenanceName,@Param("AuditYear") String AuditYear,@Param("gradeId") UUID gradeId);
 	
 
 }
