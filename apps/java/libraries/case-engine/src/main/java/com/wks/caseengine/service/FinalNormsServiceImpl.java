@@ -85,7 +85,7 @@ public class FinalNormsServiceImpl implements FinalNormsService {
 			    finalNormsDTO.setJanuary(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
 			    finalNormsDTO.setFebruary(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
 			    finalNormsDTO.setMarch(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
-			    finalNormsDTO.setRemark(row[20] != null ? row[20].toString() : null);
+			    finalNormsDTO.setRemark(row[20] != null ? row[20].toString() : "");
 			    finalNormsDTO.setIsEditable(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
 			   // finalNormsDTO.setIsChecked(row[24] != null ? Boolean.valueOf(row[24].toString()) : null);
 			    finalNormsDTOList.add(finalNormsDTO); // Add the DTO to the list
