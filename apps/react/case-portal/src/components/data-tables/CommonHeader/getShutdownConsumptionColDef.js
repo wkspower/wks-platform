@@ -21,7 +21,13 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
 
-  const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${shutdownMonths.join(',')}`
+  let safeShutdownMonths = Array.isArray(shutdownMonths) ? shutdownMonths : []
+
+  if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+    safeShutdownMonths = []
+  }
+
+  const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
 
   if (colDefsCache.has(cacheKey)) {
     return colDefsCache.get(cacheKey)
@@ -35,8 +41,8 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
       return {
         ...col,
         headerName: headerMap?.[monthNum] || col.field,
-        editable: shutdownMonths.includes(monthNum),
-        isDisabled: !shutdownMonths.includes(monthNum),
+        editable: safeShutdownMonths.includes(monthNum),
+        isDisabled: !safeShutdownMonths.includes(monthNum),
       }
     }
 

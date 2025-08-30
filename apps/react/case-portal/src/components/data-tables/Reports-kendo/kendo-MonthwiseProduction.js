@@ -57,9 +57,7 @@ const MonthwiseProduction = () => {
   const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
   const verticalName = vertical?.toLowerCase()
 
-  const isMEGVertical = verticalName === 'meg'
-
-  const columns = [
+  const colsMeg = [
     { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
 
     {
@@ -165,7 +163,7 @@ const MonthwiseProduction = () => {
         },
         {
           field: 'TotalEOE',
-          title: verticalName == 'meg' ? 'Total EOE, MT' : 'Total, MT',
+          title: 'Total EOE, MT',
           width: 150,
           editable: false,
           type: 'number',
@@ -181,39 +179,113 @@ const MonthwiseProduction = () => {
     },
   ]
 
-  const filteredColumns = columns.map((topGroup) => {
-    if (!topGroup.children) return topGroup
+  const colsNonMeg = [
+    { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
 
-    const filteredChildren = topGroup.children
-      .map((child) => {
-        if (child.children) {
-          const filteredGrandChildren = child.children.filter((fieldDef) => {
-            if (!isMEGVertical) {
-              return (
-                fieldDef.field !== 'EOThroughput' &&
-                fieldDef.field !== 'EOEThroughput'
-              )
-            }
-            return true
-          })
-          return { ...child, children: filteredGrandChildren }
-        }
+    {
+      field: 'Month',
+      title: 'Month',
+      width: 100,
+      editable: false,
+    },
 
-        if (!isMEGVertical) {
-          if (
-            child.field === 'EOThroughput' ||
-            child.field === 'EOEThroughput'
-          ) {
-            return null
-          }
-        }
+    {
+      title: oldYear,
+      children: [
+        {
+          title: 'Production, MT',
+          children: [
+            {
+              field: 'ProdBudget',
+              title: 'Budget',
+              width: 120,
+              editable: false,
+              type: 'number',
+            },
+            {
+              field: 'ProdActual',
+              title: 'Actual',
+              width: 120,
+              editable: false,
+              type: 'number',
+            },
+          ],
+        },
+        {
+          title: 'Operating Hours',
+          children: [
+            {
+              field: 'OpHrsBudget',
+              title: 'Budget',
+              width: 120,
+              editable: false,
+              type: 'number',
+            },
+            {
+              field: 'OpHrsActual',
+              title: 'Actual',
+              width: 120,
+              editable: false,
+              type: 'number',
+            },
+          ],
+        },
+        {
+          title: 'Throughput, TPH',
+          children: [
+            {
+              field: 'ThroughputBudget',
+              title: 'Budget',
+              width: 120,
+              editable: false,
+              type: 'number',
+            },
+            {
+              field: 'ThroughputActual',
+              title: 'Actual',
+              width: 120,
+              editable: false,
+              type: 'number',
+            },
+          ],
+        },
+      ],
+    },
 
-        return child
-      })
-      .filter(Boolean)
+    {
+      title: thisYear,
+      children: [
+        {
+          field: 'OperatingHours',
+          title: 'Operating Hours',
+          width: 150,
+          editable: false,
+          type: 'number',
+        },
+        {
+          field: 'Throughput',
+          title: 'Throughput, TPH',
+          width: 150,
+          editable: false,
+          type: 'number',
+        },
+        {
+          field: 'Total',
+          title: 'Total, MT',
+          width: 150,
+          editable: false,
+          type: 'number',
+        },
+      ],
+    },
 
-    return { ...topGroup, children: filteredChildren }
-  })
+    {
+      field: 'Remark',
+      title: 'Remarks',
+      width: 200,
+      editable: true,
+    },
+  ]
 
   const [rows, setRows] = useState()
 
@@ -248,6 +320,7 @@ const MonthwiseProduction = () => {
       setLoading(false)
     }
   }
+
   useEffect(() => {
     fetchData()
   }, [year, plantId])
@@ -424,7 +497,7 @@ const MonthwiseProduction = () => {
         title='Monthwise Production (T-16)'
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        columns={filteredColumns}
+        columns={verticalName == 'meg' ? colsMeg : colsNonMeg}
         permissions={{
           customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',
