@@ -161,6 +161,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					list.add(dto.getFeb());
 					list.add(dto.getMar());
 					list.add(dto.getRemarks());
+					list.add(dto.getUOM());
 					list.add(dto.getNormParameterFKId());
 					isEditable.add(dto.getIsEditable());
 					//list.add(dto.getIsEditable());
@@ -174,15 +175,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<String> innerHeaders = new ArrayList<>();
 			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
 				innerHeaders.add("Category");
-				innerHeaders.add("Type");
-				
+				innerHeaders.add("Type");	
 			}
-			
 			
 			innerHeaders.add("Particulars");
 			List<String> monthsList = getAcademicYearMonths(year);
 			innerHeaders.addAll(monthsList);
 			innerHeaders.add("Remarks");
+			innerHeaders.add("UOM");
 			innerHeaders.add("NormParameterId");
 			//innerHeaders.add("IsEditable");
 			
@@ -233,9 +233,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 			
 			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
-				sheet.setColumnHidden(16, true);
+				sheet.setColumnHidden(17, true);
 			}else {
-				sheet.setColumnHidden(14, true);
+				sheet.setColumnHidden(15, true);
 			}
 			
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
@@ -544,7 +544,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("Name", row[2]);
 				map.put("DisplayName", row[3]);
 				map.put("UOM", row[4]);
-				map.put("ConstantValue", row[5]);
+				map.put("ConstantValue", Double.parseDouble(row[5].toString()));
 				map.put("AuditYear", row[6]);
 				map.put("Remarks", row[7]);
 				boolean isEditable;
@@ -1307,7 +1307,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setFeb(getNumericCellValue(row.getCell(13), dto));
 						dto.setMar(getNumericCellValue(row.getCell(14), dto));
 						dto.setRemarks(getStringCellValue(row.getCell(15), dto));
-						dto.setNormParameterFKId(getStringCellValue(row.getCell(16), dto));
+						dto.setUOM(getStringCellValue(row.getCell(16), dto));
+						dto.setNormParameterFKId(getStringCellValue(row.getCell(17), dto));
 					}else {
 						
 						dto.setProductName(getStringCellValue(row.getCell(0), dto));
@@ -1325,7 +1326,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setFeb(getNumericCellValue(row.getCell(11), dto));
 						dto.setMar(getNumericCellValue(row.getCell(12), dto));
 						dto.setRemarks(getStringCellValue(row.getCell(13), dto));
-						dto.setNormParameterFKId(getStringCellValue(row.getCell(14), dto));
+						dto.setUOM(getStringCellValue(row.getCell(14), dto));
+						dto.setNormParameterFKId(getStringCellValue(row.getCell(15), dto));
 					}
 					
 				} catch (Exception e) {
