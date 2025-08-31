@@ -23,18 +23,18 @@ public class AOPController {
 	@Autowired
 	private AOPService aopService;
 	
-	@GetMapping(value="/getAOP")
+	@GetMapping(value="/monthly-production")
 	public AOPMessageVM getAOP(@RequestParam String plantId,@RequestParam String year,String type){
 		 return  aopService.getAOPData(plantId,year,type);
 	}
 	
-	@PutMapping(value="/updateAOP")
+	@PutMapping(value="/monthly-production")
 	public List<AOPDTO> updateAOP(@RequestBody List<AOPDTO> aOPDTOList) {
 		aopService.updateAOP(aOPDTOList);
 		return aOPDTOList;
 	}
 
-    @GetMapping(value="/calculateData")
+    @GetMapping(value="/calculate-monthly-production")
 	public AOPMessageVM calculateData(@RequestParam String plantId,@RequestParam String year){
     	try {
     		 return aopService.calculateData(plantId,year);

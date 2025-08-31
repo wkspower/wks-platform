@@ -36,7 +36,7 @@ public class SlowdownPlanController {
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
 	
-	@GetMapping(value = "/getSlowDownPlanData")
+	@GetMapping(value = "/slowdown")
     public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName, @RequestParam String year) {
 		List<ShutDownPlanDTO> listOfSite=null;
 		try {
@@ -47,7 +47,7 @@ public class SlowdownPlanController {
         return ResponseEntity.ok(listOfSite);
     }
 	
-	@PostMapping(value="/saveSlowdownData/{plantId}")
+	@PostMapping(value="/slowdown/{plantId}")
 	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){
 		slowdownPlanService.saveShutdownData(plantId,shutDownPlanDTOList);
 				return ResponseEntity.ok(shutDownPlanDTOList); 
@@ -61,13 +61,13 @@ public class SlowdownPlanController {
         return ResponseEntity.ok(shutDownPlanDTOList);
     }
 	
-	@DeleteMapping("/deleteSlowdownData/{plantMaintenanceTransactionId}/{plantId}")
+	@DeleteMapping("/slowdown/{plantMaintenanceTransactionId}/{plantId}")
     public ResponseEntity<String> deletePlant(@PathVariable UUID plantMaintenanceTransactionId,@PathVariable UUID plantId) {
 	  	shutDownPlanService.deletePlanData(plantMaintenanceTransactionId,plantId);
         return ResponseEntity.ok("Plant with ID " + plantMaintenanceTransactionId + " deleted successfully");
     }
 	
-	@PostMapping(value="/slowdown/configuration")
+	@PostMapping(value="/slowdown-configuration")
 	public AOPMessageVM saveSlowdownConfigurationData(@RequestParam String plantId,@RequestParam String year, @RequestBody List<Map<String, Object>> payload){
 		List<NormAttributeTransactionsDTO> dtoList = new ArrayList<>();
 
@@ -96,7 +96,7 @@ public class SlowdownPlanController {
 		return slowdownPlanService.saveSlowdownConfigurationData(plantId,year,dtoList);		
 	}
 	
-	@GetMapping(value = "/slowdown/configuration")
+	@GetMapping(value = "/slowdown-configuration")
     public AOPMessageVM getSlowdownConfigurationData(@RequestParam String plantId, @RequestParam String year) {
 		
 		try {
@@ -107,7 +107,7 @@ public class SlowdownPlanController {
         return null;
     }
 	
-	@GetMapping("/shutdown/dynamic/columns")
+	@GetMapping("/slowdown-columns")
 	  public AOPMessageVM getShutdownDynamicColumns(@RequestParam String year,@RequestParam String plantId){
 		  return slowdownPlanService.getShutdownDynamicColumns(year,UUID.fromString(plantId));
 	  }

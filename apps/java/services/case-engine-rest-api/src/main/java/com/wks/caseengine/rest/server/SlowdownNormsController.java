@@ -49,18 +49,18 @@ public class SlowdownNormsController {
 	        return ResponseEntity.ok(data);
 	    }
 	 
-	 @GetMapping(value = "/slowdown-norms/calculate")
+	 @GetMapping(value = "/calculate-slowdown-consumption")
 		public AOPMessageVM getCalculateSlowdownNorms(@RequestParam String year, @RequestParam String plantId) {
 			return slowdownNormsService.getCalculateSlowdownNorms(year, plantId);
 		}
 	 
 		
-		@GetMapping("/slowdown-norms/dynamic/columns")
+		@GetMapping("/slowdown-consumption-columns")
 		  public AOPMessageVM getSlowdownNormsDynamicColumns(@RequestParam String year,@RequestParam String plantId){
 			  return slowdownNormsService.getSlowdownNormsDynamicColumns(year,UUID.fromString(plantId));
 		  }
 		
-		@GetMapping(value = "/slowdown-norms/configuration")
+		@GetMapping(value = "/slowdown-consumption")
 	    public AOPMessageVM getSlowdownNormsConfigurationData(@RequestParam String plantId, @RequestParam String year) {
 			
 			try {
@@ -71,7 +71,7 @@ public class SlowdownNormsController {
 	        return null;
 	    }
 		
-		@PostMapping(value="/slowdown-norms/configuration")
+		@PostMapping(value="/slowdown-consumption")
 		public AOPMessageVM saveSlowdowNormsConfigurationData(@RequestParam String plantId,@RequestParam String year, @RequestBody List<Map<String, Object>> payload){
 			List<NormAttributeTransactionsDTO> dtoList = new ArrayList<>();
 

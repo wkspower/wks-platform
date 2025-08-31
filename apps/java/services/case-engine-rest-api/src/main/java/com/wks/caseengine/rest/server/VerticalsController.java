@@ -36,7 +36,7 @@ public class VerticalsController {
 		return verticalsService.getAllVerticals();
 	}
 	
-	@GetMapping(value="/getPlantsAndSidesAndVerticals")
+	@GetMapping(value="/plant-site-vertical")
 	public List<VerticalsDTO> getPlantsAndSites() {
 		
 		List<VerticalsDTO> verticals= verticalsService.getHierarchyData();

@@ -23,27 +23,24 @@ public class AOPConsumptionNormController {
 	@Autowired
 	private AOPConsumptionNormService aopConsumptionNormService;
 	
-	@GetMapping(value="/getAOPConsumptionNorm")
+	@GetMapping(value="/overall-consumption")
 	public AOPMessageVM getAOPConsumptionNorm(@RequestParam String plantId,@RequestParam String year,@RequestParam(required = false) String gradeId){
 		return aopConsumptionNormService.getAOPConsumptionNorm(plantId,year,gradeId);
 	}
 	
-	@PostMapping(value="/saveAOPConsumptionNorm")
+	@PostMapping(value="/overall-consumption")
 	public List<AOPConsumptionNormDTO> saveAOPConsumptionNorm(@RequestBody List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList){
 		return aopConsumptionNormService.saveAOPConsumptionNorm(aOPConsumptionNormDTOList);
-		
 	}
 
-	@GetMapping(value="/handleCalculateonsumptionNorms")
+	@GetMapping(value="/calculate-overall-consumption")
 	public AOPMessageVM getNormalOperationNormsDataFromSP(@RequestParam String year,@RequestParam String plantId){
-		return	 aopConsumptionNormService.calculateExpressionConsumptionNorms(year,plantId);
-		
+		return	 aopConsumptionNormService.calculateExpressionConsumptionNorms(year,plantId);	
 	}
 	
 	@GetMapping(value="/getCalculatedConsumptionNorms")
 	public  List<CalculatedConsumptionNormsDTO>  getCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId){
 		return	 aopConsumptionNormService.getCalculatedConsumptionNorms(year,plantId);
-		
 	}
 	
 	@GetMapping(value="/consumption-aop/grades")

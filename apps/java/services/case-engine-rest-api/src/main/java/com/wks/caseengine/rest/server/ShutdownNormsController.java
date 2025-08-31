@@ -21,17 +21,17 @@ public class ShutdownNormsController {
 	@Autowired
 	private ShutdownNormsService shutdownNormsService;
 	
-	@GetMapping(value="/shutdownNorms")
+	@GetMapping(value="/shutdown-consumption")
 	public AOPMessageVM getShutdownNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String gradeId){
 		return	shutdownNormsService.getShutdownNormsData(year,plantId,gradeId);
 	}
 	
-	@PostMapping(value="/shutdownNorms")
+	@PostMapping(value="/shutdown-consumption")
 	public AOPMessageVM saveShutdownNormsData(@RequestParam String plantId,@RequestBody List<ShutdownNormsValueDTO> shutdownNormsValueDTOList){
 		return	shutdownNormsService.saveShutDownNorms(plantId,shutdownNormsValueDTOList);
 	}
 	
-	@GetMapping(value="/getShutdownNormsSPData")
+	@GetMapping(value="/calculate-shutdown-consumption")
 	public AOPMessageVM getShutdownNormsSPData(@RequestParam String year,@RequestParam String plantId){
 		return	shutdownNormsService.getShutdownNormsSPData(year,plantId);
 	}

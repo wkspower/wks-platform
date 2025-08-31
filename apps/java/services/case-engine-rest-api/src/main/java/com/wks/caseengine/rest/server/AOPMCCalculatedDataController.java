@@ -29,27 +29,27 @@ public class AOPMCCalculatedDataController {
 	@Autowired
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
 
-	@GetMapping(value = "/getAOPMCCalculatedData")
+	@GetMapping(value = "/production-target")
 	public AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getAOPMCCalculatedData(plantId, year);
 	}
 	
-	@GetMapping(value = "/max-achieved/capacity")
+	@GetMapping(value = "/max-achieved-capacity")
 	public AOPMessageVM getMaxAchievedCapacity(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getMaxAchievedCapacity(plantId, year);
 	}
 	
-	@GetMapping(value = "/design/capacity")
+	@GetMapping(value = "/design-capacity")
 	public AOPMessageVM getDesignCapacity(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getDesignCapacity(plantId, year);
 	}
 	
-	@PostMapping(value = "/design/capacity")
+	@PostMapping(value = "/design-capacity")
 	public AOPMessageVM updateDesignCapacity(@RequestParam String plantId,@RequestParam String year, @RequestBody List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOList) {
 		return aOPMCCalculatedDataService.updateDesignCapacity(plantId,year, aopMCCalculatedDataDTOList);
 	}
 
-	@PutMapping(value = "/editAOPMCCalculatedData")
+	@PutMapping(value = "/production-target")
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
 			@RequestBody List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTO, @RequestParam("plantId") String plantId,
 			@RequestParam("year") String year) {
@@ -57,12 +57,12 @@ public class AOPMCCalculatedDataController {
 
 	}
 
-	@GetMapping(value = "/getAOPMCCalculatedDataSP")
+	@GetMapping(value = "/calculate-production-target")
 	public AOPMessageVM getAOPMCCalculatedDataSP(@RequestParam String plantId, @RequestParam String year) {
 		return aOPMCCalculatedDataService.getAOPMCCalculatedDataSP(plantId, year);
 	}
 
-	@GetMapping(value = "/production-volume-data/export/excel")
+	@GetMapping(value = "/production-target-export")
 	public ResponseEntity<byte[]> exportProductionVolumeDataReport(@RequestParam("plantId") String plantId,
 			@RequestParam("year") String year) {
 		try {
@@ -86,7 +86,7 @@ public class AOPMCCalculatedDataController {
 		}
 	}
 
-	@PostMapping(value = "/production-volume-data/import/excel", consumes = "multipart/form-data")
+	@PostMapping(value = "/production-target-import", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(@RequestParam("plantId") String plantId,
 			@RequestParam("year") String year, @RequestParam("file") MultipartFile file) {
 		return aOPMCCalculatedDataService.importExcel(year, plantId, file);

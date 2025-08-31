@@ -28,7 +28,7 @@ public class NormalOperationNormsController {
 	@Autowired
 	private NormalOperationNormsService normalOperationNormsService;
 	
-	@GetMapping(value = "/normalOperationNorms")
+	@GetMapping(value = "/steady-state-norms")
 	public AOPMessageVM getNormalOperationNormsData(
 	        @RequestParam String year,
 	        @RequestParam String plantId,
@@ -51,7 +51,7 @@ public class NormalOperationNormsController {
 		return normalOperationNormsService.getNormsTransaction(plantId, year);
 	}
 
-	@PostMapping(value = "/normalOperationNorms")
+	@PostMapping(value = "/steady-state-norms")
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(
 		@RequestParam String plantId, @RequestParam String year,
         @RequestParam(required = false) String gradeId,
@@ -64,13 +64,13 @@ public class NormalOperationNormsController {
 		return null;
 	}
 
-	@GetMapping(value = "/handleCalculateNormalOpsNorms")
+	@GetMapping(value = "/calculate-steady-state-norms")
 	public AOPMessageVM getNormalOperationNormsDataFromSP(@RequestParam String year, @RequestParam String plantId) {
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year, plantId);
 	}
 	
 	
-	@GetMapping(value = "/norms-export-excel")
+	@GetMapping(value = "/steady-state-norms-export")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,@RequestParam(required = false) String mode, @RequestParam(required = false) String gradeId
@@ -95,7 +95,7 @@ public class NormalOperationNormsController {
 
 
 
-	@PostMapping(value = "/norms-import-excel", consumes = "multipart/form-data")
+	@PostMapping(value = "/steady-state-norms-import", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
