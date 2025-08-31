@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-// import ASDataGrid from '../data-tables/ASDataGrid'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
-// import getEnhancedProductionColDefs from '../data-tables/CommonHeader/ProductionVolumeHeader'
 import getEnhancedProductionColDefs from '../data-tables/CommonHeader/Kendo_ProductionVolumeHeader'
 
 import Backdrop from '@mui/material/Backdrop'
@@ -17,6 +14,8 @@ import { Typography } from '../../../node_modules/@mui/material/index'
 // import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
 import { validateFields } from 'utils/validationUtils'
+import { ProductionVolumeDataApiService } from 'services/production-volume-data-api-service'
+import { DataService } from 'services/DataService'
 
 const ProductionvolumeData = ({ permissions }) => {
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
@@ -34,7 +33,6 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const [calculationObject, setCalculationObject] = useState([])
 
-  const [allProducts, setAllProducts] = useState([])
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
@@ -168,11 +166,12 @@ const ProductionvolumeData = ({ permissions }) => {
         remarks: row.remarks,
       }))
 
-      const response = await DataService.editAOPMCCalculatedData(
-        plantId,
-        aopmccCalculatedData,
-        keycloak,
-      )
+      const response =
+        await ProductionVolumeDataApiService.editAOPMCCalculatedData(
+          plantId,
+          aopmccCalculatedData,
+          keycloak,
+        )
 
       if (response) {
         dispatch(setIsBlocked(false))
@@ -184,7 +183,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setModifiedCells({})
 
         const responseForNorms =
-          await DataService.calculateNormsHistorianValues(
+          await ProductionVolumeDataApiService.calculateNormsHistorianValues(
             plantId,
             localStorage.getItem('year'),
             startDate,
@@ -249,11 +248,12 @@ const ProductionvolumeData = ({ permissions }) => {
         return mapped
       })
 
-      const response = await DataService.editDesignCapacityData(
-        plantId,
-        designCapacityData,
-        keycloak,
-      )
+      const response =
+        await ProductionVolumeDataApiService.editDesignCapacityData(
+          plantId,
+          designCapacityData,
+          keycloak,
+        )
 
       if (response && response.code === 200) {
         setSnackbarOpen(true)
@@ -395,7 +395,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchData = async (unit = selectedUnit) => {
     try {
       setLoading(true)
-      const response = await DataService.getAOPMCCalculatedData(keycloak)
+      const response =
+        await ProductionVolumeDataApiService.getAOPMCCalculatedData(keycloak)
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
@@ -1198,7 +1199,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
     setLoading(true)
     try {
-      const response = await DataService.getDesignCapacityData(keycloak, unit)
+      const response =
+        await ProductionVolumeDataApiService.getDesignCapacityData(
+          keycloak,
+          unit,
+        )
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
         data = [data]
@@ -1274,10 +1279,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
     setLoading(true)
     try {
-      const response = await DataService.getMaxAchievedCapacityData(
-        keycloak,
-        unit,
-      )
+      const response =
+        await ProductionVolumeDataApiService.getMaxAchievedCapacityData(
+          keycloak,
+          unit,
+        )
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
         data = [data]
@@ -1372,11 +1378,12 @@ const ProductionvolumeData = ({ permissions }) => {
       }
 
       var plantId = plantId
-      const data = await DataService.handleCalculateProductionVolData(
-        plantId,
-        year,
-        keycloak,
-      )
+      const data =
+        await ProductionVolumeDataApiService.handleCalculateProductionVolData(
+          plantId,
+          year,
+          keycloak,
+        )
 
       if (data || data == 0) {
         // dispatch(setIsBlocked(true))
@@ -1508,11 +1515,13 @@ const ProductionvolumeData = ({ permissions }) => {
 
     try {
       if (gridType === 'design') {
-        await DataService.getDesignCapacityExcel(keycloak)
+        await ProductionVolumeDataApiService.getDesignCapacityExcel(keycloak)
       } else if (gridType === 'max') {
-        await DataService.getMaxAchievedCapacityExcel(keycloak)
+        await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
+          keycloak,
+        )
       } else {
-        await DataService.getProductionVolExcel(keycloak)
+        await ProductionVolumeDataApiService.getProductionVolExcel(keycloak)
       }
 
       setSnackbarData({
@@ -1538,10 +1547,11 @@ const ProductionvolumeData = ({ permissions }) => {
         plantId = parsedPlant.id
       }
 
-      const response = await DataService.saveProductionVolDataExcel(
-        rawFile,
-        keycloak,
-      )
+      const response =
+        await ProductionVolumeDataApiService.saveProductionVolDataExcel(
+          rawFile,
+          keycloak,
+        )
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -1551,7 +1561,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setModifiedCells({})
 
         const responseForNorms =
-          await DataService.calculateNormsHistorianValues(
+          await ProductionVolumeDataApiService.calculateNormsHistorianValues(
             plantId,
             localStorage.getItem('year'),
             startDate,

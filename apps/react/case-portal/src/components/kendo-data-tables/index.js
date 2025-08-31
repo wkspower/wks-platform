@@ -1400,11 +1400,10 @@ const KendoDataTables = ({
                       title={col.title || col.headerName}
                       width={col.widthT}
                       hidden={col.hidden}
-                      className={
-                        col?.isDisabled
-                          ? 'k-number-right-disabled'
-                          : 'k-number-right'
-                      }
+                      className={`
+        ${col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'}
+        ${col?.isBold ? 'bold-red-text' : ''}
+      `}
                       editable={col?.editable ? true : false}
                       headerClassName={isActive ? 'active-column' : ''}
                       cells={{

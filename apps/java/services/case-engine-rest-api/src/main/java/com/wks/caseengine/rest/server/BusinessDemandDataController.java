@@ -19,32 +19,31 @@ import com.wks.caseengine.service.BusinessDemandDataService;
 @RestController
 @RequestMapping("task")
 public class BusinessDemandDataController {
-	
+
 	@Autowired
 	private BusinessDemandDataService businessDemandDataService;
-	
-	@GetMapping(value="/getBusinessDemandData")
-	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
+
+	@GetMapping(value = "/business-demand")
+	public List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year, @RequestParam String plantId) {
 		System.out.println(plantId);
-		return businessDemandDataService.getBusinessDemandData(year,plantId);	
+		return businessDemandDataService.getBusinessDemandData(year, plantId);
 	}
-	
-	@PostMapping(value="/saveBusinessDemandData")
-	public 	List<BusinessDemandDataDTO>  saveBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO) {
+
+	@PostMapping(value = "/business-demand")
+	public List<BusinessDemandDataDTO> saveBusinessDemandData(
+			@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO) {
 		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);
 	}
-	
-	@PutMapping(value="/editBusinessDemandData")
-	public List<BusinessDemandDataDTO> editBusinessDemandData(@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO){
-		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);	
-	}
-	
-	@DeleteMapping(value="/deleteBusinessDemandData/{id}")
-	public BusinessDemandDataDTO deleteBusinessDemandData(@PathVariable UUID id){
-		return businessDemandDataService.deleteBusinessDemandData(id);	
-	}
-	
-	
 
+	@PutMapping(value = "/editBusinessDemandData")
+	public List<BusinessDemandDataDTO> editBusinessDemandData(
+			@RequestBody List<BusinessDemandDataDTO> businessDemandDataDTO) {
+		return businessDemandDataService.saveBusinessDemandData(businessDemandDataDTO);
+	}
+
+	@DeleteMapping(value = "/business-demand/{id}")
+	public BusinessDemandDataDTO deleteBusinessDemandData(@PathVariable UUID id) {
+		return businessDemandDataService.deleteBusinessDemandData(id);
+	}
 
 }

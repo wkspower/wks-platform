@@ -396,7 +396,7 @@ export const ShutdownConsumptionPeColumns = [
       type: 'number',
       format: '{0:#.###}',
       editable: false,
-      isDisabled: true,
+
       monthNumber: monthIndex,
     }
   }),

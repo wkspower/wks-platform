@@ -95,7 +95,7 @@ async function getNormalOperationNormsData(
   const storedPlant = localStorage.getItem('selectedPlant')
   const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
   // Construct URL based on presence of gradeId
-  const baseUrl = `${Config.CaseEngineUrl}/task/normalOperationNorms`
+  const baseUrl = `${Config.CaseEngineUrl}/task/steady-state-norms`
   const queryParams = new URLSearchParams({
     year,
     plantId,
@@ -163,7 +163,6 @@ async function getGradesForShutdownNorms(keycloak) {
     return await Promise.reject(e)
   }
 }
-
 async function getIntermediateValues(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''
@@ -173,7 +172,7 @@ async function getIntermediateValues(keycloak) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/get/configuration/intermediate-values?year=${year}&plantFKId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/intermediate-values?year=${year}&plantFKId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -217,7 +216,7 @@ async function saveNormalOperationNormsData(
   if (lowerVertName === 'pe' || lowerVertName === 'pp') {
     queryParams.append('gradeId', gradeId)
   }
-  const url = `${Config.CaseEngineUrl}/task/normalOperationNorms?${queryParams.toString()}`
+  const url = `${Config.CaseEngineUrl}/task/steady-state-norms?${queryParams.toString()}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -238,7 +237,7 @@ async function saveNormalOperationNormsData(
 async function saveNormalOpsNormsExcel(file, keycloak) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/norms-import-excel?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/steady-state-norms-import?plantId=${plantId}&year=${year}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -286,7 +285,7 @@ async function handleCalculateNormalOperationNormsPe(
 }
 async function handleCalculateNormalOperationNorms(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/handleCalculateNormalOpsNorms?year=${year1}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/calculate-steady-state-norms?year=${year1}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -315,7 +314,7 @@ async function getNormalOpsNormsExcel(keycloak, gradeId) {
     plantId = parsedPlant.id
   }
 
-  var url = `${Config.CaseEngineUrl}/task/norms-export-excel?year=${year}&plantId=${plantId}`
+  var url = `${Config.CaseEngineUrl}/task/steady-state-norms-export?year=${year}&plantId=${plantId}`
 
   if (gradeId) {
     url += `&gradeId=${gradeId}`

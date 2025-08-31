@@ -396,22 +396,9 @@ export const ShutdownConsumptionPpColumns = [
       type: 'number',
       format: '{0:#.###}',
       editable: false,
-      isDisabled: true,
       monthNumber: monthIndex,
     }
   }),
-
-  {
-    field: 'remarks',
-    headerName: 'Remark',
-    width: 120,
-    editable: false,
-  },
-  {
-    field: 'idFromApi',
-    headerName: 'idFromApi',
-    hidden: true,
-  },
 ]
 
 export const SlowdownNormsPpColumns = [

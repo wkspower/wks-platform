@@ -137,7 +137,7 @@ const WorkFlowMerge = () => {
   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
   const handleCalculate = () => {
     if (lowerVertName == 'meg') {
-      handleCalculateMeg()
+      calculateAllScreen()
     } else {
       // handleCalculatePe()
     }
@@ -147,7 +147,7 @@ const WorkFlowMerge = () => {
   }
   // const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const handleCalculateMeg = async () => {
+  const calculateAllScreen = async () => {
     try {
       setLoading(true)
       const storedPlant = localStorage.getItem('selectedPlant')

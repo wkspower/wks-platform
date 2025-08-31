@@ -6,7 +6,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import getNormalOpNormColDef from 'components/data-tables/CommonHeader/getNormalOpNormColDef'
 import { useDispatch } from 'react-redux'
-import { NormalOperationNormsApiService } from 'services/NormalOperationNormsApiService'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import {

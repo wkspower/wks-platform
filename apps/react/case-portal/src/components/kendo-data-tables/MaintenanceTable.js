@@ -3,11 +3,13 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
+
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 import KendoDataTables from './index'
+import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
+
 const MaintenanceTable = () => {
   const keycloak = useSession()
   const { verticalChange, yearChanged, oldYear, plantID } = useSelector(
@@ -20,8 +22,8 @@ const MaintenanceTable = () => {
       isCracker: lowerVertName === 'cracker',
       serviceFn:
         lowerVertName === 'cracker'
-          ? DataService.getCrackerMaintenanceData
-          : DataService.getMaintenanceData,
+          ? MaintenanceDetailsApiService.getCrackerMaintenanceData
+          : MaintenanceDetailsApiService.getMaintenanceData,
       editable: lowerVertName === 'cracker',
     }),
     [plantID],
@@ -119,14 +121,15 @@ const MaintenanceTable = () => {
         remarks: row.remarks ?? row.remark ?? '',
       }))
 
-      const response = await DataService.saveCrackerMaintenance(
-        {
-          plantId,
-          year,
-          decokePlanningDTOList,
-        },
-        keycloak,
-      )
+      const response =
+        await MaintenanceDetailsApiService.saveCrackerMaintenance(
+          {
+            plantId,
+            year,
+            decokePlanningDTOList,
+          },
+          keycloak,
+        )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -180,11 +183,12 @@ const MaintenanceTable = () => {
     const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}').id
     const year = localStorage.getItem('year')
     try {
-      const result = await DataService.handleCalculateMaintenance(
-        plantId,
-        year,
-        keycloak,
-      )
+      const result =
+        await MaintenanceDetailsApiService.handleCalculateMaintenance(
+          plantId,
+          year,
+          keycloak,
+        )
       setSnackbarData({
         message:
           result === 0
@@ -310,7 +314,6 @@ const MaintenanceTable = () => {
           allAction: true,
           downloadExcelBtnFromUI: true,
           ExcelName: `${lowerVertName}_Maintenance Details`,
-          //allAction: false,
           showRefresh: false,
         },
         oldYear?.oldYear,
@@ -355,322 +358,3 @@ const MaintenanceTable = () => {
   )
 }
 export default MaintenanceTable
-
-// import { useEffect, useState } from 'react'
-
-// import { DataService } from 'services/DataService'
-// import { useSession } from 'SessionStoreContext'
-
-// import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-// import { useSelector } from 'react-redux'
-
-// import Backdrop from '@mui/material/Backdrop'
-// import CircularProgress from '@mui/material/CircularProgress'
-// import KendoDataTables from './index'
-// import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
-
-// const MaintenanceTable = () => {
-//   const keycloak = useSession()
-//   const [loading, setLoading] = useState(false)
-//   const [open1, setOpen1] = useState(false)
-//   const [deleteId, setDeleteId] = useState(null)
-//   const [rows, setRows] = useState()
-
-//   const headerMap = generateHeaderNames(localStorage.getItem('year'))
-
-//   const dataGridStore = useSelector((state) => state.dataGridStore)
-//   const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-//     dataGridStore
-//   //const isOldYear = oldYear?.oldYear
-//   const isOldYear = oldYear?.oldYear
-
-//   const vertName = verticalChange?.selectedVertical
-//   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
-//   const [snackbarData, setSnackbarData] = useState({
-//     message: '',
-//     severity: 'info',
-//   })
-//   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
-//   const fetchData = async () => {
-//     setRows([])
-//     setLoading(true)
-//     try {
-//       if (lowerVertName === 'cracker') {
-//         const response = await DataService.getCrackerMaintenanceData(keycloak)
-//         // console.log('Cracker Data :', response)
-//         if (response?.code == 200) {
-//           const formattedData = response?.data.map((item, index) => ({
-//             ...item,
-//             idFromApi: item.id,
-//             id: index,
-//             isEditable: true,
-//           }))
-//           setRows(formattedData)
-//         } else {
-//           console.error('Error fetching data:')
-//           setRows([])
-//         }
-//       } else {
-//         const data = await DataService.getMaintenanceData(keycloak)
-//         const formattedData = data?.map((item, index) => ({
-//           ...item,
-//           idFromApi: item.id,
-//           id: index,
-//           isEditable: false,
-//         }))
-//         setRows(formattedData)
-//       }
-//     } catch (error) {
-//       console.error('Error fetching data:', error)
-//       setRows([])
-//     } finally {
-//       setLoading(false)
-//     }
-//   }
-
-//   const handleCalculate = async () => {
-//     try {
-//       const storedPlant = localStorage.getItem('selectedPlant')
-//       const year = localStorage.getItem('year')
-//       if (storedPlant) {
-//         const parsedPlant = JSON.parse(storedPlant)
-//         plantId = parsedPlant.id
-//       }
-//       var plantId = plantId
-//       const data = await DataService.handleCalculateMaintenance(
-//         plantId,
-//         year,
-//         keycloak,
-//       )
-
-//       if (data == 0) {
-//         setSnackbarOpen(true)
-//         setSnackbarData({
-//           message: 'Data refreshed successfully!',
-//           severity: 'success',
-//         })
-//         fetchData()
-//       } else {
-//         setSnackbarOpen(true)
-//         setSnackbarData({
-//           message: 'Data Refresh Falied!',
-//           severity: 'error',
-//         })
-//       }
-
-//       return data
-//     } catch (error) {
-//       setSnackbarOpen(true)
-//       setSnackbarData({
-//         message: error.message || 'An error occurred',
-//         severity: 'error',
-//       })
-//       console.error('Error!', error)
-//     }
-//   }
-
-//   useEffect(() => {
-//     fetchData()
-//   }, [sitePlantChange, oldYear, yearChanged, keycloak, lowerVertName])
-
-//   const productionColumnsMEG = [
-//     {
-//       field: 'Name',
-//       title: 'Description',
-//       align: 'left',
-//       headerAlign: 'left',
-//       width: 220,
-//       editable: false,
-//     },
-//     {
-//       field: 'April',
-//       title: headerMap[4],
-//       align: 'right',
-//       headerAlign: 'left',
-//       type: 'number',
-//       format: '{0:n2}',
-//       editable: false,
-//     },
-
-//     {
-//       field: 'May',
-//       title: headerMap[5],
-//       type: 'number',
-//       format: '{0:n2}',
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'June',
-//       title: headerMap[6],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'July',
-//       title: headerMap[7],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Aug',
-//       title: headerMap[8],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Sep',
-//       title: headerMap[9],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Oct',
-//       title: headerMap[10],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-
-//     {
-//       field: 'Nov',
-//       title: headerMap[11],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Dec',
-//       title: headerMap[12],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Jan',
-//       title: headerMap[1],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Feb',
-//       title: headerMap[2],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-//     {
-//       field: 'Mar',
-//       title: headerMap[3],
-//       type: 'number',
-//       format: '{0:n2}',
-
-//       editable: false,
-//       align: 'right',
-//       headerAlign: 'left',
-//     },
-
-//     {
-//       field: 'isEditable',
-//       title: 'isEditable',
-//       hidden: true,
-//     },
-//   ]
-//   const basecols =
-//     lowerVertName == 'cracker' ? crackercolumns : productionColumnsMEG
-
-//   const getAdjustedPermissions = (permissions, isOldYear) => {
-//     if (isOldYear != 1) return permissions
-//     return {
-//       ...permissions,
-//       showAction: false,
-//       addButton: false,
-//       deleteButton: false,
-//       editButton: false,
-//       showUnit: false,
-//       saveWithRemark: false,
-//       saveBtn: lowerVertName == 'cracker',
-//       isOldYear: isOldYear,
-//       allAction: lowerVertName == 'cracker',
-//     }
-//   }
-
-//   const adjustedPermissions = getAdjustedPermissions(
-//     {
-//       showAction: false,
-//       addButton: false,
-//       deleteButton: false,
-//       editButton: false,
-//       showUnit: false,
-//       saveWithRemark: false,
-//       saveBtn: lowerVertName == 'cracker',
-//       showRefresh: false,
-//       allAction: lowerVertName == 'cracker',
-//     },
-//     isOldYear,
-//   )
-
-//   return (
-//     <div>
-//       <Backdrop
-//         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-//         open={!!loading}
-//       >
-//         <CircularProgress color='inherit' />
-//       </Backdrop>
-//       <KendoDataTables
-//         columns={basecols}
-//         rows={rows}
-//         setRows={setRows}
-//         snackbarData={snackbarData}
-//         snackbarOpen={snackbarOpen}
-//         handleCalculate={handleCalculate}
-//         setDeleteId={setDeleteId}
-//         fetchData={fetchData}
-//         setOpen1={setOpen1}
-//         setSnackbarOpen={setSnackbarOpen}
-//         setSnackbarData={setSnackbarData}
-//         deleteId={deleteId}
-//         open1={open1}
-//         permissions={adjustedPermissions}
-//       />
-//     </div>
-//   )
-// }
-
-// export default MaintenanceTable

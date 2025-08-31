@@ -3,7 +3,7 @@ import { json } from './request'
 
 export class SlowdownNormForMegServices {
   static async getSlowdownNormsDataForMeg({ keycloak, plantId, year }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-norms/configuration?plantId=${plantId}&year=${year}`
+    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption?plantId=${plantId}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ export class SlowdownNormForMegServices {
     }
   }
   static async getSlowdownNormsColumnsForMeg({ keycloak, plantId, year }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-norms/dynamic/columns?plantId=${plantId}&year=${year}`
+    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption-columns?plantId=${plantId}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -33,7 +33,7 @@ export class SlowdownNormForMegServices {
     }
   }
   static async getSlowdownNormsCalculateForMeg({ keycloak, plantId, year }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-norms/calculate?plantId=${plantId}&year=${year}`
+    const url = `${Config.CaseEngineUrl}/task/calculate-slowdown-consumption?plantId=${plantId}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -48,7 +48,7 @@ export class SlowdownNormForMegServices {
     }
   }
   static async updateSlowdownNormsForMeg({ keycloak, plantId, year, payload }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-norms/configuration?plantId=${plantId}&year=${year}`
+    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption?plantId=${plantId}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',

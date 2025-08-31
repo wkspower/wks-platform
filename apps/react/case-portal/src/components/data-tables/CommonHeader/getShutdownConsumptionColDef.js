@@ -23,10 +23,6 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
 
   let safeShutdownMonths = Array.isArray(shutdownMonths) ? shutdownMonths : []
 
-  if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-    safeShutdownMonths = []
-  }
-
   const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
 
   if (colDefsCache.has(cacheKey)) {
@@ -38,11 +34,18 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
   const enhancedColDefs = cols.map((col) => {
     if (col.monthNumber) {
       const monthNum = col.monthNumber
+      const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+
       return {
         ...col,
         headerName: headerMap?.[monthNum] || col.field,
         editable: safeShutdownMonths.includes(monthNum),
-        isDisabled: !safeShutdownMonths.includes(monthNum),
+        ...(!isPEorPP && {
+          isDisabled: !safeShutdownMonths.includes(monthNum),
+        }),
+        ...(isPEorPP && {
+          isBold: safeShutdownMonths.includes(monthNum),
+        }),
       }
     }
 

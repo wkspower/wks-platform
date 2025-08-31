@@ -17,6 +17,7 @@ import {
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -50,7 +51,7 @@ const BusinessDemand = ({ permissions }) => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      var data = await DataService.getBDData(keycloak)
+      var data = await BusinessDemandDataApiService.getBDData(keycloak)
 
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -175,11 +176,12 @@ const BusinessDemand = ({ permissions }) => {
         inEdit: row.inEdit || false,
       }))
 
-      const response = await DataService.saveBusinessDemandData(
-        plantId,
-        businessData,
-        keycloak,
-      )
+      const response =
+        await BusinessDemandDataApiService.saveBusinessDemandData(
+          plantId,
+          businessData,
+          keycloak,
+        )
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -210,7 +212,10 @@ const BusinessDemand = ({ permissions }) => {
       }
 
       if (idFromApi) {
-        await DataService.deleteBusinessDemandData(idFromApi, keycloak)
+        await BusinessDemandDataApiService.deleteBusinessDemandData(
+          idFromApi,
+          keycloak,
+        )
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
         setSnackbarOpen(true)
         setSnackbarData({

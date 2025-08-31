@@ -6,10 +6,11 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getShutdownConsumptionColDef from 'components/data-tables/CommonHeader/getShutdownConsumptionColDef'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
-import { NormalOperationNormsApiService } from 'services/NormalOperationNormsApiService'
+
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
+import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
 
 const ShutdownNorms = () => {
   const [gradeId, setGradeId] = useState(null)
@@ -170,9 +171,12 @@ const ShutdownNorms = () => {
         let data
         if (['pe', 'pp'].includes(lowerVertName)) {
           if (!gradeId) return
-          data = await DataService.getShutdownMonths(keycloak, gradeId)
+          data = await ShutdownNormsApiService.getShutdownMonths(
+            keycloak,
+            gradeId,
+          )
         } else {
-          data = await DataService.getShutdownMonths(keycloak, null)
+          data = await ShutdownNormsApiService.getShutdownMonths(keycloak, null)
         }
         setShutdownMonths(data)
       } catch (error) {
@@ -196,6 +200,8 @@ const ShutdownNorms = () => {
   }
 
   const colDefs = getShutdownConsumptionColDef({ headerMap, shutdownMonths })
+
+  // console.log('colDefs', colDefs)
 
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
@@ -243,7 +249,7 @@ const ShutdownNorms = () => {
         gradeFkId: gradeId || null,
       }))
       if (payload.length > 0) {
-        const response = await DataService.saveShutDownNormsData(
+        const response = await ShutdownNormsApiService.saveShutDownNormsData(
           plantId,
           payload,
           keycloak,
@@ -289,7 +295,10 @@ const ShutdownNorms = () => {
         return
       }
 
-      const data = await DataService.getShutdownNormsData(keycloak, gradeId)
+      const data = await ShutdownNormsApiService.getShutdownNormsData(
+        keycloak,
+        gradeId,
+      )
 
       if (data?.code != 200) {
         setRows([])
@@ -352,7 +361,7 @@ const ShutdownNorms = () => {
       }
     } else {
       fetchData(null)
-      data = await DataService.getShutdownMonths(keycloak, null)
+      data = await ShutdownNormsApiService.getShutdownMonths(keycloak, null)
       setShutdownMonths(data)
     }
   }
@@ -374,11 +383,12 @@ const ShutdownNorms = () => {
       }
 
       var plantId = plantId
-      const response = await DataService.handleCalculateShutdownNorms(
-        plantId,
-        year,
-        keycloak,
-      )
+      const response =
+        await ShutdownNormsApiService.handleCalculateShutdownNorms(
+          plantId,
+          year,
+          keycloak,
+        )
 
       if (response?.code == 200) {
         setSnackbarOpen(true)

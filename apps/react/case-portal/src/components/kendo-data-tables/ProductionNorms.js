@@ -6,17 +6,18 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getEnhancedColDefsByProducts from 'components/data-tables/CommonHeader/Kendo_ProductionAopHeaderByProducts'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
+
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
+import { ProductionNormsApiService } from 'services/production-norms-api-service'
 
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
-  const [allProducts, setAllProducts] = useState([])
+
   const apiRef = useGridApiRef()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -210,7 +211,7 @@ const ProductionNorms = ({ permissions }) => {
         id: row.idFromApi || null,
       }))
 
-      const response = await DataService.updateProductNormData(
+      const response = await ProductionNormsApiService.updateProductNormData(
         productNormData,
         keycloak,
       )
@@ -270,7 +271,11 @@ const ProductionNorms = ({ permissions }) => {
         plantId = parsedPlant.id
       }
       var plantId = plantId
-      const data = await DataService.handleCalculate(plantId, year, keycloak)
+      const data = await ProductionNormsApiService.handleCalculate(
+        plantId,
+        year,
+        keycloak,
+      )
       if (data?.code == 200) {
         fetchData()
 
@@ -354,7 +359,10 @@ const ProductionNorms = ({ permissions }) => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await DataService.getAOPData(keycloak, 'Production')
+      const response = await ProductionNormsApiService.getAOPData(
+        keycloak,
+        'Production',
+      )
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {
         setRows([])
@@ -539,7 +547,10 @@ const ProductionNorms = ({ permissions }) => {
     try {
       setLoading(true)
 
-      const response = await DataService.getAOPData(keycloak, 'ByProducts')
+      const response = await ProductionNormsApiService.getAOPData(
+        keycloak,
+        'ByProducts',
+      )
 
       if (response?.code != 200) {
         setRows([])
@@ -756,7 +767,6 @@ const ProductionNorms = ({ permissions }) => {
         currentRowId={currentRowId}
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
-        // groupBy='Particulars'
         note={
           !permissions?.hideNoteText && lowerVertName !== 'cracker'
             ? '* MT per Annum'
@@ -772,7 +782,6 @@ const ProductionNorms = ({ permissions }) => {
           title={'By Products'}
           fetchData={fetchDataByProducts}
           permissions={adjustedPermissionsByProducts}
-          // groupBy='Particulars'
         />
       )}
     </div>
