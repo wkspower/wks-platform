@@ -906,42 +906,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			//normAttributeTransactions.setAuditYear(configurationDTO.getAuditYear());
 			normAttributeTransactions.setAuditYear(year);
 		}
-		
-
-		// Initial values
-		String entityRemarks = normAttributeTransactions.getRemarks();
-		String dtoRemarks = configurationDTO.getRemarks();
-
-		String existingValue = normAttributeTransactions.getAttributeValue();
-		String newValue = (attributeValue != null) ? attributeValue.toString() : null;
-
-		// Determine if either field changed meaningfully
-		boolean remarksChanged = !isBlank(entityRemarks)
-		    && !isBlank(dtoRemarks)
-		    && !entityRemarks.equalsIgnoreCase(dtoRemarks);
-
-		boolean attributeChanged = newValue != null
-		    && !newValue.equalsIgnoreCase(existingValue);
-
-		
-
-		// Save only if there’s a meaningful change
-		if (remarksChanged && attributeChanged) {
-			// Update entity
-			normAttributeTransactions.setAttributeValue(newValue != null ? newValue : "0.0");
-			normAttributeTransactions.setRemarks(dtoRemarks);
-		    normAttributeTransactionsRepository.save(normAttributeTransactions);
-		} else if (!remarksChanged && !attributeChanged) {
-		    configurationDTO.setSaveStatus("Failed");
-		    configurationDTO.setErrDescription("Please add/update remark or attribute value");
-		}
-		
+		normAttributeTransactions.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
+		normAttributeTransactions.setRemarks(configurationDTO.getRemarks());
+		normAttributeTransactionsRepository.save(normAttributeTransactions);
 	}
-	
-	// Helper methods
-			boolean isBlank(String s) {
-			    return s == null || s.isBlank(); // Java 11+; else use trim().isEmpty()
-			}
 
 	public Double getAttributeValue(ConfigurationDTO configurationDTO, Integer i) {
 		switch (i) {

@@ -48,7 +48,7 @@ public class ConfigurationController {
 		return configurationService.getConfigurationIntermediateValuesData(year,plantFKId);
 	}
 	
-	@PostMapping(value="/saveConfigurationData")
+	@PostMapping(value="/production-norms")
 	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year,@RequestParam String plantFKId, @RequestBody List<ConfigurationDTO> configurationDTOList) {
 		configurationService.saveConfigurationData(year,plantFKId,configurationDTOList);
 		return configurationDTOList;
