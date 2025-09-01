@@ -86,7 +86,7 @@ const getEnhancedAOPColDefs = ({
         title: headerMap[col.title],
         align: 'right',
         type: 'number',
-        format: '{0:#.###}',
+        format: '{0:#.##}',
       }
     }
 
