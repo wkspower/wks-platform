@@ -30,6 +30,11 @@ public class FinalNormsPreviewController {
 		return	finalNormsService.getFinalNorms(year, plantId,mode,method);
 	}
 	
+	@GetMapping(value="/calculate-final-norms")
+	public AOPMessageVM calculateFinalNorms(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String mode,@RequestParam(required=false) String method){
+		return	finalNormsService.calculateFinalNorms(year, plantId,mode,method);
+	}
+	
 	@PostMapping(value="/final-norms")
 	public AOPMessageVM updateModeWiseNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String mode,@RequestParam(required=false) String method,@RequestBody List<ModeWiseNormsDTO> modeWiseNormsDTOList){
 		return	finalNormsService.updateFinalNorms(year, plantId,mode,method,modeWiseNormsDTOList);

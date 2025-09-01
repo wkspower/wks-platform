@@ -35,6 +35,11 @@ public class BasisReportController {
 		return basisReportService.getBestAchievedCracker(plantId,year,reportType);
 	}
 	
+	@GetMapping(value="/calculate-best-achieved")
+	public AOPMessageVM calculateBestAchieved(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String periodTo,@RequestParam(required=false) String periodFrom){
+		return	basisReportService.calculateBestAchieved(year, plantId,periodTo,periodFrom);
+	}
+	
 	
 	
 	

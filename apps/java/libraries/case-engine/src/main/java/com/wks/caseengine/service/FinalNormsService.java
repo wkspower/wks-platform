@@ -12,5 +12,6 @@ public interface FinalNormsService {
 	AOPMessageVM getFinalNorms(String year, String plantId, String Mode, String Method);
 	
 	AOPMessageVM updateFinalNorms(String year, String plantId, String Mode, String Method,List<ModeWiseNormsDTO> modeWiseNormsDTOList);
-
+	
+	AOPMessageVM calculateFinalNorms(String year, String plantId, String Mode, String Method);
 }
