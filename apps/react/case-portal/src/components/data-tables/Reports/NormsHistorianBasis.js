@@ -237,7 +237,7 @@ const NormsHistorianBasis = () => {
         ]
       : [
           {
-            label: 'Production Volume Data',
+            label: 'Production Target',
             visible: showGrids.production,
             rows: rowsProductionVolumeData,
             cols: colsProductionVolumeData,

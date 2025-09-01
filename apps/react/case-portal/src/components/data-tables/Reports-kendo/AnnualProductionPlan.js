@@ -15,6 +15,8 @@ import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import moment from '../../../../node_modules/moment/moment'
 import { useSelector } from 'react-redux'
+//import { format } from '../../../../node_modules/@progress/kendo-intl/dist/npm/format'
+import { format } from '@progress/kendo-intl'
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
 
@@ -99,6 +101,7 @@ const AnnualProductionPlan = () => {
       return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
     }
   }
+const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
 
   const formatValueToThreeDecimalsZero = (params) => {
     const dateRegex =
@@ -170,6 +173,8 @@ const AnnualProductionPlan = () => {
       align: 'right',
       widthT: 150,
       type: 'number',
+      format: '{0:#.##}', 
+
     },
     { field: 'uom', headerName: 'UOM', editable: true, widthT: 120 },
   ]
@@ -200,6 +205,7 @@ const AnnualProductionPlan = () => {
       align: 'right',
       widthT: 150,
       type: 'number',
+      format: '{0:#.##}', 
     },
     {
       field: 'uom',
@@ -237,6 +243,7 @@ const AnnualProductionPlan = () => {
       align: 'right',
       widthT: 150,
       type: 'number',
+      format: '{0:#.##}',
     },
     {
       field: 'durationHours',
@@ -286,6 +293,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.##}',
         },
         {
           field: 'Actual1',
@@ -293,6 +301,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.##}',
         },
       ],
     },
@@ -305,6 +314,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.##}',
         },
         {
           field: 'Actual2',
@@ -312,6 +322,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.##}',
         },
       ],
     },
@@ -324,6 +335,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.##}',
         },
         {
           field: 'Actual3',
@@ -331,6 +343,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
+          format: '{0:#.##}',
         },
       ],
     },
@@ -343,7 +356,7 @@ const AnnualProductionPlan = () => {
           editable: false,
           flex: 1,
           align: 'right',
-          format: '{0:#.###}',
+          format: '{0:#.##}',
           type: 'number',
         },
       ],
@@ -375,6 +388,25 @@ const AnnualProductionPlan = () => {
             ? moment(item.periodTo, 'DD-MMM-YY').toDate()
             : null,
         }))
+if (type === 'maxRate') {
+  const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/;
+
+  res = res.map((item) => {
+    const value = item.maxHourlyRateValue;
+    const num = parseFloat(value);
+
+    return {
+      ...item,
+      maxHourlyRateValue:
+        typeof value === 'string' && !dateRegex.test(value.trim()) && !isNaN(num)
+          ? num   // ✅ keep raw number
+          : typeof value === 'number'
+          ? value // ✅ keep as number
+          : value,
+    };
+  });
+}
+
 
         switch (type) {
           case 'assumptions':

@@ -43,6 +43,7 @@
     "headerName": "Low Range",
     "minWidth": 150,
     "editable": false,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   }
 ]

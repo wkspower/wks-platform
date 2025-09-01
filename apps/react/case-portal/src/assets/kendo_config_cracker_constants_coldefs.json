@@ -16,7 +16,7 @@
     "field": "ConstantValue",
     "title": "Value",
     "editable": true,
-
+    "format": "{0:n2}",
     "type": "number"
   },
 

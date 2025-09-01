@@ -24,14 +24,16 @@
     "headerName": "High Range",
     "minWidth": 150,
     "editable": false,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "lowRange",
     "headerName": "Low Range",
     "minWidth": 150,
     "editable": false,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "lowerLimitPercent",
