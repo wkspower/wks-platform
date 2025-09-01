@@ -143,10 +143,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					
 					if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
 						list.add(dto.getConfigTypeDisplayName());
-						
+						list.add(dto.getTypeDisplayName());
+					}
+					if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") || verticalName.equalsIgnoreCase("CRACKER")) {
+						list.add(dto.getNormType());
 					}
 					
-					list.add(dto.getTypeDisplayName());
 					list.add(dto.getProductName());
 					list.add(dto.getUOM());
 					list.add(dto.getApr());
@@ -382,7 +384,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER") || verticalName.equalsIgnoreCase("CRACKER")) {
-
+					
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
 					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
@@ -1309,7 +1311,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setRemarks(getStringCellValue(row.getCell(16), dto));
 						dto.setNormParameterFKId(getStringCellValue(row.getCell(17), dto));
 					}else {
-						dto.setTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+						dto.setNormType(getStringCellValue(row.getCell(0), dto));
 						dto.setProductName(getStringCellValue(row.getCell(1), dto));
 						dto.setUOM(getStringCellValue(row.getCell(2), dto));
 						dto.setAuditYear(year);
