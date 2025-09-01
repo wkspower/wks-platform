@@ -295,7 +295,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 					map.put("name", row[1]);
 					map.put("displayName", row[2]);
 					map.put("uom", row[3]);
-					map.put("attributeValue", row[4]);
+					map.put("attributeValue", (row[4] == null || row[4].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[4].toString()));
 					map.put("remarks", row[5]);
 					map.put("operation", row[6]);
 					map.put("type", row[7]);
