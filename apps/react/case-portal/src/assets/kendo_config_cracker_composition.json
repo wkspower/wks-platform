@@ -23,7 +23,9 @@
     "field": "apr",
     "title": 4,
     "editable": true,
-    "width": 120
+    "width": 120,
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "may",
@@ -32,7 +34,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "jun",
@@ -41,7 +44,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "jul",
@@ -50,7 +54,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "aug",
@@ -59,7 +64,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "sep",
@@ -68,7 +74,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
 
   {
@@ -78,7 +85,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "nov",
@@ -87,7 +95,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "dec",
@@ -96,7 +105,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "jan",
@@ -105,7 +115,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "feb",
@@ -114,7 +125,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "mar",
@@ -123,7 +135,8 @@
     "width": 120,
     "align": "left",
     "headerAlign": "left",
-    "type": "number"
+    "type": "number",
+    "format": "{0:n2}"
   },
   {
     "field": "remarks",

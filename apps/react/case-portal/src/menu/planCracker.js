@@ -124,6 +124,14 @@ const planCracker = {
           breadcrumbs: true,
         },
         {
+          id: 'business-demand',
+          title: i18n.t('menu.productDemand'),
+          type: 'item',
+          url: '/production-norms-plan/business-demand',
+          icon: icons.IconChartBar,
+          breadcrumbs: true,
+        },
+        {
           id: 'production-aop',
           title: i18n.t('menu.productionNorms'),
           type: 'item',

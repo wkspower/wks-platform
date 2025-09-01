@@ -235,85 +235,111 @@ const CrackerConfig = () => {
         console.warn('No state for tab:', tabId)
     }
   }, [])
+  
+const fetchCrackerRows = useCallback(
+  async (currentTabDisplay, mode) => {
+    if (!currentTabDisplay) return
+    try {
+      setLoading(true)
 
-  const fetchCrackerRows = useCallback(
-    async (currentTabDisplay, mode) => {
-      if (!currentTabDisplay) return
-      try {
-        setLoading(true)
-        let transformedData = []
-        let transformedData1 = []
-        var spyroVM1 = []
-        if (currentTabDisplay == 'Constant') {
-          spyroVM1 = await DataService.getSpyroInputData(
-            keycloak,
-            mode,
-            currentTabDisplay,
-          )
+      const monthFields = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      ]
 
-          if (spyroVM1?.data && Array.isArray(spyroVM1.data)) {
-            transformedData1 = spyroVM1.data.map((item, index) => ({
-              id: item.NormParameterFKID || `row_${index}`,
-              particulars: item.Particulars,
-              uom: item.UOM,
-              remarks: item.Remarks,
-              originalRemark: item.Remarks,
-              ParticularsType: item.NormParameterTypeName,
-              april: item.Apr,
-              NormParameterFKID: item.NormParameterFKID,
-              ...item,
-            }))
-          }
-          setRowsForTab(currentTabDisplay, transformedData1)
-          return
-        }
+      const toNumber = (v, { defaultZero = false } = {}) => {
+        // keep null/undefined as-is (or change to 0 by passing defaultZero:true)
+        if (v === null || v === undefined) return defaultZero ? 0 : v
+        if (typeof v === "number") return v
+        if (typeof v !== "string") return v
 
-        const spyroVM = await DataService.getSpyroInputData(
+        const cleaned = v.replace(/,/g, "").trim() // handle "1,234.56"
+        if (cleaned === "") return defaultZero ? 0 : v
+
+        const num = Number(cleaned)
+        return Number.isFinite(num) ? num : v
+      }
+
+      if (currentTabDisplay === "Constant") {
+        const spyroVM1 = await DataService.getSpyroInputData(
           keycloak,
           mode,
-          currentTabDisplay,
+          currentTabDisplay
         )
-        setTimeout(() => {
-          if (spyroVM?.data && Array.isArray(spyroVM.data)) {
-            transformedData = spyroVM.data.map((item, index) => ({
-              id: item.NormParameterFKID || `row_${index}`,
-              particulars: item.Particulars,
-              uom: item.UOM,
-              remarks: item.Remarks,
-              originalRemark: item.Remarks,
-              ParticularsType: item.normParameterTypeName,
-              jan: item.Jan,
-              feb: item.Feb,
-              march: item.Mar,
-              april: item.Apr,
-              may: item.May,
-              june: item.Jun,
-              july: item.Jul,
-              aug: item.Aug,
-              sep: item.Sep,
-              oct: item.Oct,
-              nov: item.Nov,
-              dec: item.Dec,
-              NormParameterFKID: item.NormParameterFKID,
-              ...item,
-            }))
+
+        const data = Array.isArray(spyroVM1?.data) ? spyroVM1.data : []
+        const transformedData1 = data.map((item, index) => {
+          const row = {
+            id: item.NormParameterFKID || `row_${index}`,
+            particulars: item.Particulars,
+            uom: item.UOM,
+            remarks: item.Remarks,
+            originalRemark: item.Remarks,
+            ParticularsType: item.NormParameterTypeName,
+            NormParameterFKID: item.NormParameterFKID,
+            ...item,
           }
-          setRowsForTab(currentTabDisplay, transformedData)
-        }, 500)
-      } catch (err) {
-        // console.warn(`Failed to load ${tabId} data:`, err)
-        setSnackbarData({
-          message: `Failed to load ${currentTabDisplay} data. Please try again.`,
-          severity: 'error',
+
+          // convert Apr -> april (lowercase) numeric
+          row.april = toNumber(item.Apr) // or toNumber(item.Apr, { defaultZero: true })
+          return row
         })
-        setSnackbarOpen(true)
-        setRowsForTab(currentTabDisplay, [])
-      } finally {
-        setLoading(false)
+
+        setRowsForTab(currentTabDisplay, transformedData1)
+        return
       }
-    },
-    [keycloak, setRowsForTab, currentTabDisplay],
-  )
+
+      const spyroVM = await DataService.getSpyroInputData(
+        keycloak,
+        mode,
+        currentTabDisplay
+      )
+
+      // --- single, clean map (no nested maps) ---
+      setTimeout(() => {
+        const data = Array.isArray(spyroVM?.data) ? spyroVM.data : []
+        const transformedData = data.map((item, index) => {
+          const row = {
+            id: item.NormParameterFKID || `row_${index}`,
+            particulars: item.Particulars,
+            uom: item.UOM,
+            remarks: item.Remarks,
+            originalRemark: item.Remarks,
+            ParticularsType: item.normParameterTypeName,
+            NormParameterFKID: item.NormParameterFKID,
+            ...item,
+          }
+
+          monthFields.forEach((field) => {
+            // prefer item["Jan"], fallback to item["jan"]
+            const raw =
+              item[field] !== undefined ? item[field] : item[field.toLowerCase()]
+            // store on the row as lowercase keys (jan, feb, ...)
+            row[field.toLowerCase()] = toNumber(raw) // change to toNumber(raw, { defaultZero: true }) to default to 0
+          })
+
+          return row
+        })
+
+        // debugging: inspect one transformed row in console to verify keys/types
+        // console.log("sample transformed row:", transformedData[0])
+
+        setRowsForTab(currentTabDisplay, transformedData)
+      }, 500)
+    } catch (err) {
+      setSnackbarData({
+        message: `Failed to load ${currentTabDisplay} data. Please try again.`,
+          severity: 'error',
+      })
+      setSnackbarOpen(true)
+      setRowsForTab(currentTabDisplay, [])
+    } finally {
+      setLoading(false)
+    }
+  },
+  [keycloak, setRowsForTab, currentTabDisplay]
+)
+
 
   useEffect(() => {
     if (keycloak && plantId && currentTabDisplay) {

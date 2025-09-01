@@ -17,84 +17,96 @@
     "title": 4,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "may",
     "title": 5,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "jun",
     "title": 6,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "jul",
     "title": 7,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "aug",
     "title": 8,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "sep",
     "title": 9,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "oct",
     "title": 10,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "nov",
     "title": 11,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "dec",
     "title": 12,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "jan",
     "title": 1,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "feb",
     "title": 2,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "mar",
     "title": 3,
     "editable": true,
     "width": 120,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
     "field": "remarks",
