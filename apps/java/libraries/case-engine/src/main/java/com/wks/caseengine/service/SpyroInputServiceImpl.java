@@ -82,7 +82,6 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 	@Override
 	public AOPMessageVM getSpyroInputData(String year, String plantId, String Mode, String type) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, Object>> spyroInputDataList = new ArrayList<>();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 		Sites site = siteRepository.findById(plant.getSiteFkId())
@@ -92,32 +91,34 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		String siteId = site.getId().toString();
 		String verticalId = vertical.getId().toString();
 		String procedureName = vertical.getName() + "_" + site.getName() + "_GetSpyroInput";
+		List<SpyroInputDTO> spyroInputDTOList = new ArrayList<>();
 		try {
 			List<Object[]> results = getData(plantId, year, siteId, verticalId, Mode, procedureName);
 
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 				if (!type.equalsIgnoreCase("Composition") && row[4].toString().contains(type)) {
-
-					map.put("normParameterFKID", row[2]);
-					map.put("particulars", row[3]);
-					map.put("normParameterTypeName", row[4]);
-					map.put("uom", row[7]);
-					map.put("remarks", row[9]);
-					map.put("jan", row[10]);
-					map.put("feb", row[11]);
-					map.put("mar", row[12]);
-					map.put("apr", row[13]);
-					map.put("may", row[14]);
-					map.put("jun", row[15]);
-					map.put("jul", row[16]);
-					map.put("aug", row[17]);
-					map.put("sep", row[18]);
-					map.put("oct", row[19]);
-					map.put("nov", row[20]);
-					map.put("dec", row[21]);
-					map.put("isEditable", row[22]);
-					spyroInputDataList.add(map); // Add the map to the list here
+					SpyroInputDTO spyroInputDTO = new SpyroInputDTO();
+					spyroInputDTO.setNormParameterFKID(row[2] != null ? row[2].toString() : null);
+					spyroInputDTO.setParticulars(row[3] != null ? row[3].toString() : null);
+					spyroInputDTO.setNormParameterTypeName(row[4] != null ? row[4].toString() : null);
+					spyroInputDTO.setUom(row[7] != null ? row[7].toString() : null);
+					spyroInputDTO.setRemarks(row[9] != null ? row[9].toString() : null);
+					spyroInputDTO.setJan(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+					spyroInputDTO.setFeb(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+					spyroInputDTO.setMar(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+					spyroInputDTO.setApr(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+					spyroInputDTO.setMay(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+					spyroInputDTO.setJun(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+					spyroInputDTO.setJul(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+					spyroInputDTO.setAug(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+					spyroInputDTO.setSep(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+					spyroInputDTO.setOct(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
+					spyroInputDTO.setNov(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
+					spyroInputDTO.setDec(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
+					spyroInputDTO.setIsEditable(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
+					spyroInputDTOList.add(spyroInputDTO);
+					// Add the map to the list here
 				} else {
 					if (type.equalsIgnoreCase("Composition")) {
 						if (row[4].toString().contains("C2/C3") || row[4].toString().contains("Hexene Purge Gas")
@@ -125,32 +126,33 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 								|| row[4].toString().contains("Import Propane") || row[4].toString().contains("FCC C3")
 								|| row[4].toString().contains("LDPE Off Gas")) {
 
-							map.put("normParameterFKID", row[2]);
-							map.put("particulars", row[3]);
-							map.put("normParameterTypeName", row[4]);
-							map.put("uom", row[7]);
-							map.put("remarks", row[9]);
-							map.put("jan", row[10]);
-							map.put("feb", row[11]);
-							map.put("mar", row[12]);
-							map.put("apr", row[13]);
-							map.put("may", row[14]);
-							map.put("jun", row[15]);
-							map.put("jul", row[16]);
-							map.put("aug", row[17]);
-							map.put("sep", row[18]);
-							map.put("oct", row[19]);
-							map.put("nov", row[20]);
-							map.put("dec", row[21]);
-							map.put("isEditable", row[22]);
-							spyroInputDataList.add(map); // Add the map to the list here
+							SpyroInputDTO spyroInputDTO = new SpyroInputDTO();
+							spyroInputDTO.setNormParameterFKID(row[2] != null ? row[2].toString() : null);
+							spyroInputDTO.setParticulars(row[3] != null ? row[3].toString() : null);
+							spyroInputDTO.setNormParameterTypeName(row[4] != null ? row[4].toString() : null);
+							spyroInputDTO.setUom(row[7] != null ? row[7].toString() : null);
+							spyroInputDTO.setRemarks(row[9] != null ? row[9].toString() : null);
+							spyroInputDTO.setJan(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+							spyroInputDTO.setFeb(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+							spyroInputDTO.setMar(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+							spyroInputDTO.setApr(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+							spyroInputDTO.setMay(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+							spyroInputDTO.setJun(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+							spyroInputDTO.setJul(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+							spyroInputDTO.setAug(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+							spyroInputDTO.setSep(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+							spyroInputDTO.setOct(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
+							spyroInputDTO.setNov(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
+							spyroInputDTO.setDec(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
+							spyroInputDTO.setIsEditable(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
+							spyroInputDTOList.add(spyroInputDTO);
 						}
 					}
 				}
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(spyroInputDataList);
+			aopMessageVM.setData(spyroInputDTOList);
 			return aopMessageVM;
 
 		} catch (IllegalArgumentException e) {

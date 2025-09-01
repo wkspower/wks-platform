@@ -43,6 +43,8 @@ public class SpyroOutputDTO {
     private String saveStatus;
     private String errDescription;
     private String tableId;
+    private String normParameterDisplayName;
+    private Boolean isEditable;
 
 
 }

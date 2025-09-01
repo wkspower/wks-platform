@@ -83,11 +83,10 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	@Override
 	public AOPMessageVM getSpyroOutputData(String year, String plantId,String Mode,String type) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, Object>> spyroOutputDataList = new ArrayList<>();
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
         Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
         Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-
+        List<SpyroOutputDTO> spyroOutputDTOList = new ArrayList<>();
         String siteId = site.getId().toString();
         String verticalId = vertical.getId().toString();
         String procedureName=vertical.getName()+"_"+site.getName()+"_GetSpyroOutput";
@@ -98,31 +97,33 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 				
 				if(row[4].toString().contains(type)) {	
+					SpyroOutputDTO spyroOutputDTO = new SpyroOutputDTO();
+					spyroOutputDTO.setNormParameterFKID(row[2] != null ? row[2].toString() : null);
+					spyroOutputDTO.setParticulars(row[3] != null ? row[3].toString() : null);
+					spyroOutputDTO.setNormParameterDisplayName(row[4] != null ? row[4].toString() : null);
+					spyroOutputDTO.setUom(row[7] != null ? row[7].toString() : null);
+					spyroOutputDTO.setRemarks(row[9] != null ? row[9].toString() : null);
+					spyroOutputDTO.setJan(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+					spyroOutputDTO.setFeb(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+					spyroOutputDTO.setMar(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+					spyroOutputDTO.setApr(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+					spyroOutputDTO.setMay(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+					spyroOutputDTO.setJun(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+					spyroOutputDTO.setJul(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+					spyroOutputDTO.setAug(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+					spyroOutputDTO.setSep(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+					spyroOutputDTO.setOct(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
+					spyroOutputDTO.setNov(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
+					spyroOutputDTO.setDec(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
+					spyroOutputDTO.setIsEditable(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
+					spyroOutputDTOList.add(spyroOutputDTO);
 					
-					map.put("normParameterFKID", row[2]);
-					map.put("particulars", row[3]);
-					map.put("normParameterDisplayName", row[4]);
-					map.put("uom", row[7]);
-					map.put("remarks", row[9]);
-					map.put("jan", row[10]);
-					map.put("feb", row[11]);
-					map.put("mar", row[12]);
-					map.put("apr", row[13]);
-					map.put("may", row[14]);
-					map.put("jun", row[15]);
-					map.put("jul", row[16]);
-					map.put("aug", row[17]);
-					map.put("sep", row[18]);
-					map.put("oct", row[19]);
-					map.put("nov", row[20]);
-					map.put("dec", row[21]);
-					map.put("isEditable", row[22]);
-					spyroOutputDataList.add(map); // Add the map to the list here
+					
 				}
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(spyroOutputDataList);
+			aopMessageVM.setData(spyroOutputDTOList);
 			return aopMessageVM;
 
 		} catch (IllegalArgumentException e) {
