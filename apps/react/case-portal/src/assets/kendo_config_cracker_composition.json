@@ -25,7 +25,7 @@
     "editable": true,
     "width": 120,
     "type": "number",
-    "format": "{0:n2}"
+    "format":  "{0:#.##}"
   },
   {
     "field": "may",
@@ -35,7 +35,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "jun",
@@ -45,7 +45,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "jul",
@@ -55,7 +55,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "aug",
@@ -65,7 +65,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "sep",
@@ -75,7 +75,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
 
   {
@@ -86,7 +86,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "nov",
@@ -96,7 +96,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "dec",
@@ -106,7 +106,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "jan",
@@ -116,7 +116,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "feb",
@@ -126,7 +126,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "mar",
@@ -136,7 +136,7 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
   {
     "field": "remarks",

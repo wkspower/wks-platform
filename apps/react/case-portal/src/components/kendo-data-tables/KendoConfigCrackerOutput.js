@@ -222,148 +222,101 @@ const CrackerConfig = () => {
   }, [])
 
   const fetchCrackerRows = useCallback(
-  async (currentTabDisplay, mode) => {
-    if (!currentTabDisplay) return
+    async (currentTabDisplay, mode) => {
+      if (!currentTabDisplay) return
+      try {
+        setLoading(true)
 
-    try {
-      setLoading(true)
-
-      const monthFields = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-      ]
-
-      const toNumber = (v, { defaultZero = false } = {}) => {
-        if (v === null || v === undefined) return defaultZero ? 0 : v
-        if (typeof v === "number") return v
-        if (typeof v !== "string") return v
-
-        const cleaned = v.replace(/,/g, "").trim()
-        if (cleaned === "") return defaultZero ? 0 : v
-
-        const num = Number(cleaned);
-        return Number.isFinite(num) ? num : v
-      }
-
-      const spyroVM = await DataService.getSpyroOutputData(
-        keycloak,
-        mode,
-        currentTabDisplay,
-      )
-
-      let transformedData = []
-      if (spyroVM?.data && Array.isArray(spyroVM.data)) {
-        transformedData = spyroVM.data.map((item, index) => {
-          const row = {
+        const spyroVM = await DataService.getSpyroOutputData(
+          keycloak,
+          mode,
+          currentTabDisplay,
+        )
+        let transformedData = []
+        if (spyroVM?.data && Array.isArray(spyroVM.data)) {
+          transformedData = spyroVM.data.map((item, index) => ({
             id: item.NormParameterFKID || `row_${index}`,
             remarks: item.Remarks,
             originalRemark: item.Remarks,
             ParticularsType: item.Type,
             ...item,
-          }
-
-          // map month fields to lowercase numeric values
-          monthFields.forEach((field) => {
-            const raw = item[field] !== undefined ? item[field] : item[field.toLowerCase()];
-            row[field.toLowerCase()] = toNumber(raw); // defaultZero:true if you want 0 instead of null
-          });
-
-          return row
+          }))
+        }
+        setRowsForTab(currentTabDisplay, transformedData)
+      } catch (err) {
+        setSnackbarData({
+          message: `Failed to load ${currentTabDisplay} data. Please try again.`,
+          severity: 'error',
         })
+        setSnackbarOpen(true)
+        setRowsForTab(currentTabDisplay, [])
+      } finally {
+        setLoading(false)
       }
-
-      setRowsForTab(currentTabDisplay, transformedData)
-    } catch (err) {
-      setSnackbarData({
-        message: `Failed to load ${currentTabDisplay} data. Please try again.`,
-        severity: 'error',
-      })
-      setSnackbarOpen(true)
-      setRowsForTab(currentTabDisplay, [])
-    } finally {
-      setLoading(false)
-    }
-  },
-  [keycloak, setRowsForTab, currentTabDisplay],
-)
+    },
+    [keycloak, setRowsForTab, currentTabDisplay],
+  )
 
   const fetchCrackerRowsYield = useCallback(
-  async (currentTabDisplay, mode) => {
-    if (!currentTabDisplay) return
+    async (currentTabDisplay, mode) => {
+      if (!currentTabDisplay) return
+      try {
+        setLoading(true)
+        var spyroVMYield1 = []
+        if (currentTabDisplay == 'Yield') {
+          spyroVMYield1 = await DataService.getSpyroOutputDataYield(
+            keycloak,
+            mode,
+            currentTabDisplay,
+          )
+        }
+        let transformedData1 = []
+        if (spyroVMYield1 && Array.isArray(spyroVMYield1.data)) {
+          const rowMap = {}
 
-    try {
-      setLoading(true)
+          spyroVMYield1.data.forEach((item, i) => {
+            const comp = item.displayName
+            const col = `${item.operation}_${item.type}`
 
-      const toNumber = (v, { defaultZero = false } = {}) => {
-        if (v === null || v === undefined) return defaultZero ? 0 : v
-        if (typeof v === "number") return v
-        if (typeof v !== "string") return v
-
-        const cleaned = v.replace(/,/g, "").trim()
-        if (cleaned === "") return defaultZero ? 0 : v
-
-        const num = Number(cleaned)
-        return Number.isFinite(num) ? num : v
-      }
-
-      let spyroVMYield1 = []
-      if (currentTabDisplay === 'Yield') {
-        spyroVMYield1 = await DataService.getSpyroOutputDataYield(
-          keycloak,
-          mode,
-          currentTabDisplay,
-        )
-      }
-
-      let transformedData1 = []
-      if (spyroVMYield1 && Array.isArray(spyroVMYield1.data)) {
-        const rowMap = {}
-
-        spyroVMYield1.data.forEach((item, i) => {
-          const comp = item.displayName
-          const col = `${item.operation}_${item.type}`
-
-          if (!rowMap[comp]) {
-            rowMap[comp] = {
-              id: `row_${i}`,
-              particulars: comp,
-              uom: item.uom,
-              remarks: item.remarks,
-              NormParameterFKID: item.normParameterId,
-              '5F_C2C3': null,
-              '5F_Propane': null,
-              '5F_Ethane': null,
-              '4F_C2C3': null,
-              '4F_Propane': null,
-              '4F_Ethane': null,
-              '4FD_C2C3': null,
-              '4FD_Propane': null,
-              '4FD_Ethane': null,
+            if (!rowMap[comp]) {
+              rowMap[comp] = {
+                id: `row_${i}`,
+                particulars: comp,
+                uom: item.uom,
+                remarks: item.remarks,
+                NormParameterFKID: item.normParameterId,
+                '5F_C2C3': null,
+                '5F_Propane': null,
+                '5F_Ethane': null,
+                '4F_C2C3': null,
+                '4F_Propane': null,
+                '4F_Ethane': null,
+                '4FD_C2C3': null,
+                '4FD_Propane': null,
+                '4FD_Ethane': null,
+              }
             }
-          }
 
-          // convert attributeValue to number
-          rowMap[comp][col] = toNumber(item.attributeValue)
+            rowMap[comp][col] = item.attributeValue
+          })
+
+          transformedData1 = Object.values(rowMap)
+        }
+
+        setRowsForTab(currentTabDisplay, transformedData1)
+      } catch (err) {
+        setSnackbarData({
+          message: `Failed to load ${currentTabDisplay} data. Please try again.`,
+          severity: 'error',
         })
-
-        transformedData1 = Object.values(rowMap)
+        setSnackbarOpen(true)
+        setRowsForTab(currentTabDisplay, [])
+      } finally {
+        setLoading(false)
       }
-
-      setRowsForTab(currentTabDisplay, transformedData1)
-    } catch (err) {
-      setSnackbarData({
-        message: `Failed to load ${currentTabDisplay} data. Please try again.`,
-        severity: 'error',
-      })
-      setSnackbarOpen(true)
-      setRowsForTab(currentTabDisplay, [])
-    } finally {
-      setLoading(false)
-    }
-  },
-  [keycloak, setRowsForTab, currentTabDisplay],
-)
-
+    },
+    [keycloak, setRowsForTab, currentTabDisplay],
+  )
 
   useEffect(() => {
     if (keycloak && plantId && currentTabDisplay) {
