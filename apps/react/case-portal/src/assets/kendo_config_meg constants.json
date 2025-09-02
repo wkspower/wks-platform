@@ -28,7 +28,7 @@
     "title": "Value",
     "editable": true,
     "type": "number",
-    "format": "{0:n2}"
+    "format": "{0:#.##}"
   },
 
   {

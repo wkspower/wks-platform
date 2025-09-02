@@ -235,7 +235,7 @@ const CrackerConfig = () => {
         console.warn('No state for tab:', tabId)
     }
   }, [])
-  
+
   const fetchCrackerRows = useCallback(
     async (currentTabDisplay, mode) => {
       if (!currentTabDisplay) return
@@ -259,7 +259,9 @@ const CrackerConfig = () => {
               remarks: item.Remarks,
               originalRemark: item.Remarks,
               ParticularsType: item.NormParameterTypeName,
-              april: item.Apr,
+
+              april:
+                item.Apr && item.Apr.trim() !== '' ? Number(item.Apr) : null,
               NormParameterFKID: item.NormParameterFKID,
               ...item,
             }))
@@ -282,19 +284,9 @@ const CrackerConfig = () => {
               remarks: item.Remarks,
               originalRemark: item.Remarks,
               ParticularsType: item.normParameterTypeName,
-              jan: item.Jan,
-              feb: item.Feb,
-              march: item.Mar,
-              april: item.Apr,
-              may: item.May,
-              june: item.Jun,
-              july: item.Jul,
-              aug: item.Aug,
-              sep: item.Sep,
-              oct: item.Oct,
-              nov: item.Nov,
-              dec: item.Dec,
+
               NormParameterFKID: item.NormParameterFKID,
+
               ...item,
             }))
           }
@@ -314,6 +306,7 @@ const CrackerConfig = () => {
     },
     [keycloak, setRowsForTab, currentTabDisplay],
   )
+
   useEffect(() => {
     if (keycloak && plantId && currentTabDisplay) {
       fetchCrackerRows(currentTabDisplay, selectMode)

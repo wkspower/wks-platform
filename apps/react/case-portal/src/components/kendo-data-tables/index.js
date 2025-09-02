@@ -111,6 +111,7 @@ const KendoDataTables = ({
   handleUnitChange = () => {},
   handleGradeChange = () => {},
   handleRemarkCellClick = () => {},
+  calculatebtnClicked = () => {},
   selectedUsers = [],
   groupBy = null,
   note = '',
@@ -380,6 +381,7 @@ const KendoDataTables = ({
     }, 500)
   }
   const handleCalculateBtn = async () => {
+    setSelectedGrade('')
     setIsButtonDisabled(true)
     handleCalculate()
     setTimeout(() => {
@@ -400,6 +402,8 @@ const KendoDataTables = ({
       isColumnMenuSortActive(field, sort)
     )
   }
+
+  // console.log('rows?.length', rows?.length)
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
@@ -658,6 +662,7 @@ const KendoDataTables = ({
       handleGradeChange(firstGrade.gradeId)
     }
   }, [grades, permissions?.showG, selectedGrade])
+
   useEffect(() => {
     setSelectedGrade(null)
   }, [plantID])
@@ -689,6 +694,13 @@ const KendoDataTables = ({
     const checked = event.nativeEvent.target.checked
     console.log('Header checkbox changed. Checked:', checked)
   }
+
+  // console.log(
+  //   'grades[0].gradeId',
+  //   grades?.[0]?.gradeId,
+  //   typeof grades?.[0]?.gradeId,
+  // )
+  // console.log('selectedGrade', selectedGrade, typeof selectedGrade)
 
   const onSelectionChange = (event) => {
     // const checkbox = event.nativeEvent.target
@@ -1392,6 +1404,7 @@ const KendoDataTables = ({
                     />
                   )
                 }
+
                 if (col.type === 'number') {
                   return (
                     <GridColumn
@@ -1401,9 +1414,9 @@ const KendoDataTables = ({
                       width={col.widthT}
                       hidden={col.hidden}
                       className={`
-        ${col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'}
-        ${col?.isBold ? 'bold-red-text' : ''}
-      `}
+                  ${col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'}
+                  ${col?.isBold ? 'bold-text' : ''}
+                `}
                       editable={col?.editable ? true : false}
                       headerClassName={isActive ? 'active-column' : ''}
                       cells={{

@@ -45,8 +45,9 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [rows, setRows] = useState()
-  const [rows2, setRows2] = useState()
-  const [rows500, setRows500] = useState()
+  const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
+  const [rowsFormattedAndNonEditable, setRowsFormattedAndNonEditable] =
+    useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -183,7 +184,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setModifiedCells({})
 
         const responseForNorms =
-          await ProductionVolumeDataApiService.calculateNormsHistorianValues(
+          await DataService.calculateNormsHistorianValues(
             plantId,
             localStorage.getItem('year'),
             startDate,
@@ -466,9 +467,9 @@ const ProductionvolumeData = ({ permissions }) => {
         ...item,
         remarks: item.remarks ? item.remarks.trim() : '',
       }))
-      setRows2(nonEditableRows)
+      setRowsPercentageSummary(nonEditableRows)
       setRows(formattedData)
-      setRows500(formattedDataNONEDITABLE)
+      setRowsFormattedAndNonEditable(formattedDataNONEDITABLE)
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -551,7 +552,7 @@ const ProductionvolumeData = ({ permissions }) => {
     })
   }
 
-  const colDefs = [
+  const colDefs_percentage_summary = [
     {
       field: 'idFromApi',
       title: 'ID',
@@ -710,9 +711,14 @@ const ProductionvolumeData = ({ permissions }) => {
       title: 'isEditable',
       hidden: true,
     },
+    {
+      widthT: 150,
+      field: 'productName',
+      title: 'Remark',
+    },
   ]
 
-  const colDefsDesignCapacity = [
+  const colDefs_design_capacity = [
     {
       field: 'materialFKId',
       title: 'Particulars',
@@ -855,7 +861,7 @@ const ProductionvolumeData = ({ permissions }) => {
       widthT: 150,
     },
   ]
-  const max_achieved_capacity = [
+  const colDefs_max_achieved_capacity = [
     {
       field: 'materialFKId',
       title: 'Particulars',
@@ -989,9 +995,15 @@ const ProductionvolumeData = ({ permissions }) => {
       headerAlign: 'left',
       type: 'number',
     },
+
+    {
+      widthT: 150,
+      field: 'productName',
+      title: 'Remark',
+    },
   ]
 
-  const colDefs1233 = [
+  const colDefs_non_editable = [
     {
       field: 'idFromApi',
       title: 'ID',
@@ -1006,7 +1018,7 @@ const ProductionvolumeData = ({ permissions }) => {
     {
       field: 'normParametersFKId',
       title: 'Particulars',
-      widthT: 220,
+      widthT: 100,
 
       editable: false,
       hidden: true,
@@ -1172,7 +1184,7 @@ const ProductionvolumeData = ({ permissions }) => {
     fetchConfiguration()
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
-  const productionColumns = getEnhancedProductionColDefs({
+  const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
   })
 
@@ -1500,8 +1512,11 @@ const ProductionvolumeData = ({ permissions }) => {
     isOldYear,
   )
 
-  var cols = permissions?.hideSummary ? colDefs1233 : productionColumns
-  var rows1 = permissions?.hideSummary ? rows500 : rows
+  var colDefs_current_operating_capacity = permissions?.hideSummary
+    ? colDefs_non_editable
+    : colDefs_editable
+
+  var rows1 = permissions?.hideSummary ? rowsFormattedAndNonEditable : rows
 
   const handleExcelUpload = (rawFile) => {
     saveExcelFile(rawFile)
@@ -1561,7 +1576,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setModifiedCells({})
 
         const responseForNorms =
-          await ProductionVolumeDataApiService.calculateNormsHistorianValues(
+          await DataService.calculateNormsHistorianValues(
             plantId,
             localStorage.getItem('year'),
             startDate,
@@ -1626,13 +1641,14 @@ const ProductionvolumeData = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      {/* DESIGN_CAPACITY */}
       {conditionForFirst && (
         <KendoDataTables
           modifiedCells={modifiedCellsDesignCapacity}
           setModifiedCells={setModifiedCellsDesignCapacity}
           enableSaveAddBtn={enableSaveAddBtnDesignCapacity}
           setRows={setRowsDesignCapacity}
-          columns={colDefsDesignCapacity}
+          columns={colDefs_design_capacity}
           rows={rowsDesignCapacity}
           paginationOptions={[100, 200, 300]}
           saveChanges={saveChangesDesignCapacity}
@@ -1660,10 +1676,11 @@ const ProductionvolumeData = ({ permissions }) => {
         />
       )}
 
+      {/* MAX_ACHIEVED_CAPACITY */}
       {conditionForFirst && (
         <KendoDataTables
           setRows={setRowsMaxCapacity}
-          columns={max_achieved_capacity}
+          columns={colDefs_max_achieved_capacity}
           rows={rowsMaxCapacity}
           fetchData={fetchMaxCapacityData}
           permissions={adjustedPermissionsGrid1}
@@ -1676,12 +1693,13 @@ const ProductionvolumeData = ({ permissions }) => {
         />
       )}
 
+      {/* CURRENT_OPERATING_CAPACITY */}
       <KendoDataTables
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         enableSaveAddBtn={enableSaveAddBtn}
         setRows={setRows}
-        columns={cols}
+        columns={colDefs_current_operating_capacity}
         rows={rows1}
         paginationOptions={[100, 200, 300]}
         saveChanges={saveChanges}
@@ -1709,16 +1727,17 @@ const ProductionvolumeData = ({ permissions }) => {
         }
       />
 
+      {/* PERCENTAGE_SUMMARY */}
       {!permissions?.hideSummary && (
         <>
           <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
             Percentage Summary
           </Typography>
           <KendoDataTables
-            setRows={setRows2}
-            columns={colDefs}
-            rows={rows2}
-            title='Production Volume Data Reference'
+            setRows={setRowsPercentageSummary}
+            columns={colDefs_percentage_summary}
+            rows={rowsPercentageSummary}
+            title='Production target Reference'
             fetchData={fetchData}
           />
         </>

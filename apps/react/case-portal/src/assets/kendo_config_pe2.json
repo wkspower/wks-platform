@@ -135,7 +135,7 @@
     "field": "remarks",
     "title": "Remark",
 
-    "widthT": 150,
+    "widthT": 80,
     "editable": true,
     "renderCell": "renderRemarkCell"
   }

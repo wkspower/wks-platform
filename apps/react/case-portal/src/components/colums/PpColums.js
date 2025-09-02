@@ -19,7 +19,7 @@ export const BusinessDemandPpColumns = [
     field: 'displayName',
     title: 'Particulars',
     editable: false,
-    width: 120,
+    width: 100,
   },
   {
     field: 'april',
@@ -132,7 +132,7 @@ export const BusinessDemandPpColumns = [
   {
     field: 'remark',
     title: 'Remark',
-    width: 180,
+    widthT: 80,
     editable: false,
   },
   {
@@ -222,7 +222,7 @@ export const NormalOpNormPpColumns = [
   {
     field: 'UOM',
     title: 'UOM / MT',
-    widthT: 80,
+    widthT: 60,
     editable: false,
   },
 
@@ -345,7 +345,7 @@ export const NormalOpNormPpColumns = [
   {
     field: 'remarks',
     title: 'Remark',
-    width: 125,
+    widthT: 80,
     editable: true,
   },
 

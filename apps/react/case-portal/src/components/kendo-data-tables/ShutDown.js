@@ -12,6 +12,7 @@ import KendoDataTables from './index'
 import { ShutDownPeColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownPpColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
+import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 const ShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -324,7 +325,8 @@ const ShutDown = ({ permissions }) => {
         severity: 'success',
       })
 
-      const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
+      const maintenanceResponse =
+        await MaintenanceDetailsApiService.getMaintenanceData(keycloak)
 
       setModifiedCells({})
 
@@ -514,7 +516,7 @@ const ShutDown = ({ permissions }) => {
         fetchData()
 
         const maintenanceResponse =
-          await DataService.getMaintenanceData(keycloak)
+          await MaintenanceDetailsApiService.getMaintenanceData(keycloak)
       } else {
         setLoading(false)
       }

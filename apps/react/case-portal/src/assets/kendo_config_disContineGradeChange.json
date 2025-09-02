@@ -1,0 +1,105 @@
+[
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "widthT": 200,
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "normParameterFKId",
+
+    "hidden": true
+  },
+  {
+    "field": "productName",
+    "title": "Particulars",
+    "widthT": 120,
+    "editable": false
+  },
+
+  {
+    "field": "apr",
+    "title": 4,
+
+    "editable": true
+  },
+  {
+    "field": "may",
+    "title": 5,
+
+    "editable": true
+  },
+  {
+    "field": "jun",
+    "title": 6,
+
+    "editable": true
+  },
+  {
+    "field": "jul",
+    "title": 7,
+
+    "editable": true
+  },
+  {
+    "field": "aug",
+    "title": 8,
+
+    "editable": true
+  },
+  {
+    "field": "sep",
+    "title": 9,
+
+    "editable": true
+  },
+  {
+    "field": "oct",
+    "title": 10,
+
+    "editable": true
+  },
+  {
+    "field": "nov",
+    "title": 11,
+
+    "editable": true
+  },
+  {
+    "field": "dec",
+    "title": 12,
+
+    "editable": true
+  },
+  {
+    "field": "jan",
+    "title": 1,
+
+    "editable": true
+  },
+  {
+    "field": "feb",
+    "title": 2,
+
+    "editable": true
+  },
+  {
+    "field": "mar",
+    "title": 3,
+
+    "editable": true
+  },
+  {
+    "field": "remarks",
+    "title": "Remark",
+    "widthT": 80,
+    "editable": true
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true
+  }
+]

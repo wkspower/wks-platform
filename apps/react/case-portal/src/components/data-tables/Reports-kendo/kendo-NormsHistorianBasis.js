@@ -206,9 +206,7 @@ const NormsHistorianBasis = () => {
         {/* Accordion 1 */}
         <CustomAccordion defaultExpanded disableGutters>
           <CustomAccordionSummary>
-            <Typography className='grid-title'>
-              Production Volume Data
-            </Typography>
+            <Typography className='grid-title'>Production Target</Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>
             <Box sx={{ width: '100%' }}>

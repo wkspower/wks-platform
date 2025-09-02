@@ -23,7 +23,7 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 120
+    "widthT": 100
   },
   {
     "field": "april",

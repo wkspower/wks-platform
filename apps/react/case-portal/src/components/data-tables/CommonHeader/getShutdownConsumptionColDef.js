@@ -39,7 +39,7 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
       return {
         ...col,
         headerName: headerMap?.[monthNum] || col.field,
-        editable: safeShutdownMonths.includes(monthNum),
+        editable: isPEorPP ? false : safeShutdownMonths.includes(monthNum),
         ...(!isPEorPP && {
           isDisabled: !safeShutdownMonths.includes(monthNum),
         }),

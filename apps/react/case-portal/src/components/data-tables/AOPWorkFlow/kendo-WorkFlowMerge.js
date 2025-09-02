@@ -36,6 +36,7 @@ import MonthwiseRawMaterial from '../Reports-kendo/kendo-MonthwiseRawMaterial'
 import TurnaroundReport from '../Reports-kendo/kendo-TurnaroundReport'
 import AnnualProductionPlan from '../Reports-kendo/AnnualProductionPlan'
 import PlantContribution from '../Reports-kendo/kendo-PlantContribution'
+import PlantContributionLastFourYears from '../Reports-kendo/kendo-PlantContribution-Last-Four-Years'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -112,6 +113,7 @@ const WorkFlowMerge = () => {
   const isOldYear = oldYear?.oldYear === 1
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [tabIndex, setTabIndex] = useState(0)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -128,23 +130,14 @@ const WorkFlowMerge = () => {
     fetchData()
   }, [plantID, yearChanged])
 
-  const handleCalculate = () => {
-    if (lowerVertName == 'meg') {
-      handleCalculateMeg()
-    } else {
-      handleCalculateMeg()
-    }
-  }
   const handleExport = () => {
     handleExportAll()
   }
-  // const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  const handleCalculateMeg = async () => {
+  const handleCalculate = async () => {
     try {
       setLoadingCalculate(true)
-      // console.log('true 1')
 
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -222,7 +215,6 @@ const WorkFlowMerge = () => {
   const handleExportAll = async () => {
     try {
       setLoading(true)
-      // console.log('true 2')
 
       const storedPlant = localStorage.getItem('selectedPlant')
       const year = localStorage.getItem('year')
@@ -275,37 +267,6 @@ const WorkFlowMerge = () => {
     // }
   }
 
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-
-    return newRow
-  }, [])
   const caseData = {
     caseDefinitionId: 'aopv5',
     owner: {
@@ -320,14 +281,14 @@ const WorkFlowMerge = () => {
       { name: 'submit1', value: false, type: 'String' },
     ],
   }
-  // const screens = useScreens()
-  // console.log(screens)
+
   function getNumericKeysInAllRows(rows) {
     if (!Array.isArray(rows) || rows.length === 0) return []
     return Object.keys(rows[0]).filter((key) =>
       rows.every((row) => row[key] === '' || !isNaN(Number(row[key]))),
     )
   }
+
   const generateColumns = (data, numericKeys, handleRemarkCellClick) => {
     const cols = data.headers.map((header, i) => {
       const field = data.keys[i]
@@ -360,8 +321,6 @@ const WorkFlowMerge = () => {
   }
 
   const fetchData = async () => {
-    // setLoading(true)
-    // console.log('true 3')
     try {
       const { headers, keys, results } = await DataService.getWorkflowData(
         keycloak,
@@ -487,7 +446,6 @@ const WorkFlowMerge = () => {
   }
 
   useEffect(() => {
-    // fetchData()
     getCaseId()
   }, [plantId, year])
 
@@ -558,8 +516,6 @@ const WorkFlowMerge = () => {
       setText('')
     }
   }
-  const defaultCustomHeight = { mainBox: '43vh', otherBox: '118%' }
-  const [tabIndex, setTabIndex] = useState(0)
 
   return (
     <div
@@ -649,6 +605,7 @@ const WorkFlowMerge = () => {
               'Turnaround Report',
               'Annual Production Plan',
               'Plant Contribution',
+              'Plant Contribution Summary (Last 4 years)',
             ].map((label, idx) => (
               <Tab
                 key={idx}
@@ -701,11 +658,6 @@ const WorkFlowMerge = () => {
               handleExport={handleExport}
               fetchSecondGridData={fetchData}
             />
-
-            {/* <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-              Annual AOP Cost
-            </Typography> */}
-            {/* <div style={{ minHeight: 'fit-content', maxHeight: 'max-content' }}> */}
             <KendoDataTablesReports
               title='Annual AOP Cost'
               modifiedCells={modifiedCells}
@@ -716,9 +668,7 @@ const WorkFlowMerge = () => {
                 console.log('Row Updated:', updatedRow)
               }
               columns={columns}
-              // className='jio-data-grid'
               loading={loadingCalculate}
-              processRowUpdate={processRowUpdate}
               remarkDialogOpen={remarkDialogOpen}
               unsavedChangesRef={unsavedChangesRef}
               setRemarkDialogOpen={setRemarkDialogOpen}
@@ -735,13 +685,11 @@ const WorkFlowMerge = () => {
               saveChanges={saveChanges}
               showCreateCasebutton={showCreateCasebutton}
               permissions={{
-                // customHeight: defaultCustomHeight,
                 saveBtn: !isOldYear,
                 saveBtnForWorkflow: true,
                 remarksEditable: true,
                 showCreateCasebutton: showCreateCasebutton,
                 showTitle: true,
-                // showCalculate: true,
                 showWorkFlowBtns: true,
                 // approveBtn: false,
               }}
@@ -767,13 +715,13 @@ const WorkFlowMerge = () => {
             />
           </div>
         )}
-
         {tabIndex === 1 && <PlantsProductionSummary />}
         {tabIndex === 2 && <MonthwiseProduction />}
         {tabIndex === 3 && <MonthwiseRawMaterial />}
         {tabIndex === 4 && <TurnaroundReport />}
         {tabIndex === 5 && <AnnualProductionPlan />}
         {tabIndex === 6 && <PlantContribution />}
+        {tabIndex === 7 && <PlantContributionLastFourYears />}
       </Box>
     </div>
   )

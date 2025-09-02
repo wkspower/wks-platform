@@ -357,7 +357,7 @@ export const NormalOpNormMegColumns = [
   {
     field: 'remarks',
     title: 'Remark',
-    widthT: 160,
+    widthT: 80,
     editable: true,
   },
 

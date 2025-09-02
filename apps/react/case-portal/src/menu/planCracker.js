@@ -66,20 +66,20 @@ const planCracker = {
       type: 'collapse',
       icon: icons.IconArchive,
       children: [
-        // {
-        //   id: 'business-demand',
-        //   title: i18n.t('menu.productDemand'),
-        //   type: 'item',
-        //   url: '/production-norms-plan/business-demand',
-        //   icon: icons.IconChartBar,
-        //   breadcrumbs: true,
-        // },
         {
           id: 'configuration',
           title: i18n.t('menu.catalystSelectivity'),
           type: 'item',
           url: '/production-norms-plan/configuration',
           icon: icons.IconFilter,
+          breadcrumbs: true,
+        },
+        {
+          id: 'business-demand',
+          title: i18n.t('menu.productDemand'),
+          type: 'item',
+          url: '/production-norms-plan/business-demand',
+          icon: icons.IconChartBar,
           breadcrumbs: true,
         },
         {
@@ -121,14 +121,6 @@ const planCracker = {
           type: 'item',
           url: '/production-norms-plan/maintenance-details',
           icon: icons.IconCalendarCog,
-          breadcrumbs: true,
-        },
-        {
-          id: 'business-demand',
-          title: i18n.t('menu.productDemand'),
-          type: 'item',
-          url: '/production-norms-plan/business-demand',
-          icon: icons.IconChartBar,
           breadcrumbs: true,
         },
         {

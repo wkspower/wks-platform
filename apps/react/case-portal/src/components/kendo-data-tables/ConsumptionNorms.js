@@ -235,13 +235,44 @@ const ConsumptionNorms = () => {
   const fetchGradeDropdowns = async () => {
     try {
       setGrades([])
-      // const response = await ConsumptionNormsApiService.getNormalOperationNormsGrades(keycloak)
       const response =
         await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(keycloak)
 
       if (response?.code == 200) {
         setGrades(response?.data)
       }
+
+      fetchData(gradeId)
+    } catch (error) {
+      setGrades([])
+      console.error('Error fetching Business Demand data:', error)
+    }
+  }
+
+  const fetchGradeDropdownsAfterCalc = async () => {
+    try {
+      setGrades([])
+      const response =
+        await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(keycloak)
+
+      if (response?.code == 200) {
+        setGrades(response?.data)
+      }
+
+      if (response?.data?.length === 0) {
+        // no grades — clear selection and fetch blank data
+        setGradeId(null)
+        await fetchData(null)
+        return
+      }
+
+      const firstGrade = response?.data[0]
+      const firstId =
+        firstGrade?.id ?? firstGrade?.gradeId ?? firstGrade?.gradeFkId ?? null
+
+      setGradeId(firstId)
+
+      fetchData(firstId)
     } catch (error) {
       setGrades([])
       console.error('Error fetching Business Demand data:', error)
@@ -252,10 +283,18 @@ const ConsumptionNorms = () => {
     if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
     setLoading(true)
     try {
-      var response = await ConsumptionNormsApiService.getConsumptionNormsData(
-        keycloak,
-        gradeId,
-      )
+      var response
+      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        response = await ConsumptionNormsApiService.getConsumptionNormsData(
+          keycloak,
+          gradeId,
+        )
+      } else {
+        response = await ConsumptionNormsApiService.getConsumptionNormsData(
+          keycloak,
+          null,
+        )
+      }
 
       if (response?.code != 200) {
         setRows([])
@@ -316,7 +355,6 @@ const ConsumptionNorms = () => {
     if (lowerVertName === 'pe' || lowerVertName === 'pp') {
       fetchGradeDropdowns()
     }
-    // getAopSummary()
   }, [plantID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
 
   const productionColumns = getEnhancedColDefs({
@@ -355,7 +393,12 @@ const ConsumptionNorms = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
-        fetchData(gradeId)
+
+        if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+          fetchGradeDropdownsAfterCalc()
+        } else {
+          fetchData(null)
+        }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -490,6 +533,7 @@ const ConsumptionNorms = () => {
               groupBy='Particulars'
               grades={grades}
               handleGradeChange={handleGradeChange}
+              calculatebtnClicked={calculatebtnClicked}
             />
           </Box>
           // </CustomAccordionDetails>

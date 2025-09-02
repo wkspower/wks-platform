@@ -283,8 +283,8 @@ const BusinessDemand = ({ permissions }) => {
               id='meg-grid-header'
             >
               <Typography component='span' className='grid-title'>
-                Production Target (MT) (This is a reference for entering
-                the Business Demand value)
+                Production Target (MT) (This is a reference for entering the
+                Business Demand value)
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>

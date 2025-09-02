@@ -198,42 +198,34 @@ const ConfigurationTable = () => {
   }
 
   const fetchDataConstants = async () => {
-  setProductionRowsConstants([])
-  try {
-    var constantsRes = await DataService.getCatalystSelectivityDataConstants(keycloak)
-    if (constantsRes?.code != 200) {
-      setProductionRowsConstants([])
-      return
+    setProductionRowsConstants([])
+    try {
+      var constantsRes =
+        await DataService.getCatalystSelectivityDataConstants(keycloak)
+      if (constantsRes?.code != 200) {
+        setProductionRowsConstants([])
+        return
+      }
+
+      var data = constantsRes?.data
+
+      const formattedData = data.map((item, index) => {
+        return {
+          ...item,
+          idFromApi: item.id,
+          id: index,
+          originalRemark: item.Remarks,
+          srNo: index + 1,
+          Particulars: item.NormTypeName,
+          remarks: item.Remarks,
+        }
+      })
+
+      setProductionRowsConstants(formattedData)
+    } catch (error) {
+      console.error('Error fetching data:', error)
     }
-
-    var data = constantsRes?.data;
-
-    const formattedData = data.map((item, index) => {
-      // ✅ format ConstantValue like your maxRate logic
-      const value = item.ConstantValue
-      const num = parseFloat(value)
-      const formattedConstant =
-        typeof value === "string" && !isNaN(num) ? num :
-        typeof value === "number" ? value :
-        value
-
-      return {
-        ...item,
-        idFromApi: item.id,
-        id: index,
-        originalRemark: item.Remarks,
-        srNo: index + 1,
-        Particulars: item.NormTypeName,
-        remarks: item.Remarks,
-        ConstantValue: formattedConstant, // ✅ updated
-      };
-    });
-
-    setProductionRowsConstants(formattedData)
-  } catch (error) {
-    console.error("Error fetching data:", error)
   }
-}
 
   const fetchDataConstantsMnnualEntry = async () => {
     setProductionRowsConstantsMannualEntry([])

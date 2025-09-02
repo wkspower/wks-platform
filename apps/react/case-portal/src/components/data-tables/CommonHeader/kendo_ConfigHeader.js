@@ -4,11 +4,14 @@ import productionColumnsPE1 from '../../../assets/kendo_config_pe1.json'
 import productionColumnsPE2 from '../../../assets/kendo_config_pe2.json'
 import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
 import productionColumnsPE5 from '../../../assets/kendo_config_pe5.json'
-// import productionColumnsPE4 from '../../../assets/kendo_config_pe4.json'
+
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
 import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
 import cracker_yield from '../../../assets/kendo_config_cracker_yield_coldefs.json'
 import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
+
+import disContineGradeChange from '../../../assets/kendo_config_disContineGradeChange.json'
+import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
 
 const getConfigByType = (configType) => {
   switch (configType) {
@@ -46,6 +49,13 @@ const getConfigByType = (configType) => {
       return cracker_constants
     case 'cracker_yield':
       return cracker_yield
+
+    case 'ContineGradeChange':
+      return contineGradeChange
+
+    case 'DisContineGradeChange':
+      return disContineGradeChange
+
     default:
       return productionColumns
   }

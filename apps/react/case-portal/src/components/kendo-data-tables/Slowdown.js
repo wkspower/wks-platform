@@ -168,7 +168,8 @@ const SlowDown = ({ permissions }) => {
         keycloak,
       )
 
-      const maintenanceResponse = await DataService.getMaintenanceData(keycloak)
+      const maintenanceResponse =
+        await MaintenanceDetailsApiService.getMaintenanceData(keycloak)
 
       setSnackbarOpen(true)
 
@@ -776,7 +777,7 @@ const SlowDown = ({ permissions }) => {
         })
         fetchData()
         const maintenanceResponse =
-          await DataService.getMaintenanceData(keycloak)
+          await MaintenanceDetailsApiService.getMaintenanceData(keycloak)
       } else {
         setLoading(false)
       }

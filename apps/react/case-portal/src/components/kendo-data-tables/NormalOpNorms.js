@@ -769,6 +769,7 @@ const NormalOpNormsScreen = () => {
   }
 
   const handleCalculate = async () => {
+    setRows([])
     setLoading(true)
     try {
       const storedPlant = localStorage.getItem('selectedPlant')

@@ -201,8 +201,6 @@ const ShutdownNorms = () => {
 
   const colDefs = getShutdownConsumptionColDef({ headerMap, shutdownMonths })
 
-  // console.log('colDefs', colDefs)
-
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
     setCurrentRemark(row.remarks || '')
@@ -308,6 +306,8 @@ const ShutdownNorms = () => {
 
       setCalculationObject(data?.data?.aopCalculation)
 
+      const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+
       const formattedData = data?.data?.mcuNormsValueDTOList?.map(
         (item, index) => {
           const baseItem = {
@@ -318,7 +318,7 @@ const ShutdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'By Products',
-            isEditable: true,
+            isEditable: isPEorPP ? false : true,
           }
 
           return baseItem
@@ -337,35 +337,7 @@ const ShutdownNorms = () => {
     setSelectedUnit(unit)
   }
 
-  const loadGradesAfterCalculation = async () => {
-    if (['pe', 'pp'].includes(lowerVertName)) {
-      try {
-        const response =
-          await NormalOperationNormsApiService.getGradesForShutdownNorms(
-            keycloak,
-          )
-
-        if (response?.code === 200) {
-          setGrades(response?.data)
-          if (Array.isArray(response?.data) && response?.data?.length === 0) {
-            setLoading(false)
-            return
-          }
-        }
-
-        setGradeId(gradeId)
-        fetchData(gradeId)
-      } catch (error) {
-        setGrades([])
-        console.error('Error fetching grades:', error)
-      }
-    } else {
-      fetchData(null)
-      data = await ShutdownNormsApiService.getShutdownMonths(keycloak, null)
-      setShutdownMonths(data)
-    }
-  }
-
+  // --- handleCalculateData (call loadGradesAfterCalculation after success) ---
   const handleCalculateData = async () => {
     setRows([])
     setGrades([])
@@ -377,12 +349,12 @@ const ShutdownNorms = () => {
     try {
       const year = localStorage.getItem('year')
       const storedPlant = localStorage.getItem('selectedPlant')
+      let plantId = ''
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
 
-      var plantId = plantId
       const response =
         await ShutdownNormsApiService.handleCalculateShutdownNorms(
           plantId,
@@ -396,23 +368,77 @@ const ShutdownNorms = () => {
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
-        setLoading(false)
 
-        loadGradesAfterCalculation()
-      }
-
-      // dispatch(setIsBlocked(true))
-      else {
+        // load grades and pick the 0th index
+        await loadGradesAfterCalculation()
+      } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Refresh Falied!',
+          message: 'Data Refresh Failed!',
           severity: 'error',
         })
-        setLoading(false)
       }
     } catch (error) {
       console.error('Error saving refresh data:', error)
+    } finally {
       setLoading(false)
+      setCalculatebtnClicked(false)
+    }
+  }
+
+  // --- loadGradesAfterCalculation (always pick the first returned grade) ---
+  const loadGradesAfterCalculation = async () => {
+    if (['pe', 'pp'].includes(lowerVertName)) {
+      try {
+        const response =
+          await NormalOperationNormsApiService.getGradesForShutdownNorms(
+            keycloak,
+          )
+
+        if (response?.code === 200) {
+          const fetchedGrades = response?.data || []
+          setGrades(fetchedGrades)
+
+          if (fetchedGrades.length === 0) {
+            // no grades — clear selection and fetch blank data
+            setGradeId(null)
+            await fetchData(null)
+            return
+          }
+
+          // pick the 0th index (use the correct id field from your grade object)
+          const firstGrade = fetchedGrades[0]
+          const firstId =
+            firstGrade?.id ??
+            firstGrade?.gradeId ??
+            firstGrade?.gradeFkId ??
+            null
+
+          setGradeId(firstId)
+          await fetchData(firstId)
+        } else {
+          setGrades([])
+          setGradeId(null)
+          await fetchData(null)
+        }
+      } catch (error) {
+        console.error('Error fetching grades:', error)
+        setGrades([])
+        setGradeId(null)
+        await fetchData(null)
+      }
+    } else {
+      // non PE/PP flow
+      await fetchData(null)
+      try {
+        const months = await ShutdownNormsApiService.getShutdownMonths(
+          keycloak,
+          null,
+        )
+        setShutdownMonths(months)
+      } catch (err) {
+        console.error('Error fetching shutdown months:', err)
+      }
     }
   }
 
@@ -450,7 +476,7 @@ const ShutdownNorms = () => {
       showUnit: false,
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
-      saveBtn: true,
+      saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
       showCalculate: lowerVertName == 'meg' ? false : true,
       showCalculateVisibility:
         lowerVertName != 'meg' &&
@@ -515,6 +541,7 @@ const ShutdownNorms = () => {
         groupBy='Particulars'
         permissions={adjustedPermissions}
         handleGradeChange={handleGradeChange}
+        calculatebtnClicked={calculatebtnClicked}
         plantID={plantID}
         grades={grades}
       />

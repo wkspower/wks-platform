@@ -355,7 +355,6 @@ main.MuiBox-root.css-vognfw {
   accent-color: #111;
 }
 
-.bold-red-text {
-  font-weight: bold;
-  color: red;
+.bold-text {
+  font-weight: bold !important;
 }
