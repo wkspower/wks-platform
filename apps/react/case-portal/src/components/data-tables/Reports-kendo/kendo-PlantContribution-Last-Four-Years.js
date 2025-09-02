@@ -4,20 +4,20 @@ import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
-import { MockReportService } from './mockPlantContributionAPI'
+import { MockPlantContributionAPILastFourYears } from './mockPlantContributionAPILastFourYears'
 
 const categories = () => {
   return [
     {
       key: 'ProductMixAndProduction',
-      title: 'Plant Contribution (T-21)\nProduct mix and Production',
+      title: 'Plant Contribution Summary (T-22)\nProduct mix and Production',
     },
     { key: 'ByProducts', title: 'By products' },
     { key: 'RawMaterial', title: 'Raw material' },
     { key: 'CatChem', title: 'Cat chem' },
     { key: 'Utilities', title: 'Utilities' },
     { key: 'OtherVariableCost', title: 'Other Variable Cost' },
-    { key: 'ProductionCostCalculations', title: 'Production Cost Calculation' },
+    { key: 'ProductionCostCalculations', title: 'Cost & Contribution Summary' },
   ]
 }
 
@@ -32,7 +32,7 @@ export default function PlantContributionLastFourYears() {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [rows, setRows] = useState()
+
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -47,11 +47,12 @@ export default function PlantContributionLastFourYears() {
 
     await Promise.all(
       categories().map(async ({ key }) => {
-        const { columns, columnGrouping } = await MockReportService.getReport({
-          category: key,
-          year,
-          verticalName,
-        })
+        const { columns, columnGrouping } =
+          await MockPlantContributionAPILastFourYears.getReport({
+            category: key,
+            year,
+            verticalName,
+          })
 
         const apiResp = await DataService.getPlantContributionYearWisePlan(
           keycloak,
@@ -81,100 +82,11 @@ export default function PlantContributionLastFourYears() {
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()
   }
-  const handleCalculateMonthwiseAndTurnaround = async () => {
-    try {
-      setLoading(true)
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      var plantId = plantId
-      const res = await DataService.calculatePlantContributionReportData(
-        plantId,
-        year,
-        keycloak,
-      )
-
-      if (res?.code == 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Refreshed Successfully!',
-          severity: 'success',
-        })
-        loadAll()
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Refreshed Faild!',
-          severity: 'error',
-        })
-      }
-
-      return res
-    } catch (error) {
-      console.error('Error!', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
-  }
-
-  const saveChanges = async () => {
-    try {
-      if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        setLoading(false)
-        return
-      }
-
-      var data = Object.values(modifiedCells)
-      // console.log('row',row);
-      const rowsToUpdate = data.map((row) => ({
-        id: row?.actualId,
-        prevYearActual: row.PrevYearActual,
-        PrevYearBudget: row.PrevYearBudget,
-        CurrentYearBudget: row.CurrentYearBudget,
-
-        remark: row.remarks || '',
-      }))
-      const res = await DataService.savePlantContributionData(
-        keycloak,
-        rowsToUpdate,
-        plantId,
-      )
-
-      if (res?.code == 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Saved Successfully!',
-          severity: 'success',
-        })
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Saved Failed!',
-          severity: 'error',
-        })
-      }
-    } catch (err) {
-      console.error('Error while save', err)
-      setSnackbarOpen(true)
-      setSnackbarData({ message: err.message, severity: 'error' })
-    } finally {
-      setSnackbarOpen(true)
-    }
   }
 
   return (
@@ -185,7 +97,7 @@ export default function PlantContributionLastFourYears() {
       ></Backdrop>
 
       {categories()
-        .filter((item) => item.key) // keep only items that have a key
+        .filter((item) => item.key)
         .map(({ key, title }, idx) => {
           const rpt = reports[key] || {}
           return (
@@ -193,7 +105,6 @@ export default function PlantContributionLastFourYears() {
               <KendoDataTablesReports
                 columns={rpt.columns || []}
                 rows={rpt.rows || []}
-                handleCalculate={handleCalculate}
                 title={title}
                 permissions={{
                   textAlignment: 'center',

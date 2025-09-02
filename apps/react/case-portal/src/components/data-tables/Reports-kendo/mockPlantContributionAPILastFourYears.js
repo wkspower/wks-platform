@@ -1,24 +1,17 @@
-export const MockReportService = {
+export const MockPlantContributionAPILastFourYears = {
   async getReport({ category, year, verticalName }) {
-    // const currFY = year || ''
     const currFY = year || ''
-
     let prevFY1 = ''
     let prevFY2 = ''
     let prevFY3 = ''
     let prevFY4 = ''
-
     if (currFY.includes('-')) {
       const [start, end] = currFY.split('-').map(Number)
-
       prevFY1 = `${start - 1}-${(end - 1).toString().padStart(2, '0')}`
       prevFY2 = `${start - 2}-${(end - 2).toString().padStart(2, '0')}`
       prevFY3 = `${start - 3}-${(end - 3).toString().padStart(2, '0')}`
       prevFY4 = `${start - 4}-${(end - 4).toString().padStart(2, '0')}`
     }
-
-    // console.log(prevFY1, prevFY2, prevFY3)
-
     switch (category) {
       // ==== A. Product mix and production ====
       case 'ProductMixAndProduction':
@@ -26,22 +19,22 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'SL.No',
+              title: 'S.no',
+              widthT: 58,
               editable: false,
-              widthT: 100,
+
               align: 'right',
             },
             {
               field: 'ByProductName',
               title: 'Product name',
               editable: false,
-              widthT: 300,
             },
             {
               field: 'Unit',
+              widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
-              widthT: 100,
             },
             {
               title: 'Price',
@@ -51,7 +44,7 @@ export const MockReportService = {
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   align: 'right',
-                  width: 120,
+
                   format: '{0:#.##}',
                   type: 'number',
                 },
@@ -68,7 +61,7 @@ export const MockReportService = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      width: 120,
+
                       format: '{0:#.##}',
                       type: 'number',
                     },
@@ -82,7 +75,7 @@ export const MockReportService = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      width: 120,
+
                       format: '{0:#.##}',
                       type: 'number',
                     },
@@ -96,7 +89,7 @@ export const MockReportService = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      width: 120,
+
                       format: '{0:#.##}',
                       type: 'number',
                     },
@@ -110,7 +103,7 @@ export const MockReportService = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      width: 120,
+
                       format: '{0:#.##}',
                       type: 'number',
                     },
@@ -124,7 +117,7 @@ export const MockReportService = {
                       title: 'Budget',
                       editable: false,
                       align: 'right',
-                      width: 120,
+
                       format: '{0:#.##}',
                       type: 'number',
                     },
@@ -141,8 +134,8 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'SL.No',
-              widthT: 100,
+              title: 'S.no',
+              widthT: 58,
 
               editable: false,
               align: 'right',
@@ -151,13 +144,12 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'By product name',
               editable: false,
-              widthT: 300,
             },
             {
               field: 'Unit',
+              widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
-              widthT: 100,
             },
             {
               title: 'Price',
@@ -166,7 +158,7 @@ export const MockReportService = {
                   field: 'Price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
-                  width: 120,
+
                   align: 'right',
                   format: '{0:#.##}',
                   type: 'number',
@@ -174,25 +166,58 @@ export const MockReportService = {
               ],
             },
             {
-              title: 'Norm Unit/MT',
+              title: 'Specific Consumptions',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearNormBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1NormActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearNormActual',
+                      field: 'PrevYear2NormActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3NormActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4NormActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -203,10 +228,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearNormActual',
+                      field: 'CurrYearNormBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -219,22 +244,55 @@ export const MockReportService = {
               title: 'Cost Rs/MT',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearCostBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1CostActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearCostActual',
+                      field: 'PrevYear2CostActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3CostActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4CostActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -245,10 +303,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearCostActual',
+                      field: 'CurrYearCostBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -266,8 +324,8 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'SL.No',
-              widthT: 100,
+              title: 'S.no',
+              widthT: 58,
 
               editable: false,
               align: 'right',
@@ -276,13 +334,12 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Raw material name',
               editable: false,
-              widthT: 300,
             },
             {
               field: 'Unit',
-              title: verticalName === 'meg' ? 'UOM' : 'Unit',
+              widthT: 60,
+              title: 'UOM',
               editable: false,
-              widthT: 100,
             },
             {
               title: 'Price',
@@ -291,7 +348,7 @@ export const MockReportService = {
                   field: 'Price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
-                  width: 120,
+
                   align: 'right',
                   format: '{0:#.##}',
                   type: 'number',
@@ -299,25 +356,58 @@ export const MockReportService = {
               ],
             },
             {
-              title: 'Norm Unit/MT',
+              title: 'Specific Consumptions',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearNormBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1NormActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearNormActual',
+                      field: 'PrevYear2NormActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3NormActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4NormActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -328,10 +418,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearNormActual',
+                      field: 'CurrYearNormBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -344,22 +434,55 @@ export const MockReportService = {
               title: 'Cost Rs/MT',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearCostBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1CostActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearCostActual',
+                      field: 'PrevYear2CostActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3CostActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4CostActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -370,10 +493,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearCostActual',
+                      field: 'CurrYearCostBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -391,8 +514,8 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'SL.No',
-              widthT: 100,
+              title: 'S.no',
+              widthT: 58,
 
               editable: false,
               align: 'right',
@@ -401,13 +524,12 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Catalyst name',
               editable: false,
-              widthT: 300,
             },
             {
               field: 'Unit',
+              widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
-              widthT: 100,
             },
             {
               title: 'Price',
@@ -416,7 +538,7 @@ export const MockReportService = {
                   field: 'Price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
-                  width: 120,
+
                   align: 'right',
                   format: '{0:#.##}',
                   type: 'number',
@@ -424,27 +546,60 @@ export const MockReportService = {
               ],
             },
             {
-              title: 'Norm Unit/MT',
+              title: 'Specific Consumptions',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearNormBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1NormActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearNormActual',
+                      field: 'PrevYear2NormActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
-                      format: '{0:#. ##}',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3NormActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4NormActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
                       type: 'number',
                     },
                   ],
@@ -453,10 +608,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearNormActual',
+                      field: 'CurrYearNormBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -469,22 +624,55 @@ export const MockReportService = {
               title: 'Cost Rs/MT',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearCostBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1CostActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearCostActual',
+                      field: 'PrevYear2CostActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3CostActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4CostActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -495,10 +683,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearCostActual',
+                      field: 'CurrYearCostBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -516,8 +704,8 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'SL.No',
-              widthT: 100,
+              title: 'S.no',
+              widthT: 58,
 
               editable: false,
               align: 'right',
@@ -526,13 +714,12 @@ export const MockReportService = {
               field: 'ByProductName',
               title: 'Utility name',
               editable: false,
-              widthT: 300,
             },
             {
               field: 'Unit',
+              widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
-              widthT: 100,
             },
             {
               title: 'Price',
@@ -541,7 +728,7 @@ export const MockReportService = {
                   field: 'Price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
-                  width: 120,
+
                   align: 'right',
                   format: '{0:#.##}',
                   type: 'number',
@@ -549,25 +736,58 @@ export const MockReportService = {
               ],
             },
             {
-              title: 'Norm Unit/MT',
+              title: 'Specific Consumptions',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearNormBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1NormActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearNormActual',
+                      field: 'PrevYear2NormActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3NormActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4NormActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -578,10 +798,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearNormActual',
+                      field: 'CurrYearNormBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -594,22 +814,55 @@ export const MockReportService = {
               title: 'Cost Rs/MT',
               children: [
                 {
-                  title: prevFY1,
+                  title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearCostBudget',
-                      title: 'Budget',
+                      field: 'PrevYear1CostActual',
+                      title: 'Actual',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
                     },
+                  ],
+                },
+                {
+                  title: prevFY3,
+                  children: [
                     {
-                      field: 'PrevYearCostActual',
+                      field: 'PrevYear2CostActual',
                       title: 'Actual',
                       editable: false,
-                      width: 120,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY2,
+                  children: [
+                    {
+                      field: 'PrevYear3CostActual',
+                      title: 'Actual',
+                      editable: false,
+
+                      align: 'right',
+                      format: '{0:#.##}',
+                      type: 'number',
+                    },
+                  ],
+                },
+                {
+                  title: prevFY1,
+                  children: [
+                    {
+                      field: 'PrevYear4CostActual',
+                      title: 'Actual',
+                      editable: false,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -620,10 +873,10 @@ export const MockReportService = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearCostActual',
+                      field: 'CurrYearCostBudget',
                       title: 'Budget',
                       editable: false,
-                      width: 120,
+
                       align: 'right',
                       format: '{0:#.##}',
                       type: 'number',
@@ -641,8 +894,8 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'S.No',
-              widthT: 80,
+              title: 'S.no',
+              widthT: 58,
               align: 'right',
               editable: false,
             },
@@ -653,31 +906,59 @@ export const MockReportService = {
             {
               field: 'OtherCost',
               title: 'Other cost',
-              width: 200,
               editable: false,
             },
             {
               field: 'Unit',
+              widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
-              widthT: 100,
               editable: false,
             },
             {
-              title: prevFY1, // e.g., '2023-24'
+              title: prevFY4,
               children: [
                 {
-                  field: 'PrevYearBudget',
-                  title: 'Budget',
-                  width: 120,
+                  field: 'PrevYearActual',
+                  title: 'Actual',
                   align: 'right',
                   editable: true,
                   format: '{0:#.##}',
                   type: 'numberNonGrey',
                 },
+              ],
+            },
+            {
+              title: prevFY3,
+              children: [
                 {
                   field: 'PrevYearActual',
                   title: 'Actual',
-                  width: 120,
+                  align: 'right',
+                  editable: true,
+                  format: '{0:#.##}',
+                  type: 'numberNonGrey',
+                },
+              ],
+            },
+            {
+              title: prevFY2,
+              children: [
+                {
+                  field: 'PrevYearActual',
+                  title: 'Actual',
+                  align: 'right',
+                  editable: true,
+                  format: '{0:#.##}',
+                  type: 'numberNonGrey',
+                },
+              ],
+            },
+            {
+              title: prevFY1,
+              children: [
+                {
+                  field: 'PrevYearActual',
+                  title: 'Actual',
                   align: 'right',
                   editable: true,
                   format: '{0:#.##}',
@@ -691,7 +972,6 @@ export const MockReportService = {
                 {
                   field: 'CurrentYearBudget',
                   title: 'Budget',
-                  width: 120,
                   align: 'right',
                   editable: true,
                   format: '{0:#.##}',
@@ -708,9 +988,8 @@ export const MockReportService = {
           columns: [
             {
               field: 'SrNo',
-              title: 'SL.No',
-              widthT: 100,
-
+              title: 'S.no',
+              widthT: 58,
               align: 'right',
               editable: false,
             },
@@ -721,21 +1000,11 @@ export const MockReportService = {
               editable: false,
             },
             {
-              title: prevFY1, // e.g., '2023-24'
+              title: prevFY4, // e.g., '2023-24'
               children: [
-                {
-                  field: 'PrevYearBudget',
-                  title: 'Budget',
-                  width: 120,
-                  align: 'right',
-                  editable: false,
-                  format: '{0:#.##}',
-                  type: 'number',
-                },
                 {
                   field: 'PrevYearActual',
                   title: 'Actual',
-                  width: 120,
                   align: 'right',
                   editable: false,
                   format: '{0:#.##}',
@@ -744,12 +1013,52 @@ export const MockReportService = {
               ],
             },
             {
-              title: currFY, // e.g., '2024-25'
+              title: prevFY3, // e.g., '2023-24'
+              children: [
+                {
+                  field: 'PrevYearActual',
+                  title: 'Actual',
+                  align: 'right',
+                  editable: false,
+                  format: '{0:#.##}',
+                  type: 'number',
+                },
+              ],
+            },
+            {
+              title: prevFY2, // e.g., '2023-24'
+              children: [
+                {
+                  field: 'PrevYearActual',
+                  title: 'Actual',
+                  align: 'right',
+                  editable: false,
+                  format: '{0:#.##}',
+                  type: 'number',
+                },
+              ],
+            },
+            {
+              title: prevFY1, // e.g., '2023-24'
+              children: [
+                {
+                  field: 'PrevYearActual',
+                  title: 'Actual',
+
+                  align: 'right',
+                  editable: false,
+                  format: '{0:#.##}',
+                  type: 'number',
+                },
+              ],
+            },
+            {
+              title: currFY,
               children: [
                 {
                   field: 'NextYearBudget',
                   title: 'Budget',
-                  width: 120,
+
                   align: 'right',
                   editable: false,
                   format: '{0:#.##}',
