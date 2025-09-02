@@ -126,7 +126,7 @@ const ConfigurationTable = () => {
             startUpRows = rowsForThisCategory
           } else if (ConfigTypeName == 'Otherlosses') {
             otherLossRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'ContineGradeChange') {
+          } else if (ConfigTypeName == 'gradeChange') {
             continiousGradeRows = rowsForThisCategory
           } else if (ConfigTypeName == 'DisContineGradeChange') {
             discontiniousGradeRows = rowsForThisCategory
@@ -332,17 +332,17 @@ const ConfigurationTable = () => {
                   configType='grades'
                 />
               )
-            case getTheId('ContineGradeChange'): // ContineGradeChange
+            case getTheId('gradeChange'): // gradeChange
               return (
                 <SelectivityData
                   rows={continiousGradeData}
                   loading={loading}
                   setRows={setContiniousGradeData}
                   fetchData={fetchData}
-                  configType='ContineGradeChange'
+                  configType='gradeChange'
                 />
               )
-            case getTheId('DisContineGradeChange'): // DisContineGradeChange
+            case getTheId('DisContineGradeChange'): //
               return (
                 <SelectivityData
                   rows={discontiniousGradeData}

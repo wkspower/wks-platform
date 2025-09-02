@@ -14,7 +14,7 @@
   {
     "field": "productName",
     "title": "Particulars",
-    "widthT": 120,
+    "widthT": 160,
     "editable": false
   },
 
