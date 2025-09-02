@@ -116,7 +116,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 					map.put("oct", (row[19] == null || row[19].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[19].toString()));
 					map.put("nov", (row[20] == null || row[20].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[20].toString()));
 					map.put("dec", (row[21] == null || row[21].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[21].toString()));
-					map.put("isEditable", row[22]);
+					map.put("isEditable", row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
 					spyroInputDataList.add(map); // Add the map to the list here
 				} else {
 					if (type.equalsIgnoreCase("Composition")) {
@@ -142,7 +142,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 							map.put("oct", (row[19] == null || row[19].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[19].toString()));
 							map.put("nov", (row[20] == null || row[20].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[20].toString()));
 							map.put("dec", (row[21] == null || row[21].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[21].toString()));
-							map.put("isEditable", row[22]);
+							map.put("isEditable", row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
 							spyroInputDataList.add(map); // Add the map to the list here
 						}
 					}
