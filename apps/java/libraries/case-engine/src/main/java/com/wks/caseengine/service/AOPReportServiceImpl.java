@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPReportDTO;
+import com.wks.caseengine.dto.FiveYearSummaryReportDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -400,6 +401,62 @@ public class AOPReportServiceImpl implements AOPReportService {
 		}
 	}
 
+	@Override
+	public AOPMessageVM getFiveYearSummaryReport(String plantId, String year, String reportType) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<FiveYearSummaryReportDTO> fiveYearSummaryReportDTOList =new ArrayList<>();
+			List<Object[]> results = getData(plantId, year, reportType);
+			for (Object[] row : results) {
+				FiveYearSummaryReportDTO fiveYearSummaryReportDTO = new FiveYearSummaryReportDTO();
+				fiveYearSummaryReportDTO.setId(row[0] != null ? row[0].toString() : null);
+				fiveYearSummaryReportDTO.setRowNo(row[1] != null ? Integer.parseInt(row[1].toString()) : null);
+				fiveYearSummaryReportDTO.setMaterial(row[2] != null ? row[2].toString() : null);
+				fiveYearSummaryReportDTO.setUom(row[3] != null ? row[3].toString() : null);
+				fiveYearSummaryReportDTO.setPrice(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
+				fiveYearSummaryReportDTO.setActualFourYearsAgo(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
+				fiveYearSummaryReportDTO.setActualThreeYearsAgo(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
+				fiveYearSummaryReportDTO.setActualTwoYearsAgo(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
+				fiveYearSummaryReportDTO.setActualLastYear(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+				fiveYearSummaryReportDTO.setBudgetCurrent(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+				fiveYearSummaryReportDTO.setRemark(row[10] != null ? row[10].toString() : null);
+				fiveYearSummaryReportDTOList.add(fiveYearSummaryReportDTO);
+
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(fiveYearSummaryReportDTOList);
+			aopMessageVM.setMessage("Data fetched successfully");
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+
+	public List<Object[]> getData(String plantId, String aopYear, String reportType) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			
+			String procedureName = "PlantContributionFiveYearSummaryReport";
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("reportType", reportType);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 
 	
 

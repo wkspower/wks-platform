@@ -35,6 +35,12 @@ public class AOPReportController {
 		AOPMessageVM response	=aopReportService.getHandleCalculateMIISContribution(plantId,year);
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
+	
+	@GetMapping(value="/plant-contribution-years-wise")
+	public AOPMessageVM getFiveYearSummaryReport(@RequestParam String plantId,@RequestParam String year,@RequestParam(required=false) String reportType){
+		return aopReportService.getFiveYearSummaryReport(plantId,year,reportType);
+		
+	}
 
 
 }
