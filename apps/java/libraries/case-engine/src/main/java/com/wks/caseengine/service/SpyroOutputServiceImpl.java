@@ -414,6 +414,11 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 								list.add(value);
 							}
 							list.add(tableId);
+							UUID normParameterFKId = UUID.fromString(dto.getNormParameterFKID());
+							Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
+							if(optionNormParameters.isPresent()) {
+								list.add(optionNormParameters.get().getIsEditable());
+							}
 							dataList.add(list);
 						}
 
@@ -445,6 +450,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 								list.add(map.get(header));
 							}
 							list.add(tableId);
+							list.add(map.get("isEditable"));
 							dataList.add(list);
 						}
 
