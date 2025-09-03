@@ -23,6 +23,7 @@ const ShutDown = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
 
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const plantName = JSON.parse(localStorage.getItem('selectedPlant'))?.name
 
   useEffect(() => {
     if (plantID?.plantId) {
@@ -69,11 +70,18 @@ const ShutDown = ({ permissions }) => {
         return
       }
       let requiredFields
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-        requiredFields = ['discription', 'remark', 'productName1']
+      if (lowerVertName === 'pe') {
+        if (plantName?.toLowerCase() === 'ldpe') {
+          requiredFields = ['discription', 'remark', 'productName1']
+        } else {
+          requiredFields = ['discription', 'remark']
+        }
+      } else if (lowerVertName === 'pp') {
+        requiredFields = ['discription', 'remark']
       } else {
         requiredFields = ['discription', 'remark']
       }
+
       const rowsWithErrors = new Set()
 
       // Check each record for missing required fields
@@ -487,13 +495,20 @@ const ShutDown = ({ permissions }) => {
   const colDefs = useMemo(() => {
     switch (lowerVertName) {
       case verticalEnums.PE:
+        if (plantName?.toLowerCase() != 'ldpe') {
+          return ShutDownAllColumns
+        }
+
         return ShutDownPeColumns
+
       case verticalEnums.PP:
         return ShutDownPpColumns
+
       default:
         return ShutDownAllColumns
     }
-  }, [lowerVertName])
+  }, [lowerVertName, plantName])
+
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
 

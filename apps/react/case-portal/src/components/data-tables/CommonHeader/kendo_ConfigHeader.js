@@ -50,7 +50,7 @@ const getConfigByType = (configType) => {
     case 'cracker_yield':
       return cracker_yield
 
-    case 'gradeChange':
+    case 'ContineGradeChange':
       return contineGradeChange
 
     case 'DisContineGradeChange':

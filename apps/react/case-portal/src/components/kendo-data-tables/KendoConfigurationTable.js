@@ -35,7 +35,6 @@ import {
 const ConfigurationTable = () => {
   const year = localStorage.getItem('year')
   const hasExecutedRef = useRef(false)
-
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
@@ -133,6 +132,7 @@ const ConfigurationTable = () => {
         // setRows(formattedData)
       } else {
         const groups = new Map()
+
         data.forEach((item) => {
           const ConfigTypeName = item.ConfigTypeName
           const TypeName = item.TypeDisplayName
@@ -173,7 +173,7 @@ const ConfigurationTable = () => {
             startUpRows = rowsForThisCategory
           } else if (ConfigTypeName == 'Otherlosses') {
             otherLossRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'gradeChange') {
+          } else if (ConfigTypeName == 'ContineGradeChange') {
             continiousGradeRows = rowsForThisCategory
           } else if (ConfigTypeName == 'DisContineGradeChange') {
             discontiniousGradeRows = rowsForThisCategory
@@ -1003,14 +1003,14 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                   />
                 )
-              case getTheId('gradeChange'):
+              case getTheId('ContineGradeChange'):
                 return (
                   <SelectivityData
                     rows={continiousGradeData}
                     loading={loading}
                     setRows={setContiniousGradeData}
                     fetchData={fetchData}
-                    configType='gradeChange'
+                    configType='ContineGradeChange'
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}

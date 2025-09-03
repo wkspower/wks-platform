@@ -713,7 +713,7 @@ const ProductionvolumeData = ({ permissions }) => {
     },
     {
       widthT: 150,
-      field: 'productName',
+      field: 'remarks',
       title: 'Remark',
     },
   ]
@@ -998,7 +998,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
     {
       widthT: 150,
-      field: 'productName',
+      field: 'remarks',
       title: 'Remark',
     },
   ]

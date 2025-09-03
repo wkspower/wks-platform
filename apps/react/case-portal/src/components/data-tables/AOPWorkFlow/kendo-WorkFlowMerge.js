@@ -605,7 +605,7 @@ const WorkFlowMerge = () => {
               'Turnaround Report',
               'Annual Production Plan',
               'Plant Contribution',
-              'Plant Contribution Summary (Last 4 years)',
+              // 'Plant Contribution Summary (Last 4 years)',
             ].map((label, idx) => (
               <Tab
                 key={idx}
@@ -721,7 +721,7 @@ const WorkFlowMerge = () => {
         {tabIndex === 4 && <TurnaroundReport />}
         {tabIndex === 5 && <AnnualProductionPlan />}
         {tabIndex === 6 && <PlantContribution />}
-        {tabIndex === 7 && <PlantContributionLastFourYears />}
+        {/* {tabIndex === 7 && <PlantContributionLastFourYears />} */}
       </Box>
     </div>
   )

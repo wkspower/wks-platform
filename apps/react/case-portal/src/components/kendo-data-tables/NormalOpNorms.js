@@ -846,41 +846,24 @@ const NormalOpNormsScreen = () => {
       }
       var plantId = plantId
       var data = null
-      let siteID =
-        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-      let verticalId = localStorage.getItem('verticalId')
 
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-        data =
-          await NormalOperationNormsApiService.handleCalculateNormalOperationNormsPe(
-            plantId,
-            siteID,
-            verticalId,
-            year,
-            keycloak,
-          )
-      } else {
-        data =
-          await NormalOperationNormsApiService.handleCalculateNormalOperationNorms(
-            plantId,
-            year,
-            keycloak,
-          )
-      }
+      data = await NormalOperationNormsApiService.calculateFinalNorms(
+        plantId,
+        year,
+        keycloak,
+      )
 
       if (data == 0 || data) {
-        // dispatch(setIsBlocked(true))
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Data refreshed successfully!',
           severity: 'success',
         })
 
-        if (lowerVertName == 'pe' || lowerVertName == 'pp')
-          fetchGradeDropdowns()
         fetchData(gradeId)
-        if (lowerVertName == 'meg' || lowerVertName == 'cracker')
+        if (lowerVertName == 'meg' || lowerVertName == 'cracker') {
           fetchDataIntermediateValues()
+        }
         getNormTransactions()
       } else {
         setSnackbarOpen(true)
@@ -928,7 +911,7 @@ const NormalOpNormsScreen = () => {
       showUnit: false,
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate: lowerVertName === 'cracker' ? false : true,
+      showCalculate: true,
       showCheckbox: lowerVertName === 'cracker' ? true : false,
       marginBottom: lowerVertName === 'cracker' ? true : false,
       showG:
@@ -960,10 +943,9 @@ const NormalOpNormsScreen = () => {
       allAction: true,
       showTitleNameBusiness: true,
       titleName: 'Expression (Norms)',
+      showCalculate: false,
       downloadExcelBtnFromUI: true,
-
       ExcelName: `${lowerVertName}_Expression_(Norms)`,
-
       showCheckbox: lowerVertName === 'cracker' ? true : false,
     },
     isOldYear,
@@ -979,6 +961,7 @@ const NormalOpNormsScreen = () => {
       ExcelName: `${lowerVertName}_Final_Norms`,
       saveWithRemark: true,
       saveBtn: true,
+      showCalculate: true,
     },
     isOldYear,
   )
@@ -1007,7 +990,6 @@ const NormalOpNormsScreen = () => {
       saveBtn: false,
       showCalculate: false,
       allAction: true,
-
       downloadExcelBtnFromUI: true,
       ExcelName: `${lowerVertName}_Intermediate Values`,
     },
@@ -1408,7 +1390,7 @@ const NormalOpNormsScreen = () => {
             />
 
             <Tab
-              label='Final monthly norms preview'
+              label='Final monthly norms'
               sx={{
                 border: '1px solid #ADD8E6',
                 borderBottom: '1px solid #ADD8E6',
