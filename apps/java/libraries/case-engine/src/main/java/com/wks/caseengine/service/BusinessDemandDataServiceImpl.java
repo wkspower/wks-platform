@@ -1,24 +1,36 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Date;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BusinessDemand;
+import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class BusinessDemandDataServiceImpl implements BusinessDemandDataService {
@@ -40,6 +52,12 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+
+	@Autowired
+	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 
 	
 	@Override
@@ -142,6 +160,21 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 				}
 			} // TODO Auto-generated method stub
+			
+			Plants plant = plantsRepository.findById((plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			
+			if(vertical.getName().equalsIgnoreCase("Cracker")) {
+				for(BusinessDemandDataDTO businessDemandDataDTO : businessDemandDataDTOList) {
+					for (int i = 1; i <= 12; i++) {
+						Double attributeValue = getAttributeValue(businessDemandDataDTO, i);
+						saveData(UUID.fromString(businessDemandDataDTO.getNormParameterId()),i,attributeValue,businessDemandDataDTO.getRemark(),plantId.toString(),businessDemandDataDTO.getYear());
+					}
+				}
+			}
 			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("business-demand");
 			for(ScreenMapping screenMapping:screenMappingList) {
 				AopCalculation aopCalculation=new AopCalculation();
@@ -158,6 +191,68 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 		}
 
 	}
+	
+	void saveData(UUID normParameterFKId, Integer i, Double attributeValue, String remark, String plantId,
+			String year) {
+
+		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+
+		NormAttributeTransactions normAttributeTransactions;
+
+		if (existingRecord.isPresent()) {
+			normAttributeTransactions = existingRecord.get();
+			normAttributeTransactions.setModifiedOn(new Date());
+		} else {
+
+			normAttributeTransactions = new NormAttributeTransactions();
+			normAttributeTransactions.setCreatedOn(new Date());
+			normAttributeTransactions.setAttributeValueVersion("V1");
+			normAttributeTransactions.setUserName(Utility.getUserName());
+			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+			normAttributeTransactions.setAopMonth(i);
+			normAttributeTransactions.setAuditYear(year);
+		}
+
+		normAttributeTransactions
+				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
+		normAttributeTransactions.setRemarks(remark);
+		normAttributeTransactions.setUserName(Utility.getUserName());
+		normAttributeTransactionsRepository.save(normAttributeTransactions);
+	}
+	
+	public Double getAttributeValue(BusinessDemandDataDTO businessDemandDataDTO, Integer i) {
+		switch (i) {
+			case 1:
+				return businessDemandDataDTO.getJan();
+			case 2:
+				return businessDemandDataDTO.getFeb();
+			case 3:
+				return businessDemandDataDTO.getMarch();
+			case 4:
+				return businessDemandDataDTO.getApril();
+			case 5:
+				return businessDemandDataDTO.getMay();
+			case 6:
+				return businessDemandDataDTO.getJune();
+			case 7:
+				return businessDemandDataDTO.getJuly();
+			case 8:
+				return businessDemandDataDTO.getAug();
+			case 9:
+				return businessDemandDataDTO.getSep();
+			case 10:
+				return businessDemandDataDTO.getOct();
+			case 11:
+				return businessDemandDataDTO.getNov();
+			case 12:
+				return businessDemandDataDTO.getDec();
+
+		}
+		return businessDemandDataDTO.getJan();
+	}
+
+
 
 	@Override
 	public List<BusinessDemandDataDTO> editBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
