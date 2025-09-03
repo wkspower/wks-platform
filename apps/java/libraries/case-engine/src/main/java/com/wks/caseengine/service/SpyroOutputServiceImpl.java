@@ -177,14 +177,28 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		}
 	}
 
-
 	@Override
 	public AOPMessageVM updateSpyroOutputData(String year,String plantId,List<SpyroOutputDTO> spyroOutputDTOList) {
 		AOPMessageVM aopMessageVM=new AOPMessageVM();
-		
+		List<SpyroOutputDTO> failedList = new ArrayList<>();
 		try {
 			for (SpyroOutputDTO spyroOutputDTO : spyroOutputDTOList) {
+				if (spyroOutputDTO.getSaveStatus() != null
+						&& spyroOutputDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(spyroOutputDTO);
+					continue;
+				}
 				UUID normParameterFKId = UUID.fromString(spyroOutputDTO.getNormParameterFKID());
+				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
+				if (!optionNormParameters.isPresent()) {
+					spyroOutputDTO.setSaveStatus("Failed");
+					spyroOutputDTO.setErrDescription("Norm Paramter not found");
+					failedList.add(spyroOutputDTO);
+					continue;
+				}
+				if (optionNormParameters.isPresent() && !optionNormParameters.get().getIsEditable()) {
+					continue;
+				}
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(spyroOutputDTO, i);
 		
@@ -203,10 +217,8 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data updated successfully");
-			aopMessageVM.setData(spyroOutputDTOList);
+			aopMessageVM.setData(failedList);
 			return aopMessageVM;
-		
-		
 
 	} catch (IllegalArgumentException e) {
 		throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
