@@ -1201,7 +1201,7 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const handleCalculate = () => {
-    if (lowerVertName == 'meg') {
+    if (lowerVertName == 'meg' || lowerVertName == 'elastomer') {
       handleCalculateMeg()
     } else {
       // handleCalculatePe()
@@ -1396,7 +1396,6 @@ const ProductionvolumeData = ({ permissions }) => {
           year,
           keycloak,
         )
-
       if (data || data == 0) {
         // dispatch(setIsBlocked(true))
         setSnackbarOpen(true)
@@ -1498,7 +1497,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       units: ['TPH', 'TPD'],
-      showCalculate: permissions?.hideSummary ? false : lowerVertName === 'meg',
+      showCalculate: permissions?.hideSummary ? false : (lowerVertName === 'meg' || lowerVertName === 'elastomer'),
       showCalculateVisibility:
         lowerVertName === 'meg' &&
         Object.keys(calculationObject || {}).length > 0
