@@ -100,7 +100,7 @@ public class SlowdownNormsController {
 			return slowdownNormsService.saveSlowdownNormsConfigurationData(plantId,year,dtoList);		
 		}
 		
-		@GetMapping(value="slowdown-norms-grades")
+		@GetMapping(value="/slowdown-norms-grades")
 		public AOPMessageVM getUniqueGrades(@RequestParam String year,@RequestParam String plantId){
 			return	slowdownNormsService.getUniqueGrades(year,plantId);
 		}
