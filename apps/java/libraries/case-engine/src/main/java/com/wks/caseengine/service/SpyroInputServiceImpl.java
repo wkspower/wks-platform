@@ -188,58 +188,62 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 	@Override
 	public AOPMessageVM updateSpyroInputData(List<SpyroInputDTO> spyroInputDTOList, String plantFKId, String year) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<SpyroInputDTO> failedList = new ArrayList<>();
-		// String year = null;
-		UUID plantId = null;
-		try {
-			for (SpyroInputDTO spyroInputDTO : spyroInputDTOList) {
-				// year = spyroInputDTO.getAuditYear();
-				plantId = UUID.fromString(plantFKId);
-				if (spyroInputDTO.getSaveStatus() != null
-						&& spyroInputDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
-					failedList.add(spyroInputDTO);
-					continue;
-				}
-				UUID normParameterFKId = UUID.fromString(spyroInputDTO.getNormParameterFKID());
-				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
-				if (!optionNormParameters.isPresent()) {
-					spyroInputDTO.setSaveStatus("Failed");
-					spyroInputDTO.setErrDescription("Norm Paramter not found");
-					failedList.add(spyroInputDTO);
-					continue;
-				}
-				if (optionNormParameters.isPresent() && !optionNormParameters.get().getIsEditable()) {
-					continue;
-				}
-				
-				for (int i = 1; i <= 12; i++) {
-					Double attributeValue = getAttributeValue(spyroInputDTO, i);
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    UUID plantId;
 
-					saveData(normParameterFKId, i, attributeValue, spyroInputDTO, plantFKId, year);
-				}
-			}
-			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-input");
-			for (ScreenMapping screenMapping : screenMappingList) {
-				AopCalculation aopCalculation = new AopCalculation();
-				aopCalculation.setAopYear(year);
-				aopCalculation.setIsChanged(true);
-				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(plantId);
-				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-				aopCalculationRepository.save(aopCalculation);
-			}
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data updated successfully");
-			aopMessageVM.setData(failedList);
-			return aopMessageVM;
+	    try {
+	        plantId = UUID.fromString(plantFKId);
 
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	        for (SpyroInputDTO spyroInputDTO : spyroInputDTOList) {
+	            if ("Failed".equalsIgnoreCase(spyroInputDTO.getSaveStatus())) {
+	                continue;
+	            }
 
+	            UUID normParameterFKId = UUID.fromString(spyroInputDTO.getNormParameterFKID());
+	            Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
+	            if (!optionNormParameters.isPresent()) {
+	                spyroInputDTO.setSaveStatus("Failed");
+	                spyroInputDTO.setErrDescription("Norm Parameter not found");
+	                continue;
+	            }
+
+	            if (!optionNormParameters.get().getIsEditable()) {
+	                continue;
+	            }
+
+	            for (int month = 1; month <= 12; month++) {
+	                Double attributeValue = getAttributeValue(spyroInputDTO, month);
+	                saveData(normParameterFKId, month, attributeValue, spyroInputDTO, plantFKId, year);
+	            }
+	        }
+
+	        // Mark AOP calculations for dependent screens after processing inputs
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-input");
+	        for (ScreenMapping screenMapping : screenMappingList) {
+	            AopCalculation aopCalculation = new AopCalculation();
+	            aopCalculation.setAopYear(year);
+	            aopCalculation.setIsChanged(true);
+	            aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	            aopCalculation.setPlantId(plantId);
+	            aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	            aopCalculationRepository.save(aopCalculation);
+	        }
+
+	        // Filter only failed records using Stream API
+	        List<SpyroInputDTO> failedList = spyroInputDTOList.stream()
+	            .filter(dto -> "Failed".equalsIgnoreCase(dto.getSaveStatus()))
+	            .collect(Collectors.toList());
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data updated successfully");
+	        aopMessageVM.setData(failedList);
+	        return aopMessageVM;
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to update Spyro input data", ex);
+	    }
 	}
 
 	public Double getAttributeValue(SpyroInputDTO spyroInputDTO, Integer i) {
@@ -273,33 +277,61 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		return spyroInputDTO.getJan();
 	}
 
-	void saveData(UUID normParameterFKId, Integer i, Double attributeValue, SpyroInputDTO spyroInputDTO, String plantId,
-			String year) {
+	public void saveData(UUID normParameterFKId, Integer i, Double attributeValue, SpyroInputDTO spyroInputDTO, String plantId, String year) {
+	    if (spyroInputDTO == null) {
+	        throw new IllegalArgumentException("SpyroInputDTO cannot be null");
+	    }
 
-		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
-				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+	    String newRemarks = Optional.ofNullable(spyroInputDTO.getRemarks()).orElse("").trim();
+	    String newValue = attributeValue != null ? attributeValue.toString() : "0.0";
+	    if(newValue.equalsIgnoreCase("123456")) {
+	    	System.out.println(newValue);
+	    }
+	    
 
-		NormAttributeTransactions normAttributeTransactions;
+	    Optional<NormAttributeTransactions> existingOpt = 
+	        normAttributeTransactionsRepository
+	            .findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
 
-		if (existingRecord.isPresent()) {
-			normAttributeTransactions = existingRecord.get();
-			normAttributeTransactions.setModifiedOn(new Date());
-		} else {
+	    if (existingOpt.isPresent()) {
+	        // ----- Updating existing record -----
+	        NormAttributeTransactions existing = existingOpt.get();
+	        String existingRemarks = Optional.ofNullable(existing.getRemarks()).orElse("").trim();
+	        String existingValue = Optional.ofNullable(existing.getAttributeValue()).orElse("").trim();
 
-			normAttributeTransactions = new NormAttributeTransactions();
-			normAttributeTransactions.setCreatedOn(new Date());
-			normAttributeTransactions.setAttributeValueVersion("V1");
-			normAttributeTransactions.setUserName(Utility.getUserName());
-			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
-			normAttributeTransactions.setAopMonth(i);
-			normAttributeTransactions.setAuditYear(year);
-		}
+	        if (existingRemarks.equalsIgnoreCase(newRemarks) && !existingValue.equalsIgnoreCase(newValue)) {
+	            spyroInputDTO.setSaveStatus("Failed");
+	            spyroInputDTO.setErrDescription("Please add/update remark");
+	            return;
+	        }
 
-		normAttributeTransactions
-				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
-		normAttributeTransactions.setRemarks(spyroInputDTO.getRemarks());
-		normAttributeTransactions.setUserName(Utility.getUserName());
-		normAttributeTransactionsRepository.save(normAttributeTransactions);
+	        // Proceed to update because remarks changed (or both changed)
+	        existing.setRemarks(newRemarks);
+	        existing.setAttributeValue(newValue);
+	        existing.setModifiedOn(new Date());
+	        existing.setUserName(Utility.getUserName());
+	        normAttributeTransactionsRepository.save(existing);
+
+	    } else {
+	        // ----- Creating a new record -----
+	        if (newRemarks.isEmpty()) {
+	            spyroInputDTO.setSaveStatus("Failed");
+	            spyroInputDTO.setErrDescription("Please add/update remark");
+	            return;
+	        }
+
+	        NormAttributeTransactions newRecord = new NormAttributeTransactions();
+	        newRecord.setCreatedOn(new Date());
+	        newRecord.setAttributeValueVersion("V1");
+	        newRecord.setUserName(Utility.getUserName());
+	        newRecord.setNormParameterFKId(normParameterFKId);
+	        newRecord.setAopMonth(i);
+	        newRecord.setAuditYear(year);
+	        newRecord.setRemarks(newRemarks);
+	        newRecord.setAttributeValue(newValue);
+
+	        normAttributeTransactionsRepository.save(newRecord);
+	    }
 	}
 
 	public byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
@@ -396,11 +428,11 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 					}
 
-					System.out.println("datalist " + dataList);
+					
 					data.put(tableId, dataList);
 				}
 			}
-			System.out.println("data in calling method " + data);
+			
 			return excelUtilityService.generateFlexibleExcel(structure, data);
 
 		} catch (Exception e) {
@@ -451,7 +483,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 			System.out.println("Ended Save spyroInput in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId, mode, true, map);
+				byte[] fileByteArray = createExcel(year, plantFKId, mode, true, mapForExcel);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
@@ -632,7 +664,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -677,7 +709,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -722,7 +754,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -767,7 +799,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -812,7 +844,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -857,7 +889,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -902,7 +934,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -947,7 +979,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -992,7 +1024,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -1037,7 +1069,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
@@ -1082,7 +1114,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 						"                    \"UOM\",\r\n" + //
 						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
 						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16],\r\n" + //
+						"                \"hiddenColumns\":[15,16,18],\r\n" + //
 						"                \"styles\": {\r\n" + //
 						"                    \"boldColumns\": [\r\n" + //
 						"                        0\r\n" + //
