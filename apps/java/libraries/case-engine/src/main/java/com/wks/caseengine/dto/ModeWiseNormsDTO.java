@@ -41,6 +41,7 @@ public class ModeWiseNormsDTO {
     private Boolean isChecked;
     private String materialDisplayName;
     private String uom;
+    private String sapMaterialCode;
    
     
 }
