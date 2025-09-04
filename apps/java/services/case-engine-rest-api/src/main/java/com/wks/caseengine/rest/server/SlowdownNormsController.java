@@ -29,8 +29,8 @@ public class SlowdownNormsController {
 	private SlowdownNormsService slowdownNormsService;
 	
 	@GetMapping(value="/slowdownNorms")
-	public List<SlowdownNormsValueDTO> getSlowdownNormsData(@RequestParam String year,@RequestParam String plantId){
-		return	slowdownNormsService.getSlowdownNormsData(year, plantId);
+	public AOPMessageVM getSlowdownNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String gradeId){
+		return	slowdownNormsService.getSlowdownNormsData(year, plantId,gradeId);
 	}
 	
 	@PostMapping(value="/slowdownNorms")
@@ -98,6 +98,11 @@ public class SlowdownNormsController {
 		    }
 			
 			return slowdownNormsService.saveSlowdownNormsConfigurationData(plantId,year,dtoList);		
+		}
+		
+		@GetMapping(value="slowdown-norms-grades")
+		public AOPMessageVM getUniqueGrades(@RequestParam String year,@RequestParam String plantId){
+			return	slowdownNormsService.getUniqueGrades(year,plantId);
 		}
 
 }

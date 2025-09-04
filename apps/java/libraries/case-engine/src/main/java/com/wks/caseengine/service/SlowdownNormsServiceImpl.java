@@ -39,6 +39,7 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -87,8 +88,10 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	private SlowdownConsumptionRepository slowdownConsumptionRepository;
 	
 	private DataSource dataSource;
-
 	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
+
 	public SlowdownNormsServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
@@ -98,8 +101,10 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 	@Override
 	@Transactional
-	public List<SlowdownNormsValueDTO> getSlowdownNormsData(String year, String plantId) {
+	public AOPMessageVM getSlowdownNormsData(String year, String plantId,String gradeId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
+			UUID grade=null;
 			List<Object[]> objList = null;
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
@@ -115,10 +120,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 						site.getId().toString(),
 						vertical.getId().toString());
 
-				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
+				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms",grade);
 			} else {
 				String viewName = "vwScrn" + vertical.getName() + "SlowdownNorms";
-				objList = getSlowdownNorms(year, plant.getId(), viewName);
+				
+				if(gradeId!=null) {
+					 grade=UUID.fromString(gradeId);
+				}
+				objList = getSlowdownNorms(year, plant.getId(), viewName,grade);
 			}
 
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();
@@ -155,8 +164,16 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				slowdownNormsValueDTO.setProductName(row[30] != null ? row[30].toString() : null);
 				slowdownNormsValueDTOList.add(slowdownNormsValueDTO);
 			}
+			Map<String, Object> map = new HashMap<>();
 
-			return slowdownNormsValueDTOList;
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "slowdown-norms");
+			map.put("slowdownNormsValueDTO", slowdownNormsValueDTOList);
+			map.put("aopCalculation", aopCalculation);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -346,7 +363,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		}
 	}
 
-	public List<Object[]> getSlowdownNorms(String year, UUID plantId, String viewName) {
+	public List<Object[]> getSlowdownNorms(String year, UUID plantId, String viewName,UUID gradeId) {
 		try {
 			String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], "
 					+ "[Material_FK_Id], [April], [May], [June], [July], [August], [September], "
@@ -355,11 +372,12 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 					+ "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], "
 					+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable],[DisplayName] "
 					+ "FROM " + viewName + " "
-					+ "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) "
+					+ "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) AND (:gradeId IS NULL OR Grade_FK_Id = :gradeId) "
 					+ "ORDER BY NormTypeDisplayOrder";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantId", plantId);
+			query.setParameter("gradeId", gradeId);
 			query.setParameter("year", year);
 
 			return query.getResultList();
@@ -626,5 +644,50 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
             throw new IllegalArgumentException("Unknown month: " + monthName, ex);
         }
     }
+	
+	@Override
+	public AOPMessageVM getUniqueGrades(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String viewName="vwScrn"+vertical.getName()+"SlowdownNorms";
+			List<String> grades=fetchUniqueGradeFkIds(viewName,UUID.fromString(plantId),year);
+			List<Map<String, String>> listOfMaps = new ArrayList<>();
+
+			for (String grade : grades) {
+			    String productName = normParametersRepository.findNormParameterIdByGrade(UUID.fromString(grade));
+			    Map<String, String> singleEntryMap = new HashMap<>();
+			    singleEntryMap.put("gradeId", grade);
+			    singleEntryMap.put("displayName", productName);
+			    listOfMaps.add(singleEntryMap);
+			}
+			
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(listOfMaps);
+			aopMessageVM.setMessage("Data fetched successfully");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	 public List<String> fetchUniqueGradeFkIds(String viewName, UUID plantFkId, String financialYear) {
+	        // Build SQL with safe view injection (ensure viewName is validated)
+	        String sql = "SELECT DISTINCT Grade_Fk_Id FROM " + viewName +
+	                     " WHERE Plant_Fk_Id = :plantFkId AND FinancialYear = :financialYear";
+
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantFkId", plantFkId);
+	        query.setParameter("financialYear", financialYear);
+
+	        @SuppressWarnings("unchecked")
+	        List<String> results = query.getResultList();
+	        return results;
+	    }
+
 
 }
