@@ -81,30 +81,35 @@ public class FinalNormsServiceImpl implements FinalNormsService {
 			List<Object[]> results = getFinalNormsData(plantId, year, mode, method, procedureName);
 
 			for (Object[] row : results) {
-			    ModeWiseNormsDTO finalNormsDTO = new ModeWiseNormsDTO(); // Create a new DTO for each row
-			    finalNormsDTO.setId(row[0] != null ? row[0].toString() : null);
-			    finalNormsDTO.setNormParameterTypeId(row[2] != null ? row[2].toString() : null);
-			    finalNormsDTO.setMaterialFKId(row[3] != null ? row[3].toString() : null);
-			    finalNormsDTO.setNormType(row[4] != null ? row[4].toString() : null);
-			    finalNormsDTO.setMaterialDisplayName(row[5] != null ? row[5].toString() : null);
-			    finalNormsDTO.setUom(row[6] != null ? row[6].toString() : null);
-			    //finalNormsDTO.setMaterialName(row[7] != null ? row[7].toString() : null); // Corrected index for MaterialName
-			    finalNormsDTO.setApril(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
-			    finalNormsDTO.setMay(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
-			    finalNormsDTO.setJune(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
-			    finalNormsDTO.setJuly(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
-			    finalNormsDTO.setAugust(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
-			    finalNormsDTO.setSeptember(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
-			    finalNormsDTO.setOctober(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
-			    finalNormsDTO.setNovember(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
-			    finalNormsDTO.setDecember(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
-			    finalNormsDTO.setJanuary(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
-			    finalNormsDTO.setFebruary(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
-			    finalNormsDTO.setMarch(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
-			    finalNormsDTO.setRemark(row[20] != null ? row[20].toString() : "");
-			    finalNormsDTO.setIsEditable(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);
-			   // finalNormsDTO.setIsChecked(row[24] != null ? Boolean.valueOf(row[24].toString()) : null);
-			    finalNormsDTOList.add(finalNormsDTO); // Add the DTO to the list
+				ModeWiseNormsDTO finalNormsDTO = new ModeWiseNormsDTO();
+
+				finalNormsDTO.setId(row[0] != null ? row[0].toString() : null);
+				finalNormsDTO.setNormParameterTypeId(row[2] != null ? row[2].toString() : null);
+				finalNormsDTO.setMaterialFKId(row[3] != null ? row[3].toString() : null);
+				finalNormsDTO.setNormType(row[4] != null ? row[4].toString() : null);
+				finalNormsDTO.setSapMaterialCode(row[5] != null ? row[5].toString() : null);
+				finalNormsDTO.setMaterialDisplayName(row[6] != null ? row[6].toString() : null);
+				finalNormsDTO.setUom(row[7] != null ? row[7].toString() : null);
+
+				// Monthly values now shift by +1:
+				finalNormsDTO.setApril(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+				finalNormsDTO.setMay(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+				finalNormsDTO.setJune(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+				finalNormsDTO.setJuly(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+				finalNormsDTO.setAugust(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+				finalNormsDTO.setSeptember(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+				finalNormsDTO.setOctober(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+				finalNormsDTO.setNovember(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+				finalNormsDTO.setDecember(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+				finalNormsDTO.setJanuary(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+				finalNormsDTO.setFebruary(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+				finalNormsDTO.setMarch(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
+
+				finalNormsDTO.setRemark(row[21] != null ? row[21].toString() : "");
+				finalNormsDTO.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
+				// Optionally, if needed: finalNormsDTO.setIsChecked(row[25] != null ? Boolean.valueOf(row[25].toString()) : null);
+
+				finalNormsDTOList.add(finalNormsDTO);
 			}			
 			Map<String, Object> map = new HashMap<>();
 

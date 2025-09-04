@@ -65,30 +65,33 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 			List<Object[]> results = getModeWiseNormsData(plantId, year, mode, method, procedureName);
 
 			for (Object[] row : results) {
-			    ModeWiseNormsDTO modeWiseNormsDTO = new ModeWiseNormsDTO(); // Create a new DTO for each row
-			    modeWiseNormsDTO.setId(row[0] != null ? row[0].toString() : null);
-			    modeWiseNormsDTO.setNormParameterTypeId(row[2] != null ? row[2].toString() : null);
-			    modeWiseNormsDTO.setMaterialFKId(row[3] != null ? row[3].toString() : null);
-			    modeWiseNormsDTO.setNormType(row[4] != null ? row[4].toString() : null);
-			    modeWiseNormsDTO.setMaterialDisplayName(row[5] != null ? row[5].toString() : null);
-			    modeWiseNormsDTO.setUom(row[6] != null ? row[6].toString() : null);
-			    modeWiseNormsDTO.setMaterialName(row[7] != null ? row[7].toString() : null); // Corrected index for MaterialName
-			    modeWiseNormsDTO.setApril(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
-			    modeWiseNormsDTO.setMay(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
-			    modeWiseNormsDTO.setJune(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
-			    modeWiseNormsDTO.setJuly(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
-			    modeWiseNormsDTO.setAugust(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
-			    modeWiseNormsDTO.setSeptember(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
-			    modeWiseNormsDTO.setOctober(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
-			    modeWiseNormsDTO.setNovember(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
-			    modeWiseNormsDTO.setDecember(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
-			    modeWiseNormsDTO.setJanuary(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
-			    modeWiseNormsDTO.setFebruary(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
-			    modeWiseNormsDTO.setMarch(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
-			    modeWiseNormsDTO.setRemark(row[21] != null ? row[21].toString() : null);
-			    modeWiseNormsDTO.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
-			    modeWiseNormsDTO.setIsChecked(row[24] != null ? Boolean.valueOf(row[24].toString()) : null);
-			    modeWiseNormsDTOList.add(modeWiseNormsDTO); // Add the DTO to the list
+				ModeWiseNormsDTO modeWiseNormsDTO = new ModeWiseNormsDTO();
+				modeWiseNormsDTO.setId(row[0] != null ? row[0].toString() : null);
+				modeWiseNormsDTO.setNormParameterTypeId(row[2] != null ? row[2].toString() : null);
+				modeWiseNormsDTO.setMaterialFKId(row[3] != null ? row[3].toString() : null);
+				modeWiseNormsDTO.setNormType(row[4] != null ? row[4].toString() : null);
+				modeWiseNormsDTO.setSapMaterialCode(row[5] != null ? row[5].toString() : null);
+				modeWiseNormsDTO.setMaterialDisplayName(row[6] != null ? row[6].toString() : null);
+				modeWiseNormsDTO.setUom(row[7] != null ? row[7].toString() : null);
+				modeWiseNormsDTO.setMaterialName(row[8] != null ? row[8].toString() : null);
+				modeWiseNormsDTO.setApril(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+				modeWiseNormsDTO.setMay(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+				modeWiseNormsDTO.setJune(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+				modeWiseNormsDTO.setJuly(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+				modeWiseNormsDTO.setAugust(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+				modeWiseNormsDTO.setSeptember(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+				modeWiseNormsDTO.setOctober(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+				modeWiseNormsDTO.setNovember(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+				modeWiseNormsDTO.setDecember(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+				modeWiseNormsDTO.setJanuary(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+				modeWiseNormsDTO.setFebruary(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
+				modeWiseNormsDTO.setMarch(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
+				modeWiseNormsDTO.setRemark(row[22] != null ? row[22].toString() : null);        // Was row[21]
+				modeWiseNormsDTO.setIsEditable(row[24] != null ? Boolean.valueOf(row[24].toString()) : null); // Was row[23]
+				modeWiseNormsDTO.setIsChecked(row[25] != null ? Boolean.valueOf(row[25].toString()) : null);  // Was row[24]
+
+				modeWiseNormsDTOList.add(modeWiseNormsDTO);
+
 			}			
 			Map<String, Object> map = new HashMap<>();
 
