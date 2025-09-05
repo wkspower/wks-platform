@@ -162,7 +162,9 @@ public class AOPReportServiceImpl implements AOPReportService {
 		String storedProcedure;
 		if ("MEG".equalsIgnoreCase(vertical.getName())) {
 			storedProcedure = "AnnualCostAOPReport";
-		} else {
+		}else if ("ELASTOMER".equalsIgnoreCase(vertical.getName())) {
+			storedProcedure = vertical.getName()+"_AnnualCostAOPReport";
+		}  else {
 			storedProcedure = vertical.getName() + "_" + site.getName() + "_AnnualAOPCostReport";
 		}
 
@@ -210,6 +212,8 @@ public class AOPReportServiceImpl implements AOPReportService {
 			String storedProcedure;
 			if ("MEG".equalsIgnoreCase(vertical.getName())) {
 				storedProcedure = "AnnualCostAOPReport";
+			}else if ("ELASTOMER".equalsIgnoreCase(vertical.getName())) {
+				storedProcedure = vertical.getName()+"_AnnualCostAOPReport";
 			} else {
 				storedProcedure = vertical.getName() + "_" + site.getName() + "_AnnualAOPCostReport";
 			}
@@ -244,6 +248,10 @@ public class AOPReportServiceImpl implements AOPReportService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 			String procedureName = "ProductionVolumnDataReport";
+			if(!verticalName.equalsIgnoreCase("MEG")) {
+				procedureName = verticalName+"_ProductionVolumnDataReport";
+			}
+			
 			String sql = "EXEC " + procedureName
 					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType,@UOM = :uom";
 

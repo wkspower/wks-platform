@@ -147,6 +147,9 @@ public class NormHistorianBasisServiceImpl  implements NormHistorianBasisService
         try {
             String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
             String storedProcedure = "NormsHistorianBasis";
+            if(!verticalName.equalsIgnoreCase("MEG")) {
+            	storedProcedure = verticalName+"_NormsHistorianBasis";
+			}
             String sql = "EXEC " + storedProcedure
                     + " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType,@UOM = :uom";
 
