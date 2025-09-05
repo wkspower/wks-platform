@@ -301,7 +301,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateSlowdownNorms";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateConsumptionAOPValues";
 			List<Object[]> list = getCalculatedSlowdownNormsSP(storedProcedure, year, plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString());
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();
@@ -390,9 +390,15 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 	@Override
 	@Transactional
-	public List getSlowdownMonths(UUID plantId, String maintenanceName,String year) {
+	public List getSlowdownMonths(UUID plantId, String maintenanceName,String year,String gradeId) {
+		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
+		
 		try {
-			return slowdownNormsRepository.getSlowdownMonths(plantId, maintenanceName,year);
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {	
+				return	slowdownNormsRepository.getSlowdownMonthsWithGrades(plantId,maintenanceName,year,UUID.fromString(gradeId));
+			}else {
+				return	slowdownNormsRepository.getSlowdownMonths(plantId,maintenanceName,year);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
