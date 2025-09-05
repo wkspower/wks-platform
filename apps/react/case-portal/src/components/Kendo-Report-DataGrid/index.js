@@ -121,6 +121,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
                   field={field}
                   title={title}
                   cell={cell}
+                  width={widthT}
                   cells={{
                     edit: {
                       date: ['dateTime', 'dateTime', 'mcuDate'].includes(
@@ -155,6 +156,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
                   field={field}
                   title={title}
                   cell={cell}
+                  width={widthT}
                   cells={{
                     edit: {
                       DateOnlyPicker,

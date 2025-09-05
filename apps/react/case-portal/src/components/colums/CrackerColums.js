@@ -5,6 +5,13 @@ export const CrackerColums = [
     widthT: 30,
     filter: false,
   },
+
+  {
+    field: 'sapMaterialCode',
+    title: 'SAP MAT Code',
+    widthT: 120,
+    editable: false,
+  },
   {
     field: 'materialDisplayName',
     title: 'Particulars',

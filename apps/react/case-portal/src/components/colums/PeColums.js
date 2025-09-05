@@ -442,17 +442,10 @@ export const SlowdownNormsPeColumns = [
       type: 'number',
       format: '{0:#.###}',
       editable: false,
-      isDisabled: true,
       monthNumber: monthIndex,
     }
   }),
 
-  {
-    field: 'remarks',
-    headerName: 'Remark',
-    width: 100,
-    editable: false,
-  },
   {
     field: 'idFromApi',
     headerName: 'idFromApi',

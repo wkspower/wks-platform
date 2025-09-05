@@ -21,7 +21,11 @@ const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
 
-  const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${slowdownMonths.join(',')}`
+  let safeShutdownMonths = Array.isArray(slowdownMonths) ? slowdownMonths : []
+
+  console.log('safeShutdownMonths', safeShutdownMonths)
+
+  const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
 
   if (colDefsCache.has(cacheKey)) {
     return colDefsCache.get(cacheKey)
@@ -32,17 +36,23 @@ const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
   const enhancedColDefs = cols.map((col) => {
     if (col.monthNumber) {
       const monthNum = col.monthNumber
+      const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+
       return {
         ...col,
         headerName: headerMap?.[monthNum] || col.field,
-        editable: slowdownMonths.includes(monthNum),
-        isDisabled: !slowdownMonths.includes(monthNum),
+        editable: isPEorPP ? false : safeShutdownMonths.includes(monthNum),
+        ...(!isPEorPP && {
+          isDisabled: !safeShutdownMonths.includes(monthNum),
+        }),
+        ...(isPEorPP && {
+          isBold: safeShutdownMonths.includes(monthNum),
+        }),
       }
     }
 
     return col
   })
-
   colDefsCache.set(cacheKey, enhancedColDefs)
   return enhancedColDefs
 }

@@ -60,6 +60,7 @@ const defs = {
     productionVolumeDataBasis: 'Production Volume Data', // New addition
     normsHistorianBasis: 'Norms Historian',
     bestAchievedBasis: 'Best Achieved Basis (Min CC)',
+    intermediateValuesDataSet: 'Intermediate Values',
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     monthwiseRawMaterial: 'Monthwise Raw Material',

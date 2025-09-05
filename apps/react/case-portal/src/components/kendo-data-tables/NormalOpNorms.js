@@ -481,6 +481,13 @@ const NormalOpNormsScreen = () => {
       widthT: 30,
       filter: false,
     },
+
+    {
+      field: 'sapMaterialCode',
+      title: 'SAP MAT Code',
+      widthT: 120,
+      editable: false,
+    },
     {
       field: 'materialDisplayName',
       title: 'Particulars',
@@ -505,9 +512,16 @@ const NormalOpNormsScreen = () => {
 
   const colDefsFinalNorms = [
     {
+      field: 'sapMaterialCode',
+      title: 'SAP MAT Code',
+      widthT: 120,
+      editable: false,
+    },
+    {
       field: 'materialDisplayName',
       title: 'Particulars',
       widthT: 130,
+      editable: false,
     },
     {
       field: 'uom',

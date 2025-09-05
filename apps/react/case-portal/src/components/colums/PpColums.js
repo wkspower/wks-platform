@@ -422,7 +422,7 @@ export const SlowdownNormsPpColumns = [
     width: 180,
     editable: false,
   },
-  { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
+  { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12
@@ -436,7 +436,6 @@ export const SlowdownNormsPpColumns = [
       type: 'number',
       format: '{0:#.###}',
       editable: false,
-      isDisabled: true,
       monthNumber: monthIndex,
     }
   }),

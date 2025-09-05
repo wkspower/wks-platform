@@ -9,6 +9,7 @@ import {
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import {
@@ -19,7 +20,7 @@ import {
 
 const CALL_DELAY_MS = 200
 
-const BestAchievedNorms = () => {
+const BestAchievedReport = () => {
   const keycloak = useSession()
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
@@ -46,9 +47,7 @@ const BestAchievedNorms = () => {
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
-    const DEFAULT_MIN_WIDTH = 200
-
-    const cols = backendCols.map((col) => {
+    return backendCols.map((col) => {
       const isTextCol = col.type === 'string'
       const isNumberCol = col.type === 'number'
       return {
@@ -62,24 +61,32 @@ const BestAchievedNorms = () => {
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
     })
-
-    if (cols.length > 12) {
-      return cols.map((c) => ({
-        widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
-        ...c,
-      }))
-    }
-
-    return cols
   }, [])
 
+  // fetchDataForGrid now accepts mode and uses type to decide which service method to call
   const fetchDataForGrid = useCallback(
-    async (reportType) => {
+    async (reportType, mode) => {
       try {
-        const apiResponse = await DataService.getBestAchievedNorms(
-          keycloak,
-          reportType,
-        )
+        // choose API based on reportType string
+        const lower = (reportType || '').toLowerCase()
+        let apiResponse = null
+
+        if (lower.includes('input')) {
+          // call input API with mode
+          apiResponse = await CrackerReportsApiDataService.spyroInputReport(
+            keycloak,
+            reportType,
+            mode,
+          )
+        } else {
+          // call output API with mode
+          // passing mode here as well; ensure backend method accepts mode if needed
+          apiResponse = await CrackerReportsApiDataService.spyroOutputReport(
+            keycloak,
+            reportType,
+            mode,
+          )
+        }
 
         if (apiResponse?.code !== 200) {
           return { rows: [], columns: [] }
@@ -111,26 +118,27 @@ const BestAchievedNorms = () => {
 
         return { rows: rowsWithId, columns: enrichedCols }
       } catch (err) {
-        console.error(`Error fetching ${reportType}:`, err)
+        console.error(`Error fetching ${reportType} (mode: ${mode}):`, err)
         return { rows: [], columns: [] }
       }
     },
     [keycloak, enrichColumns],
   )
 
+  // scheduleAndRunFetch now accepts a unique reportKey (used for map/export keys), a reportType and the mode
   const scheduleAndRunFetch = useCallback(
-    (reportType, delayMs) => {
+    (reportKey, reportType, mode, delayMs) => {
       const id = setTimeout(async () => {
         activeRequestsRef.current += 1
         if (isMountedRef.current) setLoading(true)
 
         try {
-          const { rows, columns } = await fetchDataForGrid(reportType)
+          const { rows, columns } = await fetchDataForGrid(reportType, mode)
 
           if (!isMountedRef.current) return
-          setDataMap((prev) => ({ ...prev, [reportType]: { rows, columns } }))
+          setDataMap((prev) => ({ ...prev, [reportKey]: { rows, columns } }))
         } catch (err) {
-          console.error(`Scheduled fetch failed for ${reportType}:`, err)
+          console.error(`Scheduled fetch failed for ${reportKey}:`, err)
         } finally {
           activeRequestsRef.current -= 1
           if (activeRequestsRef.current <= 0 && isMountedRef.current) {
@@ -142,7 +150,7 @@ const BestAchievedNorms = () => {
 
       timeoutIdsRef.current.push(id)
     },
-    [fetchDataForGrid, keycloak],
+    [fetchDataForGrid],
   )
 
   // Main: fetch TYPE_LIST then schedule fetching each grid in order
@@ -154,10 +162,37 @@ const BestAchievedNorms = () => {
     try {
       setLoading(true)
 
-      const typeListResult = await DataService.getBestAchievedNorms(
-        keycloak,
-        'TYPE LIST',
-      )
+      // Keep your static result - replace with real TYPE_LIST call if needed
+      const typeListResult = {
+        code: 200,
+        message: 'SP Executed successfully',
+        data: {
+          data: [
+            {
+              DisplayOrder: 1,
+              TYPE: 'Spyro Output',
+            },
+            {
+              DisplayOrder: 2,
+              TYPE: 'Spyro Input',
+            },
+          ],
+          columns: [
+            {
+              field: 'DisplayOrder',
+              editable: false,
+              title: 'DisplayOrder',
+              type: 'number',
+            },
+            {
+              field: 'TYPE',
+              editable: false,
+              title: 'TYPE',
+              type: 'string',
+            },
+          ],
+        },
+      }
 
       let types = []
       if (typeListResult?.code == 200) {
@@ -167,18 +202,49 @@ const BestAchievedNorms = () => {
       }
 
       const normalized = [...new Set(types)] // unique, preserve order as returned
-      setGridNames(normalized)
 
-      // schedule fetch for each grid with delay to throttle
-      normalized.forEach((type, idx) => {
+      // ensure Input types appear first (user wanted 3 input then 3 output)
+      const inputFirst = []
+      const outputLater = []
+      normalized.forEach((t) => {
+        if ((t || '').toLowerCase().includes('input')) inputFirst.push(t)
+        else outputLater.push(t)
+      })
+      const orderedTypes = [...inputFirst, ...outputLater]
+
+      // modes to call
+      const modes = [
+        { key: '4F', label: '4F' },
+        { key: '5F', label: '5F' },
+        { key: '4F+D', label: '4F+D' },
+      ]
+
+      // build grid name list: "<TYPE> - <MODE_LABEL>"
+      const expandedGridNames = []
+      orderedTypes.forEach((type) => {
+        modes.forEach((m) => {
+          expandedGridNames.push(`${type} - ${m.label}`)
+        })
+      })
+
+      setGridNames(expandedGridNames)
+
+      // schedule fetch for each expanded grid with small delays
+      expandedGridNames.forEach((gridName, idx) => {
+        // parse type and mode back from gridName
+        // gridName format: "<TYPE> - <MODE_LABEL>"
+        const [typePart, modeLabel] = gridName.split(' - ')
+        const modeObj = modes.find((mm) => mm.label === modeLabel)
+        const modeKey = modeObj ? modeObj.key : modes[0].key
+
         const delay = idx * CALL_DELAY_MS
-        scheduleAndRunFetch(type, delay)
+        scheduleAndRunFetch(gridName, typePart, modeKey, delay)
       })
     } catch (err) {
       console.error('Error fetching TYPE_LIST or config:', err)
       setLoading(false)
     }
-  }, [keycloak, scheduleAndRunFetch])
+  }, [scheduleAndRunFetch])
 
   useEffect(() => {
     fetchAllGrids()
@@ -317,4 +383,4 @@ const BestAchievedNorms = () => {
   )
 }
 
-export default BestAchievedNorms
+export default BestAchievedReport

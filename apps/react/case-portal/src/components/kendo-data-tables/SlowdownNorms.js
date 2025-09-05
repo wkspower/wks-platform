@@ -18,12 +18,15 @@ import getSlowdownNormsColDef from 'components/data-tables/CommonHeader/getSlowd
 import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
 import SlowdownNormForMeg from './SlowdownNormForMeg'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
+import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
 
 const SlowdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
   const [allProducts, setAllProducts] = useState([])
+  const [grades, setGrades] = useState([])
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
   const { sitePlantChange, yearChanged, oldYear, plantID } = menu
@@ -54,6 +57,9 @@ const SlowdownNorms = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+
+  const [gradeId, setGradeId] = useState(null)
+
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
@@ -175,20 +181,39 @@ const SlowdownNorms = () => {
   }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
 
   useEffect(() => {
-    const getAllProducts = async () => {
+    const loadData = async () => {
       try {
-        const data = await DataService.getAllProducts(keycloak, null)
-        const productList = data.map((product) => ({
-          id: product.id.toLowerCase(),
-          displayName: product.displayName,
-        }))
-        setAllProducts(productList)
+        if (['pe', 'pp'].includes(lowerVertName)) {
+          if (!gradeId) return
+          await fetchData(gradeId)
+        } else {
+          await fetchData()
+        }
+        let data
+        if (['pe', 'pp'].includes(lowerVertName)) {
+          if (!gradeId) return
+          data = await DataService.getSlowdownMonths(keycloak, gradeId)
+        } else {
+          data = await DataService.getSlowdownMonths(keycloak, null)
+        }
+        setSlowdownMonths(data)
       } catch (error) {
-        console.error('Error fetching product:', error)
-      } finally {
-        // handleMenuClose();
+        console.error('Error in loadData:', error)
       }
     }
+
+    loadData()
+  }, [
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    plantID,
+    gradeId,
+    lowerVertName,
+  ])
+
+  useEffect(() => {
     const getSlowdownMonths = async () => {
       try {
         const data = await DataService.getSlowdownMonths(keycloak, null)
@@ -200,8 +225,7 @@ const SlowdownNorms = () => {
       }
     }
     if (lowerVertName !== verticalEnums.MEG) {
-      fetchData()
-      getAllProducts()
+      fetchData(gradeId)
       getSlowdownMonths()
     }
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
@@ -324,7 +348,7 @@ const SlowdownNorms = () => {
         setLoading(false)
         setCalculatebtnClicked(false)
 
-        // fetchData()
+        fetchData(gradeId)
         return response
       } else {
         setSnackbarOpen(true)
@@ -339,56 +363,45 @@ const SlowdownNorms = () => {
       console.error(`Error saving Shutdown Norms`, error)
       setLoading(false)
     } finally {
-      fetchData()
+      fetchData(gradeId)
       setCalculatebtnClicked(false)
       setLoading(false)
     }
   }
 
-  const fetchData = async () => {
+  const fetchData = async (gradeId) => {
     try {
       setLoading(true)
+      setRows([])
+
+      const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+
+      if (isPEorPP && !gradeId) {
+        setLoading(false)
+        return
+      }
 
       // Fetch data from API
-      const data = await DataService.getSlowdownNormsData(keycloak)
-      const isTPD = selectedUnit === 'TPD'
+      const data = await DataService.getSlowdownNormsData(keycloak, gradeId)
 
-      const formattedData = data.map((item, index) => {
-        const baseItem = {
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          remarks: item?.remarks?.trim() || null,
-          originalRemark: item?.remarks?.trim(),
-          materialFkId: item?.materialFkId?.toLowerCase(),
-          Particulars: item.normParameterTypeDisplayName || 'By Products',
-          isEditable: true,
-        }
+      setCalculationObject(data?.data?.aopCalculation)
 
-        if (isTPD) {
-          const months = [
-            'april',
-            'may',
-            'june',
-            'july',
-            'august',
-            'september',
-            'october',
-            'november',
-            'december',
-            'january',
-            'february',
-            'march',
-          ]
+      const formattedData = data?.data?.slowdownNormsValueDTO?.map(
+        (item, index) => {
+          const baseItem = {
+            ...item,
+            idFromApi: item.id,
+            id: index,
+            remarks: item?.remarks?.trim() || null,
+            originalRemark: item?.remarks?.trim(),
+            materialFkId: item?.materialFkId?.toLowerCase(),
+            Particulars: item.normParameterTypeDisplayName || 'By Products',
+            isEditable: isPEorPP ? false : true,
+          }
 
-          months.forEach((month) => {
-            const value = item[month]
-            baseItem[month] = value ? (value / 24).toFixed(2) : value || null
-          })
-        }
-
-        return baseItem
-      })
+          return baseItem
+        },
+      )
 
       setRows(formattedData)
       setLoading(false)
@@ -406,79 +419,101 @@ const SlowdownNorms = () => {
     console.log(error)
   }, [])
 
-  const handleCalculatePe = async () => {
+  const handleCalculate = () => {
+    handleCalculateData()
+  }
+
+  const loadGradesAfterCalculation = async () => {
+    if (['pe', 'pp'].includes(lowerVertName)) {
+      try {
+        const response =
+          await NormalOperationNormsApiService.getGradesForSlowdownNorms(
+            keycloak,
+          )
+
+        if (response?.code === 200) {
+          const fetchedGrades = response?.data || []
+          setGrades(fetchedGrades)
+
+          if (fetchedGrades.length === 0) {
+            setGradeId(null)
+            await fetchData(null)
+            return
+          }
+
+          const firstGrade = fetchedGrades[0]
+          const firstId = firstGrade?.id ?? firstGrade?.gradeId ?? null
+
+          setGradeId(firstId)
+          await fetchData(firstId)
+        } else {
+          setGrades([])
+          setGradeId(null)
+          await fetchData(null)
+        }
+      } catch (error) {
+        console.error('Error fetching grades:', error)
+        setGrades([])
+        setGradeId(null)
+        await fetchData(null)
+      }
+    } else {
+      // non PE/PP flow
+      await fetchData(null)
+      try {
+        const months = await DataService.getShutdownMonths(keycloak, null)
+        setShutdownMonths(months)
+      } catch (err) {
+        console.error('Error fetching shutdown months:', err)
+      }
+    }
+  }
+
+  const handleCalculateData = async () => {
+    setRows([])
+    setGrades([])
+    setGradeId(null)
+    setSlowdownMonths([])
+
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
       const year = localStorage.getItem('year')
       const storedPlant = localStorage.getItem('selectedPlant')
+      let plantId = ''
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
       }
 
-      var plantId = plantId
-      const data = await DataService.handleCalculateSlowdownNorms(
+      const response = await DataService.handleCalculateSlowdownNorms(
         plantId,
         year,
         keycloak,
       )
 
-      if (data) {
-        const groupedRows = []
-        const groups = new Map()
-        let groupId = 0
-
-        data.forEach((item) => {
-          const groupKey = item.normParameterTypeDisplayName
-
-          if (!groups.has(groupKey)) {
-            groups.set(groupKey, [])
-            groupedRows.push({
-              id: groupId++,
-              Particulars: groupKey,
-              //isGroupHeader: true,
-            })
-          }
-          const formattedItem = {
-            ...item,
-            idFromApi: item.id,
-            // NormParametersId: item.materialFkId.toLowerCase(),
-            materialFkId: item?.materialFkId.toLowerCase(),
-            id: groupId++,
-            remarks: item?.remarks?.trim() || null,
-          }
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Data refreshed successfully!',
-            severity: 'success',
-          })
-
-          groups.get(groupKey).push(formattedItem)
-          groupedRows.push(formattedItem)
+      if (response?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
         })
 
-        setRows(groupedRows)
-        // dispatch(setIsBlocked(true))
-        setLoading(false)
+        // load grades and pick the 0th index
+        await loadGradesAfterCalculation()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Refresh Falied!',
+          message: 'Data Refresh Failed!',
           severity: 'error',
         })
-        setLoading(false)
       }
-
-      return data
     } catch (error) {
       console.error('Error saving refresh data:', error)
+    } finally {
       setLoading(false)
+      setCalculatebtnClicked(false)
     }
-  }
-
-  const handleCalculate = () => {
-    handleCalculatePe()
   }
 
   const onRowModesModelChange = (newRowModesModel) => {
@@ -502,6 +537,8 @@ const SlowdownNorms = () => {
     }
   }
 
+  const [calculationObject, setCalculationObject] = useState([])
+
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -511,14 +548,53 @@ const SlowdownNorms = () => {
       showUnit: false,
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
-      saveBtn: true,
-      showCalculate: lowerVertName == 'meg' ? false : false,
+      saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+      showCalculate: true,
       allAction: true,
+      dropdownLabel:
+        lowerVertName === 'pe' || lowerVertName === 'pp'
+          ? 'Select Grade'
+          : 'Select Grade',
       downloadExcelBtnFromUI: true,
+      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+
       ExcelName: `${lowerVertName}_Slowdown Consumption (Norms/Quantity)`,
+      showCalculateVisibility:
+        Object.keys(calculationObject || {}).length > 0 ? true : false,
     },
     isOldYear,
   )
+
+  // 1) Load grades list if vertical requires it
+  useEffect(() => {
+    const loadGrades = async () => {
+      if (['pe', 'pp'].includes(lowerVertName)) {
+        try {
+          const response =
+            await NormalOperationNormsApiService.getGradesForSlowdownNorms(
+              keycloak,
+            )
+
+          if (response?.code === 200) {
+            setGrades(response?.data)
+            if (Array.isArray(response?.data) && response?.data?.length === 0) {
+              setLoading(false)
+            }
+          }
+        } catch (error) {
+          setGrades([])
+          setGradeId(null)
+          console.error('Error fetching grades:', error)
+        }
+      }
+    }
+    loadGrades()
+  }, [plantID, yearChanged, keycloak])
+
+  const handleGradeChange = (gradeId) => {
+    setGradeId(gradeId)
+  }
+
   const NormParameterIdCell = (props) => {
     const productId = props.dataItem.materialFkId
     const product = allProducts.find((p) => p.id === productId)
@@ -562,8 +638,6 @@ const SlowdownNorms = () => {
           setOpen1={setOpen1}
           setSnackbarOpen={setSnackbarOpen}
           setSnackbarData={setSnackbarData}
-          onProcessRowUpdateError={onProcessRowUpdateError}
-          fetchData={fetchData}
           remarkDialogOpen={remarkDialogOpen}
           setRemarkDialogOpen={setRemarkDialogOpen}
           currentRemark={currentRemark}
@@ -574,6 +648,10 @@ const SlowdownNorms = () => {
           handleCalculate={handleCalculate}
           permissions={adjustedPermissions}
           groupBy='Particulars'
+          plantID={plantID}
+          grades={grades}
+          calculatebtnClicked={calculatebtnClicked}
+          handleGradeChange={handleGradeChange}
 
           // permissions={{
           //   showAction: false,

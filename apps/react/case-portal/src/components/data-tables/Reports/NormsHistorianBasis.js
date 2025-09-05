@@ -196,17 +196,28 @@ const NormsHistorianBasis = () => {
     const refs = [exportRef1, exportRef2, exportRef3]
     const options = refs.map((ref) => ref.current.workbookOptions())
 
-    options[0].sheets[1] = options[1].sheets[0]
-    options[0].sheets[2] = options[2].sheets[0]
+    if (lowerVertName === 'cracker') {
+      // For Cracker, skip 0th sheet and only take from ref2, ref3
+      const crackerSheets = [
+        options[1].sheets[0], // Expression
+        // options[2].sheets[0], // Individual Best Achieved
+      ]
 
-    options[0].sheets[0].title =
-      lowerVertName === 'cracker' ? 'Best Achieved' : 'Production Volume'
-    options[0].sheets[1].title =
-      lowerVertName === 'cracker' ? 'Expression Based' : 'MCU & Norm'
-    options[0].sheets[2].title =
-      lowerVertName === 'cracker' ? 'Current Year' : 'Current Values'
+      crackerSheets[0].title = '(Norms) Expression'
+      // crackerSheets[1].title = '(Norms) (Individual Best Achieved)'
 
-    exportRef1.current.save(options[0])
+      exportRef1.current.save({ ...options[0], sheets: crackerSheets })
+    } else {
+      // Normal flow
+      options[0].sheets[1] = options[1].sheets[0]
+      options[0].sheets[2] = options[2].sheets[0]
+
+      options[0].sheets[0].title = 'Production Volume'
+      options[0].sheets[1].title = 'MCU & Norm'
+      options[0].sheets[2].title = 'Current Values'
+
+      exportRef1.current.save(options[0])
+    }
   }
 
   const fileName = `Norms Historian Basis ${new Date().toISOString().split('.')[0].replace(/:/g, '-')}.xlsx`
@@ -219,21 +230,21 @@ const NormsHistorianBasis = () => {
   const gridData =
     lowerVertName === 'cracker'
       ? [
-          {
-            label: 'Norms (Best Achieved-Min CC)',
-            rows: rowsBestAchieved,
-            cols: colsBestAchieved,
-          },
+          // {
+          //   label: 'Norms (Best Achieved-Min CC)',
+          //   rows: rowsBestAchieved,
+          //   cols: colsBestAchieved,
+          // },
           {
             label: 'Norms (Expression)',
             rows: rowsExpressionBased,
             cols: colsExpressionBased,
           },
-          {
-            label: 'Norms (Individual Best Achieved)',
-            rows: rowsCurrentYear,
-            cols: colsCurrentYear,
-          },
+          // {
+          //   label: 'Norms (Individual Best Achieved)',
+          //   rows: rowsCurrentYear,
+          //   cols: colsCurrentYear,
+          // },
         ]
       : [
           {

@@ -24,6 +24,7 @@ import {
   IconTools,
   IconTrafficCone, // For shutdown-related items
   IconTrendingDown, // For slowdown
+  IconSettingsAutomation,
 } from '@tabler/icons-react'
 // import { useSelector } from 'react-redux'
 import i18n from '../i18n'
@@ -44,6 +45,7 @@ const icons = {
   IconShield,
   IconFunction,
   IconReport,
+  IconSettingsAutomation,
   IconFile,
   IconFileText,
   IconCalendarCog,
@@ -205,7 +207,25 @@ const planCracker = {
           icon: icons.IconReport,
           breadcrumbs: true,
         },
+
+        {
+          id: 'intermediate-values',
+          title: i18n.t('menu.intermediateValuesDataSet'),
+          type: 'item',
+          url: '/reports/intermediate-values',
+          icon: icons.IconReport,
+          breadcrumbs: true,
+        },
       ],
+    },
+
+    {
+      id: 'workflow',
+      title: i18n.t('menu.workflow'),
+      type: 'item',
+      url: '/workflow',
+      icon: icons?.IconSettingsAutomation,
+      breadcrumbs: true,
     },
   ],
 }

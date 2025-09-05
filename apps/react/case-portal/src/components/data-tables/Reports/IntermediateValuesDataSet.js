@@ -9,7 +9,7 @@ import {
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
+import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -17,25 +17,21 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-const CALL_DELAY_MS = 200
+const GRID_NAME = 'Intermediate Values'
 
-const BestAchievedNorms = () => {
+const IntermediateValuesDataSet = () => {
   const keycloak = useSession()
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantID, yearChanged, oldYear } = dataGridStore
-  const timeoutIdsRef = useRef([])
-  const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
 
   useEffect(() => {
     return () => {
       isMountedRef.current = false
-      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-      timeoutIdsRef.current = []
     }
   }, [])
 
@@ -46,9 +42,7 @@ const BestAchievedNorms = () => {
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
-    const DEFAULT_MIN_WIDTH = 200
-
-    const cols = backendCols.map((col) => {
+    return backendCols.map((col) => {
       const isTextCol = col.type === 'string'
       const isNumberCol = col.type === 'number'
       return {
@@ -62,26 +56,22 @@ const BestAchievedNorms = () => {
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
     })
-
-    if (cols.length > 12) {
-      return cols.map((c) => ({
-        widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
-        ...c,
-      }))
-    }
-
-    return cols
   }, [])
 
   const fetchDataForGrid = useCallback(
     async (reportType) => {
       try {
-        const apiResponse = await DataService.getBestAchievedNorms(
-          keycloak,
-          reportType,
-        )
+        // Call the single service for intermediate values.
+        // If your service signature differs, adjust the arguments accordingly.
+        const apiResponse =
+          await CrackerReportsApiDataService.configurationIntermediateValues(
+            keycloak,
+            reportType,
+            { plantId: plantID, aopYear: oldYear }, // remove/adjust if service doesn't accept this object
+          )
 
         if (apiResponse?.code !== 200) {
+          console.warn('[fetchDataForGrid] non-200 response', apiResponse)
           return { rows: [], columns: [] }
         }
 
@@ -111,97 +101,43 @@ const BestAchievedNorms = () => {
 
         return { rows: rowsWithId, columns: enrichedCols }
       } catch (err) {
-        console.error(`Error fetching ${reportType}:`, err)
+        console.error('[fetchDataForGrid] error', err)
         return { rows: [], columns: [] }
       }
     },
-    [keycloak, enrichColumns],
+    [keycloak, enrichColumns, plantID, oldYear],
   )
 
-  const scheduleAndRunFetch = useCallback(
-    (reportType, delayMs) => {
-      const id = setTimeout(async () => {
-        activeRequestsRef.current += 1
-        if (isMountedRef.current) setLoading(true)
-
-        try {
-          const { rows, columns } = await fetchDataForGrid(reportType)
-
-          if (!isMountedRef.current) return
-          setDataMap((prev) => ({ ...prev, [reportType]: { rows, columns } }))
-        } catch (err) {
-          console.error(`Scheduled fetch failed for ${reportType}:`, err)
-        } finally {
-          activeRequestsRef.current -= 1
-          if (activeRequestsRef.current <= 0 && isMountedRef.current) {
-            activeRequestsRef.current = 0
-            setLoading(false)
-          }
-        }
-      }, delayMs)
-
-      timeoutIdsRef.current.push(id)
-    },
-    [fetchDataForGrid, keycloak],
-  )
-
-  // Main: fetch TYPE_LIST then schedule fetching each grid in order
-  const fetchAllGrids = useCallback(async () => {
-    // clear previous timers
-    timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-    timeoutIdsRef.current = []
-
+  // single-shot fetch
+  const loadGrid = useCallback(async () => {
+    setLoading(true)
     try {
-      setLoading(true)
-
-      const typeListResult = await DataService.getBestAchievedNorms(
-        keycloak,
-        'TYPE LIST',
-      )
-
-      let types = []
-      if (typeListResult?.code == 200) {
-        types = (typeListResult?.data?.data ?? []).map((item) => item.TYPE)
-      } else {
-        return
-      }
-
-      const normalized = [...new Set(types)] // unique, preserve order as returned
-      setGridNames(normalized)
-
-      // schedule fetch for each grid with delay to throttle
-      normalized.forEach((type, idx) => {
-        const delay = idx * CALL_DELAY_MS
-        scheduleAndRunFetch(type, delay)
-      })
+      const { rows, columns } = await fetchDataForGrid(GRID_NAME)
+      if (!isMountedRef.current) return
+      setDataMap({ [GRID_NAME]: { rows, columns } })
+      setGridNames([GRID_NAME])
     } catch (err) {
-      console.error('Error fetching TYPE_LIST or config:', err)
-      setLoading(false)
+      console.error('[loadGrid] failed', err)
+    } finally {
+      if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, scheduleAndRunFetch])
+  }, [fetchDataForGrid])
 
   useEffect(() => {
-    fetchAllGrids()
-    // cleanup timers on dependency change
-    return () => {
-      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-      timeoutIdsRef.current = []
-    }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+    loadGrid()
+    // re-load when plant/year changes
+  }, [loadGrid, plantID, oldYear, yearChanged])
 
-  // Export: gather sheets from each ExcelExport instance and combine into one workbook
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})
     if (!keys.length) return
 
-    // find first available ref
     const firstKey = keys.find((k) => exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
     const baseOptions = baseRef?.workbookOptions?.()
     if (!baseOptions) return
 
-    // collect first sheet from each ref (preserves order of gridNames when possible)
     const sheets = gridNames
       .map((name) => {
         const ref = exportRefs.current[name]
@@ -216,7 +152,6 @@ const BestAchievedNorms = () => {
 
     if (!sheets.length) return
 
-    // set readable titles (use the original grid name)
     sheets.forEach((s, idx) => {
       s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
     })
@@ -230,9 +165,8 @@ const BestAchievedNorms = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Best Achieved Norms(Min CC) ${currentDateTime}.xlsx`
+  const fileName = `IntermediateValues ${currentDateTime}.xlsx`
 
-  // helper to render Title exactly as API sent (or tweak)
   const renderTitle = (t) => t
 
   return (
@@ -244,11 +178,10 @@ const BestAchievedNorms = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Hidden ExcelExport instances for each grid */}
+      {/* Hidden ExcelExport instance for the single grid */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
-          // function ref to capture the export instance
           const setRef = (ref) => {
             if (ref) exportRefs.current[name] = ref
           }
@@ -317,4 +250,4 @@ const BestAchievedNorms = () => {
   )
 }
 
-export default BestAchievedNorms
+export default IntermediateValuesDataSet

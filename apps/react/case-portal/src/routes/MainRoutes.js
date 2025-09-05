@@ -49,6 +49,7 @@ import AopSummary from 'components/kendo-data-tables/AopSummary'
 import PlantTeam from 'components/kendo-data-tables/PlantTeam'
 import RelPerf from 'components/kendo-data-tables/RelPerf'
 import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafetyPerformanceTarget'
+import IntermediateValuesDataSet from 'components/data-tables/Reports/IntermediateValuesDataSet'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -64,13 +65,17 @@ export const MainRoutes = (
   )?.name
 
   const ProductionVolumeDataBasisElement =
-    verticalName == 'PE' ? (
+    verticalName == 'PE' || verticalName == 'PP' ? (
       <ProductionVolumeDataBasisPe />
     ) : (
       <ProductionVolumeDataBasis />
     )
   const NormsHistorianBasisElement =
-    verticalName == 'PE' ? <NormsHistorianBasisPe /> : <NormsHistorianBasis />
+    verticalName == 'PE' || verticalName == 'PP' ? (
+      <NormsHistorianBasisPe />
+    ) : (
+      <NormsHistorianBasis />
+    )
 
   let routes = {
     path: '/',
@@ -396,6 +401,16 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+
+          {
+            path: 'intermediate-values',
+            element: (
+              <PrivateRoute routeId='intermediate-values'>
+                <IntermediateValuesDataSet />
+              </PrivateRoute>
+            ),
+          },
+
           {
             path: 'monthwise-raw-material',
             element: <MonthwiseRawMaterial />,
