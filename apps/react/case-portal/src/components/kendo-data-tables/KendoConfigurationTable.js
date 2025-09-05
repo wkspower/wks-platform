@@ -806,7 +806,7 @@ const ConfigurationTable = () => {
     )
   }
 
-  if (lowerVertName === 'cracker' || lowerVertName === 'elastomer') {
+  if (lowerVertName === 'cracker' ) {
     const crackerTabs = ['Configuration', 'Constants']
     const auditYear = localStorage.getItem('year')
     let displayYear = ''
@@ -880,6 +880,94 @@ const ConfigurationTable = () => {
       </div>
     )
   }
+  if (lowerVertName === 'elastomer') {
+  const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
+  const auditYear = localStorage.getItem('year')
+  let displayYear = ''
+  if (auditYear) {
+    const [start, end] = auditYear.split('-').map(Number)
+    displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
+  }
+  return (
+    <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!!loading1}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
+      {ConfigurationAccordian}
+      <Box>
+        <AopTabs
+          tabIndex={tabIndex}
+          setTabIndex={setTabIndex}
+          tabs={elastomerTabs.map((tab) =>
+            tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
+          )}
+        />
+        {(() => {
+          const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
+          switch (currentTab) {
+            case 'configuration':
+              return (
+                <SelectivityData
+                  rows={productionRows}
+                  loading={loading}
+                  fetchData={fetchData}
+                  setRows={setProductionRows}
+                  configType='elastomer'
+                  groupBy='Particulars'
+                  summary={debouncedSummary}
+                  summaryEdited={summaryEdited}
+                  onSummaryEditChange={setSummaryEdited}
+                  tabIndex='0'
+                />
+              )
+            case 'constants':
+              return (
+                <SelectivityData
+                  rows={productionRowsConstants}
+                  loading={loading}
+                  fetchData={fetchDataConstants}
+                  setRows={setProductionRowsConstants}
+                  configType='elastomerConstants'
+                  groupBy='Particulars'
+                  summaryEdited={summaryEdited}
+                  summary={debouncedSummary}
+                  onSummaryEditChange={setSummaryEdited}
+                  tabIndex='1'
+                />
+              )
+            case 'report manual entry':
+              return (
+                <SelectivityData
+                  rows={productionRowsConstantsMannualEntry}
+                  loading={loading}
+                  fetchData={fetchDataConstantsMnnualEntry}
+                  setRows={setProductionRowsConstantsMannualEntry}
+                  configType='elastomerConstantsMannualEntry'
+                  groupBy='Particulars'
+                  summaryEdited={summaryEdited}
+                  summary={debouncedSummary}
+                  onSummaryEditChange={setSummaryEdited}
+                  tabIndex='2'
+                />
+              )
+            default:
+              return null
+          }
+        })()}
+      </Box>
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData?.message || ''}
+        severity={snackbarData?.severity || 'info'}
+        onClose={() => setSnackbarOpen(false)}
+      />
+      {ConfigurationDialog}
+    </div>
+  )
+}
 
   return (
     <div>
