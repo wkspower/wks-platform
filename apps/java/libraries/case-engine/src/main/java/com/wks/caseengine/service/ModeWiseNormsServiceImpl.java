@@ -14,6 +14,7 @@ import com.wks.caseengine.dto.ModeWiseNormsDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -21,6 +22,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.utility.Utility;
@@ -49,6 +51,9 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
 
 	@Override
 	public AOPMessageVM getModeWiseNormsData(String year, String plantId, String mode, String method) {
@@ -186,6 +191,16 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 		}catch(Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to update data", e);
+		}
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(year);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data updated successfully");
