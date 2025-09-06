@@ -52,7 +52,7 @@ const ShutdownNorms = () => {
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
-    if (lowerVertName == 'meg') {
+    if (lowerVertName == 'meg' || lowerVertName === 'elastomer') {
       try {
         var data = Object.values(modifiedCells)
 
@@ -318,9 +318,8 @@ const ShutdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'By Products',
-            isEditable: isPEorPP ? false : true,
+            isEditable: isPEorPP ? false : item.isEditable,
           }
-
           return baseItem
         },
       )
