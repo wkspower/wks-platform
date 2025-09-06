@@ -110,7 +110,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
-			if (vertical.getName().equalsIgnoreCase("MEG")) {
+			if (vertical.getName().equalsIgnoreCase("MEG") || vertical.getName().equalsIgnoreCase("ELASTOMER")) {
 				String storedProcedure = vertical.getName() + "_" + site.getName() + "_SlowdownNormCalculation";
 
 				int spResult = getSlowdownNormsSPData(
@@ -120,14 +120,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 						site.getId().toString(),
 						vertical.getId().toString());
 
-				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms",grade);
+				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
 			} else {
 				String viewName = "vwScrn" + vertical.getName() + "SlowdownNorms";
 				
 				if(gradeId!=null) {
 					 grade=UUID.fromString(gradeId);
 				}
-				objList = getSlowdownNorms(year, plant.getId(), viewName,grade);
+				objList = getSlowdownNormsWithGrades(year, plant.getId(), viewName,grade);
 			}
 
 			List<SlowdownNormsValueDTO> slowdownNormsValueDTOList = new ArrayList<>();
@@ -363,7 +363,31 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		}
 	}
 
-	public List<Object[]> getSlowdownNorms(String year, UUID plantId, String viewName,UUID gradeId) {
+	public List<Object[]> getSlowdownNorms(String year, UUID plantId, String viewName) {
+		try {
+			String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], "
+					+ "[Material_FK_Id], [April], [May], [June], [July], [August], [September], "
+					+ "[October], [November], [December], [January], [February], [March], "
+					+ "[FinancialYear], [Remarks], [CreatedOn], [ModifiedOn], [MCUVersion], "
+					+ "[UpdatedBy], [NormParameterTypeId], [NormParameterTypeName], "
+					+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable],[DisplayName] "
+					+ "FROM " + viewName + " "
+					+ "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) "
+					+ "ORDER BY NormTypeDisplayOrder";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<Object[]> getSlowdownNormsWithGrades(String year, UUID plantId, String viewName,UUID gradeId) {
 		try {
 			String sql = "SELECT TOP (1000) [Id], [Site_FK_Id], [Plant_FK_Id], [Vertical_FK_Id], "
 					+ "[Material_FK_Id], [April], [May], [June], [July], [August], [September], "
@@ -387,6 +411,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
 
 	@Override
 	@Transactional
