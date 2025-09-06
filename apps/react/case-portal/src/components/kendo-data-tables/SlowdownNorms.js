@@ -93,7 +93,7 @@ const SlowdownNorms = () => {
     // })
 
     setTimeout(() => {
-      if (lowerVertName == 'meg') {
+      if (lowerVertName == 'meg' || lowerVertName == 'elastomer') {
         try {
           var data = Object.values(modifiedCells)
           if (data.length == 0) {
