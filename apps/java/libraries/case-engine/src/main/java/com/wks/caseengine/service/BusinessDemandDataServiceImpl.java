@@ -26,6 +26,7 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -58,6 +59,9 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
 
 	
 	@Override
@@ -169,9 +173,13 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 			
 			if(vertical.getName().equalsIgnoreCase("Cracker")) {
 				for(BusinessDemandDataDTO businessDemandDataDTO : businessDemandDataDTOList) {
-					for (int i = 1; i <= 12; i++) {
-						Double attributeValue = getAttributeValue(businessDemandDataDTO, i);
-						saveData(UUID.fromString(businessDemandDataDTO.getNormParameterId()),i,attributeValue,businessDemandDataDTO.getRemark(),plantId.toString(),businessDemandDataDTO.getYear());
+					String normParameterName=normParametersRepository.findNormParameterName(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
+					List<UUID> ids= normParametersRepository.findNormParameterIds(normParameterName,plantId);
+					for(UUID id:ids) {
+						for (int i = 1; i <= 12; i++) {	
+							Double attributeValue = getAttributeValue(businessDemandDataDTO, i);	
+							saveData(id,i,attributeValue,businessDemandDataDTO.getRemark(),plantId.toString(),businessDemandDataDTO.getYear());
+						}
 					}
 				}
 			}
