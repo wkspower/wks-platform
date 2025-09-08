@@ -256,8 +256,8 @@ const CrackerConfig = () => {
               id: item.NormParameterFKID || `row_${index}`,
               particulars: item.Particulars,
               uom: item.UOM,
-              remarks: item.Remarks,
-              originalRemark: item.Remarks,
+              remarks: item.remarks ?? item.Remarks ?? '',
+              originalRemark: item.remarks ?? item.Remarks ?? '',
               ParticularsType: item.NormParameterTypeName,
 
               april:
@@ -281,8 +281,8 @@ const CrackerConfig = () => {
               id: item.NormParameterFKID || `row_${index}`,
               particulars: item.Particulars,
               uom: item.UOM,
-              remarks: item.Remarks,
-              originalRemark: item.Remarks,
+              remarks: item.remarks ?? item.Remarks ?? '',
+              originalRemark: item.remarks ?? item.Remarks ?? '',
               ParticularsType: item.normParameterTypeName,
 
               NormParameterFKID: item.NormParameterFKID,

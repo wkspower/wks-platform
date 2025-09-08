@@ -236,8 +236,8 @@ const CrackerConfig = () => {
         if (spyroVM?.data && Array.isArray(spyroVM.data)) {
           transformedData = spyroVM.data.map((item, index) => ({
             id: item.NormParameterFKID || `row_${index}`,
-            remarks: item.Remarks,
-            originalRemark: item.Remarks,
+            remarks: item.remarks ?? item.Remarks ?? '',
+            originalRemark: item.remarks ?? item.Remarks ?? '',
             ParticularsType: item.Type,
             ...item,
           }))
