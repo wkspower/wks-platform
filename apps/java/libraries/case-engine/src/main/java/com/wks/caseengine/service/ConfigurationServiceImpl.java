@@ -551,7 +551,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				map.put("Name", row[2]);
 				map.put("DisplayName", row[3]);
 				map.put("UOM", row[4]);
-				map.put("ConstantValue", Double.parseDouble(row[5].toString()));
+				map.put("ConstantValue", (row[5] != null) ? Double.parseDouble(row[5].toString()) : 0.0);
 				map.put("AuditYear", row[6]);
 				map.put("Remarks", row[7]);
 				boolean isEditable;
