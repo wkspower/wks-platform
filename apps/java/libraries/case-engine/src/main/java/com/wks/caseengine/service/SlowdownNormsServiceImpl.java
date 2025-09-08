@@ -419,8 +419,12 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
 		
 		try {
-			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {	
-				return	slowdownNormsRepository.getSlowdownMonthsWithGrades(plantId,maintenanceName,year,UUID.fromString(gradeId));
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+				UUID grade=null;
+				if(gradeId!=null) {
+					 grade=UUID.fromString(gradeId);
+				}
+				return	slowdownNormsRepository.getSlowdownMonthsWithGrades(plantId,maintenanceName,year,grade);
 			}else {
 				return	slowdownNormsRepository.getSlowdownMonths(plantId,maintenanceName,year);
 			}
