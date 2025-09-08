@@ -309,6 +309,7 @@ const SlowdownNorms = () => {
       setRows([])
 
       const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+      const isElastomer = ['elastomer'].includes(lowerVertName)
 
       if (isPEorPP && !gradeId) {
         setLoading(false)
@@ -330,7 +331,11 @@ const SlowdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'By Products',
-            isEditable: isPEorPP ? false : true,
+            isEditable: isPEorPP
+              ? false
+              : isElastomer
+                ? item?.isEditable
+                : true,
           }
 
           return baseItem

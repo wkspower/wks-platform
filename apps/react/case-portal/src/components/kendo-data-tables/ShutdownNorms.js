@@ -259,6 +259,7 @@ const ShutdownNorms = () => {
       setCalculationObject(data?.data?.aopCalculation)
 
       const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+      const isElastomer = ['elastomer'].includes(lowerVertName)
 
       const formattedData = data?.data?.mcuNormsValueDTOList?.map(
         (item, index) => {
@@ -270,7 +271,11 @@ const ShutdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'By Products',
-            isEditable: isPEorPP ? false : true,
+            isEditable: isPEorPP
+              ? false
+              : isElastomer
+                ? item?.isEditable
+                : true,
           }
 
           return baseItem
