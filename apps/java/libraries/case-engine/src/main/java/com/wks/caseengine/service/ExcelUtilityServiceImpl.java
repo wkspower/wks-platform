@@ -49,7 +49,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
             CellStyle unlockedStyle = workbook.createCellStyle();
             unlockedStyle.setLocked(false);
 
-            System.out.println("postman structure" + structure);
+            
 
             for (String sheetName : structure.keySet()) {
                 Map<String, Object> sheetData = (Map<String, Object>) structure.get(sheetName);
@@ -59,7 +59,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                 Sheet sheet = workbook.createSheet(sheetName);
                 int currentRow = 0;
                 int tableCount = -1;
-                System.out.println("data" + data);
+                
                 for (Map<String, Object> table : tables) {
                     String title = "";
                     boolean hideTable = (boolean) table.get(ExcelConstants.HIDE_TABLE);
