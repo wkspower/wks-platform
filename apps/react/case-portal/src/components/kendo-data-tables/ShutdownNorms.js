@@ -52,82 +52,34 @@ const ShutdownNorms = () => {
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
-    if (lowerVertName == 'meg' || lowerVertName === 'elastomer') {
-      try {
-        var data = Object.values(modifiedCells)
+    try {
+      var data = Object.values(modifiedCells)
 
-        if (data.length == 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          setLoading(false)
-          return
-        }
-
-        const requiredFields = ['remarks']
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
-
-        saveShutDownNormsData(data)
-      } catch (error) {
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
         setLoading(false)
+        return
       }
-    }
-    if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-      try {
-        var editedData = Object.values(modifiedCells)
-        if (editedData.length === 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'No Records to Save!',
-            severity: 'info',
-          })
-          return
-        }
 
-        const requiredFields = ['remarks']
-
-        const validationMessage = validateFields(editedData, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
-
-        if (calculatebtnClicked == false) {
-          if (editedData.length === 0) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: 'No Records to Save!',
-              severity: 'info',
-            })
-            setCalculatebtnClicked(false)
-            return
-          }
-
-          saveShutDownNormsData(editedData)
-        } else {
-          saveShutDownNormsData(editedData)
-        }
-      } catch (error) {
-        console.log('Error saving changes:', error)
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
         setLoading(false)
-        setCalculatebtnClicked(false)
+        return
       }
+
+      saveShutDownNormsData(data)
+    } catch (error) {
+      setLoading(false)
     }
   }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
 
@@ -318,8 +270,9 @@ const ShutdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'By Products',
-            isEditable: isPEorPP ? false : item.isEditable,
+            isEditable: isPEorPP ? false : true,
           }
+
           return baseItem
         },
       )
@@ -476,7 +429,8 @@ const ShutdownNorms = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
       saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
-      showCalculate: lowerVertName == 'meg' ? false : true,
+      showCalculate:
+        lowerVertName == 'meg' || lowerVertName == 'elastomer' ? false : true,
       showCalculateVisibility:
         lowerVertName != 'meg' &&
         Object.keys(calculationObject || {}).length > 0

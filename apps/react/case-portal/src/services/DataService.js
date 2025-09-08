@@ -1214,7 +1214,7 @@ async function updateUserAttributes(keycloak, userId) {
   }
 }
 
-async function getSlowdownNormsData(keycloak) {
+async function getSlowdownNormsData(keycloak, gradeId) {
   var year = localStorage.getItem('year')
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -1222,9 +1222,14 @@ async function getSlowdownNormsData(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  // let siteID =
-  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-  const url = `${Config.CaseEngineUrl}/task/slowdownNorms?year=${year}&plantId=${plantId}`
+
+  let url
+  if (gradeId) {
+    url = `${Config.CaseEngineUrl}/task/slowdownNorms?year=${year}&plantId=${plantId}&gradeId=${gradeId}`
+  } else {
+    url = `${Config.CaseEngineUrl}/task/slowdownNorms?year=${year}&plantId=${plantId}`
+  }
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2056,11 +2061,19 @@ async function getAllProducts(keycloak) {
   }
 }
 
-async function getSlowdownMonths(keycloak) {
+async function getSlowdownMonths(keycloak, gradeId) {
   const storedPlant = localStorage.getItem('selectedPlant')
   var year = localStorage.getItem('year')
   const parsedPlant = JSON.parse(storedPlant)
-  const url = `${Config.CaseEngineUrl}/task/slowdown-months?plantId=${parsedPlant.id}&maintenanceName=Slowdown&year=${year}`
+  let url
+  // const url = `${Config.CaseEngineUrl}/task/slowdown-months?plantId=${parsedPlant.id}&maintenanceName=Slowdown&year=${year}`
+
+  if (gradeId) {
+    url = `${Config.CaseEngineUrl}/task/slowdown-months?plantId=${parsedPlant.id}&maintenanceName=Slowdown&year=${year}&gradeId=${gradeId}`
+  } else {
+    url = `${Config.CaseEngineUrl}/task/slowdown-months?plantId=${parsedPlant.id}&maintenanceName=Slowdown&year=${year}`
+  }
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

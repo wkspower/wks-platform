@@ -84,100 +84,34 @@ const SlowdownNorms = () => {
   const keycloak = useSession()
 
   const saveChanges = React.useCallback(async () => {
-    // const rowsInEditMode = Object.keys(rowModesModel).filter(
-    //   (id) => rowModesModel[id]?.mode === 'edit',
-    // )
-
-    // rowsInEditMode.forEach((id) => {
-    //   apiRef.current.stopRowEditMode({ id })
-    // })
-
-    setTimeout(() => {
-      if (lowerVertName == 'meg' || lowerVertName == 'elastomer') {
-        try {
-          var data = Object.values(modifiedCells)
-          if (data.length == 0) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: 'No Records to Save!',
-              severity: 'info',
-            })
-            setLoading(false)
-            return
-          }
-
-          const requiredFields = ['remarks']
-          const validationMessage = validateFields(data, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            setLoading(false)
-            return
-          }
-
-          saveSlowdownNormsData(data)
-        } catch (error) {
-          /* empty */
-          setLoading(false)
-        }
+    try {
+      var data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
       }
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-        try {
-          var editedData = Object.values(modifiedCells)
-          // var allRows = Array.from(apiRef.current.getRowModels().values())
-          // allRows = allRows.filter((row) => !row.isGroupHeader)
 
-          // const updatedRows = allRows.map(
-          //   (row) => unsavedChangesRef.current.unsavedRows[row.id] || row,
-          // )
-
-          if (editedData.length === 0) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: 'No Records to Save!',
-              severity: 'info',
-            })
-            return
-          }
-
-          const requiredFields = ['remarks']
-
-          const validationMessage = validateFields(editedData, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            setLoading(false)
-            return
-          }
-
-          if (calculatebtnClicked == false) {
-            if (editedData.length === 0) {
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: 'No Records to Save!',
-                severity: 'info',
-              })
-              setCalculatebtnClicked(false)
-              return
-            }
-
-            saveSlowdownNormsData(editedData)
-          } else {
-            saveSlowdownNormsData(modifiedCells)
-          }
-        } catch (error) {
-          console.log('Error saving changes:', error)
-          setLoading(false)
-          setCalculatebtnClicked(false)
-        }
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
       }
-    }, 400)
+
+      saveSlowdownNormsData(data)
+    } catch (error) {
+      setLoading(false)
+    }
   }, [apiRef, selectedUnit, calculatebtnClicked, modifiedCells])
 
   useEffect(() => {
@@ -461,8 +395,8 @@ const SlowdownNorms = () => {
       // non PE/PP flow
       await fetchData(null)
       try {
-        const months = await DataService.getShutdownMonths(keycloak, null)
-        setShutdownMonths(months)
+        const months = await DataService.getSlowdownMonths(keycloak, null)
+        setSlowdownMonths(months)
       } catch (err) {
         console.error('Error fetching shutdown months:', err)
       }
@@ -549,7 +483,9 @@ const SlowdownNorms = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
       saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
-      showCalculate: true,
+      showCalculate:
+        lowerVertName == 'meg' || lowerVertName == 'elastomer' ? false : true,
+
       allAction: true,
       dropdownLabel:
         lowerVertName === 'pe' || lowerVertName === 'pp'

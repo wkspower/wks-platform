@@ -730,8 +730,8 @@ const WorkFlowMerge = () => {
         {lowerVertName === 'cracker' && (
           <>
             {tabIndex === 0 && <BestAchievedReport />}
-            {tabIndex === 1 && <BestAchievedReport />}
-            {tabIndex === 2 && <BestAchievedReport />}
+            {tabIndex === 1 && <PlantContribution />}
+            {tabIndex === 2 && <PlantContributionLastFourYears />}
 
             <Notification
               open={snackbarOpen}
