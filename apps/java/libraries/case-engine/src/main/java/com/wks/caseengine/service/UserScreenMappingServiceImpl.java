@@ -114,18 +114,22 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 
 	                    if (parentGroupId != null) {
 	                        // If group has a parent, it's a third level item
-	                        if (!groupWiseScreens.containsKey(parentGroupId)) {
-	                            // Ensure parent group structure exists
-	                            GroupMaster parentGroup = groupMap.get(parentGroupId);
-	                            Map<String, Object> parentData = new HashMap<>();
-	                            parentData.put("id", parentGroup.getGroupCode());
-	                            parentData.put("title", parentGroup.getGroupName());
-	                            parentData.put("type", "collapse");
-	                            parentData.put("icon", parentGroup.getIcon());
-	                            parentData.put("children", new ArrayList<>());
-	                            groupWiseScreens.put(parentGroupId, parentData);
-	                            children.add(parentData);
-	                        }
+	                    	if (parentGroupId != null) {
+	                    	    if (!groupWiseScreens.containsKey(parentGroupId)) {
+	                    	        GroupMaster parentGroup = groupMap.get(parentGroupId);
+	                    	        if (parentGroup != null) {
+	                    	            Map<String, Object> parentData = new HashMap<>();
+	                    	            parentData.put("id", parentGroup.getGroupCode());
+	                    	            parentData.put("title", parentGroup.getGroupName());
+	                    	            parentData.put("type", "collapse");
+	                    	            parentData.put("icon", parentGroup.getIcon());
+	                    	            parentData.put("children", new ArrayList<>());
+	                    	            groupWiseScreens.put(parentGroupId, parentData);
+	                    	            children.add(parentData);
+	                    	        } 
+	                    	    }
+	                    	} 
+
 	                        Map<String, Object> groupData = groupWiseScreens.get(parentGroupId);
 	                        List<Map<String, Object>> childrenList = (List<Map<String, Object>>) groupData.get("children");
 	                        

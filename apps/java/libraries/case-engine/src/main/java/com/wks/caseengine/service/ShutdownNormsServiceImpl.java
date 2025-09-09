@@ -467,7 +467,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					+ "[NormParameterTypeDisplayName], [NormTypeDisplayOrder], [MaterialDisplayOrder], [UOM],[isEditable],[DisplayName] "
 					+ "FROM " + viewName + " "
 					+ "WHERE Plant_FK_Id = :plantId AND (FinancialYear = :year OR FinancialYear IS NULL) "
-					+ "ORDER BY NormTypeDisplayOrder";
+					+ "ORDER BY NormTypeDisplayOrder,MaterialDisplayOrder";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantId", plantId);
