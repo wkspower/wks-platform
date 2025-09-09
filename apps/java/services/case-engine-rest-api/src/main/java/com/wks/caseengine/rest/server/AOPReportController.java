@@ -39,7 +39,11 @@ public class AOPReportController {
 	@GetMapping(value="/plant-contribution-years-wise")
 	public AOPMessageVM getFiveYearSummaryReport(@RequestParam String plantId,@RequestParam String year,@RequestParam(required=false) String reportType){
 		return aopReportService.getFiveYearSummaryReport(plantId,year,reportType);
-		
+	}
+	
+	@GetMapping(value="/report-plant-contribution-summary-yearly")
+	public AOPMessageVM getPlantContributionFiveYearSummaryReport(@RequestParam(required=false) String reportType,@RequestParam String plantId,@RequestParam String year) {
+		return aopReportService.getPlantContributionFiveYearSummaryReport(reportType,plantId,year);
 	}
 
 
