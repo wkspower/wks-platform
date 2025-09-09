@@ -50,6 +50,41 @@ public class CrackerReportController {
 	public AOPMessageVM getMIISData(@RequestParam String plantId,@RequestParam String year) {
 		return crackerReportService.getMIISData(plantId,year);
 	}
+	
+	@GetMapping(value="/spyro-input-repor")
+	public AOPMessageVM getCatChemRawDatasetReport(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String periodTo, @RequestParam(required=false) String periodFrom) {
+		return crackerReportService.getCatChemRawDatasetReport(plantId,year,periodTo,periodFrom);
+	}
+	
+	@GetMapping(value="/report-best-achieved-stg-catcam-monthly")
+	public AOPMessageVM getCatChemMonthlyAveragesReport(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String periodTo, @RequestParam(required=false) String periodFrom) {
+		return crackerReportService.getCatChemMonthlyAveragesReport(plantId,year,periodTo,periodFrom);
+	}
+	
+	@GetMapping(value="/report-best-achieved-raw")
+	public AOPMessageVM getUtilitiesRawDataReport(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String periodTo, @RequestParam(required=false) String periodFrom) {
+		return crackerReportService.getUtilitiesRawDataReport(plantId,year,periodTo,periodFrom);
+	}
+	
+	@GetMapping(value="/report-best-achieved-catcam")
+	public AOPMessageVM getSTGCatCamRawDatasetReport(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String periodTo, @RequestParam(required=false) String periodFrom) {
+		return crackerReportService.getSTGCatCamRawDatasetReport(plantId,year,periodTo,periodFrom);
+	}
+	
+	@GetMapping(value="/report-best-achieved-mis-utility-monthly")
+	public AOPMessageVM getMISUtiltiesMonthlyAveragesReport(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String periodTo, @RequestParam(required=false) String periodFrom) {
+		return crackerReportService.getMISUtiltiesMonthlyAveragesReport(plantId,year,periodTo,periodFrom);
+	}
+	
+	@GetMapping(value="/report-best-achieved-raw-steam")
+	public AOPMessageVM getRawDataForSteamValuesReport(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String periodTo, @RequestParam(required=false) String periodFrom,@RequestParam(required=false) String mode) {
+		return crackerReportService.getRawDataForSteamValuesReport(plantId,year,periodTo,periodFrom,mode);
+	}
+	
+	@GetMapping(value="/report-best-achieved-finding-steam")
+	public AOPMessageVM getFindingSteamValuesReport(@RequestParam String mode,@RequestParam String plantId,@RequestParam String year) {
+		return crackerReportService.getFindingSteamValuesReport(mode,plantId,year);
+	}
 
 
 }

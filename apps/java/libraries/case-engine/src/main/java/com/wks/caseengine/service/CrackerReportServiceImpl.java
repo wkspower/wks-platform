@@ -996,7 +996,865 @@ public class CrackerReportServiceImpl implements CrackerReportService{
 			return columnMetadata;
 		});
 	}
+	
+	@Override
+	public AOPMessageVM getCatChemRawDatasetReport(String plantId, String year, String periodTo, String periodFrom) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results= getCatChemRawDatasetReportData( plantId,  year,  periodTo,periodFrom);	
+			
+			List<String> columnNames = getCatChemRawDatasetReportColumns(plantId,  year,  periodTo,periodFrom);
 
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getCatChemRawDatasetReportColumnMetadata(plantId,  year,  periodTo,periodFrom));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getCatChemRawDatasetReportData(String plantId, String aopYear, String PeriodTo,String PeriodFrom){
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemRawDataset";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom ";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("PeriodTo", PeriodTo);
+			query.setParameter("PeriodFrom", PeriodFrom);
+			
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getCatChemRawDatasetReportColumns(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemRawDataset";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+	
+	public List<Map<String, Object>> getCatChemRawDatasetReportColumnMetadata(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemRawDataset";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+	
+	@Override
+	public AOPMessageVM getCatChemMonthlyAveragesReport(String plantId, String year, String periodTo, String periodFrom) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results= getCatChemRawDatasetReportData( plantId,  year,  periodTo,periodFrom);	
+			
+			List<String> columnNames = getCatChemRawDatasetReportColumns(plantId,  year,  periodTo,periodFrom);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getCatChemRawDatasetReportColumnMetadata(plantId,  year,  periodTo,periodFrom));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getCatChemMonthlyAveragesReportData(String plantId, String aopYear, String PeriodTo,String PeriodFrom){
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemMonthlyAverages";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom ";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("PeriodTo", PeriodTo);
+			query.setParameter("PeriodFrom", PeriodFrom);
+			
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getCatChemMonthlyAveragesReportColumns(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemMonthlyAverages";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+	
+	public List<Map<String, Object>> getCatChemMonthlyAveragesReportColumnMetadata(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemMonthlyAverages";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom ";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+
+	@Override
+	public AOPMessageVM getUtilitiesRawDataReport(String plantId, String year, String periodTo, String periodFrom) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results= getUtilitiesRawReportData( plantId,  year,  periodTo,periodFrom);	
+			
+			List<String> columnNames = getUtilitiesRawDataReportColumns(plantId,  year,  periodTo,periodFrom);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getUtilitiesRawReportColumnMetadata(plantId,  year,  periodTo,periodFrom));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getUtilitiesRawReportData(String plantId, String aopYear, String PeriodTo,String PeriodFrom){
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_MISUtilitiesRawDataSet";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom ";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("PeriodTo", PeriodTo);
+			query.setParameter("PeriodFrom", PeriodFrom);
+			
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getUtilitiesRawDataReportColumns(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_MISUtilitiesRawDataSet";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+	
+	public List<Map<String, Object>> getUtilitiesRawReportColumnMetadata(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_MISUtilitiesRawDataSet";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+	
+	@Override
+	public AOPMessageVM getSTGCatCamRawDatasetReport(String plantId, String year, String periodTo, String periodFrom) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results= getSTGCatCamRawDatasetReportData( plantId,  year,  periodTo,periodFrom);	
+			
+			List<String> columnNames = getSTGCatCamRawDatasetReportColumns(plantId,  year,  periodTo,periodFrom);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getSTGCatCamRawDatasetReportColumnMetadata(plantId,  year,  periodTo,periodFrom));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getSTGCatCamRawDatasetReportData(String plantId, String aopYear, String PeriodTo,String PeriodFrom){
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemRawDataset";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("PeriodTo", PeriodTo);
+			query.setParameter("PeriodFrom", PeriodFrom);
+			
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getSTGCatCamRawDatasetReportColumns(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemRawDataset";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+	
+	public List<Map<String, Object>> getSTGCatCamRawDatasetReportColumnMetadata(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_STGCatChemRawDataset";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+
+	@Override
+	public AOPMessageVM getMISUtiltiesMonthlyAveragesReport(String plantId, String year, String periodTo, String periodFrom) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results= getMISUtiltiesMonthlyAveragesReportData( plantId,  year,  periodTo,periodFrom);	
+			
+			List<String> columnNames = getMISUtiltiesMonthlyAveragesReportColumns(plantId,  year,  periodTo,periodFrom);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getMISUtiltiesMonthlyAveragesReportColumnMetadata(plantId,  year,  periodTo,periodFrom));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getMISUtiltiesMonthlyAveragesReportData(String plantId, String aopYear, String PeriodTo,String PeriodFrom){
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_MISUtilitiesMonthlyAverages";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom ";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("PeriodTo", PeriodTo);
+			query.setParameter("PeriodFrom", PeriodFrom);
+			
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getMISUtiltiesMonthlyAveragesReportColumns(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_MISUtilitiesMonthlyAverages";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+	
+	public List<Map<String, Object>> getMISUtiltiesMonthlyAveragesReportColumnMetadata(String plantId, String aopYear, String PeriodTo,String PeriodFrom) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_MISUtilitiesMonthlyAverages";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ? ";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+
+	@Override
+	public AOPMessageVM getRawDataForSteamValuesReport(String plantId, String year, String periodTo, String periodFrom,String mode) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results= getRawDataForSteamValuesReportData( plantId,  year,  periodTo,periodFrom,mode);	
+			
+			List<String> columnNames = getRawDataForSteamValuesReportColumns(plantId,  year,  periodTo,periodFrom,mode);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getRawDataForSteamValuesColumnMetadata(plantId,  year,  periodTo,periodFrom,mode));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	
+	public List<Object[]> getRawDataForSteamValuesReportData(String plantId, String aopYear, String PeriodTo,String PeriodFrom,String mode){
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_RawDataForSteamValues";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodTo = :PeriodTo, @PeriodFrom = :PeriodFrom, @mode = :mode ";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("PeriodTo", PeriodTo);
+			query.setParameter("PeriodFrom", PeriodFrom);
+			query.setParameter("mode", mode);
+			
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<String> getRawDataForSteamValuesReportColumns(String plantId, String aopYear, String PeriodTo,String PeriodFrom,String mode) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_RawDataForSteamValues";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ?, @mode = ? ";
+			
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				ps.setString(5, mode);
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+	
+	public List<Map<String, Object>> getRawDataForSteamValuesColumnMetadata(String plantId, String aopYear, String PeriodTo,String PeriodFrom,String mode) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_RawDataForSteamValues";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @aopYear = ?, @PeriodTo = ?, @PeriodFrom = ?, @mode = ? ";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, aopYear);
+				ps.setString(3, PeriodTo);
+				ps.setString(4, PeriodFrom);
+				ps.setString(5, mode);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
+	
+	@Override
+	public AOPMessageVM getFindingSteamValuesReport(String mode,String plantId,String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Map<String,Object>> mapList=new ArrayList<>();
+			List<Object[]> objList = null;
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String viewName="vw"+vertical.getName()+"FindingSteamVaues";
+			objList=getFindingSteamValues(mode,viewName);
+			for(Object[] obj:objList) {
+				Map<String,Object> map = new HashMap<>();
+				map.put("id", obj[0]);
+				map.put("modeofOperation", obj[1]);
+				map.put("materialdescription", obj[2]);
+				map.put("totalQuantity", obj[3]);
+				mapList.add(map);
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(mapList);
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	public List<Object[]> getFindingSteamValues(String ModeofOperation,String viewName) {
+		try {
+			String sql = "SELECT TOP (10000) [Id] "
+					+ "[ModeofOperation], [materialdescription], [totalQuantity] "
+					+ "FROM " + viewName + " "
+					+ "WHERE ModeofOperation = :ModeofOperation ";
+					
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("ModeofOperation", ModeofOperation);
+			query.setParameter("ModeofOperation", ModeofOperation);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	
 
 
 }

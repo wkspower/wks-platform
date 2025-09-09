@@ -1,7 +1,5 @@
 package com.wks.caseengine.service;
 
-
-
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface CrackerReportService {
@@ -13,5 +11,12 @@ public interface CrackerReportService {
 	public AOPMessageVM getConfigurationIntermediateValues(String plantId, String year);
 	public AOPMessageVM getFindingModel(String plantId, String year);
 	public AOPMessageVM getMIISData(String plantId, String year);
+	public AOPMessageVM getCatChemRawDatasetReport( String plantId, String year,  String periodTo, String periodFrom);
+	public AOPMessageVM getCatChemMonthlyAveragesReport( String plantId, String year,  String periodTo, String periodFrom);
+	public AOPMessageVM getUtilitiesRawDataReport( String plantId, String year,  String periodTo, String periodFrom);
+	public AOPMessageVM getSTGCatCamRawDatasetReport( String plantId, String year,  String periodTo, String periodFrom);
+	public AOPMessageVM getMISUtiltiesMonthlyAveragesReport( String plantId, String year,  String periodTo, String periodFrom);
+	public AOPMessageVM getRawDataForSteamValuesReport( String plantId, String year,  String periodTo, String periodFrom,String mode);
+	public AOPMessageVM getFindingSteamValuesReport(String mode,String plantId,String year);
 	
 }
