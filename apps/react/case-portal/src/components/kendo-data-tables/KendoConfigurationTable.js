@@ -930,7 +930,7 @@ const ConfigurationTable = () => {
                   loading={loading}
                   fetchData={fetchDataConstants}
                   setRows={setProductionRowsConstants}
-                  configType='elastomerConstants'
+                  configType='megConstants'
                   groupBy='Particulars'
                   summaryEdited={summaryEdited}
                   summary={debouncedSummary}
