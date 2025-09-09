@@ -115,7 +115,7 @@ async function getMaxAchievedCapacityData(keycloak) {
 }
 async function handleCalculateProductionVolData(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task /calculate-production-target?year=${year1}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/calculate-production-target?year=${year1}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
