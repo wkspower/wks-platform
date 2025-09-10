@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.ShutdownConsumptionDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.GradeShutdownNormsValue;
@@ -525,5 +526,60 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	        List<String> results = query.getResultList();
 	        return results;
 	    }
+
+
+
+
+	@Override
+	public AOPMessageVM getShutConsumptionData(String year, String plantId, String gradeId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<ShutdownConsumptionDTO> shutdownConsumptionDTOs=new ArrayList<ShutdownConsumptionDTO>();
+		try {
+			List<Object[]> obj=getShutdownHistoryData(plantId,year);
+			for(Object[] row:obj) {
+				ShutdownConsumptionDTO shutdownConsumptionDTO= new ShutdownConsumptionDTO();
+				shutdownConsumptionDTO.setMaterial(row[0] != null ? row[0].toString() : null);
+				shutdownConsumptionDTO.setUom(row[1] != null ? row[1].toString() : null);
+				shutdownConsumptionDTO.setQty(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
+				shutdownConsumptionDTO.setRepeatedCNT(row[3] != null ? row[3].toString() : null);
+				shutdownConsumptionDTO.setAvgQty(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+				shutdownConsumptionDTOs.add(shutdownConsumptionDTO);
+			}
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(shutdownConsumptionDTOs);
+		aopMessageVM.setMessage("Data fetched successfully");
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	public List<Object[]> getShutdownHistoryData(String plantId, String aopYear) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			 String storedProcedure = verticalName + "_" + site.getName() + "_ShutdownConsumtion";
+			
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 }
