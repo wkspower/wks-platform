@@ -175,22 +175,26 @@ export const CrackerColumsForYearlyNorms = [
 export const ShutdownConsumptionCrackerColumns = [
   {
     field: 'material',
-    title: 'Particulars',
+    headerName: 'Particulars',
+    widthT: 130,
     editable: false,
   },
-  {
-    field: 'uom',
-    title: 'UOM',
-    editable: false,
-  },
-  {
-    field: 'avgQty',
-    title: 'Avg Quantity',
-    editable: false,
-  },
-  {
-    field: 'repeatedCNT',
-    title: 'Repeated CNT ',
-    editable: false,
-  },
+  { field: 'uom', headerName: 'UOM', widthT: 60, editable: false },
+
+  ...Array.from({ length: 12 }, (_, i) => {
+    const monthIndex = (i + 4) % 12 || 12
+    const monthField = new Date(2000, monthIndex - 1)
+      .toLocaleString('en-US', { month: 'long' })
+      .toLowerCase()
+
+    return {
+      field: monthField,
+
+      type: 'number',
+      format: '{0:#.###}',
+      editable: false,
+      isDisabled: true,
+      monthNumber: monthIndex,
+    }
+  }),
 ]

@@ -19,9 +19,9 @@ import {
 
 const GRID_NAME = 'Intermediate Values'
 
-const IntermediateValuesDataSet = () => {
+export default function IntermediateValuesDataSet() {
   const keycloak = useSession()
-  const [dataMap, setDataMap] = useState({})
+  const [dataMap, setDataMap] = useState({}) // { [gridName]: { rows:[], columns:[] } }
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -61,13 +61,11 @@ const IntermediateValuesDataSet = () => {
   const fetchDataForGrid = useCallback(
     async (reportType) => {
       try {
-        // Call the single service for intermediate values.
-        // If your service signature differs, adjust the arguments accordingly.
         const apiResponse =
           await CrackerReportsApiDataService.configurationIntermediateValues(
             keycloak,
             reportType,
-            { plantId: plantID, aopYear: oldYear }, // remove/adjust if service doesn't accept this object
+            { plantId: plantID, aopYear: oldYear },
           )
 
         if (apiResponse?.code !== 200) {
@@ -85,7 +83,9 @@ const IntermediateValuesDataSet = () => {
           .filter((c) => c.type === 'number')
           .map((c) => c.field)
 
-        const rowsWithId = (apiResponse.data.data || []).map((item, index) => {
+        // Make ids globally unique across the whole dataset
+        let globalIndex = 0
+        const rowsWithId = (apiResponse.data.data || []).map((item) => {
           const parsedItem = { ...item }
           dateFields.forEach((f) => {
             parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
@@ -96,7 +96,9 @@ const IntermediateValuesDataSet = () => {
                 ? Number(item[f])
                 : null
           })
-          return { ...parsedItem, id: index, isEditable: false }
+          parsedItem.id = globalIndex++
+          parsedItem.isEditable = false
+          return parsedItem
         })
 
         return { rows: rowsWithId, columns: enrichedCols }
@@ -108,16 +110,64 @@ const IntermediateValuesDataSet = () => {
     [keycloak, enrichColumns, plantID, oldYear],
   )
 
-  // single-shot fetch
+  // Helper: group rows by a field
+  const groupRowsByField = (rows, field) => {
+    const map = {}
+    rows.forEach((r) => {
+      const key = r?.[field] ?? 'Unknown'
+      const name = typeof key === 'string' ? key : String(key)
+      if (!map[name]) map[name] = []
+      map[name].push(r)
+    })
+    return map
+  }
+
+  // single-shot fetch, but now split into multiple grids based on NormTypeName-like column
   const loadGrid = useCallback(async () => {
     setLoading(true)
     try {
       const { rows, columns } = await fetchDataForGrid(GRID_NAME)
       if (!isMountedRef.current) return
-      setDataMap({ [GRID_NAME]: { rows, columns } })
-      setGridNames([GRID_NAME])
+
+      // Find a candidate grouping field. Look for common names like "NormTypeName", "NormType", etc.
+      const candidateField =
+        (columns || []).find((c) => /normtype/i.test(c.field || '')) ||
+        (columns || []).find((c) => /normtype/i.test(c.title || '')) ||
+        null
+
+      if (!candidateField) {
+        // fallback to single grid if no grouping column found
+        setDataMap({ [GRID_NAME]: { rows, columns } })
+        setGridNames([GRID_NAME])
+        return
+      }
+
+      const groupField = candidateField.field
+
+      // group rows
+      const grouped = groupRowsByField(rows, groupField)
+
+      // build dataMap: for each group, create a grid name and remove the group column from columns (optional)
+      const newDataMap = {}
+      const newGridNames = []
+      Object.keys(grouped).forEach((groupKey) => {
+        const gridTitle = `${groupKey}`
+        // Remove grouping column from display/export since it's redundant inside a grouped grid
+        const colsForGroup = (columns || []).filter(
+          (c) => c.field !== groupField,
+        )
+        newDataMap[gridTitle] = {
+          rows: grouped[groupKey],
+          columns: colsForGroup,
+        }
+        newGridNames.push(gridTitle)
+      })
+
+      setDataMap(newDataMap)
+      setGridNames(newGridNames)
     } catch (err) {
       console.error('[loadGrid] failed', err)
+      // keep previous state if present
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
@@ -178,7 +228,7 @@ const IntermediateValuesDataSet = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Hidden ExcelExport instance for the single grid */}
+      {/* Hidden ExcelExport instance for each grid (used to build multi-sheet workbook) */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
@@ -249,5 +299,3 @@ const IntermediateValuesDataSet = () => {
     </div>
   )
 }
-
-export default IntermediateValuesDataSet

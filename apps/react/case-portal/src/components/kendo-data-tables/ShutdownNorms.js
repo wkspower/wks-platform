@@ -280,7 +280,7 @@ const ShutdownNorms = () => {
             remarks: item?.remarks?.trim() || null,
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
-            Particulars: item.normParameterTypeDisplayName || 'By Products',
+            Particulars: item.normParameterTypeDisplayName || 'Particulars',
             isEditable: isPEorPP
               ? false
               : isElastomer
@@ -291,20 +291,14 @@ const ShutdownNorms = () => {
           return baseItem
         })
       } else {
-        formattedData = data?.data?.mcuNormsValueDTOList?.map((item, index) => {
+        formattedData = data?.data?.map((item, index) => {
           const baseItem = {
             ...item,
             idFromApi: item.id,
             id: index,
-            remarks: item?.remarks?.trim() || null,
-            originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
-            Particulars: item.normParameterTypeDisplayName || 'By Products',
-            isEditable: isPEorPP
-              ? false
-              : isElastomer
-                ? item?.isEditable
-                : true,
+            Particulars: item.normParameterTypeDisplayName || 'Particulars',
+            isEditable: false,
           }
 
           return baseItem
@@ -462,9 +456,18 @@ const ShutdownNorms = () => {
       showUnit: false,
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
-      saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+      saveBtn:
+        lowerVertName === 'pe' ||
+        lowerVertName === 'pp' ||
+        lowerVertName === 'cracker'
+          ? false
+          : true,
       showCalculate:
-        lowerVertName == 'meg' || lowerVertName == 'elastomer' ? false : true,
+        lowerVertName == 'meg' ||
+        lowerVertName == 'elastomer' ||
+        lowerVertName === 'cracker'
+          ? false
+          : true,
       showCalculateVisibility:
         lowerVertName != 'meg' &&
         Object.keys(calculationObject || {}).length > 0

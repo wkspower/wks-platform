@@ -131,36 +131,70 @@ const WorkFlowMerge = () => {
       }
 
       // Wait for all API calls to complete
-      const [data, res1, res2, res3, res4, res5, res6] = await Promise.all([
-        DataService.handleCalculateAnnualAopCostMiisContribution(
-          plantId,
-          year,
-          keycloak,
-        ),
-        DataService.handleCalculateProductionVolData2(plantId, year, keycloak),
-        DataService.handleCalculatePlantProductionData(plantId, year, keycloak),
-        DataService.handleCalculateMonthwiseProduction(plantId, year, keycloak),
-        DataService.calculateTurnAroundPlanReportData(plantId, year, keycloak),
-        DataService.calculateAnnualProductionPlanData(plantId, year, keycloak),
-        DataService.handleCalculatePlantConsumptionData(
-          plantId,
-          year,
-          keycloak,
-        ),
-        DataService.calculatePlantContributionReportData(
-          plantId,
-          year,
-          keycloak,
-        ),
+      const [data, res1, res2, res3, res4, res5, res6, res7] =
+        await Promise.all([
+          DataService.handleCalculateAnnualAopCostMiisContribution(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.handleCalculateProductionVolData2(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.handleCalculatePlantProductionData(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.handleCalculateMonthwiseProduction(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.calculateTurnAroundPlanReportData(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.calculateAnnualProductionPlanData(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.handleCalculatePlantConsumptionData(
+            plantId,
+            year,
+            keycloak,
+          ),
+          DataService.calculatePlantContributionReportData(
+            plantId,
+            year,
+            keycloak,
+          ),
 
-        DataService.calculatePlantContributionSummaryYearly(
-          plantId,
-          year,
-          keycloak,
-        ),
-      ])
+          DataService.calculatePlantContributionSummaryYearly(
+            plantId,
+            year,
+            keycloak,
+          ),
 
-      const allSuccess = [data, res1, res2, res3, res4, res5, res6].every(
+          lowerVertName === 'meg'
+            ? DataService.calculatePlantContributionReportData(
+                plantId,
+                year,
+                keycloak,
+              )
+            : Promise.resolve(null),
+        ])
+
+      const responses =
+        lowerVertName === 'meg'
+          ? [data, res1, res2, res3, res4, res5, res6, res7]
+          : [data, res1, res2, res3, res4, res5, res6]
+
+      const allSuccess = responses.every(
         (res) => res !== null && res !== undefined,
       )
 

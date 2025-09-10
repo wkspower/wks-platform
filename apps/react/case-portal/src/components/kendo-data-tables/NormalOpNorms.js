@@ -926,6 +926,10 @@ const NormalOpNormsScreen = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
+
+      downloadExcelBtnFromUI: lowerVertName === 'cracker' ? true : false,
+      ExcelName: `${lowerVertName}_BestAcheived(Min CC)`,
+
       showCheckbox: lowerVertName === 'cracker' ? true : false,
       marginBottom: lowerVertName === 'cracker' ? true : false,
       showG:
