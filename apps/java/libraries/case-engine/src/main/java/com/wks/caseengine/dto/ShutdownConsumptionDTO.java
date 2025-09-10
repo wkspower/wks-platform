@@ -17,9 +17,18 @@ import lombok.NoArgsConstructor;
 public class ShutdownConsumptionDTO {
     private String material;
     private String uom;
-    private Double qty;
-    private String repeatedCNT;
-    private Double avgQty;
-    private String aopYear;
+    private Double january;
+    private Double february;
+    private Double march;
+    private Double april;
+    private Double may;
+    private Double june;
+    private Double july;
+    private Double august;
+    private Double september;
+    private Double october;
+    private Double november;
+    private Double december;
+
  }
 

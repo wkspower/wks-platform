@@ -37,7 +37,8 @@ public interface ProductionVolumeDataReportService {
     AOPMessageVM calculateTurnAroundPlanReportData(String year, String plantId);
     AOPMessageVM calculateAnnualProductionPlanData(String year, String plantId);
     AOPMessageVM calculatePlantContributionReportData(String year, String plantId);
-
+    AOPMessageVM calculatePlantContributionSummary(String year, String plantId);
+    
     
 // --LoadMonthWiseProductionPlanReport
 // --LoadPlantConsumptionSummaryReport

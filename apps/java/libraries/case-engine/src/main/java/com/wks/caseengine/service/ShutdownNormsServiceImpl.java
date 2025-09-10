@@ -540,9 +540,18 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				ShutdownConsumptionDTO shutdownConsumptionDTO= new ShutdownConsumptionDTO();
 				shutdownConsumptionDTO.setMaterial(row[0] != null ? row[0].toString() : null);
 				shutdownConsumptionDTO.setUom(row[1] != null ? row[1].toString() : null);
-				shutdownConsumptionDTO.setQty(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
-				shutdownConsumptionDTO.setRepeatedCNT(row[3] != null ? row[3].toString() : null);
-				shutdownConsumptionDTO.setAvgQty(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+				shutdownConsumptionDTO.setApril(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
+				shutdownConsumptionDTO.setMay(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
+				shutdownConsumptionDTO.setJune(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+				shutdownConsumptionDTO.setJuly(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
+				shutdownConsumptionDTO.setAugust(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
+				shutdownConsumptionDTO.setSeptember(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+				shutdownConsumptionDTO.setOctober(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+				shutdownConsumptionDTO.setNovember(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+				shutdownConsumptionDTO.setDecember(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+				shutdownConsumptionDTO.setJanuary(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+				shutdownConsumptionDTO.setFebruary(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+				shutdownConsumptionDTO.setMarch(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
 				shutdownConsumptionDTOs.add(shutdownConsumptionDTO);
 			}
 		}catch (IllegalArgumentException e) {

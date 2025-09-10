@@ -131,9 +131,16 @@ public class ProductionVolumeDataReportController {
 			@RequestParam String year) {
 		AOPMessageVM response =  productionVolumeDataReportService.calculatePlantConsumptionSummaryReportData(year,plantId);
 		return ResponseEntity.status(response.getCode()).body(response);
-
-
 	}
+		
+		@GetMapping("/calculate-plant-contribution-summary-yearly")
+		public ResponseEntity<AOPMessageVM> calculatePlantContributionSummary(
+				@RequestParam String plantId,
+				@RequestParam String year) {
+			AOPMessageVM response =  productionVolumeDataReportService.calculatePlantContributionSummary(year,plantId);
+			return ResponseEntity.status(response.getCode()).body(response);
+		}
+		
 		@GetMapping("/handle/calculate/turnarounf-plan-data")
 	public ResponseEntity<AOPMessageVM> calculateTurnAroundPlanReportData(
 			@RequestParam String plantId,
