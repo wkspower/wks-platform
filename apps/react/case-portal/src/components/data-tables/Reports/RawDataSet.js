@@ -35,42 +35,115 @@ const GRID_CONFIGS = [
     fetcher: CrackerReportsApiDataService.getRawatcammonthly,
   },
   {
-    name: 'Finding Steam',
-    fetcher: (keycloak, from, to) =>
-      CrackerReportsApiDataService.getRawasfindingteam(keycloak, defaultSteamMode),
-  },
+  name: 'Finding Steam',
+  fetcher: async (keycloak, from, to) => {
+    const results = await Promise.all(
+      steamModes.map(mode =>
+        CrackerReportsApiDataService.getRawasfindingteam(keycloak, mode)
+          .then(res => ({ ...res, mode }))
+          .catch(() => null)
+      )
+    );
+    // Only include successful and non-empty results
+    const validResults = results.filter(
+      r =>
+        r &&
+        (
+          (Array.isArray(r.data?.data) && r.data.data.length > 0) ||
+          (Array.isArray(r.data) && r.data.length > 0)
+        )
+    );
+    const merged = {
+      code: 200,
+      data: {
+        columns: [
+          { field: 'id', title: 'ID', type: 'string', hidden: true },
+          { field: 'materialdescription', title: 'Material Description', type: 'string' },
+          { field: 'modeofOperation', title: 'Mode of Operation', type: 'string' },
+          { field: 'totalQuantity', title: 'Total Quantity', type: 'number' },
+          //{ field: 'steamMode', title: 'Steam Mode', type: 'string' },
+        ],
+        data: validResults.flatMap(r => {
+          const arr = Array.isArray(r.data?.data)
+            ? r.data.data
+            : Array.isArray(r.data)
+              ? r.data
+              : [];
+          return arr.map(row => ({
+            ...row,
+            steamMode: r.mode
+          }))
+        })
+      }
+    }
+    return merged
+  }
+},
   {
     name: 'Raw Steam',
-    fetcher: (keycloak, from, to) =>
-      CrackerReportsApiDataService.getRawasteam(keycloak, from, to, defaultSteamMode),
+    fetcher: async (keycloak, from, to) => {
+      const results = await Promise.all(
+        steamModes.map(mode =>
+          CrackerReportsApiDataService.getRawasteam(keycloak, from, to, mode)
+            .then(res => ({ ...res, mode }))
+        )
+      )
+      const merged = {
+        code: 200,
+        data: {
+          columns: results[0]?.data?.columns
+            ? [
+                ...results[0].data.columns,
+                { field: 'steamMode', title: 'Steam Mode', type: 'string' }
+              ]
+            : [],
+          data: results.flatMap(r =>
+            (Array.isArray(r.data?.data) ? r.data.data : []).map(row => ({
+              ...row,
+              steamMode: r.mode
+            }))
+          )
+        }
+      }
+      return merged
+    }
   },
 ]
 
-const defaultPeriodFrom = '2020-09-01'
-const defaultPeriodTo = '2025-08-31'
-const defaultSteamMode = '4F'
-
 const RawDataSet = () => {
   const keycloak = useSession()
+  const [periodFrom, setPeriodFrom] = useState(null)
+  const [periodTo, setPeriodTo] = useState(null)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantID, yearChanged, oldYear } = dataGridStore
   const isMountedRef = useRef(true)
-  const exportRefs = useRef(null);
-  const exportGrid = useCallback((name) => {
-    const ref = exportRefs.current[name]
-    if (ref) {
-      ref.save()
-    }
-  }, [])
-
+  const exportRefs = useRef({});
   useEffect(() => {
     return () => {
       isMountedRef.current = false
     }
   }, [])
+  useEffect(() => {
+    async function fetchPeriod() {
+      try {
+        const resp = await CrackerReportsApiDataService.getConfigurationExecutionDetails(keycloak)
+        if (Array.isArray(resp?.data)) {
+          const start = resp.data.find(d => d.Name === 'StartDate')
+          const end = resp.data.find(d => d.Name === 'EndDate')
+          if (start?.AttributeValue) setPeriodFrom(start.AttributeValue)
+          if (end?.AttributeValue) setPeriodTo(end.AttributeValue)
+        }
+      } catch (e) {
+        // fallback: set default values if needed
+        // setPeriodFrom('2020-09-01')
+        // setPeriodTo('2025-08-31')
+      }
+    }
+    fetchPeriod()
+  }, [keycloak])
 
   function parseDDMMYYYY(dateStr) {
     if (!dateStr) return null
@@ -104,8 +177,8 @@ const RawDataSet = () => {
       } else {
         apiResponse = await gridConfig.fetcher(
           keycloak,
-          defaultPeriodFrom,
-          defaultPeriodTo
+          periodFrom,
+          periodTo
         );
       }
 
@@ -165,7 +238,7 @@ const rowsWithId = (apiDataArray || []).map((item, index) => {
       return { rows: [], columns: [] }
     }
   },
-  [keycloak, enrichColumns]
+  [keycloak, enrichColumns, periodFrom, periodTo]
 )
   // Fetch all grids in parallel
   const loadGrids = useCallback(async () => {
@@ -194,41 +267,44 @@ const rowsWithId = (apiDataArray || []).map((item, index) => {
   }, [fetchDataForGrid])
 
   useEffect(() => {
+  if (periodFrom && periodTo) {
     loadGrids()
-    // re-load when plant/year changes
-  }, [loadGrids, plantID, oldYear, yearChanged])
+  }
+  // re-load when plant/year changes
+}, [loadGrids, plantID, oldYear, yearChanged, periodFrom, periodTo])
 
-//   const exportAllGrids = useCallback(() => {
-//     const keys = Object.keys(exportRefs.current || {})
-//     if (!keys.length) return
+const exportAllGrids = useCallback(() => {
+  const keys = Object.keys(exportRefs.current || {});
+  if (!keys.length) return;
 
-//     const firstKey = keys.find((k) => exportRefs.current[k])
-//     if (!firstKey) return
-//     const baseRef = exportRefs.current[firstKey]
-//     const baseOptions = baseRef?.workbookOptions?.()
-//     if (!baseOptions) return
+  const firstKey = keys.find((k) => exportRefs.current[k]);
+  if (!firstKey) return;
 
-//     const sheets = gridNames
-//       .map((name) => {
-//         const ref = exportRefs.current[name]
-//         try {
-//           const opts = ref?.workbookOptions?.()
-//           return opts?.sheets?.[0] ? { ...opts.sheets[0] } : null
-//         } catch {
-//           return null
-//         }
-//       })
-//       .filter(Boolean)
+  const baseRef = exportRefs.current[firstKey];
+  const baseOptions = baseRef?.workbookOptions?.();
+  if (!baseOptions) return;
 
-//     if (!sheets.length) return
+  // Collect sheets from all grids
+  const sheets = gridNames
+    .map((name) => {
+      const ref = exportRefs.current[name];
+      try {
+        const opts = ref?.workbookOptions?.();
+        if (!opts?.sheets?.[0]) return null;
+        const sheet = { ...opts.sheets[0] };
+        sheet.title = name; // 👈 set sheet name to grid name
+        return sheet;
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
 
-//     sheets.forEach((s, idx) => {
-//       s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
-//     })
+  if (!sheets.length) return;
 
-//     baseOptions.sheets = sheets
-//     baseRef.save(baseOptions)
-//   }, [gridNames])
+  baseOptions.sheets = sheets;
+  baseRef.save(baseOptions);
+}, [gridNames]);
 
   const currentDateTime = new Date()
     .toISOString()
@@ -238,28 +314,6 @@ const rowsWithId = (apiDataArray || []).map((item, index) => {
   const fileName = `RawDataSet ${currentDateTime}.xlsx`
 
   const renderTitle = (t) => t
-  const allRows = gridNames.flatMap(name =>
-  (dataMap[name]?.rows || []).map(row => ({
-    ...row,
-    __GridName: name
-  }))
-);
-
-const allColumns = [
-  { field: "__GridName", title: "Grid Name" },
-  ...Array.from(
-    new Map(
-      gridNames.flatMap(name =>
-        (dataMap[name]?.columns || []).map(col => [col.field, col])
-      )
-    ).values()
-  )
-];
-const exportAllGrids = useCallback(() => {
-  if (exportRefs.current) {
-    exportRefs.current.save();
-  }
-}, []);
 
   return (
   <div>
@@ -272,28 +326,31 @@ const exportAllGrids = useCallback(() => {
 
     {/* Hidden ExcelExport instance for each grid */}
     <div style={{ display: 'none' }}>
-      {gridNames.map((name) => {
-        const data = dataMap[name] || { rows: [], columns: [] }
-        const setRef = (ref) => {
-          if (ref) exportRefs.current[name] = ref
-        }
-        return (
-          <ExcelExport
-    ref={exportRefs}
-    fileName={fileName}
-    data={allRows}
-  >
-    {allColumns.map(col => (
-      <ExcelExportColumn
-        key={col.field}
-        field={col.field}
-        title={col.title || col.field}
-      />
-    ))}
-  </ExcelExport>
-        )
-      })}
-    </div>
+  {gridNames.map((name) => {
+    const data = dataMap[name] || { rows: [], columns: [] };
+    return (
+      <ExcelExport
+        key={name}
+        ref={(ref) => {
+          if (ref) {
+            exportRefs.current[name] = ref; // ✅ store ref by grid name
+          }
+        }}
+        fileName={fileName}
+        data={data.rows}
+      >
+        {(data.columns || []).map((col) => (
+          <ExcelExportColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.field}
+          />
+        ))}
+      </ExcelExport>
+    );
+  })}
+</div>
+
 
     {/* ✅ One global Export button */}
     <Box display="flex" justifyContent="flex-end" mb={2}>
