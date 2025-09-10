@@ -37,8 +37,9 @@ import TurnaroundReport from '../Reports-kendo/kendo-TurnaroundReport'
 import AnnualProductionPlan from '../Reports-kendo/AnnualProductionPlan'
 import PlantContribution from '../Reports-kendo/kendo-PlantContribution'
 import PlantContributionLastFourYears from '../Reports-kendo/kendo-PlantContribution-Last-Four-Years'
-import BestAchieved from '../Reports/BestAchievedReport'
+
 import BestAchievedReport from '../Reports/BestAchievedReport'
+import MonthWiseRawData from '../Reports/MonthWiseRawData'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -147,6 +148,12 @@ const WorkFlowMerge = () => {
           keycloak,
         ),
         DataService.calculatePlantContributionReportData(
+          plantId,
+          year,
+          keycloak,
+        ),
+
+        DataService.calculatePlantContributionSummaryYearly(
           plantId,
           year,
           keycloak,
@@ -518,6 +525,7 @@ const WorkFlowMerge = () => {
 
   const crackerTabs = [
     'Month Wise Production Plan',
+    'Month Wise Raw Data',
     'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
   ]
@@ -750,8 +758,9 @@ const WorkFlowMerge = () => {
         {lowerVertName === 'cracker' && (
           <>
             {tabIndex === 0 && <BestAchievedReport />}
-            {tabIndex === 1 && <PlantContribution />}
-            {tabIndex === 2 && <PlantContributionLastFourYears />}
+            {tabIndex === 1 && <MonthWiseRawData />}
+            {tabIndex === 2 && <PlantContribution />}
+            {tabIndex === 3 && <PlantContributionLastFourYears />}
 
             <Notification
               open={snackbarOpen}

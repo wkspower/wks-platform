@@ -244,11 +244,19 @@ const ShutdownNorms = () => {
         setLoading(false)
         return
       }
+      let data = []
 
-      const data = await ShutdownNormsApiService.getShutdownNormsData(
-        keycloak,
-        gradeId,
-      )
+      if (lowerVertName != 'cracker') {
+        data = await ShutdownNormsApiService.getShutdownNormsData(
+          keycloak,
+          gradeId,
+        )
+      } else {
+        data = await ShutdownNormsApiService.shutdownConsumptionHistoryData(
+          keycloak,
+          gradeId,
+        )
+      }
 
       if (data?.code != 200) {
         setRows([])
@@ -258,11 +266,13 @@ const ShutdownNorms = () => {
 
       setCalculationObject(data?.data?.aopCalculation)
 
+      let formattedData = []
+
       const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
       const isElastomer = ['elastomer'].includes(lowerVertName)
 
-      const formattedData = data?.data?.mcuNormsValueDTOList?.map(
-        (item, index) => {
+      if (lowerVertName != 'cracker') {
+        formattedData = data?.data?.mcuNormsValueDTOList?.map((item, index) => {
           const baseItem = {
             ...item,
             idFromApi: item.id,
@@ -279,8 +289,27 @@ const ShutdownNorms = () => {
           }
 
           return baseItem
-        },
-      )
+        })
+      } else {
+        formattedData = data?.data?.mcuNormsValueDTOList?.map((item, index) => {
+          const baseItem = {
+            ...item,
+            idFromApi: item.id,
+            id: index,
+            remarks: item?.remarks?.trim() || null,
+            originalRemark: item?.remarks?.trim(),
+            materialFkId: item?.materialFkId?.toLowerCase(),
+            Particulars: item.normParameterTypeDisplayName || 'By Products',
+            isEditable: isPEorPP
+              ? false
+              : isElastomer
+                ? item?.isEditable
+                : true,
+          }
+
+          return baseItem
+        })
+      }
 
       setRows(formattedData)
       setLoading(false)

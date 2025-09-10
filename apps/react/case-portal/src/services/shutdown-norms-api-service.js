@@ -5,6 +5,7 @@ export const ShutdownNormsApiService = {
   saveShutDownNormsData,
   handleCalculateShutdownNorms,
   getShutdownNormsData,
+  shutdownConsumptionHistoryData,
 }
 async function getShutdownMonths(keycloak, gradeId) {
   var year = localStorage.getItem('year')
@@ -69,6 +70,30 @@ async function getShutdownNormsData(keycloak, gradeId) {
   } else {
     url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${year}&plantId=${plantId}`
   }
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function shutdownConsumptionHistoryData(keycloak, gradeId) {
+  var year = localStorage.getItem('year')
+  var plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption-history-data?year=${year}&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',

@@ -171,3 +171,26 @@ export const CrackerColumsForYearlyNorms = [
     type: 'number',
   },
 ]
+
+export const ShutdownConsumptionCrackerColumns = [
+  {
+    field: 'material',
+    title: 'Particulars',
+    editable: false,
+  },
+  {
+    field: 'uom',
+    title: 'UOM',
+    editable: false,
+  },
+  {
+    field: 'avgQty',
+    title: 'Avg Quantity',
+    editable: false,
+  },
+  {
+    field: 'repeatedCNT',
+    title: 'Repeated CNT ',
+    editable: false,
+  },
+]

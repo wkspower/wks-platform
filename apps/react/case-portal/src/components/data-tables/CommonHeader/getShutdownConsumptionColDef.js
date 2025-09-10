@@ -1,5 +1,6 @@
 import { ShutdownConsumptionElastomerColumns } from 'components/colums/ElastomerColums'
 import { ShutdownConsumptionMegColumns } from 'components/colums/MegColums'
+import { ShutdownConsumptionCrackerColumns } from 'components/colums/CrackerColums'
 import { ShutdownConsumptionPeColumns } from 'components/colums/PeColums'
 import { ShutdownConsumptionPpColumns } from 'components/colums/PpColums'
 import { ShutdownConsumptionPtaColumns } from 'components/colums/PtaColums'
@@ -14,6 +15,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.PTA]: ShutdownConsumptionPtaColumns,
   [verticalEnums.ELASTOMER]: ShutdownConsumptionElastomerColumns,
   [verticalEnums.MEG]: ShutdownConsumptionMegColumns,
+  [verticalEnums.CRACKER]: ShutdownConsumptionCrackerColumns,
 }
 
 const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
