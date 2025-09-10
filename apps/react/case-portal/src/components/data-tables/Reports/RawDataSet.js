@@ -16,7 +16,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-const steamModes = ['4F', '5F', '4F+D']
+const steamModes = ['5F', '4F', '4F+D']
 const GRID_CONFIGS = [
   {
     name: 'Raw Data',
@@ -31,82 +31,8 @@ const GRID_CONFIGS = [
     fetcher: CrackerReportsApiDataService.getRawCatcame,
   },
   {
-    name: 'ATCAM Monthly',
+    name: 'Catcam Monthly',
     fetcher: CrackerReportsApiDataService.getRawatcammonthly,
-  },
-  {
-  name: 'Finding Steam',
-  fetcher: async (keycloak, from, to) => {
-    const results = await Promise.all(
-      steamModes.map(mode =>
-        CrackerReportsApiDataService.getRawasfindingteam(keycloak, mode)
-          .then(res => ({ ...res, mode }))
-          .catch(() => null)
-      )
-    );
-    // Only include successful and non-empty results
-    const validResults = results.filter(
-      r =>
-        r &&
-        (
-          (Array.isArray(r.data?.data) && r.data.data.length > 0) ||
-          (Array.isArray(r.data) && r.data.length > 0)
-        )
-    );
-    const merged = {
-      code: 200,
-      data: {
-        columns: [
-          { field: 'id', title: 'ID', type: 'string', hidden: true },
-          { field: 'materialdescription', title: 'Material Description', type: 'string' },
-          { field: 'modeofOperation', title: 'Mode of Operation', type: 'string' },
-          { field: 'totalQuantity', title: 'Total Quantity', type: 'number' },
-          //{ field: 'steamMode', title: 'Steam Mode', type: 'string' },
-        ],
-        data: validResults.flatMap(r => {
-          const arr = Array.isArray(r.data?.data)
-            ? r.data.data
-            : Array.isArray(r.data)
-              ? r.data
-              : [];
-          return arr.map(row => ({
-            ...row,
-            steamMode: r.mode
-          }))
-        })
-      }
-    }
-    return merged
-  }
-},
-  {
-    name: 'Raw Steam',
-    fetcher: async (keycloak, from, to) => {
-      const results = await Promise.all(
-        steamModes.map(mode =>
-          CrackerReportsApiDataService.getRawasteam(keycloak, from, to, mode)
-            .then(res => ({ ...res, mode }))
-        )
-      )
-      const merged = {
-        code: 200,
-        data: {
-          columns: results[0]?.data?.columns
-            ? [
-                ...results[0].data.columns,
-                { field: 'steamMode', title: 'Steam Mode', type: 'string' }
-              ]
-            : [],
-          data: results.flatMap(r =>
-            (Array.isArray(r.data?.data) ? r.data.data : []).map(row => ({
-              ...row,
-              steamMode: r.mode
-            }))
-          )
-        }
-      }
-      return merged
-    }
   },
 ]
 
@@ -168,92 +94,143 @@ const RawDataSet = () => {
     })
   }, [])
 
-  const fetchDataForGrid = useCallback(
-  async (gridConfig) => {
-    try {
-      let apiResponse;
-      if (gridConfig.name === 'Finding Steam') {
-        apiResponse = await gridConfig.fetcher(keycloak);
-      } else {
-        apiResponse = await gridConfig.fetcher(
-          keycloak,
-          periodFrom,
-          periodTo
-        );
-      }
-
-      if (apiResponse?.code !== 200) {
-        console.warn(`[fetchDataForGrid] non-200 response for ${gridConfig.name}`, apiResponse)
-        return { rows: [], columns: [] }
-      }
-
-      let backendCols = apiResponse.data.columns || []
-
-      // Manually set columns for Finding Steam if not present
-      if (
-        gridConfig.name === 'Finding Steam' &&
-        (!backendCols || backendCols.length === 0)
-      ) {
-        backendCols = [
-          { field: 'id', title: 'ID', type: 'string', hidden: true },
-          { field: 'materialdescription', title: 'Material Description', type: 'string' },
-          { field: 'modeofOperation', title: 'Mode of Operation', type: 'string' },
-          { field: 'totalQuantity', title: 'Total Quantity', type: 'number' },
-        ]
-      }
-
-      const enrichedCols = enrichColumns(backendCols)
-
-      const dateFields = enrichedCols
-        .filter((c) => c.type === 'date')
-        .map((c) => c.field)
-      const numberFields = enrichedCols
-        .filter((c) => c.type === 'number')
-        .map((c) => c.field)
-
-      let apiDataArray = [];
-if (Array.isArray(apiResponse.data)) {
-  apiDataArray = apiResponse.data;
-} else if (Array.isArray(apiResponse.data.data)) {
-  apiDataArray = apiResponse.data.data;
-}
-
-const rowsWithId = (apiDataArray || []).map((item, index) => {
-  const parsedItem = { ...item }
-  dateFields.forEach((f) => {
-    parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
-  })
-  numberFields.forEach((f) => {
-    parsedItem[f] =
-      item?.[f] !== undefined && item?.[f] !== null
-        ? Number(item[f])
-        : null
-  })
-  return { ...parsedItem, id: item.id || index, isEditable: false }
-})
-
-      return { rows: rowsWithId, columns: enrichedCols }
-    } catch (err) {
-      console.error(`[fetchDataForGrid] error for ${gridConfig.name}`, err)
-      return { rows: [], columns: [] }
+  // Helper to fetch and format a single mode for a grid type
+  const fetchModeGrid = useCallback(async (type, mode) => {
+    let apiResponse;
+    if (type === 'Finding Steam') {
+      apiResponse = await CrackerReportsApiDataService.getRawasfindingteam(
+        keycloak,
+        mode
+      );
+    } else if (type === 'Raw Steam') {
+      apiResponse = await CrackerReportsApiDataService.getRawasteam(
+        keycloak,
+        periodFrom,
+        periodTo,
+        mode
+      );
+    } else {
+      return { rows: [], columns: [] };
     }
-  },
-  [keycloak, enrichColumns, periodFrom, periodTo]
-)
-  // Fetch all grids in parallel
+
+    if (apiResponse?.code !== 200) return { rows: [], columns: [] };
+
+    let backendCols = apiResponse.data.columns || [];
+    if (
+      type === 'Finding Steam' &&
+      (!backendCols || backendCols.length === 0)
+    ) {
+      backendCols = [
+        { field: 'id', title: 'ID', type: 'string', hidden: true },
+        { field: 'materialdescription', title: 'Material Description', type: 'string' },
+        { field: 'modeofOperation', title: 'Mode of Operation', type: 'string' },
+        { field: 'totalQuantity', title: 'Total Quantity', type: 'number' },
+      ];
+    }
+
+    const enrichedCols = enrichColumns(backendCols);
+
+    const dateFields = enrichedCols.filter((c) => c.type === 'date').map((c) => c.field);
+    const numberFields = enrichedCols.filter((c) => c.type === 'number').map((c) => c.field);
+
+    let apiDataArray = [];
+    if (Array.isArray(apiResponse.data)) {
+      apiDataArray = apiResponse.data;
+    } else if (Array.isArray(apiResponse.data.data)) {
+      apiDataArray = apiResponse.data.data;
+    }
+
+    const rowsWithId = (apiDataArray || []).map((item, index) => {
+      const parsedItem = { ...item }
+      dateFields.forEach((f) => {
+        parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
+      })
+      numberFields.forEach((f) => {
+        parsedItem[f] =
+          item?.[f] !== undefined && item?.[f] !== null
+            ? Number(item[f])
+            : null
+      })
+      return { ...parsedItem, id: item.id || index, isEditable: false }
+    })
+
+    return { rows: rowsWithId, columns: enrichedCols }
+  }, [keycloak, enrichColumns, periodFrom, periodTo]);
+    const fetchDataForGrid = useCallback(async (gridConfig) => {
+  let apiResponse;
+  if (gridConfig.name === 'Raw Data') {
+    apiResponse = await gridConfig.fetcher(keycloak, periodFrom, periodTo);
+  } else if (gridConfig.name === 'Utility Monthly') {
+    apiResponse = await gridConfig.fetcher(keycloak, periodFrom, periodTo);
+  } else if (gridConfig.name === 'Catcam') {
+    apiResponse = await gridConfig.fetcher(keycloak, periodFrom, periodTo);
+  } else if (gridConfig.name === 'Catcam Monthly') {
+    apiResponse = await gridConfig.fetcher(keycloak, periodFrom, periodTo);
+  } else {
+    return { rows: [], columns: [] };
+  }
+
+  if (apiResponse?.code !== 200) return { rows: [], columns: [] };
+
+  let backendCols = apiResponse.data.columns || [];
+  const enrichedCols = enrichColumns(backendCols);
+
+  const dateFields = enrichedCols.filter((c) => c.type === 'date').map((c) => c.field);
+  const numberFields = enrichedCols.filter((c) => c.type === 'number').map((c) => c.field);
+
+  let apiDataArray = [];
+  if (Array.isArray(apiResponse.data)) {
+    apiDataArray = apiResponse.data;
+  } else if (Array.isArray(apiResponse.data.data)) {
+    apiDataArray = apiResponse.data.data;
+  }
+
+  const rowsWithId = (apiDataArray || []).map((item, index) => {
+    const parsedItem = { ...item }
+    dateFields.forEach((f) => {
+      parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
+    })
+    numberFields.forEach((f) => {
+      parsedItem[f] =
+        item?.[f] !== undefined && item?.[f] !== null
+          ? Number(item[f])
+          : null
+    })
+    return { ...parsedItem, id: item.id || index, isEditable: false }
+  })
+
+  return { rows: rowsWithId, columns: enrichedCols }
+}, [keycloak, enrichColumns, periodFrom, periodTo]);
+  // Fetch all grids in parallel, including per-mode grids for Finding/Raw Steam
   const loadGrids = useCallback(async () => {
     setLoading(true)
     try {
+      // Fetch standard grids
       const results = await Promise.all(
         GRID_CONFIGS.map(async (cfg) => {
           const { rows, columns } = await fetchDataForGrid(cfg)
           return { name: cfg.name, rows, columns }
         })
       )
+
+      // Fetch per-mode grids for Finding Steam and Raw Steam
+      const findingSteamResults = await Promise.all(
+        steamModes.map(async (mode) => {
+          const { rows, columns } = await fetchModeGrid('Finding Steam', mode)
+          return { name: `Finding Steam (${mode})`, rows, columns }
+        })
+      )
+      const rawSteamResults = await Promise.all(
+        steamModes.map(async (mode) => {
+          const { rows, columns } = await fetchModeGrid('Raw Steam', mode)
+          return { name: `Raw Steam (${mode})`, rows, columns }
+        })
+      )
+
       if (!isMountedRef.current) return
       const newDataMap = {}
       const names = []
-      results.forEach(({ name, rows, columns }) => {
+      results.concat(findingSteamResults).concat(rawSteamResults).forEach(({ name, rows, columns }) => {
         newDataMap[name] = { rows, columns }
         names.push(name)
       })
@@ -264,8 +241,9 @@ const rowsWithId = (apiDataArray || []).map((item, index) => {
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [fetchDataForGrid])
+  }, [fetchDataForGrid, fetchModeGrid])
 
+ 
   useEffect(() => {
   if (periodFrom && periodTo) {
     loadGrids()
@@ -355,7 +333,7 @@ const exportAllGrids = useCallback(() => {
     {/* ✅ One global Export button */}
     <Box display="flex" justifyContent="flex-end" mb={2}>
       <Button variant="contained" onClick={exportAllGrids} className="btn-save">
-        Export All
+        Export
       </Button>
     </Box>
 
