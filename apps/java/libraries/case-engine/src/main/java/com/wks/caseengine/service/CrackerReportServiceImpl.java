@@ -1836,7 +1836,7 @@ public class CrackerReportServiceImpl implements CrackerReportService{
 	
 	public List<Object[]> getFindingSteamValues(String ModeofOperation,String viewName) {
 		try {
-			String sql = "SELECT TOP (10000) [Id] "
+			String sql = "SELECT TOP (10000) [Id], "
 					+ "[ModeofOperation], [materialdescription], [totalQuantity] "
 					+ "FROM " + viewName + " "
 					+ "WHERE ModeofOperation = :ModeofOperation ";
