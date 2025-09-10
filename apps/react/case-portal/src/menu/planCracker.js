@@ -216,6 +216,14 @@ const planCracker = {
           icon: icons.IconReport,
           breadcrumbs: true,
         },
+        {
+          id: 'RawData-Set',
+          title: i18n.t('menu.RawDataValuesDataSet'),
+          type: 'item',
+          url: '/reports/RawData-Set',
+          icon: icons.IconReport,
+          breadcrumbs: true,
+        },
       ],
     },
 

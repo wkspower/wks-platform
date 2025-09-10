@@ -6,6 +6,12 @@ export const CrackerReportsApiDataService = {
   finalNormsReport,
   finalNormsProductionReport,
   configurationIntermediateValues,
+  getRawDataSetvalues,
+  getRawutilitymonthly,
+  getRawCatcame,
+  getRawatcammonthly,
+  getRawasteam,
+  getRawasfindingteam,
   findingModel,
   miisData,
 }
@@ -55,6 +61,131 @@ async function configurationIntermediateValues(keycloak) {
   const year = localStorage.getItem('year')
 
   let url = `${Config.CaseEngineUrl}/task/configuration-intermediate-values?plantId=${plantId}&year=${year}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRawDataSetvalues(keycloak, periodFrom, periodTo) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+async function getRawCatcame(keycloak, periodFrom, periodTo) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-catcam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRawutilitymonthly(keycloak, periodFrom, periodTo) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-mis-utility-monthly?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRawatcammonthly(keycloak, periodFrom, periodTo) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-stg-catcam-monthly?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+///task/report-best-achieved-raw-steam? 
+async function getRawasteam(keycloak, periodFrom, periodTo, mode) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw-steam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}&mode=${mode}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRawasfindingteam(keycloak, mode) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-finding-steam?plantId=${plantId}&year=${year}&mode=${mode}`
 
   const headers = {
     Accept: 'application/json',

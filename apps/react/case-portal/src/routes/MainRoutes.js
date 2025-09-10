@@ -50,7 +50,7 @@ import PlantTeam from 'components/kendo-data-tables/PlantTeam'
 import RelPerf from 'components/kendo-data-tables/RelPerf'
 import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafetyPerformanceTarget'
 import IntermediateValuesDataSet from 'components/data-tables/Reports/IntermediateValuesDataSet'
-
+import RawDataSet from 'components/data-tables/Reports/RawDataSet'
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
 
@@ -411,6 +411,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='intermediate-values'>
                 <IntermediateValuesDataSet />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'RawData-Set',
+            element: (
+              <PrivateRoute routeId='RawData-Set'>
+                <RawDataSet />
               </PrivateRoute>
             ),
           },

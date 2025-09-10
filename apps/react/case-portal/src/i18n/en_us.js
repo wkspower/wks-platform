@@ -71,6 +71,7 @@ const defs = {
     workflow: 'AOP Approval Flow', // New addition
     userManage: 'User Management', // New addition
     valueHistory: 'Value History', // New addition
+    RawDataValuesDataSet: 'Raw Data Set',
 
     //FUNCTIONAL AOP
     functionalAop: 'CES',
