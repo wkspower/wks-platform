@@ -18,20 +18,19 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
               editable: false,
-
               align: 'right',
             },
             {
-              field: 'ByProductName',
+              field: 'material',
               title: 'Product name',
               editable: false,
             },
             {
-              field: 'Unit',
+              field: 'uom',
               widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
@@ -40,7 +39,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: 'Price',
               children: [
                 {
-                  field: 'Price',
+                  field: 'price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
                   align: 'right',
@@ -57,7 +56,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYearFourNormActual',
+                      field: 'actualFourYearsAgo',
                       title: 'Actual',
                       editable: false,
                       align: 'right',
@@ -71,7 +70,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYearThreeNormActual',
+                      field: 'actualThreeYearsAgo',
                       title: 'Actual',
                       editable: false,
                       align: 'right',
@@ -85,7 +84,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYearTwoNormActual',
+                      field: 'actualTwoYearsAgo',
                       title: 'Actual',
                       editable: false,
                       align: 'right',
@@ -99,7 +98,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYearOneNormActual',
+                      field: 'actualLastYear',
                       title: 'Actual',
                       editable: false,
                       align: 'right',
@@ -113,7 +112,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'NextYearCostBudget',
+                      field: 'budgetCurrent',
                       title: 'Budget',
                       editable: false,
                       align: 'right',
@@ -133,7 +132,7 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
 
@@ -141,12 +140,12 @@ export const MockPlantContributionAPILastFourYears = {
               align: 'right',
             },
             {
-              field: 'ByProductName',
-              title: 'By product name',
+              field: 'material',
+              title: 'Product Name',
               editable: false,
             },
             {
-              field: 'Unit',
+              field: 'uom',
               widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
@@ -155,7 +154,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: 'Price',
               children: [
                 {
-                  field: 'Price',
+                  field: 'price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
 
@@ -172,7 +171,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1NormActual',
+                      field: 'actualFourYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -186,7 +185,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2NormActual',
+                      field: 'actualThreeYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -200,7 +199,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3NormActual',
+                      field: 'actualTwoYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -214,7 +213,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4NormActual',
+                      field: 'actualLastYear',
                       title: 'Actual',
                       editable: false,
 
@@ -228,7 +227,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearNormBudget',
+                      field: 'budgetCurrent',
                       title: 'Budget',
                       editable: false,
 
@@ -247,7 +246,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1CostActual',
+                      field: 'actualFourYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -261,7 +260,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2CostActual',
+                      field: 'actualThreeYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -275,7 +274,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3CostActual',
+                      field: 'actualTwoYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -289,7 +288,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4CostActual',
+                      field: 'actualLastYearCost',
                       title: 'Actual',
                       editable: false,
 
@@ -303,7 +302,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearCostBudget',
+                      field: 'budgetCurrentCost',
                       title: 'Budget',
                       editable: false,
 
@@ -323,7 +322,7 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
 
@@ -331,21 +330,21 @@ export const MockPlantContributionAPILastFourYears = {
               align: 'right',
             },
             {
-              field: 'ByProductName',
-              title: 'Raw material name',
+              field: 'material',
+              title: 'Product Name',
               editable: false,
             },
             {
-              field: 'Unit',
+              field: 'uom',
               widthT: 60,
-              title: 'UOM',
+              title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
             },
             {
               title: 'Price',
               children: [
                 {
-                  field: 'Price',
+                  field: 'price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
 
@@ -362,7 +361,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1NormActual',
+                      field: 'actualFourYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -376,7 +375,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2NormActual',
+                      field: 'actualThreeYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -390,7 +389,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3NormActual',
+                      field: 'actualTwoYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -404,7 +403,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4NormActual',
+                      field: 'actualLastYear',
                       title: 'Actual',
                       editable: false,
 
@@ -418,7 +417,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearNormBudget',
+                      field: 'budgetCurrent',
                       title: 'Budget',
                       editable: false,
 
@@ -437,7 +436,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1CostActual',
+                      field: 'actualFourYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -451,7 +450,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2CostActual',
+                      field: 'actualThreeYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -465,7 +464,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3CostActual',
+                      field: 'actualTwoYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -479,7 +478,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4CostActual',
+                      field: 'actualLastYearCost',
                       title: 'Actual',
                       editable: false,
 
@@ -493,7 +492,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearCostBudget',
+                      field: 'budgetCurrentCost',
                       title: 'Budget',
                       editable: false,
 
@@ -513,7 +512,7 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
 
@@ -521,12 +520,12 @@ export const MockPlantContributionAPILastFourYears = {
               align: 'right',
             },
             {
-              field: 'ByProductName',
-              title: 'Catalyst name',
+              field: 'material',
+              title: 'Product Name',
               editable: false,
             },
             {
-              field: 'Unit',
+              field: 'uom',
               widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
@@ -535,7 +534,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: 'Price',
               children: [
                 {
-                  field: 'Price',
+                  field: 'price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
 
@@ -552,7 +551,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1NormActual',
+                      field: 'actualFourYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -566,7 +565,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2NormActual',
+                      field: 'actualThreeYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -580,7 +579,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3NormActual',
+                      field: 'actualTwoYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -594,7 +593,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4NormActual',
+                      field: 'actualLastYear',
                       title: 'Actual',
                       editable: false,
 
@@ -608,7 +607,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearNormBudget',
+                      field: 'budgetCurrent',
                       title: 'Budget',
                       editable: false,
 
@@ -627,7 +626,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1CostActual',
+                      field: 'actualFourYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -641,7 +640,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2CostActual',
+                      field: 'actualThreeYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -655,7 +654,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3CostActual',
+                      field: 'actualTwoYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -669,7 +668,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4CostActual',
+                      field: 'actualLastYearCost',
                       title: 'Actual',
                       editable: false,
 
@@ -683,7 +682,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearCostBudget',
+                      field: 'budgetCurrentCost',
                       title: 'Budget',
                       editable: false,
 
@@ -703,7 +702,7 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
 
@@ -711,12 +710,12 @@ export const MockPlantContributionAPILastFourYears = {
               align: 'right',
             },
             {
-              field: 'ByProductName',
-              title: 'Utility name',
+              field: 'material',
+              title: 'Product Name',
               editable: false,
             },
             {
-              field: 'Unit',
+              field: 'uom',
               widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
@@ -725,7 +724,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: 'Price',
               children: [
                 {
-                  field: 'Price',
+                  field: 'price',
                   title: verticalName === 'meg' ? 'Rs/UOM' : 'Rs/MT',
                   editable: false,
 
@@ -742,7 +741,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1NormActual',
+                      field: 'actualFourYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -756,7 +755,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2NormActual',
+                      field: 'actualThreeYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -770,7 +769,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3NormActual',
+                      field: 'actualTwoYearsAgo',
                       title: 'Actual',
                       editable: false,
 
@@ -784,7 +783,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4NormActual',
+                      field: 'actualLastYear',
                       title: 'Actual',
                       editable: false,
 
@@ -798,7 +797,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearNormBudget',
+                      field: 'budgetCurrent',
                       title: 'Budget',
                       editable: false,
 
@@ -817,7 +816,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY4,
                   children: [
                     {
-                      field: 'PrevYear1CostActual',
+                      field: 'actualFourYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -831,7 +830,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY3,
                   children: [
                     {
-                      field: 'PrevYear2CostActual',
+                      field: 'actualThreeYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -845,7 +844,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY2,
                   children: [
                     {
-                      field: 'PrevYear3CostActual',
+                      field: 'actualTwoYearsAgoCost',
                       title: 'Actual',
                       editable: false,
 
@@ -859,7 +858,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: prevFY1,
                   children: [
                     {
-                      field: 'PrevYear4CostActual',
+                      field: 'actualLastYearCost',
                       title: 'Actual',
                       editable: false,
 
@@ -873,7 +872,7 @@ export const MockPlantContributionAPILastFourYears = {
                   title: currFY,
                   children: [
                     {
-                      field: 'CurrYearCostBudget',
+                      field: 'budgetCurrentCost',
                       title: 'Budget',
                       editable: false,
 
@@ -893,7 +892,7 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
               align: 'right',
@@ -904,12 +903,12 @@ export const MockPlantContributionAPILastFourYears = {
               hidden: true,
             },
             {
-              field: 'OtherCost',
+              field: 'material',
               title: 'Other cost',
               editable: false,
             },
             {
-              field: 'Unit',
+              field: 'uom',
               widthT: 60,
               title: verticalName === 'meg' ? 'UOM' : 'Unit',
               editable: false,
@@ -918,7 +917,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY4,
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualFourYearsAgo',
                   title: 'Actual',
                   align: 'right',
                   editable: true,
@@ -931,7 +930,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY3,
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualThreeYearsAgo',
                   title: 'Actual',
                   align: 'right',
                   editable: true,
@@ -944,7 +943,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY2,
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualTwoYearsAgo',
                   title: 'Actual',
                   align: 'right',
                   editable: true,
@@ -957,7 +956,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY1,
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualLastYear',
                   title: 'Actual',
                   align: 'right',
                   editable: true,
@@ -970,7 +969,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: currFY, // e.g., '2024-25'
               children: [
                 {
-                  field: 'CurrentYearBudget',
+                  field: 'budgetCurrent',
                   title: 'Budget',
                   align: 'right',
                   editable: true,
@@ -987,14 +986,14 @@ export const MockPlantContributionAPILastFourYears = {
         return {
           columns: [
             {
-              field: 'SrNo',
+              field: 'rowNo',
               title: 'S.no',
               widthT: 58,
               align: 'right',
               editable: false,
             },
             {
-              field: 'ProductionCostCalculations',
+              field: 'material',
               title: 'Production cost calculations',
               width: 220,
               editable: false,
@@ -1003,7 +1002,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY4, // e.g., '2023-24'
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualFourYearsAgo',
                   title: 'Actual',
                   align: 'right',
                   editable: false,
@@ -1016,7 +1015,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY3, // e.g., '2023-24'
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualThreeYearsAgo',
                   title: 'Actual',
                   align: 'right',
                   editable: false,
@@ -1029,7 +1028,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY2, // e.g., '2023-24'
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'actualTwoYearsAgo',
                   title: 'Actual',
                   align: 'right',
                   editable: false,
@@ -1042,7 +1041,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: prevFY1, // e.g., '2023-24'
               children: [
                 {
-                  field: 'PrevYearActual',
+                  field: 'ActualLastYear',
                   title: 'Actual',
 
                   align: 'right',
@@ -1056,7 +1055,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: currFY,
               children: [
                 {
-                  field: 'NextYearBudget',
+                  field: 'BudgetCurrent',
                   title: 'Budget',
 
                   align: 'right',

@@ -63,6 +63,12 @@ export default function AopBudget() {
   const columns = useMemo(
     () => [
       {
+        field: 'plant',
+        title: 'Plant',
+        widthT: 60,
+        editable: false,
+      },
+      {
         field: 'Cost',
         title: 'Cost',
         widthT: 100,
@@ -164,7 +170,7 @@ export default function AopBudget() {
         type: 'number',
         format: '{0:#.###}',
       },
-      { field: 'remarks', title: 'Remark', widthT: 220, editable: false },
+      { field: 'remarks', title: 'Remark', widthT: 100, editable: false },
     ],
     [plantID, yearChanged],
   )
@@ -449,18 +455,23 @@ export default function AopBudget() {
         ],
       }
 
+      const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
+      const plantName = plantObject?.name
+
       if (res?.code === 200) {
         const mapped = res?.data?.map((item, index) => ({
           ...item,
           id: index,
           isEditable: item?.isEditable,
           originalRemark: item.remarks,
+          plant: plantName,
         }))
         const mapped1 = res?.data1?.map((item, index) => ({
           ...item,
           id: index,
           isEditable: item?.isEditable,
           originalRemark: item.remarks,
+          plant: plantName,
         }))
         setRows(mapped)
         setRowsP(mapped1)

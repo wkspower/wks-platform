@@ -121,7 +121,7 @@ export default function PlantSafetyPerformanceTarget() {
         editable: true,
       },
 
-      { field: 'remarks', title: 'Remark', widthT: 220, editable: false },
+      { field: 'remarks', title: 'Remark', widthT: 60, editable: false },
     ],
     [plantID, yearChanged],
   )
@@ -342,27 +342,11 @@ export default function PlantSafetyPerformanceTarget() {
             targetDate: '',
             responsible: '',
           },
-          {
-            serialNumber: '',
-            incidentDescription: '',
-            rootCauses: '',
-            recommendation: '',
-            targetDate: '',
-            responsible: '',
-          },
         ],
 
         data3: [
           {
             serialNumber: 1,
-            initiative: '',
-            outcome: '',
-            recommendation: '',
-            targetDate: '',
-            responsible: '',
-          },
-          {
-            serialNumber: '',
             initiative: '',
             outcome: '',
             recommendation: '',

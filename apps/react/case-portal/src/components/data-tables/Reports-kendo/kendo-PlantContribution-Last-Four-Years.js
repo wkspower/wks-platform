@@ -54,7 +54,7 @@ export default function PlantContributionLastFourYears() {
             verticalName,
           })
 
-        const apiResp = await DataService.getPlantContributionYearWisePlan(
+        const apiResp = await DataService.plantContributionPlanLastFourYears(
           keycloak,
           key,
         )

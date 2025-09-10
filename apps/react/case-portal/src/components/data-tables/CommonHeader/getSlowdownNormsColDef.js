@@ -23,7 +23,7 @@ const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
 
   let safeShutdownMonths = Array.isArray(slowdownMonths) ? slowdownMonths : []
 
-  console.log('safeShutdownMonths', safeShutdownMonths)
+  // console.log('safeShutdownMonths', safeShutdownMonths)
 
   const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
 

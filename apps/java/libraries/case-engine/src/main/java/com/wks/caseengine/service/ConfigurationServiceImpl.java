@@ -1129,7 +1129,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
 					+ "  AND NP.Plant_FK_Id = :plantFKId " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
 					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
-					+ "    NP.ConfigTypeName, " + "    NP.TypeName " + "ORDER BY NP.TypeDisplayOrder";
+					+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
+					+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("year", year);

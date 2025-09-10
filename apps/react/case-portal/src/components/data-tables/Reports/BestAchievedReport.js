@@ -19,6 +19,7 @@ import {
 } from 'utils/CustomAccrodian'
 
 const CALL_DELAY_MS = 200
+const MONTH_GRID_NAME = 'Month wise Quantity, Tonnes / Month'
 
 const BestAchievedReport = () => {
   const keycloak = useSession()
@@ -63,24 +64,29 @@ const BestAchievedReport = () => {
     })
   }, [])
 
-  // fetchDataForGrid now accepts mode and uses type to decide which service method to call
+  // helper to detect NormType key in a row (robust against casing)
+  const findNormTypeKey = (row = {}) => {
+    const keys = Object.keys(row || {})
+    const match = keys.find(
+      (k) => k.toLowerCase() === 'normtype' || k.toLowerCase() === 'norm_type',
+    )
+    return match
+  }
+
+  // fetchDataForGrid now returns either {rows, columns} OR { groups: {normName: {rows, columns}} }
   const fetchDataForGrid = useCallback(
     async (reportType, mode) => {
       try {
-        // choose API based on reportType string
         const lower = (reportType || '').toLowerCase()
         let apiResponse = null
 
         if (lower.includes('input')) {
-          // call input API with mode
           apiResponse = await CrackerReportsApiDataService.spyroInputReport(
             keycloak,
             reportType,
             mode,
           )
         } else {
-          // call output API with mode
-          // passing mode here as well; ensure backend method accepts mode if needed
           apiResponse = await CrackerReportsApiDataService.spyroOutputReport(
             keycloak,
             reportType,
@@ -102,7 +108,9 @@ const BestAchievedReport = () => {
           .filter((c) => c.type === 'number')
           .map((c) => c.field)
 
-        const rowsWithId = (apiResponse.data.data || []).map((item, index) => {
+        const rawRows = apiResponse.data.data || []
+
+        const rowsWithId = rawRows.map((item, index) => {
           const parsedItem = { ...item }
           dateFields.forEach((f) => {
             parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
@@ -116,6 +124,22 @@ const BestAchievedReport = () => {
           return { ...parsedItem, id: index, isEditable: false }
         })
 
+        // check if grouping by NormType is required
+        const sample = rowsWithId[0]
+        const normKey = sample ? findNormTypeKey(sample) : null
+
+        if (normKey) {
+          // group rows by NormType value
+          const groups = {}
+          rowsWithId.forEach((r) => {
+            const gName = r[normKey] || 'Unknown'
+            if (!groups[gName]) groups[gName] = { rows: [], columns: enrichedCols }
+            groups[gName].rows.push(r)
+          })
+
+          return { groups }
+        }
+
         return { rows: rowsWithId, columns: enrichedCols }
       } catch (err) {
         console.error(`Error fetching ${reportType} (mode: ${mode}):`, err)
@@ -125,7 +149,69 @@ const BestAchievedReport = () => {
     [keycloak, enrichColumns],
   )
 
-  // scheduleAndRunFetch now accepts a unique reportKey (used for map/export keys), a reportType and the mode
+  // fetchMonthWiseGrid also supports NormType grouping (calls finalNormsProductionReport)
+  const fetchMonthWiseGrid = useCallback(
+    async (mode, reportTypeForCall) => {
+      try {
+        const apiResponseForRawData = await CrackerReportsApiDataService.finalNormsProductionReport(
+          keycloak,
+          reportTypeForCall,
+          mode,
+        )
+
+        if (apiResponseForRawData?.code !== 200) {
+          return { rows: [], columns: [] }
+        }
+
+        const backendCols = apiResponseForRawData.data.columns || []
+        const enrichedCols = enrichColumns(backendCols)
+
+        const dateFields = enrichedCols
+          .filter((c) => c.type === 'date')
+          .map((c) => c.field)
+        const numberFields = enrichedCols
+          .filter((c) => c.type === 'number')
+          .map((c) => c.field)
+
+        const rawRows = apiResponseForRawData.data.data || []
+
+        const rowsWithId = rawRows.map((item, index) => {
+          const parsedItem = { ...item }
+          dateFields.forEach((f) => {
+            parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
+          })
+          numberFields.forEach((f) => {
+            parsedItem[f] =
+              item?.[f] !== undefined && item?.[f] !== null
+                ? Number(item[f])
+                : null
+          })
+          return { ...parsedItem, id: index, isEditable: false }
+        })
+
+        const sample = rowsWithId[0]
+        const normKey = sample ? findNormTypeKey(sample) : null
+
+        if (normKey) {
+          const groups = {}
+          rowsWithId.forEach((r) => {
+            const gName = r[normKey] || 'Unknown'
+            if (!groups[gName]) groups[gName] = { rows: [], columns: enrichedCols }
+            groups[gName].rows.push(r)
+          })
+          return { groups }
+        }
+
+        return { rows: rowsWithId, columns: enrichedCols }
+      } catch (err) {
+        console.error('Error fetching month-wise raw data:', err)
+        return { rows: [], columns: [] }
+      }
+    },
+    [keycloak, enrichColumns],
+  )
+
+  // scheduleAndRunFetch handles grouped results by creating separate grid entries per NormType
   const scheduleAndRunFetch = useCallback(
     (reportKey, reportType, mode, delayMs) => {
       const id = setTimeout(async () => {
@@ -133,10 +219,46 @@ const BestAchievedReport = () => {
         if (isMountedRef.current) setLoading(true)
 
         try {
-          const { rows, columns } = await fetchDataForGrid(reportType, mode)
+          let result = { rows: [], columns: [] }
+
+          if (reportKey === MONTH_GRID_NAME) {
+            result = await fetchMonthWiseGrid(mode, reportType)
+          } else {
+            result = await fetchDataForGrid(reportType, mode)
+          }
 
           if (!isMountedRef.current) return
-          setDataMap((prev) => ({ ...prev, [reportKey]: { rows, columns } }))
+
+          // if grouped result, create separate grids named "<reportKey> - <NormType>"
+          if (result.groups) {
+            const childNames = Object.keys(result.groups).map((g) => `${reportKey} - ${g}`)
+
+            // update gridNames: remove parent and append child names
+            setGridNames((prev) => {
+              const withoutParent = prev.filter((n) => n !== reportKey)
+              // avoid duplicate child names
+              const newList = [...withoutParent]
+              childNames.forEach((cn) => {
+                if (!newList.includes(cn)) newList.push(cn)
+              })
+              return newList
+            })
+
+            // set dataMap entries for each child
+            setDataMap((prev) => {
+              const next = { ...prev }
+              Object.entries(result.groups).forEach(([gName, payload]) => {
+                const key = `${reportKey} - ${gName}`
+                next[key] = payload
+              })
+              // also delete any existing parent entry
+              delete next[reportKey]
+              return next
+            })
+          } else {
+            // normal single-grid result
+            setDataMap((prev) => ({ ...prev, [reportKey]: result }))
+          }
         } catch (err) {
           console.error(`Scheduled fetch failed for ${reportKey}:`, err)
         } finally {
@@ -150,7 +272,7 @@ const BestAchievedReport = () => {
 
       timeoutIdsRef.current.push(id)
     },
-    [fetchDataForGrid],
+    [fetchDataForGrid, fetchMonthWiseGrid],
   )
 
   // Main: fetch TYPE_LIST then schedule fetching each grid in order
@@ -203,7 +325,7 @@ const BestAchievedReport = () => {
 
       const normalized = [...new Set(types)] // unique, preserve order as returned
 
-      // ensure Input types appear first (user wanted 3 input then 3 output)
+      // ensure Input types appear first
       const inputFirst = []
       const outputLater = []
       normalized.forEach((t) => {
@@ -227,18 +349,27 @@ const BestAchievedReport = () => {
         })
       })
 
+      // append the special month-wise grid at the end (placeholder)
+      expandedGridNames.push(MONTH_GRID_NAME)
+
       setGridNames(expandedGridNames)
 
       // schedule fetch for each expanded grid with small delays
       expandedGridNames.forEach((gridName, idx) => {
-        // parse type and mode back from gridName
-        // gridName format: "<TYPE> - <MODE_LABEL>"
-        const [typePart, modeLabel] = gridName.split(' - ')
-        const modeObj = modes.find((mm) => mm.label === modeLabel)
-        const modeKey = modeObj ? modeObj.key : modes[0].key
+        let typePart = gridName
+        let modeKey = modes[0].key
 
-        const delay = idx * CALL_DELAY_MS
-        scheduleAndRunFetch(gridName, typePart, modeKey, delay)
+        if (gridName !== MONTH_GRID_NAME) {
+          const [tPart, modeLabel] = gridName.split(' - ')
+          typePart = tPart
+          const modeObj = modes.find((mm) => mm.label === modeLabel)
+          modeKey = modeObj ? modeObj.key : modes[0].key
+          scheduleAndRunFetch(gridName, typePart, modeKey, idx * CALL_DELAY_MS)
+        } else {
+          // for month grid pick a sensible report type (last orderedTypes)
+          const fallbackReportType = orderedTypes.length ? orderedTypes[orderedTypes.length - 1] : orderedTypes[0]
+          scheduleAndRunFetch(gridName, fallbackReportType, modes[0].key, idx * CALL_DELAY_MS)
+        }
       })
     } catch (err) {
       console.error('Error fetching TYPE_LIST or config:', err)
@@ -248,7 +379,6 @@ const BestAchievedReport = () => {
 
   useEffect(() => {
     fetchAllGrids()
-    // cleanup timers on dependency change
     return () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
@@ -260,14 +390,12 @@ const BestAchievedReport = () => {
     const keys = Object.keys(exportRefs.current || {})
     if (!keys.length) return
 
-    // find first available ref
     const firstKey = keys.find((k) => exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
     const baseOptions = baseRef?.workbookOptions?.()
     if (!baseOptions) return
 
-    // collect first sheet from each ref (preserves order of gridNames when possible)
     const sheets = gridNames
       .map((name) => {
         const ref = exportRefs.current[name]
@@ -282,7 +410,6 @@ const BestAchievedReport = () => {
 
     if (!sheets.length) return
 
-    // set readable titles (use the original grid name)
     sheets.forEach((s, idx) => {
       s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
     })
@@ -298,7 +425,6 @@ const BestAchievedReport = () => {
     .split('.')[0]
   const fileName = `Best Achieved Norms(Min CC) ${currentDateTime}.xlsx`
 
-  // helper to render Title exactly as API sent (or tweak)
   const renderTitle = (t) => t
 
   return (
@@ -314,7 +440,6 @@ const BestAchievedReport = () => {
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
-          // function ref to capture the export instance
           const setRef = (ref) => {
             if (ref) exportRefs.current[name] = ref
           }

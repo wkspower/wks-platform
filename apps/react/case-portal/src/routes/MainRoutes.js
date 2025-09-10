@@ -442,60 +442,17 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+
+          {
+            path: 'reliability-performance',
+            element: (
+              <PrivateRoute routeId='reliability-performance'>
+                <RelPerf />
+              </PrivateRoute>
+            ),
+          },
         ],
       },
-
-      // {
-      //   path: 'functional-aop',
-      //   children: [
-      //     {
-      //       path: 'aop-budget',
-      //       element: (
-      //         <PrivateRoute routeId='aop-budget'>
-      //           <AopBudget />
-      //         </PrivateRoute>
-      //       ),
-      //     },
-      //     {
-      //       path: 'monthly-template-plants',
-      //       element: (
-      //         <PrivateRoute routeId='monthly-template-plants'>
-      //           <MonthlyTemplatePlants />
-      //         </PrivateRoute>
-      //       ),
-      //     },
-      //     {
-      //       path: 'aop-summary',
-      //       element: (
-      //         <PrivateRoute routeId='aop-summary'>
-      //           <AopSummary />
-      //         </PrivateRoute>
-      //       ),
-      //     },
-      //   ],
-      // },
-
-      // {
-      //   path: 'manufacturing-division',
-      //   children: [
-      //     {
-      //       path: 'plant-team',
-      //       element: (
-      //         <PrivateRoute routeId='plant-team'>
-      //           <PlantTeam />
-      //         </PrivateRoute>
-      //       ),
-      //     },
-      //     {
-      //       path: 'plant-safety-performance-target',
-      //       element: (
-      //         <PrivateRoute routeId='plant-safety-performance-target'>
-      //           <PlantSafetyPerformanceTarget />
-      //         </PrivateRoute>
-      //       ),
-      //     },
-      //   ],
-      // },
 
       {
         path: 'plant-team',
@@ -505,14 +462,7 @@ export const MainRoutes = (
           </PrivateRoute>
         ),
       },
-      {
-        path: 'reliability-performance',
-        element: (
-          <PrivateRoute routeId='reliability-performance'>
-            <RelPerf />
-          </PrivateRoute>
-        ),
-      },
+
       {
         path: 'plant-safety-performance-target',
         element: (

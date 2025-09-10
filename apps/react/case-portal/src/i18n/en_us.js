@@ -30,6 +30,7 @@ const defs = {
     dataForm2: 'WKS Form2',
     // New menu items for "Production / Norms Plan"
     productionNormsPlan: 'Production / Norms Plan',
+    process: 'Process',
     productMCUVal: 'Production Target',
     spyroInput: 'Spyro Input',
     spyroOutput: 'Spyro Output',
@@ -61,6 +62,7 @@ const defs = {
     normsHistorianBasis: 'Norms Historian',
     bestAchievedBasis: 'Best Achieved Basis (Min CC)',
     intermediateValuesDataSet: 'Intermediate Values',
+    rawDataSet: 'Raw Data',
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     monthwiseRawMaterial: 'Monthwise Raw Material',
@@ -71,10 +73,11 @@ const defs = {
     valueHistory: 'Value History', // New addition
 
     //FUNCTIONAL AOP
-    functionalAop: 'Maintenance',
+    functionalAop: 'CES',
+
     manufacturingDivision: 'Manufacturing Division',
     reliabilityPerformance: 'Reliability Performance',
-    monthlyAop: 'Monthly Budget',
+    monthlyAop: 'Maintenance',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
     plantTeam: 'People',
@@ -243,11 +246,12 @@ const defs = {
         userManage: 'User Management', // New addition
         workflow: 'AOP Approval Flow', // New addition
         valueHistory: 'Value History', // New addition
+        process: 'Process',
 
         //FUNCTIONAL AOP
-        functionalAop: 'Maintenance',
+        functionalAop: 'CES',
 
-        monthlyAop: 'Monthly Budget',
+        monthlyAop: 'Maintenance',
         reliabilityPerformance: 'Reliability Performance',
         siteWiseAop: 'Consumption Summary (Sites)',
         allSiteSummaryAop: 'Summary',

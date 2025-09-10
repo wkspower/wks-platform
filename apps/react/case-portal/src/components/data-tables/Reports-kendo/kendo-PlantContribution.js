@@ -41,7 +41,9 @@ export default function PlantContribution() {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [rows, setRows] = useState()
-  const verticalName = JSON.parse(localStorage.getItem('selectedVertical'))?.name?.toLowerCase()
+  const verticalName = JSON.parse(
+    localStorage.getItem('selectedVertical'),
+  )?.name?.toLowerCase()
   const loadAll = async () => {
     setLoading(true)
     const out = {}
@@ -220,7 +222,7 @@ export default function PlantContribution() {
                 permissions={{
                   textAlignment: 'center',
                   showCalculate: false,
-                  showFinalSubmit: idx === 0,
+                  showFinalSubmit: false,
                   showTitle: true,
                 }}
               />

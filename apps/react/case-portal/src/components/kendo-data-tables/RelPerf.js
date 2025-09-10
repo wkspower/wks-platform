@@ -291,15 +291,6 @@ export default function RelPerf() {
       responsible: '',
       id: 0,
     },
-    {
-      serialNumber: 2,
-      incidentDescription: '',
-      rootCause: '',
-      recommendation: '',
-      targetDate: '',
-      responsible: '',
-      id: 1,
-    },
   ]
   const [majorIncidentsRows, setMajorIncidentsRows] = useState(
     initialMajorIncidentsRows,
@@ -337,15 +328,6 @@ export default function RelPerf() {
       targetDate: '',
       responsible: '',
       id: 0,
-    },
-    {
-      serialNumber: 2,
-      initiative: '',
-      outcome: '',
-      recommendation: '',
-      targetDate: '',
-      responsible: '',
-      id: 1,
     },
   ]
   const [reliabilityInitiativeRows, setReliabilityInitiativeRows] = useState(

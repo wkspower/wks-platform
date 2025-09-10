@@ -132,10 +132,12 @@ export const DataService = {
   spyroInputReport,
   spyroOutputReport,
   finalNormsReport,
-  finalNormsProductionReport,
+
   configurationIntermediateValues,
   findingModel,
   miisData,
+
+  plantContributionPlanLastFourYears,
 }
 
 async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
@@ -230,32 +232,7 @@ async function finalNormsReport(
     return Promise.reject(e)
   }
 }
-async function finalNormsProductionReport(
-  keycloak,
-  reportType,
-  periodFrom,
-  periodTo,
-  mode,
-) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
 
-  let url = `${Config.CaseEngineUrl}/task/final-norms-production-report?plantId=${plantId}&year=${year}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return Promise.reject(e)
-  }
-}
 async function spyroOutputReport(
   keycloak,
   reportType,
@@ -3176,5 +3153,23 @@ async function getCrackerNextYearData(keycloak, qParams) {
   } catch (e) {
     console.error('Failed to fetch next-year data', e)
     return Promise.reject(e)
+  }
+}
+async function plantContributionPlanLastFourYears(keycloak, type) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/report-plant-contribution-summary-yearly?plantId=${plantId}&year=${year}&reportType=${type}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
