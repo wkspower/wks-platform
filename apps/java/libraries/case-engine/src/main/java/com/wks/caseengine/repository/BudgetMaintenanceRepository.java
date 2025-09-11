@@ -15,13 +15,13 @@ import com.wks.caseengine.entity.BudgetMaintenance;
 public interface BudgetMaintenanceRepository extends JpaRepository<BudgetMaintenance, UUID>{
 	
 	@Query(
-	        value = "SELECT * FROM BudgetMaintenance bm WHERE bm.PlantId = :plantId AND bm.AOPYear = :aopYear",
+	        value = "SELECT * FROM BudgetMaintenance bm WHERE bm.PlantId = :plantId AND bm.AOPYear = :aopYear AND bm.budgetCategory = :budgetCategory",
 	        nativeQuery = true
 	    )
 	    List<BudgetMaintenance> findByPlantIdAndAOPYear(
 	        @Param("plantId") UUID plantId,
-	        @Param("aopYear") String aopYear
-	    );
+	        @Param("aopYear") String aopYear,@Param("budgetCategory") String budgetCategory);
+	    
 	
 	
 

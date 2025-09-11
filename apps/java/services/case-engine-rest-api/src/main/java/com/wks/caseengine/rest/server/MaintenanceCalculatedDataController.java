@@ -40,8 +40,8 @@ public class MaintenanceCalculatedDataController {
 	}
 	
 	@GetMapping(value="/budget-maintenance")
-	public AOPMessageVM getBudgetMaintenance(@RequestParam String plantId, @RequestParam String year){
-		return maintenanceCalculatedDataService.getBudgetMaintenance(plantId,year);		
+	public AOPMessageVM getBudgetMaintenance(@RequestParam String plantId, @RequestParam String year,@RequestParam(required=false) String budgetCategory){
+		return maintenanceCalculatedDataService.getBudgetMaintenance(plantId,year,budgetCategory);		
 	}
 	
 	@PostMapping(value="/budget-maintenance")

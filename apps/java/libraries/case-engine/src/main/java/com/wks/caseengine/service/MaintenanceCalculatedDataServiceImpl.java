@@ -269,7 +269,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	}
 
 	@Override
-	public AOPMessageVM getBudgetMaintenance(String plantId, String year) {
+	public AOPMessageVM getBudgetMaintenance(String plantId, String year,String budgetCategory) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		UUID plant=null;
 		if(plantId!=null) {
@@ -277,7 +277,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 		List<BudgetMaintenanceDto> budgetMaintenanceDtoList = new ArrayList<BudgetMaintenanceDto>();
 		try {
-			List<BudgetMaintenance> budgetMaintenanceList	= budgetMaintenanceRepository.findByPlantIdAndAOPYear(plant,year);
+			List<BudgetMaintenance> budgetMaintenanceList	= budgetMaintenanceRepository.findByPlantIdAndAOPYear(plant,year,budgetCategory);
 			for(BudgetMaintenance budgetMaintenance:budgetMaintenanceList) {
 				BudgetMaintenanceDto budgetMaintenanceDto = new BudgetMaintenanceDto();
 				budgetMaintenanceDto.setAopYear(budgetMaintenance.getAopYear());
