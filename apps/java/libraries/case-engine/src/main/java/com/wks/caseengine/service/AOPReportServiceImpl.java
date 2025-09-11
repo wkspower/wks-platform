@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.sql.DataSource;
@@ -19,11 +20,14 @@ import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPReportDTO;
 import com.wks.caseengine.dto.FiveYearSummaryReportDTO;
+import com.wks.caseengine.dto.PlantContributionSummaryDTO;
+import com.wks.caseengine.entity.PlantContributionSummaryT22;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantContributionSummaryT22Repository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -49,6 +53,9 @@ public class AOPReportServiceImpl implements AOPReportService {
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private PlantContributionSummaryT22Repository plantContributionSummaryT22Repository;
 
 	@Override
 	public AOPMessageVM getAnnualAOPReport(String plantId, String year, String reportType, String AopYearFilter) {
@@ -594,6 +601,35 @@ public class AOPReportServiceImpl implements AOPReportService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM updatePlantContributionFiveYearSummaryReport(
+			List<PlantContributionSummaryDTO> plantContributionSummaryDTOs) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<PlantContributionSummaryT22> plantContributionSummaryT22s=new ArrayList<PlantContributionSummaryT22>();
+		try {
+			for(PlantContributionSummaryDTO plantContributionSummaryDTO:plantContributionSummaryDTOs) {
+				Optional<PlantContributionSummaryT22> plantContributionSummaryT22Opt = plantContributionSummaryT22Repository.findById(plantContributionSummaryDTO.getId());
+				if(plantContributionSummaryT22Opt.isPresent()) {
+					PlantContributionSummaryT22 plantContributionSummaryT22=plantContributionSummaryT22Opt.get();
+					plantContributionSummaryT22.setActual4(plantContributionSummaryDTO.getActualFourYearsAgo());
+					plantContributionSummaryT22.setActual3(plantContributionSummaryDTO.getActualThreeYearsAgo());
+					plantContributionSummaryT22.setActual2(plantContributionSummaryDTO.getActualTwoYearsAgo());
+					plantContributionSummaryT22.setActual1(plantContributionSummaryDTO.getActualLastYear());
+					plantContributionSummaryT22.setBudgetCurrentYear(plantContributionSummaryDTO.getBudgetCurrent());
+					plantContributionSummaryT22s.add(plantContributionSummaryT22Repository.save(plantContributionSummaryT22));
+				}
+				
+			}
+		}catch(Exception e) {
+			throw new RuntimeException("Failed to update data", e);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(plantContributionSummaryT22s);
+		aopMessageVM.setMessage("Data fetched successfully");
+		// TODO Auto-generated method stub
+		return aopMessageVM;
 	}
 
 
