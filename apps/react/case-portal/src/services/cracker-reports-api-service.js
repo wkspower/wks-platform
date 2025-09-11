@@ -165,7 +165,10 @@ async function getRawasteam(keycloak, periodFrom, periodTo, mode) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw-steam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}&mode=${mode}`
+  // ? Encode mode to handle special characters like '+'
+  const encodedMode = encodeURIComponent(mode)
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw-steam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}&mode=${encodedMode}`
 
   const headers = {
     Accept: 'application/json',
@@ -186,7 +189,9 @@ async function getRawasfindingteam(keycloak, mode) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-finding-steam?plantId=${plantId}&year=${year}&mode=${mode}`
+  const encodedMode = encodeURIComponent(mode)
+
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-finding-steam?plantId=${plantId}&year=${year}&mode=${encodedMode}`
 
   const headers = {
     Accept: 'application/json',

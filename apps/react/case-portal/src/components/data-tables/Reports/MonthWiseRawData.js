@@ -10,6 +10,7 @@ import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -17,9 +18,11 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-const MONTH_GRID_NAME = 'Month wise Quantity, Tonnes / Month'
+const MONTH_GRID_NAME = 'Final Norms'
+const MODE_GRADES = ['4F', '5F', '4F+D']
+const MODE_TYPES = ['Best Achieved', 'Expression', 'Yearly Norms']
 
-const MonthWiseRawData = () => {
+export default function MonthWiseRawData() {
   const keycloak = useSession()
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
@@ -37,7 +40,7 @@ const MonthWiseRawData = () => {
 
   function parseDDMMYYYY(dateStr) {
     if (!dateStr) return null
-    const [day, month, year] = dateStr.split('-')
+    const [day, month, year] = String(dateStr).split('-')
     return new Date(`${year}-${month}-${day}`)
   }
 
@@ -83,10 +86,116 @@ const MonthWiseRawData = () => {
     return containsNorm || null
   }
 
+  // build columns from the 0th record as requested
+  const MODE_COLUMNS_ORDER = [
+    'sapMaterialCode',
+    'normType',
+    'materialDisplayName',
+    'uom',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+    'january',
+    'february',
+    'march',
+  ]
+
+  const FIELD_TITLE_MAP = {
+    sapMaterialCode: 'SAP Mat Code',
+    normType: 'Type',
+    materialDisplayName: 'Particular',
+    uom: 'UOM',
+    april: 'April',
+    may: 'May',
+    june: 'June',
+    july: 'July',
+    august: 'August',
+    september: 'September',
+    october: 'October',
+    november: 'November',
+    december: 'December',
+    january: 'January',
+    february: 'February',
+    march: 'March',
+  }
+
+  // build columns from the 0th record in the fixed order and with mapped titles
+  const columnsFromFirstRow = (firstRow = {}) => {
+    const first = firstRow || {}
+    return MODE_COLUMNS_ORDER.map((f) => {
+      const sample = first[f]
+      let type = 'string'
+      if (typeof sample === 'number') type = 'number'
+      else if (typeof sample === 'string' && sample.split('-').length === 3)
+        type = 'date'
+      else if (
+        sample !== undefined &&
+        sample !== null &&
+        sample !== '' &&
+        !isNaN(sample)
+      )
+        type = 'number'
+      return { field: f, title: FIELD_TITLE_MAP[f] || f, type }
+    })
+  }
+
+  const fetchModeWiseGrids = useCallback(async () => {
+    const modeMap = {}
+    for (const grade of MODE_GRADES) {
+      for (const mode of MODE_TYPES) {
+        try {
+          const resp =
+            await NormalOperationNormsApiService.getModeWiseNormsData(
+              keycloak,
+              grade,
+              mode,
+            )
+          if (resp?.code !== 200) continue
+
+          const raw = resp.data?.mcuNormsValueDTOList || []
+          const first = raw[0] || {}
+          const cols = columnsFromFirstRow(first)
+          const enriched = enrichColumns(cols)
+
+          const rowsWithId = raw.map((r, idx) => {
+            const parsed = { ...r }
+            cols
+              .filter((c) => c.type === 'date')
+              .forEach((c) => {
+                parsed[c.field] = parsed[c.field]
+                  ? parseDDMMYYYY(parsed[c.field])
+                  : null
+              })
+            cols
+              .filter((c) => c.type === 'number')
+              .forEach((c) => {
+                parsed[c.field] =
+                  parsed[c.field] !== undefined && parsed[c.field] !== null
+                    ? Number(parsed[c.field])
+                    : null
+              })
+            return { ...parsed, id: `${grade}_${mode}_${idx}` }
+          })
+
+          const key = `${grade} - ${mode}`
+          modeMap[key] = { rows: rowsWithId, columns: enriched }
+        } catch (err) {
+          console.error(`Mode grid fetch failed for ${grade} - ${mode}:`, err)
+        }
+      }
+    }
+    return modeMap
+  }, [keycloak, enrichColumns])
+
   const fetchAndPrepare = useCallback(async () => {
     setLoading(true)
     try {
-      // Call the API (no mode/dates). Replace with correct method if different.
       const apiResponse =
         await CrackerReportsApiDataService.finalNormsReport(keycloak)
 
@@ -128,6 +237,9 @@ const MonthWiseRawData = () => {
       const sample = rowsWithId[0] || {}
       const normKey = findNormTypeKey(sample)
 
+      let nextDataMap = {}
+      let nextGridNames = []
+
       if (normKey) {
         const groups = {}
         rowsWithId.forEach((r) => {
@@ -138,22 +250,29 @@ const MonthWiseRawData = () => {
           groups[gName].rows.push(r)
         })
 
-        // preserve API order if possible; otherwise alphabetical
         const names = Object.keys(groups)
-        // build dataMap so first entry uses full parent title + NormType, rest are NormType only
-        const nextDataMap = {}
         names.forEach((n, idx) => {
-          const key = idx === 0 ? `${MONTH_GRID_NAME} - ${n}` : n
+          const key = `${MONTH_GRID_NAME} - ${n}`
           nextDataMap[key] = groups[n]
         })
-
-        setDataMap(nextDataMap)
-        setGridNames(Object.keys(nextDataMap))
+        nextGridNames = Object.keys(nextDataMap)
       } else {
         const key = MONTH_GRID_NAME
-        setDataMap({ [key]: { rows: rowsWithId, columns: enrichedCols } })
-        setGridNames([key])
+        nextDataMap[key] = { rows: rowsWithId, columns: enrichedCols }
+        nextGridNames = [key]
       }
+
+      // fetch the 9 mode-wise grids and append below existing grids
+      const modeMap = await fetchModeWiseGrids()
+
+      // merge while preserving order: first existing, then mode grids
+      const mergedDataMap = { ...nextDataMap, ...modeMap }
+      const mergedNames = [...nextGridNames, ...Object.keys(modeMap)]
+
+      if (!isMountedRef.current) return
+
+      setDataMap(mergedDataMap)
+      setGridNames(mergedNames)
     } catch (err) {
       console.error('Error fetching month-wise raw data:', err)
       setDataMap({})
@@ -161,7 +280,7 @@ const MonthWiseRawData = () => {
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [keycloak, enrichColumns, fetchModeWiseGrids])
 
   useEffect(() => {
     fetchAndPrepare()
@@ -217,6 +336,7 @@ const MonthWiseRawData = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      {/* Hidden Excel exports for each grid (including the new 9) */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
@@ -287,5 +407,3 @@ const MonthWiseRawData = () => {
     </div>
   )
 }
-
-export default MonthWiseRawData

@@ -483,7 +483,9 @@ const KendoDataTablesReciepe = ({
                 variant='contained'
                 className='btn-save'
                 onClick={saveModalOpen}
-                disabled={isButtonDisabled}
+                disabled={
+                  isButtonDisabled || Object.keys(modifiedCells).length === 0
+                }
                 // loading={loading}
                 // loadingposition='start'
                 {...(loading ? {} : {})}
