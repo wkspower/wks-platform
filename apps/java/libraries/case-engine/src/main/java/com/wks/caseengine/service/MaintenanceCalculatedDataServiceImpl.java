@@ -13,9 +13,11 @@ import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.BudgetMaintenance;
 import com.wks.caseengine.entity.DecokeMaintenance;
 import com.wks.caseengine.entity.DecokePlanning;
 import com.wks.caseengine.entity.Plants;
@@ -25,6 +27,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.BudgetMaintenanceRepository;
 import com.wks.caseengine.repository.DecokeMaintenanceRepository;
 import com.wks.caseengine.repository.DecokePlanningRepository;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -58,6 +61,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
+	
+	@Autowired
+	private BudgetMaintenanceRepository budgetMaintenanceRepository;
 
 	@Override
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId, String year) {
@@ -261,5 +267,111 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		return aopMessageVM;
 
 	}
+
+	@Override
+	public AOPMessageVM getBudgetMaintenance(String plantId, String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		UUID plant=null;
+		if(plantId!=null) {
+			plant=UUID.fromString(plantId);
+		}
+		List<BudgetMaintenanceDto> budgetMaintenanceDtoList = new ArrayList<BudgetMaintenanceDto>();
+		try {
+			List<BudgetMaintenance> budgetMaintenanceList	= budgetMaintenanceRepository.findByPlantIdAndAOPYear(plant,year);
+			for(BudgetMaintenance budgetMaintenance:budgetMaintenanceList) {
+				BudgetMaintenanceDto budgetMaintenanceDto = new BudgetMaintenanceDto();
+				budgetMaintenanceDto.setAopYear(budgetMaintenance.getAopYear());
+				budgetMaintenanceDto.setApr(budgetMaintenance.getApr());
+				budgetMaintenanceDto.setMay(budgetMaintenance.getMay());
+				budgetMaintenanceDto.setJun(budgetMaintenance.getJun());
+				budgetMaintenanceDto.setJul(budgetMaintenance.getJul());
+				budgetMaintenanceDto.setAug(budgetMaintenance.getAug());
+				budgetMaintenanceDto.setSep(budgetMaintenance.getSep());
+				budgetMaintenanceDto.setOct(budgetMaintenance.getOct());
+				budgetMaintenanceDto.setNov(budgetMaintenance.getNov());
+				budgetMaintenanceDto.setDec(budgetMaintenance.getDec());
+				budgetMaintenanceDto.setJan(budgetMaintenance.getJan());
+				budgetMaintenanceDto.setFeb(budgetMaintenance.getFeb());
+				budgetMaintenanceDto.setMar(budgetMaintenance.getMar());
+				budgetMaintenanceDto.setBudgetCategory(budgetMaintenance.getBudgetCategory());
+				budgetMaintenanceDto.setBudgetType(budgetMaintenance.getBudgetType());
+				budgetMaintenanceDto.setCostName(budgetMaintenance.getCostName());
+				budgetMaintenanceDto.setId(budgetMaintenance.getId());
+				budgetMaintenanceDto.setPlantId(plant);
+				budgetMaintenanceDto.setPlantName(budgetMaintenance.getPlantName());
+				budgetMaintenanceDto.setRemark(budgetMaintenance.getRemark());
+				budgetMaintenanceDtoList.add(budgetMaintenanceDto);
+			}
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to get data", ex);
+		}
+		
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(budgetMaintenanceDtoList);
+		aopMessageVM.setMessage("Data fetched successfully");
+		return aopMessageVM;
+	}
+
+	@Override
+	public AOPMessageVM updateBudgetMaintenance(List<BudgetMaintenanceDto> budgetMaintenanceDtos) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<BudgetMaintenanceDto> failedList= new ArrayList<BudgetMaintenanceDto>();
+		List<BudgetMaintenance> budgetMaintenanceList=new ArrayList<BudgetMaintenance>();
+		try {
+			for(BudgetMaintenanceDto budgetMaintenanceDto:budgetMaintenanceDtos) {
+				BudgetMaintenance budgetMaintenance=null;
+				if(budgetMaintenanceDto.getId()==null) {
+					budgetMaintenance=new BudgetMaintenance();
+					budgetMaintenanceList.add(saveData(budgetMaintenance,budgetMaintenanceDto));
+				}else {
+					Optional<BudgetMaintenance> budgetMaintenanceOpt=budgetMaintenanceRepository.findById(budgetMaintenanceDto.getId());
+					if(budgetMaintenanceOpt.isPresent()) {
+						budgetMaintenance=budgetMaintenanceOpt.get();
+						budgetMaintenanceList.add(saveData(budgetMaintenance,budgetMaintenanceDto));
+					}else {
+						failedList.add(budgetMaintenanceDto);
+					}
+				}
+					
+			}
+		}catch(Exception e) {
+			throw new RuntimeException("Failed to update data", e);
+		}
+		Map<String,Object> map=new HashMap<>();
+		map.put("Success", budgetMaintenanceList);
+		map.put("Failed", failedList);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(map);
+		aopMessageVM.setMessage("Data updated successfully");
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	public BudgetMaintenance saveData(BudgetMaintenance budgetMaintenance,BudgetMaintenanceDto budgetMaintenanceDto) {
+		budgetMaintenance.setApr(budgetMaintenanceDto.getApr());
+		budgetMaintenance.setMay(budgetMaintenanceDto.getMay());
+		budgetMaintenance.setJun(budgetMaintenanceDto.getJun());
+		budgetMaintenance.setJul(budgetMaintenanceDto.getJul());
+		budgetMaintenance.setAug(budgetMaintenanceDto.getAug());
+		budgetMaintenance.setSep(budgetMaintenanceDto.getSep());
+		budgetMaintenance.setOct(budgetMaintenanceDto.getOct());
+		budgetMaintenance.setNov(budgetMaintenanceDto.getNov());
+		budgetMaintenance.setDec(budgetMaintenanceDto.getDec());
+		budgetMaintenance.setJan(budgetMaintenanceDto.getJan());
+		budgetMaintenance.setFeb(budgetMaintenanceDto.getFeb());
+		budgetMaintenance.setMar(budgetMaintenanceDto.getMar());
+		budgetMaintenance.setBudgetCategory(budgetMaintenanceDto.getBudgetCategory());
+		budgetMaintenance.setBudgetType(budgetMaintenanceDto.getBudgetType());
+		budgetMaintenance.setCostName(budgetMaintenanceDto.getCostName());
+		budgetMaintenance.setPlantId(budgetMaintenanceDto.getPlantId());
+		budgetMaintenance.setPlantName(budgetMaintenanceDto.getPlantName());
+		budgetMaintenance.setAopYear(budgetMaintenanceDto.getAopYear());
+		budgetMaintenance.setRemark(budgetMaintenanceDto.getRemark());
+		return budgetMaintenanceRepository.save(budgetMaintenance);
+	}
+	
+	
 
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
@@ -36,5 +37,15 @@ public class MaintenanceCalculatedDataController {
 	@PostMapping(value="/maintenance")
 	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year,@RequestBody List<DecokePlanningDTO> decokePlanningDTOList){
 		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,decokePlanningDTOList);		
+	}
+	
+	@GetMapping(value="/budget-maintenance")
+	public AOPMessageVM getBudgetMaintenance(@RequestParam String plantId, @RequestParam String year){
+		return maintenanceCalculatedDataService.getBudgetMaintenance(plantId,year);		
+	}
+	
+	@PostMapping(value="/budget-maintenance")
+	public AOPMessageVM updateBudgetMaintenance(@RequestBody List<BudgetMaintenanceDto> budgetMaintenanceDtos){
+		return maintenanceCalculatedDataService.updateBudgetMaintenance(budgetMaintenanceDtos);		
 	}
 }
