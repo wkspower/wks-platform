@@ -26,28 +26,28 @@ public class DecokeMaintenance {
     private String monthName;
 
     @Column(name = "IBR")
-    private Integer ibr;
+    private Double ibr;
 
     @Column(name = "MNT")
-    private Integer mnt;
+    private Double mnt;
 
     @Column(name = "Shoutdown")
-    private Integer shoutdown;
+    private Double shoutdown;
 
     @Column(name = "SAD")
-    private Integer sad;
+    private Double sad;
 
     @Column(name = "BBU")
-    private Integer bbu;
+    private Double bbu;
 
     @Column(name = "DemoHSS")
-    private Integer demoHss;
+    private Double demoHss;
 
     @Column(name = "DemoBBU")
-    private Integer demoBbu;
+    private Double demoBbu;
 
     @Column(name = "DemoSAD")
-    private Integer demoSad;
+    private Double demoSad;
 
     @Column(name = "4FD")
     private Double fourFd;
@@ -74,11 +74,11 @@ public class DecokeMaintenance {
     private String remarks;
 
     @Column(name = "Slowdown")
-    private Integer slowdown;
+    private Double slowdown;
 
     @Column(name = "BBD")
-    private Integer bbd;
+    private Double bbd;
 
     @Column(name = "DemoSD")
-    private Integer demoSd;
+    private Double demoSd;
 }
