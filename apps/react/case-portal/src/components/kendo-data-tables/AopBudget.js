@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
-import { Backdrop, Box, CircularProgress } from '@mui/material'
+import { Select, MenuItem, Backdrop, Box, CircularProgress, Typography, Button } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useSession } from 'SessionStoreContext'
 import { DataService } from 'services/DataService'
@@ -8,7 +8,6 @@ import KendoDataTables from './index'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { workbookOptions, toDataURL } from '@progress/kendo-react-excel-export'
-import { Button } from '@mui/material'
 import { ExcelExport, ExcelExportColumn } from '@progress/kendo-react-excel-export'
 export default function AopBudget() {
   const keycloak = useSession()
@@ -82,6 +81,15 @@ const monthFields = [
   { field: 'mar', index: 3, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
 ]
 
+// Custom cell renderer for month fields: green if >0, red if <0, black otherwise
+const getMonthCell = (field) => (props) => {
+  const value = props.dataItem[field];
+  let color = 'black';
+  if (value > 0) color = 'green';
+  else if (value < 0) color = 'red';
+  return <span style={{ color }}>{value}</span>;
+};
+
 const columns = [
   { field: 'plantName', title: 'Plant', width: 120,},
   { field: 'costName', title: 'Cost', width: 120,},
@@ -93,6 +101,7 @@ const columns = [
     type,
     format,
     width // This will show "Apr 25", ..., "Mar 26"
+    cell: getMonthCell(field), // <-- custom cell renderer for color
   })),
   { field: 'remark', title: 'Remark', editable: true, width: 120 }, 
 ]

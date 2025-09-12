@@ -183,6 +183,7 @@ export default function PlantContributionLastFourYears() {
             columns={rpt.columns || []}
             rows={rpt.rows || []}
             title={title}
+            setRows={() => {}}
             permissions={{
               textAlignment: 'center',
               showCalculate: false,
@@ -239,6 +240,7 @@ export default function PlantContributionLastFourYears() {
             columns={rpt.columns || []}
             rows={rpt.rows || []}
             title={rpt.title || 'Cost & Contribution Summary'}
+            setRows={() => {}}
             permissions={{
               textAlignment: 'center',
               showCalculate: false,
