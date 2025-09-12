@@ -531,10 +531,10 @@ public class AOPReportServiceImpl implements AOPReportService {
 					map.put("rowNo", row[1]);
 					map.put("material", row[2]);
 					map.put("uom", row[3]);
-					map.put("actualFourYearsAgo", row[4]);
-					map.put("actualThreeYearsAgo", row[5]);
-					map.put("actualTwoYearsAgo", row[6]);
-					map.put("actualLastYear", row[7]);
+					map.put("actualFourYearsAgo", row[7]);
+					map.put("actualThreeYearsAgo", row[6]);
+					map.put("actualTwoYearsAgo", row[5]);
+					map.put("actualLastYear", row[4]);
 					map.put("budgetCurrent", row[8]);
 					map.put("remark", row[9]!=null?row[9].toString():"");
 					
