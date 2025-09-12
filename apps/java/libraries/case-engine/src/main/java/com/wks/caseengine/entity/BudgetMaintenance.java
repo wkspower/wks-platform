@@ -11,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -83,4 +84,13 @@ public class BudgetMaintenance {
 
 	@Column(name = "AOPYear")
 	private String aopYear;
+	
+	@Column(name = "IsEditable")
+	private Boolean isEditable;
+	
+	@Column(name = "UpdatedBy")
+	private String updatedBy;
+	
+	@Column(name = "ModifiedOn")
+	private Date modifiedOn;
 }

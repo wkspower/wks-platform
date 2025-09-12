@@ -4,7 +4,10 @@ package com.wks.caseengine.dto;
 
 import lombok.*;
 
+import java.util.Date;
 import java.util.UUID;
+
+import jakarta.persistence.Column;
 
 @Data
 @NoArgsConstructor
@@ -51,5 +54,11 @@ public class BudgetMaintenanceDto {
     private String remark;
 
     private String aopYear;
+    
+	private Boolean isEditable;
+	
+	private String updatedBy;
+	
+	private Date modifiedOn;
 }
 

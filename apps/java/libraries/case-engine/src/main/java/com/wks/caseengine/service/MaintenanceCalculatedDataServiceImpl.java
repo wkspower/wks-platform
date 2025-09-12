@@ -6,6 +6,7 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculatedDataService {
@@ -300,6 +302,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 				budgetMaintenanceDto.setPlantId(plant);
 				budgetMaintenanceDto.setPlantName(budgetMaintenance.getPlantName());
 				budgetMaintenanceDto.setRemark(budgetMaintenance.getRemark());
+				budgetMaintenanceDto.setIsEditable(budgetMaintenance.getIsEditable());
 				budgetMaintenanceDtoList.add(budgetMaintenanceDto);
 			}
 		}catch (IllegalArgumentException e) {
@@ -369,6 +372,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		budgetMaintenance.setPlantName(budgetMaintenanceDto.getPlantName());
 		budgetMaintenance.setAopYear(budgetMaintenanceDto.getAopYear());
 		budgetMaintenance.setRemark(budgetMaintenanceDto.getRemark());
+		budgetMaintenance.setModifiedOn(new Date());
+		budgetMaintenance.setUpdatedBy(Utility.getUserName());
 		return budgetMaintenanceRepository.save(budgetMaintenance);
 	}
 	
