@@ -18,5 +18,5 @@ public interface CrackerReportService {
 	public AOPMessageVM getMISUtiltiesMonthlyAveragesReport( String plantId, String year,  String periodTo, String periodFrom);
 	public AOPMessageVM getRawDataForSteamValuesReport( String plantId, String year,  String periodTo, String periodFrom,String mode);
 	public AOPMessageVM getFindingSteamValuesReport(String mode,String plantId,String year);
-	
+	public AOPMessageVM getFurnaceReport( String plantId, String year, String reportType);
 }

@@ -26,6 +26,11 @@ public class CrackerReportController {
 		return crackerReportService.getSpyroOutputReport(plantId,year,mode);
 	}
 	
+	@GetMapping(value="/report-furnace")
+	public AOPMessageVM getFurnaceReport(@RequestParam String plantId,@RequestParam String year, @RequestParam String reportType) {
+		return crackerReportService.getFurnaceReport(plantId,year,reportType);
+	}
+	
 	@GetMapping(value="/final-norms-report")
 	public AOPMessageVM getFinalNormsReport(@RequestParam String plantId,@RequestParam String year) {
 		return crackerReportService.getFinalNormsReport(plantId,year);
