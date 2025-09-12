@@ -6,6 +6,8 @@ export const DataService = {
   getAllSites,
   getShutDownPlantData,
   getAllProducts,
+  maintenacegetdata,
+  savemaintenacegetdata,
   getAllProductsAll,
   getIbrPlanData,
   getShutdownActivitiesData,
@@ -108,6 +110,7 @@ export const DataService = {
   getConfigurationExecutionDetails,
   getConfigurationExcelConstants,
   savePlantContributionData,
+  savePlantContributionlastfourData,
   getProductionVolDataBasisPe,
   getBestAchievedNorms,
   getProductionVolDataBasisMode,
@@ -1402,6 +1405,28 @@ async function savePlantContributionData(keycloak, dataList) {
     return await Promise.reject(e)
   }
 }
+async function savePlantContributionlastfourData(keycloak, dataList) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage?.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/report-plant-contribution-summary-yearly`
+  //report-plant-contribution-summary-yearly
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 async function saveMonthwiseProduction(keycloak, dataList) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage?.getItem('year')
@@ -1956,8 +1981,53 @@ async function getAllProducts(keycloak) {
     console.log(e)
     return await Promise.reject(e)
   }
-}
+} 
 
+async function maintenacegetdata(keycloak, budgetCategory) {
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const parsedPlant = JSON.parse(storedPlant)
+  var year = localStorage.getItem('year')
+  
+  // Only encode plantId and year, leave budgetCategory as-is
+  const url = `${Config.CaseEngineUrl}/task/budget-maintenance?plantId=${encodeURIComponent(parsedPlant.id)}&year=${encodeURIComponent(year)}&budgetCategory=${budgetCategory}`
+  
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function savemaintenacegetdata(maintenancedetails, keycloak) {
+  const storedPlant = localStorage.getItem('selectedPlant')
+  const parsedPlant = JSON.parse(storedPlant)
+  var year = localStorage.getItem('year')
+  
+  // Only encode plantId and year, leave budgetCategory as-is
+  const url = `${Config.CaseEngineUrl}/task/budget-maintenance`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(maintenancedetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 async function getSlowdownMonths(keycloak, gradeId) {
   const storedPlant = localStorage.getItem('selectedPlant')
   var year = localStorage.getItem('year')

@@ -307,3 +307,6 @@ a.k-grid-header-menu.k-grid-column-menu {
   border-radius: 4px; /* round corners */
   border: 1px solid #ccc; /* custom border */
 }
+.custom-bold-row td {
+  font-weight: bold !important;
+}
