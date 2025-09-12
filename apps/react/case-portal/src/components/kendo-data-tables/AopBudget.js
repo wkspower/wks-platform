@@ -9,6 +9,7 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { workbookOptions, toDataURL } from '@progress/kendo-react-excel-export'
 import { ExcelExport, ExcelExportColumn } from '@progress/kendo-react-excel-export'
+import { validateFields } from 'utils/validationUtils'
 export default function AopBudget() {
   const keycloak = useSession()
   const thisYear = localStorage.getItem('year')
@@ -117,6 +118,7 @@ const columns = [
   ...item,
   plantName: plantName || item.plantName || '',
   IsEditable: true,
+  originalRemark: item.remark?.trim() || '', // add this
 }));
 setRows(mapped)
 
@@ -126,6 +128,7 @@ setRows(mapped)
   ...item,
   plantName: plantName || item.plantName || '',
   IsEditable: true
+  originalRemark: item.remark?.trim() || '', // add this
 }));
 setRowsP(mappedP)
 console.log('Consumption rows:', mapped);
@@ -305,7 +308,18 @@ const handleSaveAll = async () => {
       setLoading(false)
       return
     }
-
+     const requiredFields = ['remark']
+    const validationMessageC = validateFields(consumptionData, requiredFields)
+    const validationMessageP = validateFields(procurementData, requiredFields)
+    if (validationMessageC || validationMessageP) {
+      setSnackbarData({ 
+        message: validationMessageC || validationMessageP, 
+        severity: 'error' 
+      })
+      setSnackbarOpen(true)
+      setLoading(false)
+      return
+    }
     // Fields to omit from payload
     const fieldsToOmit = [
       'isEditable',
