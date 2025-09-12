@@ -167,13 +167,13 @@ useEffect(() => { console.log('rowsP', rowsP); }, [rowsP]);
   const handleCalculateP = () => {}
 
   const handleRemarkCellClick = useCallback((row) => {
-    setCurrentRemark(row.remarks || '')
+    setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }, [])
 
   const handleRemarkCellClickP = useCallback((row) => {
-    setCurrentRemarkP(row.remarks || '')
+    setCurrentRemarkP(row.remark || '')
     setCurrentRowIdP(row.id)
     setRemarkDialogOpenP(true)
   }, [])
