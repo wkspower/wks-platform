@@ -101,7 +101,7 @@ const columns = [
     editable,    // Make sure this is passed through
     type,
     format,
-    width // This will show "Apr 25", ..., "Mar 26"
+    width,
     cell: getMonthCell(field), // <-- custom cell renderer for color
   })),
   { field: 'remark', title: 'Remark', editable: true, width: 120 }, 
