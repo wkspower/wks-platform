@@ -48,4 +48,9 @@ public class MaintenanceCalculatedDataController {
 	public AOPMessageVM updateBudgetMaintenance(@RequestBody List<BudgetMaintenanceDto> budgetMaintenanceDtos){
 		return maintenanceCalculatedDataService.updateBudgetMaintenance(budgetMaintenanceDtos);		
 	}
+	
+	@GetMapping(value="/macro")
+	public AOPMessageVM getMacroData(@RequestParam Double value, @RequestParam String year,@RequestParam String plantId){
+		return maintenanceCalculatedDataService.getMacroData(value,year,plantId);		
+	}
 }

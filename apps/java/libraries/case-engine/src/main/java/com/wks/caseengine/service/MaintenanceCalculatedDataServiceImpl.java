@@ -273,13 +273,19 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	@Override
 	public AOPMessageVM getBudgetMaintenance(String plantId, String year,String budgetCategory) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<BudgetMaintenance> budgetMaintenanceList=null;
+		
 		UUID plant=null;
-		if(plantId!=null) {
+		if(plantId!=null && (!plantId.equalsIgnoreCase("ALL"))) {
 			plant=UUID.fromString(plantId);
+			 budgetMaintenanceList	= budgetMaintenanceRepository.findByPlantIdAndAOPYear(plant,year,budgetCategory);
+		}else {
+			 budgetMaintenanceList	= budgetMaintenanceRepository.findByAOPYear(year,budgetCategory);
+			
 		}
 		List<BudgetMaintenanceDto> budgetMaintenanceDtoList = new ArrayList<BudgetMaintenanceDto>();
 		try {
-			List<BudgetMaintenance> budgetMaintenanceList	= budgetMaintenanceRepository.findByPlantIdAndAOPYear(plant,year,budgetCategory);
+			
 			for(BudgetMaintenance budgetMaintenance:budgetMaintenanceList) {
 				BudgetMaintenanceDto budgetMaintenanceDto = new BudgetMaintenanceDto();
 				budgetMaintenanceDto.setAopYear(budgetMaintenance.getAopYear());
@@ -376,6 +382,67 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		budgetMaintenance.setUpdatedBy(Utility.getUserName());
 		return budgetMaintenanceRepository.save(budgetMaintenance);
 	}
+
+	@Override
+	public AOPMessageVM getMacroData(Double value, String year,String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		
+		Map<String,Object> map=new HashMap<String,Object>();
+		try {
+			Double obj=getData( value,  year, plantId);
+				map.put("macroValue",obj);
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(map);
+		aopMessageVM.setMessage(plantId);
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	public Double getData(Double value, String aopYear, String plantId) {
+	    try {
+	    	String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	        
+	        String storedProcedure = "MacroTest";
+	        if (!"MEG".equalsIgnoreCase(verticalName)) {
+	            storedProcedure = verticalName + "_" + site.getName() + "_MacroTest";
+	        }
+	        
+	        String sql = "EXEC " + storedProcedure
+	                     + " @value = :value, @aopYear = :aopYear";
+	        
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("value", value);
+	        query.setParameter("aopYear", aopYear);
+	        
+	        Object singleResult = query.getSingleResult();  // expect exactly one result
+	        
+	        if (singleResult == null) {
+	            return null;
+	        }
+	        
+	        // Depending on what your database/stored proc returns, it may be a BigDecimal, Double, Number etc.
+	        if (singleResult instanceof Number) {
+	            return ((Number) singleResult).doubleValue();
+	        } else {
+	            // Unexpected type; try converting
+	            return Double.parseDouble(singleResult.toString());
+	        }
+	        
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
+	
+	
 	
 	
 

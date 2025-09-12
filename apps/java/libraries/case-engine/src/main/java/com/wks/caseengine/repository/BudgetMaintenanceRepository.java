@@ -21,6 +21,13 @@ public interface BudgetMaintenanceRepository extends JpaRepository<BudgetMainten
 	    List<BudgetMaintenance> findByPlantIdAndAOPYear(
 	        @Param("plantId") UUID plantId,
 	        @Param("aopYear") String aopYear,@Param("budgetCategory") String budgetCategory);
+	
+	@Query(
+	        value = "SELECT * FROM BudgetMaintenance bm WHERE  bm.AOPYear = :aopYear AND bm.budgetCategory = :budgetCategory",
+	        nativeQuery = true
+	    )
+	    List<BudgetMaintenance> findByAOPYear(
+	        @Param("aopYear") String aopYear,@Param("budgetCategory") String budgetCategory);
 	    
 	
 	

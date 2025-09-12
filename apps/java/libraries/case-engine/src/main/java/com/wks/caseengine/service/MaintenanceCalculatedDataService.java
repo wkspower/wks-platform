@@ -1,6 +1,8 @@
 package com.wks.caseengine.service;
 
 import java.util.List;
+
+
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
@@ -13,4 +15,5 @@ public interface MaintenanceCalculatedDataService {
 	public AOPMessageVM updateMaintenanceDataForCracker( String plantId,  String year, List<DecokePlanningDTO> decokePlanningDTOList);
 	public AOPMessageVM getBudgetMaintenance( String plantId,  String year,String budgetCategory);
 	public AOPMessageVM updateBudgetMaintenance( List<BudgetMaintenanceDto> budgetMaintenanceDtos);
+	public AOPMessageVM getMacroData( Double value,  String year,String plantId);
 }
