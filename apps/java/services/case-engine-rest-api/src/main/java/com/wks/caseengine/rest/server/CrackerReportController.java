@@ -90,6 +90,10 @@ public class CrackerReportController {
 	public AOPMessageVM getFindingSteamValuesReport(@RequestParam String mode,@RequestParam String plantId,@RequestParam String year) {
 		return crackerReportService.getFindingSteamValuesReport(mode,plantId,year);
 	}
-
+	
+	@GetMapping(value="/run-length-data-set")
+	public AOPMessageVM getRunLengthDataSet(@RequestParam String plantId,@RequestParam String year, @RequestParam String reportType) {
+		return crackerReportService.getRunLengthDataSet(plantId,year,reportType);
+	}
 
 }
