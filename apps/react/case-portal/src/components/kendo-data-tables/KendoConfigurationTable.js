@@ -945,7 +945,7 @@ const ConfigurationTable = () => {
                   loading={loading}
                   fetchData={fetchDataConstantsMnnualEntry}
                   setRows={setProductionRowsConstantsMannualEntry}
-                  configType='elastomerConstantsMannualEntry'
+                  configType='megConstantsMannualEntry'
                   groupBy='Particulars'
                   summaryEdited={summaryEdited}
                   summary={debouncedSummary}
