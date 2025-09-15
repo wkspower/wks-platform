@@ -5,6 +5,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +24,10 @@ public class ReliabilityRecordDto {
     private String initiative;
     private String outcome;
     private String recommendation;
-    private LocalDate targetDate;
+    private Date targetDate;
     private String responsible;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Date createdAt;
+    private Date updatedAt;
     private String updatedBy;
     private String remarks;
     private String aopYear;

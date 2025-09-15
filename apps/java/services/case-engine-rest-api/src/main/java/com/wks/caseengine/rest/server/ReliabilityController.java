@@ -22,6 +22,11 @@ public class ReliabilityController {
 		 return  reliabilityService.getReliabilityPerformance(plantId,year,type);
 	}
 	
+	@GetMapping(value="/reliability-records")
+	public AOPMessageVM getReliabilityRecords(@RequestParam String plantId,@RequestParam String year,@RequestParam(required=false) String type){
+		 return  reliabilityService.getReliabilityRecords(plantId,year,type);
+	}
+	
 	
   
 }
