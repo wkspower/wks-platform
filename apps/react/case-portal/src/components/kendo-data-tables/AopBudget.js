@@ -93,7 +93,7 @@ const columns = [
     const mapped = (resConsumption?.data || []).map((item, index) => ({
   ...item,
   plantName: item.plantName || item.plantName || '',
-  IsEditable: true,
+  IsEditable: item.isEditable,
   originalRemark: item.remark?.trim() || '', // add this
 }));
 setRows(mapped)
@@ -102,8 +102,8 @@ setRows(mapped)
     const resProcurement = await DataService.maintenacegetdata(keycloak, 'ProcurementBudget')
     const mappedP = (resProcurement?.data || []).map((item, index) => ({
   ...item,
-  plantName: item.plantName?.toUpperCase() || item.plantName || '',
-  IsEditable: item.IsEditable,
+  plantName: item.plantName || item.plantName || '',
+  IsEditable: item.isEditable, 
   originalRemark: item.remark?.trim() || '', // add this
 }));
 setRowsP(mappedP)
