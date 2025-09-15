@@ -491,7 +491,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 						budgetMaintenanceDto.setBudgetCategory(budgetMaintenance.getBudgetCategory());
 						budgetMaintenanceDto.setBudgetType(budgetMaintenance.getBudgetType());
 						budgetMaintenanceDto.setIsEditable(budgetMaintenance.getIsEditable());
-						budgetMaintenanceList.add(saveData(budgetMaintenance,budgetMaintenanceDto));
+						if(budgetMaintenance.getIsEditable()) {
+							budgetMaintenanceList.add(saveData(budgetMaintenance,budgetMaintenanceDto));
+						}
 					}else {
 						budgetMaintenanceDto.setSaveStatus("Failed");
 						budgetMaintenanceDto.setErrDescription("No record found with given id");
@@ -807,7 +809,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"jan\", \r\n" + //
 	            "\t\t\t\t\t\"feb\", \r\n" + //
 	            "\t\t\t\t\t\"mar\", \r\n" + //
-	            "\t\t\t\t\t\"remarks\",\r\n" + //
+	            "\t\t\t\t\t\"remark\",\r\n" + //
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
@@ -854,7 +856,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"jan\",\r\n" + //
 	            "\t\t\t\t\t\"feb\", \r\n" + //
 	            "\t\t\t\t\t\"mar\", \r\n" + //
-	            "\t\t\t\t\t\"remarks\",\r\n" + //
+	            "\t\t\t\t\t\"remark\",\r\n" + //
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
