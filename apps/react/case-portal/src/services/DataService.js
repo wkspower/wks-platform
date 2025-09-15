@@ -8,6 +8,8 @@ export const DataService = {
   getAllProducts,
   maintenacegetdata,
   savemaintenacegetdata,
+  maintenaceExportdata,
+  maintenaceImportExceldata,
   getAllProductsAll,
   getIbrPlanData,
   getShutdownActivitiesData,
@@ -2025,6 +2027,74 @@ async function savemaintenacegetdata(maintenancedetails, keycloak) {
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)
+    return await Promise.reject(e)
+  }
+} 
+async function maintenaceExportdata(keycloak,budgetCategory) {
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  let url = `${Config.CaseEngineUrl}/task/budget-maintenance-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}`
+//  if (budgetCategory) {
+//     url += `&budgetCategory=${encodeURIComponent(budgetCategory)}`
+//   }
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `maintenancebudget_${budgetCategory || 'Export'}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Spyro Input Excel:', e)
+    return Promise.reject(e)
+  }
+} 
+
+async function maintenaceImportExceldata(file, keycloak) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  const url = `${Config.CaseEngineUrl}/task/budget-maintenance-import-excel?plantId=${plantId}&year=${year}`
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return json(keycloak, resp) // assuming `json()` handles response properly
+  } catch (e) {
+    console.error('Error importing Budget Maintenance Excel:', e)
     return await Promise.reject(e)
   }
 }

@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { Select, MenuItem, Backdrop, Box, CircularProgress, Typography, Button } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useSession } from 'SessionStoreContext'
@@ -7,8 +6,6 @@ import { DataService } from 'services/DataService'
 import KendoDataTables from './index'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
-import { workbookOptions, toDataURL } from '@progress/kendo-react-excel-export'
-import { ExcelExport, ExcelExportColumn } from '@progress/kendo-react-excel-export'
 import { validateFields } from 'utils/validationUtils'
 export default function AopBudget() {
   const keycloak = useSession()
@@ -16,11 +13,11 @@ export default function AopBudget() {
 
   const [row, setRows] = useState([])
   const [loading, setLoading] = useState(false)
-
+  const [openSaveDialog, setOpenSaveDialog] = useState(false)
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [modifiedCells, setModifiedCells] = useState({})
+  const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -28,8 +25,6 @@ export default function AopBudget() {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const consumptionExportRef = useRef(null)
-  const procurementExportRef = useRef(null)
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   // second grid states
@@ -37,18 +32,13 @@ export default function AopBudget() {
   const [remarkDialogOpenP, setRemarkDialogOpenP] = useState(false)
   const [currentRemarkP, setCurrentRemarkP] = useState('')
   const [currentRowIdP, setCurrentRowIdP] = useState(null)
-  const [modifiedCellsP, setModifiedCellsP] = useState({})
+  const [modifiedCellsP, setModifiedCellsP] =  React.useState({})
   const [enableSaveAddBtnP, setEnableSaveAddBtnP] = useState(false)
-  const [rowsConsumption, setRowsConsumption] = useState([]);
-  const [rowsProcurement, setRowsProcurement] = useState([]);
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
-  const unsavedChangesRef = useRef({ unsavedRows: {}, rowsBeforeChange: {} })
-
   const oldYearLabel = useMemo(() => {
     if (!thisYear || !thisYear.includes('-')) return ''
     const [start, end] = thisYear.split('-').map(Number)
@@ -63,10 +53,6 @@ export default function AopBudget() {
       return ''
     }
   }, [])
-/*width: 120,
-      type: 'number',
-      format: '{0:#.###}',
-      editable: false, */
 const monthFields = [
   { field: 'apr', index: 4, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
   { field: 'may', index: 5, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
@@ -82,15 +68,6 @@ const monthFields = [
   { field: 'mar', index: 3, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
 ]
 
-// Custom cell renderer for month fields: green if >0, red if <0, black otherwise
-const getMonthCell = (field) => (props) => {
-  const value = props.dataItem[field];
-  let color = 'black';
-  if (value > 0) color = 'green';
-  else if (value < 0) color = 'red';
-  return <span style={{ color }}>{value}</span>;
-};
-
 const columns = [
   { field: 'plantName', title: 'Plant', width: 120,},
   { field: 'costName', title: 'Cost', width: 120,},
@@ -102,7 +79,6 @@ const columns = [
     type,
     format,
     width,
-    cell: getMonthCell(field), // <-- custom cell renderer for color
   })),
   { field: 'remark', title: 'Remark', editable: true, width: 120 }, 
 ]
@@ -116,7 +92,7 @@ const columns = [
     const resConsumption = await DataService.maintenacegetdata(keycloak, 'ConsumptionBudget')
     const mapped = (resConsumption?.data || []).map((item, index) => ({
   ...item,
-  plantName: plantName || item.plantName || '',
+  plantName: item.plantName || item.plantName || '',
   IsEditable: true,
   originalRemark: item.remark?.trim() || '', // add this
 }));
@@ -126,13 +102,11 @@ setRows(mapped)
     const resProcurement = await DataService.maintenacegetdata(keycloak, 'ProcurementBudget')
     const mappedP = (resProcurement?.data || []).map((item, index) => ({
   ...item,
-  plantName: plantName || item.plantName || '',
-  IsEditable: true
+  plantName: item.plantName?.toUpperCase() || item.plantName || '',
+  IsEditable: item.IsEditable,
   originalRemark: item.remark?.trim() || '', // add this
 }));
 setRowsP(mappedP)
-console.log('Consumption rows:', mapped);
-console.log('Procurement rows:', mappedP);
   } catch (err) {
     console.error('fetchData error', err)
     setRows([])
@@ -146,26 +120,6 @@ useEffect(() => {
   fetchData()
 }, [fetchData, yearChanged, plantID,keycloak])
   const year = thisYear
-
-useEffect(() => { console.log('row', row); }, [row]);
-useEffect(() => { console.log('rowsP', rowsP); }, [rowsP]);
-
-  const saveChanges = useCallback(async () => {
-    try {
-      setLoading(true)
-      const data = Object.values(modifiedCells)
-      if (!data.length) {
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setSnackbarOpen(true)
-        return
-      }
-      // save logic...
-    } finally {
-      setSnackbarOpen(true)
-      setLoading(false)
-    }
-  }, [modifiedCells])
-
   const handleCalculate = () => {}
   const handleCalculateP = () => {}
 
@@ -198,7 +152,7 @@ useEffect(() => { console.log('rowsP', rowsP); }, [rowsP]);
 
   const adjustedPermissionsP = getAdjustedPermissionsP(
     {
-      saveBtn: false,
+      saveBtn: true,
       allAction: true,
       showTitleNameBusiness: true,
       titleName: 'Procurment Budget',
@@ -228,66 +182,18 @@ useEffect(() => { console.log('rowsP', rowsP); }, [rowsP]);
   const adjustedPermissionsC = getAdjustedPermissionsC(
     {
       allAction: true,
-      saveBtn: false,
+      saveBtn: true,
       showTitleNameBusiness: true,
-
       titleName: 'Consumption Budget',
-
       adjustedPermissions: true,
       // downloadExcelBtnFromUI: true,
-      downloadExcelBtn: false,
-      uploadExcelBtn: false,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
     },
     isOldYear,
   )
 
- const handleCustomExport = () => {
-  // Get workbook options from both refs
-  const consumptionOptions = consumptionExportRef.current?.workbookOptions()
-  const procurementOptions = procurementExportRef.current?.workbookOptions()
-
-  if (!consumptionOptions?.sheets?.[0] && !procurementOptions?.sheets?.[0]) {
-    alert('No data to export!')
-    return
-  }
-
-  // Build a single sheet with both grids separated by a blank row and a title row
-  const allRows = []
-
-  if (consumptionOptions?.sheets?.[0]) {
-    allRows.push({
-      cells: [{ value: 'Consumption Budget', bold: true, fontSize: 14 }, ...columns.slice(1).map(() => ({ value: '' }))],
-    })
-    allRows.push(...consumptionOptions.sheets[0].rows)
-    allRows.push({ cells: columns.map(() => ({ value: '' })) }) // blank row
-  }
-
-  if (procurementOptions?.sheets?.[0]) {
-    allRows.push({
-      cells: [{ value: 'Procurement Budget', bold: true, fontSize: 14 }, ...columns.slice(1).map(() => ({ value: '' }))],
-    })
-    allRows.push(...procurementOptions.sheets[0].rows)
-  }
-
-  const options = {
-    sheets: [
-      {
-        title: 'AOP Budget',
-        rows: allRows,
-      },
-    ],
-  }
-
-  toDataURL(options).then((dataURL) => {
-    const link = document.createElement('a')
-    link.href = dataURL
-    link.download = `AopBudget.xlsx`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  })
-}
 function omitFields(obj, fields) {
   const result = { ...obj }
   fields.forEach(field => {
@@ -347,45 +253,96 @@ const handleSaveAll = async () => {
     setLoading(false)
   }
 }
+const downloadExcelForConfiguration = async () => {
+  setLoading(true)
+  const storedplant=localStorage.getItem('selectedPlant')
+  try {
+     await DataService.maintenaceExportdata(
+      keycloak,
+    )
+
+    setSnackbarData({ message: 'Export started!', severity: 'success' })
+    setSnackbarOpen(true)
+  } catch (err) {
+    setSnackbarData({ message: 'Export failed!', severity: 'error' })
+    setSnackbarOpen(true)
+  } finally {
+    setLoading(false)
+  }
+}
+ const budgetMaintenanceExcelFile = async (rawFile) => {
+    setLoading(true)
+
+    try {
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const plantId = storedPlant ? JSON.parse(storedPlant)?.id : ''
+      let response
+
+      response = await DataService.maintenaceImportExceldata(
+        rawFile,
+        keycloak
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File - budgetMaintenance.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error uploading Budget Maintenance Excel:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Unexpected error occurred!',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExcelUpload = (rawFile) => {
+    budgetMaintenanceExcelFile(rawFile)
+  }
   return (
     <Box>
-      <div style={{ display: 'none' }}>
-  <ExcelExport
-    ref={consumptionExportRef}
-    data={row}
-    fileName="AopBudget.xlsx"
-  >
-    {columns.map(col => (
-      <ExcelExportColumn key={col.field} field={col.field} title={col.title} />
-    ))}
-  </ExcelExport>
-  <ExcelExport
-    ref={procurementExportRef}
-    data={rowsP}
-    fileName="AopBudget.xlsx"
-  >
-    {columns.map(col => (
-      <ExcelExportColumn key={col.field} field={col.field} title={col.title} />
-    ))}
-  </ExcelExport>
-</div>
-     <Box display="flex" justifyContent="flex-end" gap={2} mb={2}>
-  <Button
-    variant="contained"
-    onClick={handleCustomExport}
-    className="btn-save"
-  >
-    Export
-  </Button>
-  <Button
-    variant="contained"
-    onClick={handleSaveAll}
-    className="btn-save"
-    disabled={loading}
-  >
-    Save
-  </Button>
-</Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
@@ -409,9 +366,13 @@ const handleSaveAll = async () => {
         currentRowId={currentRowId}
         setCurrentRowId={setCurrentRowId}
         enableSaveAddBtn={enableSaveAddBtn}
-        // saveChanges={saveChanges}
+        saveChanges={handleSaveAll}
         handleCalculate={handleCalculate}
         handleRemarkCellClick={handleRemarkCellClick}
+        handleExcelUpload={handleExcelUpload}
+        downloadExcelForConfiguration={
+                      downloadExcelForConfiguration
+                    }
         permissions={adjustedPermissionsC}
         groupBy='budgetType'
        
@@ -432,13 +393,12 @@ const handleSaveAll = async () => {
         currentRowId={currentRowIdP}
         setCurrentRowId={setCurrentRowIdP}
         enableSaveAddBtn={enableSaveAddBtnP}
-        // saveChanges={saveChangesP}
+        saveChanges={handleSaveAll}
         handleCalculate={handleCalculateP}
         handleRemarkCellClick={handleRemarkCellClickP}
         permissions={adjustedPermissionsP}
         groupBy='budgetType'
       />
-
       <Notification
         open={snackbarOpen}
         message={snackbarData.message}

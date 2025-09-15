@@ -75,6 +75,12 @@ export default function PlantContributionLastFourYears() {
           if (key === 'ProductionCostCalculations' && index >= arr.length - 6 && verticalName==='meg') {
             isBold = true
           }
+          if (key === 'CatChem' && index >= arr.length - 2 && verticalName==='meg'){
+            isBold = true
+          }
+          if( key === 'Utilities' && index>= arr.length -2 && verticalName==='meg'){
+            isBold = true
+          }
           if (key === 'OtherVariableCost' && index >= arr.length - 2 && verticalName==='meg') {
             isBold = true
       }
