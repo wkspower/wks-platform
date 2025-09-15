@@ -9,13 +9,19 @@ import jakarta.persistence.Query;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.wks.caseengine.dto.ReliabilityPerformanceDto;
 import com.wks.caseengine.dto.ReliabilityRecordDto;
+import com.wks.caseengine.entity.ReliabilityPerformance;
+import com.wks.caseengine.entity.ReliabilityRecords;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ReliabilityPerformanceRepository;
+import com.wks.caseengine.repository.ReliabilityRecordsRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class ReliabilityServiceImpl implements ReliabilityService{
@@ -25,6 +31,12 @@ public class ReliabilityServiceImpl implements ReliabilityService{
 	 
 	 @Autowired
 	 private PlantsRepository plantsRepository;
+	 
+	 @Autowired
+	 private ReliabilityPerformanceRepository reliabilityPerformanceRepository;
+	 
+	 @Autowired
+	 private ReliabilityRecordsRepository reliabilityRecordsRepository;
 
 	 @Override
 	 public AOPMessageVM getReliabilityPerformance(String plantId, String year, String type) {
@@ -259,5 +271,68 @@ public class ReliabilityServiceImpl implements ReliabilityService{
         List<Object[]> resultList = q.getResultList();
         return resultList;
     }
+
+	@Override
+	public AOPMessageVM updateReliabilityPerformance(List<ReliabilityPerformanceDto> reliabilityPerformanceDtos) {
+		List<ReliabilityPerformance> reliabilityPerformances = new ArrayList<ReliabilityPerformance>();
+		try {	
+			for(ReliabilityPerformanceDto reliabilityPerformanceDto:reliabilityPerformanceDtos) {
+				Optional<ReliabilityPerformance> reliabilityPerformanceOpt = reliabilityPerformanceRepository.findById(reliabilityPerformanceDto.getId());
+				if(reliabilityPerformanceOpt.isPresent()) {
+					ReliabilityPerformance reliabilityPerformance = reliabilityPerformanceOpt.get();
+					reliabilityPerformance.setActual(reliabilityPerformanceDto.getActual());
+					reliabilityPerformance.setAop(reliabilityPerformanceDto.getAop());
+					reliabilityPerformance.setBestAchieved(reliabilityPerformanceDto.getBestAchieved());
+					reliabilityPerformance.setLimit(reliabilityPerformanceDto.getLimit());
+					reliabilityPerformance.setPlann(reliabilityPerformanceDto.getPlann());
+					reliabilityPerformance.setRationale(reliabilityPerformanceDto.getRationale());
+					reliabilityPerformance.setRemarks(reliabilityPerformanceDto.getRemarks());
+					reliabilityPerformance.setUpdatedAt(new Date());
+					reliabilityPerformance.setUpdatedBy(Utility.getUserName());
+					reliabilityPerformances.add(reliabilityPerformanceRepository.save(reliabilityPerformance));
+					
+				}
+			}
+		}catch (Exception ex) {
+	         throw new RuntimeException("Failed to update data", ex);
+	     }
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(reliabilityPerformances);
+		aopMessageVM.setMessage("Data updated successfully");
+		return aopMessageVM;
+		
+	}
+
+	@Override
+	public AOPMessageVM updateReliabilityRecords(List<ReliabilityRecordDto> reliabilityRecordDtos) {
+		List<ReliabilityRecords> reliabilityRecordsList= new ArrayList<ReliabilityRecords>();
+		try {
+			for(ReliabilityRecordDto reliabilityRecordDto:reliabilityRecordDtos) {
+				Optional<ReliabilityRecords> reliabilityRecordsOpt	= reliabilityRecordsRepository.findById(reliabilityRecordDto.getId());
+				if(reliabilityRecordsOpt.isPresent()) {
+					ReliabilityRecords reliabilityRecords = reliabilityRecordsOpt.get();
+					reliabilityRecords.setIncidentDescription(reliabilityRecordDto.getIncidentDescription());
+					reliabilityRecords.setRootCauseAnalysis(reliabilityRecordDto.getRootCauseAnalysis());
+					reliabilityRecords.setInitiative(reliabilityRecordDto.getInitiative());
+					reliabilityRecords.setOutcome(reliabilityRecordDto.getOutcome());
+					reliabilityRecords.setRecommendation(reliabilityRecordDto.getRecommendation());
+					reliabilityRecords.setTargetDate(reliabilityRecordDto.getTargetDate());
+					reliabilityRecords.setResponsible(reliabilityRecordDto.getResponsible());
+					reliabilityRecords.setRemarks(reliabilityRecordDto.getRemarks());
+					reliabilityRecords.setUpdatedAt(new Date());
+					reliabilityRecords.setUpdatedBy(Utility.getUserName());
+					reliabilityRecordsList.add(reliabilityRecordsRepository.save(reliabilityRecords));
+				}	
+			}
+		}catch (Exception ex) {
+	         throw new RuntimeException("Failed to update data", ex);
+	     }
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(reliabilityRecordsList);
+		aopMessageVM.setMessage("Data updated successfully");
+		return aopMessageVM;
+	}
 
 }

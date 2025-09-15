@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -42,16 +43,16 @@ public class ReliabilityRecords {
     private String recommendation;
 
     @Column(name = "TargetDate")
-    private LocalDate targetDate;
+    private Date targetDate;
 
     @Column(name = "Responsible")
     private String responsible;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
     @Column(name = "updated_by")
     private String updatedBy;
