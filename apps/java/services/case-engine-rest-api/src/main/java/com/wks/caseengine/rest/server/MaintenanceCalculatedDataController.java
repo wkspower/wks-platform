@@ -3,12 +3,18 @@ package com.wks.caseengine.rest.server;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
@@ -48,6 +54,38 @@ public class MaintenanceCalculatedDataController {
 	public AOPMessageVM updateBudgetMaintenance(@RequestBody List<BudgetMaintenanceDto> budgetMaintenanceDtos){
 		return maintenanceCalculatedDataService.updateBudgetMaintenance(budgetMaintenanceDtos);		
 	}
+	
+	@GetMapping(value = "/budget-maintenance-export-excel")
+	public ResponseEntity<byte[]> exportBudgetMaintenance(
+	         @RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(required = false) String budgetCategory) {
+	    try {
+			byte[] excelBytes = maintenanceCalculatedDataService.createExcel(year,plantId,false, null);
+	       // byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId), false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("budget-maintenance.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
+	@PostMapping(value = "/budget-maintenance-import-excel", consumes = "multipart/form-data")
+	public AOPMessageVM importExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestParam(value = "budgetCategory", required = false) String budgetCategory,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	maintenanceCalculatedDataService.importExcel(year, plantId, budgetCategory, file); 
+	}
+
 	
 	@GetMapping(value="/macro")
 	public AOPMessageVM getMacroData(@RequestParam Double value, @RequestParam String year,@RequestParam String plantId){

@@ -7,5 +7,7 @@ public interface ExcelUtilityService {
     
      byte[]  generateFlexibleExcel(Map<String, Object> structure, Map<String, List<List<Object>>> data) ;
      List<String>  getAcademicYearMonths(String year);
+     byte[]  generateFlexibleExcelForBudgetMaintenance(Map<String, Object> structure, Map<String, List<List<Object>>> data) ;
+     
 
 }

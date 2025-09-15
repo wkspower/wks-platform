@@ -60,5 +60,9 @@ public class BudgetMaintenanceDto {
 	private String updatedBy;
 	
 	private Date modifiedOn;
+	
+	private String saveStatus;
+	private String errDescription;
+	 private String tableId;
 }
 

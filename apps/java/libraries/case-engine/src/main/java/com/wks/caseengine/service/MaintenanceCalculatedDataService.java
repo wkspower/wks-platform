@@ -1,7 +1,9 @@
 package com.wks.caseengine.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
@@ -16,4 +18,7 @@ public interface MaintenanceCalculatedDataService {
 	public AOPMessageVM getBudgetMaintenance( String plantId,  String year,String budgetCategory);
 	public AOPMessageVM updateBudgetMaintenance( List<BudgetMaintenanceDto> budgetMaintenanceDtos);
 	public AOPMessageVM getMacroData( Double value,  String year,String plantId);
+	byte[] createExcel(String year, String plantId,  boolean isAfterSave,
+			Map<String, List<BudgetMaintenanceDto>> mapForExcel);
+	AOPMessageVM importExcel(String year, String plantFKId, String budgetCategory, MultipartFile file);
 }
