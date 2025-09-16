@@ -242,7 +242,7 @@ public class ReliabilityServiceImpl implements ReliabilityService{
         String sql = "SELECT id, row_no, parameter, uom, best_achieved, aop, actual, plann, [limit], rationale, " +
                      "created_at, updated_at, updated_by, remarks, aopYear, plantId, reportType " +
                      "FROM " + viewName + " " +
-                     "WHERE aopYear = :aopYear AND plantId = :plantId and reportType = :reportType";
+                     "WHERE aopYear = :aopYear AND plantId = :plantId and reportType = :reportType order by row_no";
 
         Query q = entityManager.createNativeQuery(sql);
         q.setParameter("aopYear", aopYear);
