@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Select, MenuItem, Backdrop, Box, CircularProgress, Typography, Button } from '@mui/material'
+import {
+  Select,
+  MenuItem,
+  Backdrop,
+  Box,
+  CircularProgress,
+  Typography,
+  Button,
+} from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useSession } from 'SessionStoreContext'
 import { DataService } from 'services/DataService'
@@ -32,7 +40,7 @@ export default function AopBudget() {
   const [remarkDialogOpenP, setRemarkDialogOpenP] = useState(false)
   const [currentRemarkP, setCurrentRemarkP] = useState('')
   const [currentRowIdP, setCurrentRowIdP] = useState(null)
-  const [modifiedCellsP, setModifiedCellsP] =  React.useState({})
+  const [modifiedCellsP, setModifiedCellsP] = React.useState({})
   const [enableSaveAddBtnP, setEnableSaveAddBtnP] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -53,72 +61,162 @@ export default function AopBudget() {
       return ''
     }
   }, [])
-const monthFields = [
-  { field: 'apr', index: 4, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'may', index: 5, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'jun', index: 6, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'jul', index: 7, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'aug', index: 8, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'sep', index: 9, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'oct', index: 10, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'nov', index: 11, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'dec', index: 12, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'jan', index: 1, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'feb', index: 2, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-  { field: 'mar', index: 3, editable: true, type: 'number',format: '{0:#.###}',width: 120 },
-]
+  const monthFields = [
+    {
+      field: 'apr',
+      index: 4,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'may',
+      index: 5,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'jun',
+      index: 6,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'jul',
+      index: 7,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'aug',
+      index: 8,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'sep',
+      index: 9,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'oct',
+      index: 10,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'nov',
+      index: 11,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'dec',
+      index: 12,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'jan',
+      index: 1,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'feb',
+      index: 2,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+    {
+      field: 'mar',
+      index: 3,
+      editable: true,
+      type: 'number',
+      format: '{0:#.###}',
+      width: 120,
+    },
+  ]
 
-const columns = [
-  { field: 'plantName', title: 'Plant', width: 120,},
-  { field: 'costName', title: 'Cost', width: 120,},
-  { field: 'budgetType', title: 'Budget Type', width: 120,hidden: true},
-  ...monthFields.map(({ field, index, editable, type, format, width }) => ({
-    field,
-    title: headerMap[index],
-    editable,    // Make sure this is passed through
-    type,
-    format,
-    width,
-  })),
-  { field: 'remark', title: 'Remark', editable: true, width: 120 }, 
-]
+  const columns = [
+    { field: 'plantName', title: 'Plant', width: 120 },
+    { field: 'costName', title: 'Cost', width: 120 },
+    { field: 'budgetType', title: 'Budget Type', width: 120, hidden: true },
+    ...monthFields.map(({ field, index, editable, type, format, width }) => ({
+      field,
+      title: headerMap[index],
+      editable, // Make sure this is passed through
+      type,
+      format,
+      width,
+    })),
+    { field: 'remark', title: 'Remark', editable: true, width: 120 },
+  ]
   const fetchData = useCallback(async () => {
-  setLoading(true)
-  try {
-    const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-    const plantName = plantObject?.name
+    setLoading(true)
+    try {
+      const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
+      const plantName = plantObject?.name
 
-    // Fetch for Consumption Budget
-    const resConsumption = await DataService.maintenacegetdata(keycloak, 'ConsumptionBudget')
-    const mapped = (resConsumption?.data || []).map((item, index) => ({
-  ...item,
-  plantName: item.plantName || item.plantName || '',
-  IsEditable: item.isEditable,
-  originalRemark: item.remark?.trim() || '', // add this
-}));
-setRows(mapped)
+      // Fetch for Consumption Budget
+      const resConsumption = await DataService.maintenacegetdata(
+        keycloak,
+        'ConsumptionBudget',
+      )
+      const mapped = (resConsumption?.data || []).map((item, index) => ({
+        ...item,
+        plantName: item.plantName || item.plantName || '',
+        IsEditable: item.isEditable,
+        originalRemark: item.remark?.trim() || '', // add this
+      }))
+      setRows(mapped)
 
-    // Fetch for Procurement Budget
-    const resProcurement = await DataService.maintenacegetdata(keycloak, 'ProcurementBudget')
-    const mappedP = (resProcurement?.data || []).map((item, index) => ({
-  ...item,
-  plantName: item.plantName || item.plantName || '',
-  IsEditable: item.isEditable, 
-  originalRemark: item.remark?.trim() || '', // add this
-}));
-setRowsP(mappedP)
-  } catch (err) {
-    console.error('fetchData error', err)
-    setRows([])
-    setRowsP([])
-  } finally {
-    setLoading(false)
-  }
-}, [keycloak, yearChanged, plantID])
+      // Fetch for Procurement Budget
+      const resProcurement = await DataService.maintenacegetdata(
+        keycloak,
+        'ProcurementBudget',
+      )
+      const mappedP = (resProcurement?.data || []).map((item, index) => ({
+        ...item,
+        plantName: item.plantName || item.plantName || '',
+        IsEditable: item.isEditable,
+        originalRemark: item.remark?.trim() || '', // add this
+      }))
+      setRowsP(mappedP)
+    } catch (err) {
+      console.error('fetchData error', err)
+      setRows([])
+      setRowsP([])
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak, yearChanged, plantID])
 
-useEffect(() => {
-  fetchData()
-}, [fetchData, yearChanged, plantID,keycloak])
+  useEffect(() => {
+    fetchData()
+  }, [fetchData, yearChanged, plantID, keycloak])
   const year = thisYear
   const handleCalculate = () => {}
   const handleCalculateP = () => {}
@@ -194,83 +292,78 @@ useEffect(() => {
     isOldYear,
   )
 
-function omitFields(obj, fields) {
-  const result = { ...obj }
-  fields.forEach(field => {
-    delete result[field]
-  })
-  return result
-}
-const handleSaveAll = async () => {
-  setLoading(true)
-  try {
-    // Get modified rows for both grids
-    const consumptionData = Object.values(modifiedCells)
-    const procurementData = Object.values(modifiedCellsP)
-
-    if (!consumptionData.length && !procurementData.length) {
-      setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-      setSnackbarOpen(true)
-      setLoading(false)
-      return
-    }
-     const requiredFields = ['remark']
-    const validationMessageC = validateFields(consumptionData, requiredFields)
-    const validationMessageP = validateFields(procurementData, requiredFields)
-    if (validationMessageC || validationMessageP) {
-      setSnackbarData({ 
-        message: validationMessageC || validationMessageP, 
-        severity: 'error' 
-      })
-      setSnackbarOpen(true)
-      setLoading(false)
-      return
-    }
-    // Fields to omit from payload
-    const fieldsToOmit = [
-      'isEditable',
-      'IsEditable'
-    ]
-
-    // Combine and clean all modified rows
-    const allRows = [
-      ...consumptionData.map(row => omitFields(row, fieldsToOmit)),
-      ...procurementData.map(row => omitFields(row, fieldsToOmit))
-    ]
-
-    // Send as array payload
-    await DataService.savemaintenacegetdata(allRows, keycloak)
-
-    setSnackbarData({ message: 'Saved successfully!', severity: 'success' })
-    setSnackbarOpen(true)
-    setModifiedCells({})      // <-- clear modified cells for Consumption
-    setModifiedCellsP({})
-    fetchData()
-  } catch (err) {
-    setSnackbarData({ message: 'Save failed!', severity: 'error' })
-    setSnackbarOpen(true)
-  } finally {
-    setLoading(false)
+  function omitFields(obj, fields) {
+    const result = { ...obj }
+    fields.forEach((field) => {
+      delete result[field]
+    })
+    return result
   }
-}
-const downloadExcelForConfiguration = async () => {
-  setLoading(true)
-  const storedplant=localStorage.getItem('selectedPlant')
-  try {
-     await DataService.maintenaceExportdata(
-      keycloak,
-    )
+  const handleSaveAll = async () => {
+    setLoading(true)
+    try {
+      // Get modified rows for both grids
+      const consumptionData = Object.values(modifiedCells)
+      const procurementData = Object.values(modifiedCellsP)
 
-    setSnackbarData({ message: 'Export started!', severity: 'success' })
-    setSnackbarOpen(true)
-  } catch (err) {
-    setSnackbarData({ message: 'Export failed!', severity: 'error' })
-    setSnackbarOpen(true)
-  } finally {
-    setLoading(false)
+      if (!consumptionData.length && !procurementData.length) {
+        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+        setSnackbarOpen(true)
+        setLoading(false)
+        return
+      }
+      const requiredFields = ['remark']
+      const validationMessageC = validateFields(consumptionData, requiredFields)
+      const validationMessageP = validateFields(procurementData, requiredFields)
+      if (validationMessageC || validationMessageP) {
+        setSnackbarData({
+          message: validationMessageC || validationMessageP,
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        setLoading(false)
+        return
+      }
+      // Fields to omit from payload
+      const fieldsToOmit = ['isEditable', 'IsEditable']
+
+      // Combine and clean all modified rows
+      const allRows = [
+        ...consumptionData.map((row) => omitFields(row, fieldsToOmit)),
+        ...procurementData.map((row) => omitFields(row, fieldsToOmit)),
+      ]
+
+      // Send as array payload
+      await DataService.savemaintenacegetdata(allRows, keycloak)
+
+      setSnackbarData({ message: 'Saved successfully!', severity: 'success' })
+      setSnackbarOpen(true)
+      setModifiedCells({}) // <-- clear modified cells for Consumption
+      setModifiedCellsP({})
+      fetchData()
+    } catch (err) {
+      setSnackbarData({ message: 'Save failed!', severity: 'error' })
+      setSnackbarOpen(true)
+    } finally {
+      setLoading(false)
+    }
   }
-}
- const budgetMaintenanceExcelFile = async (rawFile) => {
+  const downloadExcelForConfiguration = async () => {
+    setLoading(true)
+    const storedplant = localStorage.getItem('selectedPlant')
+    try {
+      await DataService.maintenaceExportdata(keycloak)
+
+      setSnackbarData({ message: 'Export started!', severity: 'success' })
+      setSnackbarOpen(true)
+    } catch (err) {
+      setSnackbarData({ message: 'Export failed!', severity: 'error' })
+      setSnackbarOpen(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+  const budgetMaintenanceExcelFile = async (rawFile) => {
     setLoading(true)
 
     try {
@@ -278,10 +371,7 @@ const downloadExcelForConfiguration = async () => {
       const plantId = storedPlant ? JSON.parse(storedPlant)?.id : ''
       let response
 
-      response = await DataService.maintenaceImportExceldata(
-        rawFile,
-        keycloak
-      )
+      response = await DataService.maintenaceImportExceldata(rawFile, keycloak)
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -341,6 +431,10 @@ const downloadExcelForConfiguration = async () => {
   const handleExcelUpload = (rawFile) => {
     budgetMaintenanceExcelFile(rawFile)
   }
+
+  const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
+  const plantName = plantObject?.name
+
   return (
     <Box>
       <Backdrop
@@ -349,6 +443,13 @@ const downloadExcelForConfiguration = async () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      {plantName?.toLowerCase() === 'eoeg' && (
+        <Typography component='div' className='grid-title'>
+          <div>Planning Plant : 40N0 </div>
+          <div>Maintenance Plant : 40N3</div>
+        </Typography>
+      )}
 
       <KendoDataTables
         title='Consumption Budget'
@@ -370,12 +471,9 @@ const downloadExcelForConfiguration = async () => {
         handleCalculate={handleCalculate}
         handleRemarkCellClick={handleRemarkCellClick}
         handleExcelUpload={handleExcelUpload}
-        downloadExcelForConfiguration={
-                      downloadExcelForConfiguration
-                    }
+        downloadExcelForConfiguration={downloadExcelForConfiguration}
         permissions={adjustedPermissionsC}
         groupBy='budgetType'
-       
       />
 
       <KendoDataTables

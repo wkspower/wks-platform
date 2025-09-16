@@ -49,18 +49,26 @@ import {
 } from '../../../node_modules/@progress/kendo-react-excel-export/index'
 import { useSelector } from 'react-redux'
 import { Checkbox } from '../../../node_modules/@progress/kendo-react-inputs/index'
+import LimitCellEditor from './Utilities-Kendo/LimitCellEditor'
 
 export const dateFields = [
   'maintStartDateTime',
   'maintEndDateTime',
   'periodTo',
   'periodFrom',
-
   'toDateReport',
   'fromDateReport',
 ]
 export const dateFields2 = ['fromDate', 'toDate']
-export const dateFields1 = ['ibrSD', 'ibrED', 'taSD', 'taED', 'sdED', 'sdSD']
+export const dateFields1 = [
+  'ibrSD',
+  'ibrED',
+  'taSD',
+  'taED',
+  'sdED',
+  'sdSD',
+  'targetDate',
+]
 
 export const hiddenFields = []
 export const monthMap = {
@@ -1138,6 +1146,7 @@ const KendoDataTables = ({
                             'taED',
                             'sdED',
                             'sdSD',
+                            'targetDate',
                           ].includes(col.field)
                             ? DateOnlyPicker
                             : DateOnlyPicker,
@@ -1160,6 +1169,7 @@ const KendoDataTables = ({
                           'taED',
                           'sdED',
                           'sdSD',
+                          'targetDate',
                         ].includes(col.field)
                           ? '{0:dd-MM-yyyy}'
                           : '{0:dd-MM-yyyy}'
@@ -1167,6 +1177,23 @@ const KendoDataTables = ({
                       editor='date'
                       hidden={col.hidden}
                       columnMenu={DateColumnMenu}
+                    />
+                  )
+                }
+                if (col?.field === 'limit') {
+                  return (
+                    <GridColumn
+                      key='limit'
+                      field='limit'
+                      width={80}
+                      title={col.title}
+                      editable={col.editable || true}
+                      cells={{
+                        data: (cellProps) => <LimitCellEditor {...cellProps} />,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                      headerClassName={isActive ? 'active-column' : ''}
                     />
                   )
                 }

@@ -13,10 +13,13 @@ export const ProductionVolumeDataApiService = {
   getProductionVolExcel,
 }
 
-async function editAOPMCCalculatedData(plantId, turnAroundDetails, keycloak) {
-  const year = localStorage.getItem('year')
-
-  const url = `${Config.CaseEngineUrl}/task/production-target?plantId=${plantId}&year=${year}`
+async function editAOPMCCalculatedData(
+  turnAroundDetails,
+  PLANT_ID,
+  AOP_YEAR,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/production-target?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -35,9 +38,13 @@ async function editAOPMCCalculatedData(plantId, turnAroundDetails, keycloak) {
   }
 }
 
-async function editDesignCapacityData(plantId, designCapacityData, keycloak) {
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/design-capacity?plantId=${plantId}&year=${year}`
+async function editDesignCapacityData(
+  designCapacityData,
+  PLANT_ID,
+  AOP_YEAR,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/design-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -56,15 +63,8 @@ async function editDesignCapacityData(plantId, designCapacityData, keycloak) {
   }
 }
 
-async function getAOPMCCalculatedData(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/production-target?plantId=${plantId}&year=${year}`
+async function getAOPMCCalculatedData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/production-target?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -79,10 +79,8 @@ async function getAOPMCCalculatedData(keycloak) {
   }
 }
 
-async function getDesignCapacityData(keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/design-capacity?plantId=${plantId}&year=${year}`
+async function getDesignCapacityData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/design-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -96,10 +94,8 @@ async function getDesignCapacityData(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getMaxAchievedCapacityData(keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/max-achieved-capacity?plantId=${plantId}&year=${year}`
+async function getMaxAchievedCapacityData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/max-achieved-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -113,9 +109,8 @@ async function getMaxAchievedCapacityData(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function handleCalculateProductionVolData(plantId, year, keycloak) {
-  const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/calculate-production-target?year=${year1}&plantId=${plantId}`
+async function handleCalculateProductionVolData(PLANT_ID, AOP_YEAR, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-production-target?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -135,15 +130,8 @@ async function handleCalculateProductionVolData(plantId, year, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getDesignCapacityExcel(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${year}&plantId=${plantId}`
+async function getDesignCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -172,15 +160,8 @@ async function getDesignCapacityExcel(keycloak) {
   }
 }
 
-async function getMaxAchievedCapacityExcel(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${year}&plantId=${plantId}`
+async function getMaxAchievedCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -208,15 +189,8 @@ async function getMaxAchievedCapacityExcel(keycloak) {
     return Promise.reject(e)
   }
 }
-async function getProductionVolExcel(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${year}&plantId=${plantId}`
+async function getProductionVolExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -245,10 +219,8 @@ async function getProductionVolExcel(keycloak) {
   }
 }
 
-async function saveProductionVolDataExcel(file, keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/production-target-import?plantId=${plantId}&year=${year}`
+async function saveProductionVolDataExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/production-target-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {

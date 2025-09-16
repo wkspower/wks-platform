@@ -17,11 +17,11 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-const GRID_NAME = 'Intermediate Values'
+const GRID_NAME = 'Norms (Expression)'
 
 export default function IntermediateValuesDataSet() {
   const keycloak = useSession()
-  const [dataMap, setDataMap] = useState({}) // { [gridName]: { rows:[], columns:[] } }
+  const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -110,64 +110,23 @@ export default function IntermediateValuesDataSet() {
     [keycloak, enrichColumns, plantID, oldYear],
   )
 
-  // Helper: group rows by a field
-  const groupRowsByField = (rows, field) => {
-    const map = {}
-    rows.forEach((r) => {
-      const key = r?.[field] ?? 'Unknown'
-      const name = typeof key === 'string' ? key : String(key)
-      if (!map[name]) map[name] = []
-      map[name].push(r)
-    })
-    return map
-  }
-
-  // single-shot fetch, but now split into multiple grids based on NormTypeName-like column
+  // -----------------------------------------------------------------------
+  // NEW: simplified loadGrid -> ALWAYS produce single grid (no grouping)
+  // -----------------------------------------------------------------------
   const loadGrid = useCallback(async () => {
     setLoading(true)
     try {
       const { rows, columns } = await fetchDataForGrid(GRID_NAME)
       if (!isMountedRef.current) return
 
-      // Find a candidate grouping field. Look for common names like "NormTypeName", "NormType", etc.
-      const candidateField =
-        (columns || []).find((c) => /normtype/i.test(c.field || '')) ||
-        (columns || []).find((c) => /normtype/i.test(c.title || '')) ||
-        null
-
-      if (!candidateField) {
-        // fallback to single grid if no grouping column found
-        setDataMap({ [GRID_NAME]: { rows, columns } })
-        setGridNames([GRID_NAME])
-        return
+      // Put everything in one grid named GRID_NAME
+      const singleMap = {
+        [GRID_NAME]: { rows, columns },
       }
-
-      const groupField = candidateField.field
-
-      // group rows
-      const grouped = groupRowsByField(rows, groupField)
-
-      // build dataMap: for each group, create a grid name and remove the group column from columns (optional)
-      const newDataMap = {}
-      const newGridNames = []
-      Object.keys(grouped).forEach((groupKey) => {
-        const gridTitle = `${groupKey}`
-        // Remove grouping column from display/export since it's redundant inside a grouped grid
-        const colsForGroup = (columns || []).filter(
-          (c) => c.field !== groupField,
-        )
-        newDataMap[gridTitle] = {
-          rows: grouped[groupKey],
-          columns: colsForGroup,
-        }
-        newGridNames.push(gridTitle)
-      })
-
-      setDataMap(newDataMap)
-      setGridNames(newGridNames)
+      setDataMap(singleMap)
+      setGridNames([GRID_NAME])
     } catch (err) {
       console.error('[loadGrid] failed', err)
-      // keep previous state if present
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
@@ -175,7 +134,6 @@ export default function IntermediateValuesDataSet() {
 
   useEffect(() => {
     loadGrid()
-    // re-load when plant/year changes
   }, [loadGrid, plantID, oldYear, yearChanged])
 
   const exportAllGrids = useCallback(() => {
@@ -265,8 +223,10 @@ export default function IntermediateValuesDataSet() {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {gridNames.length === 0 && !loading && (
-          <Typography>No grids available.</Typography>
+        {loading && <Typography>Loading...</Typography>}
+
+        {!loading && gridNames.length === 0 && (
+          <Typography>No Grid Available</Typography>
         )}
 
         {gridNames.map((name) => {
@@ -288,6 +248,7 @@ export default function IntermediateValuesDataSet() {
                       rows={d.rows}
                       columns={d.columns}
                       permissions={{ isHeight: d?.rows?.length > 15 }}
+                      groupBy='NormTypeName'
                     />
                   </Box>
                 </CustomAccordionDetails>

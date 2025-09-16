@@ -15,9 +15,12 @@ import {
   setCurrentYear,
   setOldYear,
   setPlantID,
+  setPlantObject,
   setSiteID,
+  setSiteObject,
   setSitePlantChange,
   setVerticalChange,
+  setVerticalObject,
   setYearChange,
 } from 'store/reducers/dataGridStore'
 import MobileSection from './MobileSection'
@@ -123,6 +126,8 @@ export default function HeaderContent({ keycloak }) {
           selectedPlant: '',
         }),
       )
+
+      dispatch(setVerticalObject({ id: defV.id, name: defV.name }))
     }
   }, [fullDetails, allowedMap, selectedVertical, dispatch])
 
@@ -148,6 +153,13 @@ export default function HeaderContent({ keycloak }) {
         JSON.stringify({ id: defS.id, name: defS.name }),
       )
       localStorage.setItem('selectedSiteId', JSON.stringify({ id: defS.id }))
+
+      dispatch(
+        setSiteObject({
+          id: defS.id,
+          name: defS.displayName ?? defS.name ?? '',
+        }),
+      )
 
       dispatch(setSiteID({ siteId: defS.id }))
 
@@ -191,6 +203,14 @@ export default function HeaderContent({ keycloak }) {
         'selectedPlant',
         JSON.stringify({ id: defP.id, name: defP.name }),
       )
+
+      dispatch(
+        setPlantObject({
+          id: defP.id,
+          name: defP.displayName ?? defP.name ?? '',
+        }),
+      )
+
       dispatch(setSitePlantChange({ sitePlantChange: true }))
       dispatch(setPlantID({ plantId: defP.id, plantName: defP.name }))
     }
@@ -258,6 +278,13 @@ export default function HeaderContent({ keycloak }) {
         JSON.stringify({ id: plantObj.id, name: plantObj.name }),
       )
 
+      dispatch(
+        setPlantObject({
+          id: plantObj.id,
+          name: plantObj.name ?? plantObj.name ?? '',
+        }),
+      )
+
       dispatch(setSitePlantChange({ sitePlantChange: true }))
       dispatch(setPlantID({ plantId: plantObj.id, plantName: plantObj.name }))
     }
@@ -275,6 +302,9 @@ export default function HeaderContent({ keycloak }) {
     if (vert) {
       localStorage.setItem('verticalId', vert.id)
       localStorage.setItem('selectedVertical', JSON.stringify(vert))
+
+      dispatch(setVerticalObject({ id: vert.id, name: vert.name }))
+
       dispatch(
         setVerticalChange({
           selectedVertical: vert.name,
@@ -291,6 +321,9 @@ export default function HeaderContent({ keycloak }) {
 
     localStorage.setItem('verticalId', vert.id)
     localStorage.setItem('selectedVertical', JSON.stringify(vert))
+
+    dispatch(setVerticalObject({ id: vert.id, name: vert.name }))
+
     dispatch(
       setVerticalChange({
         selectedVertical: vert.name,
@@ -309,7 +342,15 @@ export default function HeaderContent({ keycloak }) {
         JSON.stringify({ id: site.id, name: site.name }),
       )
 
+      dispatch(
+        setSiteObject({ id: site.id, name: site.name ?? site.name ?? '' }),
+      )
+
       localStorage.setItem('selectedSiteId', JSON.stringify({ id: site?.id }))
+
+      dispatch(
+        setSiteObject({ id: site.id, name: site.name ?? site.name ?? '' }),
+      )
 
       setSelectedPlant('')
       dispatch(

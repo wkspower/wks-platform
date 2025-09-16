@@ -46,7 +46,7 @@ const BestAchievedNorms = () => {
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
-    const DEFAULT_MIN_WIDTH = 200
+    const DEFAULT_MIN_WIDTH = 160
 
     const cols = backendCols.map((col) => {
       const isTextCol = col.type === 'string'
@@ -63,7 +63,7 @@ const BestAchievedNorms = () => {
       }
     })
 
-    if (cols.length > 12) {
+    if (cols.length > 17) {
       return cols.map((c) => ({
         widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
         ...c,

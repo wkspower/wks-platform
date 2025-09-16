@@ -7,7 +7,7 @@ import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBu
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -17,7 +17,6 @@ import {
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
-import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -27,13 +26,28 @@ const BusinessDemand = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -49,9 +63,14 @@ const BusinessDemand = ({ permissions }) => {
   })
 
   const fetchData = async () => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
     setLoading(true)
     try {
-      var data = await BusinessDemandDataApiService.getBDData(keycloak)
+      var data = await BusinessDemandDataApiService.getBDData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -136,23 +155,7 @@ const BusinessDemand = ({ permissions }) => {
 
   const saveBusinessDemandData = async (newRows) => {
     try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      let siteId = ''
-      const storedSite = localStorage.getItem('selectedSiteId')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
-
-      let verticalId = localStorage.getItem('verticalId')
-
-      const businessData = newRows.map((row) => ({
+      const payloadData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
         june: row.june || null,
@@ -167,10 +170,10 @@ const BusinessDemand = ({ permissions }) => {
         march: row.march || null,
         remark: row.remark || null,
         avgTph: row.avgTph || null,
-        year: localStorage.getItem('year'),
-        plantId: plantId,
-        siteFKId: siteId,
-        verticalFKId: verticalId,
+        year: AOP_YEAR,
+        plantId: PLANT_ID,
+        siteFKId: SITE_ID,
+        verticalFKId: VERTICAL_ID,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
         inEdit: row.inEdit || false,
@@ -178,8 +181,7 @@ const BusinessDemand = ({ permissions }) => {
 
       const response =
         await BusinessDemandDataApiService.saveBusinessDemandData(
-          plantId,
-          businessData,
+          payloadData,
           keycloak,
         )
 

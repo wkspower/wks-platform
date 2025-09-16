@@ -40,6 +40,7 @@ import PlantContributionLastFourYears from '../Reports-kendo/kendo-PlantContribu
 
 import BestAchievedReport from '../Reports/BestAchievedReport'
 import MonthWiseRawData from '../Reports/MonthWiseRawData'
+import FurnaceRawData from '../Reports/FurnaceRawData'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -105,6 +106,7 @@ const WorkFlowMerge = () => {
     setRowModesModel(newRowModesModel)
   }
   useEffect(() => {
+    setTabIndex(0)
     fetchData()
   }, [plantID, yearChanged])
 
@@ -180,7 +182,7 @@ const WorkFlowMerge = () => {
             keycloak,
           ),
 
-          lowerVertName === 'meg'
+          lowerVertName === 'meg' || lowerVertName === 'pe'
             ? DataService.calculatePlantContributionReportData(
                 plantId,
                 year,
@@ -190,7 +192,7 @@ const WorkFlowMerge = () => {
         ])
 
       const responses =
-        lowerVertName === 'meg'
+        lowerVertName === 'meg' || lowerVertName === 'pe'
           ? [data, res1, res2, res3, res4, res5, res6, res7]
           : [data, res1, res2, res3, res4, res5, res6]
 
@@ -547,7 +549,7 @@ const WorkFlowMerge = () => {
     'Plant Contribution Summary (T-22)',
   ]
 
-  const PEOrPPTabs = [
+  const PETabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
     'Month Wise Production Plan',
@@ -555,11 +557,24 @@ const WorkFlowMerge = () => {
     'Turnaround Report',
     'Annual Production Plan',
     'Plant Contribution',
+    'Plant Contribution Summary (T-22)',
+  ]
+
+  const PPTabs = [
+    'Annual AOP Cost',
+    'Plant Production Summary',
+    'Month Wise Production Plan',
+    'Month Wise Raw Data',
+    'Turnaround Report',
+    'Annual Production Plan',
+    'Plant Contribution',
+    'Plant Contribution Summary (T-22)',
   ]
 
   const crackerTabs = [
     'Month Wise Production Plan',
     'Month Wise Raw Data',
+    'Furnace Data',
     'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
   ]
@@ -577,13 +592,16 @@ const WorkFlowMerge = () => {
 
   // Pick tabs based on vertical
   // Pick tabs based on vertical
+
   let activeTabs = defaultTabs
   if (lowerVertName === 'cracker') {
     activeTabs = crackerTabs
   } else if (lowerVertName === 'elastomer') {
     activeTabs = elastomerTabs
-  } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
-    activeTabs = PEOrPPTabs
+  } else if (lowerVertName === 'pe') {
+    activeTabs = PETabs
+  } else if (lowerVertName === 'pp') {
+    activeTabs = PPTabs
   }
   return (
     <div
@@ -793,8 +811,9 @@ const WorkFlowMerge = () => {
           <>
             {tabIndex === 0 && <BestAchievedReport />}
             {tabIndex === 1 && <MonthWiseRawData />}
-            {tabIndex === 2 && <PlantContribution />}
-            {tabIndex === 3 && <PlantContributionLastFourYears />}
+            {tabIndex === 2 && <FurnaceRawData />}
+            {tabIndex === 3 && <PlantContribution />}
+            {tabIndex === 4 && <PlantContributionLastFourYears />}
 
             <Notification
               open={snackbarOpen}

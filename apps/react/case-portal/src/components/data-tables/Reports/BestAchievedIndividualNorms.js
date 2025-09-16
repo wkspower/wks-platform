@@ -1,49 +1,34 @@
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '@progress/kendo-react-excel-export'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import {
   CustomAccordion,
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-import { Button } from '@mui/material'
-import {
-  ExcelExport,
-  ExcelExportColumn,
-} from '@progress/kendo-react-excel-export'
-import { Tab, Tabs } from '../../../../node_modules/@mui/material/index'
-import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
 
 const CALL_DELAY_MS = 200
 
-const ProductionVolumeDataBasisPe = () => {
+const BestAchievedIndividualNorms = () => {
   const keycloak = useSession()
-
-  // Dynamic data map keyed by exact grid name from API
-  // dataMap = { [gridName]: { rows: [], columns: [] } }
   const [dataMap, setDataMap] = useState({})
-  const [gridNames, setGridNames] = useState([]) // ordered list from API
+  const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-
-  const { plantID, yearChanged, oldYear, verticalChange } = dataGridStore
-  const [tabIndex, setTabIndex] = useState(0)
-  const vertName = verticalChange?.selectedVertical
-
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const { plantID, yearChanged, oldYear } = dataGridStore
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
-  // dynamic refs for excel exports: exportRefs.current[gridName] = ExcelExportInstance
   const exportRefs = useRef({})
 
   useEffect(() => {
@@ -61,32 +46,39 @@ const ProductionVolumeDataBasisPe = () => {
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
-    return backendCols.map((col) => {
+    const DEFAULT_MIN_WIDTH = 160
+
+    const cols = backendCols.map((col) => {
       const isTextCol = col.type === 'string'
       const isNumberCol = col.type === 'number'
-      // const isDateCol = col.type === 'date' // unused but available
       return {
         ...col,
         title: col.title || col.field,
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+        ...(isNumberCol ? { format: '{0:#.###}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
     })
+
+    if (cols.length > 17) {
+      return cols.map((c) => ({
+        widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
+        ...c,
+      }))
+    }
+
+    return cols
   }, [])
 
-  // Fetch columns + rows for one grid type. Returns { rows, columns }
   const fetchDataForGrid = useCallback(
-    async (reportType, StartDate, EndDate) => {
+    async (reportType) => {
       try {
-        const apiResponse = await DataService.getProductionVolDataBasisPe(
+        const apiResponse = await DataService.getBestAchievedNorms(
           keycloak,
           reportType,
-          StartDate,
-          EndDate,
         )
 
         if (apiResponse?.code !== 200) {
@@ -126,7 +118,6 @@ const ProductionVolumeDataBasisPe = () => {
     [keycloak, enrichColumns],
   )
 
-  // Schedule and run a single fetch (keeps loading state correct)
   const scheduleAndRunFetch = useCallback(
     (reportType, delayMs) => {
       const id = setTimeout(async () => {
@@ -134,24 +125,7 @@ const ProductionVolumeDataBasisPe = () => {
         if (isMountedRef.current) setLoading(true)
 
         try {
-          // get config before fetching grid (so we have StartDate/EndDate)
-          const configData =
-            await DataService.getConfigurationExecutionDetails(keycloak)
-          if (configData?.code !== 200) return
-
-          const StartDate = configData.data.find(
-            (d) => d.Name === 'StartDate',
-          )?.AttributeValue
-          const EndDate = configData.data.find(
-            (d) => d.Name === 'EndDate',
-          )?.AttributeValue
-          if (!StartDate || !EndDate) return
-
-          const { rows, columns } = await fetchDataForGrid(
-            reportType,
-            StartDate,
-            EndDate,
-          )
+          const { rows, columns } = await fetchDataForGrid(reportType)
 
           if (!isMountedRef.current) return
           setDataMap((prev) => ({ ...prev, [reportType]: { rows, columns } }))
@@ -179,31 +153,10 @@ const ProductionVolumeDataBasisPe = () => {
 
     try {
       setLoading(true)
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
-      if (configData?.code !== 200) {
-        setLoading(false)
-        return
-      }
-      const StartDate = configData.data.find(
-        (d) => d.Name === 'StartDate',
-      )?.AttributeValue
-      const EndDate = configData.data.find(
-        (d) => d.Name === 'EndDate',
-      )?.AttributeValue
-      if (!StartDate || !EndDate) {
-        setGridNames([])
-        setDataMap({})
-        setLoading(false)
-        return
-      }
 
-      // request TYPE_LIST
-      const typeListResult = await DataService.getProductionVolDataBasisPe(
+      const typeListResult = await DataService.getBestAchievedNorms(
         keycloak,
         'TYPE LIST2',
-        StartDate,
-        EndDate,
       )
 
       let types = []
@@ -228,7 +181,6 @@ const ProductionVolumeDataBasisPe = () => {
   }, [keycloak, scheduleAndRunFetch])
 
   useEffect(() => {
-    setTabIndex(0)
     fetchAllGrids()
     // cleanup timers on dependency change
     return () => {
@@ -278,18 +230,10 @@ const ProductionVolumeDataBasisPe = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Norms Historian Data Basis ${currentDateTime}.xlsx`
+  const fileName = `Best Achieved Norms(Min CC) ${currentDateTime}.xlsx`
 
   // helper to render Title exactly as API sent (or tweak)
   const renderTitle = (t) => t
-
-  const PETabs = ['Steady State Norm Basis', 'Overall Consumption Norm Basis']
-  const defaultTabs = ['Steady State Norm Basis']
-
-  let activeTabs = defaultTabs
-  if (lowerVertName === 'pe') {
-    activeTabs = PETabs
-  }
 
   return (
     <div>
@@ -326,89 +270,51 @@ const ProductionVolumeDataBasisPe = () => {
           )
         })}
       </div>
-      {activeTabs?.length > 1 && (
-        <Tabs
-          value={tabIndex}
-          onChange={(e, newIndex) => setTabIndex(newIndex)}
-          variant='scrollable'
-          scrollButtons='auto'
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 10px 0px',
-            minHeight: '28px',
-          }}
-          textColor='primary'
-          indicatorColor='primary'
-        >
-          {activeTabs.map((label, idx) => (
-            <Tab
-              key={idx}
-              label={label}
-              sx={{
-                border: '1px solid #ADD8E6',
-                borderBottom: '1px solid #ADD8E6',
-                fontSize: '0.75rem',
-                padding: '9px',
-                minHeight: '12px',
-              }}
-            />
-          ))}
-        </Tabs>
-      )}
 
-      {tabIndex === 0 && (
-        <Box display='flex' justifyContent='flex-end' mb='2px'>
-          <Button
-            variant='contained'
-            onClick={exportAllGrids}
-            className='btn-save'
-          >
-            Export
-          </Button>
-        </Box>
-      )}
+      <Box display='flex' justifyContent='flex-end' mb='2px'>
+        <Button
+          variant='contained'
+          onClick={exportAllGrids}
+          className='btn-save'
+        >
+          Export
+        </Button>
+      </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {/* {gridNames.length === 0 && !loading && (
-          <Typography>No grids available for the selected period.</Typography>
-        )} */}
-
-        {tabIndex === 0 && (
-          <>
-            {gridNames.map((name) => {
-              const d = dataMap[name] || { rows: [], columns: [] }
-              return (
-                <div key={name}>
-                  <CustomAccordion defaultExpanded disableGutters>
-                    <CustomAccordionSummary
-                      aria-controls={`${name}-content`}
-                      id={`${name}-header`}
-                    >
-                      <Typography component='span' className='grid-title'>
-                        {renderTitle(name)}
-                      </Typography>
-                    </CustomAccordionSummary>
-                    <CustomAccordionDetails>
-                      <Box sx={{ width: '100%', margin: 0 }}>
-                        <KendoDataGrid
-                          rows={d.rows}
-                          columns={d.columns}
-                          permissions={{ isHeight: d?.rows?.length > 15 }}
-                        />
-                      </Box>
-                    </CustomAccordionDetails>
-                  </CustomAccordion>
-                </div>
-              )
-            })}
-          </>
+        {gridNames.length === 0 && !loading && (
+          <Typography>No grids available.</Typography>
         )}
 
-        {tabIndex === 1 && <ConsumptionNormsHistorianBasis />}
+        {gridNames.map((name) => {
+          const d = dataMap[name] || { rows: [], columns: [] }
+          return (
+            <div key={name}>
+              <CustomAccordion defaultExpanded disableGutters>
+                <CustomAccordionSummary
+                  aria-controls={`${name}-content`}
+                  id={`${name}-header`}
+                >
+                  <Typography component='span' className='grid-title'>
+                    {renderTitle(name)}
+                  </Typography>
+                </CustomAccordionSummary>
+                <CustomAccordionDetails>
+                  <Box sx={{ width: '100%', margin: 0 }}>
+                    <KendoDataGrid
+                      rows={d.rows}
+                      columns={d.columns}
+                      permissions={{ isHeight: d?.rows?.length > 15 }}
+                    />
+                  </Box>
+                </CustomAccordionDetails>
+              </CustomAccordion>
+            </div>
+          )
+        })}
       </Box>
     </div>
   )
 }
 
-export default ProductionVolumeDataBasisPe
+export default BestAchievedIndividualNorms

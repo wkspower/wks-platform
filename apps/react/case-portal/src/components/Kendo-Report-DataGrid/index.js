@@ -13,7 +13,13 @@ import { useState } from 'react'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import '../../kendo-data-grid.css'
 
-const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
+const KendoDataGrid = ({
+  rows,
+  columns,
+  onRowChange,
+  permissions,
+  groupBy = null,
+}) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
@@ -26,6 +32,15 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
       onRowChange?.(updated, e)
     }
   }
+
+  const initialGroup = groupBy
+    ? [
+        {
+          field: groupBy,
+          dir: undefined,
+        },
+      ]
+    : []
 
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
@@ -99,6 +114,7 @@ const KendoDataGrid = ({ rows, columns, onRowChange, permissions }) => {
                 }
               : false
           }
+          defaultGroup={initialGroup}
         >
           {columns?.map((col) => {
             const {

@@ -21,17 +21,18 @@ import { Box } from '../../../node_modules/@mui/material/index'
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const plantName = JSON.parse(localStorage.getItem('selectedPlant'))?.name
-  const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name
-  const verticalId = localStorage.getItem('verticalId')
-  const verticalName = JSON.parse(
-    localStorage.getItem('selectedVertical'),
-  )?.name
+  const { verticalChange, plantObject, verticalObject, siteObject } =
+    dataGridStore
+
   const dispatch = useDispatch()
 
-  // const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name;
+  const PLANT_ID = plantObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const SITE_ID = siteObject?.id
+
+  const PLANT_NAME = plantObject?.name
+  const VERTICAL_NAME = verticalObject?.name
+  const SITE_NAME = siteObject?.name
 
   const [notification, setNotification] = useState({
     open: false,
@@ -40,7 +41,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   })
 
   async function handleOpenPdf(title) {
-    const url = `${Config.StorageUrl}/storage/files/${vertName}/${siteName}/${plantName}/downloads/${title}.pdf?content-type=application/pdf`
+    const url = `${Config.StorageUrl}/storage/files/${VERTICAL_NAME}/${SITE_NAME}/${PLANT_NAME}/downloads/${title}.pdf?content-type=application/pdf`
     const headers = {
       Authorization: `Bearer ${keycloak.token}`,
     }
@@ -108,24 +109,12 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   useEffect(() => {
     let title = item?.title
 
-    const verticalName = JSON.parse(
-      localStorage.getItem('selectedVertical'),
-    )?.name?.toLowerCase()
-
-    // if (title === 'Business Demand') {
-    //   if (verticalName === 'meg') {
-    //     title = 'Business Demand (Percentage)'
-    //   } else if (verticalName === 'pe') {
-    //     title = 'Business Demand (Absolute)'
-    //   }
-    // }
-
     dispatch(
       setScreenTitle({
         title,
       }),
     )
-  }, [item, vertName])
+  }, [item, VERTICAL_NAME])
 
   // set active item state
   const getCollapse = (menu) => {
@@ -185,15 +174,12 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     var title1 = itemTitle
     if (
       title1 === 'Business Demand' &&
-      verticalChange?.selectedVertical?.toLowerCase() === 'meg'
+      VERTICAL_NAME?.toLowerCase() === 'meg'
     ) {
       title1 = 'Business Demand (Percentage)'
     }
 
-    if (
-      title1 === 'Business Demand' &&
-      verticalChange?.selectedVertical?.toLowerCase() === 'pe'
-    ) {
+    if (title1 === 'Business Demand' && VERTICAL_NAME?.toLowerCase() === 'pe') {
       title1 = 'Business Demand (Absolute)'
     }
 
@@ -207,9 +193,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         'monthwiseproductionplan',
         'overallaopconsumption(norm/quantity)',
       ].includes(normalizedTitle) &&
-      JSON.parse(
-        localStorage.getItem('selectedVertical'),
-      )?.name?.toLowerCase() == 'meg'
+      VERTICAL_NAME?.toLowerCase() == 'meg'
     ) {
       itemContent = (
         <Typography
@@ -319,7 +303,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     alignItems: 'center',
                   }}
                 >
-                  {verticalName} / {siteName} / {plantName}{' '}
+                  {VERTICAL_NAME} / {SITE_NAME} / {PLANT_NAME}{' '}
                   {/* {getRoleName(verticalId, item?.id)} */}
                   {/* {keycloak?.realmAccess?.roles[0]} */}
                   {itemContent}

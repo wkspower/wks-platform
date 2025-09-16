@@ -70,20 +70,6 @@ const setStorageItem = (key, value) => {
   }
 }
 
-const useLocalStorage = (key, defaultValue) => {
-  const [value, setValue] = useState(() => getStorageItem(key, defaultValue))
-
-  const setStoredValue = useCallback(
-    (newValue) => {
-      setValue(newValue)
-      setStorageItem(key, newValue)
-    },
-    [key],
-  )
-
-  return [value, setStoredValue]
-}
-
 export default function HeaderContent({ keycloak }) {
   const dispatch = useDispatch()
   const matchesXs = useMediaQuery((theme) => theme.breakpoints.down('md'))

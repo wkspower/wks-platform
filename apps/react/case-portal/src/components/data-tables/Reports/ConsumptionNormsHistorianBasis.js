@@ -322,9 +322,9 @@ const ConsumptionNormsHistorianBasis = () => {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {gridNames.length === 0 && !loading && (
+        {/* {gridNames.length === 0 && !loading && (
           <Typography>No grids available for the selected period.</Typography>
-        )}
+        )} */}
 
         {gridNames.map((name) => {
           const d = dataMap[name] || { rows: [], columns: [] }

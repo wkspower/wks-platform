@@ -10,7 +10,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { Typography } from '../../../node_modules/@mui/material/index'
-// import TextField from '@mui/material/TextField'
 // import { usePermissions } from 'hooks/usePermissions'
 import KendoDataTables from './index'
 import { validateFields } from 'utils/validationUtils'
@@ -35,15 +34,29 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
   //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
 
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const PLANT_ID = plantObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const SITE_ID = siteObject?.id
+  const AOP_YEAR = year?.selectedYear
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const PLANT_NAME = plantObject?.name?.toLowerCase()
+  const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
+  const SITE_NAME = siteObject?.name?.toLowerCase()
+
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
   const [rowsFormattedAndNonEditable, setRowsFormattedAndNonEditable] =
@@ -58,7 +71,6 @@ const ProductionvolumeData = ({ permissions }) => {
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [loading, setLoading] = useState(false)
 
-  // States for the Remark Dialog
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [remarkDialogOpenDesignCapacity, setRemarkDialogOpenDesignCapacity] =
     useState(false)
@@ -73,10 +85,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const dispatch = useDispatch()
   const [rowsDesignCapacity, setRowsDesignCapacity] = useState([])
   const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
-  // const unsavedChangesRef = React.useRef({
-  //   unsavedRows: {},
-  //   rowsBeforeChange: {},
-  // })
+
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -119,21 +128,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const editAOPMCCalculatedData = async (newRows) => {
     setLoading(true)
     try {
-      let plantId = ''
       const isTPH = selectedUnit == 'TPD'
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      let siteId = ''
-
-      const storedSite = localStorage.getItem('selectedSiteId')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
 
       const aopmccCalculatedData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april / 24 : row.april || null,
@@ -153,14 +148,11 @@ const ProductionvolumeData = ({ permissions }) => {
           isTPH && row.february ? row.february / 24 : row.february || null,
         march: isTPH && row.march ? row.march / 24 : row.march || null,
 
-        // aopStatus: row.aopStatus || 'draft',
-        financialYear: row.financialYear,
-        // plant: plantId,
-        plantFKId: row.plantFKId || plantId,
-        siteFKId: row.siteFKId || siteId,
-        // material: 'EOE',
+        financialYear: AOP_YEAR,
+        plantFKId: PLANT_ID,
+        siteFKId: SITE_ID,
         materialFKId: row.normParametersFKId,
-        verticalFKId: row.verticalFKId ?? localStorage.getItem('verticalId'),
+        verticalFKId: VERTICAL_ID,
         id: row.idFromApi || null,
         avgTPH: findAvg('1', row) || null,
         remark: row.remarks,
@@ -169,8 +161,9 @@ const ProductionvolumeData = ({ permissions }) => {
 
       const response =
         await ProductionVolumeDataApiService.editAOPMCCalculatedData(
-          plantId,
           aopmccCalculatedData,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
 
@@ -185,8 +178,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
         const responseForNorms =
           await DataService.calculateNormsHistorianValues(
-            plantId,
-            localStorage.getItem('year'),
+            PLANT_ID,
+            AOP_YEAR,
             startDate,
             endDate,
             keycloak,
@@ -214,13 +207,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const editDesignCapacityData = async (newRows) => {
     setLoading(true)
     try {
-      let plantId = ''
-      const isTPH = unitDesignCapacity === 'TPD' // match third grid logic!
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+      const isTPH = unitDesignCapacity === 'TPD'
 
       const months = [
         'april',
@@ -251,8 +238,9 @@ const ProductionvolumeData = ({ permissions }) => {
 
       const response =
         await ProductionVolumeDataApiService.editDesignCapacityData(
-          plantId,
           designCapacityData,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
 
@@ -320,7 +308,6 @@ const ProductionvolumeData = ({ permissions }) => {
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
-      // console.log(data)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -394,10 +381,16 @@ const ProductionvolumeData = ({ permissions }) => {
   }, [modifiedCells, selectedUnit])
 
   const fetchData = async (unit = selectedUnit) => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
     try {
       setLoading(true)
       const response =
-        await ProductionVolumeDataApiService.getAOPMCCalculatedData(keycloak)
+        await ProductionVolumeDataApiService.getAOPMCCalculatedData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
@@ -488,8 +481,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const fetchConfiguration = async () => {
     try {
       setLoading(true)
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+      const configData = await DataService.getConfigurationExecutionDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (configData?.code !== 200) return
 
       const StartDate = configData.data.find(
@@ -1179,6 +1175,10 @@ const ProductionvolumeData = ({ permissions }) => {
   ]
 
   useEffect(() => {
+    setModifiedCellsDesignCapacity({})
+    setEnableSaveAddBtnDesignCapacity({})
+    setModifiedCells({})
+
     fetchData()
 
     fetchConfiguration()
@@ -1201,7 +1201,7 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const handleCalculate = () => {
-    if (lowerVertName == 'meg' || lowerVertName == 'elastomer') {
+    if (VERTICAL_NAME == 'meg' || VERTICAL_NAME == 'elastomer') {
       handleCalculateMeg()
     } else {
       // handleCalculatePe()
@@ -1209,12 +1209,15 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
     setLoading(true)
     try {
       const response =
         await ProductionVolumeDataApiService.getDesignCapacityData(
           keycloak,
-          unit,
+          PLANT_ID,
+          AOP_YEAR,
         )
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
@@ -1289,12 +1292,15 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
   const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
     setLoading(true)
     try {
       const response =
         await ProductionVolumeDataApiService.getMaxAchievedCapacityData(
           keycloak,
-          unit,
+          PLANT_ID,
+          AOP_YEAR,
         )
       let data = response?.data?.aopMCCalculatedDataDTOList
       if (data && !Array.isArray(data)) {
@@ -1381,21 +1387,16 @@ const ProductionvolumeData = ({ permissions }) => {
   }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
 
   const handleCalculateMeg = async () => {
-    try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
-      var plantId = plantId
+    try {
       const data =
         await ProductionVolumeDataApiService.handleCalculateProductionVolData(
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
+
       if (data || data == 0) {
         // dispatch(setIsBlocked(true))
         setSnackbarOpen(true)
@@ -1457,7 +1458,7 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName: 'Max Achieved Capacity',
 
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${lowerVertName}_Max Achieved Capacity`,
+      ExcelName: `${VERTICAL_NAME}_Max Achieved Capacity`,
     },
     isOldYear,
   )
@@ -1477,7 +1478,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${lowerVertName}_Design Capacity`,
+      ExcelName: `${VERTICAL_NAME}_Design Capacity`,
 
       showTitleNameBusiness: true,
       titleName: 'Design Capacity',
@@ -1497,9 +1498,11 @@ const ProductionvolumeData = ({ permissions }) => {
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? true,
       units: ['TPH', 'TPD'],
-      showCalculate: permissions?.hideSummary ? false : (lowerVertName === 'meg' || lowerVertName === 'elastomer'),
+      showCalculate: permissions?.hideSummary
+        ? false
+        : VERTICAL_NAME === 'meg' || VERTICAL_NAME === 'elastomer',
       showCalculateVisibility:
-        lowerVertName === 'meg' &&
+        VERTICAL_NAME === 'meg' &&
         Object.keys(calculationObject || {}).length > 0
           ? true
           : false,
@@ -1521,6 +1524,8 @@ const ProductionvolumeData = ({ permissions }) => {
     saveExcelFile(rawFile)
   }
   const downloadExcelForConfiguration = async (gridType) => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
     setSnackbarOpen(true)
     setSnackbarData({
       message: 'Excel download started!',
@@ -1529,13 +1534,23 @@ const ProductionvolumeData = ({ permissions }) => {
 
     try {
       if (gridType === 'design') {
-        await ProductionVolumeDataApiService.getDesignCapacityExcel(keycloak)
+        await ProductionVolumeDataApiService.getDesignCapacityExcel(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       } else if (gridType === 'max') {
         await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
           keycloak,
+          PLANT_ID,
+          AOP_YEAR,
         )
       } else {
-        await ProductionVolumeDataApiService.getProductionVolExcel(keycloak)
+        await ProductionVolumeDataApiService.getProductionVolExcel(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       }
 
       setSnackbarData({
@@ -1552,19 +1567,16 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
   const saveExcelFile = async (rawFile) => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
     setLoading(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
       const response =
         await ProductionVolumeDataApiService.saveProductionVolDataExcel(
           rawFile,
           keycloak,
+          PLANT_ID,
+          AOP_YEAR,
         )
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -1576,8 +1588,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
         const responseForNorms =
           await DataService.calculateNormsHistorianValues(
-            plantId,
-            localStorage.getItem('year'),
+            PLANT_ID,
+            AOP_YEAR,
             startDate,
             endDate,
             keycloak,

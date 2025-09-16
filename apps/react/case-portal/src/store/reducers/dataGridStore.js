@@ -3,19 +3,6 @@ import { createSlice } from '@reduxjs/toolkit'
 const getSelectedPlantStorage = localStorage.getItem('selectedPlant')
   ? JSON.parse(localStorage.getItem('selectedPlant'))
   : null
-const getStoragePlantId = () => {
-  const plantId = localStorage.getItem('selectedPlant')
-  return plantId ? JSON.parse(plantId).id : ''
-}
-const getStorageSiteId = () => {
-  const siteId = localStorage.getItem('selectedSite')
-  return siteId ? JSON.parse(siteId).id : ''
-}
-
-const getStorageVerticalId = () => {
-  const verticalId = localStorage.getItem('selectedVertical')
-  return verticalId ? JSON.parse(verticalId).id : ''
-}
 
 const getStorageYear = () => {
   const year = localStorage.getItem('year')
@@ -32,7 +19,13 @@ const initialState = {
   oldYear: null,
   siteID: null,
   plantID: getSelectedPlantStorage,
+
+  // New objects (each with shape { id, name } or null)
+  plantObject: null,
+  siteObject: null,
+  verticalObject: null,
 }
+
 const dataGridStore = createSlice({
   name: 'menu',
   initialState,
@@ -67,6 +60,25 @@ const dataGridStore = createSlice({
     setPlantID(state, action) {
       state.plantID = action.payload
     },
+
+    setPlantObject(state, action) {
+      state.plantObject = action.payload
+      if (action.payload && action.payload.id !== undefined) {
+        state.plantID = action.payload.id
+      }
+    },
+    setSiteObject(state, action) {
+      state.siteObject = action.payload
+      if (action.payload && action.payload.id !== undefined) {
+        state.siteID = action.payload.id
+      }
+    },
+    setVerticalObject(state, action) {
+      state.verticalObject = action.payload
+      if (action.payload && action.payload.id !== undefined) {
+        state.verticalID = action.payload.id
+      }
+    },
   },
 })
 
@@ -83,4 +95,8 @@ export const {
   setOldYear,
   setSiteID,
   setPlantID,
+
+  setPlantObject,
+  setSiteObject,
+  setVerticalObject,
 } = dataGridStore.actions

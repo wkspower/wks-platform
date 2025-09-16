@@ -62,8 +62,9 @@ const defs = {
     normsHistorianBasis: 'Norms Historian',
     steadyStateNormsHistorianBasis: 'Steady State Norm Basis',
     consumptionNormsHistorianBasis: 'Overall Consumption Norm Basis',
-    intermediateValuesDataSet: 'Intermediate Values',
-    rawDataSet: 'Raw Data',
+    intermediateValuesDataSet: 'Norms (Expression) Basis',
+
+    rawDataSet: 'Steam Norms Basis',
     plantsProduction: 'Plants Production Summary', // New addition
     monthwise: 'Monthwise Production Plan',
     monthwiseRawMaterial: 'Monthwise Raw Material',
@@ -72,7 +73,9 @@ const defs = {
     workflow: 'AOP Approval Flow', // New addition
     userManage: 'User Management', // New addition
     valueHistory: 'Value History', // New addition
-    rawData: 'Raw Data',
+    rawData: 'Steam Norms Basis',
+
+    runlengthData: 'Run Length Data Set ',
 
     //FUNCTIONAL AOP
     functionalAop: 'CES',
@@ -84,8 +87,11 @@ const defs = {
     allSiteSummaryAop: 'Summary',
     plantTeam: 'People',
     plantSafetyPerformanceTarget: 'S&OR',
-
     bestAchievedBasis: 'Best Achieved Basis (Min CC)',
+
+    bestAchievedIndividualBasis: 'Best Achieved (Individual)',
+
+    furnaceModeAndRunLength: 'Furnace Mode And Run Length',
   },
   pages: {
     dashboard: {
@@ -267,8 +273,13 @@ const defs = {
         plantTeam: 'People',
 
         bestAchievedBasis: 'Best Achieved Basis (Min CC)',
-        intermediateValuesDataSet: 'Intermediate Values',
-        rawData: 'Raw Data',
+        bestAchievedIndividualBasis: 'Best Achieved (Individual)',
+
+        intermediateValuesDataSet: 'Norms (Expression) Basis',
+        rawData: 'Steam Norms Basis',
+        runlengthData: 'Run Length Data Set ',
+
+        furnaceModeAndRunLength: 'Furnace Mode And Run Length',
       },
     },
   },

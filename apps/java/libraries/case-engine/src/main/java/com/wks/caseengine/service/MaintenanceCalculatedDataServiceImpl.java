@@ -812,7 +812,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                \"startingIndexOfMonths\":3,\r\n" + //
 	            "                \"hideTable\":false,\r\n" + //
 	            "                \"textBeforeTitle\":\"\",\r\n" + //
-	            "                \"title\":\"consumptionBudget\",\r\n" + //
+				"                \"title\":\"Consumption Budget\",\r\n" + //
 	            "                \"tableId\":\"ConsumptionBudget\",\r\n" + //
 	            "                \"dataInput\":\"Consumption Budget\",\r\n" + //
 	            "                \"isColumnMergeRequired\":false,\r\n" + //
@@ -860,7 +860,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                \"startingIndexOfMonths\":3,\r\n" + //
 	            "                \"hideTable\":false,\r\n" + //
 	            "                \"textBeforeTitle\":\"\",\r\n" + //
-	            "                \"title\":\"Procurment Budget\",\r\n" + //
+	            "                \"title\":\"Procurement Budget\",\r\n" + //
 	            "                \"tableId\":\"ProcurmentBudget\",\r\n" + //
 	            "                \"dataInput\":\"Procurement Budget\",\r\n" + //
 	            "                \"isColumnMergeRequired\":false,\r\n" + //
