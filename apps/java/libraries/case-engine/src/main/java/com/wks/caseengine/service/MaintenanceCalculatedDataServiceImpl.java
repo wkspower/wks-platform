@@ -548,11 +548,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 
 		try {
-
-			System.out.println("started Read spyroOutput in importExcel");
+			
 			Map<String, List<BudgetMaintenanceDto>> map = readBudgetMaintenanceExcel(file.getInputStream(), year);
-			System.out.println("Ended Read spyroOutput in importExcel");
-			System.out.println("Started Save spyroOutput in importExcel");
+			
 			Map<String, List<BudgetMaintenanceDto>> mapForExcel = new HashMap<>();
 			List<BudgetMaintenanceDto> failedRecords = new ArrayList<>();
 			for (String key : map.keySet()) {
@@ -575,8 +573,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    }
 			}
 
-
-			System.out.println("Ended Save spyroOutput in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
 				byte[] fileByteArray = createExcel(year, plantFKId, true, mapForExcel);
@@ -603,7 +599,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		Map<String, List<BudgetMaintenanceDto>> map = new HashMap<>();
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 
-			
 				Sheet sheet = workbook.getSheetAt(0);
 				Iterator<Row> rowIterator = sheet.iterator();
 				List<BudgetMaintenanceDto> budgetMaintenanceDto = new ArrayList<BudgetMaintenanceDto>();
@@ -612,7 +607,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 				while (rowIterator.hasNext()) {
 					Row row = rowIterator.next();
-					Cell tableIdCell = row.getCell(17, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					Cell tableIdCell = row.getCell(18, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                 	if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
                     	continue;
                 	}
@@ -620,29 +615,29 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
                 	BudgetMaintenanceDto dto = new BudgetMaintenanceDto();
 
 					try {
-						
-						dto.setPlantName(getStringCellValue(row.getCell(0), dto));
-						dto.setCostName(getStringCellValue(row.getCell(1), dto));
+						dto.setBudgetType(getStringCellValue(row.getCell(0), dto));
+						dto.setPlantName(getStringCellValue(row.getCell(1), dto));
+						dto.setCostName(getStringCellValue(row.getCell(2), dto));
 						dto.setAopYear(year);
-						dto.setApr(getNumericCellValue(row.getCell(2), dto));
-						dto.setMay(getNumericCellValue(row.getCell(3), dto));
-						dto.setJun(getNumericCellValue(row.getCell(4), dto));
-						dto.setJul(getNumericCellValue(row.getCell(5), dto));
-						dto.setAug(getNumericCellValue(row.getCell(6), dto));
-						dto.setSep(getNumericCellValue(row.getCell(7), dto));
-						dto.setOct(getNumericCellValue(row.getCell(8), dto));
-						dto.setNov(getNumericCellValue(row.getCell(9), dto));
-						dto.setDec(getNumericCellValue(row.getCell(10), dto));
-						dto.setJan(getNumericCellValue(row.getCell(11), dto));
-						dto.setFeb(getNumericCellValue(row.getCell(12), dto));
-						dto.setMar(getNumericCellValue(row.getCell(13), dto));
-						dto.setRemark(getStringCellValue(row.getCell(14), dto));
-						String id=getStringCellValue(row.getCell(15), dto);
+						dto.setApr(getNumericCellValue(row.getCell(3), dto));
+						dto.setMay(getNumericCellValue(row.getCell(4), dto));
+						dto.setJun(getNumericCellValue(row.getCell(5), dto));
+						dto.setJul(getNumericCellValue(row.getCell(6), dto));
+						dto.setAug(getNumericCellValue(row.getCell(7), dto));
+						dto.setSep(getNumericCellValue(row.getCell(8), dto));
+						dto.setOct(getNumericCellValue(row.getCell(9), dto));
+						dto.setNov(getNumericCellValue(row.getCell(10), dto));
+						dto.setDec(getNumericCellValue(row.getCell(11), dto));
+						dto.setJan(getNumericCellValue(row.getCell(12), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(13), dto));
+						dto.setMar(getNumericCellValue(row.getCell(14), dto));
+						dto.setRemark(getStringCellValue(row.getCell(15), dto));
+						String id=getStringCellValue(row.getCell(16), dto);
 						if(id!=null) {
 							dto.setId(UUID.fromString(id));
 						}
 						
-						dto.setTableId(getStringCellValue(row.getCell(17), dto));
+						dto.setTableId(getStringCellValue(row.getCell(18), dto));
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -789,12 +784,13 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	String getJson() {
 	    return "{\r\n" + //
 	            "    \"BudgetMaintenance\": {\r\n" + //
-	            "        \"columnCount\":18,\r\n" + //
+	            "        \"columnCount\":19,\r\n" + //
 	            "        \"tables\": [\r\n" + //
 	            "            {\r\n" + //
 	            "                \"startRow\": 0,\r\n" + //
 	            "                \"headers\": [\r\n" + //
 	            "\t\t\t\t\t \r\n" + //
+	            "\t\t\t\t\t\"budgetType\", \r\n" + //
 	            "\t\t\t\t\t\"plantName\", \r\n" + //
 	            "\t\t\t\t\t\"costName\", \r\n" + //
 	            "\t\t\t\t\t\"apr\", \r\n" + //
@@ -813,7 +809,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
-	            "                \"startingIndexOfMonths\":2,\r\n" + //
+	            "                \"startingIndexOfMonths\":3,\r\n" + //
 	            "                \"hideTable\":false,\r\n" + //
 	            "                \"textBeforeTitle\":\"\",\r\n" + //
 	            "                \"title\":\"consumptionBudget\",\r\n" + //
@@ -822,11 +818,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                \"isColumnMergeRequired\":false,\r\n" + //
 	            "                \"isRowMergeRequired\":false,\r\n" + //
 	            "                \"headersTitles\":[[\r\n" + //
+	            "                    \"Type\",\r\n" + //
 	            "                    \"Plant\",\r\n" + //
 	            "                    \"Cost\",\r\n" + //
 	            "                    \"Remark\",\"Id\",\"Is Editable\"]],\r\n" + //
 	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[15,16,17],\r\n" + //
+	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
 	            "                \"styles\": {\r\n" + //
 	            "                    \"boldColumns\": [\r\n" + //
 	            "                        0\r\n" + //
@@ -841,7 +838,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "            {\r\n" + //
 	            "                \"startRow\": 0,\r\n" + //
 	            "                \"headers\": [\r\n" + //
-	           
+	            "\t\t\t\t\t\"budgetType\", \r\n" + //
 	            "\t\t\t\t\t\"plantName\", \r\n" + //
 	            "\t\t\t\t\t\"costName\", \r\n" + //
 	            "\t\t\t\t\t\"apr\", \r\n" + //
@@ -860,7 +857,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
-	            "                \"startingIndexOfMonths\":2,\r\n" + //
+	            "                \"startingIndexOfMonths\":3,\r\n" + //
 	            "                \"hideTable\":false,\r\n" + //
 	            "                \"textBeforeTitle\":\"\",\r\n" + //
 	            "                \"title\":\"Procurment Budget\",\r\n" + //
@@ -869,11 +866,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                \"isColumnMergeRequired\":false,\r\n" + //
 	            "                \"isRowMergeRequired\":false,\r\n" + //
 	            "                \"headersTitles\":[[\r\n" + //
+	            "                    \"Type\",\r\n" + //
 	            "                    \"Plant\",\r\n" + //
 	            "                    \"Cost\",\r\n" + //
 	            "                    \"Remark\",\"Id\",\"Is Editable\"]],\r\n" + //
 	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[15,16,17],\r\n" + //
+	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
 	            "                \"styles\": {\r\n" + //
 	            "                    \"boldColumns\": [\r\n" + //
 	            "                        0\r\n" + //
