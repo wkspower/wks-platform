@@ -479,6 +479,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		List<BudgetMaintenance> budgetMaintenanceList=new ArrayList<BudgetMaintenance>();
 		try {
 			for(BudgetMaintenanceDto budgetMaintenanceDto:budgetMaintenanceDtos) {
+				if (budgetMaintenanceDto.getSaveStatus() != null
+						&& budgetMaintenanceDto.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(budgetMaintenanceDto);
+					continue;
+				}
 				BudgetMaintenance budgetMaintenance=null;
 				if(budgetMaintenanceDto.getId()==null) {
 					budgetMaintenance=new BudgetMaintenance();
