@@ -76,9 +76,6 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	public ShutdownNormsServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
-	
-	
-
 
 	@Override
 	public AOPMessageVM getShutdownNormsData(String year, String plantId,String gradeId) {
@@ -89,7 +86,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			if (vertical.getName().equalsIgnoreCase("MEG")) {
 				objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
-			}else if (vertical.getName().equalsIgnoreCase("ELASTOMER")) {
+			}else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA")) {
 				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
 				objList = getShutdownNormsMEG(year, plant.getId(), viewName);
 			}else {
