@@ -33,5 +33,12 @@ public class ModeWiseNormsController {
 	public AOPMessageVM updateModeWiseNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String mode,@RequestParam(required=false) String method,@RequestBody List<ModeWiseNormsDTO> modeWiseNormsDTOList){
 		return	modeWiseNormsService.updateModeWiseNormsData(year, plantId,mode,method,modeWiseNormsDTOList);
 	}
+
+	
+
+	@GetMapping(value="/mode-wise/norms-monthwise-modetype")
+	public AOPMessageVM getNormsMonthWiseModeTypeData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String mode){
+		return	modeWiseNormsService.getNormsMonthWiseModeTypeData(year, plantId,mode);
+	}
 		
 }

@@ -1,9 +1,9 @@
 package com.wks.caseengine.service;
 
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.ModeWiseNormsDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
+import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
@@ -45,13 +46,13 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 
 	@Autowired
 	private VerticalsRepository verticalRepository;
-	
+
 	@Autowired
 	private MCUNormsValueRepository mcuNormsValueRepository;
-	
+
 	@Autowired
 	private AopCalculationRepository aopCalculationRepository;
-	
+
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
 
@@ -91,13 +92,15 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 				modeWiseNormsDTO.setJanuary(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
 				modeWiseNormsDTO.setFebruary(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
 				modeWiseNormsDTO.setMarch(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
-				modeWiseNormsDTO.setRemark(row[22] != null ? row[22].toString() : null);        // Was row[21]
-				modeWiseNormsDTO.setIsEditable(row[24] != null ? Boolean.valueOf(row[24].toString()) : null); // Was row[23]
-				modeWiseNormsDTO.setIsChecked(row[25] != null ? Boolean.valueOf(row[25].toString()) : null);  // Was row[24]
+				modeWiseNormsDTO.setRemark(row[22] != null ? row[22].toString() : null); // Was row[21]
+				modeWiseNormsDTO.setIsEditable(row[24] != null ? Boolean.valueOf(row[24].toString()) : null); // Was
+																												// row[23]
+				modeWiseNormsDTO.setIsChecked(row[25] != null ? Boolean.valueOf(row[25].toString()) : null); // Was
+																												// row[24]
 
 				modeWiseNormsDTOList.add(modeWiseNormsDTO);
 
-			}			
+			}
 			Map<String, Object> map = new HashMap<>();
 
 			List<AopCalculation> aopCalculation = aopCalculationRepository
@@ -109,7 +112,6 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 			aopMessageVM.setMessage("Data fetched successfully");
 			return aopMessageVM;
 
-
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -117,7 +119,7 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 		}
 
 	}
-	
+
 	public List<Object[]> getModeWiseNormsData(String plantId, String aopYear, String Mode,
 			String Method, String procedureName) {
 		try {
@@ -131,7 +133,6 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 			query.setParameter("aopYear", aopYear);
 			query.setParameter("Mode", Mode);
 			query.setParameter("Method", Method);
-			
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -153,42 +154,43 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			for(ModeWiseNormsDTO modeWiseNormsDTO : modeWiseNormsDTOList) {
-				MCUNormsValue mcuNormsValue=null;
-				if(modeWiseNormsDTO.getId()==null) {
+			for (ModeWiseNormsDTO modeWiseNormsDTO : modeWiseNormsDTOList) {
+				MCUNormsValue mcuNormsValue = null;
+				if (modeWiseNormsDTO.getId() == null) {
 					mcuNormsValue = new MCUNormsValue();
 					mcuNormsValue.setCreatedOn(new Date());
-				}else {
-					Optional<MCUNormsValue> mcuNormsValueOpt= mcuNormsValueRepository.findById(UUID.fromString(modeWiseNormsDTO.getId()));
-					if(mcuNormsValueOpt.isPresent()) {
-						 mcuNormsValue = mcuNormsValueOpt.get();
-						 mcuNormsValue.setModifiedOn(new Date());
+				} else {
+					Optional<MCUNormsValue> mcuNormsValueOpt = mcuNormsValueRepository
+							.findById(UUID.fromString(modeWiseNormsDTO.getId()));
+					if (mcuNormsValueOpt.isPresent()) {
+						mcuNormsValue = mcuNormsValueOpt.get();
+						mcuNormsValue.setModifiedOn(new Date());
 					}
-					
-				}
-					mcuNormsValue.setApril(modeWiseNormsDTO.getApril());
-					mcuNormsValue.setMay(modeWiseNormsDTO.getMay());
-					mcuNormsValue.setJune(modeWiseNormsDTO.getJune());
-					mcuNormsValue.setJuly(modeWiseNormsDTO.getJuly());
-					mcuNormsValue.setAugust(modeWiseNormsDTO.getAugust());
-					mcuNormsValue.setSeptember(modeWiseNormsDTO.getSeptember());
-					mcuNormsValue.setOctober(modeWiseNormsDTO.getOctober());
-					mcuNormsValue.setNovember(modeWiseNormsDTO.getNovember());
-					mcuNormsValue.setDecember(modeWiseNormsDTO.getDecember());
-					mcuNormsValue.setJanuary(modeWiseNormsDTO.getJanuary());
-					mcuNormsValue.setFebruary(modeWiseNormsDTO.getFebruary());
-					mcuNormsValue.setMarch(modeWiseNormsDTO.getMarch());
-					mcuNormsValue.setUpdatedBy(Utility.getUserName());
-					mcuNormsValue.setIsChecked(modeWiseNormsDTO.getIsChecked());
-					mcuNormsValue.setFinancialYear(year);
-					mcuNormsValue.setMaterialFkId(UUID.fromString(modeWiseNormsDTO.getMaterialFKId()));
-					mcuNormsValue.setPlantFkId(UUID.fromString(plantId));
-					mcuNormsValue.setSiteFkId(plant.getSiteFkId());
-					mcuNormsValue.setVerticalFkId(plant.getVerticalFKId());
-					mcuNormsValueList.add(mcuNormsValueRepository.save(mcuNormsValue));
-				}
 
-		}catch(Exception e) {
+				}
+				mcuNormsValue.setApril(modeWiseNormsDTO.getApril());
+				mcuNormsValue.setMay(modeWiseNormsDTO.getMay());
+				mcuNormsValue.setJune(modeWiseNormsDTO.getJune());
+				mcuNormsValue.setJuly(modeWiseNormsDTO.getJuly());
+				mcuNormsValue.setAugust(modeWiseNormsDTO.getAugust());
+				mcuNormsValue.setSeptember(modeWiseNormsDTO.getSeptember());
+				mcuNormsValue.setOctober(modeWiseNormsDTO.getOctober());
+				mcuNormsValue.setNovember(modeWiseNormsDTO.getNovember());
+				mcuNormsValue.setDecember(modeWiseNormsDTO.getDecember());
+				mcuNormsValue.setJanuary(modeWiseNormsDTO.getJanuary());
+				mcuNormsValue.setFebruary(modeWiseNormsDTO.getFebruary());
+				mcuNormsValue.setMarch(modeWiseNormsDTO.getMarch());
+				mcuNormsValue.setUpdatedBy(Utility.getUserName());
+				mcuNormsValue.setIsChecked(modeWiseNormsDTO.getIsChecked());
+				mcuNormsValue.setFinancialYear(year);
+				mcuNormsValue.setMaterialFkId(UUID.fromString(modeWiseNormsDTO.getMaterialFKId()));
+				mcuNormsValue.setPlantFkId(UUID.fromString(plantId));
+				mcuNormsValue.setSiteFkId(plant.getSiteFkId());
+				mcuNormsValue.setVerticalFkId(plant.getVerticalFKId());
+				mcuNormsValueList.add(mcuNormsValueRepository.save(mcuNormsValue));
+			}
+
+		} catch (Exception e) {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to update data", e);
 		}
@@ -205,11 +207,59 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data updated successfully");
 		aopMessageVM.setData(mcuNormsValueList);
-				
+
 		// TODO Auto-generated method stub
 		return aopMessageVM;
 	}
 
+	@Override
+	public AOPMessageVM getNormsMonthWiseModeTypeData(String plantId, String year, String modeVal) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		 String[] MONTHS = {
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+    	};
+		
+		try {
+			// Get the data
+			List<Object[]> rows = mcuNormsValueRepository.getNormsMonthWiseModeTypeData(year, plantId, modeVal);
 
+			// Get column names
+
+			// Prepare the list of maps
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : rows) {
+				String materialId = row[0] != null ? row[0].toString() : null;
+
+				for (int i = 1; i <= 12; i++) {
+					String value = row[i] != null ? row[i].toString() : null;
+
+					String mode = null;
+					if ("Propane(2Z)".equalsIgnoreCase(value) || "Propane(1Z)".equalsIgnoreCase(value)) {
+						mode = value;
+					}
+
+					Map<String, Object> map = new LinkedHashMap<>();
+					map.put("NormParameter_FK_Id", materialId);
+					map.put("month", MONTHS[i - 1]);
+					map.put("mode", mode);
+
+					resultList.add(map);
+				}
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			// data.put("changedData", monthIdList);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(data);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
+
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 
 }

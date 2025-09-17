@@ -13,4 +13,6 @@ public interface ModeWiseNormsService {
 	
 	AOPMessageVM updateModeWiseNormsData(String year, String plantId, String Mode, String Method,List<ModeWiseNormsDTO> modeWiseNormsDTOList);
 
+    AOPMessageVM getNormsMonthWiseModeTypeData(String plantId, String year, String modeVal);
+
 }
