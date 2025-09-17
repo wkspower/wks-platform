@@ -261,15 +261,17 @@ const KendoDataTablesCracker = ({
     )
   }
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = isDisabled ? `custom-disabled-row` : className
-    return (
-      <tr {...rest?.trProps} className={rowClassName}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
+  const isDisabled =
+    !dataItem.isEditable && dataItem?.isEditable !== undefined
+  let rowClassName = className || ''
+  if (dataItem.isError) rowClassName += ' error-row'
+  if (isDisabled) rowClassName += ' custom-disabled-row'
+  return (
+    <tr {...rest?.trProps} className={rowClassName.trim()}>
+      {rest.children}
+    </tr>
+  )
+}, [])
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -334,6 +336,7 @@ const KendoDataTablesCracker = ({
       autoProcessData={true}
       defaultGroup={initialGroup}
       data={rows}
+      rowRender={CustomRow}
       rows={{ data: CustomRow }}
       dataItemKey='id'
       editField='inEdit'

@@ -1,7 +1,15 @@
 import React from 'react'
 import { Box } from '@mui/material'
 import KendoDataTablesCracker from './index-cracker.js'
-
+const CustomRow = ({ dataItem, className, ...rest }) => {
+  let rowClassName = className || ''
+  if (dataItem.isError) rowClassName += ' error-row'
+  return (
+    <tr {...rest?.trProps} className={rowClassName.trim()}>
+      {rest.children}
+    </tr>
+  )
+}
 const SDTAActivitiesGrid = ({
   columns,
   rows,
@@ -48,6 +56,7 @@ const SDTAActivitiesGrid = ({
         saveChanges={saveChanges}
         setRemarkDialogOpen={setRemarkDialogOpen}
         titleName='SD / TA Activities'
+        rowRender={CustomRow}
       />
     </Box>
   )

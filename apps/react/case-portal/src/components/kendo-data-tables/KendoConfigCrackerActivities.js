@@ -179,6 +179,74 @@ const DecokingConfig = () => {
     fetchData()
   }, [plantID, oldYear, yearChanged, keycloak, fetchData])
 
+ function validateAllDateOverlaps(rows) {
+  const pairs = [
+    ['ibrStartDate', 'ibrEndDate', 'IBR'],
+    ['taStartDate', 'taEndDate', 'TA'],
+    ['shutDownStartDate', 'shutDownEndDate', 'SD'],
+  ];
+  rows.forEach(row => { row.isError = false });
+
+  let overlapMessage = '';
+  let foundOverlap = false;
+
+  // Compare every range in every row with every other range (including different types)
+  for (let i = 0; i < rows.length; i++) {
+    for (const [startA, endA, labelA] of pairs) {
+      const aStart = rows[i][startA] ? new Date(rows[i][startA]).getTime() : null;
+      const aEnd = rows[i][endA] ? new Date(rows[i][endA]).getTime() : null;
+      if (!aStart || !aEnd) continue;
+      for (let j = 0; j < rows.length; j++) {
+        for (const [startB, endB, labelB] of pairs) {
+          const bStart = rows[j][startB] ? new Date(rows[j][startB]).getTime() : null;
+          const bEnd = rows[j][endB] ? new Date(rows[j][endB]).getTime() : null;
+          if (!bStart || !bEnd) continue;
+          // Skip same row and same activity
+          if (i === j && labelA === labelB) continue;
+          if (aStart < bEnd && bStart < aEnd) {
+            rows[i].isError = true;
+            rows[j].isError = true;
+            foundOverlap = true;
+            overlapMessage = `Furnace ${rows[i].displayName} ${labelA} overlaps Furnace ${rows[j].displayName} ${labelB}.`;
+            break;
+          }
+        }
+        if (foundOverlap) break;
+      }
+      if (foundOverlap) break;
+    }
+    if (foundOverlap) break;
+  }
+
+  // Also check within a single row (column-wise)
+  if (!foundOverlap) {
+    for (let i = 0; i < rows.length; i++) {
+      const ranges = pairs.map(([start, end, label]) => {
+        const s = rows[i][start] ? new Date(rows[i][start]).getTime() : null;
+        const e = rows[i][end] ? new Date(rows[i][end]).getTime() : null;
+        return s && e ? { start: s, end: e, label } : null;
+      }).filter(Boolean);
+
+      for (let m = 0; m < ranges.length; m++) {
+        for (let n = m + 1; n < ranges.length; n++) {
+          if (ranges[m].start < ranges[n].end && ranges[n].start < ranges[m].end) {
+            rows[i].isError = true;
+            foundOverlap = true;
+           overlapMessage = `Furnace ${rows[i].displayName} ${ranges[m].label} overlaps Furnace ${rows[i].displayName} ${ranges[n].label}.`;
+            break;
+          }
+        }
+        if (foundOverlap) break;
+      }
+      if (foundOverlap) break;
+    }
+  }
+
+  return foundOverlap
+    ? { overlap: true, message: overlapMessage }
+    : { overlap: false };
+}
+
   const saveChangesSdTa = React.useCallback(async () => {
     try {
       if (Object.keys(modifiedCellsSdTa).length === 0) {
@@ -192,6 +260,19 @@ const DecokingConfig = () => {
       }
       var rawData = Object.values(modifiedCellsSdTa)
       const requiredFields = ['idFromApi', 'remarks']
+
+    var rawData1 = getRows('IBR Plan')[2] 
+      // Overlap validation
+    const result = validateAllDateOverlaps(rawData1)
+    if (result.overlap) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: result.message,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
 
       const validationMessage = validateFields(rawData, requiredFields)
       if (validationMessage) {
@@ -494,6 +575,7 @@ const DecokingConfig = () => {
       setLoading(false)
     }
   }
+  const rowClass = (row) => row.isError ? 'row-error' : '';
   return (
     <Box>
       <Backdrop
@@ -524,6 +606,7 @@ const DecokingConfig = () => {
             permissions={adjustedPermissionsSdTa}
             saveChanges={saveChangesSdTa}
             setRemarkDialogOpen={setRemarkDialogOpenSdTa}
+            rowClass={rowClass}
           />
 
           <FurnaceRunLengthGrid

@@ -35,7 +35,7 @@ const defs = {
     spyroInput: 'Spyro Input',
     spyroOutput: 'Spyro Output',
     spyroMenu: 'Spyro Menu',
-    decokingActivities: 'Decoking Activities',
+    decokingActivities: 'Furnace Maintenance and SAD plan',
     maintenanceDetails: 'Maintenance Details',
     consumptionNorms: 'Overall AOP Consumption (Norm/Quantity)',
     productionNorms: 'Month wise Production plan',
