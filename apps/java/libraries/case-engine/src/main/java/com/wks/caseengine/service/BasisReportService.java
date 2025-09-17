@@ -12,5 +12,7 @@ public interface BasisReportService {
 	public AOPMessageVM getNormBasisReportCracker( String plantId, String aopYear, String type,String mode);
 	public AOPMessageVM getBestAchievedCracker( String plantId, String aopYear, String reportType);
 	public AOPMessageVM calculateBestAchieved( String year, String plantId,String periodTo, String periodFrom);
+	public AOPMessageVM calculateBestAchievedIndividual(String year, String plantId, String periodTo,
+			String periodFrom);
 
 }

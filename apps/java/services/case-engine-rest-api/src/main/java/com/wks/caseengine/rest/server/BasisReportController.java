@@ -39,6 +39,11 @@ public class BasisReportController {
 	public AOPMessageVM calculateBestAchieved(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String periodTo,@RequestParam(required=false) String periodFrom){
 		return	basisReportService.calculateBestAchieved(year, plantId,periodTo,periodFrom);
 	}
+
+	@GetMapping(value="/calculate-best-achieved-individual")
+	public AOPMessageVM calculateBestAchievedIndividual(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String periodTo,@RequestParam(required=false) String periodFrom){
+		return	basisReportService.calculateBestAchievedIndividual(year, plantId,periodTo,periodFrom);
+	}
 	
 	
 	

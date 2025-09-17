@@ -468,6 +468,38 @@ public class BasisReportServiceImpl implements BasisReportService {
 		}
 		return aopMessageVM;
 	}
+
+
+	@Override
+	public AOPMessageVM calculateBestAchievedIndividual(String year, String plantId,String periodTo, String periodFrom) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadBestAchived_Individual";
+			System.out.println(storedProcedure);
+			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year,periodTo,periodFrom);
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"best-achieved-individual");
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("best-achieved-individual");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return aopMessageVM;
+	}
 	
 	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
 			String aopYear,String PeriodTo, String PeriodFrom) {
