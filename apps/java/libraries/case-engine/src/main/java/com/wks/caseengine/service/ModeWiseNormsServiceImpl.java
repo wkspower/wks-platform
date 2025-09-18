@@ -213,7 +213,7 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 	}
 
 	@Override
-	public AOPMessageVM getNormsMonthWiseModeTypeData(String plantId, String year, String modeVal) {
+	public AOPMessageVM getNormsMonthWiseModeTypeData(String year, String plantId, String modeVal) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		 String[] MONTHS = {
             "January", "February", "March", "April", "May", "June",
@@ -238,14 +238,15 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 					String mode = null;
 					if ("Propane(2Z)".equalsIgnoreCase(value) || "Propane(1Z)".equalsIgnoreCase(value)) {
 						mode = value;
+						System.out.println("value2 " + value);
+						Map<String, Object> map = new LinkedHashMap<>();
+						map.put("NormParameter_FK_Id", materialId);
+						map.put("month", MONTHS[i - 1]);
+						map.put("mode", mode);
+
+						resultList.add(map);
 					}
 
-					Map<String, Object> map = new LinkedHashMap<>();
-					map.put("NormParameter_FK_Id", materialId);
-					map.put("month", MONTHS[i - 1]);
-					map.put("mode", mode);
-
-					resultList.add(map);
 				}
 			}
 
