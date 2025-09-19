@@ -73,6 +73,10 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 
 		try {
+			 if(vertical.getName().equalsIgnoreCase("CRACKER")) {
+				List<Object[]> obj=getOverallConsumptionData(plantId,year);
+				return getData(obj, plantId, year);
+			}
 			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId),gradeId);
 			List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
 
@@ -439,5 +443,68 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<Object[]> getOverallConsumptionData(String plantId, String aopYear) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			
+			 String storedProcedure = verticalName + "_" + site.getName() + "_OverAllConsumtion";
+			
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @siteId = :siteId, @verticalId = :verticalId";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("siteId", site.getId());
+			query.setParameter("verticalId", vertical.getId());
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public AOPMessageVM getData(List<Object[]> obj,String plantId,String year){
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		List<AOPConsumptionNormDTO> aopConsumptionNormDTOs = new ArrayList<AOPConsumptionNormDTO>();
+		for(Object[] row:obj) {
+			AOPConsumptionNormDTO aopConsumptionNormDTO = new AOPConsumptionNormDTO();
+			aopConsumptionNormDTO.setId(row[0] != null ? row[0].toString() : null);
+			aopConsumptionNormDTO.setAopCaseId(row[3] != null ? row[3].toString() : null);
+			aopConsumptionNormDTO.setAopStatus(row[4] != null ? row[4].toString() : null);
+			aopConsumptionNormDTO.setAopRemarks(row[5] != null ? row[5].toString() : null);
+			aopConsumptionNormDTO.setMaterialFkId(row[6] != null ? row[6].toString() : null);
+			aopConsumptionNormDTO.setJan(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+			aopConsumptionNormDTO.setFeb(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+			aopConsumptionNormDTO.setMarch(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+			aopConsumptionNormDTO.setApril(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+			aopConsumptionNormDTO.setMay(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+			aopConsumptionNormDTO.setJune(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+			aopConsumptionNormDTO.setJuly(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+			aopConsumptionNormDTO.setAug(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+			aopConsumptionNormDTO.setSep(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+			aopConsumptionNormDTO.setOct(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+			aopConsumptionNormDTO.setNov(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+			aopConsumptionNormDTO.setDec(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+			aopConsumptionNormDTOs.add(aopConsumptionNormDTO);
+		}
+		Map<String, Object> map = new HashMap<>(); 
+		
+		List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"consumption-aop");
+		map.put("aopConsumptionNormDTOList", aopConsumptionNormDTOs);
+		map.put("aopCalculation", aopCalculation);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(map);
+		aopMessageVM.setMessage("Data fetched successfully");
+		return aopMessageVM;
+	}
+
 
 }

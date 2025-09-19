@@ -761,7 +761,7 @@ public class ExcelServiceImpl implements ExcelService {
                         "                                \"startRow\": 8, \r\n" + //
                         "                                \"headers\": [ \r\n" + //
                         "                                    [ \r\n" + //
-                        "                                        \"particulars\", \r\n" + //
+                        "                                        \"Products\", \r\n" + //
                 months +
                         "                ,                        \"Total\" \r\n" + //
                         "                                    ] \r\n" + //

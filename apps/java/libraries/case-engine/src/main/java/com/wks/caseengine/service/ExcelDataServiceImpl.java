@@ -206,7 +206,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         for (AOPDTO dto : aOPList) {
             Double sum = 0.0;
             List<Object> list = new ArrayList<>();
-            list.add(dto.getNormParameterName());
+            list.add(dto.getDisplayName());
             list.add(dto.getApril());
             list.add(dto.getMay());
             list.add(dto.getJune());
@@ -610,8 +610,8 @@ public class ExcelDataServiceImpl implements ExcelDataService {
             List<Object> list = new ArrayList<>();
             list.add(dto.getParticulates());
             list.add(dto.getUom());
-            list.add(dto.getFyActual());
             list.add(dto.getFyAop());
+            list.add(dto.getFyActual());
             list.add(dto.getSyAop());
             list.add(dto.getRemark());
             dataList.add(list);
