@@ -1,9 +1,4 @@
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { Box } from '@mui/material'
-import MuiAccordion from '@mui/material/Accordion'
-import MuiAccordionDetails from '@mui/material/AccordionDetails'
-import MuiAccordionSummary from '@mui/material/AccordionSummary'
-import { styled } from '@mui/material/styles'
 import AopTabs from 'components/AopTabs'
 import Notification from 'components/Utilities/Notification'
 import { verticalEnums } from 'enums/verticalEnums'
@@ -12,6 +7,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
 import {
   Backdrop,
   Button,
@@ -26,11 +26,6 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import SelectivityData from './SelectivityData'
-import {
-  CustomAccordion,
-  CustomAccordionDetails,
-  CustomAccordionSummary,
-} from 'utils/CustomAccrodian'
 
 const ConfigurationTable = () => {
   const year = localStorage.getItem('year')

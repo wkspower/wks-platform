@@ -681,7 +681,7 @@ const KendoDataTables = ({
     if (permissions?.showG && grades?.length > 0 && !selectedGrade) {
       const firstGrade = grades[0]
       setSelectedGrade(firstGrade.gradeId)
-      handleGradeChange(firstGrade.gradeId)
+      handleGradeChange(firstGrade.gradeId, firstGrade?.displayName)
     }
   }, [grades, permissions?.showG, selectedGrade])
 
@@ -814,7 +814,10 @@ const KendoDataTables = ({
                       (g) => g.gradeId === selectedGradeId,
                     )
                     setSelectedGrade(selectedGradeId)
-                    handleGradeChange(selectedGradeObj?.gradeId)
+                    handleGradeChange(
+                      selectedGradeObj?.gradeId,
+                      selectedGradeObj?.displayName,
+                    ) // ✅ Pass both id & name
                   }}
                   className='dropdown-select'
                   variant='outlined'

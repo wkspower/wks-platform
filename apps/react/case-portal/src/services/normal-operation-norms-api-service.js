@@ -18,7 +18,75 @@ export const NormalOperationNormsApiService = {
   updateFinalNormsData,
   getfinalNorms,
   calculateFinalNorms,
+  getNormsConstants,
+  BestAchivedColorCodes,
+  load1,
+  load2,
 }
+
+async function BestAchivedColorCodes(keycloak, plantId, year, mode) {
+  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms-monthwise-modetype?year=${year}&plantId=${plantId}&mode=${mode}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getNormsConstants(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function load1(keycloak, PLANT_ID, AOP_YEAR, endDate, startDate) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-best-achieved-individual?year=${AOP_YEAR}&plantId=${PLANT_ID}&periodTo=${endDate}&periodFrom=${startDate}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function load2(keycloak, PLANT_ID, AOP_YEAR, endDate, startDate) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-best-achieved?year=${AOP_YEAR}&plantId=${PLANT_ID}&periodTo=${endDate}&periodFrom=${startDate}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 async function getfinalNorms(keycloak, gradeId, method) {
   const year = localStorage.getItem('year') || ''
   const storedPlant = localStorage.getItem('selectedPlant')

@@ -1,23 +1,21 @@
-import { Box } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useRef, useState, useCallback } from 'react'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '@progress/kendo-react-excel-export'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import {
   CustomAccordion,
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-import { Button } from '@mui/material'
-import {
-  ExcelExport,
-  ExcelExportColumn,
-} from '@progress/kendo-react-excel-export'
 import { Tab, Tabs } from '../../../../node_modules/@mui/material/index'
 import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
 
@@ -237,41 +235,90 @@ const ProductionVolumeDataBasisPe = () => {
     }
   }, [fetchAllGrids, plantID, oldYear, yearChanged])
 
+  // eslint-disable-next-line no-useless-escape
+  const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
+
+  function sanitizeSheetName(name = '', fallback = 'Sheet') {
+    let s = String(name || '')
+      .replace(INVALID_SHEET_CHARS_RE, ' ')
+      .trim()
+    if (s.length === 0) s = fallback
+    if (s.length > 31) s = s.slice(0, 31) // Excel limit
+    return s
+  }
+
+  function normalizeCellValue(v) {
+    if (v === undefined || v === null) return ''
+    // If it's a Date object, keep as Date (Kendo/Excel accepts Date) — but fallback to ISO if not supported
+    if (v instanceof Date) return v
+    // If it's an object or array, convert to string (avoid injecting nested objects)
+    if (typeof v === 'object') {
+      try {
+        return JSON.stringify(v)
+      } catch {
+        return String(v)
+      }
+    }
+    return v
+  }
+
   // Export: gather sheets from each ExcelExport instance and combine into one workbook
   const exportAllGrids = useCallback(() => {
+    // find any existing ExcelExport ref to use as base for saving
     const keys = Object.keys(exportRefs.current || {})
-    if (!keys.length) return
-
-    // find first available ref
     const firstKey = keys.find((k) => exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
-    const baseOptions = baseRef?.workbookOptions?.()
-    if (!baseOptions) return
+    if (!baseRef || typeof baseRef.save !== 'function') return
 
-    // collect first sheet from each ref (preserves order of gridNames when possible)
+    // build sheets from gridNames & dataMap (preserve gridNames order)
     const sheets = gridNames
-      .map((name) => {
-        const ref = exportRefs.current[name]
-        try {
-          const opts = ref?.workbookOptions?.()
-          return opts?.sheets?.[0] ? { ...opts.sheets[0] } : null
-        } catch {
-          return null
+      .map((gridName, idx) => {
+        const d = dataMap[gridName] || { rows: [], columns: [] }
+        const cols = d.columns || []
+        const rows = d.rows || []
+
+        // if no columns and no rows, skip this sheet
+        if (!cols.length && !rows.length) return null
+
+        const sheetColumns = cols.map((c) => {
+          // minimal column object for workbook: we include width/autoWidth optionally
+          return {
+            // don't rely on any functions or deep references
+            autoWidth: true,
+            title: c.title || c.field || '',
+          }
+        })
+
+        const sheetRows = rows.map((r) => {
+          return {
+            cells: cols.map((c) => {
+              return { value: normalizeCellValue(r[c.field]) }
+            }),
+          }
+        })
+
+        return {
+          title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
+          columns: sheetColumns,
+          rows: sheetRows,
         }
       })
       .filter(Boolean)
 
     if (!sheets.length) return
 
-    // set readable titles (use the original grid name)
-    sheets.forEach((s, idx) => {
-      s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
-    })
+    const workbookOptions = {
+      sheets,
+    }
 
-    baseOptions.sheets = sheets
-    baseRef.save(baseOptions)
-  }, [gridNames])
+    try {
+      // call save with the constructed workbook options
+      baseRef.save(workbookOptions)
+    } catch (err) {
+      console.error('Export save failed:', err)
+    }
+  }, [gridNames, dataMap])
 
   const currentDateTime = new Date()
     .toISOString()
