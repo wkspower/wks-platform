@@ -135,6 +135,7 @@ const KendoDataTables = ({
   downloadExcelForConfiguration = () => {},
   onLoad = () => {},
   disableRedHighlight = false,
+  showThreeColors = false,
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -160,20 +161,18 @@ const KendoDataTables = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const ParticularsRedCell = (props) => {
-  const { dataItem, field } = props;
-  // Common condition for red highlight
-  const isRed =
-    (field === 'materialDisplayName' || field === 'Particulars') &&
-    (
-      dataItem.isRedParticulars ||(
-        dataItem.normParameterTypeId === '5859D066-F475-461E-9D60-7B781C604FF2' )
-    );
-  return (
-    <td style={{ color: isRed ? 'red' : undefined }}>
-      {dataItem.materialDisplayName}
-    </td>
-  );
-};
+    const { dataItem, field } = props
+    // Common condition for red highlight
+    const isRed =
+      (field === 'materialDisplayName' || field === 'Particulars') &&
+      (dataItem.isRedParticulars ||
+        dataItem.normParameterTypeId === '5859D066-F475-461E-9D60-7B781C604FF2')
+    return (
+      <td style={{ color: isRed ? 'red' : undefined }}>
+        {dataItem.materialDisplayName}
+      </td>
+    )
+  }
   const initialGroup = groupBy
     ? [
         {
@@ -463,6 +462,7 @@ const KendoDataTables = ({
     )
   }
   //
+
   const RedHighlightCell = (props) => {
     const {
       dataItem,
@@ -483,14 +483,12 @@ const KendoDataTables = ({
       )
     }
 
-    // Check if edited (local edits)
     const isEdited = Object.prototype.hasOwnProperty.call(
       customModifiedCells?.[rowId] || {},
       field,
     )
 
-    // Backend red highlight (allRedCell logic)
-    const month = field // Using field name as month
+    const month = field
     const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
 
     const isRedFromAllRedCell = allRedCell?.some(
@@ -499,7 +497,6 @@ const KendoDataTables = ({
         cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
     )
 
-    // Final highlight condition
     const shouldHighlight = isEdited || isRedFromAllRedCell
 
     return (
@@ -516,7 +513,64 @@ const KendoDataTables = ({
     )
   }
 
-  //
+  const RedHighlightCell2 = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+    } = props
+
+    const rowId = dataItem.id
+    const value = dataItem[field]
+
+    if (disableRedHighlight) {
+      return (
+        <td {...tdProps} title={value}>
+          {children}
+        </td>
+      )
+    }
+
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    const month = field
+    const normId = dataItem.materialFKId || dataItem.NormParameter_FK_Id
+
+    const matchedCell = allRedCell?.find(
+      (cell) =>
+        cell.month?.toLowerCase() === month?.toLowerCase() &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    let highlightColor
+    if (isEdited) {
+      highlightColor = 'orange'
+    } else if (matchedCell?.mode === 'Propane(1Z)') {
+      highlightColor = 'red'
+    } else if (matchedCell?.mode === 'Propane(2Z)') {
+      highlightColor = 'green'
+    }
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: highlightColor,
+          fontWeight: highlightColor ? 'bold' : undefined,
+        }}
+      >
+        {children}
+      </td>
+    )
+  }
+
   const toolTipRenderer = (props) => {
     const value = props.dataItem[props.field]
     const month = props.field
@@ -1465,14 +1519,22 @@ const KendoDataTables = ({
                       headerClassName={isActive ? 'active-column' : ''}
                       cells={{
                         edit: { text: NoSpinnerNumericEditor },
-                        data: (props) => (
-                          <RedHighlightCell
-                            {...props}
-                            customModifiedCells={customModifiedCells}
-                            allRedCell={allRedCell}
-                            disableRedHighlight={disableRedHighlight}
-                          />
-                        ),
+                        data: (props) =>
+                          showThreeColors ? (
+                            <RedHighlightCell2
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              allRedCell={allRedCell}
+                              disableRedHighlight={disableRedHighlight}
+                            />
+                          ) : (
+                            <RedHighlightCell
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              allRedCell={allRedCell}
+                              disableRedHighlight={disableRedHighlight}
+                            />
+                          ),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
@@ -1550,24 +1612,7 @@ const KendoDataTables = ({
                     />
                   )
                 }
-              if (col.field === 'materialDisplayName' &&  gridName === 'main' ) {
-                 return (
-                <GridColumn
-                 key={col.field}
-                 field={col.field}
-                 title={col.title || col.headerName}
-                 width={col.widthT}
-                 hidden={col.hidden}
-                 editable={col?.editable ? true : false}
-                 headerClassName={isColumnActive(col?.field, filter, sort) ? 'active-column' : ''}
-                 cells={{
-                 data: ParticularsRedCell,
-                 headerCell: SimpleHeaderWithTooltip,
-             }}
-                columnMenu={ColumnMenuCheckboxFilter}
-              />
-             );
-          }
+
                 if (col.field === 'ConstantValue') {
                   return (
                     <GridColumn

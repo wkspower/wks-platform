@@ -296,16 +296,16 @@ const CrakcerConstants = () => {
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        moment(endDate).format('YYYY/MM/DD'),
-        moment(startDate).format('YYYY/MM/DD'),
+        moment(endDate).format('YYYY-MM-DD'),
+        moment(startDate).format('YYYY-MM-DD'),
       )
 
       const response2 = await NormalOperationNormsApiService.load2(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        moment(endDate).format('YYYY/MM/DD'),
-        moment(startDate).format('YYYY/MM/DD'),
+        moment(endDate).format('YYYY-MM-DD'),
+        moment(startDate).format('YYYY-MM-DD'),
       )
 
       if (response) {
@@ -481,24 +481,28 @@ const CrakcerConstants = () => {
 
   const colDefsConstants = [
     {
-      field: 'materialDisplayName',
+      field: 'DisplayName',
       title: 'Particulars',
     },
 
     {
-      field: 'uom',
+      field: 'UOM',
       title: 'UOM',
 
       editable: false,
     },
 
     {
-      field: 'april',
+      field: 'ConstantValue',
       title: 'Value',
       editable: true,
       align: 'right',
       format: '{0:#.###}',
       type: 'number',
+    },
+    {
+      field: 'remarks',
+      title: 'Remark',
     },
   ]
 
@@ -569,16 +573,15 @@ const CrakcerConstants = () => {
         AOP_YEAR,
       )
 
-      setCalculationObject(response?.data?.aopCalculation)
-
-      let mappedData = response?.data?.mcuNormsValueDTOList
+      let mappedData = response?.data
 
       let formattedData = mappedData?.map((item, index) => ({
         ...item,
         idFromApi: item.id,
         id: `main-${index}`,
-        originalRemark: item.remarks,
-        Particulars: item.normType,
+        originalRemark: item.Remarks,
+        remarks: item.Remarks || '',
+        Particulars: item.NormTypeName,
       }))
 
       setRowsConstants(formattedData)
@@ -639,6 +642,8 @@ const CrakcerConstants = () => {
           message: 'No Records to Save!',
           severity: 'info',
         })
+        setModifiedCellsConstants({})
+
         return
       }
       saveCatalystData(data)
@@ -653,7 +658,6 @@ const CrakcerConstants = () => {
   }, [modifiedCellsConstants, summary])
 
   const handleRemarkCellClickConstants = (row) => {
-    if (!row?.isEditable) return
     setCurrentRemarkConstants(row.remarks || '')
     setCurrentRowIdConstants(row.id)
     setRemarkDialogOpenConstants(true)
@@ -669,19 +673,19 @@ const CrakcerConstants = () => {
       ExcelName: `${lowerVertName}_Constants`,
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate: true,
+      showCalculate: false,
     },
     isOldYear,
   )
 
   return (
     <div>
-      {/* <Backdrop
+      <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading1}
       >
         <CircularProgress color='inherit' />
-      </Backdrop> */}
+      </Backdrop>
       {ConfigurationAccordian}
       <Box>
         <KendoDataTables
@@ -712,6 +716,7 @@ const CrakcerConstants = () => {
           permissions={adjustedPermissionsConstants}
           groupBy='Particulars'
           plantID={plantID}
+          summaryEdited={summaryEdited}
         />
       </Box>
       <Notification

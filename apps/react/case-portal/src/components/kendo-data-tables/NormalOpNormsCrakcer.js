@@ -169,14 +169,14 @@ const NormalOpNormsScreenCracker = () => {
       let mappedData2 = response2?.data?.mcuNormsValueDTOList
       let mappedData3 = response3?.data?.mcuNormsValueDTOList
 
-      var red = data3?.data?.data
-      var redCells = red?.data
 
-      // const normalized = redCells.map((obj) => ({
-      //   ...obj,
-      //   normParameterFKId: obj.NormParameter_FK_Id.toUpperCase(),
-      // }))
-      // setAllRedCell(normalized)
+      var red = data3?.data?.data
+
+      const normalized = red.map((obj) => ({
+        ...obj,
+        normParameterFKId: obj.NormParameter_FK_Id.toUpperCase(),
+      }))
+      setAllRedCell(normalized)
 
       let formattedData = mappedData?.map((item, index) => ({
         ...item,
@@ -184,8 +184,6 @@ const NormalOpNormsScreenCracker = () => {
         id: `main-${index}`,
         originalRemark: item.remarks,
         Particulars: item.normType,
-        isRedParticulars: index === 1 ? true : false,
-
       }))
 
       let formattedData2 = mappedData2?.map((item, index) => ({
@@ -474,17 +472,18 @@ const NormalOpNormsScreenCracker = () => {
         return
       }
 
-      const requiredFields = ['remarks']
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        return
+      if (lowerVertName != 'cracker') {
+        const requiredFields = ['remarks']
+        const validationMessage = validateFields(data, requiredFields)
+        if (validationMessage) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: validationMessage,
+            severity: 'error',
+          })
+          return
+        }
       }
-
       saveNormalOperationNormsData(data)
     } catch (error) {
       console.log(error)
@@ -1233,6 +1232,7 @@ const NormalOpNormsScreenCracker = () => {
           onGlobalCheckboxChange={handleGlobalCheckboxChange}
           plantID={plantID}
           gridName='main'
+          showThreeColors={true}
         />
       )}
 
@@ -1269,7 +1269,6 @@ const NormalOpNormsScreenCracker = () => {
           unsavedChangesRef={unsavedChangesRef}
           handleRemarkCellClick={handleRemarkCellClick}
           permissions={adjustedPermissionsExpression}
-          allRedCell={allRedCell}
           groupBy='Particulars'
           handleExcelUpload={handleExcelUpload}
           downloadExcelForConfiguration={downloadExcelForConfiguration}
@@ -1311,7 +1310,6 @@ const NormalOpNormsScreenCracker = () => {
           unsavedChangesRef={unsavedChangesRef}
           handleRemarkCellClick={handleRemarkCellClick}
           permissions={adjustedPermissionsBestAchivedIndividual}
-          allRedCell={allRedCell}
           groupBy='Particulars'
           handleExcelUpload={handleExcelUpload}
           downloadExcelForConfiguration={downloadExcelForConfiguration}
