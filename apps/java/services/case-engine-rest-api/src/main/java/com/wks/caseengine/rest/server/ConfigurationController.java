@@ -70,6 +70,13 @@ public class ConfigurationController {
 		return configurationService.getConfigurationConstants(year,plantFKId);
 	}
 
+
+	@GetMapping(value="/configuration-constants-norms")
+	public AOPMessageVM getConfigurationConstantsNorms(@RequestParam String year,@RequestParam String plantFKId) {
+		return configurationService.getConfigurationConstantsNorms(year,plantFKId);
+	}
+
+
 	@GetMapping(value = "/configuration-constants-export-excel")
 	public ResponseEntity<byte[]> exportConfigurationConstantsReport(
 	         @RequestParam("plantFKId") String plantFKId,

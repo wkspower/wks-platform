@@ -534,7 +534,52 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
-	public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
+
+	public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
+			String procedureName = verticalName + "_GetConfigurationForNorms_Constant";
+			List<Object[]> obj = new ArrayList<>();
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
+					|| verticalName.equalsIgnoreCase("CRACKER") || verticalName.equalsIgnoreCase("VCM")
+					|| verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
+				obj = findConstantsByYearAndPlantFkId(year, plantFKId, procedureName);
+			}
+			for (Object[] row : obj) {
+				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+				map.put("NormTypeName", row[0]);
+				map.put("NormParameter_FK_Id", row[1]);
+				map.put("Name", row[2]);
+				map.put("DisplayName", row[3]);
+				map.put("UOM", row[4]);
+				map.put("ConstantValue", (row[5] != null) ? Double.parseDouble(row[5].toString()) : 0.0);
+				map.put("AuditYear", row[6]);
+				map.put("Remarks", row[7]);
+				boolean isEditable;
+				Object flagObj = row[8];
+				if (flagObj instanceof Boolean) {
+					isEditable = (Boolean) flagObj;
+				} else if (flagObj instanceof Number) {
+					isEditable = ((Number) flagObj).intValue() == 1;
+				} else {
+					isEditable = false; // or default
+				}
+				map.put("isEditable", isEditable);
+				configurationConstantsList.add(map); // Add the map to the list here
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationConstantsList);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+		public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
@@ -578,7 +623,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
 	public AOPMessageVM getConfigurationIntermediateValues(String year, UUID plantFKId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {

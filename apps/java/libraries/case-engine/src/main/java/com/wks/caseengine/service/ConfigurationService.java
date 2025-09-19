@@ -31,5 +31,6 @@ public interface ConfigurationService {
 	public AOPMessageVM getConfigurationExecution( String year, String plantId);
     public AOPMessageVM saveConfigurationExecution( List<ExecutionDetailDto> executionDetailDtoList);
     byte[] createConfigurationConstantsExcelResponse(String year, UUID plantFKId, List<ConfigurationDTO> list);
+    public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId);
 
 }
