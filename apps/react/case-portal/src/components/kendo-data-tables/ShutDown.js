@@ -69,6 +69,44 @@ const ShutDown = ({ permissions }) => {
         })
         return
       }
+      const yearStr = localStorage.getItem('year'); // e.g. "2025-26"
+let startLimit, endLimit;
+if (yearStr) {
+  const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10));
+  if (!isNaN(startYear) && !isNaN(endYear)) {
+    startLimit = new Date(`${startYear}-04-01T00:00:00`);
+    endLimit = new Date(`20${endYear}-03-31T23:59:59`);
+  }
+}
+for (const record of data) {
+  const startDate = record.maintStartDateTime;
+  const endDate = record.maintEndDateTime;
+  if (
+    startLimit &&
+    endLimit &&
+    (
+      !startDate ||
+      !endDate ||
+      startDate < startLimit ||
+      startDate > endLimit ||
+      endDate < startLimit ||
+      endDate > endLimit
+    )
+  ) {
+    record.isError = true;
+    // Format dates as DD-MM-YYYY
+    const formatDate = (date) =>
+      `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${date.getFullYear()}`;
+    setSnackbarOpen(true);
+    setSnackbarData({
+      message: `Dates must be between ${formatDate(startLimit)} and ${formatDate(endLimit)} for selected year.`,
+      severity: 'error',
+    });
+    return;
+  }
+}
       let requiredFields
       if (lowerVertName === 'pe') {
         if (plantName?.toLowerCase() === 'ldpe') {

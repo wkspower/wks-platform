@@ -14,6 +14,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.PTA]: SlowdownNormsPtaColumns,
   [verticalEnums.ELASTOMER]: SlowdownNormsElastomerColumns,
   [verticalEnums.MEG]: SlowdownNormsMegColumns,
+  [verticalEnums.AROMATICS]: SlowdownNormsElastomerColumns, // Using Elastomer columns
 }
 
 const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {

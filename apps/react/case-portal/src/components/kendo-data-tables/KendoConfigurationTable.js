@@ -42,6 +42,8 @@ const ConfigurationTable = () => {
   const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const vcmVertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
+  const vcmVerticalName = vcmVertical?.toLowerCase().trim()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
@@ -713,11 +715,12 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    lowerVertName == 'meg' &&
+    (lowerVertName == 'meg' || lowerVertName === 'aromatics') &&
     lowerVertName !== 'cracker' &&
     lowerVertName !== 'elastomer'
   ) {
-    const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
+    const isAromatics = lowerVertName === 'aromatics'
+    const megTabs = isAromatics ? ['Configuration', 'Constants'] : ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')
     let displayYear = ''
     if (auditYear) {
@@ -776,6 +779,7 @@ const ConfigurationTable = () => {
                   />
                 )
               case 'report manual entry':
+                 if (!isAromatics) {
                 return (
                   <SelectivityData
                     rows={productionRowsConstantsMannualEntry}
@@ -790,6 +794,7 @@ const ConfigurationTable = () => {
                     tabIndex='2'
                   />
                 )
+             }
               default:
                 return null
             }
@@ -880,7 +885,7 @@ const ConfigurationTable = () => {
       </div>
     )
   }
-  if (lowerVertName === 'elastomer') {
+  if (lowerVertName === 'elastomer' || lowerVertName === 'pta' || vcmVerticalName === 'vcm') {
   const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
   const auditYear = localStorage.getItem('year')
   let displayYear = ''

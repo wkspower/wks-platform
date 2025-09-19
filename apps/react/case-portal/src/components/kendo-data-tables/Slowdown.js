@@ -8,6 +8,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import { SlowDownElastomerColumns } from 'components/colums/ElastomerColums'
+import { SlowDownAromaticsColumns } from 'components/colums/AromaticsColumns'
 import { SlowDownMegColumns } from 'components/colums/MegColums'
 import { SlowDownPeColumns } from 'components/colums/PeColums'
 import { SlowDownPpColumns } from 'components/colums/PpColums'
@@ -17,6 +18,7 @@ import { validateFields } from 'utils/validationUtils'
 import { Box, Tab, Tabs } from '../../../node_modules/@mui/material/index'
 import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 import KendoDataTables from './index'
+import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -258,6 +260,43 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
+      const yearStr = localStorage.getItem('year'); // e.g. "2025-26"
+    let startLimit, endLimit;
+    if (yearStr) {
+  const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10));
+  if (!isNaN(startYear) && !isNaN(endYear)) {
+    startLimit = new Date(`${startYear}-04-01T00:00:00`);
+    endLimit = new Date(`20${endYear}-03-31T23:59:59`);
+    // Format as "Apr 2025"
+    const startLimitFormatted = startLimit.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+    const endLimitFormatted = endLimit.toLocaleString('en-US', { month: 'short', year: 'numeric' });
+    console.log('Start:', startLimitFormatted, 'End:', endLimitFormatted);
+  }
+}
+    for (const record of data) {
+      const startDate = record.maintStartDateTime;
+      const endDate = record.maintEndDateTime;
+      if (
+        startLimit &&
+        endLimit &&
+        (
+          !startDate ||
+          !endDate ||
+          startDate < startLimit ||
+          startDate > endLimit ||
+          endDate < startLimit ||
+          endDate > endLimit
+        )
+      ) {
+        record.isError = true;
+        setSnackbarOpen(true);
+        setSnackbarData({
+          message: `Dates must be between ${startLimit.toLocaleDateString()} and ${endLimit.toLocaleDateString()} for selected year.`,
+          severity: 'error',
+        });
+        return;
+      }
+    }
 
       // Select required fields based on vertical
       const requiredFields = ['discription', 'remark']
@@ -751,6 +790,8 @@ const SlowDown = ({ permissions }) => {
         return SlowDownElastomerColumns
       case verticalEnums.MEG:
         return SlowDownMegColumns
+      case verticalEnums.AROMATICS:
+        return SlowDownAromaticsColumns
       default:
         return SlowDownMegColumns
     }

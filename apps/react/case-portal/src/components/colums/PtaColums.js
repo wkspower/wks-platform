@@ -156,11 +156,11 @@ export const SlowDownPtaColumns = [
     hidden: true,
   },
 
-  {
-    field: 'productName1',
-    title: 'Particulars',
-    editable: true,
-  },
+  // {
+  //   field: 'productName1',
+  //   title: 'Particulars',
+  //   editable: true,
+  // },
 
   {
     field: 'maintStartDateTime',

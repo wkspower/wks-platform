@@ -6,4 +6,5 @@ export const verticalEnums = {
   NMD: 'nmd',
   PTA: 'pta',
   ELASTOMER: 'elastomer',
+  AROMATICS: 'aromatics',
 }

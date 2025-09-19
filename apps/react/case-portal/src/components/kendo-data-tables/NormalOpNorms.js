@@ -165,6 +165,7 @@ const NormalOpNormsScreen = () => {
           id: `main-${index}`,
           originalRemark: item.remarks,
           Particulars: item.normType,
+          isRedParticulars: index === 1 ? true : false,
         }))
       } else {
         formattedData = mappedData?.map((item, index) => ({

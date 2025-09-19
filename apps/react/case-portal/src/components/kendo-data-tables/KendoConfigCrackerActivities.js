@@ -259,6 +259,69 @@ const DecokingConfig = () => {
         return
       }
       var rawData = Object.values(modifiedCellsSdTa)
+      const yearStr = localStorage.getItem('year'); // e.g. "2025-26"
+let startLimit, endLimit;
+if (yearStr) {
+  const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10));
+  if (!isNaN(startYear) && !isNaN(endYear)) {
+    startLimit = new Date(`${startYear}-04-01T00:00:00`);
+    endLimit = new Date(`20${endYear}-03-31T23:59:59`);
+  }
+}
+const dateFields = [
+  'ibrStartDate', 'ibrEndDate',
+  'taStartDate', 'taEndDate',
+  'shutDownStartDate', 'shutDownEndDate'
+];
+const allRows = [...ibrScreen2Rows]; // get all rows, not just modified
+let hasDateError = false;
+
+for (const record of allRows) {
+  record.isError = false; // reset previous errors
+  for (const field of dateFields) {
+    let dateValue = record[field];
+    if (typeof dateValue === 'string') {
+      // Only accept DD-MM-YYYY format
+      const ddmmyyyyRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+      const match = dateValue.match(ddmmyyyyRegex);
+      if (match) {
+        // month is 1-based in JS Date
+        const day = match[1], month = match[2], year = match[3];
+        dateValue = new Date(`${year}-${month}-${day}T00:00:00`);
+      } else {
+        // Invalid format, mark as error
+        dateValue = null;
+      }
+    }
+    if (
+      startLimit &&
+      endLimit &&
+      (
+        !dateValue ||
+        dateValue < startLimit ||
+        dateValue > endLimit
+      )
+    ) {
+      record.isError = true;
+      hasDateError = true;
+    }
+  }
+}
+
+if (hasDateError) {
+  setRowsForTab('IBR Plan', [...allRows], 2); // update all rows
+  const formatDate = (date) =>
+    `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${date.getFullYear()}`;
+  setSnackbarOpen(true);
+  setSnackbarData({
+    message: `All dates must be between ${formatDate(startLimit)} and ${formatDate(endLimit)} for selected year.`,
+    severity: 'error',
+  });
+  setLoading(false);
+  return;
+}
       const requiredFields = ['idFromApi', 'remarks']
 
     var rawData1 = getRows('IBR Plan')[2] 
