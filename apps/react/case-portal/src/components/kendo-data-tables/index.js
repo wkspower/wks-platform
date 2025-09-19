@@ -168,9 +168,12 @@ const KendoDataTables = ({
       dataItem.isRedParticulars ||(
         dataItem.normParameterTypeId === '5859D066-F475-461E-9D60-7B781C604FF2' )
     );
+    const value = dataItem.materialDisplayName || dataItem.Particulars;
   return (
-    <td style={{ color: isRed ? 'red' : undefined }}>
-      {dataItem.materialDisplayName}
+    <td style={{ color: isRed ? 'red' : undefined }}
+    title={isRed ? value : undefined}>
+      {value}
+      
     </td>
   );
 };

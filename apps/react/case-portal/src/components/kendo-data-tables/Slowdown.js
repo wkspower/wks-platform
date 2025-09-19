@@ -280,8 +280,10 @@ function formatDateDDMMYYYY(date) {
   return `${d}/${m}/${y}`;
 }
 for (const record of data) {
-  const startDate = record.maintStartDateTime instanceof Date ? record.maintStartDateTime : new Date(record.maintStartDateTime);
-  const endDate = record.maintEndDateTime instanceof Date ? record.maintEndDateTime : new Date(record.maintEndDateTime);
+  const startDate = record.maintStartDateTime instanceof Date 
+  ? record.maintStartDateTime  : new Date(record.maintStartDateTime);
+  const endDate = record.maintEndDateTime instanceof Date 
+  ? record.maintEndDateTime : new Date(record.maintEndDateTime);
 
   // Validate date format: dd/mm/yyyy (by parsing and checking)
   if (
@@ -304,8 +306,16 @@ for (const record of data) {
       message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
       severity: 'error',
     });
-    return;
   }
+}
+setRows((prevRows) =>
+  prevRows.map((row) => {
+    const updated = data.find((d) => d.id === row.id);
+    return updated ? { ...row, isError: updated.isError } : row;
+  })
+);
+if (data.some(record => record.isError)) {
+  return; // Stop save operation if any error
 }
 
       // Select required fields based on vertical
