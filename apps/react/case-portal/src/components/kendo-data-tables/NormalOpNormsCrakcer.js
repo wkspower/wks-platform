@@ -172,11 +172,11 @@ const NormalOpNormsScreenCracker = () => {
       var red = data3?.data?.data
       var redCells = red?.data
 
-      const normalized = redCells.map((obj) => ({
-        ...obj,
-        normParameterFKId: obj.NormParameter_FK_Id.toUpperCase(),
-      }))
-      setAllRedCell(normalized)
+      // const normalized = redCells.map((obj) => ({
+      //   ...obj,
+      //   normParameterFKId: obj.NormParameter_FK_Id.toUpperCase(),
+      // }))
+      // setAllRedCell(normalized)
 
       let formattedData = mappedData?.map((item, index) => ({
         ...item,
@@ -184,6 +184,8 @@ const NormalOpNormsScreenCracker = () => {
         id: `main-${index}`,
         originalRemark: item.remarks,
         Particulars: item.normType,
+        isRedParticulars: index === 1 ? true : false,
+
       }))
 
       let formattedData2 = mappedData2?.map((item, index) => ({
