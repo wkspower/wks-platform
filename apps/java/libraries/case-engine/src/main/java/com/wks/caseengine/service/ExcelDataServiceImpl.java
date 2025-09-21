@@ -30,14 +30,14 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     private WorkflowService workflowService;
 
     @Override
-    public List<List<Object>> getDataForProductionVolumeReport(String plantId, String year) {
+    public List<List<Object>> getDataForProductionVolumeReport(String plantId, String year, List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService.getReportForProductionVolumnData(plantId, year);
 
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) aopMessageVM.getData();
 
-        String[] headers = { "RowNo", "Particulates", "UOM", "BudgetPrevYear", "ActualPrevYear",
-                "BudgetCurrentYear", "VarBudgetMT", "VarBudgetPer", "VarActualMT", "VarActualPer", "Remark" };
+        // String[] headers = { "RowNo", "Particulates", "UOM", "BudgetPrevYear", "ActualPrevYear",
+        //         "BudgetCurrentYear", "VarBudgetMT", "VarBudgetPer", "VarActualMT", "VarActualPer", "Remark" };
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -54,7 +54,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForMonthWiseProductionData(String plantId, String year) {
+    public List<List<Object>> getReportForMonthWiseProductionData(String plantId, String year, List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService.getReportForMonthWiseProductionData(plantId,
                 year);
@@ -62,22 +62,22 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap.get("data");
 
-        String[] headers = {
-                "RowNo",
-                "Month",
-                "EOEProdBudget",
-                "EOEProdActual",
-                "OpHrsBudget",
-                "OpHrsActual",
-                "ThroughputBudget",
-                "ThroughputActual",
-                "OperatingHours",
-                "MEGThroughput",
-                "EOThroughput",
-                "EOEThroughput",
-                "TotalEOE",
-                "Remark"
-        };
+        // String[] headers = {
+        //         "RowNo",
+        //         "Month",
+        //         "EOEProdBudget",
+        //         "EOEProdActual",
+        //         "OpHrsBudget",
+        //         "OpHrsActual",
+        //         "ThroughputBudget",
+        //         "ThroughputActual",
+        //         "OperatingHours",
+        //         "MEGThroughput",
+        //         "EOThroughput",
+        //         "EOEThroughput",
+        //         "TotalEOE",
+        //         "Remark"
+        // };
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -334,7 +334,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForTurnAroundPlanData(String plantId, String year, String reportType) {
+    public List<List<Object>> getReportForTurnAroundPlanData(String plantId, String year, String reportType, List<String> headers) {
 
         AOPMessageVM aopMessageVM = turnAroundDataReportService.getReportForTurnAroundPlanData(plantId, year,
                 reportType);
@@ -343,14 +343,14 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap
                 .get("plantTurnAroundReportData");
 
-        String[] headers = {
-                "sno",
-                "activity",
-                "fromDate",
-                "toDate",
-                "durationInHrs",
-                "remarks"
-        };
+        // String[] headers = {
+        //         "sno",
+        //         "activity",
+        //         "fromDate",
+        //         "toDate",
+        //         "durationInHrs",
+        //         "remarks"
+        // };
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -367,7 +367,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForPlantProductionPlanData(String plantId, String year, String reportType) {
+    public List<List<Object>> getReportForPlantProductionPlanData(String plantId, String year, String reportType,List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService.getReportForPlantProductionPlanData(plantId, year,
                 reportType);
@@ -376,60 +376,6 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap
                 .get("plantProductionData");
 
-        String[] headers = {
-                "sno",
-                "activity",
-                "fromDate",
-                "toDate",
-                "durationInHrs",
-                "remarks"
-        };
-        if (reportType.equalsIgnoreCase("maxRate")) {
-            headers = new String[] {
-                    "sno",
-                    "part1",
-                    "part2",
-                    "part3"
-            };
-
-        } else if (reportType.equalsIgnoreCase("OperatingHrs")) {
-            headers = new String[] {
-                    "sno",
-                    "part1",
-                    "part2",
-                    "part3"
-            };
-
-        } else if (reportType.equalsIgnoreCase("AverageHourlyRate")) {
-            headers = new String[] {
-                    "sno",
-                    "Throughput", //
-                    "HourlyRate",
-                    "OperatingHrs",
-                    "PeriodFrom", //
-                    "PeriodTo"
-            };
-
-        } else if (reportType.equalsIgnoreCase("assumptions")) {
-            headers = new String[] {
-                    "sno",
-                    "part1"
-            };
-
-        } else if (reportType.equalsIgnoreCase("ProductionPerformance")) {
-            headers = new String[] {
-                    "sno",
-                    "Item",
-                    "Budget1",
-                    "Actual1",
-                    "Budget2",
-                    "Actual2",
-                    "Budget3",
-                    "Actual3",
-                    "Budget4",
-            };
-        }
-
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
         for (Map<String, Object> map : productionVolumeReportList) {
@@ -445,7 +391,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForPlantContributionYearWise(String plantId, String year, String reportType) {
+    public List<List<Object>> getReportForPlantContributionYearWise(String plantId, String year, String reportType, List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService.getReportForPlantContributionYearWise(plantId,
                 year,
@@ -455,102 +401,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap
                 .get("plantProductionData");
 
-        String[] headers = {
-                "sno",
-                "activity",
-                "fromDate",
-                "toDate",
-                "durationInHrs",
-                "remarks"
-        };
-        if (reportType.equalsIgnoreCase("RawMaterial")) {
-            headers = new String[] {
-                    "SrNo",
-                    "ByProductName",
-                    "Unit",
-                    "Price",
-                    "PrevYearNormBudget",
-                    "PrevYearNormActual",
-                    "NextYearNormActual",
-                    "PrevYearCostBudget",
-                    "PrevYearCostActual",
-                    "NextYearCostActual"
-
-            };
-        } else if (reportType.equalsIgnoreCase("ByProducts")) {
-            headers = new String[] {
-                    "SrNo",
-                    "ByProductName",
-                    "Unit",
-                    "Price",
-                    "PrevYearNormBudget",
-                    "PrevYearNormActual",
-                    "NextYearNormActual",
-                    "PrevYearCostBudget",
-                    "PrevYearCostActual",
-                    "NextYearCostActual"
-
-            };
-
-        } else if (reportType.equalsIgnoreCase("ProductMixAndProduction")) {
-            headers = new String[] {
-                    "SrNo",
-                    "ByProductName",
-                    "Unit",
-                    "Price",
-                    "PrevYearNormBudget",
-                    "PrevYearNormActual",
-                    "NextYearCostBudget"
-
-            };
-
-        } else if (reportType.equalsIgnoreCase("CatChem")) {
-            headers = new String[] {
-                    "SrNo",
-                    "ByProductName",
-                    "Unit",
-                    "Price",
-                    "PrevYearNormBudget",
-                    "PrevYearNormActual",
-                    "NextYearNormActual",
-                    "PrevYearCostBudget",
-                    "PrevYearCostActual",
-                    "NextYearCostActual"
-
-            };
-
-        } else if (reportType.equalsIgnoreCase("Utilities")) {
-            headers = new String[] {
-                    "SrNo",
-                    "ByProductName",
-                    "Unit",
-                    "Price",
-                    "PrevYearNormBudget",
-                    "PrevYearNormActual",
-                    "NextYearNormActual",
-                    "PrevYearCostBudget",
-                    "PrevYearCostActual",
-                    "NextYearCostActual"
-
-            };
-        } else if (reportType.equalsIgnoreCase("OtherVariableCost")) {
-            headers = new String[] {
-                    "SrNo",
-                    "OtherCost",
-                    "Unit",
-                    "PrevYearBudget",
-                    "PrevYearActual",
-                    "CurrentYearBudget",
-            };
-        } else if (reportType.equalsIgnoreCase("ProductionCostCalculations")) {
-            headers = new String[] {
-                    "SrNo",
-                    "ProductionCostCalculations",
-                    "PrevYearBudget",
-                    "PrevYearActual",
-                    "NextYearBudget",
-            };
-        }
+        
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -622,6 +473,32 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         return map;
     }
 
+    
+
+    @Override
+    public List<List<Object>> getPlantContributionFiveYearSummaryReport(String plantId, String year, String reportType, List<String> headers) {
+
+        AOPMessageVM aopMessageVM = aopReportService.getPlantContributionFiveYearSummaryReport(reportType,
+                plantId,
+                year);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap
+                .get("plantProductionData");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        for (Map<String, Object> map : productionVolumeReportList) {
+            List<Object> list = new ArrayList<>();
+            for (String header : headers) {
+                list.add(map.get(header));
+            }
+            dataList.add(list);
+        }
+
+        return dataList;
+
+    }
 
 
 }
