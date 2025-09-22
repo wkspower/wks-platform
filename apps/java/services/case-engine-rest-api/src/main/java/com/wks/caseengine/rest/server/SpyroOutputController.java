@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.SpyroOutputDTO;
-
+import com.wks.caseengine.dto.YieldDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @RestController
@@ -48,51 +48,38 @@ public class SpyroOutputController {
 		return	spyroOutputService.getSpyroOutputYieldData(year, plantId);
 	}
 	
+	@GetMapping(value = "/yield-export")
+	public ResponseEntity<byte[]> exportYieldReport(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year
+	        ) {
+	    try {
+			
+	        byte[] excelBytes = spyroOutputService.exportYieldReport(year,plantId,false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("Yield_Report.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
+	
 	@PostMapping(value="/spyro-output/yield")
 	public AOPMessageVM updateSpyroOutputYieldData(
 	    @RequestParam String plantId,
 	    @RequestParam String year,
-	    @RequestBody List<Map<String, Object>> payload
+	    @RequestBody List<YieldDTO> payload
 	) {
-	    List<NormAttributeTransactionsDTO> dtoList = new ArrayList<>();
-
-	    for (Map<String, Object> item : payload) {
-	        String particulars = (String) item.get("particulars"); // e.g. "Ethylene"
-
-	        for (Map.Entry<String, Object> e : item.entrySet()) {
-	            String key = e.getKey();
-	            if ("NormParameterFKID".equalsIgnoreCase(key) || "particulars".equalsIgnoreCase(key))
-	                continue;
-
-	            // Build "Ethylene_5F_C2C3"
-	            String combined = particulars + "_" + key;
-
-	            // Split on '_'
-	            String[] parts = combined.split("_", 3); 
-	            // parts[0] = "Ethylene", parts[1] = "5F", parts[2] = "C2C3"
-
-	            String normName;
-	            if (parts.length == 3) {
-	                normName = parts[1] + "_" + parts[0] + "_" + parts[2];
-	            } else {
-	                // Fallback to original if format unexpected
-	                normName = combined;
-	            }
-
-	            String valStr = Optional.ofNullable(e.getValue())
-	                                    .map(Object::toString)
-	                                    .orElse(null);
-
-	            NormAttributeTransactionsDTO dto = new NormAttributeTransactionsDTO();
-	            
-	            dto.setNormParameterName(normName);
-	            dto.setAttributeValue(valStr);
-
-	            dtoList.add(dto);
-	        }
-	    }
-
-	    return spyroOutputService.updateSpyroOutputYieldData(plantId, year, dtoList);
+	    
+	    return spyroOutputService.updateSpyroOutputYieldData(plantId, year, payload);
 	}
 	
 	@GetMapping(value = "/spyro-output-export-excel")
