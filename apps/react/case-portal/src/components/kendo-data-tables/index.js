@@ -161,7 +161,6 @@ const KendoDataTables = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const ParticularsRedCell = (props) => {
-<<<<<<< HEAD
     const { dataItem, field } = props
     // Common condition for red highlight
     const isRed =
@@ -174,25 +173,6 @@ const KendoDataTables = ({
       </td>
     )
   }
-=======
-  const { dataItem, field } = props;
-  // Common condition for red highlight
-  const isRed =
-    (field === 'materialDisplayName' || field === 'Particulars') &&
-    (
-      dataItem.isRedParticulars ||(
-        dataItem.normParameterTypeId === '5859D066-F475-461E-9D60-7B781C604FF2' )
-    );
-    const value = dataItem.materialDisplayName || dataItem.Particulars;
-  return (
-    <td style={{ color: isRed ? 'red' : undefined }}
-    title={isRed ? value : undefined}>
-      {value}
-      
-    </td>
-  );
-};
->>>>>>> 981016c96daee60b4e7fbf52c4da570224025973
   const initialGroup = groupBy
     ? [
         {

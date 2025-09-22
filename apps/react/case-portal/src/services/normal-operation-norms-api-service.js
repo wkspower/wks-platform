@@ -25,7 +25,7 @@ export const NormalOperationNormsApiService = {
 }
 
 async function BestAchivedColorCodes(keycloak, plantId, year, mode) {
-  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms-monthwise-modetype?year=${year}&plantId=${plantId}&mode=${mode}`
+  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms-monthwise-modetype?year=${year}&plantId=${plantId}&mode=${encodeURIComponent(mode)}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

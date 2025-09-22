@@ -262,7 +262,7 @@ const ProductionVolumeDataBasisPe = () => {
     return v
   }
 
-  // Export: gather sheets from each ExcelExport instance and combine into one workbook
+  // Replace your existing exportAllGrids with this improved implementation
   const exportAllGrids = useCallback(() => {
     // find any existing ExcelExport ref to use as base for saving
     const keys = Object.keys(exportRefs.current || {})
@@ -281,22 +281,33 @@ const ProductionVolumeDataBasisPe = () => {
         // if no columns and no rows, skip this sheet
         if (!cols.length && !rows.length) return null
 
-        const sheetColumns = cols.map((c) => {
-          // minimal column object for workbook: we include width/autoWidth optionally
-          return {
-            // don't rely on any functions or deep references
-            autoWidth: true,
-            title: c.title || c.field || '',
-          }
-        })
+        // Build columns for the workbook. Keep autoWidth for nice sizing.
+        const sheetColumns = cols.map((c) => ({
+          autoWidth: true,
+          // Kendo workbook column title isn't used here to render the header row,
+          // but we keep title for clarity and potential use.
+          title: c.title || c.field || '',
+        }))
 
-        const sheetRows = rows.map((r) => {
+        // Build an explicit header row so Excel has column headers
+        const headerRow = {
+          cells: cols.map((c) => ({ value: c.title || c.field || '' })),
+        }
+
+        // Build the data rows
+        const dataRows = rows.map((r) => {
           return {
             cells: cols.map((c) => {
-              return { value: normalizeCellValue(r[c.field]) }
+              const raw = r?.[c.field]
+              const value = normalizeCellValue(raw)
+              // Kendo workbook accepts JS Date objects as cell.value for date cells
+              return { value }
             }),
           }
         })
+
+        // Combine header + data rows (header first)
+        const sheetRows = [headerRow, ...dataRows]
 
         return {
           title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
@@ -313,7 +324,6 @@ const ProductionVolumeDataBasisPe = () => {
     }
 
     try {
-      // call save with the constructed workbook options
       baseRef.save(workbookOptions)
     } catch (err) {
       console.error('Export save failed:', err)
@@ -325,7 +335,7 @@ const ProductionVolumeDataBasisPe = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Norms Historian Data Basis ${currentDateTime}.xlsx`
+  const fileName = `Norms Historian Basis.xlsx`
 
   // helper to render Title exactly as API sent (or tweak)
   const renderTitle = (t) => t

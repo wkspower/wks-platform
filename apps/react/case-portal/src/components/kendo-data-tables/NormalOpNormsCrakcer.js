@@ -1,690 +1,176 @@
-import { useGridApiRef } from '@mui/x-data-grid'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@mui/material/CircularProgress'
-import getNormalOpNormColDef from 'components/data-tables/CommonHeader/getNormalOpNormColDef'
-import { useDispatch } from 'react-redux'
-import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
-import { useSession } from 'SessionStoreContext'
-import { setIsBlocked } from 'store/reducers/dataGridStore'
-import {
-  CustomAccordion,
-  CustomAccordionDetails,
-  CustomAccordionSummary,
-} from 'utils/CustomAccrodian'
-import { validateFields } from 'utils/validationUtils'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Box,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Tab,
   Tabs,
   Typography,
-} from '../../../node_modules/@mui/material/index'
-import KendoDataTables from './index'
+} from '@mui/material'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+import { useGridApiRef } from '@mui/x-data-grid'
+import getNormalOpNormColDef from 'components/data-tables/CommonHeader/getNormalOpNormColDef'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useDispatch, useSelector } from 'react-redux'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
+import { useSession } from 'SessionStoreContext'
+import { setIsBlocked } from 'store/reducers/dataGridStore'
 import CrakcerConstants from './CrackerConstants'
+import KendoDataTables from './index'
+
+// Constants
+const MONTHS = [
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+  'january',
+  'february',
+  'march',
+]
+
+const mapApiRowToGrid = (list = [], prefix = '') =>
+  (list || []).map((item, index) => ({
+    ...item,
+    idFromApi: item.id,
+    id: `${prefix}${index}`,
+    originalRemark: item.remarks || '',
+    Particulars: item.normType || item.normParameterTypeDisplayName,
+  }))
+
+const mapGridRowToPayload = (rows = []) =>
+  (rows || []).map((row) => {
+    const payload = {}
+    MONTHS.forEach((m) => {
+      payload[m] = row[m] || 0
+    })
+    payload.remark = row.remark || row.remarks || ''
+    payload.isChecked = !!row.isChecked
+    payload.id = row.idFromApi || null
+    payload.materialFKId = row.materialFKId || row.materialFkId || null
+    return payload
+  })
 
 const NormalOpNormsScreenCracker = () => {
-  const [modifiedCells, setModifiedCells] = React.useState({})
-  const [modifiedCellsFinalNorms, setModifiedCellsFinalNorms] = React.useState(
-    {},
-  )
-
+  // state
+  const [modifiedCells, setModifiedCells] = useState({})
+  const [modifiedCellsFinalNorms, setModifiedCellsFinalNorms] = useState({})
   const [allRedCell, setAllRedCell] = useState([])
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const [calculationObject, setCalculationObject] = useState([])
+
+  const dataGridStore = useSelector((s) => s.dataGridStore) || {}
+  const { verticalChange, yearChanged, oldYear, plantObject, year } =
+    dataGridStore || {}
+
+  const isOldYear = oldYear?.oldYear
+  const PLANT_ID = plantObject?.id
+  const AOP_YEAR = year?.selectedYear
+  const vertName = verticalChange?.selectedVertical || ''
+  const lowerVertName = (vertName || '').toLowerCase()
+
+  const dispatch = useDispatch()
+  const keycloak = useSession()
+  const headerMap = generateHeaderNames(AOP_YEAR)
+
+  const [loading, setLoading] = useState(false)
   const [grades, setGrades] = useState([])
-  const [open1, setOpen1] = useState(false)
-  const apiRef = useGridApiRef()
-  const [rows, setRows] = useState()
-  const [defaultSelect, setDefaultSelect] = useState()
-  const [rowsBestAchivedIndividual, setRowsBestAchivedIndividual] = useState()
-  const [rowsBestFinalNorms, setRowsBestFinalNorms] = useState()
-  const [rowsConstants, setRowsConstants] = useState()
-  const [rowsExpression, setRowsExpression] = useState()
-  const [rowsIntermediateValues, setRowsIntermediateValues] = useState()
+  const [rows, setRows] = useState([])
+  const [rowsExpression, setRowsExpression] = useState([])
+  const [rowsBestAchivedIndividual, setRowsBestAchivedIndividual] = useState([])
+  const [rowsBestFinalNorms, setRowsBestFinalNorms] = useState([])
+
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [remarkDialogOpenFinalNorms, setRemarkDialogOpenFinalNorms] =
     useState(false)
-
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRemarkFinalNorms, setCurrentRemarkFinalNorms] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [currentRowIdConstants, setCurrentRowIdConstants] = useState(null)
   const [currentRowIdFinalNorms, setCurrentRowIdFinalNorms] = useState(null)
-  const [loading, setLoading] = useState(false)
-  const [gradeId, setGradeId] = useState(null)
-  const [gradeDisplayName, setGradeDisplayName] = useState(null)
-  const {
-    sitePlantChange,
-    verticalChange,
-    yearChanged,
-    oldYear,
-    plantID,
-    plantObject,
-    siteObject,
-    verticalObject,
-    year,
-  } = dataGridStore
-  const isOldYear = oldYear?.oldYear
 
-  const [_plantID, set_PlantID] = useState('')
+  // default gradeId same as earlier (you used '4F' default)
+  const [gradeId, setGradeId] = useState('4F')
+  const [gradeDisplayName, setGradeDisplayName] = useState('4F')
 
-  const PLANT_ID = plantObject?.id
-  const SITE_ID = siteObject?.id
-  const VERTICAL_ID = verticalObject?.id
-  const AOP_YEAR = year?.selectedYear
-
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase()
-  const dispatch = useDispatch()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const [calculationObject, setCalculationObject] = useState({})
   const [selectedTab, setSelectedTab] = useState(0)
 
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
-  const unsavedChangesRefFinalNorms = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
+  const apiRef = useGridApiRef()
 
-  const keycloak = useSession()
+  // column defs
+  const colDefs = useMemo(
+    () => getNormalOpNormColDef({ headerMap }),
+    [headerMap],
+  )
 
-  const fetchFinalNorms = async () => {
-    setLoading(true)
-    let response
-    try {
-      response = await NormalOperationNormsApiService.getfinalNorms(keycloak)
-      if (response?.code !== 200) {
-        setRowsBestFinalNorms([])
-        return
-      }
-      let mappedData = response?.data?.mcuNormsValueDTOList
-      let formattedData
+  const colDefsIndividual = useMemo(
+    () => [
+      { field: 'isChecked', type: 'switch', widthT: 30, filter: false },
+      {
+        field: 'sapMaterialCode',
+        title: 'SAP MAT Code',
+        widthT: 120,
+        editable: false,
+      },
+      { field: 'materialDisplayName', title: 'Particulars' },
+      { field: 'uom', title: 'UOM', editable: false },
+      {
+        field: 'april',
+        title: 'Value',
+        editable: true,
+        align: 'right',
+        format: '{0:#.###}',
+        type: 'number',
+      },
+    ],
+    [],
+  )
 
-      formattedData = mappedData?.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: `${index}`,
-        remarks: item?.remarks || '',
-        originalRemark: item?.remarks || '',
-        Particulars: item.normType,
-      }))
+  const colDefsFinalNorms = useMemo(
+    () => [
+      {
+        field: 'sapMaterialCode',
+        title: 'SAP MAT Code',
+        widthT: 120,
+        editable: false,
+      },
+      {
+        field: 'materialDisplayName',
+        title: 'Particulars',
+        widthT: 130,
+        editable: false,
+      },
+      { field: 'uom', title: 'UOM', widthT: 60, editable: false },
+      ...MONTHS.map((m, i) => ({
+        field: m,
+        title: headerMap[i + 1] || m,
+        editable: true,
+        width: 120,
+        align: 'right',
+        type: 'number',
+        format: '{0:#.##}',
+      })),
+      { field: 'isEditable', title: 'isEditable', hidden: true },
+      { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
+    ],
+    [headerMap],
+  )
 
-      setRowsBestFinalNorms(formattedData)
-    } catch (error) {
-      console.error('Error fetching Data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchData = async (gradeId) => {
-    fetchFinalNorms()
-    setRows([])
-    setRowsExpression([])
-    setRowsBestAchivedIndividual([])
-
-    const verticalsRequiringGrade = ['cracker']
-    if (verticalsRequiringGrade.includes(lowerVertName) && !gradeId) return
-    setLoading(true)
-    let response
-    let response2
-    let response3
-    try {
-      if (lowerVertName === 'cracker') {
-        response = await NormalOperationNormsApiService.getModeWiseNormsData(
-          keycloak,
-          gradeId,
-          'Best Achieved',
-        )
-        response2 = await NormalOperationNormsApiService.getModeWiseNormsData(
-          keycloak,
-          gradeId,
-          'Expression',
-        )
-        response3 = await NormalOperationNormsApiService.getModeWiseNormsData(
-          keycloak,
-          gradeId,
-          'Yearly Norms',
-        )
-        var data3 = await NormalOperationNormsApiService.BestAchivedColorCodes(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          gradeId,
-        )
-      }
-
-      setCalculationObject(response?.data?.aopCalculation)
-
-      let mappedData = response?.data?.mcuNormsValueDTOList
-      let mappedData2 = response2?.data?.mcuNormsValueDTOList
-      let mappedData3 = response3?.data?.mcuNormsValueDTOList
-
-
-      var red = data3?.data?.data
-
-      const normalized = red.map((obj) => ({
-        ...obj,
-        normParameterFKId: obj.NormParameter_FK_Id.toUpperCase(),
-      }))
-      setAllRedCell(normalized)
-
-      let formattedData = mappedData?.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: `main-${index}`,
-        originalRemark: item.remarks,
-        Particulars: item.normType,
-      }))
-
-      let formattedData2 = mappedData2?.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: `expression-${index}`,
-        originalRemark: item.remarks,
-        Particulars:
-          lowerVertName === 'cracker'
-            ? item.normType
-            : item.normParameterTypeDisplayName,
-      }))
-
-      let formattedData3 = mappedData3?.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: `best-${index}`,
-        originalRemark: item.remarks,
-        Particulars:
-          lowerVertName === 'cracker'
-            ? item.normType
-            : item.normParameterTypeDisplayName,
-      }))
-
-      setRows(formattedData)
-      setRowsExpression(formattedData2)
-      setRowsBestAchivedIndividual(formattedData3)
-    } catch (error) {
-      console.error('Error fetching Data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchAllData = async (gradeId) => {
-    setLoading(true)
-    setRows([])
-    setAllRedCell([])
-    setGrades([])
-
-    try {
-      const promises = [fetchData(gradeId)]
-
-      setGrades([
-        {
-          name: '4F',
-          displayName: '4F',
-          gradeId: '4F',
-        },
-        {
-          name: '5F',
-          displayName: '5F',
-          gradeId: '5F',
-        },
-        {
-          name: '4F+D',
-          displayName: '4F+D',
-          gradeId: '4F+D',
-        },
-        {
-          name: 'Monthly',
-          displayName: 'Monthly',
-          gradeId: 'Monthly',
-        },
-      ])
-
-      await Promise.all(promises)
-    } catch (error) {
-      console.error('Error during data fetching:', error)
-    } finally {
-      // setLoading(false)
-      // console.log(2)
-    }
-  }
-
-  useEffect(() => {
-    fetchAllData(gradeId)
-  }, [oldYear, yearChanged, keycloak, gradeId, plantID, selectedTab])
-
-  const colDefs = getNormalOpNormColDef({
-    headerMap,
-  })
-
-  const colDefsIndividual = [
-    {
-      field: 'isChecked',
-      type: 'switch',
-      widthT: 30,
-      filter: false,
-    },
-
-    {
-      field: 'sapMaterialCode',
-      title: 'SAP MAT Code',
-      widthT: 120,
-      editable: false,
-    },
-    {
-      field: 'materialDisplayName',
-      title: 'Particulars',
-    },
-
-    {
-      field: 'uom',
-      title: 'UOM',
-
-      editable: false,
-    },
-
-    {
-      field: 'april',
-      title: 'Value',
-      editable: true,
-      align: 'right',
-      format: '{0:#.###}',
-      type: 'number',
-    },
-  ]
-
-  const colDefsFinalNorms = [
-    {
-      field: 'sapMaterialCode',
-      title: 'SAP MAT Code',
-      widthT: 120,
-      editable: false,
-    },
-    {
-      field: 'materialDisplayName',
-      title: 'Particulars',
-      widthT: 130,
-      editable: false,
-    },
-    {
-      field: 'uom',
-      title: 'UOM',
-      widthT: 60,
-      editable: false,
-    },
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-
-    {
-      field: 'may',
-      title: headerMap[5],
-      editable: true,
-      width: 120,
-      align: 'right',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      editable: true,
-      type: 'number',
-      width: 120,
-      align: 'right',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'july',
-      title: headerMap[7],
-      editable: true,
-      type: 'number',
-      width: 120,
-      align: 'right',
-      format: '{0:#.##}',
-    },
-
-    {
-      field: 'august',
-      title: headerMap[8],
-      editable: true,
-      width: 120,
-      type: 'number',
-      align: 'right',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      editable: true,
-      width: 120,
-      align: 'right',
-      type: 'number',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      editable: true,
-      width: 120,
-      type: 'number',
-      align: 'right',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      editable: true,
-      width: 120,
-      align: 'right',
-      type: 'number',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      editable: true,
-      width: 120,
-      align: 'right',
-      type: 'number',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      editable: true,
-      width: 120,
-      align: 'right',
-      type: 'number',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      editable: true,
-      width: 120,
-      type: 'number',
-      align: 'right',
-      format: '{0:#.##}',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      editable: true,
-      width: 120,
-      type: 'number',
-      align: 'right',
-      format: '{0:#.##}',
-    },
-
-    {
-      field: 'isEditable',
-      title: 'isEditable',
-      hidden: true,
-    },
-
-    {
-      field: 'remarks',
-      title: 'Remark',
-      widthT: 140,
-      editable: true,
-    },
-  ]
-
-  const handleRemarkCellClick = (row) => {
-    if (!row?.isEditable) return
-    setCurrentRemark(row.remarks || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
-  }
-  const handleRemarkCellClickFinalNorms = (row) => {
-    if (!row?.isEditable) return
-    setCurrentRemarkFinalNorms(row.remarks || '')
-    setCurrentRowIdFinalNorms(row.id)
-    setRemarkDialogOpenFinalNorms(true)
-  }
-
-  const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(modifiedCells)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-
-      if (lowerVertName != 'cracker') {
-        const requiredFields = ['remarks']
-        const validationMessage = validateFields(data, requiredFields)
-        if (validationMessage) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: validationMessage,
-            severity: 'error',
-          })
-          return
-        }
-      }
-      saveNormalOperationNormsData(data)
-    } catch (error) {
-      console.log(error)
-    }
-  }, [modifiedCells])
-
-  const saveNormalOperationNormsData = async (newRows) => {
-    setLoading(true)
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      const businessData = newRows.map((row) => ({
-        april: row.april || null,
-        may: row.may || null,
-        june: row.june || null,
-        july: row.july || null,
-        august: row.august || null,
-        september: row.september || null,
-        october: row.october || null,
-        november: row.november || null,
-        december: row.december || null,
-        january: row.january || null,
-        february: row.february || null,
-        march: row.march || null,
-        remark: row.remarks,
-        remarks: row.remarks,
-        financialYear: localStorage.getItem('year'),
-        plantId: plantId,
-        normParameterId: row.normParameterId,
-        id: row.idFromApi || null,
-        materialFkId: row.materialFkId || null,
-        mcuVersion: row.mcuVersion || null,
-        plantFkId: row.plantFkId || null,
-        siteFkId: row.siteFkId || null,
-        verticalFkId: row.verticalFkId || null,
-        unit: row.unit || null,
-        normParameterTypeId: row.normParameterTypeId || null,
-      }))
-
-      if (businessData.length > 0) {
-        const response =
-          await NormalOperationNormsApiService.saveNormalOperationNormsData(
-            plantId,
-            businessData,
-            keycloak,
-            gradeId,
-            lowerVertName,
-          )
-
-        // if (response.status === 200) {
-        if (response) {
-          dispatch(setIsBlocked(false))
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Saved Successfully!`,
-            severity: 'success',
-          })
-
-          setModifiedCells({})
-          unsavedChangesRef.current = {
-            unsavedRows: {},
-            rowsBeforeChange: {},
-          }
-
-          fetchData(gradeId)
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Norms not saved!`,
-            severity: 'error',
-          })
-        }
-        return response
-      }
-    } catch (error) {
-      console.error(`Error saving Norms`, error)
-    } finally {
-      // fetchData()
-      // setLoading(false)
-    }
-  }
-
-  const isCellEditable = (params) => {
-    return params.row.isEditable
-  }
-
-  const handleCalculate = async () => {
-    setRows([])
-    setLoading(true)
-    try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
-      var data = null
-      let siteID =
-        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-      let verticalId = localStorage.getItem('verticalId')
-
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-        data =
-          await NormalOperationNormsApiService.handleCalculateNormalOperationNormsPe(
-            plantId,
-            siteID,
-            verticalId,
-            year,
-            keycloak,
-          )
-      } else {
-        data =
-          await NormalOperationNormsApiService.handleCalculateNormalOperationNorms(
-            plantId,
-            year,
-            keycloak,
-          )
-      }
-
-      if (data == 0 || data) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data refreshed successfully!',
-          severity: 'success',
-        })
-
-        fetchData(gradeId)
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Refresh Falied!',
-          severity: 'error',
-        })
-      }
-
-      return data
-    } catch (error) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: error.message || 'An error occurred',
-        severity: 'error',
-      })
-
-      console.error('Error!', error)
-    }
-  }
-
-  const handleCalculateFinalNorms = async () => {
-    setLoading(true)
-    try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
-      var data = null
-
-      data = await NormalOperationNormsApiService.calculateFinalNorms(
-        plantId,
-        year,
-        keycloak,
-      )
-
-      if (data == 0 || data) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data refreshed successfully!',
-          severity: 'success',
-        })
-
-        fetchData(gradeId)
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Refresh Falied!',
-          severity: 'error',
-        })
-      }
-
-      return data
-    } catch (error) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: error.message || 'An error occurred',
-        severity: 'error',
-      })
-
-      console.error('Error!', error)
-    }
-  }
-
-  const getAdjustedPermissions = (permissions, isOldYear) => {
-    if (isOldYear != 1) return permissions
+  // permission helper: if old year, getAdjustedPermissions blocks actions
+  const getAdjustedPermissions = useCallback((permissions, isOldYearFlag) => {
+    if (isOldYearFlag != 1) return permissions
     return {
       ...permissions,
       showAction: false,
@@ -694,27 +180,69 @@ const NormalOpNormsScreenCracker = () => {
       showUnit: false,
       saveWithRemark: false,
       saveBtn: false,
-      isOldYear: isOldYear,
+      isOldYear: isOldYearFlag,
       showCalculate: false,
     }
-  }
+  }, [])
 
-  const adjustedPermissionsExpression = getAdjustedPermissions(
-    {
+  // base permission objects (these are not final; we'll apply topGrid toggles)
+  const baseModePermissions = useMemo(
+    () => ({
+      showAction: false,
+      allAction: true,
+      addButton: false,
+      deleteButton: false,
+      editButton: false,
+      showUnit: false,
+      saveWithRemark: true,
+      // saveBtn/showCalculate will be toggled per-grid depending on which is top
+      saveBtn: true,
+      showCalculate: true,
+      downloadExcelBtnFromUI: false,
+      ExcelName: `${lowerVertName}_BestAcheived(Min CC)`,
+      showCheckbox: false,
+      marginBottom: false,
+      showTitleNameBusiness: true,
+      dropdownLabel: 'Select Mode',
+      showCalculateVisibility: true,
+      titleName: 'Best Achieved (Min CC)',
+      isHeight: (rows?.length || 0) > 10,
+    }),
+    [calculationObject, lowerVertName, rows],
+  )
+
+  const baseExpressionPermissions = useMemo(
+    () => ({
       showAction: false,
       allAction: true,
       showTitleNameBusiness: true,
       titleName: 'Expression (Norms)',
+      saveBtn: true, // will be hidden if not top
       showCalculate: false,
       downloadExcelBtnFromUI: true,
       ExcelName: `${lowerVertName}_Expression_(Norms)`,
       showCheckbox: true,
-    },
-    isOldYear,
+    }),
+    [lowerVertName],
   )
 
-  const adjustedPermissionsFinalNorms = getAdjustedPermissions(
-    {
+  const baseMonthlyPermissions = useMemo(
+    () => ({
+      showAction: false,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: 'Best Achieved (Individual)',
+      showCheckbox: true,
+      downloadExcelBtnFromUI: true,
+      ExcelName: `${lowerVertName}_Best Achieved (Norms)`,
+      saveBtn: true, // visible only if top
+      showCalculate: true, // visible only if top and calculation available
+    }),
+    [lowerVertName, calculationObject],
+  )
+
+  const baseFinalPermissions = useMemo(
+    () => ({
       showAction: false,
       allAction: true,
       showTitleNameBusiness: true,
@@ -724,602 +252,653 @@ const NormalOpNormsScreenCracker = () => {
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: true,
-    },
-    isOldYear,
+      showCalculateVisibility: true,
+    }),
+    [lowerVertName],
   )
 
-  const adjustedPermissionsBestAchivedIndividual = getAdjustedPermissions(
-    {
-      showAction: false,
-      allAction: true,
-      showTitleNameBusiness: true,
-      titleName: 'Best Achieved (Individual)',
-      showCheckbox: true,
-      downloadExcelBtnFromUI: true,
-      ExcelName: `${lowerVertName}_Best Achieved (Norms)`,
-    },
+  // Which grid is top?
+  // Mode tab: if Monthly selected -> monthly grid is top; otherwise main is top.
+  const isModeTab = selectedTab === 1
+  const mainIsTop = isModeTab && gradeDisplayName !== 'Monthly'
+  const monthlyIsTop = isModeTab && gradeDisplayName === 'Monthly'
+  const finalIsTop = selectedTab === 2
+
+  // derive per-grid permissions: top grid keeps save/calc flags, others have them hidden.
+  const mainPermissions = useMemo(() => {
+    const base = { ...baseModePermissions }
+    base.saveBtn = mainIsTop && base.saveBtn
+    base.showCalculate = mainIsTop && base.showCalculate
+    return getAdjustedPermissions(base, isOldYear)
+  }, [baseModePermissions, mainIsTop, getAdjustedPermissions, isOldYear])
+
+  const expressionPermissions = useMemo(() => {
+    const base = { ...baseExpressionPermissions }
+    // expression only shows save/calc if it is the top grid (rare: e.g., if you reorder)
+    const showSave = !mainIsTop && !monthlyIsTop && isModeTab // expression becomes top if both main & monthly not present (edge)
+    base.saveBtn = showSave && base.saveBtn
+    base.showCalculate = showSave && base.showCalculate
+    return getAdjustedPermissions(base, isOldYear)
+  }, [
+    baseExpressionPermissions,
+    mainIsTop,
+    monthlyIsTop,
+    isModeTab,
+    getAdjustedPermissions,
     isOldYear,
+  ])
+
+  const monthlyPermissions = useMemo(() => {
+    const base = { ...baseMonthlyPermissions }
+    base.saveBtn = monthlyIsTop && base.saveBtn
+    base.showCalculate =
+      monthlyIsTop &&
+      base.showCalculate &&
+      Object.keys(calculationObject || {}).length > 0
+    return getAdjustedPermissions(base, isOldYear)
+  }, [
+    baseMonthlyPermissions,
+    monthlyIsTop,
+    calculationObject,
+    getAdjustedPermissions,
+    isOldYear,
+  ])
+
+  const finalPermissions = useMemo(() => {
+    const base = { ...baseFinalPermissions }
+    base.saveBtn = finalIsTop && base.saveBtn
+    base.showCalculate = finalIsTop && base.showCalculate
+    return getAdjustedPermissions(base, isOldYear)
+  }, [baseFinalPermissions, finalIsTop, getAdjustedPermissions, isOldYear])
+
+  // --- Data fetchers ---
+  const fetchFinalNorms = useCallback(async () => {
+    try {
+      const response =
+        await NormalOperationNormsApiService.getfinalNorms(keycloak)
+      if (response?.code !== 200) {
+        setRowsBestFinalNorms([])
+        return
+      }
+      const mapped = response?.data?.mcuNormsValueDTOList || []
+      setRowsBestFinalNorms(mapApiRowToGrid(mapped, ''))
+    } catch (err) {
+      console.error('fetchFinalNorms', err)
+    }
+  }, [keycloak])
+
+  const fetchModeData = useCallback(
+    async (gradeIdParam) => {
+      if (!lowerVertName) return
+      setLoading(true)
+      try {
+        if (lowerVertName === 'cracker') {
+          const [bestResp, exprResp, yearlyResp, colorResp] = await Promise.all(
+            [
+              NormalOperationNormsApiService.getModeWiseNormsData(
+                keycloak,
+                gradeIdParam,
+                'Best Achieved',
+              ),
+              NormalOperationNormsApiService.getModeWiseNormsData(
+                keycloak,
+                gradeIdParam,
+                'Expression',
+              ),
+              NormalOperationNormsApiService.getModeWiseNormsData(
+                keycloak,
+                gradeIdParam,
+                'Yearly Norms',
+              ),
+              NormalOperationNormsApiService.BestAchivedColorCodes(
+                keycloak,
+                PLANT_ID,
+                AOP_YEAR,
+                gradeIdParam,
+              ),
+            ],
+          )
+
+          setCalculationObject(bestResp?.data?.aopCalculation || {})
+
+          setAllRedCell(
+            (colorResp?.data?.data || []).map((obj) => ({
+              ...obj,
+              normParameterFKId: (obj.NormParameter_FK_Id || '').toUpperCase(),
+            })),
+          )
+
+          setRows(
+            mapApiRowToGrid(bestResp?.data?.mcuNormsValueDTOList, 'main-'),
+          )
+          setRowsExpression(
+            mapApiRowToGrid(
+              exprResp?.data?.mcuNormsValueDTOList,
+              'expression-',
+            ),
+          )
+          setRowsBestAchivedIndividual(
+            mapApiRowToGrid(yearlyResp?.data?.mcuNormsValueDTOList, 'best-'),
+          )
+        }
+      } catch (err) {
+        console.error('fetchModeData', err)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [AOP_YEAR, PLANT_ID, keycloak, lowerVertName],
   )
 
-  const handleExcelUpload = (rawFile) => {
-    saveExcelFile(rawFile)
-  }
+  const fetchAllData = useCallback(
+    async (gId) => {
+      setLoading(true)
+      try {
+        setGrades([
+          { name: '4F', displayName: '4F', gradeId: '4F' },
+          { name: '5F', displayName: '5F', gradeId: '5F' },
+          { name: '4F+D', displayName: '4F+D', gradeId: '4F+D' },
+          { name: 'Monthly', displayName: 'Monthly', gradeId: 'Monthly' },
+        ])
 
-  const downloadExcelForConfiguration = async () => {
+        const promises = [fetchModeData(gId)]
+        if (selectedTab === 2) promises.push(fetchFinalNorms())
+        await Promise.all(promises)
+      } catch (err) {
+        console.error('fetchAllData', err)
+      } finally {
+        setLoading(false)
+      }
+    },
+    [fetchModeData, fetchFinalNorms, selectedTab],
+  )
+
+  useEffect(() => {
+    fetchAllData(gradeId)
+  }, [
+    fetchAllData,
+    oldYear,
+    yearChanged,
+    keycloak,
+    gradeId,
+    plantObject?.id,
+    selectedTab,
+  ])
+
+  // remark handlers
+  const handleRemarkCellClick = useCallback((row) => {
+    if (!row?.isEditable) return
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }, [])
+
+  const handleRemarkCellClickFinalNorms = useCallback((row) => {
+    if (!row?.isEditable) return
+    setCurrentRemarkFinalNorms(row.remarks || '')
+    setCurrentRowIdFinalNorms(row.id)
+    setRemarkDialogOpenFinalNorms(true)
+  }, [])
+
+  const isCellEditable = useCallback((params) => !!params.row.isEditable, [])
+
+  // save/calc logic
+  const saveRows = useCallback(
+    async (rowsToSave, isFinal = false) => {
+      if (!rowsToSave || rowsToSave.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+        return
+      }
+
+      setLoading(true)
+      try {
+        const payload = mapGridRowToPayload(rowsToSave)
+        const response = isFinal
+          ? await NormalOperationNormsApiService.updateFinalNormsData(
+              keycloak,
+              gradeId,
+              payload,
+            )
+          : await NormalOperationNormsApiService.updateModeWiseNormsData(
+              keycloak,
+              gradeId,
+              payload,
+            )
+
+        if (response?.code === 200) {
+          dispatch(setIsBlocked(false))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Saved Successfully!',
+            severity: 'success',
+          })
+          if (isFinal) setModifiedCellsFinalNorms({})
+          else setModifiedCells({})
+          await fetchModeData(gradeId)
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({ message: 'Data not saved!', severity: 'error' })
+        }
+        return response
+      } catch (err) {
+        console.error('saveRows', err)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: err.message || 'Error saving data',
+          severity: 'error',
+        })
+      } finally {
+        setLoading(false)
+      }
+    },
+    [dispatch, fetchModeData, gradeId, keycloak],
+  )
+
+  const saveChangesCrackerFinalNorms = useCallback(() => {
+    const data = Object.values(modifiedCellsFinalNorms)
+    return saveRows(data, true)
+  }, [modifiedCellsFinalNorms, saveRows])
+
+  const saveChangesUnified = useCallback(async () => {
+    // Final tab -> final norms
+    if (selectedTab === 2) return saveChangesCrackerFinalNorms()
+
+    // Mode tab + Monthly -> top is monthly -> save monthly entries only
+    if (selectedTab === 1 && gradeDisplayName === 'Monthly') {
+      const bestModified = Object.entries(modifiedCells)
+        .filter(([key]) => key.startsWith('best-'))
+        .map(([_, val]) => val)
+      if (!bestModified || bestModified.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+        return
+      }
+      return saveRows(bestModified, false)
+    }
+
+    // Mode tab + non-Monthly -> top is main -> save all modifiedCells
+    const data = Object.values(modifiedCells)
+    return saveRows(data, false)
+  }, [
+    selectedTab,
+    gradeDisplayName,
+    modifiedCells,
+    saveRows,
+    saveChangesCrackerFinalNorms,
+  ])
+
+  const handleCalculate = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res =
+        await NormalOperationNormsApiService.handleCalculateNormalOperationNorms(
+          PLANT_ID,
+          year,
+          keycloak,
+        )
+      const success = res == 0 || !!res
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: success
+          ? 'Data refreshed successfully!'
+          : 'Data Refresh Failed!',
+        severity: success ? 'success' : 'error',
+      })
+      if (success) await fetchModeData(gradeId)
+      return res
+    } catch (err) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: err.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('handleCalculate', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [PLANT_ID, fetchModeData, gradeId, keycloak, year])
+
+  const handleCalculateFinalNorms = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await NormalOperationNormsApiService.calculateFinalNorms(
+        PLANT_ID,
+        AOP_YEAR,
+        keycloak,
+      )
+      const success = res == 0 || !!res
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: success
+          ? 'Data refreshed successfully!'
+          : 'Data Refresh Failed!',
+        severity: success ? 'success' : 'error',
+      })
+      if (success) await fetchModeData(gradeId)
+      return res
+    } catch (err) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: err.message || 'An error occurred',
+        severity: 'error',
+      })
+      console.error('handleCalculateFinalNorms', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [PLANT_ID, fetchModeData, gradeId, keycloak, AOP_YEAR])
+
+  const handleCalculateUnified = useCallback(async () => {
+    if (selectedTab === 2) return handleCalculateFinalNorms()
+    return handleCalculate()
+  }, [selectedTab, handleCalculate, handleCalculateFinalNorms])
+
+  const handleGlobalCheckboxChange = useCallback(
+    (gridName, id, materialName, field, value, dataItem) => {
+      const uniqueItemId = `${gridName}-${id}`
+      const uncheckedRows = []
+      const updateGridRows = (setRowsFunc, currentGridName) => {
+        setRowsFunc((prev) =>
+          (prev || []).map((row) => {
+            if (row.id === id && gridName === currentGridName)
+              return { ...row, [field]: value }
+            if (
+              row.materialName === materialName &&
+              !(row.id === id && gridName === currentGridName)
+            ) {
+              uncheckedRows.push({ ...row, gridName: currentGridName })
+              return { ...row, [field]: false }
+            }
+            return row
+          }),
+        )
+      }
+      updateGridRows(setRows, 'main')
+      updateGridRows(setRowsExpression, 'expression')
+      updateGridRows(setRowsBestAchivedIndividual, 'best')
+
+      setModifiedCells((prev) => {
+        const updated = {
+          ...prev,
+          [uniqueItemId]: {
+            ...(prev[uniqueItemId] || {}),
+            ...dataItem,
+            [field]: value,
+          },
+        }
+        uncheckedRows.forEach((row) => {
+          const rowUniqueId = `${row.gridName}-${row.id}`
+          updated[rowUniqueId] = {
+            ...(prev[rowUniqueId] || {}),
+            ...row,
+            [field]: false,
+          }
+        })
+        return updated
+      })
+    },
+    [],
+  )
+
+  const downloadExcelForConfiguration = useCallback(async () => {
     setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Excel download started!',
-      severity: 'success',
-    })
-
+    setSnackbarData({ message: 'Excel download started!', severity: 'success' })
     try {
       await NormalOperationNormsApiService.getNormalOpsNormsExcel(
         keycloak,
         gradeId,
       )
-
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
       })
-    } catch (error) {
-      console.error('Error!', error)
+    } catch (err) {
+      console.error('downloadExcelForConfiguration', err)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to download Excel.',
         severity: 'error',
       })
-    } finally {
-      // optional cleanup or logging
     }
-  }
+  }, [gradeId, keycloak])
 
-  const saveExcelFile = async (rawFile) => {
-    setLoading(true)
-    try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
+  // grade handlers
+  const handleGradeChange = useCallback((gId, gDisplayName) => {
+    setGradeId(gId)
+    setGradeDisplayName(gDisplayName)
+  }, [])
+
+  const onModeSelect = useCallback(
+    (event) => {
+      const selectedId = event.target.value
+      const sel = grades.find((g) => g.gradeId === selectedId) || {
+        displayName: selectedId,
       }
-
-      const response =
-        await NormalOperationNormsApiService.saveNormalOpsNormsExcel(
-          rawFile,
-          keycloak,
-        )
-      if (response?.code === 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Uploaded Successfully!',
-          severity: 'success',
-        })
-        setModifiedCells({})
-        fetchAllData(gradeId)
-      } else if (response?.code === 400 && response?.data) {
-        // Partial save, error file download
-        const byteCharacters = atob(response.data)
-        const byteNumbers = new Array(byteCharacters.length)
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i)
-        }
-        const byteArray = new Uint8Array(byteNumbers)
-        const blob = new Blob([byteArray], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', 'Error File Steady state Norms.xlsx')
-        document.body.appendChild(link)
-        link.click()
-        link.remove()
-        window.URL.revokeObjectURL(url)
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Partial data saved. Error file downloaded.',
-          severity: 'warning',
-        })
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Save Failed!',
-          severity: 'error',
-        })
-      }
-
-      return response
-    } catch (error) {
-      console.error('Error saving data:', error)
-      setLoading(false)
-    } finally {
-      // fetchData()
-      setLoading(false)
-    }
-  }
-  const handleGradeChange = (gradeId, gradeDisplayName) => {
-    setGradeId(gradeId)
-    setGradeDisplayName(gradeDisplayName)
-  }
-
-  const handleTabChange = (event, newValue) => {
-    setModifiedCells({})
-    setSelectedTab(newValue)
-
-    if (newValue === 0) {
-      setModifiedCells({})
-      fetchAllData(gradeId)
-    } else if (newValue === 1) {
-      // fetchAllData(gradeId)
-    }
-  }
-  const saveNormalOperationNormsDataCracker = async (newRows) => {
-    setLoading(true)
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      const payload = newRows.map((row) => ({
-        april: row.april || 0,
-        may: row.may || 0,
-        june: row.june || 0,
-        july: row.july || 0,
-        august: row.august || 0,
-        september: row.september || 0,
-        october: row.october || 0,
-        november: row.november || 0,
-        december: row.december || 0,
-        january: row.january || 0,
-        february: row.february || 0,
-        march: row.march || 0,
-        remark: row.remark || row.remarks || '',
-        isChecked: row.isChecked || false,
-        id: row.idFromApi || row.id || null,
-        materialFKId: row.materialFKId || row.materialFkId || null,
-      }))
-
-      // console.log('payload', payload)
-      setLoading(false)
-
-      if (payload.length > 0) {
-        const response =
-          await NormalOperationNormsApiService.updateModeWiseNormsData(
-            keycloak,
-            gradeId,
-            payload,
-          )
-
-        if (response?.code == 200) {
-          dispatch(setIsBlocked(false))
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Saved Successfully!`,
-            severity: 'success',
-          })
-
-          setModifiedCells({})
-          unsavedChangesRef.current = {
-            unsavedRows: {},
-            rowsBeforeChange: {},
-          }
-
-          fetchData(gradeId)
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Data not saved!`,
-            severity: 'error',
-          })
-        }
-        return response
-      }
-    } catch (error) {
-      console.error(`Error saving Data`, error)
-    } finally {
-      // fetchData()
-      // setLoading(false)
-    }
-  }
-  const saveNormalOperationFinalNorms = async (newRows) => {
-    setLoading(true)
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      const payload = newRows.map((row) => ({
-        april: row.april || 0,
-        may: row.may || 0,
-        june: row.june || 0,
-        july: row.july || 0,
-        august: row.august || 0,
-        september: row.september || 0,
-        october: row.october || 0,
-        november: row.november || 0,
-        december: row.december || 0,
-        january: row.january || 0,
-        february: row.february || 0,
-        march: row.march || 0,
-        isChecked: row.isChecked || false,
-        id: row.idFromApi || row.id || null,
-        materialFKId: row.materialFKId || row.materialFkId || null,
-        remarks: row.remarks || row.remarks || '',
-        remark: row.remarks || row.remarks || '',
-      }))
-
-      // console.log('payload', payload)
-
-      if (payload.length > 0) {
-        const response =
-          await NormalOperationNormsApiService.updateFinalNormsData(
-            keycloak,
-            gradeId,
-            payload,
-          )
-
-        if (response?.code == 200) {
-          dispatch(setIsBlocked(false))
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Saved Successfully!`,
-            severity: 'success',
-          })
-
-          setLoading(false)
-
-          setModifiedCellsFinalNorms({})
-          unsavedChangesRefFinalNorms.current = {
-            unsavedRows: {},
-            rowsBeforeChange: {},
-          }
-          fetchData(gradeId)
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Data not saved!`,
-            severity: 'error',
-          })
-          setLoading(false)
-        }
-        return response
-      }
-    } catch (error) {
-      console.error(`Error saving Data`, error)
-    } finally {
-      // fetchData()
-      setLoading(false)
-    }
-  }
-
-  const saveChangesCracker = React.useCallback(async () => {
-    try {
-      const data = Object.values(modifiedCells)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-      saveNormalOperationNormsDataCracker(data)
-    } catch (error) {
-      console.error('Error saving Cracker Data:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Error saving Cracker Data!',
-        severity: 'error',
-      })
-    }
-  }, [modifiedCells])
-
-  const saveChangesCrackerFinalNorms = React.useCallback(async () => {
-    try {
-      const data = Object.values(modifiedCellsFinalNorms)
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-      saveNormalOperationFinalNorms(data)
-    } catch (error) {
-      console.error('Error saving Cracker Data:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Error saving Cracker Data!',
-        severity: 'error',
-      })
-    }
-  }, [modifiedCellsFinalNorms])
-
-  const handleGlobalCheckboxChange = (
-    gridName,
-    id,
-    materialName,
-    field,
-    value,
-    dataItem,
-    itemId,
-  ) => {
-    unsavedChangesRefFinalNorms
-    const uniqueItemId = `${gridName}-${id}`
-    const uncheckedRows = []
-
-    const updateGridRows = (setRowsFunc, currentGridName) => {
-      setRowsFunc((prev) =>
-        prev.map((row) => {
-          if (row.id === id && gridName === currentGridName) {
-            return { ...row, [field]: value }
-          }
-          if (
-            row.materialName === materialName &&
-            !(row.id === id && gridName === currentGridName)
-          ) {
-            uncheckedRows.push({ row, gridName: currentGridName })
-            return { ...row, [field]: false }
-          }
-          return row
-        }),
-      )
-    }
-
-    updateGridRows(setRows, 'main')
-    updateGridRows(setRowsExpression, 'expression')
-    updateGridRows(setRowsBestAchivedIndividual, 'best')
-
-    setModifiedCells((prev) => {
-      const updated = {
-        ...prev,
-        [uniqueItemId]: {
-          ...(prev[uniqueItemId] || {}),
-          ...dataItem,
-          [field]: value,
-        },
-      }
-
-      uncheckedRows.forEach(({ row, gridName }) => {
-        const rowUniqueId = `${gridName}-${row.id}`
-        updated[rowUniqueId] = {
-          ...(prev[rowUniqueId] || {}),
-          ...row,
-          [field]: false && prevValue === true,
-        }
-      })
-
-      return updated
-    })
-  }
-
-  const adjustedPermissions = getAdjustedPermissions(
-    {
-      showAction: false,
-      allAction: true,
-      addButton: false,
-      deleteButton: false,
-      editButton: false,
-      showUnit: false,
-      saveWithRemark: true,
-      saveBtn: true,
-      showCalculate: true,
-      downloadExcelBtnFromUI: false,
-      ExcelName: `${lowerVertName}_BestAcheived(Min CC)`,
-      showCheckbox: false,
-      marginBottom: false,
-      showG: true,
-      dropdownLabel: 'Select Mode',
-      showCalculateVisibility:
-        Object.keys(calculationObject || {}).length > 0 ? true : false,
-      titleName: 'Best Achieved (Min CC)',
-      downloadExcelBtn: true,
-      uploadExcelBtn: true,
-      isHeight: rows?.length > 10,
+      handleGradeChange(selectedId, sel.displayName)
     },
-    isOldYear,
+    [grades, handleGradeChange],
   )
 
+  // tabs
+  const handleTabChange = useCallback(
+    (_, newValue) => {
+      setModifiedCells({})
+      setSelectedTab(newValue)
+      if (newValue === 0) fetchAllData(gradeId)
+    },
+    [gradeId, fetchAllData],
+  )
+
+  const tabSx = {
+    border: '1px solid #ADD8E6',
+    borderBottom: '1px solid #ADD8E6',
+    fontSize: '0.75rem',
+    padding: '9px',
+    minHeight: '12px',
+  }
+  const tabLabels = ['Constants', 'Mode wise selection', 'Final monthly norms']
+
+  // UI render
   return (
     <div>
-      {/* <Backdrop
+      <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
       >
         <CircularProgress color='inherit' />
-      </Backdrop> */}
+      </Backdrop>
 
-      <Box style={{ margin: 0, padding: 0 }}>
+      <Box sx={{ margin: 0, padding: 0 }}>
         <Tabs
           value={selectedTab}
           onChange={handleTabChange}
           sx={{
             borderBottom: '0px solid #ccc',
             '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 0px 0px',
+            margin: 0,
             minHeight: '28px',
           }}
         >
-          <Tab
-            label='Constants'
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-              fontSize: '0.75rem',
-              padding: '9px',
-              minHeight: '12px',
-            }}
-          />
-
-          <Tab
-            label='Mode wise selection'
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-              fontSize: '0.75rem',
-              padding: '9px',
-              minHeight: '12px',
-            }}
-          />
-
-          <Tab
-            label='Final monthly norms'
-            sx={{
-              border: '1px solid #ADD8E6',
-              borderBottom: '1px solid #ADD8E6',
-              fontSize: '0.75rem',
-              padding: '9px',
-              minHeight: '12px',
-            }}
-          />
+          {tabLabels.map((label) => (
+            <Tab key={label} label={label} sx={tabSx} />
+          ))}
         </Tabs>
       </Box>
 
-      {selectedTab == 1 && (
-        <Typography
-          component='div'
-          className='grid-title'
-          sx={{
-            marginBottom: '10px',
-          }}
-        >
-          Best Achieved (Min CC)
-        </Typography>
-      )}
       {selectedTab === 1 && (
-        <KendoDataTables
-          modifiedCells={modifiedCells}
-          setModifiedCells={setModifiedCells}
-          columns={colDefs}
-          setRows={setRows}
-          rows={rows}
-          grades={grades}
-          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-          onDeleteRow={(id) => console.log('Row Deleted:', id)}
-          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-          paginationOptions={[100, 200, 300]}
-          saveChanges={saveChanges}
-          isCellEditable={isCellEditable}
-          snackbarData={snackbarData}
-          handleCalculate={handleCalculate}
-          snackbarOpen={snackbarOpen}
-          apiRef={apiRef}
-          open1={open1}
-          setOpen1={setOpen1}
-          setSnackbarOpen={setSnackbarOpen}
-          setSnackbarData={setSnackbarData}
-          remarkDialogOpen={remarkDialogOpen}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
-          currentRowId={currentRowId}
-          unsavedChangesRef={unsavedChangesRef}
-          handleRemarkCellClick={handleRemarkCellClick}
-          permissions={adjustedPermissions}
-          allRedCell={allRedCell}
-          groupBy='Particulars'
-          handleExcelUpload={handleExcelUpload}
-          downloadExcelForConfiguration={downloadExcelForConfiguration}
-          handleGradeChange={handleGradeChange}
-          onGlobalCheckboxChange={handleGlobalCheckboxChange}
-          plantID={plantID}
-          gridName='main'
-          showThreeColors={true}
-        />
+        <>
+          {/* EXTERNAL DROPDOWN */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+            <FormControl size='small' sx={{ minWidth: 120 }}>
+              <InputLabel id='mode-select-label'>Select Mode</InputLabel>
+              <Select
+                labelId='mode-select-label'
+                value={gradeId || ''}
+                label='Mode'
+                onChange={onModeSelect}
+              >
+                {grades.map((g) => (
+                  <MenuItem key={g.gradeId} value={g.gradeId}>
+                    {g.displayName}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Typography component='div' className='grid-title'>
+              <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> -
+              Propane (1Z)&nbsp;&nbsp;
+              <span style={{ color: 'green', fontWeight: 'bold' }}>
+                Green
+              </span>{' '}
+              - Propane (2Z)
+            </Typography>
+          </Box>
+
+          {/* MODE TAB: render TOP grid first depending on Monthly vs non-Monthly */}
+          {gradeDisplayName === 'Monthly' ? (
+            <>
+              {/* Monthly is top when Monthly selected -> monthly gets save/calc */}
+              <KendoDataTables
+                modifiedCells={modifiedCells}
+                setModifiedCells={setModifiedCells}
+                title='Normal Operations Norms'
+                columns={colDefsIndividual}
+                setRows={setRowsBestAchivedIndividual}
+                rows={rowsBestAchivedIndividual}
+                grades={grades}
+                paginationOptions={[100, 200, 300]}
+                saveChanges={saveChangesUnified}
+                isCellEditable={isCellEditable}
+                snackbarData={snackbarData}
+                handleCalculate={handleCalculateUnified}
+                snackbarOpen={snackbarOpen}
+                apiRef={apiRef}
+                setSnackbarOpen={setSnackbarOpen}
+                setSnackbarData={setSnackbarData}
+                remarkDialogOpen={remarkDialogOpen}
+                setRemarkDialogOpen={setRemarkDialogOpen}
+                currentRemark={currentRemark}
+                setCurrentRemark={setCurrentRemark}
+                currentRowId={currentRowId}
+                handleRemarkCellClick={handleRemarkCellClick}
+                permissions={monthlyPermissions}
+                groupBy='Particulars'
+                downloadExcelForConfiguration={downloadExcelForConfiguration}
+                handleGradeChange={handleGradeChange}
+                onGlobalCheckboxChange={handleGlobalCheckboxChange}
+                plantID={PLANT_ID}
+                gridName='best'
+              />
+
+              {/* expression below */}
+              <KendoDataTables
+                modifiedCells={modifiedCells}
+                setModifiedCells={setModifiedCells}
+                title='Normal Operations Norms'
+                columns={colDefs}
+                setRows={setRowsExpression}
+                rows={rowsExpression}
+                grades={grades}
+                paginationOptions={[100, 200, 300]}
+                saveChanges={saveChangesUnified}
+                isCellEditable={isCellEditable}
+                snackbarData={snackbarData}
+                handleCalculate={handleCalculateUnified}
+                snackbarOpen={snackbarOpen}
+                apiRef={apiRef}
+                setSnackbarOpen={setSnackbarOpen}
+                setSnackbarData={setSnackbarData}
+                remarkDialogOpen={remarkDialogOpen}
+                setRemarkDialogOpen={setRemarkDialogOpen}
+                currentRemark={currentRemark}
+                setCurrentRemark={setCurrentRemark}
+                currentRowId={currentRowId}
+                handleRemarkCellClick={handleRemarkCellClick}
+                permissions={expressionPermissions}
+                groupBy='Particulars'
+                downloadExcelForConfiguration={downloadExcelForConfiguration}
+                handleGradeChange={handleGradeChange}
+                plantID={PLANT_ID}
+                onGlobalCheckboxChange={handleGlobalCheckboxChange}
+                gridName='expression'
+              />
+            </>
+          ) : (
+            <>
+              {/* Non-monthly: Main is top -> main gets save/calc */}
+              <KendoDataTables
+                modifiedCells={modifiedCells}
+                setModifiedCells={setModifiedCells}
+                columns={colDefs}
+                setRows={setRows}
+                rows={rows}
+                grades={grades}
+                paginationOptions={[100, 200, 300]}
+                saveChanges={saveChangesUnified}
+                isCellEditable={isCellEditable}
+                snackbarData={snackbarData}
+                handleCalculate={handleCalculateUnified}
+                snackbarOpen={snackbarOpen}
+                apiRef={apiRef}
+                setSnackbarOpen={setSnackbarOpen}
+                setSnackbarData={setSnackbarData}
+                remarkDialogOpen={remarkDialogOpen}
+                setRemarkDialogOpen={setRemarkDialogOpen}
+                currentRemark={currentRemark}
+                setCurrentRemark={setCurrentRemark}
+                currentRowId={currentRowId}
+                handleRemarkCellClick={handleRemarkCellClick}
+                permissions={mainPermissions}
+                allRedCell={allRedCell}
+                groupBy='Particulars'
+                downloadExcelForConfiguration={downloadExcelForConfiguration}
+                handleGradeChange={handleGradeChange}
+                onGlobalCheckboxChange={handleGlobalCheckboxChange}
+                plantID={PLANT_ID}
+                gridName='main'
+                showThreeColors={true}
+              />
+
+              {/* expression below */}
+              <KendoDataTables
+                modifiedCells={modifiedCells}
+                setModifiedCells={setModifiedCells}
+                title='Normal Operations Norms'
+                columns={colDefs}
+                setRows={setRowsExpression}
+                rows={rowsExpression}
+                grades={grades}
+                paginationOptions={[100, 200, 300]}
+                saveChanges={saveChangesUnified}
+                isCellEditable={isCellEditable}
+                snackbarData={snackbarData}
+                handleCalculate={handleCalculateUnified}
+                snackbarOpen={snackbarOpen}
+                apiRef={apiRef}
+                setSnackbarOpen={setSnackbarOpen}
+                setSnackbarData={setSnackbarData}
+                remarkDialogOpen={remarkDialogOpen}
+                setRemarkDialogOpen={setRemarkDialogOpen}
+                currentRemark={currentRemark}
+                setCurrentRemark={setCurrentRemark}
+                currentRowId={currentRowId}
+                handleRemarkCellClick={handleRemarkCellClick}
+                permissions={expressionPermissions}
+                groupBy='Particulars'
+                downloadExcelForConfiguration={downloadExcelForConfiguration}
+                handleGradeChange={handleGradeChange}
+                plantID={PLANT_ID}
+                onGlobalCheckboxChange={handleGlobalCheckboxChange}
+                gridName='expression'
+              />
+            </>
+          )}
+        </>
       )}
 
-      {selectedTab === 1 && (
-        <KendoDataTables
-          modifiedCells={modifiedCells}
-          setModifiedCells={setModifiedCells}
-          title='Normal Operations Norms'
-          columns={colDefs}
-          setRows={setRowsExpression}
-          rows={rowsExpression}
-          grades={grades}
-          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-          onDeleteRow={(id) => console.log('Row Deleted:', id)}
-          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-          paginationOptions={[100, 200, 300]}
-          saveChanges={
-            lowerVertName === 'cracker' ? saveChangesCracker : saveChanges
-          }
-          isCellEditable={isCellEditable}
-          snackbarData={snackbarData}
-          handleCalculate={handleCalculate}
-          snackbarOpen={snackbarOpen}
-          apiRef={apiRef}
-          open1={open1}
-          setOpen1={setOpen1}
-          setSnackbarOpen={setSnackbarOpen}
-          setSnackbarData={setSnackbarData}
-          remarkDialogOpen={remarkDialogOpen}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
-          currentRowId={currentRowId}
-          unsavedChangesRef={unsavedChangesRef}
-          handleRemarkCellClick={handleRemarkCellClick}
-          permissions={adjustedPermissionsExpression}
-          groupBy='Particulars'
-          handleExcelUpload={handleExcelUpload}
-          downloadExcelForConfiguration={downloadExcelForConfiguration}
-          handleGradeChange={handleGradeChange}
-          plantID={plantID}
-          onGlobalCheckboxChange={handleGlobalCheckboxChange}
-          gridName='expression'
-        />
-      )}
-
-      {selectedTab === 1 && gradeDisplayName == 'Monthly' && (
-        <KendoDataTables
-          modifiedCells={modifiedCells}
-          setModifiedCells={setModifiedCells}
-          title='Normal Operations Norms'
-          columns={colDefsIndividual}
-          setRows={setRowsBestAchivedIndividual}
-          rows={rowsBestAchivedIndividual}
-          grades={grades}
-          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-          onDeleteRow={(id) => console.log('Row Deleted:', id)}
-          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-          paginationOptions={[100, 200, 300]}
-          saveChanges={saveChangesCracker}
-          isCellEditable={isCellEditable}
-          snackbarData={snackbarData}
-          handleCalculate={handleCalculate}
-          snackbarOpen={snackbarOpen}
-          apiRef={apiRef}
-          open1={open1}
-          setOpen1={setOpen1}
-          setSnackbarOpen={setSnackbarOpen}
-          setSnackbarData={setSnackbarData}
-          remarkDialogOpen={remarkDialogOpen}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
-          currentRowId={currentRowId}
-          unsavedChangesRef={unsavedChangesRef}
-          handleRemarkCellClick={handleRemarkCellClick}
-          permissions={adjustedPermissionsBestAchivedIndividual}
-          groupBy='Particulars'
-          handleExcelUpload={handleExcelUpload}
-          downloadExcelForConfiguration={downloadExcelForConfiguration}
-          handleGradeChange={handleGradeChange}
-          plantID={plantID}
-          onGlobalCheckboxChange={handleGlobalCheckboxChange}
-          gridName='best'
-        />
-      )}
-
+      {/* FINAL norms tab: final grid is top */}
       {selectedTab === 2 && (
         <KendoDataTables
           modifiedCells={modifiedCellsFinalNorms}
@@ -1327,18 +906,13 @@ const NormalOpNormsScreenCracker = () => {
           columns={colDefsFinalNorms}
           setRows={setRowsBestFinalNorms}
           rows={rowsBestFinalNorms}
-          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-          onDeleteRow={(id) => console.log('Row Deleted:', id)}
-          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
           paginationOptions={[100, 200, 300]}
-          saveChanges={saveChangesCrackerFinalNorms}
+          saveChanges={saveChangesUnified}
           isCellEditable={isCellEditable}
           snackbarData={snackbarData}
-          handleCalculate={handleCalculateFinalNorms}
+          handleCalculate={handleCalculateUnified}
           snackbarOpen={snackbarOpen}
           apiRef={apiRef}
-          open1={open1}
-          setOpen1={setOpen1}
           setSnackbarOpen={setSnackbarOpen}
           setSnackbarData={setSnackbarData}
           remarkDialogOpen={remarkDialogOpenFinalNorms}
@@ -1346,11 +920,10 @@ const NormalOpNormsScreenCracker = () => {
           currentRemark={currentRemarkFinalNorms}
           setCurrentRemark={setCurrentRemarkFinalNorms}
           currentRowId={currentRowIdFinalNorms}
-          unsavedChangesRef={unsavedChangesRefFinalNorms}
           handleRemarkCellClick={handleRemarkCellClickFinalNorms}
-          permissions={adjustedPermissionsFinalNorms}
+          permissions={finalPermissions}
           groupBy='Particulars'
-          plantID={plantID}
+          plantID={PLANT_ID}
         />
       )}
 

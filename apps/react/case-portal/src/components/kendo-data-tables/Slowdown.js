@@ -260,63 +260,60 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
-      const yearStr = localStorage.getItem('year'); // e.g. "2025-26"
-   let startLimit, endLimit;
-if (yearStr) {
-  const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10));
-  if (!isNaN(startYear) && !isNaN(endYear)) {
-    // Use yyyy-mm-dd format for reliable parsing
-    startLimit = new Date(`${startYear}-04-01T00:00:00`);
-    endLimit = new Date(`20${endYear}-03-31T23:59:59`);
-  }
-}
+      const yearStr = localStorage.getItem('year') // e.g. "2025-26"
+      let startLimit, endLimit
+      if (yearStr) {
+        const [startYear, endYear] = yearStr
+          .split('-')
+          .map((y) => parseInt(y.trim(), 10))
+        if (!isNaN(startYear) && !isNaN(endYear)) {
+          // Use yyyy-mm-dd format for reliable parsing
+          startLimit = new Date(`${startYear}-04-01T00:00:00`)
+          endLimit = new Date(`20${endYear}-03-31T23:59:59`)
+        }
+      }
 
-// Helper to format date as dd/mm/yyyy
-function formatDateDDMMYYYY(date) {
-  if (!(date instanceof Date) || isNaN(date)) return '';
-  const d = date.getDate().toString().padStart(2, '0');
-  const m = (date.getMonth() + 1).toString().padStart(2, '0');
-  const y = date.getFullYear();
-  return `${d}/${m}/${y}`;
-}
-for (const record of data) {
-  const startDate = record.maintStartDateTime instanceof Date 
-  ? record.maintStartDateTime  : new Date(record.maintStartDateTime);
-  const endDate = record.maintEndDateTime instanceof Date 
-  ? record.maintEndDateTime : new Date(record.maintEndDateTime);
+      // Helper to format date as dd/mm/yyyy
+      // eslint-disable-next-line
+      function formatDateDDMMYYYY(date) {
+        if (!(date instanceof Date) || isNaN(date)) return ''
+        const d = date.getDate().toString().padStart(2, '0')
+        const m = (date.getMonth() + 1).toString().padStart(2, '0')
+        const y = date.getFullYear()
+        return `${d}/${m}/${y}`
+      }
+      for (const record of data) {
+        const startDate =
+          record.maintStartDateTime instanceof Date
+            ? record.maintStartDateTime
+            : new Date(record.maintStartDateTime)
+        const endDate =
+          record.maintEndDateTime instanceof Date
+            ? record.maintEndDateTime
+            : new Date(record.maintEndDateTime)
 
-  // Validate date format: dd/mm/yyyy (by parsing and checking)
-  if (
-    startLimit &&
-    endLimit &&
-    (
-      !startDate ||
-      !endDate ||
-      isNaN(startDate) ||
-      isNaN(endDate) ||
-      startDate < startLimit ||
-      startDate > endLimit ||
-      endDate < startLimit ||
-      endDate > endLimit
-    )
-  ) {
-    record.isError = true;
-    setSnackbarOpen(true);
-    setSnackbarData({
-      message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-      severity: 'error',
-    });
-  }
-}
-setRows((prevRows) =>
-  prevRows.map((row) => {
-    const updated = data.find((d) => d.id === row.id);
-    return updated ? { ...row, isError: updated.isError } : row;
-  })
-);
-if (data.some(record => record.isError)) {
-  return; // Stop save operation if any error
-}
+        // Validate date format: dd/mm/yyyy (by parsing and checking)
+        if (
+          startLimit &&
+          endLimit &&
+          (!startDate ||
+            !endDate ||
+            isNaN(startDate) ||
+            isNaN(endDate) ||
+            startDate < startLimit ||
+            startDate > endLimit ||
+            endDate < startLimit ||
+            endDate > endLimit)
+        ) {
+          record.isError = true
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
+            severity: 'error',
+          })
+          return
+        }
+      }
 
       // Select required fields based on vertical
       const requiredFields = ['discription', 'remark']
