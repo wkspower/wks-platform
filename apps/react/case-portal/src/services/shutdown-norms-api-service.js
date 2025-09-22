@@ -93,7 +93,7 @@ async function shutdownConsumptionHistoryData(keycloak, gradeId) {
     plantId = parsedPlant.id
   }
 
-  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption-history-data?year=${year}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${year}&plantId=${plantId}`
 
   const headers = {
     Accept: 'application/json',

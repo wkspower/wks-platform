@@ -291,18 +291,23 @@ const ShutdownNorms = () => {
           return baseItem
         })
       } else {
-        formattedData = data?.data?.map((item, index) => {
-          const baseItem = {
-            ...item,
-            idFromApi: item.id,
-            id: index,
-            materialFkId: item?.materialFkId?.toLowerCase(),
-            Particulars: item.normParameterTypeDisplayName || 'Particulars',
-            isEditable: false,
-          }
-
-          return baseItem
-        })
+        // For cracker, use mcuNormsValueDTOList if present, else fallback to data.data
+  const crackerArray = Array.isArray(data?.data?.mcuNormsValueDTOList)
+    ? data.data.mcuNormsValueDTOList
+    : Array.isArray(data?.data)
+      ? data.data
+      : [];
+  formattedData = crackerArray.map((item, index) => {
+    const baseItem = {
+      ...item,
+      idFromApi: item.id,
+      id: index,
+      materialFkId: item?.materialFkId?.toLowerCase(),
+      Particulars: item.normParameterTypeDisplayName || 'productName',
+      isEditable: false,
+    }
+    return baseItem
+  })
       }
 
       setRows(formattedData)

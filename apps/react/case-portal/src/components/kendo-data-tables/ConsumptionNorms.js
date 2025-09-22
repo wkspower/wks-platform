@@ -317,7 +317,7 @@ const ConsumptionNorms = () => {
           originalRemark: item.aopRemarks?.trim() || null,
           id: index,
           isEditable: false,
-          Particulars: item.normParameterTypeDisplayName,
+          Particulars: item.normParameterTypeDisplayName || 'productName',
         }),
       )
       setRows(formattedData)

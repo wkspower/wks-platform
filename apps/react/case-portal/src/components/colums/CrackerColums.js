@@ -174,12 +174,12 @@ export const CrackerColumsForYearlyNorms = [
 
 export const ShutdownConsumptionCrackerColumns = [
   {
-    field: 'material',
+    field: 'productName',
     headerName: 'Particulars',
     widthT: 130,
     editable: false,
   },
-  { field: 'uom', headerName: 'UOM', widthT: 60, editable: false },
+  { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12
