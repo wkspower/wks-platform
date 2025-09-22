@@ -11,11 +11,11 @@ public interface ExcelDataService {
 
     List<List<Object>> getReportForMonthWiseProductionData(String plantId, String year, List<String> headers);
 
-    Map<String, List<List<Object>>> getReportForMonthWiseConsumptionSummaryData(String plantId, String year);
+    Map<String, List<List<Object>>> getReportForMonthWiseConsumptionSummaryData(String plantId, String year, List<String> headers);
 
     Map<String, List<List<Object>>> getAnnualAOPReport(String plantId, String year);
 
-    List<List<Object>> getReportForMonthWiseConsumptionForSelectivityData(String plantId, String year);
+    List<List<Object>> getReportForMonthWiseConsumptionForSelectivityData(String plantId, String year, List<String> headers);
 
     List<List<Object>> getReportForTurnAroundPlanData(String plantId, String year, String reportType, List<String> headers);
 
@@ -25,9 +25,9 @@ public interface ExcelDataService {
 
     List<List<Object>> getAOPData(String plantId, String year,String type);
 
-    Map<String,Object> getProductionAOPWorkflowData(String plantId, String year);
+    Map<String,Object> getProductionAOPWorkflowData(String plantId, String year, List<String> headers);
 
 
-    Map<String,Object> getAnnualAOPWorkflowData(String plantId, String year);
+    Map<String,Object> getAnnualAOPWorkflowData(String plantId, String year, List<String> headers);
     List<List<Object>> getPlantContributionFiveYearSummaryReport(String plantId, String year, String reportType, List<String> headers);
 }

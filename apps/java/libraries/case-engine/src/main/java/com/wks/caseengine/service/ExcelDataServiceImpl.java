@@ -1,5 +1,7 @@
 package com.wks.caseengine.service;
 
+
+import java.lang.reflect.Field;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.AOPDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-
 
 @Service
 public class ExcelDataServiceImpl implements ExcelDataService {
@@ -25,7 +26,6 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     @Autowired
     private TurnAroundDataReportService turnAroundDataReportService;
 
-
     @Autowired
     private WorkflowService workflowService;
 
@@ -36,8 +36,10 @@ public class ExcelDataServiceImpl implements ExcelDataService {
 
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) aopMessageVM.getData();
 
-        // String[] headers = { "RowNo", "Particulates", "UOM", "BudgetPrevYear", "ActualPrevYear",
-        //         "BudgetCurrentYear", "VarBudgetMT", "VarBudgetPer", "VarActualMT", "VarActualPer", "Remark" };
+        // String[] headers = { "RowNo", "Particulates", "UOM", "BudgetPrevYear",
+        // "ActualPrevYear",
+        // "BudgetCurrentYear", "VarBudgetMT", "VarBudgetPer", "VarActualMT",
+        // "VarActualPer", "Remark" };
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -63,20 +65,20 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap.get("data");
 
         // String[] headers = {
-        //         "RowNo",
-        //         "Month",
-        //         "EOEProdBudget",
-        //         "EOEProdActual",
-        //         "OpHrsBudget",
-        //         "OpHrsActual",
-        //         "ThroughputBudget",
-        //         "ThroughputActual",
-        //         "OperatingHours",
-        //         "MEGThroughput",
-        //         "EOThroughput",
-        //         "EOEThroughput",
-        //         "TotalEOE",
-        //         "Remark"
+        // "RowNo",
+        // "Month",
+        // "EOEProdBudget",
+        // "EOEProdActual",
+        // "OpHrsBudget",
+        // "OpHrsActual",
+        // "ThroughputBudget",
+        // "ThroughputActual",
+        // "OperatingHours",
+        // "MEGThroughput",
+        // "EOThroughput",
+        // "EOEThroughput",
+        // "TotalEOE",
+        // "Remark"
         // };
 
         List<List<Object>> dataList = new ArrayList<>();
@@ -94,7 +96,8 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForMonthWiseConsumptionForSelectivityData(String plantId, String year) {
+    public List<List<Object>> getReportForMonthWiseConsumptionForSelectivityData(String plantId, String year,
+            List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService
                 .getReportForMonthWiseConsumptionSummaryData(plantId, year, "Selectivity");
@@ -104,23 +107,22 @@ public class ExcelDataServiceImpl implements ExcelDataService {
                 .get("consumptionSummary");
 
         System.out.println("getReportForMonthWiseConsumptionForSelectivityData " + productionVolumeReportList);
-        String[] headers = {
-                "material",
-                "april",
-                "may",
-                "june",
-                "july",
-                "aug",
-                "sep",
-                "oct",
-                "nov",
-                "dec",
-                "jan",
-                "feb",
-                "march"
-        };
+        // String[] headers = {
+        // "material",
+        // "april",
+        // "may",
+        // "june",
+        // "july",
+        // "aug",
+        // "sep",
+        // "oct",
+        // "nov",
+        // "dec",
+        // "jan",
+        // "feb",
+        // "march"
+        // };
 
-        System.out.println("Selectivity data " + headers.length);
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
         for (Map<String, Object> map : productionVolumeReportList) {
@@ -131,14 +133,13 @@ public class ExcelDataServiceImpl implements ExcelDataService {
             }
             dataList.add(list);
         }
-
-        System.out.println("getReportForMonthWiseConsumptionForSelectivityData2 " + dataList);
         return dataList;
 
     }
 
     @Override
-    public Map<String, List<List<Object>>> getReportForMonthWiseConsumptionSummaryData(String plantId, String year) {
+    public Map<String, List<List<Object>>> getReportForMonthWiseConsumptionSummaryData(String plantId, String year,
+            List<String> headers) {
         Map<String, List<List<Object>>> outerMap = new HashMap<>();
         AOPMessageVM aopMessageVM = productionVolumeDataReportService
                 .getReportForMonthWiseConsumptionSummaryData(plantId, year, "NormQuantity");
@@ -147,25 +148,25 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         List<Map<String, Object>> annualAOPReportList = (List<Map<String, Object>>) responseMap
                 .get("consumptionSummary");
         System.out.println("getReportForMonthWiseConsumptionSummaryData " + annualAOPReportList);
-        String[] headers = {
+        // String[] headers = {
 
-                "material",
-                "UOM",
-                "spec",
-                "april",
-                "may",
-                "june",
-                "july",
-                "aug",
-                "sep",
-                "oct",
-                "nov",
-                "dec",
-                "jan",
-                "feb",
-                "march",
-                "total"
-        };
+        // "material",
+        // "UOM",
+        // "spec",
+        // "april",
+        // "may",
+        // "june",
+        // "july",
+        // "aug",
+        // "sep",
+        // "oct",
+        // "nov",
+        // "dec",
+        // "jan",
+        // "feb",
+        // "march",
+        // "total"
+        // };
 
         for (Map<String, Object> map : annualAOPReportList) {
             List<Object> list = new ArrayList<>();
@@ -194,9 +195,9 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getAOPData(String plantId, String year,String type) {
+    public List<List<Object>> getAOPData(String plantId, String year, String type) {
 
-        AOPMessageVM aopMessageVM = aopService.getAOPData(plantId, year,type);
+        AOPMessageVM aopMessageVM = aopService.getAOPData(plantId, year, type);
 
         Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
         List<AOPDTO> aOPList = (List<AOPDTO>) responseMap.get("aopDTOList");
@@ -334,7 +335,8 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForTurnAroundPlanData(String plantId, String year, String reportType, List<String> headers) {
+    public List<List<Object>> getReportForTurnAroundPlanData(String plantId, String year, String reportType,
+            List<String> headers) {
 
         AOPMessageVM aopMessageVM = turnAroundDataReportService.getReportForTurnAroundPlanData(plantId, year,
                 reportType);
@@ -344,12 +346,12 @@ public class ExcelDataServiceImpl implements ExcelDataService {
                 .get("plantTurnAroundReportData");
 
         // String[] headers = {
-        //         "sno",
-        //         "activity",
-        //         "fromDate",
-        //         "toDate",
-        //         "durationInHrs",
-        //         "remarks"
+        // "sno",
+        // "activity",
+        // "fromDate",
+        // "toDate",
+        // "durationInHrs",
+        // "remarks"
         // };
 
         List<List<Object>> dataList = new ArrayList<>();
@@ -367,7 +369,8 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForPlantProductionPlanData(String plantId, String year, String reportType,List<String> headers) {
+    public List<List<Object>> getReportForPlantProductionPlanData(String plantId, String year, String reportType,
+            List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService.getReportForPlantProductionPlanData(plantId, year,
                 reportType);
@@ -391,7 +394,8 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getReportForPlantContributionYearWise(String plantId, String year, String reportType, List<String> headers) {
+    public List<List<Object>> getReportForPlantContributionYearWise(String plantId, String year, String reportType,
+            List<String> headers) {
 
         AOPMessageVM aopMessageVM = productionVolumeDataReportService.getReportForPlantContributionYearWise(plantId,
                 year,
@@ -400,8 +404,6 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
         List<Map<String, Object>> productionVolumeReportList = (List<Map<String, Object>>) responseMap
                 .get("plantProductionData");
-
-        
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -417,66 +419,68 @@ public class ExcelDataServiceImpl implements ExcelDataService {
 
     }
 
+    @Override
+    public Map<String, Object> getProductionAOPWorkflowData(String plantId, String year, List<String> headers) {
+
+        Map<String, Object> outMap = new HashMap<>();
+        Map<String, Object> map = workflowService.getProductionAOPWorkflowData(plantId,
+                year);
+
+        // List<String> headers = (List<String>) map.get("headers");
+        List<WorkflowYearDTO> dtoList = (List<WorkflowYearDTO>) map.get("results");
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+
+        for (WorkflowYearDTO dto : dtoList) {
+            List<Object> list = new ArrayList<>();
+            for (String fieldName : headers) {
+                try {
+                    Field field = dto.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true); // in case field is private
+                    String value = (String) field.get(dto);
+                    list.add(value);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    // If field doesn't exist or not accessible, add null
+                    list.add(null);
+                }
+            }
+            dataList.add(list);
+        }
+        map.put("rows", dataList);
+        return map;
+    }
 
     @Override
-    public Map<String,Object> getProductionAOPWorkflowData(String plantId, String year) {
-
-        Map<String,Object> outMap = new HashMap<>();
-        Map<String, Object>  map = workflowService.getProductionAOPWorkflowData(plantId,
-                year
-                );
-
-        
-       List<String> headers = (List<String>) map.get("headers");
+    public Map<String, Object> getAnnualAOPWorkflowData(String plantId, String year,List<String> headers) {
+        Map<String, Object> outMap = new HashMap<>();
+        Map<String, Object> map = workflowService.getWorkFlow(plantId, year);
+        //List<String> headers = (List<String>) map.get("headers");
         List<WorkflowYearDTO> dtoList = (List<WorkflowYearDTO>) map.get("results");
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
         for (WorkflowYearDTO dto : dtoList) {
             List<Object> list = new ArrayList<>();
-            list.add(dto.getParticulates());
-            list.add(dto.getUom());
-            list.add(dto.getFyActual());
-            list.add(dto.getFyAop());
-            list.add(dto.getSyAop());
-            list.add(dto.getRemark());
+            for (String fieldName : headers) {
+                try {
+                    Field field = dto.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true); // in case field is private
+                    String value = (String) field.get(dto);
+                    list.add(value);
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    // If field doesn't exist or not accessible, add null
+                    list.add(null);
+                }
+            }
             dataList.add(list);
         }
-        
-        map.put("headers", headers);
+
         map.put("rows", dataList);
         return map;
     }
 
-
-    
     @Override
-    public Map<String,Object> getAnnualAOPWorkflowData(String plantId, String year) {
-      Map<String,Object> outMap = new HashMap<>();
-       Map<String, Object> map = workflowService.getWorkFlow(plantId,year);
-       List<String> headers = (List<String>) map.get("headers");
-        List<WorkflowYearDTO> dtoList = (List<WorkflowYearDTO>) map.get("results");
-        List<List<Object>> dataList = new ArrayList<>();
-        // Data rows
-        for (WorkflowYearDTO dto : dtoList) {
-            List<Object> list = new ArrayList<>();
-            list.add(dto.getParticulates());
-            list.add(dto.getUom());
-            list.add(dto.getFyAop());
-            list.add(dto.getFyActual());
-            list.add(dto.getSyAop());
-            list.add(dto.getRemark());
-            dataList.add(list);
-        }
-        
-        map.put("headers", headers);
-        map.put("rows", dataList);
-        return map;
-    }
-
-    
-
-    @Override
-    public List<List<Object>> getPlantContributionFiveYearSummaryReport(String plantId, String year, String reportType, List<String> headers) {
+    public List<List<Object>> getPlantContributionFiveYearSummaryReport(String plantId, String year, String reportType,
+            List<String> headers) {
 
         AOPMessageVM aopMessageVM = aopReportService.getPlantContributionFiveYearSummaryReport(reportType,
                 plantId,
@@ -499,6 +503,5 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         return dataList;
 
     }
-
 
 }
