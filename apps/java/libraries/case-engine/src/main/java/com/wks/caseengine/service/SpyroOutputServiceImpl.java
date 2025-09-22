@@ -18,9 +18,9 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
+
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -30,9 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wks.caseengine.dto.MCUNormsValueDTO;
-import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
-import com.wks.caseengine.dto.SpyroInputDTO;
+
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.dto.YieldDTO;
 import com.wks.caseengine.dto.YieldParticularDTO;
@@ -464,7 +462,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 					}
 				}
 			}
-			sheet.setColumnHidden(7, true);
+			
 			//sheet.setColumnHidden(18, true);
 			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
 
@@ -482,6 +480,141 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		return null;
 
 	}
+	
+	@Override
+	public AOPMessageVM importYieldExcel(String year,UUID plantId,MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<YieldDTO> data = readYieldData(file.getInputStream(), plantId, year);
+			 AOPMessageVM aopMessageVM = updateSpyroOutputYieldData( plantId.toString(),  year, data);
+			 Map<String, Object> map = (Map<String, Object>) aopMessageVM.getData();
+
+			List<YieldDTO> failedList = (List<YieldDTO>) map.get("Failed");
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = exportYieldReport(year, plantId.toString(), true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+	
+	public List<YieldDTO> readYieldData(InputStream inputStream, UUID plantFKId, String year) {
+		List<YieldDTO> yieldList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				YieldDTO dto = new YieldDTO();
+				try {
+					dto.setParticulars(getStringCellValue(row.getCell(0), dto));
+					dto.setFiveFC2C3(getNumericCellValue(row.getCell(1), dto));
+					dto.setFiveFPropane(getNumericCellValue(row.getCell(2), dto));
+					dto.setFiveFEthane(getNumericCellValue(row.getCell(3), dto));
+					dto.setFourFC2C3(getNumericCellValue(row.getCell(4), dto));
+					dto.setFourFPropane(getNumericCellValue(row.getCell(5), dto));
+					dto.setFourFEthane(getNumericCellValue(row.getCell(6), dto));
+					dto.setFourFDC2C3(getNumericCellValue(row.getCell(7), dto));
+					dto.setFourFDPropane(getNumericCellValue(row.getCell(8), dto));
+					dto.setFourFDEthane(getNumericCellValue(row.getCell(9), dto));
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+				yieldList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return yieldList;
+	}
+	
+	private static String getStringCellValue(Cell cell, YieldDTO dto) {
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	private static Double getNumericCellValue(Cell cell, YieldDTO dto) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				dto.setSaveStatus("Failed");
+				dto.setErrDescription("Please enter numeric values");
+			}
+		}
+		return null;
+	}
+
+	public static Boolean getBooleanCellValue(Cell cell, YieldDTO dto) {
+		if (cell == null)
+			return null;
+
+		CellType type = cell.getCellType();
+		if (type == CellType.FORMULA) {
+			type = cell.getCachedFormulaResultType();
+		}
+
+		switch (type) {
+			case BOOLEAN:
+				return cell.getBooleanCellValue();
+			case STRING:
+				String text = cell.getStringCellValue().trim().toLowerCase();
+				if ("true".equals(text))
+					return true;
+				if ("false".equals(text))
+					return false;
+				return null;
+			case NUMERIC:
+				double num = cell.getNumericCellValue();
+				if (num == 1.0)
+					return true;
+				if (num == 0.0)
+					return false;
+				return null;
+			case BLANK:
+			case _NONE:
+			default:
+				return null;
+		}
+	}
+
+
 	
 	private CellStyle createBoldBorderedStyle(Workbook workbook) {
 		CellStyle style = createBorderedStyle(workbook);
@@ -507,12 +640,19 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<NormAttributeTransactions> normAttributeTransactionsList = new ArrayList<>();
-		
+		List<YieldDTO> failedList = new ArrayList<>();
 		List<YieldParticularDTO> yieldParticularDTOs = makeNormParameterName(yieldDTOs);
-		
+		for(YieldDTO yieldDTO:yieldDTOs) {
+			if (yieldDTO.getSaveStatus() != null
+					&& yieldDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+				failedList.add(yieldDTO);
+				continue;
+			}
+		}
 		
 		try {
 			for(YieldParticularDTO yieldParticularDTO:yieldParticularDTOs) {
+				
 				String normParameterName=yieldParticularDTO.getNormParameterName();
 				Optional<NormParameters> normParameterOpt=normParametersRepository.findFirstOneByNameAndPlantFkId(normParameterName, UUID.fromString(plantId));
 				if(normParameterOpt.isPresent()) {
@@ -551,7 +691,10 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 			}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data updated successfully");
-			aopMessageVM.setData(normAttributeTransactionsList);
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("Success", normAttributeTransactionsList);
+			map.put("Failed", failedList);
+			aopMessageVM.setData(map);
 			return aopMessageVM;
 		}catch (Exception ex) {
 			throw new RuntimeException("Failed to update data", ex);

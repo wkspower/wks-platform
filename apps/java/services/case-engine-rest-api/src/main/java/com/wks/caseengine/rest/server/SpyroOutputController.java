@@ -1,9 +1,8 @@
 package com.wks.caseengine.rest.server;
 
-import java.util.ArrayList;
+
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
 import java.util.UUID;
 
 import com.wks.caseengine.service.SpyroOutputService;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
+
 import com.wks.caseengine.dto.SpyroOutputDTO;
 import com.wks.caseengine.dto.YieldDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -102,6 +101,15 @@ public class SpyroOutputController {
 	    } catch (Exception e) {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
+	}
+	
+	@PostMapping(value = "/yield-import", consumes = "multipart/form-data")
+	public AOPMessageVM importYieldExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	spyroOutputService.importYieldExcel(year,UUID.fromString(plantId), file); 
 	}
 	
 	@PostMapping(value = "/spyro-output-import-excel", consumes = "multipart/form-data")
