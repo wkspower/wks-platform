@@ -622,21 +622,24 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		List<ShutdownNormsValueDTO> shutdownNormsValueDTOs = new ArrayList<ShutdownNormsValueDTO>();
 		for(Object[] row:obj) {
 			ShutdownNormsValueDTO shutdownNormsValueDTO = new ShutdownNormsValueDTO();
+			
 			shutdownNormsValueDTO.setId(row[0] != null ? row[0].toString() : null);
-			shutdownNormsValueDTO.setMaterialFkId(row[4] != null ? row[4].toString() : null);
-			shutdownNormsValueDTO.setApril(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
-			shutdownNormsValueDTO.setMay(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
-			shutdownNormsValueDTO.setJune(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
-			shutdownNormsValueDTO.setJuly(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
-			shutdownNormsValueDTO.setAugust(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
-			shutdownNormsValueDTO.setSeptember(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
-			shutdownNormsValueDTO.setOctober(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
-			shutdownNormsValueDTO.setNovember(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
-			shutdownNormsValueDTO.setDecember(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
-			shutdownNormsValueDTO.setJanuary(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
-			shutdownNormsValueDTO.setFebruary(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
-			shutdownNormsValueDTO.setMarch(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
-			shutdownNormsValueDTO.setRemarks(row[19] != null ? row[19].toString() : null);
+			shutdownNormsValueDTO.setProductName(row[1] != null ? row[1].toString() : null);
+			shutdownNormsValueDTO.setUOM(row[2] != null ? row[2].toString() : null);
+			shutdownNormsValueDTO.setMaterialFkId(row[6] != null ? row[6].toString() : null);
+			shutdownNormsValueDTO.setApril(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+			shutdownNormsValueDTO.setMay(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+			shutdownNormsValueDTO.setJune(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+			shutdownNormsValueDTO.setJuly(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+			shutdownNormsValueDTO.setAugust(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+			shutdownNormsValueDTO.setSeptember(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+			shutdownNormsValueDTO.setOctober(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+			shutdownNormsValueDTO.setNovember(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+			shutdownNormsValueDTO.setDecember(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+			shutdownNormsValueDTO.setJanuary(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+			shutdownNormsValueDTO.setFebruary(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+			shutdownNormsValueDTO.setMarch(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
+			shutdownNormsValueDTO.setRemarks(row[20] != null ? row[20].toString() : null);
 			
 			shutdownNormsValueDTOs.add(shutdownNormsValueDTO);
 		}
