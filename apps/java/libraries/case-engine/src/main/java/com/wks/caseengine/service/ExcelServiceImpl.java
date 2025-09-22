@@ -73,12 +73,12 @@ public class ExcelServiceImpl implements ExcelService {
                 // String dataStr = getJson();
 
                 dataStr = dataStr
-                        .replaceAll("\"yearJson\"", "\"" + year + "\"")
-                        .replaceAll("\"previousYearJson\"", "\"" + previousYear + "\"")
-                        .replaceAll("\"previous2YearJson\"", "\"" + previous2Year + "\"")
-                        .replaceAll("\"previous3YearJson\"", "\"" + previous3Year + "\"")
-                        .replaceAll("\"previous4YearJson\"", "\"" + previous4Year + "\"")
-                        .replaceAll("\"nextYearJson\"", "\"" + nextYear + "\"");
+                        .replaceAll("yearJson", year)
+                        .replaceAll("previousYearJson",  previousYear )
+                        .replaceAll("previous2YearJson", previous2Year)
+                        .replaceAll("previous3YearJson",  previous3Year)
+                        .replaceAll("previous4YearJson",  previous4Year)
+                        .replaceAll("nextYearJson", nextYear);
                 dataStr = dataStr.replace("\"monthsJson\"", quotedMonths);
 
                 System.out.println(dataStr);
@@ -103,9 +103,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<String, List<List<Object>>> monthWiseRawData = null;
                     createTitleBlock(sheet, SheetDisplayName, plant.getDisplayName(), formattedDate, workbook,
                             site.getDisplayName());
-                    if (sheetName.equalsIgnoreCase("MonthwiseRawData")) {
-                        monthWiseRawData = excelDataService.getReportForMonthWiseConsumptionSummaryData(plantId, year);
-                    }
+                    
                     int columnCount = 13;
 
                     int tableCount = -1;
@@ -127,20 +125,19 @@ public class ExcelServiceImpl implements ExcelService {
                         if (sheetName.equalsIgnoreCase("AnnualAOPCost")) {
                             if (tableId.equalsIgnoreCase("ProductionData")) {
                                 // title = "Production Data";
-                                Map<String, Object> map = excelDataService.getProductionAOPWorkflowData(plantId, year);
+                                Map<String, Object> map = excelDataService.getProductionAOPWorkflowData(plantId, year,headers);
                                 rows = (List<List<Object>>) map.get("rows");
                                 List<String> headerList = (List<String>) map.get("headers");
-                                headers.addAll(headerList);
-                                headersTitles.add(headerList);
+                               
+                                
                             }
                             if (tableId.equalsIgnoreCase("AnnualAOPCost")) {
                                 // title = "Annual AOP Cost";
-                                Map<String, Object> map = excelDataService.getAnnualAOPWorkflowData(plantId, year);
+                                Map<String, Object> map = excelDataService.getAnnualAOPWorkflowData(plantId, year,headers);
 
                                 rows = (List<List<Object>>) map.get("rows");
                                 List<String> headerList = (List<String>) map.get("headers");
-                                headers.addAll(headerList);
-                                headersTitles.add(headerList);
+                               
                             }
                         } else if (sheetName.equalsIgnoreCase("PlantProductionSummary")) {
                             // title = "Plant Production Summary (T-14)";
@@ -161,8 +158,11 @@ public class ExcelServiceImpl implements ExcelService {
                             if (tableId.equalsIgnoreCase("MonthwiseConsumptionT18")) {
                                 // title = "Monthwise Consumption (T-18)";
                                 rows = excelDataService.getReportForMonthWiseConsumptionForSelectivityData(plantId,
-                                        year);
+                                        year,headers);
                             } else {
+                                //if (sheetName.equalsIgnoreCase("MonthwiseRawData")) {
+                                   monthWiseRawData = excelDataService.getReportForMonthWiseConsumptionSummaryData(plantId, year,headers);
+                                //}
                                 if (monthWiseRawData.containsKey(dataInput)) {
                                     rows = monthWiseRawData.get(dataInput);
                                 } else {

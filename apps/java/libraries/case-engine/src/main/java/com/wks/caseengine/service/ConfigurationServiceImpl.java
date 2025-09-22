@@ -386,7 +386,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
-						|| verticalName.equalsIgnoreCase("CRACKER")) {
+						|| verticalName.equalsIgnoreCase("CRACKER") || (verticalName.equalsIgnoreCase("VCM")) 
+						|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
 
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
