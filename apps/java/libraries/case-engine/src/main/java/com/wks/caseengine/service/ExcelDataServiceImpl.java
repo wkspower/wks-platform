@@ -622,6 +622,7 @@ public class ExcelDataServiceImpl implements ExcelDataService {
                     list.add(null);
                 }
             }
+            dataList.add(list);
 
         }
 
