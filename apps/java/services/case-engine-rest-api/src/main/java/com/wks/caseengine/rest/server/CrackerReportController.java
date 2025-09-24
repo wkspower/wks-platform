@@ -32,13 +32,13 @@ public class CrackerReportController {
 	}
 	
 	@GetMapping(value="/final-norms-report")
-	public AOPMessageVM getFinalNormsReport(@RequestParam String plantId,@RequestParam String year) {
-		return crackerReportService.getFinalNormsReport(plantId,year);
+	public AOPMessageVM getFinalNormsReport(@RequestParam String plantId,@RequestParam String year,@RequestParam String reportType) {
+		return crackerReportService.getFinalNormsReport(plantId,year,reportType);
 	}
 	
 	@GetMapping(value="/final-norms-production-report")
-	public AOPMessageVM getFinalNormsProductionReport(@RequestParam String plantId,@RequestParam String year) {
-		return crackerReportService.getFinalNormsProductionReport(plantId,year);
+	public AOPMessageVM getFinalNormsProductionReport(@RequestParam String plantId,@RequestParam String year,@RequestParam String reportType) {
+		return crackerReportService.getFinalNormsProductionReport(plantId,year,reportType);
 	}
 	
 	@GetMapping(value="/configuration-intermediate-values")

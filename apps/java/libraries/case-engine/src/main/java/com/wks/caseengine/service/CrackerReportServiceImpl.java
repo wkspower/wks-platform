@@ -347,11 +347,11 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 	}
 
 	@Override
-	public AOPMessageVM getFinalNormsReport(String plantId, String AopYear) {
+	public AOPMessageVM getFinalNormsReport(String plantId, String AopYear, String reportType) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> results = getFinalNormsReportData(plantId, AopYear);
-			List<String> columnNames = getFinalNormsReportColumns(plantId, AopYear);
+			List<Object[]> results = getFinalNormsReportData(plantId, AopYear,reportType);
+			List<String> columnNames = getFinalNormsReportColumns(plantId, AopYear,reportType);
 
 			List<Map<String, Object>> resultList = new ArrayList<>();
 
@@ -379,7 +379,7 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 		}
 	}
 
-	public List<Object[]> getFinalNormsReportData(String plantId, String aopYear) {
+	public List<Object[]> getFinalNormsReportData(String plantId, String aopYear, String reportType) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -390,12 +390,13 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetFinalNormsReport";
 
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @aopYear = :aopYear";
+					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
+			query.setParameter("reportType", reportType);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -405,7 +406,7 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 		}
 	}
 
-	public List<String> getFinalNormsReportColumns(String plantId, String aopYear) {
+	public List<String> getFinalNormsReportColumns(String plantId, String aopYear,String reportType) {
 		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
 			List<String> columnNames = new ArrayList<>();
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
@@ -417,11 +418,12 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetFinalNormsReport";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = ?, @AopYear = ?";
+					+ " @plantId = ?, @AopYear = ? , @reportType = ?";
 
 			try (PreparedStatement ps = connection.prepareStatement(sql)) {
 				ps.setString(1, plantId);
 				ps.setString(2, aopYear);
+				ps.setString(3, reportType);
 
 				try (ResultSet rs = ps.executeQuery()) {
 					ResultSetMetaData rsMetaData = rs.getMetaData();
@@ -471,11 +473,11 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 	}
 
 	@Override
-	public AOPMessageVM getFinalNormsProductionReport(String plantId, String AopYear) {
+	public AOPMessageVM getFinalNormsProductionReport(String plantId, String AopYear,String reportType) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> results = getFinalNormsProductionReportData(plantId, AopYear);
-			List<String> columnNames = getFinalNormsProductionReportColumns(plantId, AopYear);
+			List<Object[]> results = getFinalNormsProductionReportData(plantId, AopYear, reportType);
+			List<String> columnNames = getFinalNormsProductionReportColumns(plantId, AopYear,reportType);
 
 			List<Map<String, Object>> resultList = new ArrayList<>();
 
@@ -503,7 +505,7 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 		}
 	}
 
-	public List<Object[]> getFinalNormsProductionReportData(String plantId, String aopYear) {
+	public List<Object[]> getFinalNormsProductionReportData(String plantId, String aopYear,String reportType) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -514,12 +516,13 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetFinalNormsProductionReport";
 
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @aopYear = :aopYear";
+					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType= :reportType";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
+			query.setParameter("reportType", reportType);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
@@ -529,7 +532,7 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 		}
 	}
 
-	public List<String> getFinalNormsProductionReportColumns(String plantId, String aopYear) {
+	public List<String> getFinalNormsProductionReportColumns(String plantId, String aopYear, String reportType) {
 		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
 			List<String> columnNames = new ArrayList<>();
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
@@ -541,12 +544,12 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetFinalNormsProductionReport";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = ?, @AopYear = ?";
+					+ " @plantId = ?, @AopYear = ?, @reportType=?" ;
 
 			try (PreparedStatement ps = connection.prepareStatement(sql)) {
 				ps.setString(1, plantId);
 				ps.setString(2, aopYear);
-
+				ps.setString(3, reportType);
 				try (ResultSet rs = ps.executeQuery()) {
 					ResultSetMetaData rsMetaData = rs.getMetaData();
 					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {

@@ -74,10 +74,10 @@ public class ExcelServiceImpl implements ExcelService {
 
                 dataStr = dataStr
                         .replaceAll("yearJson", year)
-                        .replaceAll("previousYearJson",  previousYear )
+                        .replaceAll("previousYearJson", previousYear)
                         .replaceAll("previous2YearJson", previous2Year)
-                        .replaceAll("previous3YearJson",  previous3Year)
-                        .replaceAll("previous4YearJson",  previous4Year)
+                        .replaceAll("previous3YearJson", previous3Year)
+                        .replaceAll("previous4YearJson", previous4Year)
                         .replaceAll("nextYearJson", nextYear);
                 dataStr = dataStr.replace("\"monthsJson\"", quotedMonths);
 
@@ -103,7 +103,7 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<String, List<List<Object>>> monthWiseRawData = null;
                     createTitleBlock(sheet, SheetDisplayName, plant.getDisplayName(), formattedDate, workbook,
                             site.getDisplayName());
-                    
+
                     int columnCount = 13;
 
                     int tableCount = -1;
@@ -125,19 +125,20 @@ public class ExcelServiceImpl implements ExcelService {
                         if (sheetName.equalsIgnoreCase("AnnualAOPCost")) {
                             if (tableId.equalsIgnoreCase("ProductionData")) {
                                 // title = "Production Data";
-                                Map<String, Object> map = excelDataService.getProductionAOPWorkflowData(plantId, year,headers);
+                                Map<String, Object> map = excelDataService.getProductionAOPWorkflowData(plantId, year,
+                                        headers);
                                 rows = (List<List<Object>>) map.get("rows");
                                 List<String> headerList = (List<String>) map.get("headers");
-                               
-                                
+
                             }
                             if (tableId.equalsIgnoreCase("AnnualAOPCost")) {
                                 // title = "Annual AOP Cost";
-                                Map<String, Object> map = excelDataService.getAnnualAOPWorkflowData(plantId, year,headers);
+                                Map<String, Object> map = excelDataService.getAnnualAOPWorkflowData(plantId, year,
+                                        headers);
 
                                 rows = (List<List<Object>>) map.get("rows");
                                 List<String> headerList = (List<String>) map.get("headers");
-                               
+
                             }
                         } else if (sheetName.equalsIgnoreCase("PlantProductionSummary")) {
                             // title = "Plant Production Summary (T-14)";
@@ -158,11 +159,12 @@ public class ExcelServiceImpl implements ExcelService {
                             if (tableId.equalsIgnoreCase("MonthwiseConsumptionT18")) {
                                 // title = "Monthwise Consumption (T-18)";
                                 rows = excelDataService.getReportForMonthWiseConsumptionForSelectivityData(plantId,
-                                        year,headers);
+                                        year, headers);
                             } else {
-                                //if (sheetName.equalsIgnoreCase("MonthwiseRawData")) {
-                                   monthWiseRawData = excelDataService.getReportForMonthWiseConsumptionSummaryData(plantId, year,headers);
-                                //}
+                                // if (sheetName.equalsIgnoreCase("MonthwiseRawData")) {
+                                monthWiseRawData = excelDataService.getReportForMonthWiseConsumptionSummaryData(plantId,
+                                        year, headers);
+                                // }
                                 if (monthWiseRawData.containsKey(dataInput)) {
                                     rows = monthWiseRawData.get(dataInput);
                                 } else {
@@ -180,6 +182,41 @@ public class ExcelServiceImpl implements ExcelService {
                                     dataInput, headers);
                         } else if (sheetName.equalsIgnoreCase("PlantContributionSummary")) {
                             rows = excelDataService.getPlantContributionFiveYearSummaryReport(plantId, year,
+                                    dataInput, headers);
+                        } else if (sheetName.equalsIgnoreCase("MonthWiseProductionPlanCracker")) {
+                            if (tableId.equalsIgnoreCase("SpyroInputReport4F")
+                                    || tableId.equalsIgnoreCase("SpyroInputReport5F")
+                                    || tableId.equalsIgnoreCase("SpyroInputReport4FD")) {
+                                rows = excelDataService.getSpyroInputReport(plantId, year,
+                                        dataInput, headers);
+                            } else if (tableId.equalsIgnoreCase("SpyroOutputReport4F")
+                                    || tableId.equalsIgnoreCase("SpyroOutputReport5F")
+                                    || tableId.equalsIgnoreCase("SpyroOutputReport4FD")) {
+                                rows = excelDataService.getSpyroOutputReport(plantId, year,
+                                        dataInput, headers);
+                            } else {
+                                rows = excelDataService.getFinalNormsProductionReport(plantId, year, dataInput,
+                                        headers);
+
+                            }
+                        } else if (sheetName.equalsIgnoreCase("MonthWiseRawDataCracker")) {
+
+                            if (tableId.equalsIgnoreCase("FinalNormsRawMaterials")
+                                    || tableId.equalsIgnoreCase("FinalNormsByProducts")
+                                    || tableId.equalsIgnoreCase("FinalNormsBestAchieved")) {
+                                
+
+                                rows = excelDataService.getFinalNormsReport(plantId, year, dataInput,
+                                        headers);
+                            } else {
+                                String method = (String) table.get("method");
+                                System.out.println("method "+method);
+                                rows = excelDataService.getModeWiseNormsData(plantId, year,
+                                        dataInput, method, headers);
+
+                            }
+                        } else if (sheetName.equalsIgnoreCase("FurnaceDataCracker")) {
+                            rows = excelDataService.getFurnaceReport(plantId, year,
                                     dataInput, headers);
                         } else {
                             rows = (List<List<Object>>) table.get("rows");
@@ -534,7 +571,8 @@ public class ExcelServiceImpl implements ExcelService {
         int end = Integer.parseInt(year.substring(5));
         return String.format("%d-%02d", start - 3, start - 2 % 100);
     }
-     public static String getPrevious4Year(String year) {
+
+    public static String getPrevious4Year(String year) {
         int start = Integer.parseInt(year.substring(0, 4));
         int end = Integer.parseInt(year.substring(5));
         return String.format("%d-%02d", start - 4, start - 3 % 100);

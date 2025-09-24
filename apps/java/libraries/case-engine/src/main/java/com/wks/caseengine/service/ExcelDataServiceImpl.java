@@ -1,6 +1,5 @@
 package com.wks.caseengine.service;
 
-
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -8,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPDTO;
+import com.wks.caseengine.dto.ModeWiseNormsDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
@@ -28,6 +28,12 @@ public class ExcelDataServiceImpl implements ExcelDataService {
 
     @Autowired
     private WorkflowService workflowService;
+
+    @Autowired
+    private CrackerReportService crackerReportService;
+
+    @Autowired
+    private ModeWiseNormsService modeWiseNormsService;
 
     @Override
     public List<List<Object>> getDataForProductionVolumeReport(String plantId, String year, List<String> headers) {
@@ -451,10 +457,10 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public Map<String, Object> getAnnualAOPWorkflowData(String plantId, String year,List<String> headers) {
+    public Map<String, Object> getAnnualAOPWorkflowData(String plantId, String year, List<String> headers) {
         Map<String, Object> outMap = new HashMap<>();
         Map<String, Object> map = workflowService.getWorkFlow(plantId, year);
-        //List<String> headers = (List<String>) map.get("headers");
+        // List<String> headers = (List<String>) map.get("headers");
         List<WorkflowYearDTO> dtoList = (List<WorkflowYearDTO>) map.get("results");
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
@@ -502,6 +508,175 @@ public class ExcelDataServiceImpl implements ExcelDataService {
 
         return dataList;
 
+    }
+
+    @Override
+    public List<List<Object>> getSpyroInputReport(String plantId, String year, String reportType,
+            List<String> headers) {
+
+        AOPMessageVM aopMessageVM = crackerReportService.getSpyroInputReport(
+                plantId,
+                year, reportType);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<Map<String, Object>> spyroInputDataList = (List<Map<String, Object>>) responseMap
+                .get("data");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        if (spyroInputDataList != null) {
+            for (Map<String, Object> map : spyroInputDataList) {
+                List<Object> list = new ArrayList<>();
+                for (String header : headers) {
+                    list.add(map.get(header));
+                }
+                dataList.add(list);
+            }
+        }
+
+        return dataList;
+
+    }
+
+    @Override
+    public List<List<Object>> getSpyroOutputReport(String plantId, String year, String reportType,
+            List<String> headers) {
+
+        AOPMessageVM aopMessageVM = crackerReportService.getSpyroOutputReport(
+                plantId,
+                year, reportType);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<Map<String, Object>> spyroOutputDataList = (List<Map<String, Object>>) responseMap
+                .get("data");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        if (spyroOutputDataList != null) {
+            for (Map<String, Object> map : spyroOutputDataList) {
+                List<Object> list = new ArrayList<>();
+                for (String header : headers) {
+                    list.add(map.get(header));
+                }
+                dataList.add(list);
+            }
+        }
+
+        return dataList;
+
+    }
+
+    @Override
+    public List<List<Object>> getFinalNormsProductionReport(String plantId, String year, String dataInput,
+            List<String> headers) {
+
+        AOPMessageVM aopMessageVM = crackerReportService.getFinalNormsProductionReport(
+                plantId,
+                year, dataInput);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<Map<String, Object>> finalNormsProduction = (List<Map<String, Object>>) responseMap
+                .get("data");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        if (finalNormsProduction != null) {
+            for (Map<String, Object> map : finalNormsProduction) {
+                List<Object> list = new ArrayList<>();
+                for (String header : headers) {
+                    list.add(map.get(header));
+                }
+                dataList.add(list);
+            }
+        }
+
+        return dataList;
+
+    }
+
+    @Override
+    public List<List<Object>> getModeWiseNormsData(String plantId, String year, String mode, String method,
+            List<String> headers) {
+
+        AOPMessageVM aopMessageVM = modeWiseNormsService.getModeWiseNormsData(year, plantId, mode, method);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<ModeWiseNormsDTO> modeWiseNormsList = (List<ModeWiseNormsDTO>) responseMap
+                .get("mcuNormsValueDTOList");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        for (ModeWiseNormsDTO dto : modeWiseNormsList) {
+            List<Object> list = new ArrayList<>();
+            for (String fieldName : headers) {
+                try {
+                    Field field = dto.getClass().getDeclaredField(fieldName);
+                    field.setAccessible(true); // in case field is private
+                    Object rawValue = field.get(dto); // get as Object
+
+                    String value = rawValue != null ? String.valueOf(rawValue) : null;
+                    list.add(value);
+
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    // If field doesn't exist or not accessible, add null
+                    list.add(null);
+                }
+            }
+
+        }
+
+        return dataList;
+
+    }
+
+    @Override
+    public List<List<Object>> getFinalNormsReport(String plantId, String year, String dataInput,
+            List<String> headers) {
+
+        AOPMessageVM aopMessageVM = crackerReportService.getFinalNormsReport(plantId, year, dataInput);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<Map<String, Object>> modeWiseNormsList = (List<Map<String, Object>>) responseMap
+                .get("data");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        if (modeWiseNormsList != null) {
+            for (Map<String, Object> map : modeWiseNormsList) {
+                List<Object> list = new ArrayList<>();
+                for (String header : headers) {
+                    list.add(map.get(header));
+                }
+                dataList.add(list);
+            }
+        }
+
+        return dataList;
+    }
+
+    @Override
+    public List<List<Object>> getFurnaceReport(String plantId, String year, String dataInput,
+            List<String> headers) {
+
+        AOPMessageVM aopMessageVM = crackerReportService.getFurnaceReport(plantId, year, dataInput);
+
+        Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+        List<Map<String, Object>> furnaceListList = (List<Map<String, Object>>) responseMap
+                .get("data");
+
+        List<List<Object>> dataList = new ArrayList<>();
+        // Data rows
+        if (furnaceListList != null) {
+            for (Map<String, Object> map : furnaceListList) {
+                List<Object> list = new ArrayList<>();
+                for (String header : headers) {
+                    list.add(map.get(header));
+                }
+                dataList.add(list);
+            }
+        }
+
+        return dataList;
     }
 
 }
