@@ -1,12 +1,17 @@
 package com.wks.caseengine.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
+import java.util.Iterator;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,11 +23,27 @@ import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.MCUNormsValueDTO;
+import com.wks.caseengine.dto.YieldDTO;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
@@ -62,6 +83,10 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private SiteRepository siteRepository;
+
 
 	
 	@Override
@@ -113,13 +138,356 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public byte[] exportBusinessDemand(String year, String plantId, boolean isAfterSave, List<BusinessDemandDataDTO> dtoList) {
+		try {
+			
+			List<Boolean> isEditable = new ArrayList<>();
+
+			if (!isAfterSave) {
+				 dtoList = getBusinessDemandData(year,plantId);
+			}
+
+			Workbook workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			
+			// Data rows
+			for (BusinessDemandDataDTO dto : dtoList) {
+				//if (isAfterSave) {
+					List<Object> list = new ArrayList<>();
+					
+					list.add(dto.getDisplayName());
+					list.add(dto.getUOM());
+					list.add(dto.getApril());
+					list.add(dto.getMay());
+					list.add(dto.getJune());
+					list.add(dto.getJuly());
+					list.add(dto.getAug());
+					list.add(dto.getSep());
+					list.add(dto.getOct());
+					list.add(dto.getNov());
+					list.add(dto.getDec());
+					list.add(dto.getJan());
+					list.add(dto.getFeb());
+					list.add(dto.getMarch());
+					list.add(dto.getRemark());
+					list.add(dto.getId());
+					list.add(dto.getNormParameterId());
+					
+					
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				//}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			
+			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
+			innerHeaders.add(getMonth( year, 4));
+			innerHeaders.add(getMonth( year, 5));
+			innerHeaders.add(getMonth( year, 6));
+			innerHeaders.add(getMonth( year, 7));
+			innerHeaders.add(getMonth( year, 8));
+			innerHeaders.add(getMonth( year, 9));
+			innerHeaders.add(getMonth( year, 10));
+			innerHeaders.add(getMonth( year, 11));
+			innerHeaders.add(getMonth( year, 12));
+			innerHeaders.add(getMonth( year, 1));
+			innerHeaders.add(getMonth( year, 2));
+			innerHeaders.add(getMonth( year, 3));
+			innerHeaders.add("Remark");
+			innerHeaders.add("Id");
+			innerHeaders.add("NormParameterId");
+			// innerHeaders.add("NormParamterId");
+			 //innerHeaders.add("IsEditable");
+			if (isAfterSave) {
+				innerHeaders.add("Status");
+				innerHeaders.add("Error Description");
+			}
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				
+				 
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+				}
+			}
+			sheet.setColumnHidden(15, true);
+			sheet.setColumnHidden(16, true);
+			//sheet.setColumnHidden(18, true);
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	private CellStyle createBorderedStyle(Workbook wb) {
+		CellStyle style = wb.createCellStyle();
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	private CellStyle createBoldStyle(Workbook wb) {
+		Font font = wb.createFont();
+		font.setBold(true);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		return style;
+	}
+
+	private CellStyle createBoldBorderedStyle(Workbook workbook) {
+		CellStyle style = createBorderedStyle(workbook);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
+	}
+	
+	public String getMonth(String year, int month) {
+	    
+	    if (year == null || !year.matches("\\d{4}-\\d{2}")) {
+	        throw new IllegalArgumentException("Year must be in format YYYY-YY");
+	    }
+	    String[] parts = year.split("-");
+	    int startYear = Integer.parseInt(parts[0]);   
+	    int endYearSuffix = Integer.parseInt(parts[1]); 
+	    int endYear = (startYear / 100) * 100 + endYearSuffix;  
+
+	    
+	    String[] monthNames = {
+	        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+	    };
+	    if (month < 1 || month > 12) {
+	        throw new IllegalArgumentException("Month must be 1 to 12");
+	    }
+
+	    String mname = monthNames[month - 1];
+	    int displayYear;
+	    
+	    if (month >= 4 && month <= 12) {
+	        displayYear = startYear;
+	    } else {  
+	        displayYear = endYear;
+	    }
+
+	    
+	    int yy = displayYear % 100;  
+	    String yyStr = String.format("%02d", yy);
+
+	    return mname + "-" + yyStr;
+	}
+	
+	@Override
+	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<BusinessDemandDataDTO> data = readBusinessDemand(file.getInputStream(), plantFKId, year);
+			List<BusinessDemandDataDTO> failedRecords = saveBusinessDemandData(data);
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (failedRecords != null && failedRecords.size() > 0) {
+				byte[] fileByteArray = exportBusinessDemand(year, plantFKId.toString(), true, failedRecords);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+	
+	public List<BusinessDemandDataDTO> readBusinessDemand(InputStream inputStream, UUID plantFKId, String year) {
+		List<BusinessDemandDataDTO> configList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				BusinessDemandDataDTO dto = new BusinessDemandDataDTO();
+				try {
+					dto.setDisplayName(getStringCellValue(row.getCell(0), dto));
+					dto.setUOM(getStringCellValue(row.getCell(1), dto));
+					dto.setApril(getNumericCellValue(row.getCell(2), dto));
+					dto.setMay(getNumericCellValue(row.getCell(3), dto));
+					dto.setJune(getNumericCellValue(row.getCell(4), dto));
+					dto.setJuly(getNumericCellValue(row.getCell(5), dto));
+					dto.setAug(getNumericCellValue(row.getCell(6), dto));
+					dto.setSep(getNumericCellValue(row.getCell(7), dto));
+					dto.setOct(getNumericCellValue(row.getCell(8), dto));
+					dto.setNov(getNumericCellValue(row.getCell(9), dto));
+					dto.setDec(getNumericCellValue(row.getCell(10), dto));
+					dto.setJan(getNumericCellValue(row.getCell(11), dto));
+					dto.setFeb(getNumericCellValue(row.getCell(12), dto));
+					dto.setMarch(getNumericCellValue(row.getCell(13), dto));
+					dto.setRemark(getStringCellValue(row.getCell(14), dto));
+					dto.setId(getStringCellValue(row.getCell(15), dto));
+					dto.setNormParameterId(getStringCellValue(row.getCell(16), dto));
+					dto.setPlantId(plantFKId!=null ? plantFKId.toString():"");
+					Plants plant = plantsRepository.findById(plantFKId)
+							.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+					Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+							.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+					Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+					dto.setVerticalFKId(vertical.getId().toString());
+					dto.setSiteFKId(site.getId().toString());
+					dto.setYear(year);
+					// dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
+					// dto.setIsEditable(getBooleanCellValue(row.getCell(18), dto));
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+				configList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return configList;
+	}
+	
+	
+	
+	private static Double getNumericCellValue(Cell cell, BusinessDemandDataDTO dto) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				dto.setSaveStatus("Failed");
+				dto.setErrDescription("Please enter numeric values");
+			}
+		}
+		return null;
+	}
+
+	public static Boolean getBooleanCellValue(Cell cell, BusinessDemandDataDTO dto) {
+		if (cell == null)
+			return null;
+
+		CellType type = cell.getCellType();
+		if (type == CellType.FORMULA) {
+			type = cell.getCachedFormulaResultType();
+		}
+
+		switch (type) {
+			case BOOLEAN:
+				return cell.getBooleanCellValue();
+			case STRING:
+				String text = cell.getStringCellValue().trim().toLowerCase();
+				if ("true".equals(text))
+					return true;
+				if ("false".equals(text))
+					return false;
+				return null;
+			case NUMERIC:
+				double num = cell.getNumericCellValue();
+				if (num == 1.0)
+					return true;
+				if (num == 0.0)
+					return false;
+				return null;
+			case BLANK:
+			case _NONE:
+			default:
+				return null;
+		}
+	}
+	
+	private static String getStringCellValue(Cell cell, BusinessDemandDataDTO dto) {
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
 
 	@Override
 	public List<BusinessDemandDataDTO> saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTOList) {
 		String year=null;
 		UUID plantId=null;
+		List<BusinessDemandDataDTO> failedList = new ArrayList<>();
 		try {
 			for (BusinessDemandDataDTO businessDemandDataDTO : businessDemandDataDTOList) {
+				if (businessDemandDataDTO.getSaveStatus() != null
+						&& businessDemandDataDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(businessDemandDataDTO);
+					continue;
+				}
 				BusinessDemand businessDemand = new BusinessDemand();
 				businessDemand.setApril(businessDemandDataDTO.getApril());
 				businessDemand.setAug(businessDemandDataDTO.getAug());
@@ -314,7 +682,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					+ "NormParameterTypeId, NormParameterTypeName, NormParameterTypeDisplayName, "
 					+ "CreatedOn, ModifiedOn, UpdatedBy, IsDeleted, MaterialDisplayOrder, "
 					+ "Site_FK_Id, Vertical_FK_Id,isEditable,isVisible,UOM,DisplayName " + "FROM " + viewName + " "
-					+ "WHERE (Year = :year OR Year IS NULL) " + "AND Plant_FK_Id = :plantFkId "
+					+ "WHERE (Year = :year AND Year IS NOT NULL) " + "AND Plant_FK_Id = :plantFkId "
 					+ "ORDER BY NormTypeDisplayOrder, MaterialDisplayOrder";
 
 			Query query = entityManager.createNativeQuery(sql);

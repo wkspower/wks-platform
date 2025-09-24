@@ -33,6 +33,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.CrackerConfigurationDTO;
@@ -1072,6 +1073,61 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 						// 4. Execute
 						return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	@Override
+	@Transactional
+	public AOPMessageVM calculateData(String plantId, String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		
+		String verticalName = plantsRepository.findVerticalNameByPlantId(plant.getId());
+		// if(verticalName.equalsIgnoreCase("MEG")) {
+		Integer result = executeDynamicDecokeMaintenanceCalculation(verticalName, plant.getId().toString(),
+				year);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Data fetched successfully");
+		aopMessageVM.setData(result);
+		return aopMessageVM;
+	}
+
+	
+	public Integer executeDynamicDecokeMaintenanceCalculation(String verticalName, String plantId,String aopYear) {
+		try {
+
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			String procedureName = verticalName + "_" + site.getName() + "_CalculateDecokeMaintenance";
+
+			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
+
+			try (Connection connection = dataSource.getConnection();
+					CallableStatement stmt = connection.prepareCall(callSql)) {
+
+				// Set parameters in the correct order
+				stmt.setString(1, plantId); // @finYear
+				stmt.setString(4, aopYear); // @siteId
+
+				// Execute the stored procedure
+				int rowsAffected = stmt.executeUpdate();
+
+				// Optional: commit if auto-commit is off
+				if (!connection.getAutoCommit()) {
+					connection.commit();
+				}
+
+				return rowsAffected;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return 0;
+			}
+
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {

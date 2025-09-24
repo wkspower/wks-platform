@@ -101,4 +101,15 @@ public class DecokingActivitiesController {
 	public AOPMessageVM getNextYearConfiguration(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "startDate", required = false) String startDate) {
 		return decokingActivitiesService.getNextYearConfiguration(plantId,year,startDate);
 	}
+	
+	@GetMapping(value="/calculate-decoke-maintenance")
+	public AOPMessageVM calculateData(@RequestParam String plantId,@RequestParam String year){
+    	try {
+    		 return decokingActivitiesService.calculateData(plantId,year);
+    		// return ResponseEntity.ok(aOPList);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
+		return null;
+	}
 }
