@@ -346,15 +346,15 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 				YieldDTO yieldDTO = new YieldDTO();
 				yieldDTO.setParticulars(row[0] != null ? row[0].toString() : " ");
-				yieldDTO.setFiveFC2C3(row[1] != null && !(row[1].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[1].toString()) : 0.0);
-				yieldDTO.setFiveFPropane(row[2] != null && !(row[2].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[2].toString()) : 0.0);
-				yieldDTO.setFiveFEthane(row[3] != null && !(row[3].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[3].toString()) : 0.0);
-				yieldDTO.setFourFC2C3(row[4] != null && !(row[4].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[4].toString()) : 0.0);
-				yieldDTO.setFourFPropane(row[5] != null && !(row[5].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[5].toString()) : 0.0);
-				yieldDTO.setFourFEthane(row[6] != null && !(row[6].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[6].toString()) : 0.0);
-				yieldDTO.setFourFDC2C3(row[7] != null && !(row[7].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[7].toString()) : 0.0);
-				yieldDTO.setFourFDPropane(row[8] != null && !(row[8].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[8].toString()) : 0.0);
-				yieldDTO.setFourFDEthane(row[9] != null && !(row[9].toString().equalsIgnoreCase("")) ? Double.parseDouble(row[9].toString()) : 0.0);	
+				yieldDTO.setFiveFC2C3(row[1] != null && !(row[1].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[1].toString()) : 0.0);
+				yieldDTO.setFiveFPropane(row[2] != null && !(row[2].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[2].toString()) : 0.0);
+				yieldDTO.setFiveFEthane(row[3] != null && !(row[3].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[3].toString()) : 0.0);
+				yieldDTO.setFourFC2C3(row[4] != null && !(row[4].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[4].toString()) : 0.0);
+				yieldDTO.setFourFPropane(row[5] != null && !(row[5].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[5].toString()) : 0.0);
+				yieldDTO.setFourFEthane(row[6] != null && !(row[6].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[6].toString()) : 0.0);
+				yieldDTO.setFourFDC2C3(row[7] != null && !(row[7].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[7].toString()) : 0.0);
+				yieldDTO.setFourFDPropane(row[8] != null && !(row[8].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[8].toString()) : 0.0);
+				yieldDTO.setFourFDEthane(row[9] != null && !(row[9].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[9].toString()) : 0.0);	
 				spyroOutputYieldDataList.add(yieldDTO); // Add the map to the list here
 				
 			}
