@@ -561,7 +561,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
-			return businessDemandDataDTOList;
+			return failedList;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
