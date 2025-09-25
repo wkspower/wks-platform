@@ -48,5 +48,6 @@ public class ShutdownNormsValueDTO {
     private Boolean isEditable;
     private String productName;
     private String gradeFkId;
+    private String sapCode;
 }
 

@@ -641,6 +641,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			shutdownNormsValueDTO.setMarch(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
 			shutdownNormsValueDTO.setRemarks(row[20] != null ? row[20].toString() : null);
 			shutdownNormsValueDTO.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
+			shutdownNormsValueDTO.setSapCode(row[22] != null ? row[22].toString() : null);
 			shutdownNormsValueDTOs.add(shutdownNormsValueDTO);
 		}
 		Map<String, Object> map = new HashMap<>();

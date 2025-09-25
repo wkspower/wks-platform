@@ -496,6 +496,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			aopConsumptionNormDTO.setNov(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
 			aopConsumptionNormDTO.setDec(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
 			aopConsumptionNormDTO.setNormParameterTypeDisplayName(row[21] != null ? row[21].toString() : null);
+			aopConsumptionNormDTO.setSapCode(row[22] != null ? row[22].toString() : null);
 			aopConsumptionNormDTOs.add(aopConsumptionNormDTO);
 		}
 		Map<String, Object> map = new HashMap<>(); 

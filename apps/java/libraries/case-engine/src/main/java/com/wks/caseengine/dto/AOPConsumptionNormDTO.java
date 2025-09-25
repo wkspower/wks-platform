@@ -40,5 +40,6 @@ public class AOPConsumptionNormDTO {
     private Boolean isEditable;
     private String productName;
     private String gradeId;
+    private String sapCode;
 
 }
