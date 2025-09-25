@@ -63,7 +63,7 @@ public class BasisReportServiceImpl implements BasisReportService {
 			String periodTo) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			Map<String, Object> typeMap=getNormBasis( plantId,  aopYear,  "TYPE LIST2",  periodFrom,
+			Map<String, Object> typeMap=getNormBasis( plantId,  aopYear,  type,  periodFrom,
 					 periodTo);
 			
 			List<String> types = extractTypes(typeMap);
