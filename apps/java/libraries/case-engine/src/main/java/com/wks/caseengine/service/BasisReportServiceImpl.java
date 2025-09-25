@@ -63,6 +63,55 @@ public class BasisReportServiceImpl implements BasisReportService {
 			String periodTo) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
+			Map<String, Object> typeMap=getNormBasis( plantId,  aopYear,  "TYPE LIST2",  periodFrom,
+					 periodTo);
+			
+			List<String> types = extractTypes(typeMap);
+			
+			List<Map<String, Object>> combined = new ArrayList<>();
+			for (String type1 : types) {
+			    Map<String, Object> dataForType = getNormBasis(plantId, aopYear, type1, periodFrom, periodTo);
+			    Map<String,Object> list = new LinkedHashMap<>();
+			   
+			    list.put("gridName", type1);
+			    list.put("data", dataForType);
+			    combined.add(list);
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(combined);
+			return aopMessageVM;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return aopMessageVM;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<String> extractTypes(Map<String, Object> typeMap) {
+	    List<String> types = new ArrayList<>();
+	    Object dataObj = typeMap.get("data");
+	    if (dataObj instanceof List<?>) {
+	        List<?> dataList = (List<?>) dataObj;
+	        for (Object elem : dataList) {
+	            if (elem instanceof Map<?, ?>) {
+	                Map<?, ?> row = (Map<?, ?>) elem;
+	                Object typeObj = row.get("TYPE");
+	                if (typeObj != null) {
+	                    types.add(typeObj.toString());
+	                }
+	            }
+	        }
+	    }
+	    return types;
+	}
+
+	
+	public Map<String, Object> getNormBasis(String plantId, String aopYear, String type, String periodFrom,
+			String periodTo) {
+		
+		try {
 
 			List<Object[]> obj = getReportDataForPE(plantId, aopYear, type, periodFrom, periodTo);
 
@@ -83,18 +132,15 @@ public class BasisReportServiceImpl implements BasisReportService {
 			Map<String, Object> data = new HashMap<>();
 			data.put("data", resultList);
 			data.put("columns", getColumnMetadata(plantId, aopYear, type, periodFrom, periodTo));
+			return data;
+			
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("SP Executed successfully");
-			aopMessageVM.setData(data);
-			return aopMessageVM;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return aopMessageVM;
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
 		}
 
 	}
+
 
 	public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType, String PeriodFrom,
 			String PeriodTo) {
