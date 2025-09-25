@@ -160,7 +160,7 @@ const NormalOpNormsScreenCracker = () => {
         width: 120,
         align: 'right',
         type: 'number',
-        format: '{0:#.##}',
+        format: '{0:#.###}',
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
       { field: 'remarks', title: 'Remark', widthT: 140, editable: true },

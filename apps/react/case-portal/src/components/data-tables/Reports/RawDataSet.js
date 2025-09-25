@@ -210,7 +210,7 @@ const RawDataSet = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `SteamData ${currentDateTime}.xlsx`
+  const fileName = `Steam Norms Data_Set.xlsx`
 
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})

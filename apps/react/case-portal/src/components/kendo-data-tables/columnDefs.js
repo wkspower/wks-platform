@@ -66,8 +66,24 @@ export const ibrPlanColumns = [
     filter: false,
     title: 'End Date - IBR',
     editable: true,
-    width: 200,
+    widthT: 200,
   },
+
+  {
+    field: 'shutDownStartDate',
+    title: 'Maint. Start Date (Coil Replacem.)',
+    editable: true,
+    widthT: 200,
+    filter: false,
+  },
+  {
+    field: 'shutDownEndDate',
+    title: 'Maint. End Date (Coil Replacem.)',
+    editable: true,
+    width: 200,
+    filter: false,
+  },
+
   {
     field: 'taStartDate',
     title: 'Start Date - TA',
@@ -76,20 +92,7 @@ export const ibrPlanColumns = [
     filter: false,
   },
   { field: 'taEndDate', title: 'End Date - TA', editable: true, width: 200 },
-  {
-    field: 'shutDownStartDate',
-    title: 'Start Date - SD',
-    editable: true,
-    width: 200,
-    filter: false,
-  },
-  {
-    field: 'shutDownEndDate',
-    title: 'End Date - SD',
-    editable: true,
-    width: 200,
-    filter: false,
-  },
+
   {
     field: 'preCrDays',
     title: 'Pre Coil Replacement',

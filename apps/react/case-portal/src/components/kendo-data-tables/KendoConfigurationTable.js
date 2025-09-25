@@ -157,6 +157,7 @@ const ConfigurationTable = () => {
               rowsForThisCategory.push({
                 ...item,
                 idFromApi: item.id,
+                originalRemark: item.remarks,
                 id: groupId++,
               })
             })
@@ -248,21 +249,38 @@ const ConfigurationTable = () => {
     setLoading(true)
     try {
       var data = await DataService.getPeConfigData(keycloak)
-      const formattedData = data?.map((item, index) => ({
-        ...item,
-        id: index,
-        TypeDisplayName: item?.TypeDisplayName
-          ? item?.TypeDisplayName
-          : 'Recipe',
-      }))
+
+      const formattedData = data?.map((item, index) => {
+        const converted = {}
+
+        Object.entries(item).forEach(([key, value]) => {
+          // Convert numeric strings to numbers
+          if (typeof value === 'string' && !isNaN(value)) {
+            converted[key] = value.includes('.')
+              ? parseFloat(value)
+              : parseInt(value, 10)
+          } else {
+            converted[key] = value
+          }
+        })
+
+        return {
+          ...converted,
+          id: index,
+          TypeDisplayName: item?.TypeDisplayName
+            ? item?.TypeDisplayName
+            : 'Recipe',
+        }
+      })
+
       setGradeData(formattedData)
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching grade data:', error)
     } finally {
       setLoading(false)
     }
   }
+
   const getConfigurationTabsMatrix = async () => {
     setLoading(true)
     try {
@@ -560,6 +578,7 @@ const ConfigurationTable = () => {
       setLoading1(false)
     }
   }
+
   useEffect(() => {
     if (tabIndex >= tabs.length) {
       setTabIndex(0)
@@ -806,7 +825,7 @@ const ConfigurationTable = () => {
     )
   }
 
-  if (lowerVertName === 'cracker' ) {
+  if (lowerVertName === 'cracker') {
     const crackerTabs = ['Configuration', 'Constants']
     const auditYear = localStorage.getItem('year')
     let displayYear = ''

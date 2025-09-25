@@ -82,7 +82,7 @@ const getEnhancedAOPColDefs = ({
         title: field?.displayName,
         editable: true,
         width1: 200,
-        type: 'Receipe',
+        type: 'number',
       })
     })
   } else {

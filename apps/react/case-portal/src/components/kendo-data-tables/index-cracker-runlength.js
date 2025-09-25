@@ -1257,6 +1257,14 @@ const KendoDataTablesCrackerRunLength = ({
     }
   }
 
+  ;<Box>
+    {permissions?.showNote && (
+      <Typography component='div' className='text-note'>
+        {note}
+      </Typography>
+    )}
+  </Box>
+
   return (
     <Box>
       {(permissions?.allAction ?? false) && (
@@ -1270,13 +1278,19 @@ const KendoDataTablesCrackerRunLength = ({
             }}
           >
             {/* Left side - Note */}
-            <Box>
-              {permissions?.showNote && (
-                <Typography component='div' className='text-note'>
-                  {note}
-                </Typography>
-              )}
-            </Box>
+
+            {permissions?.showTitleNameBusiness && (
+              <Typography
+                component='div'
+                className='grid-title'
+                sx={{
+                  ...(permissions?.marginBottom && { marginBottom: '10px' }),
+                }}
+              >
+                {permissions?.titleName}
+              </Typography>
+            )}
+
             {/* Right side - All other actions */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {permissions?.downloadExcelBtn && (

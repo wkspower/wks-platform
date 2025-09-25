@@ -260,7 +260,7 @@ const ConsumptionNorms = () => {
       }
 
       if (response?.data?.length === 0) {
-        // no grades — clear selection and fetch blank data
+        // no grades â€” clear selection and fetch blank data
         setGradeId(null)
         await fetchData(null)
         return
@@ -317,7 +317,7 @@ const ConsumptionNorms = () => {
           originalRemark: item.aopRemarks?.trim() || null,
           id: index,
           isEditable: false,
-          Particulars: item.normParameterTypeDisplayName || 'productName',
+          Particulars: item.normParameterTypeDisplayName || 'Type',
         }),
       )
       setRows(formattedData)

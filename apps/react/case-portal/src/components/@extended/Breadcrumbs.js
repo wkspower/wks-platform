@@ -102,6 +102,20 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     }
   }
 
+  async function handleOpenPdfTempSSRS(title) {
+    try {
+      let url = ''
+      url =
+        'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx?%2fAOP&rs:Command=Render'
+
+      window.open(url, '_blank')
+      return true
+    } catch (e) {
+      console.error('Error opening link:', e)
+      return Promise.reject(e)
+    }
+  }
+
   const location = useLocation()
   const [main, setMain] = useState()
   const [item, setItem] = useState()
@@ -216,6 +230,38 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                 padding: '6px',
               }}
               onClick={() => handleOpenPdfTemp(item?.id)}
+            >
+              <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
+            </IconButton>
+          </Tooltip>
+        </Typography>
+      )
+    } else if (
+      (['aopapprovalflow'].includes(normalizedTitle) &&
+        VERTICAL_NAME?.toLowerCase() === 'pe') ||
+      VERTICAL_NAME?.toLowerCase() === 'pp'
+    ) {
+      itemContent = (
+        <Typography
+          variant='subtitle1'
+          color='textPrimary'
+          display='flex'
+          alignItems='center'
+        >
+          {/* HIDE THE TITLE NAME  */}
+          {/* {title1} */}
+          <Tooltip title={`Report`}>
+            <IconButton
+              size='medium'
+              sx={{
+                ml: 1,
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                },
+                padding: '6px',
+              }}
+              onClick={() => handleOpenPdfTempSSRS(item?.id)}
             >
               <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
             </IconButton>

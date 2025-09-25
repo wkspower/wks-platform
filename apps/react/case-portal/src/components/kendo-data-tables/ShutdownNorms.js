@@ -303,7 +303,7 @@ const ShutdownNorms = () => {
       idFromApi: item.id,
       id: index,
       materialFkId: item?.materialFkId?.toLowerCase(),
-      Particulars: item.normParameterTypeDisplayName || 'productName',
+      Particulars: item.normParameterTypeDisplayName || 'Type',
       isEditable: false,
     }
     return baseItem
@@ -385,7 +385,7 @@ const ShutdownNorms = () => {
           setGrades(fetchedGrades)
 
           if (fetchedGrades.length === 0) {
-            // no grades — clear selection and fetch blank data
+            // no grades â€” clear selection and fetch blank data
             setGradeId(null)
             await fetchData(null)
             return

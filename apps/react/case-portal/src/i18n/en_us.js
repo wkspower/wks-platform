@@ -81,6 +81,7 @@ const defs = {
     bestAchievedBasis: 'Best Achieved Basis (Min CC)',
     bestAchievedIndividualBasis: 'Best Achieved (Individual)',
     furnaceModeAndRunLength: 'Furnace Mode And Run Length',
+    maintenanceProcess: 'Process',
   },
   pages: {
     dashboard: {
@@ -261,6 +262,7 @@ const defs = {
         rawData: 'Steam Norms Basis',
         runlengthData: 'Furnace Run Length ',
         furnaceModeAndRunLength: 'Furnace Mode And Run Length',
+        maintenanceProcess: 'Process',
       },
     },
   },

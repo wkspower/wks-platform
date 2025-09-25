@@ -61,32 +61,7 @@ export default function MonthWiseRawData() {
     })
   }, [])
 
-  const findNormTypeKey = (row = {}) => {
-    if (!row) return null
-    const keys = Object.keys(row)
-    const normalize = (s) =>
-      String(s || '')
-        .replace(/[_\s]/g, '')
-        .toLowerCase()
-    const candidates = [
-      'normtype',
-      'norm_type',
-      'norm type',
-      'normcategory',
-      'norm_category',
-      'norm category',
-    ]
-    const map = {}
-    keys.forEach((k) => (map[normalize(k)] = k))
-    for (const c of candidates) {
-      const found = map[normalize(c)]
-      if (found) return found
-    }
-    const containsNorm = keys.find((k) => k.toLowerCase().includes('norm'))
-    return containsNorm || null
-  }
-
-  // build columns from the 0th record as requested
+  // build columns from the 0th record as requested (used for mode-wise fallback)
   const MODE_COLUMNS_ORDER = [
     'sapMaterialCode',
     'normType',
@@ -125,7 +100,6 @@ export default function MonthWiseRawData() {
     march: 'March',
   }
 
-  // build columns from the 0th record in the fixed order and with mapped titles
   const columnsFromFirstRow = (firstRow = {}) => {
     const first = firstRow || {}
     return MODE_COLUMNS_ORDER.map((f) => {
@@ -196,76 +170,89 @@ export default function MonthWiseRawData() {
   const fetchAndPrepare = useCallback(async () => {
     setLoading(true)
     try {
-      const apiResponse =
-        await CrackerReportsApiDataService.finalNormsReport(keycloak)
+      const REPORT_TYPES = [
+        'Raw Material',
+        'By Products',
+        'Cat Chem',
+        'Utility Consumption',
+      ]
 
-      if (!isMountedRef.current) return
+      const nextDataMap = {}
+      const nextGridNames = []
+      let globalEnrichedCols = null // if one report returns columns, reuse for others
 
-      if (apiResponse?.code !== 200) {
-        setDataMap({})
-        setGridNames([])
-        setLoading(false)
-        return
-      }
+      for (const reportType of REPORT_TYPES) {
+        try {
+          // NOTE: adjust call if your API expects different signature
+          const apiResponse =
+            await CrackerReportsApiDataService.finalNormsReport(
+              keycloak,
+              reportType,
+            )
 
-      const backendCols = apiResponse.data?.columns || []
-      const enrichedCols = enrichColumns(backendCols)
+          if (!isMountedRef.current) return
 
-      const dateFields = enrichedCols
-        .filter((c) => c.type === 'date')
-        .map((c) => c.field)
-      const numberFields = enrichedCols
-        .filter((c) => c.type === 'number')
-        .map((c) => c.field)
+          if (apiResponse?.code !== 200) {
+            console.warn(
+              `finalNormsReport failed for ${reportType}`,
+              apiResponse,
+            )
+            continue
+          }
 
-      const rawRows = apiResponse.data?.data || []
+          const backendCols = apiResponse.data?.columns || null
+          // prefer backend-provided columns
+          if (!globalEnrichedCols && backendCols && backendCols.length) {
+            globalEnrichedCols = enrichColumns(backendCols)
+          }
 
-      const rowsWithId = rawRows.map((item, index) => {
-        const parsedItem = { ...item }
-        dateFields.forEach((f) => {
-          parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
-        })
-        numberFields.forEach((f) => {
-          parsedItem[f] =
-            item?.[f] !== undefined && item?.[f] !== null
-              ? Number(item[f])
-              : null
-        })
-        return { ...parsedItem, id: index, isEditable: false }
-      })
+          const rawRows = apiResponse.data?.data || []
+          let enrichedCols = globalEnrichedCols
 
-      const sample = rowsWithId[0] || {}
-      const normKey = findNormTypeKey(sample)
+          // fallback: derive columns from first row if no backend columns present yet
+          if (!enrichedCols) {
+            const sample = rawRows[0] || {}
+            const cols = columnsFromFirstRow(sample)
+            enrichedCols = enrichColumns(cols)
+            globalEnrichedCols = enrichedCols
+          }
 
-      let nextDataMap = {}
-      let nextGridNames = []
+          const dateFields = (enrichedCols || [])
+            .filter((c) => c.type === 'date')
+            .map((c) => c.field)
+          const numberFields = (enrichedCols || [])
+            .filter((c) => c.type === 'number')
+            .map((c) => c.field)
 
-      if (normKey) {
-        const groups = {}
-        rowsWithId.forEach((r) => {
-          const gNameRaw = r[normKey] || 'Unknown'
-          const gName = String(gNameRaw).trim() || 'Unknown'
-          if (!groups[gName])
-            groups[gName] = { rows: [], columns: enrichedCols }
-          groups[gName].rows.push(r)
-        })
+          const rowsWithId = (rawRows || []).map((item, index) => {
+            const parsedItem = { ...item }
+            dateFields.forEach((f) => {
+              parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
+            })
+            numberFields.forEach((f) => {
+              parsedItem[f] =
+                item?.[f] !== undefined && item?.[f] !== null
+                  ? Number(item[f])
+                  : null
+            })
+            return {
+              ...parsedItem,
+              id: `${reportType.replace(/\s+/g, '_')}_${index}`,
+              isEditable: false,
+            }
+          })
 
-        const names = Object.keys(groups)
-        names.forEach((n, idx) => {
-          const key = `${MONTH_GRID_NAME} - ${n}`
-          nextDataMap[key] = groups[n]
-        })
-        nextGridNames = Object.keys(nextDataMap)
-      } else {
-        const key = MONTH_GRID_NAME
-        nextDataMap[key] = { rows: rowsWithId, columns: enrichedCols }
-        nextGridNames = [key]
+          const key = `${MONTH_GRID_NAME} - ${reportType}`
+          nextDataMap[key] = { rows: rowsWithId, columns: enrichedCols }
+          nextGridNames.push(key)
+        } catch (err) {
+          console.error(`Error fetching report type ${reportType}:`, err)
+        }
       }
 
       // fetch the 9 mode-wise grids and append below existing grids
       const modeMap = await fetchModeWiseGrids()
 
-      // merge while preserving order: first existing, then mode grids
       const mergedDataMap = { ...nextDataMap, ...modeMap }
       const mergedNames = [...nextGridNames, ...Object.keys(modeMap)]
 
@@ -323,7 +310,7 @@ export default function MonthWiseRawData() {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `MonthWiseRawData ${currentDateTime}.xlsx`
+  const fileName = `NMD_Month_Wise_Raw_Data.xlsx`
 
   const renderTitle = (t) => t
 
@@ -336,7 +323,7 @@ export default function MonthWiseRawData() {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Hidden Excel exports for each grid (including the new 9) */}
+      {/* Hidden Excel exports for each grid (including the mode grids) */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
@@ -362,7 +349,7 @@ export default function MonthWiseRawData() {
         })}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='8px'>
+      {/* <Box display='flex' justifyContent='flex-end' mb='8px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -370,7 +357,7 @@ export default function MonthWiseRawData() {
         >
           Export
         </Button>
-      </Box>
+      </Box> */}
 
       <Box display='flex' flexDirection='column' gap={2}>
         {gridNames.length === 0 && !loading && (

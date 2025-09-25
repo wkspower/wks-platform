@@ -248,7 +248,7 @@ const RunLengthDataSet = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Best Achieved Norms(Min CC) ${currentDateTime}.xlsx`
+  const fileName = `Run Length-DATA-SET.xlsx`
 
   // helper to render Title exactly as API sent (or tweak)
   const renderTitle = (t) => t

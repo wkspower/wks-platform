@@ -7,74 +7,73 @@
   },
 
   {
-    "field": "5F_C2C3",
+    "field": "fiveFC2C3",
     "title": "5F-C2C3",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "5F_Propane",
+    "field": "fiveFPropane",
     "title": "5F-Propane",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "5F_Ethane",
+    "field": "fiveFEthane",
     "title": "5F-Ethane",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "4F_C2C3",
+    "field": "fourFC2C3",
     "title": "4F-C2C3",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "4F_Propane",
+    "field": "fourFPropane",
     "title": "4F-Propane",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "4F_Ethane",
+    "field": "fourFEthane",
     "title": "4F-Ethane",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "4FD_C2C3",
+    "field": "fourFDC2C3",
     "title": "4FD-C2C3",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "4FD_Propane",
+    "field": "fourFDPropane",
     "title": "4FD-Propane",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
   {
-    "field": "4FD_Ethane",
+    "field": "fourFDEthane",
     "title": "4FD-Ethane",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "format": "{0:#.##}"
   },
 
   {
     "field": "NormParameterFKID",
     "title": "NormParameterFKID",
     "filterable": false,
-    "hidden": true
-  },
-  {
-    "field": "id",
-
-    "hidden": true
-  },
-  {
-    "field": "id",
-
     "hidden": true
   }
 ]

@@ -173,7 +173,7 @@ export default function IntermediateValuesDataSet() {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `IntermediateValues ${currentDateTime}.xlsx`
+  const fileName = `Norms Expression Data-SET.xlsx`
 
   const renderTitle = (t) => t
 

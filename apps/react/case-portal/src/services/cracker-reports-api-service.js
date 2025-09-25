@@ -207,7 +207,7 @@ async function getRawasteam(keycloak, periodFrom, periodTo, mode) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  // ? Encode mode to handle special characters like '+'
+  // ✅ Encode mode to handle special characters like '+'
   const encodedMode = encodeURIComponent(mode)
 
   let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw-steam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}&mode=${encodedMode}`
@@ -277,7 +277,7 @@ async function finalNormsReport(
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  let url = `${Config.CaseEngineUrl}/task/final-norms-report?plantId=${plantId}&year=${year}`
+  let url = `${Config.CaseEngineUrl}/task/final-norms-report?plantId=${plantId}&year=${year}&reportType=${reportType}`
 
   const headers = {
     Accept: 'application/json',
@@ -303,7 +303,7 @@ async function finalNormsProductionReport(
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  let url = `${Config.CaseEngineUrl}/task/final-norms-production-report?plantId=${plantId}&year=${year}`
+  let url = `${Config.CaseEngineUrl}/task/final-norms-production-report?plantId=${plantId}&year=${year}&reportType=${reportType}`
 
   const headers = {
     Accept: 'application/json',

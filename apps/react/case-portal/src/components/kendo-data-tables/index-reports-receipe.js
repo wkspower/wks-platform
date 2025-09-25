@@ -376,6 +376,26 @@ const KendoDataTablesReciepe = ({
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
+      if (col.type === 'number') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            editable={col.editable || false}
+            format={col.format || '{0:#.###}'}
+            className={'k-number-right'}
+            width='200px'
+            cells={{
+              edit: { text: NoSpinnerNumericEditor },
+              data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+          />
+        )
+      }
+
       return (
         <GridColumn
           key={col.field}

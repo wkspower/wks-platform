@@ -18,7 +18,7 @@ import {
 } from '@progress/kendo-react-excel-export'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
 
-const CALL_DELAY_MS = 200
+const CALL_DELAY_MS = 20
 
 const FurnaceRawData = () => {
   const keycloak = useSession()
@@ -254,7 +254,7 @@ const FurnaceRawData = () => {
         })}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      {/* <Box display='flex' justifyContent='flex-end' mb='2px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -262,7 +262,7 @@ const FurnaceRawData = () => {
         >
           Export
         </Button>
-      </Box>
+      </Box> */}
 
       <Box display='flex' flexDirection='column' gap={2}>
         {gridNames.length === 0 && !loading && (

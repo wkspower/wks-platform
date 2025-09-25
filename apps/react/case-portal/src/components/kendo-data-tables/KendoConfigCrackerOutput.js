@@ -239,6 +239,7 @@ const CrackerConfig = () => {
             remarks: item.remarks ?? item.Remarks ?? '',
             originalRemark: item.remarks ?? item.Remarks ?? '',
             ParticularsType: item.Type,
+
             ...item,
           }))
         }
@@ -270,38 +271,12 @@ const CrackerConfig = () => {
             currentTabDisplay,
           )
         }
-        let transformedData1 = []
-        if (spyroVMYield1 && Array.isArray(spyroVMYield1.data)) {
-          const rowMap = {}
-
-          spyroVMYield1.data.forEach((item, i) => {
-            const comp = item.displayName
-            const col = `${item.operation}_${item.type}`
-
-            if (!rowMap[comp]) {
-              rowMap[comp] = {
-                id: `row_${i}`,
-                particulars: comp,
-                uom: item.uom,
-                remarks: item.remarks,
-                NormParameterFKID: item.normParameterId,
-                '5F_C2C3': null,
-                '5F_Propane': null,
-                '5F_Ethane': null,
-                '4F_C2C3': null,
-                '4F_Propane': null,
-                '4F_Ethane': null,
-                '4FD_C2C3': null,
-                '4FD_Propane': null,
-                '4FD_Ethane': null,
-              }
-            }
-
-            rowMap[comp][col] = item.attributeValue
-          })
-
-          transformedData1 = Object.values(rowMap)
-        }
+        let transformedData1 = (spyroVMYield1.data || []).map(
+          (item, index) => ({
+            ...item,
+            id: index,
+          }),
+        )
 
         setRowsForTab(currentTabDisplay, transformedData1)
       } catch (err) {
@@ -441,18 +416,16 @@ const CrackerConfig = () => {
     try {
       const SpyroOutputYield = newRows.map((row) => ({
         particulars: row.particulars,
-        '5F_C2C3': row['5F_C2C3'],
-        '5F_Propane': row['5F_Propane'],
-        '5F_Ethane': row['5F_Ethane'],
-        '4F_C2C3': row['4F_C2C3'],
-        '4F_Propane': row['4F_Propane'],
-        '4F_Ethane': row['4F_Ethane'],
-        '4FD_C2C3': row['4FD_C2C3'],
-        '4FD_Propane': row['4FD_Propane'],
-        '4FD_Ethane': row['4FD_Ethane'],
+        fourFPropane: row.fourFPropane || 0,
+        fiveFC2C3: row.fiveFC2C3 || 0,
+        fiveFEthane: row.fiveFEthane || 0,
+        fiveFPropane: row.fiveFPropane || 0,
+        fourFC2C3: row.fourFC2C3 || 0,
+        fourFDC2C3: row.fourFDC2C3 || 0,
+        fourFDEthane: row.fourFDEthane || 0,
+        fourFDPropane: row.fourFDPropane || 0,
+        fourFEthane: row.fourFEthane || 0,
       }))
-
-      // console.log('SpyroOutputYield', SpyroOutputYield)
 
       const response = await DataService.saveSpyroOutputYield(
         SpyroOutputYield,
@@ -499,11 +472,19 @@ const CrackerConfig = () => {
 
       let response
 
-      response = await DataService.importSpyroOutputExcel(
-        rawFile,
-        keycloak,
-        mode,
-      )
+      if (currentTabDisplay === 'Yield') {
+        response = await DataService.importSpyroOutputExcelYield(
+          rawFile,
+          keycloak,
+          mode,
+        )
+      } else {
+        response = await DataService.importSpyroOutputExcel(
+          rawFile,
+          keycloak,
+          mode,
+        )
+      }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -582,7 +563,12 @@ const CrackerConfig = () => {
     const mode = selectMode // Can be empty � that's fine
 
     try {
-      const response = await DataService.exportSpyroOutputExcel(keycloak, mode)
+      let response
+      if (currentTabDisplay === 'Yield') {
+        response = await DataService.exportSpyroOutputExcelYield(keycloak, mode)
+      } else {
+        response = await DataService.exportSpyroOutputExcel(keycloak, mode)
+      }
 
       if (response?.code === 200) {
         // setSnackbarOpen(true)

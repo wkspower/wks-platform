@@ -260,13 +260,112 @@ const BusinessDemand = ({ permissions }) => {
       units: ['TPH', 'TPD'],
       showTitleNameBusiness: true,
       titleName: 'Business Demand Data',
-
-      downloadExcelBtnFromUI: true,
+      downloadExcelBtnFromUI: lowerVertName == 'cracker' ? false : true,
       ExcelName: `${lowerVertName}_Business Demand Data`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
+
+      downloadExcelBtn: lowerVertName == 'cracker' ? true : false,
+      uploadExcelBtn: lowerVertName == 'cracker' ? true : false,
     },
     isOldYear,
   )
+
+  const uploadBusinessDemand = async (rawFile) => {
+    setLoading(true)
+
+    try {
+      let response
+
+      response = await BusinessDemandDataApiService.businessDemandImport(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File - Business Demand.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error uploading xcel:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Unexpected error occurred!',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExcelUpload = (rawFile) => {
+    uploadBusinessDemand(rawFile)
+  }
+
+  const downloadExcelForConfiguration = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'success',
+    })
+
+    try {
+      let response
+      response = await BusinessDemandDataApiService.businessDemandExport(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+    } catch (error) {
+      console.error('Error downloading Excel:', error)
+      setSnackbarData({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
 
   return (
     <div>
@@ -341,6 +440,8 @@ const BusinessDemand = ({ permissions }) => {
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
         groupBy='Particulars'
+        handleExcelUpload={handleExcelUpload}
+        downloadExcelForConfiguration={downloadExcelForConfiguration}
       />
     </div>
   )

@@ -9,6 +9,13 @@ import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
 import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
 import { validateFields } from 'utils/validationUtils.js'
 import { Height } from '../../../node_modules/@mui/icons-material/index.js'
+import MaintenanceProcessTable from './processTable.js'
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian.js'
+import { Typography } from '../../../node_modules/@mui/material/index.js'
 const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']
@@ -179,73 +186,86 @@ const DecokingConfig = () => {
     fetchData()
   }, [plantID, oldYear, yearChanged, keycloak, fetchData])
 
- function validateAllDateOverlaps(rows) {
-  const pairs = [
-    ['ibrStartDate', 'ibrEndDate', 'IBR'],
-    ['taStartDate', 'taEndDate', 'TA'],
-    ['shutDownStartDate', 'shutDownEndDate', 'SD'],
-  ];
-  rows.forEach(row => { row.isError = false });
+  function validateAllDateOverlaps(rows) {
+    const pairs = [
+      ['ibrStartDate', 'ibrEndDate', 'IBR'],
+      ['taStartDate', 'taEndDate', 'TA'],
+      ['shutDownStartDate', 'shutDownEndDate', 'SD'],
+    ]
+    rows.forEach((row) => {
+      row.isError = false
+    })
 
-  let overlapMessage = '';
-  let foundOverlap = false;
+    let overlapMessage = ''
+    let foundOverlap = false
 
-  // Compare every range in every row with every other range (including different types)
-  for (let i = 0; i < rows.length; i++) {
-    for (const [startA, endA, labelA] of pairs) {
-      const aStart = rows[i][startA] ? new Date(rows[i][startA]).getTime() : null;
-      const aEnd = rows[i][endA] ? new Date(rows[i][endA]).getTime() : null;
-      if (!aStart || !aEnd) continue;
-      for (let j = 0; j < rows.length; j++) {
-        for (const [startB, endB, labelB] of pairs) {
-          const bStart = rows[j][startB] ? new Date(rows[j][startB]).getTime() : null;
-          const bEnd = rows[j][endB] ? new Date(rows[j][endB]).getTime() : null;
-          if (!bStart || !bEnd) continue;
-          // Skip same row and same activity
-          if (i === j && labelA === labelB) continue;
-          if (aStart < bEnd && bStart < aEnd) {
-            rows[i].isError = true;
-            rows[j].isError = true;
-            foundOverlap = true;
-            overlapMessage = `Furnace ${rows[i].displayName} ${labelA} overlaps Furnace ${rows[j].displayName} ${labelB}.`;
-            break;
-          }
-        }
-        if (foundOverlap) break;
-      }
-      if (foundOverlap) break;
-    }
-    if (foundOverlap) break;
-  }
-
-  // Also check within a single row (column-wise)
-  if (!foundOverlap) {
+    // Compare every range in every row with every other range (including different types)
     for (let i = 0; i < rows.length; i++) {
-      const ranges = pairs.map(([start, end, label]) => {
-        const s = rows[i][start] ? new Date(rows[i][start]).getTime() : null;
-        const e = rows[i][end] ? new Date(rows[i][end]).getTime() : null;
-        return s && e ? { start: s, end: e, label } : null;
-      }).filter(Boolean);
-
-      for (let m = 0; m < ranges.length; m++) {
-        for (let n = m + 1; n < ranges.length; n++) {
-          if (ranges[m].start < ranges[n].end && ranges[n].start < ranges[m].end) {
-            rows[i].isError = true;
-            foundOverlap = true;
-           overlapMessage = `Furnace ${rows[i].displayName} ${ranges[m].label} overlaps Furnace ${rows[i].displayName} ${ranges[n].label}.`;
-            break;
+      for (const [startA, endA, labelA] of pairs) {
+        const aStart = rows[i][startA]
+          ? new Date(rows[i][startA]).getTime()
+          : null
+        const aEnd = rows[i][endA] ? new Date(rows[i][endA]).getTime() : null
+        if (!aStart || !aEnd) continue
+        for (let j = 0; j < rows.length; j++) {
+          for (const [startB, endB, labelB] of pairs) {
+            const bStart = rows[j][startB]
+              ? new Date(rows[j][startB]).getTime()
+              : null
+            const bEnd = rows[j][endB]
+              ? new Date(rows[j][endB]).getTime()
+              : null
+            if (!bStart || !bEnd) continue
+            // Skip same row and same activity
+            if (i === j && labelA === labelB) continue
+            if (aStart <= bEnd && bStart <= aEnd) {
+              rows[i].isError = true
+              rows[j].isError = true
+              foundOverlap = true
+              overlapMessage = `Furnace ${rows[i].displayName} ${labelA} overlaps Furnace ${rows[j].displayName} ${labelB}.`
+              break
+            }
           }
+          if (foundOverlap) break
         }
-        if (foundOverlap) break;
+        if (foundOverlap) break
       }
-      if (foundOverlap) break;
+      if (foundOverlap) break
     }
-  }
 
-  return foundOverlap
-    ? { overlap: true, message: overlapMessage }
-    : { overlap: false };
-}
+    // Also check within a single row (column-wise)
+    if (!foundOverlap) {
+      for (let i = 0; i < rows.length; i++) {
+        const ranges = pairs
+          .map(([start, end, label]) => {
+            const s = rows[i][start] ? new Date(rows[i][start]).getTime() : null
+            const e = rows[i][end] ? new Date(rows[i][end]).getTime() : null
+            return s && e ? { start: s, end: e, label } : null
+          })
+          .filter(Boolean)
+
+        for (let m = 0; m < ranges.length; m++) {
+          for (let n = m + 1; n < ranges.length; n++) {
+            if (
+              ranges[m].start <= ranges[n].end &&
+              ranges[n].start <= ranges[m].end
+            ) {
+              rows[i].isError = true
+              foundOverlap = true
+              overlapMessage = `Furnace ${rows[i].displayName} ${ranges[m].label} overlaps Furnace ${rows[i].displayName} ${ranges[n].label}.`
+              break
+            }
+          }
+          if (foundOverlap) break
+        }
+        if (foundOverlap) break
+      }
+    }
+
+    return foundOverlap
+      ? { overlap: true, message: overlapMessage }
+      : { overlap: false }
+  }
 
   const saveChangesSdTa = React.useCallback(async () => {
     try {
@@ -259,83 +279,70 @@ const DecokingConfig = () => {
         return
       }
       var rawData = Object.values(modifiedCellsSdTa)
-      const yearStr = localStorage.getItem('year'); // e.g. "2025-26"
-let startLimit, endLimit;
-if (yearStr) {
-  const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10));
-  if (!isNaN(startYear) && !isNaN(endYear)) {
-    startLimit = new Date(`${startYear}-04-01T00:00:00`);
-    endLimit = new Date(`20${endYear}-03-31T23:59:59`);
-  }
-}
-const dateFields = [
-  'ibrStartDate', 'ibrEndDate',
-  'taStartDate', 'taEndDate',
-  'shutDownStartDate', 'shutDownEndDate'
-];
-const allRows = [...ibrScreen2Rows]; // get all rows, not just modified
-let hasDateError = false;
 
-for (const record of allRows) {
-  record.isError = false; // reset previous errors
-  for (const field of dateFields) {
-    let dateValue = record[field];
-    if (typeof dateValue === 'string') {
-      // Only accept DD-MM-YYYY format
-      const ddmmyyyyRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
-      const match = dateValue.match(ddmmyyyyRegex);
-      if (match) {
-        // month is 1-based in JS Date
-        const day = match[1], month = match[2], year = match[3];
-        dateValue = new Date(`${year}-${month}-${day}T00:00:00`);
-      } else {
-        // Invalid format, mark as error
-        dateValue = null;
+      const dateFields = ['ibrStartDate', 'ibrEndDate']
+      const allRows = [...ibrScreen2Rows] // get all rows, not just modified
+      let hasDateError = false
+
+      for (const record of allRows) {
+        record.isError = false // reset previous errors
+        for (const field of dateFields) {
+          let dateValue = record[field]
+          if (typeof dateValue === 'string') {
+            // Only accept DD-MM-YYYY format
+            const ddmmyyyyRegex = /^(\d{2})-(\d{2})-(\d{4})$/
+            const match = dateValue.match(ddmmyyyyRegex)
+            if (match) {
+              // month is 1-based in JS Date
+              const day = match[1],
+                month = match[2],
+                year = match[3]
+              dateValue = new Date(`${year}-${month}-${day}T00:00:00`)
+            } else {
+              // Invalid format, mark as error
+              dateValue = null
+            }
+          }
+
+          // if (
+          //   startLimit &&
+          //   endLimit &&
+          //   (!dateValue || dateValue < startLimit || dateValue > endLimit)
+          // ) {
+          //   record.isError = true
+          //   hasDateError = true
+          // }
+        }
       }
-    }
-    if (
-      startLimit &&
-      endLimit &&
-      (
-        !dateValue ||
-        dateValue < startLimit ||
-        dateValue > endLimit
-      )
-    ) {
-      record.isError = true;
-      hasDateError = true;
-    }
-  }
-}
 
-if (hasDateError) {
-  setRowsForTab('IBR Plan', [...allRows], 2); // update all rows
-  const formatDate = (date) =>
-    `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${date.getFullYear()}`;
-  setSnackbarOpen(true);
-  setSnackbarData({
-    message: `All dates must be between ${formatDate(startLimit)} and ${formatDate(endLimit)} for selected year.`,
-    severity: 'error',
-  });
-  setLoading(false);
-  return;
-}
+      // if (hasDateError) {
+      //   setRowsForTab('IBR Plan', [...allRows], 2) // update all rows
+      //   const formatDate = (date) =>
+      //     `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1)
+      //       .toString()
+      //       .padStart(2, '0')}-${date.getFullYear()}`
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: `All dates must be between ${formatDate(startLimit)} and ${formatDate(endLimit)} for selected year.`,
+      //     severity: 'error',
+      //   })
+      //   setLoading(false)
+      //   return
+      // }
       const requiredFields = ['idFromApi', 'remarks']
 
-    var rawData1 = getRows('IBR Plan')[2] 
+      var rawData1 = getRows('IBR Plan')[2]
       // Overlap validation
-    const result = validateAllDateOverlaps(rawData1)
-    if (result.overlap) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: result.message,
-        severity: 'error',
-      })
-      setLoading(false)
-      return
-    }
+      const result = validateAllDateOverlaps(rawData1)
+      if (result.overlap) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: result.message,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
 
       const validationMessage = validateFields(rawData, requiredFields)
       if (validationMessage) {
@@ -519,6 +526,8 @@ if (hasDateError) {
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       byDefCollaps: false,
+      showTitleNameBusiness: true,
+      titleName: 'Furnace Actual and Proposed Runlength',
     },
     isOldYear,
   )
@@ -638,7 +647,7 @@ if (hasDateError) {
       setLoading(false)
     }
   }
-  const rowClass = (row) => row.isError ? 'row-error' : '';
+  const rowClass = (row) => (row.isError ? 'row-error' : '')
   return (
     <Box>
       <Backdrop
@@ -696,6 +705,24 @@ if (hasDateError) {
             downloadExcelForConfiguration={downloadExcelForConfiguration}
             handleCalculate={handleCalculate}
           />
+
+          <>
+            <CustomAccordion defaultExpanded disableGutters>
+              <CustomAccordionSummary
+                aria-controls='meg-grid-content'
+                id='meg-grid-header'
+              >
+                <Typography component='span' className='grid-title'>
+                  Summary
+                </Typography>
+              </CustomAccordionSummary>
+              <CustomAccordionDetails>
+                <Box sx={{ width: '100%', margin: 0 }}>
+                  <MaintenanceProcessTable viewOnly={true} />
+                </Box>
+              </CustomAccordionDetails>
+            </CustomAccordion>
+          </>
         </>
       </>
     </Box>

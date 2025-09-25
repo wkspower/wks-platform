@@ -96,6 +96,7 @@ const KendoDataTables = ({
   columns,
   summaryEdited,
   loading = false,
+  supressGridHeight = false,
   typeRank = {},
   permissions = {},
   errorRows = new Set(),
@@ -122,6 +123,7 @@ const KendoDataTables = ({
   calculatebtnClicked = () => {},
   selectedUsers = [],
   groupBy = null,
+  selectedUOM = 'MT/Month',
   note = '',
   titleName = '',
   gridName,
@@ -160,19 +162,7 @@ const KendoDataTables = ({
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
-  const ParticularsRedCell = (props) => {
-    const { dataItem, field } = props
-    // Common condition for red highlight
-    const isRed =
-      (field === 'materialDisplayName' || field === 'Particulars') &&
-      (dataItem.isRedParticulars ||
-        dataItem.normParameterTypeId === '5859D066-F475-461E-9D60-7B781C604FF2')
-    return (
-      <td style={{ color: isRed ? 'red' : undefined }}>
-        {dataItem.materialDisplayName}
-      </td>
-    )
-  }
+
   const initialGroup = groupBy
     ? [
         {
@@ -181,6 +171,8 @@ const KendoDataTables = ({
         },
       ]
     : []
+
+  console.log('selectedUOM', selectedUOM)
 
   const fileInputRef = useRef(null)
 
@@ -1077,7 +1069,7 @@ const KendoDataTables = ({
                 // height: `${gridHeight}px`,
 
                 height:
-                  lowerVertName === 'meg'
+                  lowerVertName === 'meg' || supressGridHeight == true
                     ? undefined
                     : rows?.length > 10
                       ? `${calculatedVH}vh`
@@ -1101,7 +1093,7 @@ const KendoDataTables = ({
               onItemChange={itemChange}
               resizable={true}
               defaultSkip={0}
-              defaultTake={200}
+              defaultTake={50}
               contextMenu={true}
               grade={grades}
               onRowClick={handleRowClick}
@@ -1121,9 +1113,9 @@ const KendoDataTables = ({
             >
               {groupBy && <ExcelExportColumn field={groupBy} title='Type' />}
 
-              {/* {permissions?.showCheckbox && (
-                <GridColumn columnType='checkbox' width='50px' />
-              )} */}
+              {permissions?.unitForExcelToadd && (
+                <ExcelExportColumn field={selectedUOM} title='UOM' />
+              )}
 
               {columns?.map((col) => {
                 const isActive = isColumnActive(col?.field, filter, sort)

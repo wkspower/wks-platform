@@ -47,62 +47,6 @@
     "widthT": 100
   },
   {
-    "field": "demoHSS",
-    "title": "Demo HSS",
-    "editable": true,
-    "type": "number",
-    "format": "{0:#.##}",
-    "hidden": false,
-    "hideFilter": true,
-    "hideSort": true,
-    "widthT": 100
-  },
-  {
-    "field": "demoBBU",
-    "title": "Demo BBU/BBD",
-    "editable": true,
-    "type": "number",
-    "format": "{0:#.##}",
-    "hidden": false,
-    "hideFilter": true,
-    "hideSort": true,
-    "widthT": 120
-  },
-  {
-    "field": "demoSAD",
-    "title": "Demo SAD",
-    "editable": true,
-    "type": "number",
-    "format": "{0:#.##}",
-    "hidden": false,
-    "hideFilter": true,
-    "hideSort": true,
-    "widthT": 100
-  },
-  {
-    "field": "demoSD",
-    "title": "Demo SD",
-    "editable": true,
-    "type": "number",
-    "format": "{0:#.##}",
-    "hidden": false,
-    "hideFilter": true,
-    "hideSort": true,
-    "widthT": 100
-  },
-
-  {
-    "field": "mnt",
-    "title": "MNT",
-    "editable": true,
-    "type": "number",
-    "format": "{0:#.##}",
-    "hidden": false,
-    "hideFilter": true,
-    "hideSort": true,
-    "widthT": 100
-  },
-  {
     "field": "coilReplacement",
     "title": "IBR/Coil Replacement",
     "editable": true,
@@ -113,9 +57,10 @@
     "hideSort": true,
     "widthT": 125
   },
+
   {
     "field": "shutdown",
-    "title": "Shutdown",
+    "title": "Shutdown(TA)",
     "editable": true,
     "type": "number",
     "format": "{0:#.##}",
@@ -135,6 +80,7 @@
     "hideSort": true,
     "widthT": 100
   },
+
   {
     "field": "sad",
     "title": "SAD",
@@ -160,6 +106,66 @@
   {
     "field": "bbd",
     "title": "BBD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "demoSAD",
+    "title": "Demo SAD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "demoSD",
+    "title": "Demo SD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "demoBBU",
+    "title": "Demo BBU/BBD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 120
+  },
+
+  {
+    "field": "demoHSS",
+    "title": "Demo HSS",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "mnt",
+    "title": "MNT",
     "editable": true,
     "type": "number",
     "format": "{0:#.##}",
