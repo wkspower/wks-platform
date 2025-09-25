@@ -1104,14 +1104,14 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 			String procedureName = verticalName + "_" + site.getName() + "_CalculateDecokeMaintenance";
 
-			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
+			String callSql = "{call " + procedureName + "(?, ?)}";
 
 			try (Connection connection = dataSource.getConnection();
 					CallableStatement stmt = connection.prepareCall(callSql)) {
 
 				// Set parameters in the correct order
 				stmt.setString(1, plantId); // @finYear
-				stmt.setString(4, aopYear); // @siteId
+				stmt.setString(2, aopYear); // @siteId
 
 				// Execute the stored procedure
 				int rowsAffected = stmt.executeUpdate();
