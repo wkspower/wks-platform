@@ -16,12 +16,12 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-import { Tab, Tabs } from '@mui/material'
+import { Tab, Tabs } from '../../../../node_modules/@mui/material/index'
 import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
 
 const CALL_DELAY_MS = 200
 
-export default function ProductionVolumeDataBasisPe() {
+const ProductionVolumeDataBasisPe = () => {
   const keycloak = useSession()
 
   // Dynamic data map keyed by exact grid name from API
@@ -169,9 +169,8 @@ export default function ProductionVolumeDataBasisPe() {
     [fetchDataForGrid, keycloak],
   )
 
-  // Main (per-grid): fetch TYPE_LIST then schedule fetching each grid in order
+  // Main: fetch TYPE_LIST then schedule fetching each grid in order
   const fetchAllGrids = useCallback(async () => {
-    if (tabIndex == 0) return
     // clear previous timers
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
@@ -197,8 +196,7 @@ export default function ProductionVolumeDataBasisPe() {
         return
       }
 
-      // request TYPE_LIST (per-grid flow uses TYPE LIST2)
-
+      // request TYPE_LIST
       const typeListResult = await DataService.getProductionVolDataBasisPe(
         keycloak,
         'TYPE LIST2',
@@ -227,120 +225,15 @@ export default function ProductionVolumeDataBasisPe() {
     }
   }, [keycloak, scheduleAndRunFetch])
 
-  // Main (single-call): fetch all grids in one call (used for tab 0)
-  const fetchAllGridsSingleCall = useCallback(async () => {
-    setLoading(true)
-    try {
-      // Fetch StartDate / EndDate ONCE from config (required by backend)
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
-      const StartDate = configData?.data?.find(
-        (d) => d.Name === 'StartDate',
-      )?.AttributeValue
-      const EndDate = configData?.data?.find(
-        (d) => d.Name === 'EndDate',
-      )?.AttributeValue
-
-      if (!StartDate || !EndDate) {
-        console.warn(
-          'StartDate / EndDate missing from configuration. Aborting single-call fetch.',
-        )
-        setGridNames([])
-        setDataMap({})
-        return
-      }
-
-      // SINGLE API CALL: pass TYPE LIST1 and Start/End dates
-      const apiResp = await DataService.getProductionVolDataBasisPe(
-        keycloak,
-        'TYPE LIST1',
-        StartDate,
-        EndDate,
-      )
-
-      if (!apiResp || apiResp.code !== 200) {
-        setGridNames([])
-        setDataMap({})
-        return
-      }
-
-      // apiResp.data is expected to be an array of grids as in your sample
-      const grids = Array.isArray(apiResp.data)
-        ? apiResp.data
-        : apiResp.data?.data || []
-
-      const nextDataMap = {}
-      const order = []
-
-      grids.forEach((g, idx) => {
-        const gridName = g.gridName || g.TYPE || `Sheet${idx + 1}`
-        order.push(gridName)
-
-        const backendCols = (g.data && g.data.columns) || []
-        const enrichedCols = enrichColumns(backendCols)
-
-        // Identify date and number fields so we can coerce values
-        const dateFields = enrichedCols
-          .filter((c) => c.type === 'date')
-          .map((c) => c.field)
-        const numberFields = enrichedCols
-          .filter((c) => c.type === 'number')
-          .map((c) => c.field)
-
-        const rows = (g.data && g.data.data ? g.data.data : []).map(
-          (item, ix) => {
-            const parsed = { ...item }
-            dateFields.forEach((f) => {
-              parsed[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
-            })
-            numberFields.forEach((f) => {
-              const raw = item?.[f]
-              parsed[f] =
-                raw === undefined || raw === null || raw === ''
-                  ? null
-                  : Number(raw)
-            })
-            return { ...parsed, id: ix, isEditable: false }
-          },
-        )
-
-        nextDataMap[gridName] = { rows, columns: enrichedCols }
-      })
-
-      if (!isMountedRef.current) return
-      setGridNames(order)
-      setDataMap(nextDataMap)
-    } catch (err) {
-      console.error('Single-call fetch failed:', err)
-    } finally {
-      if (isMountedRef.current) setLoading(false)
-    }
-  }, [keycloak, enrichColumns])
-
   useEffect(() => {
-    // Choose fetching strategy based on active tab:
-    // - tab 0 => single call (TYPE LIST1)
-    // - other tabs => per-grid scheduled calls (TYPE LIST2)
-    if (tabIndex === 0) {
-      fetchAllGridsSingleCall()
-    } else {
-      fetchAllGrids()
-    }
-
+    setTabIndex(0)
+    fetchAllGrids()
     // cleanup timers on dependency change
     return () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-    // intentionally depend on tabIndex + primary inputs so we re-fetch when they change
-  }, [
-    fetchAllGrids,
-    fetchAllGridsSingleCall,
-    plantID,
-    oldYear,
-    yearChanged,
-    tabIndex,
-  ])
+  }, [fetchAllGrids, plantID, oldYear, yearChanged])
 
   // eslint-disable-next-line no-useless-escape
   const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
@@ -356,7 +249,7 @@ export default function ProductionVolumeDataBasisPe() {
 
   function normalizeCellValue(v) {
     if (v === undefined || v === null) return ''
-    // If it's a Date object, keep as Date (Kendo/Excel accepts Date) — but fallback to ISO if not supported
+    // If it's a Date object, keep as Date (Kendo/Excel accepts Date) â€” but fallback to ISO if not supported
     if (v instanceof Date) return v
     // If it's an object or array, convert to string (avoid injecting nested objects)
     if (typeof v === 'object') {
@@ -391,6 +284,8 @@ export default function ProductionVolumeDataBasisPe() {
         // Build columns for the workbook. Keep autoWidth for nice sizing.
         const sheetColumns = cols.map((c) => ({
           autoWidth: true,
+          // Kendo workbook column title isn't used here to render the header row,
+          // but we keep title for clarity and potential use.
           title: c.title || c.field || '',
         }))
 
@@ -572,3 +467,5 @@ export default function ProductionVolumeDataBasisPe() {
     </div>
   )
 }
+
+export default ProductionVolumeDataBasisPe

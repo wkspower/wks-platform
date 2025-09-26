@@ -129,8 +129,6 @@ const KendoDataGrid = ({
   }
 
   const RedHighlightCell2 = (props) => {
-    console.log(1)
-
     const {
       dataItem,
       field,
@@ -148,7 +146,7 @@ const KendoDataGrid = ({
       field,
     )
 
-    console.log('dataItem', dataItem)
+    // console.log('dataItem', dataItem)
 
     const month = field
     const normId =

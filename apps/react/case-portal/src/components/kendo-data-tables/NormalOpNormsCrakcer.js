@@ -328,6 +328,12 @@ const NormalOpNormsScreenCracker = () => {
   const colDefsFinalNorms1 = useMemo(
     () => [
       {
+        field: 'isChecked',
+        type: 'switch',
+        widthT: 30,
+        filter: false,
+      },
+      {
         field: 'sapMaterialCode',
         title: 'SAP MAT Code',
         widthT: 120,
@@ -385,7 +391,7 @@ const NormalOpNormsScreenCracker = () => {
       // saveBtn/showCalculate will be toggled per-grid depending on which is top
       saveBtn: true,
       showCalculate: true,
-      downloadExcelBtnFromUI: false,
+      downloadExcelBtnFromUI: gradeDisplayName !== 'Monthly' ? true : false,
       ExcelName: `${lowerVertName}_BestAcheived(Min CC)`,
       showCheckbox: false,
       marginBottom: false,
@@ -424,6 +430,7 @@ const NormalOpNormsScreenCracker = () => {
       ExcelName: `${lowerVertName}_Best Achieved (Norms)`,
       saveBtn: true, // visible only if top
       showCalculate: true, // visible only if top and calculation available
+      showCalculateVisibility: true,
     }),
     [lowerVertName, calculationObject],
   )
@@ -461,8 +468,7 @@ const NormalOpNormsScreenCracker = () => {
 
   const expressionPermissions = useMemo(() => {
     const base = { ...baseExpressionPermissions }
-    // expression only shows save/calc if it is the top grid (rare: e.g., if you reorder)
-    const showSave = !mainIsTop && !monthlyIsTop && isModeTab // expression becomes top if both main & monthly not present (edge)
+    const showSave = !mainIsTop && !monthlyIsTop && isModeTab
     base.saveBtn = showSave && base.saveBtn
     base.showCalculate = showSave && base.showCalculate
     return getAdjustedPermissions(base, isOldYear)
@@ -718,6 +724,8 @@ const NormalOpNormsScreenCracker = () => {
       })
     })
 
+    // console.log('updatedRows', updatedRows)
+
     return saveRows(updatedRows, false)
   }, [
     selectedTab,
@@ -796,63 +804,109 @@ const NormalOpNormsScreenCracker = () => {
 
   const handleGlobalCheckboxChange = useCallback(
     (gridName, id, materialName, field, value, dataItem) => {
-      const uniqueItemId = `${gridName}-${id}`
-      const uncheckedRows = []
+      // helper to ensure unique key format is consistent
+      const normalizeUniqueId = (gName, rowId) => `${gName}-${rowId}`
 
-      // Only update these two grids
-      const targetGrids = [
-        { setRowsFunc: setRowsExpression, name: 'expression' },
-        { setRowsFunc: setRowsBestAchivedIndividual, name: 'best' },
-      ]
-
-      targetGrids.forEach(({ setRowsFunc, name: currentGridName }) => {
-        setRowsFunc((prev) =>
-          (prev || []).map((row) => {
-            // Update the row that was just clicked
-            if (row.id === id && gridName === currentGridName) {
-              return { ...row, [field]: value }
-            }
-            // Uncheck any other row in the same material group in these grids
-            if (
-              row.materialName === materialName &&
-              !(row.id === id && gridName === currentGridName)
-            ) {
-              uncheckedRows.push({ ...row, gridName: currentGridName })
-              return { ...row, [field]: false }
-            }
-            return row
-          }),
-        )
+      // 1) Build updated arrays synchronously from current state
+      const newMainRows = (rows || []).map((row) => {
+        if (gridName === 'main' && row.id === id)
+          return { ...row, [field]: value }
+        if (
+          row.materialName === materialName &&
+          !(gridName === 'main' && row.id === id)
+        ) {
+          return { ...row, [field]: false }
+        }
+        return row
       })
 
-      setModifiedCells((prev) => {
+      const newExpressionRows = (rowsExpression || []).map((row) => {
+        if (gridName === 'expression' && row.id === id)
+          return { ...row, [field]: value }
+        if (
+          row.materialName === materialName &&
+          !(gridName === 'expression' && row.id === id)
+        ) {
+          return { ...row, [field]: false }
+        }
+        return row
+      })
+
+      const newBestRows = (rowsBestAchivedIndividual || []).map((row) => {
+        if (gridName === 'best' && row.id === id)
+          return { ...row, [field]: value }
+        if (
+          row.materialName === materialName &&
+          !(gridName === 'best' && row.id === id)
+        ) {
+          return { ...row, [field]: false }
+        }
+        return row
+      })
+
+      // 2) Collect unchecked rows from those new arrays (except the one we just checked)
+      const uncheckedRows = []
+      ;[
+        { arr: newMainRows, gridName: 'main' },
+        { arr: newExpressionRows, gridName: 'expression' },
+        { arr: newBestRows, gridName: 'best' },
+      ].forEach(({ arr, gridName: gName }) => {
+        arr.forEach((r) => {
+          // If this row belongs to the same material and is unchecked, and it's NOT the row we clicked,
+          // then it's one of the rows that was implicitly unchecked
+          if (
+            r.materialName === materialName &&
+            !(gName === gridName && r.id === id) &&
+            !r[field]
+          ) {
+            uncheckedRows.push({ ...r, gridName: gName })
+          }
+        })
+      })
+
+      // 3) Apply the new arrays to state (this updates UI)
+      setRows(newMainRows)
+      setRowsExpression(newExpressionRows)
+      setRowsBestAchivedIndividual(newBestRows)
+
+      // 4) Build modifiedCells update using the full row objects we collected
+      setModifiedCells((prev = {}) => {
         const updated = { ...prev }
 
-        // Add/Update the checked row
+        // checked row: prefer dataItem (from the grid event) but fall back to existing saved object
+        const uniqueItemId = normalizeUniqueId(gridName, id)
         updated[uniqueItemId] = {
           ...(prev[uniqueItemId] || {}),
-          ...dataItem,
-          [field]: value,
+          ...(dataItem || {}),
+          [field]: !!value,
+          gridName,
+          id,
         }
 
-        // Add/Update all unchecked rows
+        // add/update all unchecked rows with their full data
         uncheckedRows.forEach((row) => {
-          const rowUniqueId = `${row.gridName}-${row.id}`
-          if (!updated[rowUniqueId]) {
-            // If row is not in modifiedCells, add it
-            updated[rowUniqueId] = { ...row, [field]: false }
-          } else {
-            // If row is already there, just update the field
-            updated[rowUniqueId] = { ...updated[rowUniqueId], [field]: false }
+          const rowUniqueId = normalizeUniqueId(row.gridName, row.id)
+          updated[rowUniqueId] = {
+            ...(prev[rowUniqueId] || {}),
+            ...row, // includes months, idFromApi, materialFKId, materialName, etc.
+            [field]: false,
           }
         })
 
-        console.log('updated', updated)
-
+        // console.log('modifiedCells after checkbox change (updated):', updated)
         return updated
       })
     },
-    [],
+    // include the states/setters you use
+    [
+      rows,
+      rowsExpression,
+      rowsBestAchivedIndividual,
+      setRows,
+      setRowsExpression,
+      setRowsBestAchivedIndividual,
+      setModifiedCells,
+    ],
   )
 
   const downloadExcelForConfiguration = useCallback(async () => {

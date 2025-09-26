@@ -35,7 +35,7 @@ const BestAchievedNorms = () => {
     siteObject,
     verticalObject,
     year,
-  } = dataGridStore
+  } = dataGridStore || {}
 
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
@@ -45,6 +45,8 @@ const BestAchievedNorms = () => {
   const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
+
+  const [allRedCell, setAllRedCell] = useState([])
 
   useEffect(() => {
     return () => {
@@ -56,8 +58,8 @@ const BestAchievedNorms = () => {
 
   function parseDDMMYYYY(dateStr) {
     if (!dateStr) return null
-    const [day, month, year] = dateStr.split('-')
-    return new Date(`${year}-${month}-${day}`)
+    const [day, month, yearStr] = dateStr.split('-')
+    return new Date(`${yearStr}-${month}-${day}`)
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
@@ -88,8 +90,6 @@ const BestAchievedNorms = () => {
 
     return cols
   }, [])
-
-  const [allRedCell, setAllRedCell] = useState([])
 
   const fetchDataForGrid = useCallback(
     async (reportType) => {
@@ -144,7 +144,6 @@ const BestAchievedNorms = () => {
 
         try {
           const { rows, columns } = await fetchDataForGrid(reportType)
-
           if (!isMountedRef.current) return
           setDataMap((prev) => ({ ...prev, [reportType]: { rows, columns } }))
         } catch (err) {
@@ -160,10 +159,9 @@ const BestAchievedNorms = () => {
 
       timeoutIdsRef.current.push(id)
     },
-    [fetchDataForGrid, keycloak],
+    [fetchDataForGrid],
   )
 
-  // Main: fetch TYPE_LIST then schedule fetching each grid in order
   const fetchAllGrids = useCallback(async () => {
     // clear previous timers
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
@@ -183,6 +181,18 @@ const BestAchievedNorms = () => {
         AOP_YEAR,
         '4F',
       )
+      const code2 = NormalOperationNormsApiService.BestAchivedColorCodes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '5F',
+      )
+      const code3 = NormalOperationNormsApiService.BestAchivedColorCodes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '4F+D',
+      )
 
       // code1 = {
       //   code: 200,
@@ -191,25 +201,47 @@ const BestAchievedNorms = () => {
       //     data: [
       //       {
       //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'January',
+      //         mode: 'Propane(1Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'March',
+      //         mode: 'Propane(1Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'April',
+      //         mode: 'Propane(1Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'June',
+      //         mode: 'Propane(1Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
       //         month: 'October',
+      //         mode: 'Propane(2Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'May',
+      //         mode: 'Propane(2Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'June',
+      //         mode: 'Propane(2Z)',
+      //       },
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'July',
       //         mode: 'Propane(2Z)',
       //       },
       //     ],
       //   },
       // }
-
-      let code2 = NormalOperationNormsApiService.BestAchivedColorCodes(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        '5F',
-      )
-      let code3 = NormalOperationNormsApiService.BestAchivedColorCodes(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        '4F+D',
-      )
 
       const [res1, res2, res3] = await Promise.all([code1, code2, code3])
 
@@ -219,22 +251,27 @@ const BestAchievedNorms = () => {
         ...(res3?.data?.data || []),
       ].map((obj) => ({
         ...obj,
-        normParameterFKId: (obj.NormParameter_FK_Id || '').toUpperCase(),
+        // normalized key used by RedHighlightCell2 matching logic
+        normParameterFKId: (
+          obj.NormParameter_FK_Id ||
+          obj.normParameterFKId ||
+          ''
+        ).toUpperCase(),
       }))
 
       setAllRedCell(mergedData)
 
       let types = []
-      if (typeListResult?.code == 200) {
+      if (typeListResult?.code === 200) {
         types = (typeListResult?.data?.data ?? []).map((item) => item.TYPE)
       } else {
+        setLoading(false)
         return
       }
 
-      const normalized = [...new Set(types)] // unique, preserve order as returned
+      const normalized = [...new Set(types)]
       setGridNames(normalized)
 
-      // schedule fetch for each grid with delay to throttle
       normalized.forEach((type, idx) => {
         const delay = idx * CALL_DELAY_MS
         scheduleAndRunFetch(type, delay)
@@ -243,63 +280,175 @@ const BestAchievedNorms = () => {
       console.error('Error fetching TYPE_LIST or config:', err)
       setLoading(false)
     }
-  }, [keycloak, scheduleAndRunFetch])
+  }, [keycloak, PLANT_ID, AOP_YEAR, scheduleAndRunFetch])
 
   useEffect(() => {
     fetchAllGrids()
-    // cleanup timers on dependency change
     return () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
   }, [fetchAllGrids, plantID, oldYear, yearChanged])
 
-  // Export: gather sheets from each ExcelExport instance and combine into one workbook
+  // ---------- EXCEL EXPORT HELPERS (fixed to clone template sheet safely) ----------
+  // Build a single sheet containing styled cells that mimic RedHighlightCell2
+  const buildStyledSheet = useCallback(
+    (
+      name,
+      data = { rows: [], columns: [] },
+      opts = {},
+      templateSheet = null,
+    ) => {
+      const { allRedCell = [], showThreeColors = false } = opts
+
+      // If a template sheet is provided (from workbookOptions), clone it into plain objects
+      // and then replace its rows with a fresh array we control. This avoids "rows.push is not a function".
+      let sheet
+      if (templateSheet) {
+        try {
+          sheet = JSON.parse(JSON.stringify(templateSheet))
+        } catch (err) {
+          // fallback to basic sheet if cloning fails for some reason
+          sheet = { title: name, rows: [] }
+        }
+        sheet.title = name || sheet.title || name
+        sheet.rows = [] // ensure rows is a plain array
+      } else {
+        sheet = { title: name, rows: [] }
+      }
+
+      // helper to check matched cell (same logic as UI)
+      const findMatchedCell = (row, monthField) => {
+        const normId =
+          row.materialFKId ||
+          row.NormParameter_FK_Id ||
+          row.Material_FK_Id ||
+          row.NormParameterFKId ||
+          row.normParameterFKId
+        if (!normId) return null
+
+        return allRedCell?.find((cell) => {
+          const monthMatch =
+            (cell.month || '').toString().toLowerCase() ===
+            (monthField || '').toString().toLowerCase()
+          const cellNormId = (
+            cell.normParameterFKId ||
+            cell.NormParameter_FK_Id ||
+            cell.NormParameterFKId ||
+            ''
+          )
+            .toString()
+            .toLowerCase()
+          const normIdStr = (normId || '').toString().toLowerCase()
+          return monthMatch && cellNormId === normIdStr
+        })
+      }
+
+      // header row
+      sheet.rows.push({
+        cells: (data.columns || []).map((col) => ({
+          value: col.title || col.field,
+          bold: true,
+          background: '#E6E6E6',
+        })),
+      })
+
+      // data rows
+      ;(data.rows || []).forEach((row) => {
+        const cells = (data.columns || []).map((col) => {
+          const raw = row[col.field]
+          const cellValue =
+            raw instanceof Date
+              ? raw
+              : raw === undefined || raw === null
+                ? ''
+                : raw
+
+          const cell = { value: cellValue }
+
+          if (showThreeColors && col.field) {
+            const matched = findMatchedCell(row, col.field)
+            if (matched) {
+              if (matched.mode === 'Propane(1Z)') {
+                cell.background = '#FFD6D6' // light red
+                cell.color = '#9A0000' // dark red text
+                cell.bold = true
+              } else if (matched.mode === 'Propane(2Z)') {
+                cell.background = '#DFFFD8' // light green
+                cell.color = '#006400' // dark green text
+                cell.bold = true
+              }
+            }
+          }
+
+          return cell
+        })
+
+        sheet.rows.push({ cells })
+      })
+
+      return sheet
+    },
+    [],
+  )
+
+  // Combined export using hidden ExcelExport refs + built sheets (uses template sheet if possible)
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})
     if (!keys.length) return
 
-    // find first available ref
-    const firstKey = keys.find((k) => exportRefs.current[k])
+    // pick a base ref to call .workbookOptions and .save
+    const firstKey = keys.find((k) => !!exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
-    const baseOptions = baseRef?.workbookOptions?.()
-    if (!baseOptions) return
 
-    // collect first sheet from each ref (preserves order of gridNames when possible)
+    // try to obtain template workbook options (may throw if ref not ready)
+    let baseTemplateOptions = null
+    try {
+      baseTemplateOptions =
+        typeof baseRef.workbookOptions === 'function'
+          ? baseRef.workbookOptions()
+          : null
+    } catch (err) {
+      baseTemplateOptions = null
+    }
+
+    // template sheet (if available) to clone; use first sheet as the template
+    const templateSheet =
+      baseTemplateOptions && Array.isArray(baseTemplateOptions.sheets)
+        ? baseTemplateOptions.sheets[0]
+        : null
+
+    // Build sheets in grid order (gridNames)
     const sheets = gridNames
-      .map((name) => {
-        const ref = exportRefs.current[name]
-        try {
-          const opts = ref?.workbookOptions?.()
-          return opts?.sheets?.[0] ? { ...opts.sheets[0] } : null
-        } catch {
-          return null
-        }
+      .map((name, idx) => {
+        const d = dataMap[name] || { rows: [], columns: [] }
+        const showThree = idx === 0 // replicate your UI: first grid had showThreeColors
+        return buildStyledSheet(
+          name,
+          d,
+          { allRedCell, showThreeColors: showThree },
+          templateSheet,
+        )
       })
       .filter(Boolean)
 
     if (!sheets.length) return
 
-    // set readable titles (use the original grid name)
-    sheets.forEach((s, idx) => {
-      s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
-    })
-
+    // Try to reuse baseTemplateOptions to keep other workbook meta; else create minimal options
+    const baseOptions = baseTemplateOptions ? { ...baseTemplateOptions } : {}
     baseOptions.sheets = sheets
-    baseRef.save(baseOptions)
-  }, [gridNames])
 
-  const currentDateTime = new Date()
-    .toISOString()
-    .replace(/T/, ' ')
-    .replace(/:/g, '-')
-    .split('.')[0]
+    try {
+      baseRef.save(baseOptions)
+    } catch (err) {
+      console.error('Export failed:', err)
+    }
+  }, [gridNames, dataMap, allRedCell, buildStyledSheet])
+
   const fileName = `Best Achieved Norms(Min CC)-DATA-SET.xlsx`
 
-  // helper to render Title exactly as API sent (or tweak)
-  const renderTitle = (t) => t
-
+  // ---------- UI render ----------
   return (
     <div>
       <Backdrop
@@ -309,22 +458,28 @@ const BestAchievedNorms = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Hidden ExcelExport instances for each grid */}
+      <Typography component='div' className='grid-title' sx={{ mb: 1 }}>
+        <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> - Propane
+        (1Z)&nbsp;&nbsp;
+        <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
+        Propane (2Z)
+      </Typography>
+
+      {/* Hidden ExcelExport instances for each grid (we keep these so we can call .save()) */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
-          const data = dataMap[name] || { rows: [], columns: [] }
-          // function ref to capture the export instance
+          const d = dataMap[name] || { rows: [], columns: [] }
           const setRef = (ref) => {
             if (ref) exportRefs.current[name] = ref
           }
           return (
             <ExcelExport
               key={`excel-${name}`}
-              data={data.rows}
+              data={d.rows}
               ref={setRef}
               fileName={fileName}
             >
-              {(data.columns || []).map((col) => (
+              {(d.columns || []).map((col) => (
                 <ExcelExportColumn
                   key={col.field}
                   field={col.field}
@@ -336,7 +491,7 @@ const BestAchievedNorms = () => {
         })}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      <Box display='flex' justifyContent='flex-end' mb='8px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -361,7 +516,7 @@ const BestAchievedNorms = () => {
                   id={`${name}-header`}
                 >
                   <Typography component='span' className='grid-title'>
-                    {renderTitle(name)}
+                    {name}
                   </Typography>
                 </CustomAccordionSummary>
                 <CustomAccordionDetails>

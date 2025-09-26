@@ -172,7 +172,7 @@ const KendoDataTables = ({
       ]
     : []
 
-  console.log('selectedUOM', selectedUOM)
+  // console.log('selectedUOM', selectedUOM)
 
   const fileInputRef = useRef(null)
 

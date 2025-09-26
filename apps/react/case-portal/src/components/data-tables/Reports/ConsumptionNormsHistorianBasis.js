@@ -1,93 +1,63 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Box, Button } from '@mui/material'
+import { Box } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import {
-  ExcelExport,
-  ExcelExportColumn,
-} from '@progress/kendo-react-excel-export'
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import {
   CustomAccordion,
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
+import { Button } from '@mui/material'
+import {
+  ExcelExport,
+  ExcelExportColumn,
+} from '@progress/kendo-react-excel-export'
 
-// IMPORTANT: This component expects a single API call that returns an array of grids:
-// { code:200, data: [ { gridName: 'RAW-MCU', data: { data: [...rows], columns: [...] } }, ... ] }
-// If your DataService signature differs, adapt the call in `fetchAllGridsSingleCall` accordingly.
+const CALL_DELAY_MS = 200
 
-export default function ConsumptionNormsHistorianBasis() {
+const ConsumptionNormsHistorianBasis = () => {
   const keycloak = useSession()
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear, verticalChange } = dataGridStore
 
-  const [dataMap, setDataMap] = useState({}) // { [gridName]: { rows, columns } }
-  const [gridNames, setGridNames] = useState([])
+  // Dynamic data map keyed by exact grid name from API
+  // dataMap = { [gridName]: { rows: [], columns: [] } }
+  const [dataMap, setDataMap] = useState({})
+  const [gridNames, setGridNames] = useState([]) // ordered list from API
   const [loading, setLoading] = useState(false)
-  const exportRefs = useRef({})
+
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { plantID, yearChanged, oldYear } = dataGridStore
+
+  const timeoutIdsRef = useRef([])
+  const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
+  // dynamic refs for excel exports: exportRefs.current[gridName] = ExcelExportInstance
+  const exportRefs = useRef({})
 
   useEffect(() => {
     return () => {
       isMountedRef.current = false
+      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+      timeoutIdsRef.current = []
     }
   }, [])
 
-  // --- Helpers ---
-  function sanitizeSheetName(name = '', fallback = 'Sheet') {
-    // eslint-disable-next-line no-useless-escape
-    const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
-    let s = String(name || '')
-      .replace(INVALID_SHEET_CHARS_RE, ' ')
-      .trim()
-    if (s.length === 0) s = fallback
-    if (s.length > 31) s = s.slice(0, 31)
-    return s
-  }
-
-  function normalizeCellValue(v) {
-    if (v === undefined || v === null) return ''
-    if (v instanceof Date && !Number.isNaN(v.getTime())) return v
-    if (typeof v === 'object') {
-      try {
-        return JSON.stringify(v)
-      } catch {
-        return String(v)
-      }
-    }
-    return v
-  }
-
-  // Try to parse common API date strings like "Apr 1, 2025, 12:00:00 AM" or ISO.
-  function parseApiDate(dateStr) {
+  function parseDDMMYYYY(dateStr) {
     if (!dateStr) return null
-    // If it's already a Date
-    if (dateStr instanceof Date) return dateStr
-    // Try native parsing first
-    const maybe = new Date(dateStr)
-    if (!Number.isNaN(maybe.getTime())) return maybe
-    // Fallback: try removing commas and AM/PM then parse
-    try {
-      const cleaned = String(dateStr)
-        .replace(/,\s*/g, ' ')
-        .replace(/(AM|PM)$/i, '')
-      const p = new Date(cleaned)
-      if (!Number.isNaN(p.getTime())) return p
-    } catch (e) {
-      //a
-    }
-    return null
+    const [day, month, year] = dateStr.split('-')
+    return new Date(`${year}-${month}-${day}`)
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
     return backendCols.map((col) => {
       const isTextCol = col.type === 'string'
       const isNumberCol = col.type === 'number'
+      // const isDateCol = col.type === 'date' // unused but available
       return {
         ...col,
         title: col.title || col.field,
@@ -101,59 +71,24 @@ export default function ConsumptionNormsHistorianBasis() {
     })
   }, [])
 
-  // --- Main: single API call that returns all grids ---
-  const fetchAllGridsSingleCall = useCallback(async () => {
-    setLoading(true)
-    try {
-      // Fetch StartDate / EndDate ONCE from config (required by backend)
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
-      const StartDate = configData?.data?.find(
-        (d) => d.Name === 'StartDate',
-      )?.AttributeValue
-      const EndDate = configData?.data?.find(
-        (d) => d.Name === 'EndDate',
-      )?.AttributeValue
-
-      if (!StartDate || !EndDate) {
-        console.warn(
-          'StartDate / EndDate missing from configuration. Aborting single-call fetch.',
+  // Fetch columns + rows for one grid type. Returns { rows, columns }
+  const fetchDataForGrid = useCallback(
+    async (reportType, StartDate, EndDate) => {
+      try {
+        const apiResponse = await DataService.getProductionVolDataBasisPe(
+          keycloak,
+          reportType,
+          StartDate,
+          EndDate,
         )
-        setGridNames([])
-        setDataMap({})
-        return
-      }
 
-      // SINGLE API CALL: pass TYPE LIST1 and Start/End dates as you requested
-      const apiResp = await DataService.getProductionVolDataBasisPe(
-        keycloak,
-        'TYPE LIST3',
-        StartDate,
-        EndDate,
-      )
+        if (apiResponse?.code !== 200) {
+          return { rows: [], columns: [] }
+        }
 
-      if (!apiResp || apiResp.code !== 200) {
-        setGridNames([])
-        setDataMap({})
-        return
-      }
-
-      // apiResp.data is expected to be an array of grids as in your sample
-      const grids = Array.isArray(apiResp.data)
-        ? apiResp.data
-        : apiResp.data?.data || []
-
-      const nextDataMap = {}
-      const order = []
-
-      grids.forEach((g, idx) => {
-        const gridName = g.gridName || g.TYPE || `Sheet${idx + 1}`
-        order.push(gridName)
-
-        const backendCols = (g.data && g.data.columns) || []
+        const backendCols = apiResponse.data.columns || []
         const enrichedCols = enrichColumns(backendCols)
 
-        // Identify date and number fields so we can coerce values
         const dateFields = enrichedCols
           .filter((c) => c.type === 'date')
           .map((c) => c.field)
@@ -161,91 +96,183 @@ export default function ConsumptionNormsHistorianBasis() {
           .filter((c) => c.type === 'number')
           .map((c) => c.field)
 
-        const rows = (g.data && g.data.data ? g.data.data : []).map(
-          (item, ix) => {
-            const parsed = { ...item }
-            dateFields.forEach((f) => {
-              parsed[f] = item?.[f] ? parseApiDate(item[f]) : null
-            })
-            numberFields.forEach((f) => {
-              const raw = item?.[f]
-              parsed[f] =
-                raw === undefined || raw === null || raw === ''
-                  ? null
-                  : Number(raw)
-            })
-            return { ...parsed, id: ix, isEditable: false }
-          },
-        )
+        const rowsWithId = (apiResponse.data.data || []).map((item, index) => {
+          const parsedItem = { ...item }
+          dateFields.forEach((f) => {
+            parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
+          })
+          numberFields.forEach((f) => {
+            parsedItem[f] =
+              item?.[f] !== undefined && item?.[f] !== null
+                ? Number(item[f])
+                : null
+          })
+          return { ...parsedItem, id: index, isEditable: false }
+        })
 
-        nextDataMap[gridName] = { rows, columns: enrichedCols }
+        return { rows: rowsWithId, columns: enrichedCols }
+      } catch (err) {
+        console.error(`Error fetching ${reportType}:`, err)
+        return { rows: [], columns: [] }
+      }
+    },
+    [keycloak, enrichColumns],
+  )
+
+  // Schedule and run a single fetch (keeps loading state correct)
+  const scheduleAndRunFetch = useCallback(
+    (reportType, delayMs) => {
+      const id = setTimeout(async () => {
+        activeRequestsRef.current += 1
+        if (isMountedRef.current) setLoading(true)
+
+        try {
+          // get config before fetching grid (so we have StartDate/EndDate)
+          const configData =
+            await DataService.getConfigurationExecutionDetails(keycloak)
+          if (configData?.code !== 200) return
+
+          const StartDate = configData.data.find(
+            (d) => d.Name === 'StartDate',
+          )?.AttributeValue
+          const EndDate = configData.data.find(
+            (d) => d.Name === 'EndDate',
+          )?.AttributeValue
+          if (!StartDate || !EndDate) return
+
+          const { rows, columns } = await fetchDataForGrid(
+            reportType,
+            StartDate,
+            EndDate,
+          )
+
+          if (!isMountedRef.current) return
+          setDataMap((prev) => ({ ...prev, [reportType]: { rows, columns } }))
+        } catch (err) {
+          console.error(`Scheduled fetch failed for ${reportType}:`, err)
+        } finally {
+          activeRequestsRef.current -= 1
+          if (activeRequestsRef.current <= 0 && isMountedRef.current) {
+            activeRequestsRef.current = 0
+            setLoading(false)
+          }
+        }
+      }, delayMs)
+
+      timeoutIdsRef.current.push(id)
+    },
+    [fetchDataForGrid, keycloak],
+  )
+
+  // Main: fetch TYPE_LIST then schedule fetching each grid in order
+  const fetchAllGrids = useCallback(async () => {
+    // clear previous timers
+    timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+    timeoutIdsRef.current = []
+
+    try {
+      setLoading(true)
+      const configData =
+        await DataService.getConfigurationExecutionDetails(keycloak)
+      if (configData?.code !== 200) {
+        setLoading(false)
+        return
+      }
+      const StartDate = configData.data.find(
+        (d) => d.Name === 'StartDate',
+      )?.AttributeValue
+      const EndDate = configData.data.find(
+        (d) => d.Name === 'EndDate',
+      )?.AttributeValue
+      if (!StartDate || !EndDate) {
+        setGridNames([])
+        setDataMap({})
+        setLoading(false)
+        return
+      }
+
+      // request TYPE_LIST
+      const typeListResult = await DataService.getProductionVolDataBasisPe(
+        keycloak,
+        'TYPE LIST3',
+        StartDate,
+        EndDate,
+      )
+
+      let types = []
+      if (typeListResult?.code == 200) {
+        types = (typeListResult?.data?.data ?? []).map((item) => item.TYPE)
+      } else {
+        return
+      }
+
+      const normalized = [...new Set(types)] // unique, preserve order as returned
+      setGridNames(normalized)
+
+      // schedule fetch for each grid with delay to throttle
+      normalized.forEach((type, idx) => {
+        const delay = idx * CALL_DELAY_MS
+        scheduleAndRunFetch(type, delay)
       })
-
-      if (!isMountedRef.current) return
-      setGridNames(order)
-      setDataMap(nextDataMap)
     } catch (err) {
-      console.error('Single-call fetch failed:', err)
-    } finally {
-      if (isMountedRef.current) setLoading(false)
+      console.error('Error fetching TYPE_LIST or config:', err)
+      setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [keycloak, scheduleAndRunFetch])
 
   useEffect(() => {
-    // re-fetch when primary inputs change
-    fetchAllGridsSingleCall()
-  }, [fetchAllGridsSingleCall, plantID, oldYear, yearChanged])
+    fetchAllGrids()
+    // cleanup timers on dependency change
+    return () => {
+      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+      timeoutIdsRef.current = []
+    }
+  }, [fetchAllGrids, plantID, oldYear, yearChanged])
 
-  // --- Export -- keep previous workbook builder (header row + data rows) ---
+  // Export: gather sheets from each ExcelExport instance and combine into one workbook
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})
+    if (!keys.length) return
+
+    // find first available ref
     const firstKey = keys.find((k) => exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
-    if (!baseRef || typeof baseRef.save !== 'function') return
+    const baseOptions = baseRef?.workbookOptions?.()
+    if (!baseOptions) return
 
+    // collect first sheet from each ref (preserves order of gridNames when possible)
     const sheets = gridNames
-      .map((gridName, idx) => {
-        const d = dataMap[gridName] || { rows: [], columns: [] }
-        const cols = d.columns || []
-        const rows = d.rows || []
-        if (!cols.length && !rows.length) return null
-
-        const sheetColumns = cols.map((c) => ({
-          autoWidth: true,
-          title: c.title || c.field || '',
-        }))
-        const headerRow = {
-          cells: cols.map((c) => ({ value: c.title || c.field || '' })),
-        }
-        const dataRows = rows.map((r) => ({
-          cells: cols.map((c) => ({ value: normalizeCellValue(r?.[c.field]) })),
-        }))
-        const sheetRows = [headerRow, ...dataRows]
-
-        return {
-          title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
-          columns: sheetColumns,
-          rows: sheetRows,
+      .map((name) => {
+        const ref = exportRefs.current[name]
+        try {
+          const opts = ref?.workbookOptions?.()
+          return opts?.sheets?.[0] ? { ...opts.sheets[0] } : null
+        } catch {
+          return null
         }
       })
       .filter(Boolean)
 
     if (!sheets.length) return
-    try {
-      baseRef.save({ sheets })
-    } catch (err) {
-      console.error('Export save failed:', err)
-    }
-  }, [gridNames, dataMap])
+
+    // set readable titles (use the original grid name)
+    sheets.forEach((s, idx) => {
+      s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
+    })
+
+    baseOptions.sheets = sheets
+    baseRef.save(baseOptions)
+  }, [gridNames])
 
   const currentDateTime = new Date()
     .toISOString()
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Consumption Norms Data Basis ${currentDateTime}.xlsx`
+  const fileName = `Consumption Norm Data Basis ${currentDateTime}.xlsx`
 
+  // helper to render Title exactly as API sent (or tweak)
   const renderTitle = (t) => t
 
   return (
@@ -257,9 +284,11 @@ export default function ConsumptionNormsHistorianBasis() {
         <CircularProgress color='inherit' />
       </Backdrop>
 
+      {/* Hidden ExcelExport instances for each grid */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
+          // function ref to capture the export instance
           const setRef = (ref) => {
             if (ref) exportRefs.current[name] = ref
           }
@@ -293,6 +322,10 @@ export default function ConsumptionNormsHistorianBasis() {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
+        {/* {gridNames.length === 0 && !loading && (
+          <Typography>No grids available for the selected period.</Typography>
+        )} */}
+
         {gridNames.map((name) => {
           const d = dataMap[name] || { rows: [], columns: [] }
           return (
@@ -323,3 +356,5 @@ export default function ConsumptionNormsHistorianBasis() {
     </div>
   )
 }
+
+export default ConsumptionNormsHistorianBasis
