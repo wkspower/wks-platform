@@ -11,9 +11,12 @@ import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.PersistenceContext;
+
 import org.hibernate.Session;
 
 import java.sql.*;
@@ -53,41 +56,15 @@ public class BasisReportServiceImpl implements BasisReportService {
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
 	
+	@Autowired
+	private ModeWiseNormsService modeWiseNormsService;
+	
 	private DataSource dataSource;
 	public BasisReportServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
-	@Override
-	public AOPMessageVM getNormBasisReportForPE(String plantId, String aopYear, String type, String periodFrom,
-			String periodTo) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		try {
-			Map<String, Object> typeMap=getNormBasis( plantId,  aopYear,  type,  periodFrom,
-					 periodTo);
-			
-			List<String> types = extractTypes(typeMap);
-			
-			List<Map<String, Object>> combined = new ArrayList<>();
-			for (String type1 : types) {
-			    Map<String, Object> dataForType = getNormBasis(plantId, aopYear, type1, periodFrom, periodTo);
-			    Map<String,Object> list = new LinkedHashMap<>();
-			   
-			    list.put("gridName", type1);
-			    list.put("data", dataForType);
-			    combined.add(list);
-			}
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("SP Executed successfully");
-			aopMessageVM.setData(combined);
-			return aopMessageVM;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return aopMessageVM;
-		}
-	}
-	
+		
 	@SuppressWarnings("unchecked")
 	public List<String> extractTypes(Map<String, Object> typeMap) {
 	    List<String> types = new ArrayList<>();
@@ -108,41 +85,98 @@ public class BasisReportServiceImpl implements BasisReportService {
 	}
 
 	
-	public Map<String, Object> getNormBasis(String plantId, String aopYear, String type, String periodFrom,
-			String periodTo) {
-		
-		try {
+	@Override
+	public AOPMessageVM getNormhistorian(
+	        String plantId, String aopYear, String periodFrom, String periodTo,String type) {
 
-			List<Object[]> obj = getReportDataForPE(plantId, aopYear, type, periodFrom, periodTo);
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	 // 1. Fetching SP Name (as in your original getColumnNames)
+	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	            .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	    String storedProcedure=null;
+	    if(type.equalsIgnoreCase("NormsHistorian")) {
+	    	storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
+	    }else if(type.equalsIgnoreCase("ProductionTarget")) {
+	    	storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
+	    }else if(type.equalsIgnoreCase("OverallConsumption")) {
+	    	storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
+	    }
+	    try {
+	        // 1. Fetch ALL column names (List of Lists)
+	        List<List<String>> allColNames = getAllColumnNames(plantId, aopYear, periodFrom, periodTo,type,storedProcedure);
 
-			// Get column names
+	        // 2. Fetch ALL grid data (List of Lists of Object[]) - Assuming this is the fixed version
+	        List<List<Object[]>> allGridData = getReportDataForPEE(plantId, aopYear, periodFrom, periodTo,type,storedProcedure);
 
-			List<String> columnNames = getColumnNames(plantId, aopYear, type, periodFrom, periodTo);
+	        // Ensure the number of column lists matches the number of data grids
+	        if (allColNames.size() != allGridData.size()) {
+	            throw new RuntimeException("Mismatch: Stored procedure returned " + allColNames.size()
+	                    + " column lists but " + allGridData.size() + " data grids.");
+	        }
 
-			List<Map<String, Object>> resultList = new ArrayList<>();
+	        // 3. Build combined list for frontend (List of Maps)
+	        List<Map<String, Object>> combined = new ArrayList<>();
+	        
+	        // Loop through each grid's data and its corresponding column names
+	        for (int i = 0; i < allGridData.size(); i++) {
+	            List<String> colNames = allColNames.get(i);
+	            List<Object[]> rawRows = allGridData.get(i);
+	            
+	            // Find the GridType and its value (Assuming the last column is GRID_TYPE based on your SP)
+	            String gridName = "UNKNOWN_GRID_" + (i + 1); // Default name
+	            
+	            // If the column list is not empty, get the column label and value for GRID_TYPE
+	            if (!colNames.isEmpty()) {
+	                int lastColIdx = colNames.size() - 1;
+	                // Check if the last column is actually GRID_TYPE (as in your SP)
+	                if (colNames.get(lastColIdx).equalsIgnoreCase("GRID_TYPE") && !rawRows.isEmpty()) {
+	                    // Use the value from the first row as the grid name
+	                    Object gridTypeVal = rawRows.get(0)[lastColIdx];
+	                    if (gridTypeVal != null) {
+	                        gridName = gridTypeVal.toString();
+	                    }
+	                } else {
+	                    // Fallback to the column name of the first column if no GRID_TYPE is found
+	                    gridName = colNames.get(0); 
+	                }
+	            }
+	            
+	            // Convert Object[] rows to List<Map<String, Object>>
+	            List<Map<String, Object>> gridDataMap = new ArrayList<>();
+	            for (Object[] row : rawRows) {
+	                Map<String, Object> rowMap = new LinkedHashMap<>();
+	                for (int j = 0; j < colNames.size(); j++) {
+	                    rowMap.put(colNames.get(j), row[j]);
+	                }
+	                gridDataMap.add(rowMap);
+	            }
 
-			for (Object[] row : obj) {
-				Map<String, Object> rowMap = new LinkedHashMap<>();
-				for (int i = 0; i < columnNames.size(); i++) {
-					rowMap.put(columnNames.get(i), row[i]);
-				}
-				resultList.add(rowMap);
-			}
+	            // Assemble the final map structure for the grid
+	            Map<String, Object> part = new LinkedHashMap<>();
+	            part.put("gridName", gridName);
+	            part.put("data", gridDataMap);
+	            combined.add(part);
+	        }
 
-			Map<String, Object> data = new HashMap<>();
-			data.put("data", resultList);
-			data.put("columns", getColumnMetadata(plantId, aopYear, type, periodFrom, periodTo));
-			return data;
-			
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(combined); // <-- Set the combined list here
+	        return aopMessageVM;
 
-		}catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
-
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        aopMessageVM.setCode(500); // Set an error code
+	        aopMessageVM.setMessage("Error processing report data: " + e.getMessage());
+	        aopMessageVM.setData(null);
+	        return aopMessageVM;
+	    }
 	}
 
-
-	public List<Object[]> getReportDataForPE(String plantId, String aopYear, String reportType, String PeriodFrom,
+	public List<Object[]> getReportDataForPE(String plantId, String aopYear, String PeriodFrom,
 			String PeriodTo) {
 
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
@@ -152,26 +186,74 @@ public class BasisReportServiceImpl implements BasisReportService {
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-		UUID siteId = site.getId();
-		UUID verticalId = vertical.getId();
-		String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
+		
+		String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport_TEST";
 		String sql = "EXEC " + storedProcedure
-				+ " @plantId = :plantId, @aopYear = :aopYear, @Type = :reportType, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo, @verticalId = :verticalId, @siteId = :siteId";
+				+ " @plantId = :plantId, @aopYear = :aopYear, @PeriodFrom = :PeriodFrom, @PeriodTo = :PeriodTo";
 
 		Query query = entityManager.createNativeQuery(sql);
 
 		query.setParameter("plantId", plantId);
 		query.setParameter("aopYear", aopYear);
-		query.setParameter("reportType", reportType);
 		query.setParameter("PeriodFrom", PeriodFrom);
 		query.setParameter("PeriodTo", PeriodTo);
-		query.setParameter("siteId", siteId);
-		query.setParameter("verticalId", verticalId);
+		
 
 		return query.getResultList();
 	}
+	
+	@Transactional(readOnly = true) 
+	public List<List<Object[]>> getReportDataForPEE(String plantId, String aopYear, String periodFrom, String periodTo,String type,String storedProcedure) {
+   
+	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+	   
+	    Session session = entityManager.unwrap(Session.class);
+  
+	    return session.doReturningWork(connection -> {
+	        
+	        List<List<Object[]>> allGrids = new ArrayList<>();
 
-	public List<String> getColumnNames(String plantId, String aopYear, String reportType, String PeriodFrom,
+	        try (java.sql.CallableStatement callableStatement = connection.prepareCall(storedProcedureCall)) {
+	            
+	            callableStatement.setString(1, plantId);
+	            callableStatement.setString(2, aopYear);
+	            callableStatement.setString(3, periodFrom);
+	            callableStatement.setString(4, periodTo);
+
+	            boolean results = callableStatement.execute();
+
+	            while (results || callableStatement.getUpdateCount() != -1) {
+	                if (results) {
+	                    try (java.sql.ResultSet rs = callableStatement.getResultSet()) {
+	                        java.sql.ResultSetMetaData metaData = rs.getMetaData();
+	                        int columnCount = metaData.getColumnCount();
+
+	                        List<Object[]> currentGrid = new ArrayList<>();
+	                        while (rs.next()) {
+	                            Object[] row = new Object[columnCount];
+	                            for (int i = 1; i <= columnCount; i++) {
+	                                
+	                                row[i - 1] = rs.getObject(i);
+	                            }
+	                            currentGrid.add(row);
+	                        }
+	                        allGrids.add(currentGrid);
+	                    }
+	                }
+
+	                
+	                results = callableStatement.getMoreResults();
+	            }
+
+	            return allGrids;
+
+	        } catch (java.sql.SQLException e) {
+	            // Include the dynamic SP name in the error message for better debugging
+	            throw new RuntimeException("Error executing stored procedure: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
+	        }
+	    });
+	}
+	public List<String> getColumnNames(String plantId, String aopYear, String PeriodFrom,
 			String PeriodTo) {
 		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
 			List<String> columnNames = new ArrayList<>();
@@ -182,19 +264,16 @@ public class BasisReportServiceImpl implements BasisReportService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-			UUID siteId = site.getId();
-			UUID verticalId = vertical.getId();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
+			
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport_TEST";
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = ?, @aopYear = ?, @Type = ?, @PeriodFrom = ?, @PeriodTo = ?, @siteId = ?, @verticalId = ?";
+					+ " @plantId = ?, @aopYear = ?, @PeriodFrom = ?, @PeriodTo = ?";
 			try (PreparedStatement ps = connection.prepareStatement(sql)) {
 				ps.setString(1, plantId);
 				ps.setString(2, aopYear);
-				ps.setString(3, reportType);
-				ps.setString(4, PeriodFrom);
-				ps.setString(5, PeriodTo);
-				ps.setString(6, siteId.toString());
-				ps.setString(7, verticalId.toString());
+				ps.setString(3, PeriodFrom);
+				ps.setString(4, PeriodTo);
+				
 
 				try (ResultSet rs = ps.executeQuery()) {
 					ResultSetMetaData rsMetaData = rs.getMetaData();
@@ -205,6 +284,39 @@ public class BasisReportServiceImpl implements BasisReportService {
 			}
 			return columnNames;
 		});
+	}
+	
+	// Assuming this is added to your service/utility class
+	public List<List<String>> getAllColumnNames(String plantId, String aopYear, String PeriodFrom, String PeriodTo,String type,String storedProcedure) {
+	   
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<List<String>> allColumnNames = new ArrayList<>();
+	        String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+
+	        try (java.sql.CallableStatement callableStatement = connection.prepareCall(storedProcedureCall)) {
+	            callableStatement.setString(1, plantId);
+	            callableStatement.setString(2, aopYear);
+	            callableStatement.setString(3, PeriodFrom);
+	            callableStatement.setString(4, PeriodTo);
+
+	            boolean hasResult = callableStatement.execute();
+
+	            while (hasResult || callableStatement.getUpdateCount() != -1) {
+	                if (hasResult) {
+	                    try (java.sql.ResultSet rs = callableStatement.getResultSet()) {
+	                        java.sql.ResultSetMetaData rsMetaData = rs.getMetaData();
+	                        List<String> currentColumnNames = new ArrayList<>();
+	                        for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                            currentColumnNames.add(rsMetaData.getColumnLabel(i));
+	                        }
+	                        allColumnNames.add(currentColumnNames);
+	                    }
+	                }
+	                hasResult = callableStatement.getMoreResults();
+	            }
+	            return allColumnNames;
+	        }
+	    });
 	}
 
 	public List<Map<String, Object>> getColumnMetadata(String plantId, String aopYear, String reportType,
@@ -389,7 +501,6 @@ public class BasisReportServiceImpl implements BasisReportService {
 			e.printStackTrace();
 			return aopMessageVM;
 		}
-
 	}
 	
 	public List<Object[]> getBestAchievedData(String plantId, String aopYear, String reportType) {
@@ -583,9 +694,41 @@ public class BasisReportServiceImpl implements BasisReportService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
-
-
 	
+	public AOPMessageVM getBestAchievedCrackerData(String plantId, String aopYear, String reportType) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
 
+			List<Object[]> obj = getBestAchievedData(plantId, aopYear, reportType);
+
+			List<String> columnNames = getBestAchievedColumnNames(plantId, aopYear, reportType);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : obj) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+				if(columnNames.get(i)!=null && columnNames.get(i).toString().equalsIgnoreCase("Id")) {
+										
+				}
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getBestAchievedColumnMetadata(plantId, aopYear, reportType));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return aopMessageVM;
+		}
+	}
+	
 }
