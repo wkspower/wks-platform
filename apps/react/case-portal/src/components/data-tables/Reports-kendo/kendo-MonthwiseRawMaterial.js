@@ -572,35 +572,34 @@ const MonthwiseRawMaterial = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {lowerVertName != 'pe' ||
-        (lowerVertName != 'pp' && (
-          <KendoDataTablesReports
-            rows={row2}
-            columns={columns}
-            setRows={setRow2}
-            loading={loading}
-            handleCalculate={handleCalculate}
-            title='Monthwise Consumption (T-18)'
-            modifiedCells={modifiedCells}
-            setModifiedCells={setModifiedCells}
-            permissions={{
-              showCalculate: false,
-              allAction: true,
-              showTitle: true,
-              saveBtn: false,
-              textAlignment: 'center',
-              remarksEditable: true,
-            }}
-            remarkDialogOpen={remarkDialogOpen}
-            setRemarkDialogOpen={setRemarkDialogOpen}
-            currentRemark={currentRemark}
-            setCurrentRemark={setCurrentRemark}
-            currentRowId={currentRowId}
-            setCurrentRowId={setCurrentRowId}
-            saveChanges={saveChanges}
-            handleRemarkCellClick={handleRemarkCellClick}
-          />
-        ))}
+      {lowerVertName !== 'pe' && lowerVertName !== 'pp' && (
+        <KendoDataTablesReports
+          rows={row2}
+          columns={columns}
+          setRows={setRow2}
+          loading={loading}
+          handleCalculate={handleCalculate}
+          title='Monthwise Consumption (T-18)'
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={{
+            showCalculate: false,
+            allAction: true,
+            showTitle: true,
+            saveBtn: false,
+            textAlignment: 'center',
+            remarksEditable: true,
+          }}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={setCurrentRowId}
+          saveChanges={saveChanges}
+          handleRemarkCellClick={handleRemarkCellClick}
+        />
+      )}
 
       {Object.entries(normRows).map(([normName, rows]) => (
         <div key={normName}>

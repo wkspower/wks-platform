@@ -115,6 +115,148 @@ const NormalOpNormsScreenCracker = () => {
     [headerMap],
   )
 
+  const CrackerColums = [
+    {
+      field: 'isChecked',
+      type: 'switch',
+      widthT: 30,
+      filter: false,
+    },
+    {
+      field: 'sapMaterialCode',
+      title: 'SAP MAT Code',
+      widthT: 120,
+      editable: false,
+    },
+    {
+      field: 'materialDisplayName',
+      title: 'Particulars',
+      widthT: 120,
+    },
+    {
+      field: 'uom',
+      title: 'UOM',
+      widthT: 60,
+      editable: false,
+    },
+    {
+      field: 'april',
+      title: 4,
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'may',
+      title: 5,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'june',
+      title: 6,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'july',
+      title: 7,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+
+    {
+      field: 'august',
+      title: 8,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'september',
+      title: 9,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'october',
+      title: 10,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'november',
+      title: 11,
+      editable: true,
+
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'december',
+      title: 12,
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'january',
+      title: 1,
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'february',
+      title: 2,
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+    {
+      field: 'march',
+      title: 3,
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: '{0:#.###}',
+      type: 'number',
+    },
+  ]
+
   const colDefsIndividual = useMemo(
     () => [
       { field: 'isChecked', type: 'switch', widthT: 30, filter: false },
@@ -138,6 +280,21 @@ const NormalOpNormsScreenCracker = () => {
     [],
   )
 
+  const monthIndexMap = {
+    april: 4,
+    may: 5,
+    june: 6,
+    july: 7,
+    august: 8,
+    september: 9,
+    october: 10,
+    november: 11,
+    december: 12,
+    january: 1,
+    february: 2,
+    march: 3,
+  }
+
   const colDefsFinalNorms = useMemo(
     () => [
       {
@@ -155,7 +312,37 @@ const NormalOpNormsScreenCracker = () => {
       { field: 'uom', title: 'UOM', widthT: 60, editable: false },
       ...MONTHS.map((m, i) => ({
         field: m,
-        title: headerMap[i + 1] || m,
+        title: headerMap[monthIndexMap[m]] || m,
+        editable: true,
+        width: 120,
+        align: 'right',
+        type: 'number',
+        format: '{0:#.###}',
+      })),
+      { field: 'isEditable', title: 'isEditable', hidden: true },
+      { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
+    ],
+    [headerMap],
+  )
+
+  const colDefsFinalNorms1 = useMemo(
+    () => [
+      {
+        field: 'sapMaterialCode',
+        title: 'SAP MAT Code',
+        widthT: 120,
+        editable: false,
+      },
+      {
+        field: 'materialDisplayName',
+        title: 'Particulars',
+        widthT: 130,
+        editable: false,
+      },
+      { field: 'uom', title: 'UOM', widthT: 60, editable: false },
+      ...MONTHS.map((m, i) => ({
+        field: m,
+        title: headerMap[monthIndexMap[m]] || m,
         editable: true,
         width: 120,
         align: 'right',
@@ -504,22 +691,34 @@ const NormalOpNormsScreenCracker = () => {
     // Final tab -> final norms
     if (selectedTab === 2) return saveChangesCrackerFinalNorms()
 
-    // Mode tab + Monthly -> top is monthly -> save monthly entries only
-    if (selectedTab === 1 && gradeDisplayName === 'Monthly') {
-      const bestModified = Object.entries(modifiedCells)
-        .filter(([key]) => key.startsWith('best-'))
-        .map(([_, val]) => val)
-      if (!bestModified || bestModified.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-      return saveRows(bestModified, false)
+    // Prepare modified rows for save
+    let allModified = Object.values(modifiedCells)
+
+    if (!allModified || allModified.length === 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+      return
     }
 
-    // Mode tab + non-Monthly -> top is main -> save all modifiedCells
-    const data = Object.values(modifiedCells)
-    return saveRows(data, false)
+    // Enforce single checked per materialName across the 2 grids
+    const materialGroups = {} // key = materialName, value = array of rows
+    allModified.forEach((row) => {
+      if (!materialGroups[row.materialName])
+        materialGroups[row.materialName] = []
+      materialGroups[row.materialName].push(row)
+    })
+
+    const updatedRows = []
+    Object.values(materialGroups).forEach((rows) => {
+      // Find the row that is checked
+      const checkedRow = rows.find((r) => r.isChecked)
+      rows.forEach((r) => {
+        if (r !== checkedRow) r.isChecked = false
+        updatedRows.push(r)
+      })
+    })
+
+    return saveRows(updatedRows, false)
   }, [
     selectedTab,
     gradeDisplayName,
@@ -576,6 +775,7 @@ const NormalOpNormsScreenCracker = () => {
         severity: success ? 'success' : 'error',
       })
       if (success) await fetchModeData(gradeId)
+      if (success) await fetchFinalNorms()
       return res
     } catch (err) {
       setSnackbarOpen(true)
@@ -598,11 +798,21 @@ const NormalOpNormsScreenCracker = () => {
     (gridName, id, materialName, field, value, dataItem) => {
       const uniqueItemId = `${gridName}-${id}`
       const uncheckedRows = []
-      const updateGridRows = (setRowsFunc, currentGridName) => {
+
+      // Only update these two grids
+      const targetGrids = [
+        { setRowsFunc: setRowsExpression, name: 'expression' },
+        { setRowsFunc: setRowsBestAchivedIndividual, name: 'best' },
+      ]
+
+      targetGrids.forEach(({ setRowsFunc, name: currentGridName }) => {
         setRowsFunc((prev) =>
           (prev || []).map((row) => {
-            if (row.id === id && gridName === currentGridName)
+            // Update the row that was just clicked
+            if (row.id === id && gridName === currentGridName) {
               return { ...row, [field]: value }
+            }
+            // Uncheck any other row in the same material group in these grids
             if (
               row.materialName === materialName &&
               !(row.id === id && gridName === currentGridName)
@@ -613,28 +823,32 @@ const NormalOpNormsScreenCracker = () => {
             return row
           }),
         )
-      }
-      updateGridRows(setRows, 'main')
-      updateGridRows(setRowsExpression, 'expression')
-      updateGridRows(setRowsBestAchivedIndividual, 'best')
+      })
 
       setModifiedCells((prev) => {
-        const updated = {
-          ...prev,
-          [uniqueItemId]: {
-            ...(prev[uniqueItemId] || {}),
-            ...dataItem,
-            [field]: value,
-          },
+        const updated = { ...prev }
+
+        // Add/Update the checked row
+        updated[uniqueItemId] = {
+          ...(prev[uniqueItemId] || {}),
+          ...dataItem,
+          [field]: value,
         }
+
+        // Add/Update all unchecked rows
         uncheckedRows.forEach((row) => {
           const rowUniqueId = `${row.gridName}-${row.id}`
-          updated[rowUniqueId] = {
-            ...(prev[rowUniqueId] || {}),
-            ...row,
-            [field]: false,
+          if (!updated[rowUniqueId]) {
+            // If row is not in modifiedCells, add it
+            updated[rowUniqueId] = { ...row, [field]: false }
+          } else {
+            // If row is already there, just update the field
+            updated[rowUniqueId] = { ...updated[rowUniqueId], [field]: false }
           }
         })
+
+        console.log('updated', updated)
+
         return updated
       })
     },
@@ -697,7 +911,7 @@ const NormalOpNormsScreenCracker = () => {
     padding: '9px',
     minHeight: '12px',
   }
-  const tabLabels = ['Constants', 'Mode wise selection', 'Final monthly norms']
+  const tabLabels = ['Constants', 'Norms Selection', 'Final monthly norms']
 
   // UI render
   return (
@@ -797,7 +1011,9 @@ const NormalOpNormsScreenCracker = () => {
                 modifiedCells={modifiedCells}
                 setModifiedCells={setModifiedCells}
                 title='Normal Operations Norms'
-                columns={colDefs}
+                columns={
+                  gradeDisplayName === 'Monthly' ? colDefsFinalNorms1 : colDefs
+                }
                 setRows={setRowsExpression}
                 rows={rowsExpression}
                 grades={grades}

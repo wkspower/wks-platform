@@ -19,6 +19,8 @@ const KendoDataGrid = ({
   onRowChange,
   permissions,
   groupBy = null,
+  allRedCell = [],
+  showThreeColors = false,
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
@@ -80,6 +82,109 @@ const KendoDataGrid = ({
           {props.children}
         </Tooltip>
       </th>
+    )
+  }
+
+  const RedHighlightCell = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+    } = props
+
+    const rowId = dataItem.id
+    const value = dataItem[field]
+
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    const month = field
+    const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
+
+    const isRedFromAllRedCell = allRedCell?.some(
+      (cell) =>
+        cell.month === month &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    const shouldHighlight = isEdited || isRedFromAllRedCell
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: shouldHighlight ? 'orange' : undefined,
+          fontWeight: shouldHighlight ? 'bold' : undefined,
+        }}
+      >
+        {children}
+      </td>
+    )
+  }
+
+  const RedHighlightCell2 = (props) => {
+    console.log(1)
+
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+    } = props
+
+    const rowId = dataItem.id
+    const value = dataItem[field]
+
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    console.log('dataItem', dataItem)
+
+    const month = field
+    const normId =
+      dataItem.materialFKId ||
+      dataItem.NormParameter_FK_Id ||
+      dataItem.Material_FK_Id
+
+    // console.log('normId', normId)
+    // console.log('allRedCell', allRedCell)
+
+    const matchedCell = allRedCell?.find(
+      (cell) =>
+        cell.month?.toLowerCase() === month?.toLowerCase() &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    let highlightColor
+    if (isEdited) {
+      highlightColor = 'orange'
+    } else if (matchedCell?.mode === 'Propane(1Z)') {
+      highlightColor = 'red'
+    } else if (matchedCell?.mode === 'Propane(2Z)') {
+      highlightColor = 'green'
+    }
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: highlightColor,
+          fontWeight: highlightColor ? 'bold' : undefined,
+        }}
+      >
+        {children}
+      </td>
     )
   }
 
@@ -203,8 +308,14 @@ const KendoDataGrid = ({
                 field={field}
                 title={title}
                 cell={cell}
+                hidden={hidden}
                 cells={{
-                  data: toolTipRenderer,
+                  data: (props) =>
+                    showThreeColors ? (
+                      <RedHighlightCell2 {...props} allRedCell={allRedCell} />
+                    ) : (
+                      toolTipRenderer(props)
+                    ),
                   headerCell: SimpleHeaderWithTooltip,
                 }}
                 format={format}

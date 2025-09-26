@@ -359,6 +359,7 @@ const ConsumptionNorms = () => {
 
   const productionColumns = getEnhancedColDefs({
     headerMap,
+    lowerVertName, // pass it here
   })
 
   const handleUnitChange = (unit) => {

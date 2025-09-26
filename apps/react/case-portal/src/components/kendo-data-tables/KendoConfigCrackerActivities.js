@@ -187,11 +187,7 @@ const DecokingConfig = () => {
   }, [plantID, oldYear, yearChanged, keycloak, fetchData])
 
   function validateAllDateOverlaps(rows) {
-    const pairs = [
-      ['ibrStartDate', 'ibrEndDate', 'IBR'],
-      ['taStartDate', 'taEndDate', 'TA'],
-      ['shutDownStartDate', 'shutDownEndDate', 'SD'],
-    ]
+    const pairs = [['ibrStartDate', 'ibrEndDate', 'IBR']]
     rows.forEach((row) => {
       row.isError = false
     })

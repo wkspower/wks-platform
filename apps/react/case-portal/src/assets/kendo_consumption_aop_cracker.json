@@ -1,0 +1,97 @@
+[
+  {
+    "field": "sapCode",
+    "title": "SAP MAT Code",
+    "editable": false,
+    "width": 200
+  },
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "editable": false,
+    "width": 200,
+    "hidden": true
+  },
+  {
+    "field": "NormParametersId",
+    "hidden": true
+  },
+
+  {
+    "field": "productName",
+    "title": "Particulars",
+    "editable": false,
+    "widthT": 130
+  },
+  {
+    "field": "UOM",
+    "title": "UOM / MT",
+    "editable": false,
+    "widthT": 60
+  },
+  {
+    "field": "april",
+    "title": "Apr",
+    "headerName": 4
+  },
+  {
+    "field": "may",
+    "title": "May",
+    "headerName": 5
+  },
+  {
+    "field": "june",
+    "title": "Jun",
+    "headerName": 6
+  },
+  {
+    "field": "july",
+    "title": "Jul",
+    "headerName": 7
+  },
+  {
+    "field": "aug",
+    "title": "Aug",
+    "headerName": 8
+  },
+  {
+    "field": "sep",
+    "title": "Sep",
+    "headerName": 9
+  },
+  {
+    "field": "oct",
+    "title": "Oct",
+    "headerName": 10
+  },
+  {
+    "field": "nov",
+    "title": "Nov",
+    "headerName": 11
+  },
+  {
+    "field": "dec",
+    "title": "Dec",
+    "headerName": 12
+  },
+  {
+    "field": "jan",
+    "title": "Jan",
+    "headerName": 1
+  },
+  {
+    "field": "feb",
+    "title": "Feb",
+    "headerName": 2
+  },
+  {
+    "field": "march",
+    "title": "Mar",
+    "headerName": 3
+  },
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true
+  }
+]

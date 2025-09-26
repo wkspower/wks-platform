@@ -10,6 +10,7 @@ import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -25,7 +26,21 @@ const BestAchievedNorms = () => {
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
@@ -60,6 +75,7 @@ const BestAchievedNorms = () => {
         ...(isNumberCol ? { format: '{0:#.###}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
+        hidden: col.field === 'Material_FK_Id',
       }
     })
 
@@ -72,6 +88,8 @@ const BestAchievedNorms = () => {
 
     return cols
   }, [])
+
+  const [allRedCell, setAllRedCell] = useState([])
 
   const fetchDataForGrid = useCallback(
     async (reportType) => {
@@ -158,6 +176,53 @@ const BestAchievedNorms = () => {
         keycloak,
         'TYPE LIST',
       )
+
+      let code1 = NormalOperationNormsApiService.BestAchivedColorCodes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '4F',
+      )
+
+      // code1 = {
+      //   code: 200,
+      //   message: 'Data fetched successfully',
+      //   data: {
+      //     data: [
+      //       {
+      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
+      //         month: 'October',
+      //         mode: 'Propane(2Z)',
+      //       },
+      //     ],
+      //   },
+      // }
+
+      let code2 = NormalOperationNormsApiService.BestAchivedColorCodes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '5F',
+      )
+      let code3 = NormalOperationNormsApiService.BestAchivedColorCodes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '4F+D',
+      )
+
+      const [res1, res2, res3] = await Promise.all([code1, code2, code3])
+
+      const mergedData = [
+        ...(res1?.data?.data || []),
+        ...(res2?.data?.data || []),
+        ...(res3?.data?.data || []),
+      ].map((obj) => ({
+        ...obj,
+        normParameterFKId: (obj.NormParameter_FK_Id || '').toUpperCase(),
+      }))
+
+      setAllRedCell(mergedData)
 
       let types = []
       if (typeListResult?.code == 200) {
@@ -286,7 +351,7 @@ const BestAchievedNorms = () => {
           <Typography>No grids available.</Typography>
         )}
 
-        {gridNames.map((name) => {
+        {gridNames.map((name, idx) => {
           const d = dataMap[name] || { rows: [], columns: [] }
           return (
             <div key={name}>
@@ -305,6 +370,9 @@ const BestAchievedNorms = () => {
                       rows={d.rows}
                       columns={d.columns}
                       permissions={{ isHeight: d?.rows?.length > 15 }}
+                      {...(idx === 0
+                        ? { allRedCell: allRedCell, showThreeColors: true }
+                        : {})}
                     />
                   </Box>
                 </CustomAccordionDetails>
