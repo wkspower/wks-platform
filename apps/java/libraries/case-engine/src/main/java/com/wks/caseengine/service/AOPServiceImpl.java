@@ -282,14 +282,7 @@ public class AOPServiceImpl implements AOPService {
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data fetched successfully");
 		aopMessageVM.setData(result);
-		// }
-
-		// else if(verticalName.equalsIgnoreCase("PE")) {
-		// List<AOPDTO> result= calculateDataForPE(plant.getId().toString(),year);
-		// aopMessageVM.setCode(200);
-		// aopMessageVM.setMessage("Data fetched successfully");
-		// aopMessageVM.setData(result);
-		// }
+		
 		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
 				"production-aop");
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("production-aop");

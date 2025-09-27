@@ -23,7 +23,7 @@ public class BasisReportController {
 	@Autowired
 	private BasisReportService basisReportService;
 	
-	@GetMapping(value="data-set-norms-historian")
+	@GetMapping(value="/data-set-norms-historian")
 	public ResponseEntity<AOPMessageVM> getNormhistorian(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="periodFrom", required=false) String periodFrom,@RequestParam(value="periodTo", required=false) String periodTo,@RequestParam(value="type", required=false) String type){
 		AOPMessageVM response=basisReportService.getNormhistorian(plantId,year,periodFrom,periodTo,type);
 		return ResponseEntity.status(response.getCode()).body(response);
