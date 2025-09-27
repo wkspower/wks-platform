@@ -834,7 +834,7 @@ async function getProductionVolDataBasisPe(
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
 
-  let url = `${Config.CaseEngineUrl}/task/data-set-norms-historian?plantId=${plantId}&year=${year}&type=NormsHistorian`
+  let url = `${Config.CaseEngineUrl}/task/data-set-norms-historian?plantId=${plantId}&year=${year}&type=${reportType}`
 
   if (periodFrom !== undefined) {
     url += `&periodFrom=${periodFrom}`
