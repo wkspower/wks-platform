@@ -6,7 +6,8 @@ public class NormAttributeTransactionReceipeRequestDTO {
 	
 	  private String recId;
 	    private Map<String, String> grades;
-	    
+	    private String saveStatus;
+	    private String errDescription;
 	    
 		public String getRecId() {
 			return recId;
@@ -20,7 +21,20 @@ public class NormAttributeTransactionReceipeRequestDTO {
 		public void setGrades(Map<String, String> grades) {
 			this.grades = grades;
 		}
+		public String getSaveStatus() {
+			return saveStatus;
+		}
+		public void setSaveStatus(String saveStatus) {
+			this.saveStatus = saveStatus;
+		}
+		public String getErrDescription() {
+			return errDescription;
+		}
+		public void setErrDescription(String errDescription) {
+			this.errDescription = errDescription;
+		}
 	    
+		
 	    
 
 	    
