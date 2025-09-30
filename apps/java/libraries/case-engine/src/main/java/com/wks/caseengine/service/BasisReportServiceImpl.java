@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -83,53 +84,58 @@ public class BasisReportServiceImpl implements BasisReportService {
 	    }
 	    return types;
 	}
-
-	
 	@Override
 	public AOPMessageVM getNormhistorian(
-	        String plantId, String aopYear, String periodFrom, String periodTo,String type) {
+	    String plantId, String aopYear, String periodFrom, String periodTo,String type) {
 
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
-	 // 1. Fetching SP Name (as in your original getColumnNames)
+	    
+	    // 1. Fetching SP Name (Unchanged)
 	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
-	            .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 	    Sites site = siteRepository.findById(plant.getSiteFkId())
-	            .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
 	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-	            .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 	    String storedProcedure=null;
 	    if(type.equalsIgnoreCase("NormsHistorian")) {
-	    	storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
+	        storedProcedure = vertical.getName() + "_" + site.getName() + "_NormsBasisReport";
 	    }else if(type.equalsIgnoreCase("ProductionTarget")) {
-	    	storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
+	        storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
 	    }else if(type.equalsIgnoreCase("OverallConsumption")) {
-	    	storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
+	        storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
 	    }
+	    
 	    try {
-	        // 1. Fetch ALL column names (List of Lists)
-	        List<List<String>> allColNames = getAllColumnNames(plantId, aopYear, periodFrom, periodTo,type,storedProcedure);
+	        // 1. Fetch ALL column metadata (List of Lists of Maps) - NEW
+	        List<List<Map<String, Object>>> allColMetadata = getAllColumnMetadataForPEE(
+	                plantId, aopYear, periodFrom, periodTo, type, storedProcedure);
 
-	        // 2. Fetch ALL grid data (List of Lists of Object[]) - Assuming this is the fixed version
-	        List<List<Object[]>> allGridData = getReportDataForPEE(plantId, aopYear, periodFrom, periodTo,type,storedProcedure);
+	        // 2. Fetch ALL grid data (List of Lists of Object[]) - Unchanged
+	        List<List<Object[]>> allGridData = getReportDataForPEE(
+	                plantId, aopYear, periodFrom, periodTo, type, storedProcedure);
 
-	        // Ensure the number of column lists matches the number of data grids
-	        if (allColNames.size() != allGridData.size()) {
-	            throw new RuntimeException("Mismatch: Stored procedure returned " + allColNames.size()
-	                    + " column lists but " + allGridData.size() + " data grids.");
+	       
+	        if (allColMetadata.size() != allGridData.size()) {
+	             throw new RuntimeException("Mismatch: Stored procedure returned " + allColMetadata.size()
+	                        + " metadata lists but " + allGridData.size() + " data grids.");
 	        }
 
 	        // 3. Build combined list for frontend (List of Maps)
 	        List<Map<String, Object>> combined = new ArrayList<>();
 	        
-	        // Loop through each grid's data and its corresponding column names
+	        // Loop through each grid's data and its corresponding metadata
 	        for (int i = 0; i < allGridData.size(); i++) {
-	            List<String> colNames = allColNames.get(i);
+	            List<Map<String, Object>> colMetadata = allColMetadata.get(i);
 	            List<Object[]> rawRows = allGridData.get(i);
 	            
-	            // Find the GridType and its value (Assuming the last column is GRID_TYPE based on your SP)
+	            // Extract column names from metadata list
+	            List<String> colNames = colMetadata.stream()
+	                                              .map(m -> (String)m.get("field"))
+	                                              .collect(Collectors.toList());
+
+	            // --- Grid Name Logic (Copied from original, using 'colNames' derived from metadata) ---
 	            String gridName = "UNKNOWN_GRID_" + (i + 1); // Default name
-	            
-	            // If the column list is not empty, get the column label and value for GRID_TYPE
 	            if (!colNames.isEmpty()) {
 	                int lastColIdx = colNames.size() - 1;
 	                // Check if the last column is actually GRID_TYPE (as in your SP)
@@ -144,7 +150,8 @@ public class BasisReportServiceImpl implements BasisReportService {
 	                    gridName = colNames.get(0); 
 	                }
 	            }
-	            
+	            // ---------------------------------------------------------------------------------
+
 	            // Convert Object[] rows to List<Map<String, Object>>
 	            List<Map<String, Object>> gridDataMap = new ArrayList<>();
 	            for (Object[] row : rawRows) {
@@ -159,12 +166,14 @@ public class BasisReportServiceImpl implements BasisReportService {
 	            Map<String, Object> part = new LinkedHashMap<>();
 	            part.put("gridName", gridName);
 	            part.put("data", gridDataMap);
+	            // ADD THE COLUMN METADATA HERE
+	            part.put("columns", colMetadata); 
 	            combined.add(part);
 	        }
 
 	        aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("SP Executed successfully");
-	        aopMessageVM.setData(combined); // <-- Set the combined list here
+	        aopMessageVM.setData(combined); 
 	        return aopMessageVM;
 
 	    } catch (Exception e) {
@@ -176,6 +185,8 @@ public class BasisReportServiceImpl implements BasisReportService {
 	    }
 	}
 
+	
+	
 	public List<Object[]> getReportDataForPE(String plantId, String aopYear, String PeriodFrom,
 			String PeriodTo) {
 
@@ -253,7 +264,62 @@ public class BasisReportServiceImpl implements BasisReportService {
 	        }
 	    });
 	}
-	public List<String> getColumnNames(String plantId, String aopYear, String PeriodFrom,
+	
+	// Add this new method to your service class
+	// Note: You need the same parameters to resolve the SP name as in getNormhistorian
+	@Transactional(readOnly = true)
+	public List<List<Map<String, Object>>> getAllColumnMetadataForPEE(
+	    String plantId, String aopYear, String periodFrom, String periodTo, String type, String storedProcedure) {
+
+	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+
+	    Session session = entityManager.unwrap(Session.class);
+
+	    return session.doReturningWork(connection -> {
+	        List<List<Map<String, Object>>> allMetadataGrids = new ArrayList<>();
+
+	        try (java.sql.CallableStatement callableStatement = connection.prepareCall(storedProcedureCall)) {
+
+	            callableStatement.setString(1, plantId);
+	            callableStatement.setString(2, aopYear);
+	            callableStatement.setString(3, periodFrom);
+	            callableStatement.setString(4, periodTo);
+
+	            boolean results = callableStatement.execute();
+
+	            while (results || callableStatement.getUpdateCount() != -1) {
+	                if (results) {
+	                    try (java.sql.ResultSet rs = callableStatement.getResultSet()) {
+	                        java.sql.ResultSetMetaData rsMetaData = rs.getMetaData();
+	                        List<Map<String, Object>> currentMetadata = new ArrayList<>();
+
+	                        for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                            Map<String, Object> columnInfo = new HashMap<>();
+	                            String columnName = rsMetaData.getColumnLabel(i);
+	                            String columnType = rsMetaData.getColumnTypeName(i);
+
+	                            columnInfo.put("field", columnName);
+	                            columnInfo.put("title", formatTitle(columnName)); // Use your formatting method
+	                            columnInfo.put("editable", false); // Example property
+	                            columnInfo.put("type", getFrontendType(columnType)); // Use your type mapping method
+	                            currentMetadata.add(columnInfo);
+	                        }
+	                        allMetadataGrids.add(currentMetadata);
+	                    }
+	                }
+	                // Move to the next result set or update count
+	                results = callableStatement.getMoreResults();
+	            }
+
+	            return allMetadataGrids;
+
+	        } catch (java.sql.SQLException e) {
+	            throw new RuntimeException("Error executing stored procedure for metadata: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
+	        }
+	    });
+	}
+	
+		public List<String> getColumnNames(String plantId, String aopYear, String PeriodFrom,
 			String PeriodTo) {
 		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
 			List<String> columnNames = new ArrayList<>();
