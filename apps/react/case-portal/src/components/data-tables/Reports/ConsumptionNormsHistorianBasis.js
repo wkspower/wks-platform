@@ -51,7 +51,9 @@ const ConsumptionNormsHistorianBasis = () => {
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
-    return backendCols.map((col) => {
+    return backendCols
+    .filter(col => col.field !== 'GRID_TYPE')
+    .map((col) => {
       const isTextCol = col.type === 'string'
       const isNumberCol = col.type === 'number'
       return {

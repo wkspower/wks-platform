@@ -132,7 +132,37 @@ const BusinessDemand = ({ permissions }) => {
         setLoading(false)
         return
       }
+  const isPPorPE_NMD =
+  (lowerVertName === 'pp' || lowerVertName === 'pe') &&
+  siteObject?.name?.toLowerCase() === 'nmd'
 
+if (isPPorPE_NMD) {
+  // Use all rows, not just edited ones
+  const productionRows = (rows || []).filter(
+    (row) => row.Particulars?.toLowerCase() === 'production'
+  )
+  if (productionRows.length > 0) {
+    const months = [
+      'april', 'may', 'june', 'july', 'aug', 'sep', 'oct', 'nov', 'dec',
+      'jan', 'feb', 'march'
+    ]
+    for (const month of months) {
+      const sumMonth = productionRows.reduce(
+        (acc, row) => acc + (parseFloat(row[month]) || 0),
+        0
+      )
+      if (Math.abs(sumMonth - 100) > 0.01) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Sum of '${month.charAt(0).toUpperCase() + month.slice(1)}' for Production must be exactly 100.00 (Current: ${sumMonth.toFixed(2)})`,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+    }
+  }
+}
       const requiredFields = ['normParameterId', 'remark']
 
       const validationMessage = validateFields(data, requiredFields)
@@ -246,7 +276,11 @@ const BusinessDemand = ({ permissions }) => {
       // showStepper:false,
     }
   }
-
+  const percentageTitle =
+  (lowerVertName === 'pp' && siteObject?.name?.toLowerCase() === 'nmd') ||
+  (lowerVertName === 'pe' && siteObject?.name?.toLowerCase() === 'nmd')
+    ? 'Business Demand Data (%)'
+    : 'Business Demand Data';
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -259,13 +293,13 @@ const BusinessDemand = ({ permissions }) => {
       allAction: permissions?.allAction ?? true,
       units: ['TPH', 'TPD'],
       showTitleNameBusiness: true,
-      titleName: 'Business Demand Data',
-      downloadExcelBtnFromUI: lowerVertName == 'cracker' ? false : true,
+      titleName: percentageTitle,
+      downloadExcelBtnFromUI: lowerVertName == 'cracker' || (lowerVertName == 'pe' && plantObject?.name?.toLowerCase() === 'ldpe'&& siteObject?.name?.toLowerCase() === 'nmd') ? false : true,
       ExcelName: `${lowerVertName}_Business Demand Data`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
 
-      downloadExcelBtn: lowerVertName == 'cracker' ? true : false,
-      uploadExcelBtn: lowerVertName == 'cracker' ? true : false,
+      downloadExcelBtn: (lowerVertName == 'cracker' || (lowerVertName == 'pe' && plantObject?.name?.toLowerCase() === 'ldpe'&& siteObject?.name?.toLowerCase() === 'nmd')) ? true : false,
+      uploadExcelBtn: (lowerVertName == 'cracker' || (lowerVertName == 'pe' && plantObject?.name?.toLowerCase() === 'ldpe'&& siteObject?.name?.toLowerCase() === 'nmd')) ? true : false,
     },
     isOldYear,
   )

@@ -1440,7 +1440,11 @@ const ProductionvolumeData = ({ permissions }) => {
       showCalculate: false,
     }
   }
-
+  const percentageTitle =
+  (VERTICAL_NAME === 'pp' && siteObject?.name?.toLowerCase() === 'nmd') ||
+  (VERTICAL_NAME === 'pe' && siteObject?.name?.toLowerCase() === 'nmd')
+    ? 'Current MCU'
+    : 'Max Achieved Capacity';
   const adjustedPermissionsGrid1 = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -1455,7 +1459,7 @@ const ProductionvolumeData = ({ permissions }) => {
       units: ['TPH', 'TPD'],
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       showTitleNameBusiness: true,
-      titleName: 'Max Achieved Capacity',
+      titleName: percentageTitle,
 
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
       ExcelName: `${VERTICAL_NAME}_Max Achieved Capacity`,

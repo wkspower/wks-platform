@@ -51,7 +51,9 @@ const ProductionVolumeDataBasisPe = () => {
   }
 
   const enrichColumns = useCallback((backendCols = []) => {
-    return backendCols.map((col) => {
+    const columnsToHide = ['GRID_TYPE']
+    return backendCols.filter(col => !columnsToHide.includes(col.field))
+    .map((col) => {
       const isTextCol = col.type === 'string'
       const isNumberCol = col.type === 'number'
       return {

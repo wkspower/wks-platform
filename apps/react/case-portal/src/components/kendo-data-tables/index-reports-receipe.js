@@ -127,6 +127,8 @@ const KendoDataTablesReciepe = ({
   selectMode,
   setSelectMode = () => {},
   handleExport = () => {},
+  handleExcelUpload,
+  downloadExcelForConfiguration,
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -139,9 +141,27 @@ const KendoDataTablesReciepe = ({
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
   const [edit, setEdit] = useState({})
-  const [sort, setSort] = useState([]) // or
+  const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
-
+  const shouldShowExportImportButtons = () => {
+    const verticalObject = JSON.parse(localStorage.getItem('selectedVertical'))
+    const siteObject = JSON.parse(localStorage.getItem('selectedSite'))
+    const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
+    
+    const verticalName = verticalObject?.name?.toLowerCase()
+    const siteName = siteObject?.name?.toLowerCase()
+    const plantName = plantObject?.name?.toLowerCase()
+    
+    // Check if conditions are met for showing export/import buttons
+    return (
+      (verticalName === 'pe' && 
+       siteName === 'nmd' && 
+       (plantName === 'ldpe' || plantName === 'lldpe1' || plantName === 'lldpe2')) ||
+      (verticalName === 'pp' && 
+       siteName === 'nmd' && 
+       plantName === 'pp')
+    )
+  }
   const initialGroup = groupBy
     ? [
         {
@@ -498,6 +518,48 @@ const KendoDataTablesReciepe = ({
                 Add Item
               </Button>
             )}
+            
+            {/* Export Button */}
+            {permissions?.downloadExcelBtn && shouldShowExportImportButtons() && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={downloadExcelForConfiguration}
+                disabled={isButtonDisabled}
+              >
+                Export
+              </Button>
+            )}
+
+            {/* Import Button */}
+            {permissions?.uploadExcelBtn && shouldShowExportImportButtons() && (
+              <div>
+                <input
+                  accept='.xlsx,.xls'
+                  style={{ display: 'none' }}
+                  id='excel-upload-input'
+                  type='file'
+                  onChange={(e) => {
+                    const file = e.target.files[0]
+                    if (file) {
+                      handleExcelUpload(file)
+                      e.target.value = ''
+                    }
+                  }}
+                />
+                <label htmlFor='excel-upload-input'>
+                  <Button
+                    variant='contained'
+                    component='span'
+                    className='btn-save'
+                    disabled={isButtonDisabled}
+                  >
+                    Import
+                  </Button>
+                </label>
+              </div>
+            )}
+
             {permissions?.saveBtn && (
               <Button
                 variant='contained'

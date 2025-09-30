@@ -20,7 +20,7 @@ import {
 
 const MONTH_GRID_NAME = 'Final Norms'
 const MODE_GRADES = ['4F', '5F', '4F+D']
-const MODE_TYPES = ['Best Achieved', 'Expression', 'Yearly Norms']
+const MODE_TYPES = ['Best Achieved']
 
 export default function MonthWiseRawData() {
   const keycloak = useSession()

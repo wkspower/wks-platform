@@ -445,11 +445,13 @@ const SelectivityData = (props) => {
     })
 
     try {
-      if (props?.tabIndex != 1) {
-        await DataService.getConfigurationExcel(keycloak, gradeId)
-      } else {
-        await DataService.getConfigurationExcelConstants(keycloak)
-      }
+      if (props?.configType === 'grades') {
+      await DataService.getRecipeExcel(keycloak)
+    } else if (props?.tabIndex != 1) {
+      await DataService.getConfigurationExcel(keycloak, gradeId)
+    } else {
+      await DataService.getConfigurationExcelConstants(keycloak)
+    }
 
       // If no error is thrown, the request was successful
       setSnackbarData({
@@ -499,14 +501,13 @@ const SelectivityData = (props) => {
         plantId = parsedPlant.id
       }
       var response
-      if (props?.tabIndex != 1) {
-        response = await DataService.saveConfigurationExcel(rawFile, keycloak)
-      } else {
-        response = await DataService.saveConfigurationExcelConstants(
-          rawFile,
-          keycloak,
-        )
-      }
+      if (props?.configType === 'grades') {
+      response = await DataService.saveRecipeExcel(rawFile, keycloak)
+    } else if (props?.tabIndex != 1) {
+      response = await DataService.saveConfigurationExcel(rawFile, keycloak)
+    } else {
+      response = await DataService.saveConfigurationExcelConstants(rawFile, keycloak)
+    }
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -516,10 +517,12 @@ const SelectivityData = (props) => {
         setModifiedCells({})
         setLoading(false)
 
-        if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-          props?.fetchData(gradeId)
-        }
-      } else if (response?.code === 400 && response?.data) {
+        if (props?.configType === 'grades') {
+        fetchConfigData() // This was missing!
+      } else if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+        props?.fetchData(gradeId)
+      }
+    } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = new Array(byteCharacters.length)
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -551,9 +554,9 @@ const SelectivityData = (props) => {
           severity: 'error',
         })
       }
-      if (props?.configType !== 'grades') {
-        props?.fetchData(gradeId)
-      }
+      // if (props?.configType !== 'grades') {
+      //   props?.fetchData(gradeId)
+      // }
 
       return response
     } catch (error) {
