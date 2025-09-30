@@ -224,6 +224,14 @@ const planCracker = {
           icon: icons.IconReport,
           breadcrumbs: true,
         },
+        {
+          id: 'utilities-norms-basis',
+          title: i18n.t('menu.utilitiesNormsBasis'),
+          type: 'item',
+          url: '/reports/utilities-norms-basis',
+          icon: icons.IconReport,
+          breadcrumbs: true,
+        },
       ],
     },
 

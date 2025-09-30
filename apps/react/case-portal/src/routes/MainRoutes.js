@@ -51,6 +51,7 @@ import RelPerf from 'components/kendo-data-tables/RelPerf'
 import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafetyPerformanceTarget'
 import IntermediateValuesDataSet from 'components/data-tables/Reports/IntermediateValuesDataSet'
 import RawDataSet from 'components/data-tables/Reports/RawDataSet'
+import UtilitiesNormsBasis  from 'components/data-tables/Reports/UtilitiesNormsBasis'
 import SteadyStateNormsHistorianBasis from 'components/data-tables/Reports/SteadyStateNormsHistorianBasis'
 import ConsumptionNormsHistorianBasis from 'components/data-tables/Reports/ConsumptionNormsHistorianBasis'
 import BestAchievedIndividualNorms from 'components/data-tables/Reports/BestAchievedIndividualNorms'
@@ -456,7 +457,14 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
-
+          {
+            path: 'utilities-norms-basis',
+            element: (
+              <PrivateRoute routeId='utilities-norms-basis'>
+                <UtilitiesNormsBasis />
+              </PrivateRoute>
+            ),
+          },
           {
             path: 'run-length',
             element: (

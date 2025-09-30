@@ -82,6 +82,7 @@ const defs = {
     bestAchievedIndividualBasis: 'Best Achieved (Individual)',
     furnaceModeAndRunLength: 'Furnace Mode And Run Length',
     maintenanceProcess: 'Process',
+    utilitiesNormsBasis: 'Utilities Norms Basis'
   },
   pages: {
     dashboard: {
@@ -263,6 +264,7 @@ const defs = {
         runlengthData: 'Furnace Run Length ',
         furnaceModeAndRunLength: 'Furnace Mode And Run Length',
         maintenanceProcess: 'Process',
+        utilitiesNormsBasis: 'Utilities Norms Basis'
       },
     },
   },
