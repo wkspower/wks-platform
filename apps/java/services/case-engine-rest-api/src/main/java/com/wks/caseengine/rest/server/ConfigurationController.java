@@ -155,6 +155,28 @@ public class ConfigurationController {
 	    }
 	}
 	
+	@GetMapping(value = "/shutdown-rate-export")
+	public ResponseEntity<byte[]> exportShutdownRate(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year
+	        ) {
+	    try {
+			
+	        byte[] excelBytes = configurationService.createShutdownRateExcel(year,UUID.fromString(plantId), false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("shutdown_rate.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
 	
 	@PostMapping(value = "/configuration-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
@@ -163,6 +185,15 @@ public class ConfigurationController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			return	configurationService.importExcel(year,UUID.fromString(plantId), file); 
+	}
+	
+	@PostMapping(value = "/shutdown-rate-import", consumes = "multipart/form-data")
+	public AOPMessageVM importShutdownRateExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId), file); 
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
