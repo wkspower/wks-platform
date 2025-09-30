@@ -965,7 +965,7 @@ const NormalOpNormsScreenCracker = () => {
     padding: '9px',
     minHeight: '12px',
   }
-  const tabLabels = ['Constants', 'Norms Selection', 'Final monthly norms']
+  const tabLabels = ['Criteria', 'Norms Selection', 'Final monthly norms']
 
   // UI render
   return (

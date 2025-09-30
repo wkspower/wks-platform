@@ -629,6 +629,7 @@ const ConfigurationTable = () => {
                   marginTop: '5px',
                 }}
               >
+                {lowerVertName !== 'cracker' && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography
                     className='grid-title'
@@ -659,8 +660,9 @@ const ConfigurationTable = () => {
                     size={'medium'}
                   />
                 </Box>
+                )}
                 {/* Load Button */}
-                {!isOldYearFlag && (
+                {!isOldYearFlag  && lowerVertName !== 'cracker' && (
                   <Button
                     variant='contained'
                     // onClick={onLoad}

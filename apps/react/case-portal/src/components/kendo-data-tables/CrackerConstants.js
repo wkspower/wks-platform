@@ -434,7 +434,7 @@ const CrakcerConstants = () => {
                 )}
               </Box>
             </Box>
-            <TextField
+            {/* <TextField
               label='AOP Design Basis'
               multiline
               minRows={2}
@@ -448,7 +448,7 @@ const CrakcerConstants = () => {
                 setSummaryEdited(true)
               }}
               className='aop-design-basis'
-            />
+            /> */}
           </CustomAccordionDetails>
         </CustomAccordion>
       </Box>
@@ -668,9 +668,9 @@ const CrakcerConstants = () => {
       showAction: false,
       allAction: true,
       showTitleNameBusiness: true,
-      titleName: 'Constants',
+      titleName: 'Criteria',
       downloadExcelBtnFromUI: true,
-      ExcelName: `${lowerVertName}_Constants`,
+      ExcelName: `${lowerVertName}_Criteria`,
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: false,

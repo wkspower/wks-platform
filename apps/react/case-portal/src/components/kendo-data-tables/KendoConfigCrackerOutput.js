@@ -278,6 +278,30 @@ const CrackerConfig = () => {
           }),
         )
 
+        if (transformedData1.length > 0 && currentTabDisplay === 'Yield') {
+        const numericColumns = [
+          'fourFPropane', 'fiveFC2C3', 'fiveFEthane', 'fiveFPropane',
+          'fourFC2C3', 'fourFDC2C3', 'fourFDEthane', 'fourFDPropane', 'fourFEthane'
+        ]
+        
+        const totalRow = {
+          id: 'total_row',
+          particulars: 'Total',
+          isTotal: true, // Flag to identify total row
+          editable: false, // Make total row non-editable
+        }
+
+        // Calculate totals for each numeric column
+        numericColumns.forEach(column => {
+          totalRow[column] = transformedData1.reduce((sum, row) => {
+            const value = parseFloat(row[column]) || 0
+            return sum + value
+          }, 0).toFixed(2) // Round to 2 decimal places
+        })
+
+        // Add total row at the end
+        transformedData1.push(totalRow)
+      }
         setRowsForTab(currentTabDisplay, transformedData1)
       } catch (err) {
         setSnackbarData({
@@ -414,6 +438,7 @@ const CrackerConfig = () => {
     setLoading(true)
 
     try {
+      const dataToSave = newRows.filter(row => !row.isTotal)
       const SpyroOutputYield = newRows.map((row) => ({
         particulars: row.particulars,
         fourFPropane: row.fourFPropane || 0,
