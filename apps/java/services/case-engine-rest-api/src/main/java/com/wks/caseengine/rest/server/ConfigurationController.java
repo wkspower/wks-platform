@@ -61,7 +61,7 @@ public class ConfigurationController {
 	}
 	
 	@PostMapping(value="/updatePeConfigData")
-	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOList){
+	public List<NormAttributeTransactionReceipeRequestDTO> updateCalculatedConsumptionNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOList){
 		return configurationService.updateCalculatedConsumptionNorms(year,plantId,normAttributeTransactionReceipeDTOList);
 	}
 	

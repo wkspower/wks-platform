@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import jakarta.persistence.Query;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +27,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
 import org.apache.poi.ss.usermodel.*;
 
@@ -1114,15 +1117,21 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	@Transactional
 	@Override
-	public List<NormAttributeTransactionReceipe> updateCalculatedConsumptionNorms(String year, String plantId,
+	public List<NormAttributeTransactionReceipeRequestDTO> updateCalculatedConsumptionNorms(String year, String plantId,
 			List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists) {
-
+		List<NormAttributeTransactionReceipeRequestDTO> failedList = new ArrayList<>();
 		try {
 
 			List<NormAttributeTransactionReceipe> normAttributeTransactionReceipelist = new ArrayList<>();
 			UUID plantUUId = UUID.fromString(plantId);
 
 			for (NormAttributeTransactionReceipeRequestDTO dto : normAttributeTransactionReceipeDTOLists) {
+				if (dto.getSaveStatus() != null
+						&& dto.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(dto);
+					continue;
+				}
+
 				UUID reciepeUUId = UUID.fromString(dto.getRecId());
 
 				for (Map.Entry<String, String> entry : dto.getGrades().entrySet()) {
@@ -1177,13 +1186,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 
 			if (!normAttributeTransactionReceipelist.isEmpty()) {
-				return normAttributeTransactionReceipeRepository.saveAll(normAttributeTransactionReceipelist);
-			} else {
-				throw new RuntimeException("No records available for update.");
+				 normAttributeTransactionReceipeRepository.saveAll(normAttributeTransactionReceipelist);
 			}
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to update data", ex);
 		}
+		return failedList;
 	}
 
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFKId, String viewName) {
@@ -1840,117 +1848,177 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 	
 	@Override
-	public byte[] exportConfigData(String year, UUID plantFKId, boolean isAfterSave, List<NormAttributeTransactionReceipe> dtoList) {
-		try {
-			
-			List<Map<String, Object>> data=getNormAttributeTransactionReceipe( year,  plantFKId.toString());
-			List<NormParameters> normParametersList= normParametersService.getAllGrades(plantFKId.toString());
-			
-			List<String> innerHeaders=new ArrayList<String>();
-			innerHeaders.add("Recipe");
-			for(NormParameters normParameters:normParametersList) {
-				innerHeaders.add(normParameters.getDisplayName());
-			}
-			innerHeaders.add("RecipeId");
-			
-			Map<String, String> uuidToDisplayName = new HashMap<>();
-			for (NormParameters np : normParametersList) {
-			    String id = np.getId().toString().toLowerCase();  
-			    String displayName = np.getDisplayName();
-			    uuidToDisplayName.put(id, displayName);
-			}
-			List<List<Object>> rows = new ArrayList<>();
-			for (Map<String, Object> rec : data) {
-			    Map<String, Object> newMap = new LinkedHashMap<>();
-			    List<Object> list = new ArrayList<>();
-			    if (rec.containsKey("ReceipeName")) {
-			        newMap.put("ReceipeName", rec.get("ReceipeName"));
-			        list.add(rec.get("ReceipeName"));
-			    }
-			   
-			    
-			    // Now process dynamic norm columns (UUID keys)
-			    for (Map.Entry<String, Object> e : rec.entrySet()) {
-			        String key = e.getKey();
-			        Object value = e.getValue();
-			        String lowerKey = key.toLowerCase();
-			        if (uuidToDisplayName.containsKey(lowerKey)) {
-			            String dispName = uuidToDisplayName.get(lowerKey);
-			            newMap.put(dispName, value);
-			           
-			        }
-			    }
-			    for(String header:innerHeaders) {
-			    	if(header.equalsIgnoreCase("Recipe") || header.equalsIgnoreCase("RecipeId")) {
-			    		continue;
-			    	}
-			    	
-			    	list.add(newMap.get(header));
-			    }
-			    if (rec.containsKey("Reciepe_FK_ID")) {
-			        newMap.put("Reciepe_FK_ID", rec.get("Reciepe_FK_ID"));
-			        list.add(rec.get("Reciepe_FK_ID"));
-			    }
-			    
-			    rows.add(list);		
-			}
+	public byte[] exportConfigData(String year,
+	                               UUID plantFKId,
+	                               boolean isAfterSave,
+	                               List<NormAttributeTransactionReceipeRequestDTO> dtoList) {
+	    try {
+	        
+	        if (isAfterSave) {
+	            
+	            List<NormAttributeTransactionReceipeRequestDTO> failedDtos = dtoList.stream()
+	                .filter(d -> d.getSaveStatus() != null && d.getSaveStatus().equalsIgnoreCase("Failed"))
+	                .collect(Collectors.toList());
 
-			Workbook workbook = new XSSFWorkbook();
+	            
+	            if (failedDtos.isEmpty()) {
+	                
+	                dtoList = Collections.emptyList();
+	            } else {
+	                dtoList = failedDtos;
+	            }
+	        }
 
-			Sheet sheet = workbook.createSheet("Sheet1");
-			int currentRow = 0;
-			// List<List<Object>> rows = new ArrayList<>();
-			
-			List<List<String>> headers = new ArrayList<>();
-			headers.add(innerHeaders);
+	        
+	        List<Map<String, Object>> data = getNormAttributeTransactionReceipe(year, plantFKId.toString());
+	        List<NormParameters> normParametersList = normParametersService.getAllGrades(plantFKId.toString());
 
-			for (List<String> headerRowData : headers) {
-				Row headerRow = sheet.createRow(currentRow++);
-				for (int col = 0; col < headerRowData.size(); col++) {
-					Cell cell = headerRow.createCell(col);
-					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
-				}
-			}
-			for (List<Object> rowData : rows) {
-				Row row = sheet.createRow(currentRow++);
-				for (int col = 0; col < rowData.size(); col++) {
-					Cell cell = row.createCell(col);
-					Object value = rowData.get(col);
+	        
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Recipe");
+	        for (NormParameters normParameters : normParametersList) {
+	            innerHeaders.add(normParameters.getDisplayName());
+	        }
+	        innerHeaders.add("RecipeId");
 
-					if (value instanceof Number) {
-						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
-					} else if (value instanceof Boolean) {
-						cell.setCellValue((Boolean) value);
-					} else if (value != null) {
-						cell.setCellValue(value.toString());
-					} else {
-						cell.setCellValue("");
-					}
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
 
-				}
-			}
-			System.out.println(innerHeaders.size()-1);
-			sheet.setColumnHidden(innerHeaders.size()-1, true);
-			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+	        
+	        Map<String, String> uuidToDisplayName = new HashMap<>();
+	        for (NormParameters np : normParametersList) {
+	            String id = np.getId().toString().toLowerCase();
+	            String displayName = np.getDisplayName();
+	            uuidToDisplayName.put(id, displayName);
+	        }
 
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				workbook.write(outputStream);
-				workbook.close();
-				return outputStream.toByteArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+	        
+	        List<List<Object>> rows = new ArrayList<>();
+	        for (Map<String, Object> rec : data) {
+	            if (isAfterSave) {
+	                Object recIdObj = rec.get("Reciepe_FK_ID");
+	                if (recIdObj == null) {
+	                    continue;
+	                }
+	                String recIdStr = recIdObj.toString();
+	                boolean inFailed = dtoList.stream()
+	                        .anyMatch(d -> d.getRecId() != null && d.getRecId().equals(recIdStr));
+	                if (!inFailed) {
+	                    
+	                    continue;
+	                }
+	            }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+	            Map<String, Object> newMap = new LinkedHashMap<>();
+	            List<Object> list = new ArrayList<>();
+
+	            if (rec.containsKey("ReceipeName")) {
+	                newMap.put("ReceipeName", rec.get("ReceipeName"));
+	                list.add(rec.get("ReceipeName"));
+	            } else {
+	                list.add("");  
+	            }
+
+	            
+	            for (Map.Entry<String, Object> e : rec.entrySet()) {
+	                String key = e.getKey();
+	                Object value = e.getValue();
+	                String lowerKey = key.toLowerCase();
+	                if (uuidToDisplayName.containsKey(lowerKey)) {
+	                    String dispName = uuidToDisplayName.get(lowerKey);
+	                    newMap.put(dispName, value);
+	                }
+	            }
+
+	           
+	            for (String header : innerHeaders) {
+	                if (header.equalsIgnoreCase("Recipe") || header.equalsIgnoreCase("RecipeId")
+	                        || (isAfterSave && (header.equalsIgnoreCase("Status") || header.equalsIgnoreCase("Error Description")))) {
+	                    continue;
+	                }
+	                
+	                list.add(newMap.get(header));
+	            }
+
+	            
+	            if (rec.containsKey("Reciepe_FK_ID")) {
+	                newMap.put("Reciepe_FK_ID", rec.get("Reciepe_FK_ID"));
+	                list.add(rec.get("Reciepe_FK_ID"));
+	            } else {
+	                list.add("");
+	            }
+
+	            if (isAfterSave) {
+	                
+	                String thisRecId = rec.get("Reciepe_FK_ID") != null ? rec.get("Reciepe_FK_ID").toString() : null;
+	                NormAttributeTransactionReceipeRequestDTO matched = null;
+	                for (NormAttributeTransactionReceipeRequestDTO d : dtoList) {
+	                    if (d.getRecId() != null && d.getRecId().equals(thisRecId)) {
+	                        matched = d;
+	                        break;
+	                    }
+	                }
+	                if (matched != null) {
+	                    list.add(matched.getSaveStatus());
+	                    list.add(matched.getErrDescription());
+	                } else {
+	                    list.add("");
+	                    list.add("");
+	                }
+	            }
+
+	            rows.add(list);
+	        }
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+	        int currentRow = 0;
+
+	        
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(createBoldBorderedStyle(workbook));
+	        }
+
+	        
+	        for (List<Object> rowData : rows) {
+	            Row row = sheet.createRow(currentRow++);
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	            }
+	        }
+
+	        
+	        sheet.setColumnHidden(innerHeaders.size() - 1, true);
+
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
 	}
 	
 	@Override
 	public AOPMessageVM importRecipe(String year, UUID plantFKId, MultipartFile file) {
-		// TODO Auto-generated method stub
+		
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
 		}
@@ -1961,7 +2029,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<NormAttributeTransactionReceipeRequestDTO> data = readRecipeData(file.getInputStream(), plantFKId, year);
 			System.out.println("Ended Read configuration in importExcel");
 			System.out.println("Started Save configuration in importExcel");
-			List<NormAttributeTransactionReceipe> failedRecords = updateCalculatedConsumptionNorms(year, plantFKId.toString(), data);
+			List<NormAttributeTransactionReceipeRequestDTO> failedRecords = updateCalculatedConsumptionNorms(year, plantFKId.toString(), data);
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
@@ -1971,13 +2039,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				aopMessageVM.setCode(400);
 				aopMessageVM.setMessage("Partial data has been saved");
 			} else {
-				// aopMessageVM.setData();
+				
 				aopMessageVM.setCode(200);
 				aopMessageVM.setMessage("All data has been saved");
 			}
 
 			return aopMessageVM;
-			// return ResponseEntity.ok(data);
+			
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {
@@ -2007,13 +2075,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			    NormAttributeTransactionReceipeRequestDTO dto = new NormAttributeTransactionReceipeRequestDTO();
 			    Map<String, String> grades = new LinkedHashMap<>();
 
-			    // 1. Set RecId from last column
+			    
 			    int lastColIndex = allHeaders.size() - 1;
 			    Cell recIdCell = row.getCell(lastColIndex);
 			    String recId = getStringCellValue(recIdCell, dto);
 			    dto.setRecId(recId);
 
-			    // 2. Process grade columns: from index 1 to lastColIndex-1
+			    
 			    for (int col = 1; col < lastColIndex; col++) {
 			        String header = allHeaders.get(col);
 			        Cell valueCell = row.getCell(col);
@@ -2022,14 +2090,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			        Optional<NormParameters> opt=  normParametersRepository.findFirstNameByDisplayNameAndPlantFkId(header,plantFKId);
 			        if(opt.isPresent()) {
 			        	grades.put(opt.get().getId().toString(), valStr);
+			        }else {
+			        	dto.setSaveStatus("Failed");
+						dto.setErrDescription("NormParameter not found for given recipe.");
 			        }
 			        
 			    }
 			    dto.setGrades(grades);
-
-			    // (Optional) set success
-			    dto.setSaveStatus("Success");
-
 			    recipeList.add(dto);
 			}
 
