@@ -7,6 +7,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -34,9 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
-
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
-
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BudgetMaintenance;
 import com.wks.caseengine.entity.DecokeMaintenance;
@@ -201,7 +200,188 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+	
+	public byte[] maintenanceExport(String year, String plantId, boolean isAfterSave, List<DecokePlanningDTO> dtoList) {
+		try {
+			
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
 
+			if (!isAfterSave) {
+				List<Object[]> results = getData(plantId, year, procedureName);
+				 dtoList= setData(results);
+			}
+
+			Workbook workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			
+			// Data rows
+			for (DecokePlanningDTO dto : dtoList) {
+				//if (isAfterSave) {
+					List<Object> list = new ArrayList<>();
+					
+					list.add(dto.getMonthName());
+					list.add(dto.getFiveF());
+					list.add(dto.getFourF());
+					list.add(dto.getFourFD());
+					list.add(dto.getCoilReplacement());
+					list.add(dto.getShutdown());
+					list.add(dto.getSlowdown());
+					list.add(dto.getSad());
+					list.add(dto.getBbu());
+					list.add(dto.getBbd());
+					list.add(dto.getDemoSAD());
+					list.add(dto.getDemoSD());
+					list.add(dto.getDemoBBU());
+					list.add(dto.getDemoHSS());
+					list.add(dto.getMnt());
+					list.add(dto.getTotal());
+					list.add(dto.getNumberOfDays());
+					list.add(dto.getTotalSAD());
+					list.add(dto.getRemarks());
+					list.add(dto.getId());
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				//}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			
+			innerHeaders.add("Month");
+			innerHeaders.add("5F");
+			innerHeaders.add("4f");
+			innerHeaders.add("4F With Demo");
+			innerHeaders.add("IBR/Coil Replacement");
+			innerHeaders.add("Shutdown(TA)");
+			innerHeaders.add("Slowdown");
+			innerHeaders.add("SAD");
+			innerHeaders.add("BBU");
+			innerHeaders.add("BBD");
+			innerHeaders.add("Demo SAD");
+			innerHeaders.add("Demo SD");
+			innerHeaders.add("Demo BBU/BBD");
+			innerHeaders.add("Demo HHS");
+			innerHeaders.add("MNT");
+			innerHeaders.add("Total");
+			innerHeaders.add("No of Days");
+			innerHeaders.add("No of SADs");
+			innerHeaders.add("Remarks");
+			innerHeaders.add("Id");
+			if (isAfterSave) {
+				innerHeaders.add("Status");
+				innerHeaders.add("Error Description");
+			}
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				
+				 
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+				}
+			}
+			
+			sheet.setColumnHidden(19, true);
+			try {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	public List<DecokePlanningDTO> setData(List<Object[]> results) {
+	    List<DecokePlanningDTO> dtoList = new ArrayList<>();
+	    if (results == null) {
+	        return dtoList;
+	    }
+
+	    for (Object[] row : results) {
+	    	DecokePlanningDTO dto = new DecokePlanningDTO();
+
+	        // String fields
+	        dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
+	        dto.setMonthName(row[1] != null ? row[1].toString() : null);
+	        dto.setAopYear(row[18] != null ? row[18].toString() : null);
+	        dto.setPlantId(row[19] != null ? UUID.fromString(row[19].toString()) : null);
+	        // remarks – note: you had a special null-handling before
+	        dto.setRemarks(row[20] != null ? row[20].toString() : "");
+
+	        // Numeric (Double) fields
+	        dto.setCoilReplacement(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
+	        dto.setMnt(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
+	        dto.setShutdown(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+	        dto.setSlowdown(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
+	        dto.setSad(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
+	        dto.setBbd(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+	        dto.setBbu(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+	        dto.setDemoHSS(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+	        dto.setDemoBBU(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+	        dto.setDemoSAD(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+	        dto.setDemoSD(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+	        dto.setFourFD(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+	        dto.setFourF(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+	        dto.setFiveF(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
+	        dto.setTotal(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
+	        dto.setFourFHours(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
+	        dto.setTotalSAD(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
+
+	        // numberOfDays is an integer
+	        if (row[22] != null) {
+	            try {
+	                dto.setNumberOfDays(Double.parseDouble(row[22].toString()));
+	            } catch (NumberFormatException e) {
+	                dto.setNumberOfDays(0.0);
+	            }
+	        } else {
+	            dto.setNumberOfDays(0.0);
+	        }
+
+	        dtoList.add(dto);
+	    }
+
+	    return dtoList;
 	}
 
 	public List<Object[]> getData(String plantId, String aopYear, String viewName) {
@@ -244,10 +424,16 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	@Override
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
 			List<DecokePlanningDTO> decokePlanningDTOList) {
+		List<DecokePlanningDTO> failedList=new ArrayList<>();
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<DecokeMaintenance> decokeMaintenanceList = new ArrayList<>();
 		try {
 			for (DecokePlanningDTO decokePlanningDTO : decokePlanningDTOList) {
+				if (decokePlanningDTO.getSaveStatus() != null
+						&& decokePlanningDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(decokePlanningDTO);
+					continue;
+				}
 				Optional<DecokeMaintenance> decokePlanningop = decokeMaintenanceRepository
 						.findById(decokePlanningDTO.getId());
 				if (decokePlanningop.isPresent()) {
@@ -289,9 +475,89 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("Data updated successfully");
-		aopMessageVM.setData(decokeMaintenanceList);
+		aopMessageVM.setData(failedList);
 		return aopMessageVM;
 
+	}
+	
+	@Override
+	public AOPMessageVM maintenanceImport(String year,UUID plantId,MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<DecokePlanningDTO> data = readMaintenance(file.getInputStream(), plantId, year);
+			 AOPMessageVM aopMessageVM = updateMaintenanceDataForCracker( plantId.toString(),  year, data);
+			 List<DecokePlanningDTO> failedList = (List<DecokePlanningDTO>) aopMessageVM.getData();
+
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = maintenanceExport(year, plantId.toString(), true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+	
+	public List<DecokePlanningDTO> readMaintenance(InputStream inputStream, UUID plantFKId, String year) {
+		List<DecokePlanningDTO> dtoList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				DecokePlanningDTO dto = new DecokePlanningDTO();
+				try {
+					dto.setMonthName(getStringCellValue(row.getCell(0), dto));
+					dto.setId(UUID.fromString(getStringCellValue(row.getCell(19), dto)));
+					dto.setFiveF(getNumericCellValue(row.getCell(1), dto));
+					dto.setFourF(getNumericCellValue(row.getCell(2), dto));
+					dto.setFourFD(getNumericCellValue(row.getCell(3), dto));
+					dto.setCoilReplacement(getNumericCellValue(row.getCell(4), dto));
+					dto.setShutdown(getNumericCellValue(row.getCell(5), dto));
+					dto.setSlowdown(getNumericCellValue(row.getCell(6), dto));
+					dto.setSad(getNumericCellValue(row.getCell(7), dto));
+					dto.setBbu(getNumericCellValue(row.getCell(8), dto));
+					dto.setBbd(getNumericCellValue(row.getCell(9), dto));
+					dto.setDemoSAD(getNumericCellValue(row.getCell(10), dto));
+					dto.setDemoSD(getNumericCellValue(row.getCell(11), dto));
+					dto.setDemoBBU(getNumericCellValue(row.getCell(12), dto));
+					dto.setDemoHSS(getNumericCellValue(row.getCell(13), dto));
+					dto.setMnt(getNumericCellValue(row.getCell(14), dto));
+					dto.setTotal(getNumericCellValue(row.getCell(15), dto));
+					dto.setNumberOfDays(getNumericCellValue(row.getCell(16), dto));
+					dto.setTotalSAD(getNumericCellValue(row.getCell(17), dto));
+					dto.setRemarks(getStringCellValue(row.getCell(18), dto));
+					
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+				dtoList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return dtoList;
 	}
 
 	@Override
@@ -661,7 +927,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		return map;
 	}
 	
-	private static String getStringCellValue(Cell cell, BudgetMaintenanceDto dto) {
+	private static String getStringCellValue(Cell cell, DecokePlanningDTO dto) {
 		try {
 			if (cell == null)
 				return null;
@@ -676,7 +942,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	}
 
-	private static Double getNumericCellValue(Cell cell, BudgetMaintenanceDto dto) {
+	private static Double getNumericCellValue(Cell cell, DecokePlanningDTO dto) {
 		if (cell == null)
 			return null;
 		if (cell.getCellType() == CellType.NUMERIC) {
@@ -725,6 +991,36 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 	}
 
+	private static String getStringCellValue(Cell cell, BudgetMaintenanceDto dto) {
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	private static Double getNumericCellValue(Cell cell, BudgetMaintenanceDto dto) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				dto.setSaveStatus("Failed");
+				dto.setErrDescription("Please enter numeric values");
+			}
+		}
+		return null;
+	}
 
 
 

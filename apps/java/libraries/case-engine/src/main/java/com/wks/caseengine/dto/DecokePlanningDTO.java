@@ -39,5 +39,7 @@ public class DecokePlanningDTO {
     private Double bbd;
     private Double demoSD;
     private Double numberOfDays;
-    private Double coilReplacement;	    
+    private Double coilReplacement;	   
+    private String saveStatus;
+    private String errDescription;
 }

@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
@@ -18,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
-import com.wks.caseengine.dto.MaintenanceCalculatedDataDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.MaintenanceCalculatedDataService;
@@ -40,9 +40,40 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataService.getMaintenanceDataForCracker(plantId,year);		
 	}
 	
+	@GetMapping(value = "/maintenance-export")
+	public ResponseEntity<byte[]> maintenanceExport(
+	         @RequestParam String year,@RequestParam String plantId) {
+	    try {
+			
+	        byte[] excelBytes = maintenanceCalculatedDataService.maintenanceExport(year, plantId, false, null);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("maintenance.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
+	
 	@PostMapping(value="/maintenance")
 	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year,@RequestBody List<DecokePlanningDTO> decokePlanningDTOList){
 		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,decokePlanningDTOList);		
+	}
+	
+	@PostMapping(value = "/maintenance-import", consumes = "multipart/form-data")
+	public AOPMessageVM maintenanceImport(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	maintenanceCalculatedDataService.maintenanceImport(year,UUID.fromString(plantId), file); 
 	}
 	
 	@GetMapping(value="/budget-maintenance")
