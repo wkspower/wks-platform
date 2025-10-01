@@ -107,8 +107,7 @@ public class FinalNormsServiceImpl implements FinalNormsService {
 
 				finalNormsDTO.setRemark(row[21] != null ? row[21].toString() : "");
 				finalNormsDTO.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
-				// Optionally, if needed: finalNormsDTO.setIsChecked(row[25] != null ? Boolean.valueOf(row[25].toString()) : null);
-
+				finalNormsDTO.setMethod(row[24] != null ? row[24].toString() : "");
 				finalNormsDTOList.add(finalNormsDTO);
 			}			
 			Map<String, Object> map = new HashMap<>();

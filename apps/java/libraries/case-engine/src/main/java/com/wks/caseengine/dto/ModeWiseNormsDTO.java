@@ -42,6 +42,7 @@ public class ModeWiseNormsDTO {
     private String materialDisplayName;
     private String uom;
     private String sapMaterialCode;
+    private String method;
    
     
 }

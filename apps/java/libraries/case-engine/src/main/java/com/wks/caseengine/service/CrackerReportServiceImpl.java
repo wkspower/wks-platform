@@ -1,8 +1,11 @@
 package com.wks.caseengine.service;
 
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -16,7 +19,9 @@ import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -2104,7 +2109,190 @@ public class CrackerReportServiceImpl implements CrackerReportService {
 			return columnMetadata;
 		});
 	}
+	@Override
+	public AOPMessageVM calculateMonthWiseRawData(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadAllReportsData";
+			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return aopMessageVM;
+	}
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String year) {
+		try {
+			
+			String callSql = "{call " + procedureName + "(?, ?)}";
 
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); // @finYear
+	          	stmt.setString(2, year); // @siteId
+
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
+
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	@Override
+	public AOPMessageVM getMonthWiseRawDataByMethod(String plantId,String year,String mode,String method) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<Object[]> results = getMonthWiseData(plantId, year, mode,method);
+			List<String> columnNames = getMonthWiseDataColumns(plantId, year, mode,method);
+
+			List<Map<String, Object>> resultList = new ArrayList<>();
+
+			for (Object[] row : results) {
+				Map<String, Object> rowMap = new LinkedHashMap<>();
+				for (int i = 0; i < columnNames.size(); i++) {
+					rowMap.put(columnNames.get(i), row[i]);
+				}
+				resultList.add(rowMap);
+			}
+
+			Map<String, Object> data = new HashMap<>();
+			data.put("data", resultList);
+			data.put("columns", getMonthWiseDataColumnMetadata(plantId, year, mode,method));
+
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(data);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+
+	public List<Object[]> getMonthWiseData(String plantId,String year,String mode,String method) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_getMonthwiseRawdataByMethod";
+
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @year = :year, @mode = :mode, @method = :method";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("year", year);
+			query.setParameter("mode", mode);
+			query.setParameter("method", method);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<String> getMonthWiseDataColumns(String plantId,String year,String mode,String method) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<String> columnNames = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_getMonthwiseRawdataByMethod";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @year = ?, @mode = ?, @method = ?";
+
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, year);
+				ps.setString(3, mode);
+				ps.setString(4, method);
+				
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						columnNames.add(rsMetaData.getColumnLabel(i));
+					}
+				}
+			}
+			return columnNames;
+		});
+	}
+
+	public List<Map<String, Object>> getMonthWiseDataColumnMetadata(String plantId,String year,String mode,String method) {
+		return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+			List<Map<String, Object>> columnMetadata = new ArrayList<>();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_getMonthwiseRawdataByMethod";
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = ?, @year = ?, @mode = ?, @method = ?";
+			try (PreparedStatement ps = connection.prepareStatement(sql)) {
+				ps.setString(1, plantId);
+				ps.setString(2, year);
+				ps.setString(3, mode);
+				ps.setString(4, method);
+				
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ResultSetMetaData rsMetaData = rs.getMetaData();
+					for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+						Map<String, Object> columnInfo = new HashMap<>();
+						String columnName = rsMetaData.getColumnLabel(i);
+						String columnType = rsMetaData.getColumnTypeName(i);
+
+						columnInfo.put("field", columnName);
+						columnInfo.put("title", formatTitle(columnName));
+						columnInfo.put("editable", false);
+						columnInfo.put("type", getFrontendType(columnType));
+						columnMetadata.add(columnInfo);
+					}
+				}
+			}
+			return columnMetadata;
+		});
+	}
 
 
 }

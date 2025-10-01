@@ -1,5 +1,7 @@
 package com.wks.caseengine.service;
 
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface CrackerReportService {
@@ -20,4 +22,7 @@ public interface CrackerReportService {
 	public AOPMessageVM getFindingSteamValuesReport(String mode,String plantId,String year);
 	public AOPMessageVM getFurnaceReport( String plantId, String year, String reportType);
 	public AOPMessageVM getRunLengthDataSet( String plantId, String year, String reportType);
+	public AOPMessageVM calculateMonthWiseRawData( String plantId, String year);
+	public AOPMessageVM getMonthWiseRawDataByMethod(String plantId,String year,String mode,String method);
+	
 }

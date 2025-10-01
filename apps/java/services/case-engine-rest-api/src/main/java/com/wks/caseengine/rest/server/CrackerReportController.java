@@ -95,5 +95,15 @@ public class CrackerReportController {
 	public AOPMessageVM getRunLengthDataSet(@RequestParam String plantId,@RequestParam String year, @RequestParam String reportType) {
 		return crackerReportService.getRunLengthDataSet(plantId,year,reportType);
 	}
+	
+	@GetMapping(value="/calculate-month-wise-raw-data")
+	public AOPMessageVM calculateMonthWiseRawData(@RequestParam String year,@RequestParam String plantId){
+		return	 crackerReportService.calculateMonthWiseRawData(year,plantId);	
+	}
+	
+	@GetMapping(value="/month-wise-raw-data-by-method")
+	public AOPMessageVM getMonthWiseRawDataByMethod(@RequestParam String plantId,@RequestParam String year, @RequestParam(required=false) String mode, @RequestParam(required=false) String method) {
+		return crackerReportService.getMonthWiseRawDataByMethod(plantId,year,mode,method);
+	}
 
 }
