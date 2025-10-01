@@ -106,11 +106,11 @@ const ProductionVolumeDataBasisPe = () => {
     
     // Common date patterns
     const datePatterns = [
-      /^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/,  // DD-MM-YYYY or DD/MM/YYYY
-      /^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/,  // YYYY-MM-DD or YYYY/MM/DD
-      /^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}/,  // "Apr 1, 2025" format
-      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, // ISO format
-    ]
+    /^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/,  // DD-MM-YYYY or DD/MM/YYYY
+    /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/,  // YYYY-MM-DD or YYYY/MM/DD
+    /^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}/,  // "Apr 1, 2025" format
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, // ISO format
+  ]
     
     // Check if string matches common date patterns
     const matchesPattern = datePatterns.some(pattern => pattern.test(str.trim()))
