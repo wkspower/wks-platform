@@ -72,26 +72,7 @@ const ProductionVolumeDataBasisPe = () => {
   // ---------------------------------------------------------------------------
   // Infer columns from row objects (returns [{ field, title, type }])
   // ---------------------------------------------------------------------------
-  function inferColumnsFromRows(rows = []) {
-    const fieldSet = new Set()
-    rows.forEach((r) => {
-      if (!r || typeof r !== 'object') return
-      Object.keys(r).forEach((k) => fieldSet.add(k))
-    })
-
-    const fields = Array.from(fieldSet)
-
-    const cols = fields.map((f) => {
-      let detectedType = 'string'
-      for (const r of rows) {
-        if (!r) continue
-        const v = r?.[f]
-        if (v === undefined || v === null || v === '') continue
-        if (typeof v === 'number') {
-          detectedType = 'number'
-          break
-        }
-        function isValidDateString(str) {
+  function isValidDateString(str) {
     if (typeof str !== 'string') return false
     
     // Common date patterns
@@ -112,6 +93,26 @@ const ProductionVolumeDataBasisPe = () => {
     
     return matchesPattern
   }
+  function inferColumnsFromRows(rows = []) {
+    const fieldSet = new Set()
+    rows.forEach((r) => {
+      if (!r || typeof r !== 'object') return
+      Object.keys(r).forEach((k) => fieldSet.add(k))
+    })
+
+    const fields = Array.from(fieldSet)
+
+    const cols = fields.map((f) => {
+      let detectedType = 'string'
+      for (const r of rows) {
+        if (!r) continue
+        const v = r?.[f]
+        if (v === undefined || v === null || v === '') continue
+        if (typeof v === 'number') {
+          detectedType = 'number'
+          break
+        }
+        
      const d = new Date(v)
         if (!isNaN(d.getTime()) && isValidDateString(v)) {
           detectedType = 'date'
