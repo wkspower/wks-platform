@@ -211,7 +211,7 @@ public class ExcelServiceImpl implements ExcelService {
                             } else {
                                 String method = (String) table.get("method");
                                 System.out.println("method "+method);
-                                rows = excelDataService.getModeWiseNormsData(plantId, year,
+                                rows = excelDataService.getMonthWiseRawDataByMethod(plantId, year,
                                         dataInput, method, headers);
 
                             }

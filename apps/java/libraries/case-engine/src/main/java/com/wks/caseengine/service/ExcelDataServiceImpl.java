@@ -595,40 +595,34 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     }
 
     @Override
-    public List<List<Object>> getModeWiseNormsData(String plantId, String year, String mode, String method,
+    public List<List<Object>> getMonthWiseRawDataByMethod(String plantId, String year, String mode, String method,
             List<String> headers) {
 
-        AOPMessageVM aopMessageVM = modeWiseNormsService.getModeWiseNormsData(year, plantId, mode, method);
+        AOPMessageVM aopMessageVM = crackerReportService.getMonthWiseRawDataByMethod(
+                plantId,
+                year, mode,method);
 
         Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
-        List<ModeWiseNormsDTO> modeWiseNormsList = (List<ModeWiseNormsDTO>) responseMap
-                .get("mcuNormsValueDTOList");
+        List<Map<String, Object>> finalNormsProduction = (List<Map<String, Object>>) responseMap
+                .get("data");
 
         List<List<Object>> dataList = new ArrayList<>();
         // Data rows
-        for (ModeWiseNormsDTO dto : modeWiseNormsList) {
-            List<Object> list = new ArrayList<>();
-            for (String fieldName : headers) {
-                try {
-                    Field field = dto.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true); // in case field is private
-                    Object rawValue = field.get(dto); // get as Object
-
-                    String value = rawValue != null ? String.valueOf(rawValue) : null;
-                    list.add(value);
-
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    // If field doesn't exist or not accessible, add null
-                    list.add(null);
+        if (finalNormsProduction != null) {
+            for (Map<String, Object> map : finalNormsProduction) {
+                List<Object> list = new ArrayList<>();
+                for (String header : headers) {
+                    list.add(map.get(header));
                 }
+                dataList.add(list);
             }
-            dataList.add(list);
-
         }
 
         return dataList;
 
     }
+
+    
 
     @Override
     public List<List<Object>> getFinalNormsReport(String plantId, String year, String dataInput,

@@ -37,7 +37,7 @@ public interface ExcelDataService {
     List<List<Object>> getFinalNormsProductionReport(String plantId, String year, String dataInput,
             List<String> headers);
 
-    List<List<Object>> getModeWiseNormsData(String plantId, String year, String mode, String method,
+    List<List<Object>> getMonthWiseRawDataByMethod(String plantId, String year, String mode, String method,
             List<String> headers);
 
     List<List<Object>> getFinalNormsReport(String plantId, String year, String dataInput, List<String> headers);
