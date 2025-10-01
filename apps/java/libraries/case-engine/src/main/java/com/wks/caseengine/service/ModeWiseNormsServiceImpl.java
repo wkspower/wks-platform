@@ -92,7 +92,7 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 				modeWiseNormsDTO.setJanuary(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0);
 				modeWiseNormsDTO.setFebruary(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0);
 				modeWiseNormsDTO.setMarch(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0);
-				modeWiseNormsDTO.setRemark(row[22] != null ? row[22].toString() : null); // Was row[21]
+				modeWiseNormsDTO.setRemark(row[22] != null ? row[22].toString() : ""); // Was row[21]
 				modeWiseNormsDTO.setIsEditable(row[24] != null ? Boolean.valueOf(row[24].toString()) : null); // Was
 																												// row[23]
 				modeWiseNormsDTO.setIsChecked(row[25] != null ? Boolean.valueOf(row[25].toString()) : null); // Was
