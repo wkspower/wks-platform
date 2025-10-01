@@ -445,8 +445,11 @@ const SelectivityData = (props) => {
     })
 
     try {
-      if (props?.configType === 'grades') {
+     if (props?.configType === 'grades') {
       await DataService.getRecipeExcel(keycloak)
+    } else if (props?.configType === 'ShutdownNorms') {
+      // Add shutdown rate specific download
+      await DataService.getShutdownRateExcel(keycloak)
     } else if (props?.tabIndex != 1) {
       await DataService.getConfigurationExcel(keycloak, gradeId)
     } else {
@@ -503,6 +506,9 @@ const SelectivityData = (props) => {
       var response
       if (props?.configType === 'grades') {
       response = await DataService.saveRecipeExcel(rawFile, keycloak)
+    } else if (props?.configType === 'ShutdownNorms') {
+      // Add shutdown rate specific upload
+      response = await DataService.saveShutdownRateExcel(rawFile, keycloak)
     } else if (props?.tabIndex != 1) {
       response = await DataService.saveConfigurationExcel(rawFile, keycloak)
     } else {

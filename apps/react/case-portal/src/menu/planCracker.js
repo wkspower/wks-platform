@@ -208,22 +208,22 @@ const planCracker = {
           breadcrumbs: true,
         },
 
-        {
-          id: 'intermediate-values',
-          title: i18n.t('menu.intermediateValuesDataSet'),
-          type: 'item',
-          url: '/reports/intermediate-values',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-        {
-          id: 'raw-data',
-          title: i18n.t('menu.rawData'),
-          type: 'item',
-          url: '/reports/raw-data',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
+        // {
+        //   id: 'intermediate-values',
+        //   title: i18n.t('menu.intermediateValuesDataSet'),
+        //   type: 'item',
+        //   url: '/reports/intermediate-values',
+        //   icon: icons.IconReport,
+        //   breadcrumbs: true,
+        // },
+        // {
+        //   id: 'raw-data',
+        //   title: i18n.t('menu.rawData'),
+        //   type: 'item',
+        //   url: '/reports/raw-data',
+        //   icon: icons.IconReport,
+        //   breadcrumbs: true,
+        // },
         {
           id: 'utilities-norms-basis',
           title: i18n.t('menu.utilitiesNormsBasis'),

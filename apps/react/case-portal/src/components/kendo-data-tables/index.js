@@ -191,6 +191,10 @@ const KendoDataTables = ({
       setEdit({})
       return
     }
+    if (e.dataItem?.isTotal) {
+    setEdit({})
+    return
+  }
 
     setRows(
       rows.map((r) => ({
@@ -205,6 +209,9 @@ const KendoDataTables = ({
       setIsRowEdited(true)
 
       const { dataItem, field, value } = e
+      if (dataItem?.isTotal) {
+      return
+    }
 
       if (dataItem?.field === 'Particulars') return
       if (dataItem?.field === 'ParticularsType') return
@@ -417,14 +424,51 @@ const KendoDataTables = ({
   }
 
   // console.log('rows?.length', rows?.length)
+const MaterialDisplayNameCell = (props) => {
+  const { dataItem, field, tdProps, children } = props
+  const value = dataItem[field]
+  const method = dataItem.Method
 
+  // Define colors based on Method
+  let color = 'inherit'
+
+  switch (method) {
+    case 'BestAchieved(MinCC)':
+      color = '#2e7d32'  // Dark green text
+      break
+    case 'Expression':
+      color = '#f51717ff' // Dark yellow/orange text
+      break
+    case 'BestAchieved(Indv)':
+      color = '#1565c0' // Dark blue text
+      break
+    default:
+      // No special styling for other methods
+      break
+  }
+
+  return (
+    <td
+      {...tdProps}
+      title={value}
+      style={{
+        color,
+      //  fontWeight: method ? 'bold' : 'normal',
+        ...tdProps.style
+      }}
+    >
+      {children}
+    </td>
+  )
+}
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
     const hasError = dataItem?.isError
+    const isTotal = dataItem?.isTotal
     const rowClassName = hasError
       ? 'error-row'
-      : isDisabled
+      : isDisabled || isTotal
         ? 'custom-disabled-row'
         : className
 
@@ -1382,6 +1426,25 @@ const KendoDataTables = ({
                     />
                   )
                 }
+                
+if (col.field === 'materialDisplayName' && col.useMethodColors) {
+  return (
+    <GridColumn
+      key={col.field}
+      field={col.field}
+      title={col.title || col.headerName}
+      width={col.widthT}
+      hidden={col.hidden}
+      editable={col?.editable ? true : false}
+      headerClassName={isActive ? 'active-column' : ''}
+      cells={{
+        data: MaterialDisplayNameCell,
+        headerCell: SimpleHeaderWithTooltip,
+      }}
+      columnMenu={ColumnMenuCheckboxFilter}
+    />
+  )
+}
                 if (col?.field === 'DisplayName') {
                   return (
                     <GridColumn

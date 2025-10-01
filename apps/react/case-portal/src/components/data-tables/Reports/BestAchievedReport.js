@@ -33,12 +33,16 @@ const BestAchievedReport = () => {
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
+  const [calculating, setCalculating] = useState(false) // Add this line
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear } = dataGridStore
+  const { plantID, yearChanged, oldYear, verticalChange} = dataGridStore
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || ''
+  const isCracker = lowerVertName === 'cracker'
 
   useEffect(() => {
     return () => {
@@ -455,6 +459,51 @@ const BestAchievedReport = () => {
   const fileName = `Best Achieved Norms(Min CC) ${currentDateTime}.xlsx`
 
   const renderTitle = (t) => t
+ 
+  const calculateMonthWiseData = async () => {
+    try {
+      setCalculating(true)
+      
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      let plantId = null
+
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      if (!plantId || !year) {
+        throw new Error('Plant ID or year not found in localStorage')
+      }
+
+      // Call the calculate API
+      const calculateResult = await CrackerReportsApiDataService.calculateMonthWiseRawData(keycloak)
+
+      if (calculateResult?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Calculation completed successfully!',
+          severity: 'success',
+        })
+
+        // Refresh all grids after calculation
+        await fetchAllGrids()
+      } else {
+        throw new Error(calculateResult?.message || 'Calculation failed')
+      }
+
+    } catch (error) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error.message || 'Calculation failed',
+        severity: 'error',
+      })
+      console.error('Calculation Error:', error)
+    } finally {
+      setCalculating(false)
+    }
+  }
 
   return (
     <div>
@@ -491,7 +540,18 @@ const BestAchievedReport = () => {
         })}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      <Box display='flex' justifyContent='flex-end' mb='2px' gap={1}>
+       {isCracker && (
+          <Button
+            variant='contained'
+            onClick={calculateMonthWiseData}
+            disabled={calculating || loading}
+            className='btn-save'
+            color='primary'
+          >
+            {calculating ? 'Calculating...' : 'Calculate'}
+          </Button>
+        )}
         <Button
           variant='contained'
           onClick={exportAllGrids}

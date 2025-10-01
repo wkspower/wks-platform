@@ -17,6 +17,7 @@ export const CrackerReportsApiDataService = {
   miisData,
   furnaceRawData,
   runLengthDataSet,
+  calculateMonthWiseRawData,
 }
 
 async function runLengthDataSet(keycloak, reportType, PLANT_ID, AOP_YEAR) {
@@ -145,6 +146,26 @@ async function getRawCatcame(keycloak, periodFrom, periodTo) {
   const year = localStorage.getItem('year')
 
   let url = `${Config.CaseEngineUrl}/task/report-best-achieved-catcam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+async function calculateMonthWiseRawData(keycloak) {
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const year = localStorage.getItem('year')
+
+  let url = `${Config.CaseEngineUrl}/task/calculate-month-wise-raw-data?plantId=${plantId}&year=${year}`
 
   const headers = {
     Accept: 'application/json',

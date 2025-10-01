@@ -111,7 +111,8 @@ const ConfigurationTable = () => {
       if (
         lowerVertName == verticalEnums.MEG ||
         lowerVertName == verticalEnums.CRACKER ||
-        lowerVertName == verticalEnums.ELASTOMER
+        lowerVertName == verticalEnums.ELASTOMER ||
+        lowerVertName === 'aromatics'
       ) {
         data = data?.filter((item) => item.normType !== 'Report Manual Entry')
         const formattedData = data.map((item, index) => ({
@@ -608,9 +609,11 @@ const ConfigurationTable = () => {
             aria-controls='meg-grid-content'
             id='meg-grid-header'
           >
-            <Typography className='grid-title'>
-              AOP Historical Period Basis
-            </Typography>
+            {lowerVertName !== 'cracker' && (
+    <Typography className='grid-title'>
+      AOP Historical Period Basis
+    </Typography>
+  )}
           </CustomAccordionSummary>
           <CustomAccordionDetails>
             <Box
@@ -688,7 +691,7 @@ const ConfigurationTable = () => {
               label='AOP Design Basis'
               multiline
               // minRows={isAccordionExpanded ? 4 : 20}
-              minRows={2}
+              minRows={lowerVertName === 'cracker' ? 6 : 2}
               fullWidth
               margin='normal'
               variant='outlined'

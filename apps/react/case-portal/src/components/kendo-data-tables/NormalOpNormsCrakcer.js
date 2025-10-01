@@ -20,6 +20,8 @@ import { useSession } from 'SessionStoreContext'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import CrakcerConstants from './CrackerConstants'
 import KendoDataTables from './index'
+import SelectivityData from './SelectivityData'
+import { DataService } from 'services/DataService'
 
 // Constants
 const MONTHS = [
@@ -106,6 +108,8 @@ const NormalOpNormsScreenCracker = () => {
 
   const [calculationObject, setCalculationObject] = useState({})
   const [selectedTab, setSelectedTab] = useState(0)
+  const [productionRows, setProductionRows] = useState([])
+  const [productionRowsConstants, setProductionRowsConstants] = useState([])
 
   const apiRef = useGridApiRef()
 
@@ -308,6 +312,7 @@ const NormalOpNormsScreenCracker = () => {
         title: 'Particulars',
         widthT: 130,
         editable: false,
+        useMethodColors: true,
       },
       { field: 'uom', title: 'UOM', widthT: 60, editable: false },
       ...MONTHS.map((m, i) => ({
@@ -360,7 +365,54 @@ const NormalOpNormsScreenCracker = () => {
     ],
     [headerMap],
   )
+    const fetchConfigurationData = useCallback(async (gradeId = null) => {
+    setProductionRows([])
+    setLoading(true)
 
+    try {
+      const data = await DataService.getCatalystSelectivityData(keycloak, gradeId)
+      const filteredData = data?.filter((item) => item.normType !== 'Report Manual Entry')
+      const formattedData = filteredData.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: index,
+        originalRemark: item.remarks,
+        srNo: index + 1,
+        Particulars: item.normType,
+      }))
+      setProductionRows(formattedData)
+    } catch (error) {
+      console.error('Error fetching configuration data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak])
+
+  const fetchConstantsData = useCallback(async () => {
+    setProductionRowsConstants([])
+    try {
+      const constantsRes = await DataService.getCatalystSelectivityDataConstants(keycloak)
+      if (constantsRes?.code !== 200) {
+        setProductionRowsConstants([])
+        return
+      }
+
+      const data = constantsRes?.data
+      const formattedData = data.map((item, index) => ({
+        ...item,
+        idFromApi: item.id,
+        id: index,
+        originalRemark: item.Remarks,
+        srNo: index + 1,
+        Particulars: item.NormTypeName,
+        remarks: item.Remarks,
+      }))
+
+      setProductionRowsConstants(formattedData)
+    } catch (error) {
+      console.error('Error fetching constants data:', error)
+    }
+  }, [keycloak])
   // permission helper: if old year, getAdjustedPermissions blocks actions
   const getAdjustedPermissions = useCallback((permissions, isOldYearFlag) => {
     if (isOldYearFlag != 1) return permissions
@@ -506,19 +558,29 @@ const NormalOpNormsScreenCracker = () => {
 
   // --- Data fetchers ---
   const fetchFinalNorms = useCallback(async () => {
-    try {
-      const response =
-        await NormalOperationNormsApiService.getfinalNorms(keycloak)
-      if (response?.code !== 200) {
-        setRowsBestFinalNorms([])
-        return
-      }
-      const mapped = response?.data?.mcuNormsValueDTOList || []
-      setRowsBestFinalNorms(mapApiRowToGrid(mapped, ''))
-    } catch (err) {
-      console.error('fetchFinalNorms', err)
+  try {
+    const response = await NormalOperationNormsApiService.getfinalNorms(keycloak)
+    if (response?.code !== 200) {
+      setRowsBestFinalNorms([])
+      return
     }
-  }, [keycloak])
+    const mapped = response?.data?.mcuNormsValueDTOList || []
+    
+    // Map the data and ensure Method field is included
+    const mappedWithMethod = mapped.map((item, index) => ({
+      ...item,
+      idFromApi: item.id,
+      id: `${index}`,
+      originalRemark: item.remarks || '',
+      Particulars: item.normType || item.normParameterTypeDisplayName,
+      Method: item.Method || item.method 
+    }))
+    
+    setRowsBestFinalNorms(mappedWithMethod)
+  } catch (err) {
+    console.error('fetchFinalNorms', err)
+  }
+}, [keycloak])
 
   const fetchModeData = useCallback(
     async (gradeIdParam) => {
@@ -594,8 +656,19 @@ const NormalOpNormsScreenCracker = () => {
           { name: 'Monthly', displayName: 'Monthly', gradeId: 'Monthly' },
         ])
 
-        const promises = [fetchModeData(gId)]
-        if (selectedTab === 2) promises.push(fetchFinalNorms())
+        const promises = []
+        
+        // Load data based on selected tab
+        if (selectedTab === 0) {
+          promises.push(fetchConfigurationData(gId))
+        } else if (selectedTab === 1) {
+          promises.push(fetchConstantsData())
+        } else if (selectedTab === 3) {
+          promises.push(fetchModeData(gId))
+        } else if (selectedTab === 4) {
+          promises.push(fetchFinalNorms())
+        }
+        
         await Promise.all(promises)
       } catch (err) {
         console.error('fetchAllData', err)
@@ -603,7 +676,7 @@ const NormalOpNormsScreenCracker = () => {
         setLoading(false)
       }
     },
-    [fetchModeData, fetchFinalNorms, selectedTab],
+    [fetchModeData, fetchFinalNorms, fetchConfigurationData, fetchConstantsData, selectedTab],
   )
 
   useEffect(() => {
@@ -953,7 +1026,7 @@ const NormalOpNormsScreenCracker = () => {
     (_, newValue) => {
       setModifiedCells({})
       setSelectedTab(newValue)
-      if (newValue === 0) fetchAllData(gradeId)
+      fetchAllData(gradeId)
     },
     [gradeId, fetchAllData],
   )
@@ -965,7 +1038,7 @@ const NormalOpNormsScreenCracker = () => {
     padding: '9px',
     minHeight: '12px',
   }
-  const tabLabels = ['Criteria', 'Norms Selection', 'Final monthly norms']
+  const tabLabels = ['Configuration', 'Criteria', 'Criteria for Best Achieved', 'Norms Selection', 'Final monthly norms']
 
   // UI render
   return (
@@ -993,8 +1066,35 @@ const NormalOpNormsScreenCracker = () => {
           ))}
         </Tabs>
       </Box>
+      {selectedTab === 0 && (
+        <SelectivityData
+          rows={productionRows}
+          loading={loading}
+          fetchData={fetchConfigurationData}
+          setRows={setProductionRows}
+          configType='cracker_configuration'
+          groupBy='Particulars'
+          tabIndex='0'
+          setGradeId={handleGradeChange}
+        />
+      )}
+       {selectedTab === 1 && (
+        <SelectivityData
+          rows={productionRowsConstants}
+          loading={loading}
+          fetchData={fetchConstantsData}
+          setRows={setProductionRowsConstants}
+          configType='cracker_constants'
+          groupBy='Particulars'
+          tabIndex='1'
+        />
+      )}
 
-      {selectedTab === 1 && (
+      {/* Criteria Tab */}
+      {selectedTab === 2 && <CrakcerConstants />}
+
+      {/* Norms Selection Tab */}
+      {selectedTab === 3 && (
         <>
           {/* EXTERNAL DROPDOWN */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
@@ -1169,7 +1269,16 @@ const NormalOpNormsScreenCracker = () => {
       )}
 
       {/* FINAL norms tab: final grid is top */}
-      {selectedTab === 2 && (
+      {selectedTab === 4 && (
+        <>
+          {/* Add color-coded legend for Final norms */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2, mb: 2 }}>
+            <Typography component='div' className='grid-title'>
+              <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> - Expression&nbsp;&nbsp;
+              <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> - BestAchieved(MinCC)&nbsp;&nbsp;
+              <span style={{ color: 'blue', fontWeight: 'bold' }}>Blue</span> - BestAchieved(Indv)
+            </Typography>
+          </Box>
         <KendoDataTables
           modifiedCells={modifiedCellsFinalNorms}
           setModifiedCells={setModifiedCellsFinalNorms}
@@ -1195,9 +1304,8 @@ const NormalOpNormsScreenCracker = () => {
           groupBy='Particulars'
           plantID={PLANT_ID}
         />
+         </>
       )}
-
-      {selectedTab === 0 && <CrakcerConstants />}
     </div>
   )
 }

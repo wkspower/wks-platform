@@ -236,6 +236,102 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     fetchData()
   }, [fetchData, oldYear, yearChanged, plantID])
 
+  const downloadExcelForConfiguration = async () => {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel download started!',
+        severity: 'success',
+      })
+  
+      try {
+        let response
+        response = await MaintenanceDetailsApiService.CrackerMaintenanceExport(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } catch (error) {
+        console.error('Error downloading Excel:', error)
+        setSnackbarData({
+          message: 'Failed to download Excel.',
+          severity: 'error',
+        })
+      } finally {
+        setSnackbarOpen(true)
+      }
+    }
+
+ const uploadMaintenance = async (rawFile) => {
+     setLoading(true)
+ 
+     try {
+       let response
+ 
+       response = await MaintenanceDetailsApiService.CrackerMaintenanceImport(
+         rawFile,
+         keycloak,
+         PLANT_ID,
+         AOP_YEAR,
+       )
+ 
+       if (response?.code === 200) {
+         setSnackbarOpen(true)
+         setSnackbarData({
+           message: 'Uploaded Successfully!',
+           severity: 'success',
+         })
+         setModifiedCells({})
+         fetchData()
+       } else if (response?.code === 400 && response?.data) {
+         const byteCharacters = atob(response.data)
+         const byteNumbers = Array.from(byteCharacters, (char) =>
+           char.charCodeAt(0),
+         )
+         const byteArray = new Uint8Array(byteNumbers)
+ 
+         const blob = new Blob([byteArray], {
+           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+         })
+ 
+         const url = window.URL.createObjectURL(blob)
+         const link = document.createElement('a')
+         link.href = url
+         link.setAttribute('download', 'Error File - Maintenance Details.xlsx')
+         document.body.appendChild(link)
+         link.click()
+         link.remove()
+         window.URL.revokeObjectURL(url)
+ 
+         setSnackbarOpen(true)
+         setSnackbarData({
+           message: 'Partial data saved. Error file downloaded.',
+           severity: 'warning',
+         })
+         fetchData()
+       } else {
+         setSnackbarOpen(true)
+         setSnackbarData({
+           message: 'Upload Failed!',
+           severity: 'error',
+         })
+       }
+ 
+       return response
+     } catch (error) {
+       console.error('Error uploading xcel:', error)
+       setSnackbarOpen(true)
+       setSnackbarData({
+         message: 'Unexpected error occurred!',
+         severity: 'error',
+       })
+     } finally {
+       setLoading(false)
+     }
+   }
+ 
+   const handleExcelUpload = (rawFile) => {
+     uploadMaintenance(rawFile)
+   }
   // Helper to generate monthly fields
   const getMonthlyColumns = () => {
     const months = [
@@ -286,6 +382,8 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       saveBtn: false,
       isOldYear: isOldYear,
       allAction: false,
+      uploadExcelBtn: false,
+      downloadExcelBtn:false,
     }
   }
 
@@ -301,8 +399,8 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
           saveWithRemark: false,
           saveBtn: viewOnly ? false : true,
           allAction: true,
-          downloadExcelBtnFromUI: viewOnly ? false : true,
-          ExcelName: `CRAKCER_Maintenance Details`,
+          downloadExcelBtn: true,
+          uploadExcelBtn: true,
           showRefresh: false,
           showCalculate: viewOnly ? false : true,
           showCalculateVisibility: true,
@@ -347,6 +445,8 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         currentRowId={currentRowId}
         note='*Unit of Measurement - Days'
         supressGridHeight={true}
+        handleExcelUpload={handleExcelUpload}
+        downloadExcelForConfiguration={downloadExcelForConfiguration}
       />
     </div>
   )

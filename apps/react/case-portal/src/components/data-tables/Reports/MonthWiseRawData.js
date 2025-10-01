@@ -125,17 +125,55 @@ export default function MonthWiseRawData() {
       for (const mode of MODE_TYPES) {
         try {
           const resp =
-            await NormalOperationNormsApiService.getModeWiseNormsData(
+          await NormalOperationNormsApiService.getModeWiseNormsDataworkflow(
               keycloak,
               grade,
               mode,
             )
           if (resp?.code !== 200) continue
 
-          const raw = resp.data?.mcuNormsValueDTOList || []
+        // Get data and columns from response
+        const raw = resp.data?.data || [] // Changed from mcuNormsValueDTOList to data
+        const backendCols = resp.data?.columns || null
+
+        let cols = []
+        let enriched = []
+
+        if (backendCols && backendCols.length > 0) {
+          // Use backend column definitions
+          cols = backendCols
+          enriched = enrichColumns(cols)
+        } else {
+          // Fallback: generate columns from first row if no backend columns
           const first = raw[0] || {}
-          const cols = columnsFromFirstRow(first)
-          const enriched = enrichColumns(cols)
+          cols = Object.keys(first).map((field) => {
+            const sample = first[field]
+            let type = 'string'
+            
+            if (typeof sample === 'number') {
+              type = 'number'
+            } else if (typeof sample === 'boolean') {
+              type = 'boolean'
+            } else if (typeof sample === 'string' && sample.split('-').length === 3) {
+              type = 'date'
+            } else if (
+              sample !== undefined &&
+              sample !== null &&
+              sample !== '' &&
+              !isNaN(sample)
+            ) {
+              type = 'number'
+            }
+            
+            return { 
+              field, 
+              title: field.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim(), 
+              type,
+              editable: false
+            }
+          })
+          enriched = enrichColumns(cols)
+        }
 
           const rowsWithId = raw.map((r, idx) => {
             const parsed = { ...r }
