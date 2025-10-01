@@ -187,6 +187,7 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 				mcuNormsValue.setPlantFkId(UUID.fromString(plantId));
 				mcuNormsValue.setSiteFkId(plant.getSiteFkId());
 				mcuNormsValue.setVerticalFkId(plant.getVerticalFKId());
+				mcuNormsValue.setRemarks(modeWiseNormsDTO.getRemark());
 				mcuNormsValueList.add(mcuNormsValueRepository.save(mcuNormsValue));
 			}
 
