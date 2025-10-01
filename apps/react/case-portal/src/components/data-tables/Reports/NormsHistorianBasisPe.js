@@ -95,7 +95,7 @@ const ProductionVolumeDataBasisPe = () => {
     const matchesPattern = datePatterns.some(pattern => pattern.test(str.trim()))
     
     // Additional check: if it contains only letters and numbers without date separators, it's likely not a date
-    if (!matchesPattern && !/[-\/,\s:]/.test(str)) {
+     if (!matchesPattern && !/[-/,\s:]/.test(str)) {
       return false
     }
     
