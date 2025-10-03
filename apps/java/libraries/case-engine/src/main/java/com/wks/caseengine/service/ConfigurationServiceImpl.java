@@ -1138,9 +1138,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		String newValue = (attributeValue != null) ? attributeValue.toString() : null;
 
 		// Determine if either field changed meaningfully
-		boolean remarksChanged = !isBlank(entityRemarks)
-		    && !isBlank(dtoRemarks)
-		    && !entityRemarks.equalsIgnoreCase(dtoRemarks);
+		boolean remarksChanged = !isBlank(dtoRemarks);
+		  
 
 		boolean attributeChanged = newValue != null
 		    && !newValue.equalsIgnoreCase(existingValue);
