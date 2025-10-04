@@ -74,4 +74,10 @@ public class CrackerConfiguration {
     
     @Column(name = "isVisible")
     private Boolean isVisible;
+    
+    @Column(name = "ActualRunLength")
+    private Double actualRunLength;
+    
+    @Column(name = "Reduction")
+    private Double reduction;
 }

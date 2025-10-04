@@ -433,6 +433,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						crackerConfiguration.setShutDownStartDate(crackerConfigurationDTO.getShutDownStartDate());
 						crackerConfiguration.setTaEndDate(crackerConfigurationDTO.getTaEndDate());
 						crackerConfiguration.setTaStartDate(crackerConfigurationDTO.getTaStartDate());
+						crackerConfiguration.setActualRunLength(crackerConfigurationDTO.getActualRunLength());	
+						crackerConfiguration.setReduction(crackerConfigurationDTO.getReduction());
 						crackerConfigurationList.add(crackerConfigurationRepository.save(crackerConfiguration));
 					}
 				}
@@ -908,12 +910,13 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				dto.setTaEndDate(row[6] != null ? (Date) row[6] : null);
 				dto.setShutDownStartDate(row[7] != null ? (Date) row[7] : null);
 				dto.setShutDownEndDate(row[8] != null ? (Date) row[8] : null);
-
-				dto.setPostCrDays(row[9] != null ? ((Number) row[9]).intValue() : null);
-				dto.setPreCrDays(row[10] != null ? ((Number) row[10]).intValue() : null);
-				dto.setIsCr(row[11] != null ? (Boolean) row[11] : null);
-	            dto.setRemarks(row[14] != null ? row[14].toString() : "");
-	            Object val = row[16];
+				dto.setActualRunLength(row[9] != null ? (Double) row[9] : null);
+				dto.setReduction(row[10] != null ? (Double) row[10] : null);
+				dto.setPostCrDays(row[11] != null ? ((Number) row[11]).intValue() : null);
+				dto.setPreCrDays(row[12] != null ? ((Number) row[12]).intValue() : null);
+				dto.setIsCr(row[13] != null ? (Boolean) row[13] : null);
+	            dto.setRemarks(row[16] != null ? row[16].toString() : "");
+	            Object val = row[18];
 	            if (val instanceof Number) {
 	                int i = ((Number) val).intValue();
 	                dto.setIsEditable(i != 0);

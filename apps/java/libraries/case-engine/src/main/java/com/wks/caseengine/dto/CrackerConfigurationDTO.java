@@ -21,7 +21,6 @@ public class CrackerConfigurationDTO {
 	private UUID id;
     private String name;
     private String displayName;
-   
     private Integer postCrDays;
     private Integer preCrDays;
     private Boolean isCr;
@@ -29,20 +28,13 @@ public class CrackerConfigurationDTO {
     private String aopYear;
     private String remarks;
     private Integer displaySeq;
-    
     private Date ibrStartDate;
-
     private Date ibrEndDate;
-
     private Date taStartDate;
-
     private Date taEndDate;
-
     private Date shutDownStartDate;
-
     private Date shutDownEndDate;
     private Boolean isEditable;
-
-
-
+    private Double actualRunLength;
+    private Double reduction;
 }
