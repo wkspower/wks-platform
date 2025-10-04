@@ -1,4 +1,4 @@
-import { Backdrop, Box, CircularProgress } from '@mui/material'
+import { Backdrop, Box, CircularProgress, TextField, Button } from '@mui/material'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
@@ -16,6 +16,9 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian.js'
 import { Typography } from '../../../node_modules/@mui/material/index.js'
+import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']
@@ -37,6 +40,34 @@ const DecokingConfig = () => {
   const [currentRemarkRunLength, setCurrentRemarkRunLength] = useState('')
   const [currentRowIdRunLength, setCurrentRowId3] = useState(null)
   const [calculationObject, setCalculationObject] = useState([])
+//my chnage 
+  const [modifiedCellsSdTa, setModifiedCellsSdTa] = React.useState({})
+  const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
+  const [globalTaStartDate, setGlobalTaStartDate] = useState(null)
+  const [globalTaEndDate, setGlobalTaEndDate] = useState(null)
+  useEffect(() => {
+  if (!globalTaStartDate || !globalTaEndDate) return
+
+  const updatedRows = ibrScreen2Rows.map(row => ({
+    ...row,
+    taStartDate: globalTaStartDate,
+    taEndDate: globalTaEndDate
+  }))
+  
+  setIbrScreen2Rows(updatedRows)
+  
+  // Update modified cells for saving
+  const newModifiedCells = { ...modifiedCellsSdTa }
+  updatedRows.forEach(row => {
+    newModifiedCells[row.id] = {
+      ...newModifiedCells[row.id],
+      ...row,
+      taStartDate: globalTaStartDate,
+      taEndDate: globalTaEndDate
+    }
+  })
+  setModifiedCellsSdTa(newModifiedCells)
+}, [globalTaStartDate, globalTaEndDate, ibrScreen2Rows])
   const handleRemarkCellClick2 = (dataItem) => {
     setCurrentRemarkSdTa(dataItem.remarks || '')
     setCurrentRowId2(dataItem.id)
@@ -48,10 +79,9 @@ const DecokingConfig = () => {
     setRemarkDialogOpenRunLength(true)
   }
   const [ibrScreen1Rows, setIbrScreen1Rows] = useState([])
-  const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
+  
   const [ibrScreen3Rows, setIbrScreen3Rows] = useState([])
   const [runningDurationRows, setRunningDurationRows] = useState([])
-  const [modifiedCellsSdTa, setModifiedCellsSdTa] = React.useState({})
   const [modifiedCellsRunLength, setModifiedCellsRunLength] = React.useState({})
   const allMonths = [
     'N/A',
@@ -135,6 +165,8 @@ const DecokingConfig = () => {
                 taEndDate: toDateObject(item.taEndDate),
                 shutDownStartDate: toDateObject(item.shutDownStartDate),
                 shutDownEndDate: toDateObject(item.shutDownEndDate),
+                actualRunLength: item.actualRunLength || null,
+                reduction: item.reduction || null,
               }))
 
               setRowsForTab(currentTab, processedData, 2)
@@ -325,7 +357,7 @@ const DecokingConfig = () => {
       //   setLoading(false)
       //   return
       // }
-      const requiredFields = ['idFromApi', 'remarks']
+      const requiredFields = ['idFromApi']
 
       var rawData1 = getRows('IBR Plan')[2]
       // Overlap validation
@@ -397,6 +429,8 @@ const DecokingConfig = () => {
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
         remarks: row.remarks || '',
         isCr: row?.isCr ? true : false,
+        actualRunLength: row?.actualRunLength ? Number(row.actualRunLength) : null,
+        reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
       const response = await DataService.postIbr(plantId, payload, keycloak)
@@ -501,6 +535,9 @@ const DecokingConfig = () => {
       allAction: true,
       showTitleName: true,
       showAccordian: true,
+      showCalculate: true,
+      showCalculateVisibility:
+        Object.keys(calculationObject || {}).length > 0 ? true : false,
     },
     isOldYear,
   )
@@ -612,6 +649,48 @@ const DecokingConfig = () => {
       setLoading(false)
     }
   }
+  const handleCalculateSdTa = async () => {
+  setLoading(true)
+  try {
+    const year = localStorage.getItem('year')
+    const storedPlant = localStorage.getItem('selectedPlant')
+    let plantId = ''
+    if (storedPlant) {
+      const parsedPlant = JSON.parse(storedPlant)
+      plantId = parsedPlant.id
+    }
+    
+    const data = await DataService.handleCalculateSdTaActivities(
+      plantId,
+      year,
+      keycloak,
+    )
+    
+    if (data?.code == 200) {
+      fetchData(2) // Refresh screen 2 data
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'SDTA data refreshed successfully!',
+        severity: 'success',
+      })
+    } else {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to refresh SDTA data!',
+        severity: 'error',
+      })
+    }
+  } catch (error) {
+    console.error('Error calculating SDTA data:', error)
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Error occurred while refreshing data!',
+      severity: 'error',
+    })
+  } finally {
+    setLoading(false)
+  }
+}
   const handleCalculate = async () => {
     setLoading(true)
     try {
@@ -652,75 +731,109 @@ const DecokingConfig = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <>
-        <>
-          <SDTAActivitiesGrid
-            columns={ibrPlanColumns}
-            rows={getRows('IBR Plan')[2]}
-            setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
-            fetchData={fetchData}
-            handleRemarkCellClick={handleRemarkCellClick2}
-            remarkDialogOpen={remarkDialogOpenSdTa}
-            currentRemark={currentRemarkSdTa}
-            setCurrentRemark={setCurrentRemarkSdTa}
-            currentRowId={currentRowIdSdTa}
-            snackbarData={snackbarData}
-            snackbarOpen={snackbarOpen}
-            setSnackbarOpen={setSnackbarOpen}
-            setSnackbarData={setSnackbarData}
-            modifiedCells={modifiedCellsSdTa}
-            allMonths={allMonths}
-            setModifiedCells={setModifiedCellsSdTa}
-            permissions={adjustedPermissionsSdTa}
-            saveChanges={saveChangesSdTa}
-            setRemarkDialogOpen={setRemarkDialogOpenSdTa}
-            rowClass={rowClass}
-          />
+      
+      <LocalizationProvider dateAdapter={AdapterMoment}>
+  <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Typography
+        className='grid-title'
+        sx={{ whiteSpace: 'nowrap' }}
+      >
+        TA Start Date
+      </Typography>
+      <DatePicker
+        id='global-ta-start-date'
+        format='dd-MM-yyyy'
+        value={globalTaStartDate}
+        onChange={(e) => setGlobalTaStartDate(e.value)}
+        style={{ height: '80px' }}
+        size={'medium'}
+      />
+    </Box>
+    
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Typography
+        className='grid-title'
+        sx={{ whiteSpace: 'nowrap' }}
+      >
+        TA End Date
+      </Typography>
+      <DatePicker
+        id='global-ta-end-date'
+        format='dd-MM-yyyy'
+        value={globalTaEndDate}
+        onChange={(e) => setGlobalTaEndDate(e.value)}
+        style={{ height: '80px' }}
+        size={'medium'}
+      />
+    </Box>
+  </Box>
+</LocalizationProvider>
 
-          <FurnaceRunLengthGrid
-            columns={ibrGridThree}
-            rows={getRows('IBR Plan')[3]}
-            setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
-            fetchData={fetchData}
-            handleRemarkCellClick={handleRemarkCellClickRunLength}
-            remarkDialogOpen={remarkDialogOpenRunLength}
-            currentRemark={currentRemarkRunLength}
-            setCurrentRemark={setCurrentRemarkRunLength}
-            currentRowId={currentRowIdRunLength}
-            snackbarData={snackbarData}
-            snackbarOpen={snackbarOpen}
-            setSnackbarOpen={setSnackbarOpen}
-            setSnackbarData={setSnackbarData}
-            modifiedCells={modifiedCellsRunLength}
-            allMonths={allMonths}
-            setModifiedCells={setModifiedCellsRunLength}
-            permissions={adjustedPermissionsRunLength}
-            saveChanges={saveChangesRunLength}
-            setRemarkDialogOpen={setRemarkDialogOpenRunLength}
-            handleExcelUpload={handleExcelUpload}
-            downloadExcelForConfiguration={downloadExcelForConfiguration}
-            handleCalculate={handleCalculate}
-          />
+      <SDTAActivitiesGrid
+        columns={ibrPlanColumns}
+        rows={getRows('IBR Plan')[2]}
+        setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
+        fetchData={fetchData}
+        handleRemarkCellClick={handleRemarkCellClick2}
+        remarkDialogOpen={remarkDialogOpenSdTa}
+        currentRemark={currentRemarkSdTa}
+        setCurrentRemark={setCurrentRemarkSdTa}
+        currentRowId={currentRowIdSdTa}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        modifiedCells={modifiedCellsSdTa}
+        allMonths={allMonths}
+        setModifiedCells={setModifiedCellsSdTa}
+        permissions={adjustedPermissionsSdTa}
+        saveChanges={saveChangesSdTa}
+        setRemarkDialogOpen={setRemarkDialogOpenSdTa}
+        rowClass={rowClass}
+        handleCalculate={handleCalculateSdTa}
+      />
 
-          <>
-            <CustomAccordion defaultExpanded disableGutters>
-              <CustomAccordionSummary
-                aria-controls='meg-grid-content'
-                id='meg-grid-header'
-              >
-                <Typography component='span' className='grid-title'>
-                  Summary
-                </Typography>
-              </CustomAccordionSummary>
-              <CustomAccordionDetails>
-                <Box sx={{ width: '100%', margin: 0 }}>
-                  <MaintenanceProcessTable viewOnly={true} />
-                </Box>
-              </CustomAccordionDetails>
-            </CustomAccordion>
-          </>
-        </>
-      </>
+      <FurnaceRunLengthGrid
+        columns={ibrGridThree}
+        rows={getRows('IBR Plan')[3]}
+        setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
+        fetchData={fetchData}
+        handleRemarkCellClick={handleRemarkCellClickRunLength}
+        remarkDialogOpen={remarkDialogOpenRunLength}
+        currentRemark={currentRemarkRunLength}
+        setCurrentRemark={setCurrentRemarkRunLength}
+        currentRowId={currentRowIdRunLength}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        modifiedCells={modifiedCellsRunLength}
+        allMonths={allMonths}
+        setModifiedCells={setModifiedCellsRunLength}
+        permissions={adjustedPermissionsRunLength}
+        saveChanges={saveChangesRunLength}
+        setRemarkDialogOpen={setRemarkDialogOpenRunLength}
+        handleExcelUpload={handleExcelUpload}
+        downloadExcelForConfiguration={downloadExcelForConfiguration}
+        handleCalculate={handleCalculate}
+      />
+
+      <CustomAccordion defaultExpanded disableGutters>
+        <CustomAccordionSummary
+          aria-controls='meg-grid-content'
+          id='meg-grid-header'
+        >
+          <Typography component='span' className='grid-title'>
+            Summary
+          </Typography>
+        </CustomAccordionSummary>
+        <CustomAccordionDetails>
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <MaintenanceProcessTable viewOnly={true} />
+          </Box>
+        </CustomAccordionDetails>
+      </CustomAccordion>
     </Box>
   )
 }

@@ -30,6 +30,7 @@ const SDTAActivitiesGrid = ({
   permissions,
   saveChanges,
   setRemarkDialogOpen,
+  handleCalculate,  
 }) => {
   return (
     <Box sx={{ mt: 1 }}>
@@ -57,6 +58,7 @@ const SDTAActivitiesGrid = ({
         setRemarkDialogOpen={setRemarkDialogOpen}
         titleName='SD / TA Activities'
         rowRender={CustomRow}
+        handleCalculate={handleCalculate}
       />
     </Box>
   )
