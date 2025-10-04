@@ -3,7 +3,6 @@ package com.wks.caseengine.rest.server;
 
 
 import com.wks.caseengine.service.FinalNormsService;
-import com.wks.caseengine.service.ModeWiseNormsService;
 
 import java.util.List;
 

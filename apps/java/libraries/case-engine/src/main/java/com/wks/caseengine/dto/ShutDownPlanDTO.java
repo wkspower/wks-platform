@@ -43,4 +43,6 @@ public class ShutDownPlanDTO {
 	private Double rateEO;
 	private Double rateEOE;
 	private String type;
+	private String saveStatus;
+	private String errDescription;
 }

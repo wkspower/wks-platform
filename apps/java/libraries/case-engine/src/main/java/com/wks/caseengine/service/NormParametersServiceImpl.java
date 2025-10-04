@@ -2,6 +2,7 @@
 
  import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
  import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 
@@ -68,6 +70,16 @@ import jakarta.persistence.Query;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM getNormParameters(String plantId, String year,String type) {
+		List<NormParameters> normParametersList = normParametersRepository.findByPlantFkId(UUID.fromString(plantId));
+		
+		
+		
+		// TODO Auto-generated method stub
+		return null;
 	}
 
  }

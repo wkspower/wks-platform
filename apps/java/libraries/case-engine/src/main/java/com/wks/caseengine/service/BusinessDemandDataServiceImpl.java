@@ -41,8 +41,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
-
-
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
@@ -59,8 +57,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
 
-	@Autowired
-	private NormParametersService normParametersService;
+	
 
 	@Autowired
 	private PlantsRepository plantsRepository;

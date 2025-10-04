@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.CrackerConfigurationDTO;
-import com.wks.caseengine.dto.DecokePlanningDTO;
-import com.wks.caseengine.dto.DecokePlanningIBRDTO;
 import com.wks.caseengine.dto.DecokeRunLengthDTO;
 import com.wks.caseengine.dto.DecokingActivitiesDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;

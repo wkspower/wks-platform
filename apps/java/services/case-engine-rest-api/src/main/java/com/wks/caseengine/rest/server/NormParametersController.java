@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.entity.NormParameters;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.NormParametersService;
 
 @RestController
@@ -19,10 +20,14 @@ public class NormParametersController {
     NormParametersService normParametersService;
 
     @GetMapping(value="/getAllGrades")
-		public  List<NormParameters> getAllGrades(@RequestParam String plantId){
-			return	 normParametersService.getAllGrades(plantId);
-			
-		}
+	public  List<NormParameters> getAllGrades(@RequestParam String plantId){
+		return normParametersService.getAllGrades(plantId);	
+	}
+    
+    @GetMapping(value="/norm-paramters")
+    public AOPMessageVM getNormParameters(@RequestParam String plantId,@RequestParam String year,@RequestParam String type) {
+    	return normParametersService.getNormParameters(plantId,year,type);
+    }
 
 
     
