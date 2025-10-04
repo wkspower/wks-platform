@@ -46,7 +46,7 @@ const DecokingConfig = () => {
   const [globalTaStartDate, setGlobalTaStartDate] = useState(null)
   const [globalTaEndDate, setGlobalTaEndDate] = useState(null)
   useEffect(() => {
-  if (!globalTaStartDate || !globalTaEndDate) return
+  if (!globalTaStartDate || !globalTaEndDate || ibrScreen2Rows.length === 0) return
 
   const updatedRows = ibrScreen2Rows.map(row => ({
     ...row,
@@ -67,7 +67,7 @@ const DecokingConfig = () => {
     }
   })
   setModifiedCellsSdTa(newModifiedCells)
-}, [globalTaStartDate, globalTaEndDate, ibrScreen2Rows])
+}, [globalTaStartDate, globalTaEndDate])
   const handleRemarkCellClick2 = (dataItem) => {
     setCurrentRemarkSdTa(dataItem.remarks || '')
     setCurrentRowId2(dataItem.id)
