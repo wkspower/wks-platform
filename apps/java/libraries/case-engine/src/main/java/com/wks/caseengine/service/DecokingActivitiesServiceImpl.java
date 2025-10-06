@@ -910,8 +910,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				dto.setTaEndDate(row[6] != null ? (Date) row[6] : null);
 				dto.setShutDownStartDate(row[7] != null ? (Date) row[7] : null);
 				dto.setShutDownEndDate(row[8] != null ? (Date) row[8] : null);
-				dto.setActualRunLength(row[9] != null ? (Double) row[9] : null);
-				dto.setReduction(row[10] != null ? (Double) row[10] : null);
+				dto.setActualRunLength(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+				dto.setReduction(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
 				dto.setPostCrDays(row[11] != null ? ((Number) row[11]).intValue() : null);
 				dto.setPreCrDays(row[12] != null ? ((Number) row[12]).intValue() : null);
 				dto.setIsCr(row[13] != null ? (Boolean) row[13] : null);
