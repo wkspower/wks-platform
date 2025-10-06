@@ -1440,10 +1440,12 @@ const ProductionvolumeData = ({ permissions }) => {
       showCalculate: false,
     }
   }
-  const percentageTitle =
+ const percentageTitle =
   (VERTICAL_NAME === 'pp' && siteObject?.name?.toLowerCase() === 'nmd') ||
   (VERTICAL_NAME === 'pe' && siteObject?.name?.toLowerCase() === 'nmd')
     ? 'Current MCU'
+    : VERTICAL_NAME === 'cracker'
+    ? 'Max Achieved Capacity (Ethylene)'
     : 'Max Achieved Capacity';
   const adjustedPermissionsGrid1 = getAdjustedPermissions(
     {
@@ -1485,7 +1487,8 @@ const ProductionvolumeData = ({ permissions }) => {
       ExcelName: `${VERTICAL_NAME}_Design Capacity`,
 
       showTitleNameBusiness: true,
-      titleName: 'Design Capacity',
+      titleName: VERTICAL_NAME === 'cracker' ? 'Design Capacity (Ethylene)' 
+      : 'Design Capacity',
     },
     isOldYear,
   )
@@ -1513,7 +1516,7 @@ const ProductionvolumeData = ({ permissions }) => {
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       uploadExcelBtn: permissions?.hideUploadExcel ? false : true,
       showTitleNameBusiness: true,
-      titleName: 'Current Operating Capacity',
+      titleName: VERTICAL_NAME === 'cracker' ? 'Current Operating Capacity (Ethylene)' : 'Current Operating Capacity',
     },
     isOldYear,
   )
@@ -1746,7 +1749,8 @@ const ProductionvolumeData = ({ permissions }) => {
       {!permissions?.hideSummary && (
         <>
           <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-            Percentage Summary
+            {VERTICAL_NAME === 'cracker' ? 'Percentage Summary (Ethylene)' 
+            : 'Percentage Summary'}
           </Typography>
           <KendoDataTables
             setRows={setRowsPercentageSummary}

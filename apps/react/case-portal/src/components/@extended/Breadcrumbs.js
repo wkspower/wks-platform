@@ -21,7 +21,7 @@ import { Box } from '../../../node_modules/@mui/material/index'
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, plantObject, verticalObject, siteObject } =
+  const { verticalChange, plantObject, verticalObject, siteObject, year } =
     dataGridStore
 
   const dispatch = useDispatch()
@@ -29,6 +29,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   const PLANT_ID = plantObject?.id
   const VERTICAL_ID = verticalObject?.id
   const SITE_ID = siteObject?.id
+  const AOP_YEAR = year?.selectedYear
 
   const PLANT_NAME = plantObject?.name
   const VERTICAL_NAME = verticalObject?.name
@@ -104,9 +105,16 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
   async function handleOpenPdfTempSSRS(title) {
     try {
-      let url = ''
-      url =
+      let baseurl = ''
+      baseurl =
         'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx?%2fAOP&rs:Command=Render'
+    const params = new URLSearchParams({
+      'verticalId': VERTICAL_ID,
+      'siteId': SITE_ID,
+      'plantId': PLANT_ID,
+      'finYear': AOP_YEAR
+    })
+    const url = `${baseurl}?${params.toString()}`
 
       window.open(url, '_blank')
       return true

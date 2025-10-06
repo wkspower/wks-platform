@@ -44,7 +44,8 @@ const mapApiRowToGrid = (list = [], prefix = '') =>
     ...item,
     idFromApi: item.id,
     id: `${prefix}${index}`,
-    originalRemark: item.remarks || '',
+    originalRemark: item.remark || '',
+    remark: item.remark || '',
     Particulars: item.normType || item.normParameterTypeDisplayName,
   }))
 
@@ -54,7 +55,7 @@ const mapGridRowToPayload = (rows = []) =>
     MONTHS.forEach((m) => {
       payload[m] = row[m] || 0
     })
-    payload.remark = row.remark || row.remarks || ''
+    payload.remark = row.remark || ''
     payload.isChecked = !!row.isChecked
     payload.id = row.idFromApi || null
     payload.materialFKId = row.materialFKId || row.materialFkId || null
@@ -280,6 +281,7 @@ const NormalOpNormsScreenCracker = () => {
         format: '{0:#.###}',
         type: 'number',
       },
+      { field: 'remark', title: 'Remarks', widthT: 200, editable: true },
     ],
     [],
   )
@@ -306,13 +308,13 @@ const NormalOpNormsScreenCracker = () => {
         title: 'SAP MAT Code',
         widthT: 120,
         editable: false,
+        useMethodColors: true,
       },
       {
         field: 'materialDisplayName',
         title: 'Particulars',
         widthT: 130,
         editable: false,
-        useMethodColors: true,
       },
       { field: 'uom', title: 'UOM', widthT: 60, editable: false },
       ...MONTHS.map((m, i) => ({
@@ -513,15 +515,15 @@ const NormalOpNormsScreenCracker = () => {
   // derive per-grid permissions: top grid keeps save/calc flags, others have them hidden.
   const mainPermissions = useMemo(() => {
     const base = { ...baseModePermissions }
-    base.saveBtn = mainIsTop && base.saveBtn
+    base.saveBtn = selectedTab === 3 ? true : (mainIsTop && base.saveBtn)
     base.showCalculate = mainIsTop && base.showCalculate
     return getAdjustedPermissions(base, isOldYear)
-  }, [baseModePermissions, mainIsTop, getAdjustedPermissions, isOldYear])
+  }, [baseModePermissions, mainIsTop, getAdjustedPermissions, isOldYear, selectedTab])
 
   const expressionPermissions = useMemo(() => {
     const base = { ...baseExpressionPermissions }
     const showSave = !mainIsTop && !monthlyIsTop && isModeTab
-    base.saveBtn = showSave && base.saveBtn
+    base.saveBtn = selectedTab === 3 ? true : (showSave && base.saveBtn)
     base.showCalculate = showSave && base.showCalculate
     return getAdjustedPermissions(base, isOldYear)
   }, [
@@ -531,11 +533,12 @@ const NormalOpNormsScreenCracker = () => {
     isModeTab,
     getAdjustedPermissions,
     isOldYear,
+    selectedTab,
   ])
 
   const monthlyPermissions = useMemo(() => {
     const base = { ...baseMonthlyPermissions }
-    base.saveBtn = monthlyIsTop && base.saveBtn
+    base.saveBtn = selectedTab === 3 ? true : (monthlyIsTop && base.saveBtn)
     base.showCalculate =
       monthlyIsTop &&
       base.showCalculate &&
@@ -547,6 +550,7 @@ const NormalOpNormsScreenCracker = () => {
     calculationObject,
     getAdjustedPermissions,
     isOldYear,
+    selectedTab,
   ])
 
   const finalPermissions = useMemo(() => {
@@ -571,7 +575,8 @@ const NormalOpNormsScreenCracker = () => {
       ...item,
       idFromApi: item.id,
       id: `${index}`,
-      originalRemark: item.remarks || '',
+      originalRemark: item.remark || '',
+      remark: item.remark || '',
       Particulars: item.normType || item.normParameterTypeDisplayName,
       Method: item.Method || item.method 
     }))
@@ -694,14 +699,14 @@ const NormalOpNormsScreenCracker = () => {
   // remark handlers
   const handleRemarkCellClick = useCallback((row) => {
     if (!row?.isEditable) return
-    setCurrentRemark(row.remarks || '')
+    setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }, [])
 
   const handleRemarkCellClickFinalNorms = useCallback((row) => {
     if (!row?.isEditable) return
-    setCurrentRemarkFinalNorms(row.remarks || '')
+    setCurrentRemarkFinalNorms(row.remark || '')
     setCurrentRowIdFinalNorms(row.id)
     setRemarkDialogOpenFinalNorms(true)
   }, [])

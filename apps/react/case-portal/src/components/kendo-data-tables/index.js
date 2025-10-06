@@ -1427,7 +1427,7 @@ const MaterialDisplayNameCell = (props) => {
                   )
                 }
                 
-if (col.field === 'materialDisplayName' && col.useMethodColors) {
+if (col.field === 'sapMaterialCode' && col.useMethodColors) {
   return (
     <GridColumn
       key={col.field}
