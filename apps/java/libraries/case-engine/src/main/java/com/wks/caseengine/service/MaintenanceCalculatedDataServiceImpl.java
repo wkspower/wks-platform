@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
@@ -25,7 +26,9 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -265,132 +268,123 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	}
 	
 	public byte[] maintenanceExport(String year, String plantId, boolean isAfterSave, List<DecokePlanningDTO> dtoList) {
-		try {
-			
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-			String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
+	    try {
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
 
-			if (!isAfterSave) {
-				List<Object[]> results = getData(plantId, year, procedureName);
-				 dtoList= setData(results);
-			}
+	        if (!isAfterSave) {
+	            List<Object[]> results = getData(plantId, year, procedureName);
+	            dtoList = setData(results);
+	        }
 
-			Workbook workbook = new XSSFWorkbook();
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+	        int currentRow = 0;
 
-			Sheet sheet = workbook.createSheet("Sheet1");
-			int currentRow = 0;
-			// List<List<Object>> rows = new ArrayList<>();
+	        List<List<Object>> rows = new ArrayList<>();
 
-			List<List<Object>> rows = new ArrayList<>();
-			
-			// Data rows
-			for (DecokePlanningDTO dto : dtoList) {
-				//if (isAfterSave) {
-					List<Object> list = new ArrayList<>();
-					
-					list.add(dto.getMonthName());
-					list.add(dto.getFiveF());
-					list.add(dto.getFourF());
-					list.add(dto.getFourFD());
-					list.add(dto.getCoilReplacement());
-					list.add(dto.getShutdown());
-					list.add(dto.getSlowdown());
-					list.add(dto.getSad());
-					list.add(dto.getBbu());
-					list.add(dto.getBbd());
-					list.add(dto.getDemoSAD());
-					list.add(dto.getDemoSD());
-					list.add(dto.getDemoBBU());
-					list.add(dto.getDemoHSS());
-					list.add(dto.getMnt());
-					list.add(dto.getTotal());
-					list.add(dto.getNumberOfDays());
-					list.add(dto.getTotalSAD());
-					list.add(dto.getRemarks());
-					list.add(dto.getId());
-					if (isAfterSave) {
-						list.add(dto.getSaveStatus());
-						list.add(dto.getErrDescription());
-					}
-					rows.add(list);
-				//}
-			}
+	        for (DecokePlanningDTO dto : dtoList) {
+	            List<Object> list = new ArrayList<>();
+	            list.add(dto.getMonthName());
+	            list.add(dto.getFiveF());
+	            list.add(dto.getFourF());
+	            list.add(dto.getFourFD());
+	            list.add(dto.getCoilReplacement());
+	            list.add(dto.getShutdown());
+	            list.add(dto.getSlowdown());
+	            list.add(dto.getSad());
+	            list.add(dto.getBbu());
+	            list.add(dto.getBbd());
+	            list.add(dto.getDemoSAD());
+	            list.add(dto.getDemoSD());
+	            list.add(dto.getDemoBBU());
+	            list.add(dto.getDemoHSS());
+	            list.add(dto.getMnt());
+	            list.add(dto.getTotal());
+	            list.add(dto.getNumberOfDays());
+	            list.add(dto.getTotalSAD());
+	            list.add(dto.getRemarks());
+	            list.add(dto.getId());
+	            if (isAfterSave) {
+	                list.add(dto.getSaveStatus());
+	                list.add(dto.getErrDescription());
+	            }
+	            rows.add(list);
+	        }
 
-			List<String> innerHeaders = new ArrayList<>();
-			
-			innerHeaders.add("Month");
-			innerHeaders.add("5F");
-			innerHeaders.add("4f");
-			innerHeaders.add("4F With Demo");
-			innerHeaders.add("IBR/Coil Replacement");
-			innerHeaders.add("Shutdown(TA)");
-			innerHeaders.add("Slowdown");
-			innerHeaders.add("SAD");
-			innerHeaders.add("BBU");
-			innerHeaders.add("BBD");
-			innerHeaders.add("Demo SAD");
-			innerHeaders.add("Demo SD");
-			innerHeaders.add("Demo BBU/BBD");
-			innerHeaders.add("Demo HHS");
-			innerHeaders.add("MNT");
-			innerHeaders.add("Total");
-			innerHeaders.add("No of Days");
-			innerHeaders.add("No of SADs");
-			innerHeaders.add("Remarks");
-			innerHeaders.add("Id");
-			if (isAfterSave) {
-				innerHeaders.add("Status");
-				innerHeaders.add("Error Description");
-			}
-			List<List<String>> headers = new ArrayList<>();
-			headers.add(innerHeaders);
+	        List<String> innerHeaders = new ArrayList<>(Arrays.asList(
+	            "Month", "5F", "4f", "4F With Demo", "IBR/Coil Replacement", "Shutdown(TA)",
+	            "Slowdown", "SAD", "BBU", "BBD", "Demo SAD", "Demo SD", "Demo BBU/BBD",
+	            "Demo HHS", "MNT", "Total", "No of Days", "No of SADs", "Remarks", "Id"
+	        ));
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
 
-			for (List<String> headerRowData : headers) {
-				Row headerRow = sheet.createRow(currentRow++);
-				for (int col = 0; col < headerRowData.size(); col++) {
-					Cell cell = headerRow.createCell(col);
-					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
-				}
-			}
-			for (List<Object> rowData : rows) {
-				
-				 
-				Row row = sheet.createRow(currentRow++);
-				for (int col = 0; col < rowData.size(); col++) {
-					Cell cell = row.createCell(col);
-					Object value = rowData.get(col);
+	        // Header style
+	        CellStyle headerStyle = createBoldBorderedStyle(workbook);
 
-					if (value instanceof Number) {
-						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
-					} else if (value instanceof Boolean) {
-						cell.setCellValue((Boolean) value);
-					} else if (value != null) {
-						cell.setCellValue(value.toString());
-					} else {
-						cell.setCellValue("");
-					}
-				}
-			}
-			
-			sheet.setColumnHidden(19, true);
-			try {
+	        // Gray style for the total row
+	        CellStyle grayStyle = workbook.createCellStyle();
+	        grayStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	        grayStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	        grayStyle.setBorderTop(BorderStyle.THIN);
+	        grayStyle.setBorderBottom(BorderStyle.THIN);
+	        grayStyle.setBorderLeft(BorderStyle.THIN);
+	        grayStyle.setBorderRight(BorderStyle.THIN);
 
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				workbook.write(outputStream);
-				workbook.close();
-				return outputStream.toByteArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+	        // Create header row
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(headerStyle);
+	        }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+	        // Create data rows
+	        int startDataRow = currentRow;
+	        for (List<Object> rowData : rows) {
+	            Row row = sheet.createRow(currentRow++);
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	            }
+	        }
 
+	        // Apply gray background to the last (total) row
+	        int totalRowIndex = sheet.getLastRowNum();
+	        Row totalRow = sheet.getRow(totalRowIndex);
+	        if (totalRow != null) {
+	            for (int col = 0; col < innerHeaders.size(); col++) {
+	                Cell cell = totalRow.getCell(col);
+	                if (cell == null) cell = totalRow.createCell(col);
+	                cell.setCellStyle(grayStyle);
+	            }
+	        }
+
+	        sheet.setColumnHidden(19, true);
+
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
 	
 	public List<DecokePlanningDTO> setData(List<Object[]> results) {
@@ -631,9 +625,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 			if (rowIterator.hasNext())
 				rowIterator.next(); // Skip header
-
+			int totalRows = sheet.getLastRowNum(); 
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
+				if (row.getRowNum() == totalRows) {
+			        continue;
+			    }
 				DecokePlanningDTO dto = new DecokePlanningDTO();
 				try {
 					dto.setMonthName(getStringCellValue(row.getCell(0), dto));
