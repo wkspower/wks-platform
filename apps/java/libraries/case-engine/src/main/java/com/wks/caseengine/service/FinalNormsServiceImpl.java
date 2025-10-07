@@ -125,6 +125,7 @@ public class FinalNormsServiceImpl implements FinalNormsService {
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 
