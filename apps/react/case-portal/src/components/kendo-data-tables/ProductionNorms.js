@@ -373,9 +373,9 @@ const ProductionNorms = ({ permissions }) => {
       }
 
       let dataSet = response?.data?.aopDTOList
-      if (lowerVertName === 'cracker') {
-        dataSet = rowDataForCracker
-      }
+      // if (lowerVertName === 'cracker') {
+      //   dataSet = rowDataForCracker
+      // }
 
       var data = dataSet
         ?.map((product) => ({
