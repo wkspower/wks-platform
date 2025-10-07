@@ -59,5 +59,12 @@ public interface ShutdownNormsRepository extends JpaRepository<ShutdownNormsValu
                       @Param("verticalId") UUID verticalId,
                       @Param("materialId") UUID materialId,
                       @Param("financialYear") String financialYear);
+		
+				@Query(
+			      value = "SELECT * FROM dbo.ShutdownNormsValue WHERE Plant_FK_Id = :plantId", 
+			      nativeQuery = true
+			    )
+			    List<ShutdownNormsValue> findByPlantFkIdAndFinancialYear(@Param("plantId") UUID plantId,@Param("FinancialYear") String FinancialYear);
 
 }
+

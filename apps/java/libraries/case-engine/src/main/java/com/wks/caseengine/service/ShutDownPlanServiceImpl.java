@@ -30,6 +30,7 @@ import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
+import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -40,6 +41,7 @@ import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
+import com.wks.caseengine.repository.ShutdownNormsRepository;
 import com.wks.caseengine.utility.Utility;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +76,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	
 	@Autowired
 	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
+	
+	@Autowired
+	private ShutdownNormsRepository shutdownNormsRepository;
 
 	
 	
@@ -335,6 +340,17 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        String year = plantMaintenanceTransaction.getAuditYear();
 
 	        String verticalName = plantsService.findVerticalNameByPlantId(plantId);
+	        
+	        if("ELASTOMER".equalsIgnoreCase(verticalName)) {
+	        	int month=plantMaintenanceTransaction.getMaintForMonth();
+	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month);
+	        	if(count==1) {
+	        		List<ShutdownNormsValue> shutdownNormsValues =shutdownNormsRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
+		        	for(ShutdownNormsValue shutdownNormsValue: shutdownNormsValues) {
+		        		setMonth(month,shutdownNormsValue);
+		        	}
+	        	}		
+	        }
 
 	        if ("MEG".equalsIgnoreCase(verticalName)) {
 	            UUID normparameterId1 = normParametersRepository.findNormParameterIdByNameAndPlant("EO", plantId);
@@ -408,6 +424,63 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	    	ex.printStackTrace();
 	        throw new RuntimeException("Failed to delete data", ex);
 	    }
+	}
+	
+	public void setMonth(int month,ShutdownNormsValue shutdownNormsValue) {
+		switch (month) {
+	    case 1:
+	        shutdownNormsValue.setJanuary(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 2:
+	        shutdownNormsValue.setFebruary(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 3:
+	        shutdownNormsValue.setMarch(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 4:
+	        shutdownNormsValue.setApril(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 5:
+	        shutdownNormsValue.setMay(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 6:
+	        shutdownNormsValue.setJune(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 7:
+	        shutdownNormsValue.setJuly(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 8:
+	        shutdownNormsValue.setAugust(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 9:
+	        shutdownNormsValue.setSeptember(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 10:
+	        shutdownNormsValue.setOctober(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 11:
+	        shutdownNormsValue.setNovember(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    case 12:
+	        shutdownNormsValue.setDecember(0.0);
+	        shutdownNormsRepository.save(shutdownNormsValue);
+	        break;
+	    default:
+	        // optionally handle invalid month values
+	        throw new IllegalArgumentException("Invalid month: " + month);
+	    }
+		
 	}
 
 	@Override

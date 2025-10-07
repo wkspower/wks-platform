@@ -80,5 +80,18 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	        @Param("plantId") UUID plantId,
 	        @Param("description") String description
 	    );
+	
+	@Query(
+		      value = "SELECT COUNT(*) " +
+		              "FROM PlantMaintenanceTransaction PMT " +
+		              "JOIN PlantMaintenance PM ON PMT.PlantMaintenance_FK_Id = PM.Id " +
+		              "WHERE PM.Plant_FK_Id = :plantId " +
+		              "AND PMT.MaintForMonth = :month",
+		      nativeQuery = true
+		    )
+		    Long countByPlantAndMonth(
+		        @Param("plantId") UUID plantId,
+		        @Param("month") int month
+		    );
 
 }

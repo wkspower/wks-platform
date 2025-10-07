@@ -159,36 +159,100 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
 			List<Object[]> results = getData(plantId, year, procedureName);
 
+			
+
+			// Variables to accumulate totals
+			double sumFiveF = 0;
+			double sumFourF = 0;
+			double sumFourFD = 0;
+			double sumCoilReplacement = 0;
+			double sumShutdown = 0;
+			double sumSlowdown = 0;
+			double sumSAD = 0;
+			double sumBBU = 0;
+			double sumBBD = 0;
+			double sumDemoSAD = 0;
+			double sumDemoSD = 0;
+			double sumDemoBBU = 0;
+			double sumMnt = 0;
+			double sumTotal = 0;
+			double sumNumberOfDays = 0;
+			double sumTotalSAD = 0;
+
 			for (Object[] row : results) {
-				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
+			    Map<String, Object> map = new HashMap<>();
 
-				map.put("id", row[0]);
-				map.put("monthName", row[1]);
-				map.put("coilReplacement", row[2]);
-				map.put("mnt", row[3]);
-				map.put("shutdown", row[4]);
-				map.put("slowdown", row[5]);
-				map.put("sad", row[6]);
-				map.put("bbd", row[7]);
-				map.put("bbu", row[8]);
-				map.put("demoHSS", row[9]);
-				map.put("demoBBU", row[10]);
-				map.put("demoSAD", row[11]);
-				map.put("demoSD", row[12]);
-				map.put("fourFD", row[13]);
-				map.put("fourF", row[14]);
-				map.put("fiveF", row[15]);
-				map.put("total", row[16]);
-				map.put("fourFHours", row[17]);
-				map.put("aopYear", row[18]);
-				map.put("plantId", row[19]);
-				String remarks = row[20] == null ? "" : row[20].toString();
-				map.put("remarks", remarks);
-				map.put("totalSAD", row[21]);
-				map.put("numberOfDays", row[22]);
+			    map.put("id", row[0]);
+			    map.put("monthName", row[1]);
+			    map.put("coilReplacement", row[2]);
+			    map.put("mnt", row[3]);
+			    map.put("shutdown", row[4]);
+			    map.put("slowdown", row[5]);
+			    map.put("sad", row[6]);
+			    map.put("bbd", row[7]);
+			    map.put("bbu", row[8]);
+			    map.put("demoHSS", row[9]);
+			    map.put("demoBBU", row[10]);
+			    map.put("demoSAD", row[11]);
+			    map.put("demoSD", row[12]);
+			    map.put("fourFD", row[13]);
+			    map.put("fourF", row[14]);
+			    map.put("fiveF", row[15]);
+			    map.put("total", row[16]);
+			    map.put("fourFHours", row[17]);
+			    map.put("aopYear", row[18]);
+			    map.put("plantId", row[19]);
+			    String remarks = row[20] == null ? "" : row[20].toString();
+			    map.put("remarks", remarks);
+			    map.put("totalSAD", row[21]);
+			    map.put("numberOfDays", row[22]);
 
-				data.add(map); // Add the map to the list here
+			    // accumulate totals (check for nulls and cast appropriately)
+			    sumCoilReplacement += (row[2] != null ? ((Number) row[2]).doubleValue() : 0);
+			    sumMnt += (row[3] != null ? ((Number) row[3]).doubleValue() : 0);
+			    sumShutdown += (row[4] != null ? ((Number) row[4]).doubleValue() : 0);
+			    sumSlowdown += (row[5] != null ? ((Number) row[5]).doubleValue() : 0);
+			    sumSAD += (row[6] != null ? ((Number) row[6]).doubleValue() : 0);
+			    sumBBD += (row[7] != null ? ((Number) row[7]).doubleValue() : 0);
+			    sumBBU += (row[8] != null ? ((Number) row[8]).doubleValue() : 0);
+			    sumDemoSAD += (row[11] != null ? ((Number) row[11]).doubleValue() : 0);
+			    sumDemoSD += (row[12] != null ? ((Number) row[12]).doubleValue() : 0);
+			    sumDemoBBU += (row[10] != null ? ((Number) row[10]).doubleValue() : 0);
+			    sumFourFD += (row[13] != null ? ((Number) row[13]).doubleValue() : 0);
+			    sumFourF += (row[14] != null ? ((Number) row[14]).doubleValue() : 0);
+			    sumFiveF += (row[15] != null ? ((Number) row[15]).doubleValue() : 0);
+			    sumTotal += (row[16] != null ? ((Number) row[16]).doubleValue() : 0);
+			    sumNumberOfDays += (row[22] != null ? ((Number) row[22]).doubleValue() : 0);
+			    sumTotalSAD += (row[21] != null ? ((Number) row[21]).doubleValue() : 0);
+
+			    data.add(map);
 			}
+
+			// After loop, create a “summary” map
+			Map<String, Object> sumMap = new HashMap<>();
+			sumMap.put("coilReplacement", sumCoilReplacement);
+			sumMap.put("mnt", sumMnt);
+			sumMap.put("shutdown", sumShutdown);
+			sumMap.put("slowdown", sumSlowdown);
+			sumMap.put("sad", sumSAD);
+			sumMap.put("bbd", sumBBD);
+			sumMap.put("bbu", sumBBU);
+			sumMap.put("demoSAD", sumDemoSAD);
+			sumMap.put("demoSD", sumDemoSD);
+			sumMap.put("demoBBU", sumDemoBBU);
+			sumMap.put("fourFD", sumFourFD);
+			sumMap.put("fourF", sumFourF);
+			sumMap.put("fiveF", sumFiveF);
+			sumMap.put("total", sumTotal);
+			sumMap.put("numberOfDays", sumNumberOfDays);
+			sumMap.put("totalSAD", sumTotalSAD);
+
+			// Optionally add an “id” or “monthName” for the sum row (or leave null)
+			sumMap.put("id", null);
+			sumMap.put("monthName", "SUM");
+
+			// Finally add this summary map to your data (or return separately)
+			data.add(sumMap);
 
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
