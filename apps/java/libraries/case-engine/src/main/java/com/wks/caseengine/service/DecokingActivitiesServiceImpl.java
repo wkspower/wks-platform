@@ -936,6 +936,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		} catch (IllegalArgumentException iae) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to update data", ex);
 		}
 	}
