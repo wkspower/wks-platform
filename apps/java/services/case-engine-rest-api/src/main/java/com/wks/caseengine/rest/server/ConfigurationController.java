@@ -36,6 +36,11 @@ public class ConfigurationController {
 		return configurationService.getConfigurationData(year,plantFKId);
 	}
 	
+	@GetMapping(value="/calculate-steady-norms")
+	public AOPMessageVM calculateSteadyNorms(@RequestParam String year,@RequestParam String plantId){
+		return	configurationService.calculateSteadyNorms(year, plantId);
+	}
+	
 	@GetMapping(value="/configuration/intermediate-values")
 	public AOPMessageVM getConfigurationIntermediateValues(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationIntermediateValues(year,plantFKId);

@@ -701,6 +701,72 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			e.printStackTrace();
 		}
 	}
+	
+	@Override
+	public AOPMessageVM calculateSteadyNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadSteamNorms";
+			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"steady-norms");
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("steady-norms");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return aopMessageVM;
+	}
+	
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String aopYear) {
+		try {
+			
+			String callSql = "{call " + procedureName + "(?, ?)}";
+
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+
+	            // Set parameters in the correct order
+	            stmt.setString(1, plantId); // @finYear
+	            stmt.setString(2, aopYear); // @siteId
+
+	            // Execute the stored procedure
+	            int rowsAffected = stmt.executeUpdate();
+
+	            // Optional: commit if auto-commit is off
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 
 	public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId) {
