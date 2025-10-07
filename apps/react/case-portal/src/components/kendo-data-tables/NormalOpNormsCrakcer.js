@@ -238,6 +238,43 @@ const NormalOpNormsScreenCracker = () => {
     ],
     [headerMap],
   )
+
+  const colDefsExpressionCatChem = useMemo(
+    () => [
+      {
+        field: 'isChecked',
+        type: 'switch',
+        widthT: 30,
+        filter: false,
+      },
+      {
+        field: 'sapMaterialCode',
+        title: 'SAP MAT Code',
+        widthT: 120,
+        editable: false,
+      },
+      {
+        field: 'materialDisplayName',
+        title: 'Particulars',
+        widthT: 130,
+        editable: false,
+      },
+      { field: 'uom', title: 'UOM', widthT: 60, editable: false },
+      ...MONTHS.map((m, i) => ({
+        field: m,
+        title: headerMap[monthIndexMap[m]] || m,
+        editable: true,
+        width: 120,
+        align: 'right',
+        type: 'number',
+        format: '{0:#.###}',
+      })),
+      { field: 'isEditable', title: 'isEditable', hidden: true },
+      { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
+    ],
+    [headerMap],
+  )
+
   const fetchConfigurationData = useCallback(
     async (gradeId = null) => {
       setProductionRows([])
@@ -1162,7 +1199,7 @@ const NormalOpNormsScreenCracker = () => {
                 modifiedCells={modifiedCells}
                 setModifiedCells={setModifiedCells}
                 title='Normal Operations Norms'
-                columns={colDefs}
+                columns={colDefsExpressionCatChem}
                 setRows={setRowsExpression}
                 rows={rowsExpression}
                 grades={grades}
@@ -1188,6 +1225,7 @@ const NormalOpNormsScreenCracker = () => {
                 plantID={PLANT_ID}
                 onGlobalCheckboxChange={handleGlobalCheckboxChange}
                 gridName='expression'
+                showCatChemUtilityCheckbox={true}
               />
             </>
           )}
@@ -1207,9 +1245,9 @@ const NormalOpNormsScreenCracker = () => {
               <span style={{ color: 'green', fontWeight: 'bold' }}>
                 Green
               </span>{' '}
-              - BestAchieved(MinCC)&nbsp;&nbsp;
+              - Best Achieved (MinCC)&nbsp;&nbsp;
               <span style={{ color: 'blue', fontWeight: 'bold' }}>Blue</span> -
-              Best Achieved(Indv)
+              Best Achieved (Indv)
             </Typography>
           </Box>
           <KendoDataTables

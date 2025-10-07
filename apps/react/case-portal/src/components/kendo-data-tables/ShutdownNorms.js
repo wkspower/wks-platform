@@ -292,22 +292,22 @@ const ShutdownNorms = () => {
         })
       } else {
         // For cracker, use mcuNormsValueDTOList if present, else fallback to data.data
-  const crackerArray = Array.isArray(data?.data?.mcuNormsValueDTOList)
-    ? data.data.mcuNormsValueDTOList
-    : Array.isArray(data?.data)
-      ? data.data
-      : [];
-  formattedData = crackerArray.map((item, index) => {
-    const baseItem = {
-      ...item,
-      idFromApi: item.id,
-      id: index,
-      materialFkId: item?.materialFkId?.toLowerCase(),
-      Particulars: item.normParameterTypeDisplayName || 'Type',
-      isEditable: false,
-    }
-    return baseItem
-  })
+        const crackerArray = Array.isArray(data?.data?.mcuNormsValueDTOList)
+          ? data.data.mcuNormsValueDTOList
+          : Array.isArray(data?.data)
+            ? data.data
+            : []
+        formattedData = crackerArray.map((item, index) => {
+          const baseItem = {
+            ...item,
+            idFromApi: item.id,
+            id: index,
+            materialFkId: item?.materialFkId?.toLowerCase(),
+            Particulars: item.normParameterTypeDisplayName || 'Type',
+            isEditable: false,
+          }
+          return baseItem
+        })
       }
 
       setRows(formattedData)
@@ -461,6 +461,9 @@ const ShutdownNorms = () => {
       showUnit: false,
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
+
+      showNote: lowerVertName === 'meg' ? true : false,
+
       saveBtn:
         lowerVertName === 'pe' ||
         lowerVertName === 'pp' ||
@@ -539,6 +542,7 @@ const ShutdownNorms = () => {
         calculatebtnClicked={calculatebtnClicked}
         plantID={plantID}
         grades={grades}
+        note='*Quantities are per day basis'
       />
     </div>
   )

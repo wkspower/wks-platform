@@ -125,7 +125,7 @@ const CrakcerConstants = () => {
   useEffect(() => {
     if (!plantID || !AOP_YEAR) return
     setTabIndex(0)
-    getConfigurationExecutionDetails()
+    getConfigurationExecutionDetailsNorms()
     fetchData()
   }, [plantID, AOP_YEAR])
 
@@ -133,7 +133,7 @@ const CrakcerConstants = () => {
     if (!plantID || !AOP_YEAR) {
       return
     }
-    getConfigurationExecutionDetails()
+    getConfigurationExecutionDetailsNorms()
     getAopSummary()
   }, [oldYear, yearChanged, keycloak, plantID])
 
@@ -211,17 +211,17 @@ const CrakcerConstants = () => {
       return
     }
     hasExecutedRef.current = false
-    getConfigurationExecutionDetails()
+    getConfigurationExecutionDetailsNorms()
   }, [plantID])
 
-  const getConfigurationExecutionDetails = async () => {
+  const getConfigurationExecutionDetailsNorms = async () => {
     try {
       const response =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+        await DataService.getConfigurationExecutionDetailsNorms(keycloak)
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(
-          'getConfigurationExecutionDetails returned an empty array:',
+          'getConfigurationExecutionDetailsNorms returned an empty array:',
           response,
         )
       }
@@ -236,7 +236,10 @@ const CrakcerConstants = () => {
         // setLoading1(false)
       }
     } catch (error) {
-      console.error('Error fetching getConfigurationExecutionDetails:', error)
+      console.error(
+        'Error fetching getConfigurationExecutionDetailsNorms:',
+        error,
+      )
     } finally {
       // setLoading1(false)
     }
@@ -302,7 +305,15 @@ const CrakcerConstants = () => {
         moment(startDate).format('YYYY-MM-DD'),
       )
 
-      const response2 = await NormalOperationNormsApiService.load2(
+      // const response2 = await NormalOperationNormsApiService.load2(
+      //   keycloak,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      //   moment(endDate).format('YYYY-MM-DD'),
+      //   moment(startDate).format('YYYY-MM-DD'),
+      // )
+
+      const response3 = await NormalOperationNormsApiService.load3(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -316,7 +327,7 @@ const CrakcerConstants = () => {
           message: 'Execution Started Successfully!',
           severity: 'success',
         })
-        getConfigurationExecutionDetails()
+        getConfigurationExecutionDetailsNorms()
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -366,7 +377,7 @@ const CrakcerConstants = () => {
             id='meg-grid-header'
           >
             <Typography className='grid-title'>
-              AOP Historical Period Basis
+              AOP Historical Period Basis-
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>
@@ -665,100 +676,103 @@ const CrakcerConstants = () => {
     setRemarkDialogOpenConstants(true)
   }
   const uploadCrackerConstant = async (rawFile) => {
-      setLoading(true)
-  
-      try {
-        let response
+    setLoading(true)
 
-        response = await NormalOperationNormsApiService.CrackerConstantsImport(
-          rawFile,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-  
-        if (response?.code === 200) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Uploaded Successfully!',
-            severity: 'success',
-          })
-          setModifiedCells({})
-          fetchData()
-        } else if (response?.code === 400 && response?.data) {
-          const byteCharacters = atob(response.data)
-          const byteNumbers = Array.from(byteCharacters, (char) =>
-            char.charCodeAt(0),
-          )
-          const byteArray = new Uint8Array(byteNumbers)
-  
-          const blob = new Blob([byteArray], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          })
-  
-          const url = window.URL.createObjectURL(blob)
-          const link = document.createElement('a')
-          link.href = url
-          link.setAttribute('download', 'Error File - Criteria_Best_Achieved.xlsx')
-          document.body.appendChild(link)
-          link.click()
-          link.remove()
-          window.URL.revokeObjectURL(url)
-  
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Partial data saved. Error file downloaded.',
-            severity: 'warning',
-          })
-          fetchData()
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Upload Failed!',
-            severity: 'error',
-          })
-        }
-  
-        return response
-      } catch (error) {
-        console.error('Error uploading xcel:', error)
+    try {
+      let response
+
+      response = await NormalOperationNormsApiService.CrackerConstantsImport(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Unexpected error occurred!',
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute(
+          'download',
+          'Error File - Criteria_Best_Achieved.xlsx',
+        )
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
           severity: 'error',
         })
-      } finally {
-        setLoading(false)
       }
-    }
-  
-    const handleExcelUpload = (rawFile) => {
-      uploadCrackerConstant(rawFile)
-    }
-  const downloadExcelForConfiguration = async () => {
+
+      return response
+    } catch (error) {
+      console.error('Error uploading xcel:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Excel download started!',
-        severity: 'success',
+        message: 'Unexpected error occurred!',
+        severity: 'error',
       })
-  
-      try {
-        let response
-        response = await NormalOperationNormsApiService.CrackerConstantsExport(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      } catch (error) {
-        console.error('Error downloading Excel:', error)
-        setSnackbarData({
-          message: 'Failed to download Excel.',
-          severity: 'error',
-        })
-      } finally {
-        setSnackbarOpen(true)
-      }
+    } finally {
+      setLoading(false)
     }
+  }
+
+  const handleExcelUpload = (rawFile) => {
+    uploadCrackerConstant(rawFile)
+  }
+  const downloadExcelForConfiguration = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'success',
+    })
+
+    try {
+      let response
+      response = await NormalOperationNormsApiService.CrackerConstantsExport(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+    } catch (error) {
+      console.error('Error downloading Excel:', error)
+      setSnackbarData({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
 
   const adjustedPermissionsConstants = getAdjustedPermissions(
     {

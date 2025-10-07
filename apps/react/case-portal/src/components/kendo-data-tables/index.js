@@ -88,6 +88,7 @@ export const monthMap = {
 }
 
 const KendoDataTables = ({
+  showCatChemUtilityCheckbox = false,
   rows = [],
   plantID = null,
   grades = [],
@@ -836,6 +837,8 @@ const KendoDataTables = ({
     //   },
     // }))
   }
+
+  const CHECK_TYPES = ['cat chem', 'utility consumption']
 
   return (
     <div style={{ position: 'relative' }}>
@@ -1650,16 +1653,32 @@ const KendoDataTables = ({
                       hidden={col.hidden}
                       editable={true}
                       cells={{
-                        data: (props) => (
-                          <td style={{ textAlign: 'center' }}>
-                            <Checkbox
-                              checked={!!props.dataItem[props.field]}
-                              onChange={(e) =>
-                                handleCheckboxChange(props, e.value)
-                              }
-                            />
-                          </td>
-                        ),
+                        data: (props) => {
+                          const dataItem = props.dataItem || {}
+                          const normType = (dataItem.Particulars || '')
+                            .toString()
+                            .toLowerCase()
+
+                          if (
+                            showCatChemUtilityCheckbox &&
+                            !CHECK_TYPES.includes(normType)
+                          ) {
+                            return <td />
+                          }
+
+                          return (
+                            <td style={{ textAlign: 'center' }}>
+                              <Checkbox
+                                checked={!!props.dataItem[props.field]}
+                                onChange={(e) => {
+                                  const checked =
+                                    e?.value ?? e?.target?.checked ?? false
+                                  handleCheckboxChange(props, checked)
+                                }}
+                              />
+                            </td>
+                          )
+                        },
                         headerCell: BlankHeader,
                       }}
                     />

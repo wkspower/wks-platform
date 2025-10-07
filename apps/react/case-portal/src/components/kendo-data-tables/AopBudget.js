@@ -15,6 +15,7 @@ import KendoDataTables from './index'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { validateFields } from 'utils/validationUtils'
+import { Grid, TextField } from '../../../node_modules/@mui/material/index'
 export default function AopBudget() {
   const keycloak = useSession()
   const thisYear = localStorage.getItem('year')
@@ -169,10 +170,10 @@ export default function AopBudget() {
     {
       field: 'budgetConstrains',
       title: 'Budget Constrains',
-      width: 120,
+      width: 200,
       editable: true,
     },
-    { field: 'calc', title: 'Calc', width: 120 },
+    { field: 'calc', title: 'Calculate', width: 120 },
 
     ...monthFields.map(({ field, index, editable, type, format, width }) => ({
       field,
@@ -467,12 +468,79 @@ export default function AopBudget() {
         </Typography>
       )}
 
-      {true && (
-        <Typography component='div' className='text-header'>
-          <div>Design Basis </div>
-          <div>Remarks</div>
-        </Typography>
-      )}
+      <Typography
+        component='div'
+        className='grid-title'
+        sx={{ marginBottom: '5px' }}
+      >
+        <Grid container spacing={1}>
+          {/* Design Basis Section */}
+          <Grid item xs={6}>
+            {/* Apply 2px bottom margin to the container holding the title and button */}
+            <Grid container alignItems='center' sx={{ marginBottom: '2px' }}>
+              <Grid item xs={6}>
+                <div>Design Basis</div>
+              </Grid>
+
+              {/* The Save button is placed in the remaining space and justified to the end (right) */}
+              <Grid item xs={6} container justifyContent='flex-end'>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  className='btn-save'
+                  // Add your onClick handler here, e.g., onClick={handleSaveDesignBasis}
+                >
+                  Save
+                </Button>
+              </Grid>
+            </Grid>
+
+            <TextField
+              label='Design Basis'
+              multiline
+              minRows={3}
+              fullWidth
+              // Setting margin='none' ensures the TextField doesn't add its own vertical space
+              margin='none'
+              variant='outlined'
+              className='aop-design-basis'
+            />
+          </Grid>
+
+          {/* Remarks Section (Apply the same pattern here) */}
+          <Grid item xs={6}>
+            {/* Apply 2px bottom margin to the container holding the title and button */}
+            <Grid container alignItems='center' sx={{ marginBottom: '2px' }}>
+              <Grid item xs={6}>
+                <div>Remarks</div>
+              </Grid>
+
+              {/* The Save button is placed in the remaining space and justified to the end (right) */}
+              <Grid item xs={6} container justifyContent='flex-end'>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  className='btn-save'
+                  // Add your onClick handler here, e.g., onClick={handleSaveRemarks}
+                >
+                  Save
+                </Button>
+              </Grid>
+            </Grid>
+
+            <TextField
+              label='Remarks'
+              multiline
+              minRows={3}
+              fullWidth
+              // Setting margin='none' ensures the TextField doesn't add its own vertical space
+              margin='none'
+              variant='outlined'
+              className='aop-design-basis'
+            />
+          </Grid>
+        </Grid>
+      </Typography>
 
       <KendoDataTables
         title='Consumption Budget'

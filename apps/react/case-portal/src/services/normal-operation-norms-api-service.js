@@ -25,6 +25,7 @@ export const NormalOperationNormsApiService = {
   BestAchivedColorCodes,
   load1,
   load2,
+  load3,
 }
 
 async function BestAchivedColorCodes(keycloak, plantId, year, mode) {
@@ -150,6 +151,22 @@ async function load2(keycloak, PLANT_ID, AOP_YEAR, endDate, startDate) {
     return await Promise.reject(e)
   }
 }
+async function load3(keycloak, PLANT_ID, AOP_YEAR, endDate, startDate) {
+  // calculate--norms
+  const url = `${Config.CaseEngineUrl}/task/calculate-steady-norms?year=${AOP_YEAR}&plantId=${PLANT_ID}&periodTo=${endDate}&periodFrom=${startDate}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 
 async function getfinalNorms(keycloak, gradeId, method) {
   const year = localStorage.getItem('year') || ''
@@ -197,7 +214,7 @@ async function getModeWiseNormsDataworkflow(keycloak, gradeId, method) {
   const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
 
   const url = `${Config.CaseEngineUrl}/task/month-wise-raw-data-by-method?year=${year}&plantId=${plantId}&mode=${gradeId}&method=${method}`
-///month-wise-raw-data-by-method
+  ///month-wise-raw-data-by-method
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

@@ -1,4 +1,10 @@
-import { Backdrop, Box, CircularProgress, TextField, Button } from '@mui/material'
+import {
+  Backdrop,
+  Box,
+  CircularProgress,
+  TextField,
+  Button,
+} from '@mui/material'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
@@ -40,34 +46,35 @@ const DecokingConfig = () => {
   const [currentRemarkRunLength, setCurrentRemarkRunLength] = useState('')
   const [currentRowIdRunLength, setCurrentRowId3] = useState(null)
   const [calculationObject, setCalculationObject] = useState([])
-//my chnage 
+  //my chnage
   const [modifiedCellsSdTa, setModifiedCellsSdTa] = React.useState({})
   const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
   const [globalTaStartDate, setGlobalTaStartDate] = useState(null)
   const [globalTaEndDate, setGlobalTaEndDate] = useState(null)
   useEffect(() => {
-  if (!globalTaStartDate || !globalTaEndDate || ibrScreen2Rows.length === 0) return
+    if (!globalTaStartDate || !globalTaEndDate || ibrScreen2Rows.length === 0)
+      return
 
-  const updatedRows = ibrScreen2Rows.map(row => ({
-    ...row,
-    taStartDate: globalTaStartDate,
-    taEndDate: globalTaEndDate
-  }))
-  
-  setIbrScreen2Rows(updatedRows)
-  
-  // Update modified cells for saving
-  const newModifiedCells = { ...modifiedCellsSdTa }
-  updatedRows.forEach(row => {
-    newModifiedCells[row.id] = {
-      ...newModifiedCells[row.id],
+    const updatedRows = ibrScreen2Rows.map((row) => ({
       ...row,
       taStartDate: globalTaStartDate,
-      taEndDate: globalTaEndDate
-    }
-  })
-  setModifiedCellsSdTa(newModifiedCells)
-}, [globalTaStartDate, globalTaEndDate])
+      taEndDate: globalTaEndDate,
+    }))
+
+    setIbrScreen2Rows(updatedRows)
+
+    // Update modified cells for saving
+    const newModifiedCells = { ...modifiedCellsSdTa }
+    updatedRows.forEach((row) => {
+      newModifiedCells[row.id] = {
+        ...newModifiedCells[row.id],
+        ...row,
+        taStartDate: globalTaStartDate,
+        taEndDate: globalTaEndDate,
+      }
+    })
+    setModifiedCellsSdTa(newModifiedCells)
+  }, [globalTaStartDate, globalTaEndDate])
   const handleRemarkCellClick2 = (dataItem) => {
     setCurrentRemarkSdTa(dataItem.remarks || '')
     setCurrentRowId2(dataItem.id)
@@ -79,7 +86,7 @@ const DecokingConfig = () => {
     setRemarkDialogOpenRunLength(true)
   }
   const [ibrScreen1Rows, setIbrScreen1Rows] = useState([])
-  
+
   const [ibrScreen3Rows, setIbrScreen3Rows] = useState([])
   const [runningDurationRows, setRunningDurationRows] = useState([])
   const [modifiedCellsRunLength, setModifiedCellsRunLength] = React.useState({})
@@ -170,6 +177,14 @@ const DecokingConfig = () => {
               }))
 
               setRowsForTab(currentTab, processedData, 2)
+
+              if (processedData && processedData.length > 0) {
+                const taStart = processedData[0]?.taStartDate
+                const taEnd = processedData[0]?.taEndDate
+
+                setGlobalTaStartDate(taStart ? toDateObject(taStart) : null)
+                setGlobalTaEndDate(taEnd ? toDateObject(taEnd) : null)
+              }
             } else {
               setRowsForTab(currentTab, [], 2)
             }
@@ -429,7 +444,9 @@ const DecokingConfig = () => {
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
         remarks: row.remarks || '',
         isCr: row?.isCr ? true : false,
-        actualRunLength: row?.actualRunLength ? Number(row.actualRunLength) : null,
+        actualRunLength: row?.actualRunLength
+          ? Number(row.actualRunLength)
+          : null,
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
@@ -650,47 +667,47 @@ const DecokingConfig = () => {
     }
   }
   const handleCalculateSdTa = async () => {
-  setLoading(true)
-  try {
-    const year = localStorage.getItem('year')
-    const storedPlant = localStorage.getItem('selectedPlant')
-    let plantId = ''
-    if (storedPlant) {
-      const parsedPlant = JSON.parse(storedPlant)
-      plantId = parsedPlant.id
-    }
-    
-    const data = await DataService.handleCalculateSdTaActivities(
-      plantId,
-      year,
-      keycloak,
-    )
-    
-    if (data?.code == 200) {
-      fetchData(2) // Refresh screen 2 data
+    setLoading(true)
+    try {
+      const year = localStorage.getItem('year')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      let plantId = ''
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      const data = await DataService.handleCalculateSdTaActivities(
+        plantId,
+        year,
+        keycloak,
+      )
+
+      if (data?.code == 200) {
+        fetchData(2) // Refresh screen 2 data
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'SDTA data refreshed successfully!',
+          severity: 'success',
+        })
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Failed to refresh SDTA data!',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error calculating SDTA data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'SDTA data refreshed successfully!',
-        severity: 'success',
-      })
-    } else {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Failed to refresh SDTA data!',
+        message: 'Error occurred while refreshing data!',
         severity: 'error',
       })
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Error calculating SDTA data:', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error occurred while refreshing data!',
-      severity: 'error',
-    })
-  } finally {
-    setLoading(false)
   }
-}
   const handleCalculate = async () => {
     setLoading(true)
     try {
@@ -731,44 +748,38 @@ const DecokingConfig = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      
+
       <LocalizationProvider dateAdapter={AdapterMoment}>
-  <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Typography
-        className='grid-title'
-        sx={{ whiteSpace: 'nowrap' }}
-      >
-        TA Start Date
-      </Typography>
-      <DatePicker
-        id='global-ta-start-date'
-        format='dd-MM-yyyy'
-        value={globalTaStartDate}
-        onChange={(e) => setGlobalTaStartDate(e.value)}
-        style={{ height: '80px' }}
-        size={'medium'}
-      />
-    </Box>
-    
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Typography
-        className='grid-title'
-        sx={{ whiteSpace: 'nowrap' }}
-      >
-        TA End Date
-      </Typography>
-      <DatePicker
-        id='global-ta-end-date'
-        format='dd-MM-yyyy'
-        value={globalTaEndDate}
-        onChange={(e) => setGlobalTaEndDate(e.value)}
-        style={{ height: '80px' }}
-        size={'medium'}
-      />
-    </Box>
-  </Box>
-</LocalizationProvider>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography className='grid-title' sx={{ whiteSpace: 'nowrap' }}>
+              TA Start Date
+            </Typography>
+            <DatePicker
+              id='global-ta-start-date'
+              format='dd-MM-yyyy'
+              value={globalTaStartDate}
+              onChange={(e) => setGlobalTaStartDate(e.value)}
+              style={{ height: '80px' }}
+              size={'medium'}
+            />
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography className='grid-title' sx={{ whiteSpace: 'nowrap' }}>
+              TA End Date
+            </Typography>
+            <DatePicker
+              id='global-ta-end-date'
+              format='dd-MM-yyyy'
+              value={globalTaEndDate}
+              onChange={(e) => setGlobalTaEndDate(e.value)}
+              style={{ height: '80px' }}
+              size={'medium'}
+            />
+          </Box>
+        </Box>
+      </LocalizationProvider>
 
       <SDTAActivitiesGrid
         columns={ibrPlanColumns}

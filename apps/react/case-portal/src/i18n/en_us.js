@@ -89,6 +89,7 @@ const defs = {
 
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
+    tcsinput: 'TCS Input',
   },
   pages: {
     dashboard: {
@@ -278,6 +279,7 @@ const defs = {
 
         functionalReports: 'Reports',
         aopDesignBasis: 'AOP Basis',
+        tcsinput: 'TCS Input',
       },
     },
   },
