@@ -158,9 +158,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 			String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
 			List<Object[]> results = getData(plantId, year, procedureName);
-
-			
-
 			// Variables to accumulate totals
 			double sumFiveF = 0;
 			double sumFourF = 0;
@@ -249,7 +246,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 			// Optionally add an “id” or “monthName” for the sum row (or leave null)
 			sumMap.put("id", null);
-			sumMap.put("monthName", null);
+			sumMap.put("monthName", "Total");
 
 			// Finally add this summary map to your data (or return separately)
 			data.add(sumMap);
