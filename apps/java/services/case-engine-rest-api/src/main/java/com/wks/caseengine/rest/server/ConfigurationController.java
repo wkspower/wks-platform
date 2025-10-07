@@ -37,8 +37,8 @@ public class ConfigurationController {
 	}
 	
 	@GetMapping(value="/calculate-steady-norms")
-	public AOPMessageVM calculateSteadyNorms(@RequestParam String year,@RequestParam String plantId){
-		return	configurationService.calculateSteadyNorms(year, plantId);
+	public AOPMessageVM calculateSteadyNorms(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String periodTo,@RequestParam(required=false) String periodFrom){
+		return	configurationService.calculateSteadyNorms(year, plantId,periodTo,periodFrom);
 	}
 	
 	@GetMapping(value="/configuration/intermediate-values")
