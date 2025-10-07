@@ -226,7 +226,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    data.add(map);
 			}
 
-			// After loop, create a “summary” map
+			
 			Map<String, Object> sumMap = new HashMap<>();
 			sumMap.put("coilReplacement", sumCoilReplacement);
 			sumMap.put("mnt", sumMnt);
@@ -246,7 +246,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			sumMap.put("numberOfDays", sumNumberOfDays);
 			sumMap.put("totalSAD", sumTotalSAD);
 			
-			// Optionally add an “id” or “monthName” for the sum row (or leave null)
 			sumMap.put("id", null);
 			sumMap.put("monthName", "Total");
 
