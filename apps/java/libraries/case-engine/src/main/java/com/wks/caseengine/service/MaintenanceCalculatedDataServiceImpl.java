@@ -175,6 +175,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			double sumTotal = 0;
 			double sumNumberOfDays = 0;
 			double sumTotalSAD = 0;
+			double sumDemoHHS=0;
 
 			for (Object[] row : results) {
 			    Map<String, Object> map = new HashMap<>();
@@ -221,7 +222,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    sumTotal += (row[16] != null ? ((Number) row[16]).doubleValue() : 0);
 			    sumNumberOfDays += (row[22] != null ? ((Number) row[22]).doubleValue() : 0);
 			    sumTotalSAD += (row[21] != null ? ((Number) row[21]).doubleValue() : 0);
-
+			    sumDemoHHS+=(row[9] != null ? ((Number) row[9]).doubleValue() : 0);
 			    data.add(map);
 			}
 
@@ -237,13 +238,14 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			sumMap.put("demoSAD", sumDemoSAD);
 			sumMap.put("demoSD", sumDemoSD);
 			sumMap.put("demoBBU", sumDemoBBU);
+			sumMap.put("demoHHS", sumDemoHHS);
 			sumMap.put("fourFD", sumFourFD);
 			sumMap.put("fourF", sumFourF);
 			sumMap.put("fiveF", sumFiveF);
 			sumMap.put("total", sumTotal);
 			sumMap.put("numberOfDays", sumNumberOfDays);
 			sumMap.put("totalSAD", sumTotalSAD);
-
+			
 			// Optionally add an “id” or “monthName” for the sum row (or leave null)
 			sumMap.put("id", null);
 			sumMap.put("monthName", "Total");
@@ -398,18 +400,36 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        return dtoList;
 	    }
 
+	    // Initialize sum variables
+	    double sumCoilReplacement = 0;
+	    double sumMnt = 0;
+	    double sumShutdown = 0;
+	    double sumSlowdown = 0;
+	    double sumSAD = 0;
+	    double sumBBD = 0;
+	    double sumBBU = 0;
+	    double sumDemoSAD = 0;
+	    double sumDemoSD = 0;
+	    double sumDemoBBU = 0;
+	    double sumFourFD = 0;
+	    double sumFourF = 0;
+	    double sumFiveF = 0;
+	    double sumTotal = 0;
+	    double sumTotalSAD = 0;
+	    double sumNumberOfDays = 0;
+	    double sumDemoHHS=0;
+
 	    for (Object[] row : results) {
-	    	DecokePlanningDTO dto = new DecokePlanningDTO();
+	        DecokePlanningDTO dto = new DecokePlanningDTO();
 
 	        // String fields
 	        dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
 	        dto.setMonthName(row[1] != null ? row[1].toString() : null);
 	        dto.setAopYear(row[18] != null ? row[18].toString() : null);
 	        dto.setPlantId(row[19] != null ? UUID.fromString(row[19].toString()) : null);
-	        // remarks – note: you had a special null-handling before
 	        dto.setRemarks(row[20] != null ? row[20].toString() : "");
 
-	        // Numeric (Double) fields
+	        // Numeric fields
 	        dto.setCoilReplacement(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
 	        dto.setMnt(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
 	        dto.setShutdown(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
@@ -427,20 +447,53 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        dto.setTotal(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
 	        dto.setFourFHours(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
 	        dto.setTotalSAD(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
+	        dto.setNumberOfDays(row[22] != null ? Double.parseDouble(row[22].toString()) : 0.0);
 
-	        // numberOfDays is an integer
-	        if (row[22] != null) {
-	            try {
-	                dto.setNumberOfDays(Double.parseDouble(row[22].toString()));
-	            } catch (NumberFormatException e) {
-	                dto.setNumberOfDays(0.0);
-	            }
-	        } else {
-	            dto.setNumberOfDays(0.0);
-	        }
+	        // Accumulate totals
+	        sumCoilReplacement += dto.getCoilReplacement();
+	        sumMnt += dto.getMnt();
+	        sumShutdown += dto.getShutdown();
+	        sumSlowdown += dto.getSlowdown();
+	        sumSAD += dto.getSad();
+	        sumBBD += dto.getBbd();
+	        sumBBU += dto.getBbu();
+	        sumDemoSAD += dto.getDemoSAD();
+	        sumDemoSD += dto.getDemoSD();
+	        sumDemoBBU += dto.getDemoBBU();
+	        sumFourFD += dto.getFourFD();
+	        sumFourF += dto.getFourF();
+	        sumFiveF += dto.getFiveF();
+	        sumTotal += dto.getTotal();
+	        sumNumberOfDays += dto.getNumberOfDays();
+	        sumTotalSAD += dto.getTotalSAD();
+	        sumDemoHHS+=dto.getDemoHSS();
 
 	        dtoList.add(dto);
 	    }
+
+	    // Add summary (Total) DTO
+	    DecokePlanningDTO totalDto = new DecokePlanningDTO();
+	    totalDto.setMonthName("Total");
+	    totalDto.setCoilReplacement(sumCoilReplacement);
+	    totalDto.setMnt(sumMnt);
+	    totalDto.setShutdown(sumShutdown);
+	    totalDto.setSlowdown(sumSlowdown);
+	    totalDto.setSad(sumSAD);
+	    totalDto.setBbd(sumBBD);
+	    totalDto.setBbu(sumBBU);
+	    totalDto.setDemoSAD(sumDemoSAD);
+	    totalDto.setDemoSD(sumDemoSD);
+	    totalDto.setDemoBBU(sumDemoBBU);
+	    totalDto.setFourFD(sumFourFD);
+	    totalDto.setFourF(sumFourF);
+	    totalDto.setFiveF(sumFiveF);
+	    totalDto.setTotal(sumTotal);
+	    totalDto.setNumberOfDays(sumNumberOfDays);
+	    totalDto.setTotalSAD(sumTotalSAD);
+	    totalDto.setDemoHSS(sumDemoHHS);
+	    totalDto.setRemarks("Total");
+
+	    dtoList.add(totalDto);
 
 	    return dtoList;
 	}
