@@ -653,7 +653,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 
-		String procedureName = vertical.getName() + "_" + site.getName() + "_LoadSteamNorms";
+		String procedureName = vertical.getName() + "_" + site.getName() + "_GetValuesforConsecutiveDays";
 		executeDynamicUpdateProcedure(procedureName, plantId, finYear, periodFrom, periodTo);
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("configuration");
 		for (ScreenMapping screenMapping : screenMappingList) {

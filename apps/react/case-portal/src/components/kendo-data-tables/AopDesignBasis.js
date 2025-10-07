@@ -369,6 +369,55 @@ const AopDesignBasis = () => {
   const startDateFromConfig = new Date(startDateConfig?.AttributeValue)
   const endDateDateFromConfig = new Date(endDateConfig?.AttributeValue)
 
+  const saveSummary = async () => {
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      let year = localStorage.getItem('year')
+      const response = await DataService.saveSummaryAOPConsumptionNorm(
+        plantId,
+        year,
+        summary,
+        keycloak,
+      )
+
+      if (response?.code == 200) {
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setSummaryEdited(false)
+        setLoading(false)
+        setSnackbarOpen(true)
+        // setIsEdited(false)
+      } else {
+        setSnackbarData({
+          message: 'Saved Failed!',
+          severity: 'error',
+        })
+        setLoading(false)
+        // setSnackbarOpen(true)
+        setSummaryEdited(false)
+      }
+
+      //
+
+      // setLoading(false)
+      return response
+    } catch (error) {
+      console.error('Error saving Summary!', error)
+      setSummaryEdited(false)
+    } finally {
+      //
+      setLoading(false)
+      setSummaryEdited(false)
+    }
+  }
+
   const ConfigurationAccordian = useMemo(() => {
     return (
       <Box sx={{ mb: '0px' }}>
@@ -378,7 +427,7 @@ const AopDesignBasis = () => {
             id='meg-grid-header'
           >
             <Typography className='grid-title'>
-              AOP Historical Period Basis
+              AOP Historical Period Basis for Production Target
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>
@@ -436,13 +485,27 @@ const AopDesignBasis = () => {
                     variant='contained'
                     // onClick={onLoad}
                     onClick={handleOpenDialog}
-                    className='btn-load'
+                    className='btn-save'
                     // disabled={!isLoadEnabled}
                     sx={{ alignSelf: 'flex-end' }}
                   >
                     Load
                   </Button>
                 )}
+
+                {!isOldYearFlag && (
+                  <Button
+                    variant='contained'
+                    // onClick={onLoad}
+                    onClick={saveSummary}
+                    className='btn-save'
+                    disabled={!summaryEdited}
+                    sx={{ alignSelf: 'flex-end' }}
+                  >
+                    Save
+                  </Button>
+                )}
+
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
@@ -528,4 +591,5 @@ const AopDesignBasis = () => {
     )
   }
 }
+
 export default AopDesignBasis
