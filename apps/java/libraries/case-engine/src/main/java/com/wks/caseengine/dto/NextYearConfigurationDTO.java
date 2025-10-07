@@ -1,10 +1,6 @@
 package com.wks.caseengine.dto;
 
-import java.util.Date;
-import java.util.UUID;
-
 import org.springframework.context.annotation.Configuration;
-
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,10 +1,12 @@
 package com.wks.caseengine.dto;
 
-import org.springframework.context.annotation.Configuration;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Configuration;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

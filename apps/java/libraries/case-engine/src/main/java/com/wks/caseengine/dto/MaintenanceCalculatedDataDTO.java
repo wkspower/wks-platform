@@ -1,12 +1,11 @@
 package com.wks.caseengine.dto;
 
-import lombok.*;
-
-import java.util.UUID;
-
-import org.springframework.context.annotation.Configuration;
-
 import com.wks.caseengine.entity.MaintenanceCalculatedData;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 //@Configuration
 @NoArgsConstructor
 @AllArgsConstructor
