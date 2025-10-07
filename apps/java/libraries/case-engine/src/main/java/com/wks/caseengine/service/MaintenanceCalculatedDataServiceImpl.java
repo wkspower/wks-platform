@@ -249,7 +249,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 			// Optionally add an “id” or “monthName” for the sum row (or leave null)
 			sumMap.put("id", null);
-			sumMap.put("monthName", "SUM");
+			sumMap.put("monthName", null);
 
 			// Finally add this summary map to your data (or return separately)
 			data.add(sumMap);
