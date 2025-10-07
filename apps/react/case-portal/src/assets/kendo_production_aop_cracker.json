@@ -25,6 +25,13 @@
   },
 
   {
+    "field": "uom",
+    "title": "UOM",
+    "editable": false,
+    "width": 125
+  },
+
+  {
     "field": "april",
     "title": "4",
     "editable": false,

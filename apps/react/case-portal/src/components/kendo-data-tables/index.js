@@ -1158,11 +1158,16 @@ const KendoDataTables = ({
             >
               {groupBy && <ExcelExportColumn field={groupBy} title='Type' />}
 
-              {permissions?.unitForExcelToadd && (
+              {/* {permissions?.unitForExcelToadd && (
                 <ExcelExportColumn field={selectedUOM} title='UOM' />
-              )}
+              )} */}
 
               {columns?.map((col) => {
+                {
+                  permissions?.unitForExcelToadd && (
+                    <ExcelExportColumn field={selectedUOM} title='UOM' />
+                  )
+                }
                 const isActive = isColumnActive(col?.field, filter, sort)
 
                 if (col.type === 'descLimit') {

@@ -88,6 +88,7 @@ const defs = {
     plantBudgetSummary: 'Plant Budget Summary',
 
     functionalReports: 'Reports',
+    aopDesignBasis: 'AOP Basis',
   },
   pages: {
     dashboard: {
@@ -276,6 +277,7 @@ const defs = {
         plantBudgetSummary: 'Plant Budget Summary',
 
         functionalReports: 'Reports',
+        aopDesignBasis: 'AOP Basis',
       },
     },
   },

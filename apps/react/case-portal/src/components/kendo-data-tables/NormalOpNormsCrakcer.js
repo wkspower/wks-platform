@@ -691,9 +691,6 @@ const NormalOpNormsScreenCracker = () => {
   }, [modifiedCellsFinalNorms, saveRows])
 
   const saveChangesUnified = useCallback(async () => {
-    // Final tab -> final norms
-    // console.log('selectedTab', selectedTab)
-
     if (selectedTab === 4) return saveChangesCrackerFinalNorms()
 
     // Prepare modified rows for save
@@ -795,7 +792,7 @@ const NormalOpNormsScreenCracker = () => {
   }, [PLANT_ID, fetchModeData, gradeId, keycloak, AOP_YEAR])
 
   const handleCalculateUnified = useCallback(async () => {
-    if (selectedTab === 2) return handleCalculateFinalNorms()
+    if (selectedTab === 4) return handleCalculateFinalNorms()
     return handleCalculate()
   }, [selectedTab, handleCalculate, handleCalculateFinalNorms])
 
@@ -1206,13 +1203,13 @@ const NormalOpNormsScreenCracker = () => {
           >
             <Typography component='div' className='grid-title'>
               <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> -
-              Expression&nbsp;&nbsp;
+              Expression &nbsp;&nbsp;
               <span style={{ color: 'green', fontWeight: 'bold' }}>
                 Green
               </span>{' '}
               - BestAchieved(MinCC)&nbsp;&nbsp;
               <span style={{ color: 'blue', fontWeight: 'bold' }}>Blue</span> -
-              BestAchieved(Indv)
+              Best Achieved(Indv)
             </Typography>
           </Box>
           <KendoDataTables

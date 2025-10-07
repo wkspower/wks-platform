@@ -52,21 +52,22 @@ const ProductionVolumeDataBasisPe = () => {
 
   const enrichColumns = useCallback((backendCols = []) => {
     const columnsToHide = ['GRID_TYPE']
-    return backendCols.filter(col => !columnsToHide.includes(col.field))
-    .map((col) => {
-      const isTextCol = col.type === 'string'
-      const isNumberCol = col.type === 'number'
-      return {
-        ...col,
-        title: col.title || col.field,
-        filterable: true,
-        filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-        align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.##}' } : {}),
-        editable: false,
-        isRightAlligned: isNumberCol ? 'numeric' : undefined,
-      }
-    })
+    return backendCols
+      .filter((col) => !columnsToHide.includes(col.field))
+      .map((col) => {
+        const isTextCol = col.type === 'string'
+        const isNumberCol = col.type === 'number'
+        return {
+          ...col,
+          title: col.title || col.field,
+          filterable: true,
+          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+          editable: false,
+          isRightAlligned: isNumberCol ? 'numeric' : undefined,
+        }
+      })
   }, [])
 
   // ---------------------------------------------------------------------------
@@ -74,23 +75,25 @@ const ProductionVolumeDataBasisPe = () => {
   // ---------------------------------------------------------------------------
   function isValidDateString(str) {
     if (typeof str !== 'string') return false
-    
+
     // Common date patterns
     const datePatterns = [
-    /^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/,  // DD-MM-YYYY or DD/MM/YYYY
-    /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/,  // YYYY-MM-DD or YYYY/MM/DD
-    /^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}/,  // "Apr 1, 2025" format
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, // ISO format
-  ]
-    
+      /^\d{1,2}[-/]\d{1,2}[-/]\d{4}$/, // DD-MM-YYYY or DD/MM/YYYY
+      /^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/, // YYYY-MM-DD or YYYY/MM/DD
+      /^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}/, // "Apr 1, 2025" format
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, // ISO format
+    ]
+
     // Check if string matches common date patterns
-    const matchesPattern = datePatterns.some(pattern => pattern.test(str.trim()))
-    
+    const matchesPattern = datePatterns.some((pattern) =>
+      pattern.test(str.trim()),
+    )
+
     // Additional check: if it contains only letters and numbers without date separators, it's likely not a date
-     if (!matchesPattern && !/[-/,\s:]/.test(str)) {
+    if (!matchesPattern && !/[-/,\s:]/.test(str)) {
       return false
     }
-    
+
     return matchesPattern
   }
   function inferColumnsFromRows(rows = []) {
@@ -112,14 +115,14 @@ const ProductionVolumeDataBasisPe = () => {
           detectedType = 'number'
           break
         }
-        
-     const d = new Date(v)
+
+        const d = new Date(v)
         if (!isNaN(d.getTime()) && isValidDateString(v)) {
           detectedType = 'date'
           break
         }
         // detect date-like strings
-       // const d = new Date(v)
+        // const d = new Date(v)
         // if (!isNaN(d.getTime())) {
         //   detectedType = 'date'
         //   break
@@ -234,7 +237,14 @@ const ProductionVolumeDataBasisPe = () => {
       const newMap = {}
       gridsArray.forEach((g) => {
         const rawRows = Array.isArray(g.data) ? g.data : []
-        const inferredCols = inferColumnsFromRows(rawRows)
+        // BEFORE:
+        // const inferredCols = inferColumnsFromRows(rawRows)
+
+        // AFTER:
+        const inferredCols =
+          Array.isArray(g.columns) && g.columns.length
+            ? g.columns
+            : inferColumnsFromRows(rawRows)
         const enrichedCols = enrichColumns(inferredCols)
 
         const rowsWithId = rawRows.map((r, i) => {

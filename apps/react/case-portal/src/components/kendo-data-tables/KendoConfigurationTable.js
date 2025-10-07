@@ -609,11 +609,9 @@ const ConfigurationTable = () => {
             aria-controls='meg-grid-content'
             id='meg-grid-header'
           >
-            {lowerVertName !== 'cracker' && (
-    <Typography className='grid-title'>
-      AOP Historical Period Basis
-    </Typography>
-  )}
+            <Typography className='grid-title'>
+              AOP Historical Period Basis
+            </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>
             <Box
@@ -632,40 +630,40 @@ const ConfigurationTable = () => {
                   marginTop: '5px',
                 }}
               >
-                {lowerVertName !== 'cracker' && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography
-                    className='grid-title'
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    Start Date
-                  </Typography>
-                  <DatePicker
-                    id='start-date'
-                    format='dd-MM-yyyy'
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.value)}
-                    style={{ height: '80px' }}
-                    size={'medium'}
-                  />
-                  <Typography
-                    className='grid-title'
-                    sx={{ whiteSpace: 'nowrap' }}
-                  >
-                    End Date
-                  </Typography>
-                  <DatePicker
-                    id='end-date'
-                    format='dd-MM-yyyy'
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.value)}
-                    style={{ height: '80px' }}
-                    size={'medium'}
-                  />
-                </Box>
+                {true && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography
+                      className='grid-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      Start Date
+                    </Typography>
+                    <DatePicker
+                      id='start-date'
+                      format='dd-MM-yyyy'
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.value)}
+                      style={{ height: '80px' }}
+                      size={'medium'}
+                    />
+                    <Typography
+                      className='grid-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      End Date
+                    </Typography>
+                    <DatePicker
+                      id='end-date'
+                      format='dd-MM-yyyy'
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.value)}
+                      style={{ height: '80px' }}
+                      size={'medium'}
+                    />
+                  </Box>
                 )}
                 {/* Load Button */}
-                {!isOldYearFlag  && lowerVertName !== 'cracker' && (
+                {!isOldYearFlag && (
                   <Button
                     variant='contained'
                     // onClick={onLoad}
@@ -904,11 +902,82 @@ const ConfigurationTable = () => {
       </div>
     )
   }
-  if (
-    lowerVertName === 'elastomer' ||
-    lowerVertName === 'pta' ||
-    vcmVerticalName === 'vcm'
-  ) {
+
+  if (lowerVertName === 'elastomer') {
+    const elastomerTabs = ['Constants', 'Report Manual Entry']
+    const auditYear = localStorage.getItem('year')
+    let displayYear = ''
+    if (auditYear) {
+      const [start, end] = auditYear.split('-').map(Number)
+      displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
+    }
+    return (
+      <div>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={!!loading1}
+        >
+          <CircularProgress color='inherit' />
+        </Backdrop>
+        {ConfigurationAccordian}
+        <Box>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={elastomerTabs.map((tab) =>
+              tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
+            )}
+          />
+          {(() => {
+            const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
+            switch (currentTab) {
+              case 'constants':
+                return (
+                  <SelectivityData
+                    rows={productionRowsConstants}
+                    loading={loading}
+                    fetchData={fetchDataConstants}
+                    setRows={setProductionRowsConstants}
+                    configType='megConstants'
+                    groupBy='Particulars'
+                    summaryEdited={summaryEdited}
+                    summary={debouncedSummary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='1'
+                  />
+                )
+              case 'report manual entry':
+                return (
+                  <SelectivityData
+                    rows={productionRowsConstantsMannualEntry}
+                    loading={loading}
+                    fetchData={fetchDataConstantsMnnualEntry}
+                    setRows={setProductionRowsConstantsMannualEntry}
+                    configType='megConstantsMannualEntry'
+                    groupBy='Particulars'
+                    summaryEdited={summaryEdited}
+                    summary={debouncedSummary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='2'
+                  />
+                )
+              default:
+                return null
+            }
+          })()}
+        </Box>
+        <Notification
+          open={snackbarOpen}
+          message={snackbarData?.message || ''}
+          severity={snackbarData?.severity || 'info'}
+          onClose={() => setSnackbarOpen(false)}
+        />
+        {ConfigurationDialog}
+      </div>
+    )
+  }
+
+  if (lowerVertName === 'pta' || vcmVerticalName === 'vcm') {
     const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = localStorage.getItem('year')
     let displayYear = ''

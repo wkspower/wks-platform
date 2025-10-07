@@ -58,6 +58,7 @@ import BestAchievedIndividualNorms from 'components/data-tables/Reports/BestAchi
 import RunLengthDataSet from 'components/data-tables/Reports/RunLengthDataSet'
 import MaintenanceSummary from 'components/kendo-data-tables/MaintenanceSummary'
 import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
+import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -219,6 +220,16 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+
+          {
+            path: 'aop-design-basis',
+            element: (
+              <PrivateRoute routeId='aop-design-basis'>
+                <AopDesignBasis />
+              </PrivateRoute>
+            ),
+          },
+
           {
             path: 'configuration',
             element: (

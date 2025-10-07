@@ -373,9 +373,9 @@ const ProductionNorms = ({ permissions }) => {
       }
 
       let dataSet = response?.data?.aopDTOList
-      // if (lowerVertName === 'cracker') {
-      //   dataSet = rowDataForCracker
-      // }
+      if (lowerVertName === 'cracker') {
+        dataSet = rowDataForCracker
+      }
 
       var data = dataSet
         ?.map((product) => ({
@@ -460,7 +460,7 @@ const ProductionNorms = ({ permissions }) => {
           const transformedItem = {
             ...item,
             idFromApi: item.id,
-            UOM: selectedUnit ? selectedUnit : 'MT/Month',
+            uom: selectedUnit ? selectedUnit : 'MT/Month',
             normParametersFKId: item?.normParametersFKId?.toLowerCase(),
             id: index,
             ...(TPH && {
