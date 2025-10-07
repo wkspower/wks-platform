@@ -214,9 +214,19 @@ public class ConfigurationController {
 		return configurationService.getConfigurationExecution(year,plantId);
 	}
 	
+	@GetMapping(value="/configuration-execution-norms")
+	public AOPMessageVM getConfigurationExecutionNorms(@RequestParam String year,@RequestParam String plantId) {
+		return configurationService.getConfigurationExecutionNorms(year,plantId);
+	}
+	
 	@PostMapping(value="/configuration-execution")
 	public AOPMessageVM saveConfigurationExecution(@RequestBody List<ExecutionDetailDto> executionDetailDtoList) {
 		return configurationService.saveConfigurationExecution(executionDetailDtoList);
+	}
+	
+	@PostMapping(value="/configuration-execution-norms")
+	public AOPMessageVM saveConfigurationExecutionNorms(@RequestBody List<ExecutionDetailDto> executionDetailDtoList) {
+		return configurationService.saveConfigurationExecutionNorms(executionDetailDtoList);
 	}
 
 }

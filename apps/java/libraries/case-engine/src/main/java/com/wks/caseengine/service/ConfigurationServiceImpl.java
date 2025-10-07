@@ -622,6 +622,47 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
+	public AOPMessageVM getConfigurationExecutionNorms(String year, String plantId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Object[]> rows = normAttributeTransactionsRepository
+					.findByPlantIdAndYearForNorms(
+							UUID.fromString(plantId), 
+							year 
+					);
+
+			List<Map<String, Object>> configurationConstantsList = new ArrayList<>();
+			for (Object[] row : rows) {
+				Map<String, Object> map = new HashMap<>();
+
+				map.put("Id", row[0]);
+				map.put("AttributeValue", row[1]);
+				map.put("AOPMonth", row[2]);
+				map.put("AuditYear", row[3]);
+				map.put("Remarks", row[4]);
+				map.put("CreatedOn", row[5]);
+				map.put("ModifiedOn", row[6]);
+				map.put("AttributeValueVersion", row[7]);
+				map.put("User", row[8]);
+				map.put("Name", row[9]);
+				map.put("NormParameter_FK_Id", row[10]);
+				map.put("plantId", row[11]);
+				map.put("IsMonthwise", row[12]);
+
+				configurationConstantsList.add(map);
+			}
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationConstantsList);
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	public AOPMessageVM saveConfigurationExecution(List<ExecutionDetailDto> executionDetailDtoList) {
 
 		for (ExecutionDetailDto executionDetailDto : executionDetailDtoList) {
@@ -665,6 +706,37 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 			aopCalculationRepository.save(aopCalculation);
 		}
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data saved successfully");
+			aopMessageVM.setData(executionDetailDtoList);
+			return aopMessageVM;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public AOPMessageVM saveConfigurationExecutionNorms(List<ExecutionDetailDto> executionDetailDtoList) {
+
+		for (ExecutionDetailDto executionDetailDto : executionDetailDtoList) {
+			NormAttributeTransactions normAttributeTransactions = null;
+			if (executionDetailDto.getId() != null) {
+				normAttributeTransactions = normAttributeTransactionsRepository.findById((executionDetailDto.getId()))
+						.get();
+			} else {
+				normAttributeTransactions = new NormAttributeTransactions();
+			}
+
+			normAttributeTransactions.setNormParameterFKId(executionDetailDto.getNormParameterFKId());
+			normAttributeTransactions.setAttributeValue(executionDetailDto.getApr());
+			normAttributeTransactions.setRemarks(executionDetailDto.getRemarks());
+			normAttributeTransactions.setAopMonth(4);
+			normAttributeTransactions.setAuditYear(executionDetailDto.getAuditYear());
+			normAttributeTransactions.setUserName(Utility.getUserName());
+			normAttributeTransactionsRepository.save(normAttributeTransactions);
+		}
+
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			aopMessageVM.setCode(200);

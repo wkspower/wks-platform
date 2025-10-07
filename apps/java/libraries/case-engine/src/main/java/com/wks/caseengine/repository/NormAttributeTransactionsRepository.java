@@ -171,6 +171,11 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 			@Param("plantId") UUID plantId,
 			@Param("year") String year);
 	
+	@Query(value = "EXEC GetHistorianExecutionNormsDetails @plantId = :plantId, @aopYear = :year", nativeQuery = true)
+	List<Object[]> findByPlantIdAndYearForNorms(
+			@Param("plantId") UUID plantId,
+			@Param("year") String year);
+	
 	Optional<NormAttributeTransactions> findByNormParameterFKId(UUID normParameterFKId);
 	
 	@Query(value = "SELECT * FROM NormAttributeTransactions " +

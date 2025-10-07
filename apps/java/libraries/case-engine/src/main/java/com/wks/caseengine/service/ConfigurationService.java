@@ -34,7 +34,9 @@ public interface ConfigurationService {
     public AOPMessageVM importRecipe(String year, UUID fromString, MultipartFile file);
     public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId, MultipartFile file);
 	public AOPMessageVM getConfigurationExecution( String year, String plantId);
+	public AOPMessageVM getConfigurationExecutionNorms( String year, String plantId);
     public AOPMessageVM saveConfigurationExecution( List<ExecutionDetailDto> executionDetailDtoList);
+    public AOPMessageVM saveConfigurationExecutionNorms( List<ExecutionDetailDto> executionDetailDtoList);
     byte[] createConfigurationConstantsExcelResponse(String year, UUID plantFKId, List<ConfigurationDTO> list);
     public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId);
 
