@@ -19,6 +19,8 @@ export const NormalOperationNormsApiService = {
   updateFinalNormsData,
   getfinalNorms,
   calculateFinalNorms,
+  CrackerConstantsExport,
+  CrackerConstantsImport,
   getNormsConstants,
   BestAchivedColorCodes,
   load1,
@@ -40,7 +42,68 @@ async function BestAchivedColorCodes(keycloak, plantId, year, mode) {
     return await Promise.reject(e)
   }
 }
+async function CrackerConstantsImport(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants-import-excel?plantFKId=${PLANT_ID}&year=${AOP_YEAR}`
+  const formData = new FormData()
+  formData.append('file', file)
 
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return json(keycloak, resp) // assuming `json()` handles response properly
+  } catch (e) {
+    console.error('Error importing cracker Criteria best achieved:', e)
+    return await Promise.reject(e)
+  }
+}
+async function CrackerConstantsExport(keycloak, PLANT_ID, AOP_YEAR) {
+  const year = localStorage.getItem('year')
+  let plantId = ''
+  const storedPlant = localStorage.getItem('selectedPlant')
+  if (storedPlant) {
+    const parsedPlant = JSON.parse(storedPlant)
+    plantId = parsedPlant.id
+  }
+
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantFKId=${encodeURIComponent(PLANT_ID)}`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `Criteria_best_achieved_${'Export'}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Spyro Input Excel:', e)
+    return Promise.reject(e)
+  }
+}
 async function getNormsConstants(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/configuration-constants-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
   const headers = {

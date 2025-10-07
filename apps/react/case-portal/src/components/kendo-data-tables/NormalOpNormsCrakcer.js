@@ -516,7 +516,7 @@ const NormalOpNormsScreenCracker = () => {
   const mainPermissions = useMemo(() => {
     const base = { ...baseModePermissions }
     base.saveBtn = selectedTab === 3 ? true : (mainIsTop && base.saveBtn)
-    base.showCalculate = mainIsTop && base.showCalculate
+    base.showCalculate = selectedTab === 3 ? true : (mainIsTop && base.showCalculate) 
     return getAdjustedPermissions(base, isOldYear)
   }, [baseModePermissions, mainIsTop, getAdjustedPermissions, isOldYear, selectedTab])
 
@@ -1043,7 +1043,7 @@ const NormalOpNormsScreenCracker = () => {
     padding: '9px',
     minHeight: '12px',
   }
-  const tabLabels = ['Configuration', 'Criteria', 'Criteria for Best Achieved', 'Norms Selection', 'Final monthly norms']
+  const tabLabels = ['Configuration', 'Constants', 'Criteria for Best Achieved', 'Norms Selection', 'Final monthly norms']
 
   // UI render
   return (
