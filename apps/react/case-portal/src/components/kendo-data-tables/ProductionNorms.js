@@ -736,7 +736,7 @@ const ProductionNorms = ({ permissions }) => {
             lowerVertName === 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
           customHeight: permissions?.customHeight,
           downloadExcelBtnFromUI: !permissions?.hideExportBtn,
-          ExcelName: `${lowerVertName}_Production Target`,
+          ExcelName: `${lowerVertName}_Month wise Production plan`,
           unitForExcelToadd:
             lowerVertName === 'cracker' ? selectedUnit || 'MT/Month' : null,
         },

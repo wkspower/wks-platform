@@ -84,6 +84,10 @@ const defs = {
     maintenanceProcess: 'Process',
     utilitiesNormsBasis: 'Utilities Norms Basis',
     productionTargetBasis: 'Production Target Basis',
+    maintenanceSummary: 'Maintenance Summary',
+    plantBudgetSummary: 'Plant Budget Summary',
+
+    functionalReports: 'Reports',
   },
   pages: {
     dashboard: {
@@ -267,6 +271,11 @@ const defs = {
         maintenanceProcess: 'Process',
         utilitiesNormsBasis: 'Utilities Norms Basis',
         productionTargetBasis: 'Production Target Basis',
+
+        maintenanceSummary: 'Maintenance Summary',
+        plantBudgetSummary: 'Plant Budget Summary',
+
+        functionalReports: 'Reports',
       },
     },
   },

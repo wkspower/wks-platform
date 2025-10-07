@@ -51,11 +51,13 @@ import RelPerf from 'components/kendo-data-tables/RelPerf'
 import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafetyPerformanceTarget'
 import IntermediateValuesDataSet from 'components/data-tables/Reports/IntermediateValuesDataSet'
 import RawDataSet from 'components/data-tables/Reports/RawDataSet'
-import UtilitiesNormsBasis  from 'components/data-tables/Reports/UtilitiesNormsBasis'
+import UtilitiesNormsBasis from 'components/data-tables/Reports/UtilitiesNormsBasis'
 import SteadyStateNormsHistorianBasis from 'components/data-tables/Reports/SteadyStateNormsHistorianBasis'
 import ConsumptionNormsHistorianBasis from 'components/data-tables/Reports/ConsumptionNormsHistorianBasis'
 import BestAchievedIndividualNorms from 'components/data-tables/Reports/BestAchievedIndividualNorms'
 import RunLengthDataSet from 'components/data-tables/Reports/RunLengthDataSet'
+import MaintenanceSummary from 'components/kendo-data-tables/MaintenanceSummary'
+import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -507,6 +509,29 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='reliability-performance'>
                 <RelPerf />
+              </PrivateRoute>
+            ),
+          },
+        ],
+      },
+
+      {
+        path: 'functional-reports',
+        children: [
+          {
+            path: 'maintenance-summary',
+            element: (
+              <PrivateRoute routeId='maintenance-summary'>
+                <MaintenanceSummary />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'plant-budget-summary',
+            element: (
+              <PrivateRoute routeId='plant-budget-summary'>
+                <PlantBudgetSummary />
               </PrivateRoute>
             ),
           },

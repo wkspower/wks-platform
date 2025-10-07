@@ -219,6 +219,32 @@ const workspace = {
         },
       ],
     },
+
+    {
+      id: 'functional-reports',
+      title: i18n.t('menu.functionalReports'),
+      type: 'collapse',
+      icon: icons.IconReport,
+      children: [
+        {
+          id: 'maintenance-summary',
+          title: i18n.t('menu.maintenanceSummary'),
+          type: 'item',
+          url: '/functional-reports/maintenance-summary',
+          icon: icons.IconFile,
+          breadcrumbs: true,
+        },
+
+        {
+          id: 'plant-budget-summary',
+          title: i18n.t('menu.plantBudgetSummary'),
+          type: 'item',
+          url: '/functional-reports/plant-budget-summary',
+          icon: icons.IconFileText,
+          breadcrumbs: true,
+        },
+      ],
+    },
   ],
 }
 

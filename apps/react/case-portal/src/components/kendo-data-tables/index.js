@@ -50,6 +50,7 @@ import {
 import { useSelector } from 'react-redux'
 import { Checkbox } from '../../../node_modules/@progress/kendo-react-inputs/index'
 import LimitCellEditor from './Utilities-Kendo/LimitCellEditor'
+import BudgetConstrainsCellEditor from './Utilities-Kendo/BudgetConstrainsCellEditor'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -192,9 +193,9 @@ const KendoDataTables = ({
       return
     }
     if (e.dataItem?.isTotal) {
-    setEdit({})
-    return
-  }
+      setEdit({})
+      return
+    }
 
     setRows(
       rows.map((r) => ({
@@ -210,8 +211,8 @@ const KendoDataTables = ({
 
       const { dataItem, field, value } = e
       if (dataItem?.isTotal) {
-      return
-    }
+        return
+      }
 
       if (dataItem?.field === 'Particulars') return
       if (dataItem?.field === 'ParticularsType') return
@@ -424,43 +425,43 @@ const KendoDataTables = ({
   }
 
   // console.log('rows?.length', rows?.length)
-const MaterialDisplayNameCell = (props) => {
-  const { dataItem, field, tdProps, children } = props
-  const value = dataItem[field]
-  const method = dataItem.Method
+  const MaterialDisplayNameCell = (props) => {
+    const { dataItem, field, tdProps, children } = props
+    const value = dataItem[field]
+    const method = dataItem.Method
 
-  // Define colors based on Method
-  let color = 'inherit'
+    // Define colors based on Method
+    let color = 'inherit'
 
-  switch (method) {
-    case 'BestAchieved(MinCC)':
-      color = '#2e7d32'  // Dark green text
-      break
-    case 'Expression':
-      color = '#f51717ff' // Dark yellow/orange text
-      break
-    case 'BestAchieved(Indv)':
-      color = '#1565c0' // Dark blue text
-      break
-    default:
-      // No special styling for other methods
-      break
+    switch (method) {
+      case 'BestAchieved(MinCC)':
+        color = '#2e7d32' // Dark green text
+        break
+      case 'Expression':
+        color = '#f51717ff' // Dark yellow/orange text
+        break
+      case 'BestAchieved(Indv)':
+        color = '#1565c0' // Dark blue text
+        break
+      default:
+        // No special styling for other methods
+        break
+    }
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color,
+          //  fontWeight: method ? 'bold' : 'normal',
+          ...tdProps.style,
+        }}
+      >
+        {children}
+      </td>
+    )
   }
-
-  return (
-    <td
-      {...tdProps}
-      title={value}
-      style={{
-        color,
-      //  fontWeight: method ? 'bold' : 'normal',
-        ...tdProps.style
-      }}
-    >
-      {children}
-    </td>
-  )
-}
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
       !dataItem.isEditable && dataItem?.isEditable !== undefined
@@ -1287,6 +1288,25 @@ const MaterialDisplayNameCell = (props) => {
                     />
                   )
                 }
+                if (col?.field === 'calc') {
+                  return (
+                    <GridColumn
+                      key='limit'
+                      field='limit'
+                      width={80}
+                      title={col.title}
+                      editable={col.editable || true}
+                      cells={{
+                        data: (cellProps) => (
+                          <BudgetConstrainsCellEditor {...cellProps} />
+                        ),
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                      headerClassName={isActive ? 'active-column' : ''}
+                    />
+                  )
+                }
                 if (col?.field === 'limit') {
                   return (
                     <GridColumn
@@ -1426,25 +1446,25 @@ const MaterialDisplayNameCell = (props) => {
                     />
                   )
                 }
-                
-if (col.field === 'sapMaterialCode' && col.useMethodColors) {
-  return (
-    <GridColumn
-      key={col.field}
-      field={col.field}
-      title={col.title || col.headerName}
-      width={col.widthT}
-      hidden={col.hidden}
-      editable={col?.editable ? true : false}
-      headerClassName={isActive ? 'active-column' : ''}
-      cells={{
-        data: MaterialDisplayNameCell,
-        headerCell: SimpleHeaderWithTooltip,
-      }}
-      columnMenu={ColumnMenuCheckboxFilter}
-    />
-  )
-}
+
+                if (col.field === 'sapMaterialCode' && col.useMethodColors) {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.widthT}
+                      hidden={col.hidden}
+                      editable={col?.editable ? true : false}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        data: MaterialDisplayNameCell,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
                 if (col?.field === 'DisplayName') {
                   return (
                     <GridColumn

@@ -15,7 +15,7 @@ import KendoDataTables from './index'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { validateFields } from 'utils/validationUtils'
-export default function AopBudget() {
+export default function PlantBudgetSummary() {
   const keycloak = useSession()
   const thisYear = localStorage.getItem('year')
 
@@ -29,7 +29,21 @@ export default function AopBudget() {
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -162,18 +176,8 @@ export default function AopBudget() {
 
   const columns = [
     { field: 'plantName', title: 'Plant', width: 120 },
-
     { field: 'costName', title: 'Cost', width: 120 },
     { field: 'budgetType', title: 'Budget Type', width: 120, hidden: true },
-
-    {
-      field: 'budgetConstrains',
-      title: 'Budget Constrains',
-      width: 120,
-      editable: true,
-    },
-    { field: 'calc', title: 'Calc', width: 120 },
-
     ...monthFields.map(({ field, index, editable, type, format, width }) => ({
       field,
       title: headerMap[index],
@@ -199,9 +203,7 @@ export default function AopBudget() {
         ...item,
         plantName: item.plantName || item.plantName || '',
         IsEditable: item.isEditable,
-        originalRemark: item.remark?.trim() || '',
-        budgetConstrains: '',
-        calc: '+',
+        originalRemark: item.remark?.trim() || '', // add this
       }))
       setRows(mapped)
 
@@ -215,8 +217,6 @@ export default function AopBudget() {
         plantName: item.plantName || item.plantName || '',
         IsEditable: item.isEditable,
         originalRemark: item.remark?.trim() || '', // add this
-        budgetConstrains: '',
-        calc: '+',
       }))
       setRowsP(mappedP)
     } catch (err) {
@@ -231,7 +231,6 @@ export default function AopBudget() {
   useEffect(() => {
     fetchData()
   }, [fetchData, yearChanged, plantID, keycloak])
-  const year = thisYear
   const handleCalculate = () => {}
   const handleCalculateP = () => {}
 
@@ -273,7 +272,6 @@ export default function AopBudget() {
       downloadExcelBtn: false,
       uploadExcelBtn: false,
       ExcelName: `${lowerVertName}_Monthly Procurement Budget`,
-      constarins: ['+', '-'],
     },
     isOldYear,
   )
@@ -303,7 +301,6 @@ export default function AopBudget() {
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
-      constarins: ['+', '-'],
     },
     isOldYear,
   )
@@ -448,84 +445,30 @@ export default function AopBudget() {
     budgetMaintenanceExcelFile(rawFile)
   }
 
-  const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-  const plantName = plantObject?.name
+  async function handleOpenPdfTempSSRS(title) {
+    try {
+      let baseurl = ''
+      baseurl =
+        'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx?%2fAOP&rs:Command=Render'
+      const params = new URLSearchParams({
+        verticalId: VERTICAL_ID,
+        siteId: SITE_ID,
+        plantId: PLANT_ID,
+        finYear: AOP_YEAR,
+      })
+      const url = `${baseurl}?${params.toString()}`
 
-  return (
-    <Box>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
+      window.open(url, '_blank')
+      return true
+    } catch (e) {
+      console.error('Error opening link:', e)
+      return Promise.reject(e)
+    }
+  }
 
-      {plantName?.toLowerCase() === 'eoeg' && (
-        <Typography component='div' className='grid-title'>
-          <div>Planning Plant : 40N0 </div>
-          <div>Maintenance Plant : 40N3</div>
-        </Typography>
-      )}
+  useEffect(() => {
+    handleOpenPdfTempSSRS('Some Title')
+  }, [])
 
-      {true && (
-        <Typography component='div' className='text-header'>
-          <div>Design Basis </div>
-          <div>Remarks</div>
-        </Typography>
-      )}
-
-      <KendoDataTables
-        title='Consumption Budget'
-        titleMain='Monthly Budget'
-        modifiedCells={modifiedCells}
-        columns={columns}
-        rows={row}
-        setRows={setRows}
-        fetchData={fetchData}
-        setModifiedCells={setModifiedCells}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={setCurrentRowId}
-        enableSaveAddBtn={enableSaveAddBtn}
-        saveChanges={handleSaveAll}
-        handleCalculate={handleCalculate}
-        handleRemarkCellClick={handleRemarkCellClick}
-        handleExcelUpload={handleExcelUpload}
-        downloadExcelForConfiguration={downloadExcelForConfiguration}
-        permissions={adjustedPermissionsC}
-        groupBy='budgetType'
-      />
-
-      <KendoDataTables
-        rows={rowsP}
-        setRows={setRowsP}
-        title='Procurement Budget'
-        modifiedCells={modifiedCellsP}
-        columns={columns}
-        fetchData={fetchData}
-        setModifiedCells={setModifiedCellsP}
-        remarkDialogOpen={remarkDialogOpenP}
-        setRemarkDialogOpen={setRemarkDialogOpenP}
-        currentRemark={currentRemarkP}
-        setCurrentRemark={setCurrentRemarkP}
-        currentRowId={currentRowIdP}
-        setCurrentRowId={setCurrentRowIdP}
-        enableSaveAddBtn={enableSaveAddBtnP}
-        saveChanges={handleSaveAll}
-        handleCalculate={handleCalculateP}
-        handleRemarkCellClick={handleRemarkCellClickP}
-        permissions={adjustedPermissionsP}
-        groupBy='budgetType'
-      />
-      <Notification
-        open={snackbarOpen}
-        message={snackbarData.message}
-        severity={snackbarData.severity}
-        onClose={() => setSnackbarOpen(false)}
-      />
-    </Box>
-  )
+  return null // no UI
 }
