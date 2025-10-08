@@ -802,17 +802,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	        try (Connection connection = dataSource.getConnection();
 	             CallableStatement stmt = connection.prepareCall(callSql)) {
-
-	            // Set parameters in the correct order
-	            stmt.setString(1, plantId); // @finYear
-	            stmt.setString(2, aopYear); // @siteId
+	            stmt.setString(1, plantId); 
+	            stmt.setString(2, aopYear); 
 	            stmt.setString(3, PeriodFrom);
-	            stmt.setString(4, PeriodFrom);
-
-	            // Execute the stored procedure
+	            stmt.setString(4, PeriodTo);
 	            int rowsAffected = stmt.executeUpdate();
-
-	            // Optional: commit if auto-commit is off
 	            if (!connection.getAutoCommit()) {
 	                connection.commit();
 	            }

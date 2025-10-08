@@ -736,8 +736,8 @@ public class BasisReportServiceImpl implements BasisReportService {
 	            // Set parameters in the correct order
 	            stmt.setString(1, plantId); 
 	            stmt.setString(2, aopYear); 
-	            stmt.setString(3, PeriodTo);
-	            stmt.setString(4, PeriodFrom);
+	            stmt.setString(3,PeriodFrom);
+	            stmt.setString(4, PeriodTo);
 
 	            // Execute the stored procedure
 	            int rowsAffected = stmt.executeUpdate();
