@@ -86,5 +86,24 @@ public class PIOImpactServiceImpl implements PIOImpactService {
 		return aopMessageVM;
 	}
 
+	@Override
+	public AOPMessageVM deletePIOImpact(UUID id) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Optional<PIOImpact> pioImpactDTO=pioImpactRepository.findById(id);
+			if(pioImpactDTO.isPresent()) {
+				pioImpactRepository.delete(pioImpactDTO.get());
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Failed to delete data", e);
+		}
+		
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("Deleted successfully");
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+
 			
 }

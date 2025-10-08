@@ -3,9 +3,13 @@ package com.wks.caseengine.rest.server;
 
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,10 +32,15 @@ public class PIOImpactController {
 		return	pioImpactService.getPIOImpact(year, plantId);
 	}
 	
-	
 	@PostMapping(value="/pio-impact")
 	public AOPMessageVM updatePIOImpact(@RequestParam String year,@RequestParam String plantId,@RequestBody List<PIOImpactDTO> pioImpactDTOs){
 		return	pioImpactService.updatePIOImpact(year, plantId,pioImpactDTOs);
 	}
+	
+	@DeleteMapping("/pio-impact")
+    public AOPMessageVM deletPIOImpact(@RequestParam UUID id) {	
+		return pioImpactService.deletePIOImpact(id);
+        
+    }
 		
 }

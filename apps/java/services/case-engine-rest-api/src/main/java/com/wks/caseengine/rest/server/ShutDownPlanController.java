@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.wks.caseengine.dto.MonthWiseDataDTO;
@@ -69,6 +70,15 @@ public class ShutDownPlanController {
 	    } catch (Exception e) {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
+	}
+	
+	@PostMapping(value = "/shutdown-import", consumes = "multipart/form-data")
+	public AOPMessageVM importShutdownExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam String maintenanceTypeName,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	shutDownPlanService.importShutdownExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
 	}
 
 	
