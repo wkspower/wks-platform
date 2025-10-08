@@ -104,17 +104,6 @@ const AopDesignBasis = () => {
     getAopSummary()
     let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
     let verticalName = vertical?.toLowerCase()
-    setTimeout(() => {
-      if (
-        verticalName != 'cracker' &&
-        verticalName != 'meg' &&
-        verticalName != 'elastomer'
-      ) {
-        getConfigurationTabsMatrix()
-        getConfigurationAvailableTabs()
-        fetchGradeData()
-      }
-    }, 500)
   }, [oldYear, yearChanged, keycloak, plantID])
 
   const computeAndSetDates = useCallback(() => {

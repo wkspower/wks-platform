@@ -150,6 +150,7 @@ export const DataService = {
   getShutdownRateExcel,
   saveShutdownRateExcel,
   getConfigurationExecutionDetailsNorms,
+  executeConfigurationNorms,
 }
 
 async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
@@ -2832,6 +2833,29 @@ async function getConfigurationExcelConstants(keycloak) {
 
 async function executeConfiguration(executionDetailDtoList, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/configuration-execution`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(executionDetailDtoList),
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data
+  } catch (e) {
+    console.error('Error saving configuration execution:', e)
+    return Promise.reject(e)
+  }
+}
+async function executeConfigurationNorms(executionDetailDtoList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution-norms`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

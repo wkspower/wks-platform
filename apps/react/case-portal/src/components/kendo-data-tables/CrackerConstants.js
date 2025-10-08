@@ -137,35 +137,6 @@ const CrakcerConstants = () => {
     getAopSummary()
   }, [oldYear, yearChanged, keycloak, plantID])
 
-  const computeAndSetDates = useCallback(() => {
-    setStartDate('')
-    setEndDate('')
-    const hasModifiedOn = configurationExecutionDetails[0]?.ModifiedOn
-    if (hasModifiedOn) {
-      const getDateValue = (name) =>
-        new Date(
-          configurationExecutionDetails.find(
-            (item) => item.Name === name,
-          )?.AttributeValue,
-        )
-      setStartDate(getDateValue('StartDate'))
-      setEndDate(getDateValue('EndDate'))
-    } else {
-      const today = new Date()
-      const fallbackEndDate = new Date(today.getFullYear(), today.getMonth(), 0)
-      const fallbackStartDate = new Date(
-        today.getFullYear() - 5,
-        today.getMonth(),
-        1,
-      )
-      setStartDate(fallbackStartDate)
-      setEndDate(fallbackEndDate)
-    }
-  }, [configurationExecutionDetails, plantID])
-  useEffect(() => {
-    computeAndSetDates()
-  }, [computeAndSetDates])
-
   function formatDate(date) {
     if (!date) return ''
     const AOP_YEAR = date?.getFullYear()
@@ -225,11 +196,26 @@ const CrakcerConstants = () => {
           response,
         )
       }
-      const hasNoModifiedOn = details.length && !details[0]?.ModifiedOn
-      if (hasNoModifiedOn && !hasExecutedRef.current) {
-        const startDateObj = details.find((item) => item.Name === 'StartDate')
-        const endDateObj = details.find((item) => item.Name === 'EndDate')
+      if (details) {
+        const startDateObj = details.find(
+          (item) => item.Name === 'StartDateNorms',
+        )
+        const endDateObj = details.find((item) => item.Name === 'EndDateNorms')
+
+        setStartDate(
+          startDateObj?.AttributeValue
+            ? moment(startDateObj.AttributeValue, 'YYYY-MM-DD').toDate()
+            : null,
+        )
+        setEndDate(
+          endDateObj?.AttributeValue
+            ? moment(endDateObj.AttributeValue, 'YYYY-MM-DD').toDate()
+            : null,
+        )
+
         hasExecutedRef.current = true
+        setConfigurationExecutionDetails(details)
+
         // await onLoadTest(startDateObj, endDateObj)
       } else {
         setConfigurationExecutionDetails(details)
@@ -244,6 +230,7 @@ const CrakcerConstants = () => {
       // setLoading1(false)
     }
   }
+
   const onLoad = async () => {
     if (startDate && endDate && startDate > endDate) {
       setSnackbarOpen(true)
@@ -256,10 +243,10 @@ const CrakcerConstants = () => {
     }
     setLoading1(true)
     const startDateObj = configurationExecutionDetails.find(
-      (item) => item.Name === 'StartDate',
+      (item) => item.Name === 'StartDateNorms',
     )
     const endDateObj = configurationExecutionDetails.find(
-      (item) => item.Name === 'EndDate',
+      (item) => item.Name === 'EndDateNorms',
     )
     if (!startDateObj?.Id || !endDateObj?.Id) {
       console.warn(
@@ -296,7 +283,11 @@ const CrakcerConstants = () => {
           plantId: PLANT_ID,
         },
       ]
-      const response = await DataService.executeConfiguration(payload, keycloak)
+      const response = await DataService.executeConfigurationNorms(
+        payload,
+        keycloak,
+      )
+
       const response1 = await NormalOperationNormsApiService.load1(
         keycloak,
         PLANT_ID,
@@ -305,13 +296,13 @@ const CrakcerConstants = () => {
         moment(startDate).format('YYYY-MM-DD'),
       )
 
-      // const response2 = await NormalOperationNormsApiService.load2(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      //   moment(endDate).format('YYYY-MM-DD'),
-      //   moment(startDate).format('YYYY-MM-DD'),
-      // )
+      const response2 = await NormalOperationNormsApiService.load2(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        moment(endDate).format('YYYY-MM-DD'),
+        moment(startDate).format('YYYY-MM-DD'),
+      )
 
       const response3 = await NormalOperationNormsApiService.load3(
         keycloak,
@@ -377,7 +368,7 @@ const CrakcerConstants = () => {
             id='meg-grid-header'
           >
             <Typography className='grid-title'>
-              AOP Historical Period Basis-
+              AOP Historical Period Basis
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>

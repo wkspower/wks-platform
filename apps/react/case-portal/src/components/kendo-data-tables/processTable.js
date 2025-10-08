@@ -166,17 +166,17 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     try {
       const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data
-const formatted = (raw || []).map((item, idx, arr) => ({
-  ...item,
-  idFromApi: item.id,
-  id: idx,
-  isEditable: viewOnly
-    ? false
-    : idx === arr.length - 1
-    ? false
-    : item?.isEditable,
-  originalRemark: item.remarks,
-}))
+      const formatted = (raw || []).map((item, idx, arr) => ({
+        ...item,
+        idFromApi: item.id,
+        id: idx,
+        isEditable: viewOnly
+          ? false
+          : idx === arr.length - 1
+            ? false
+            : item?.isEditable,
+        originalRemark: item.remarks,
+      }))
 
 
       const finalData = [...formatted]
@@ -382,7 +382,7 @@ const formatted = (raw || []).map((item, idx, arr) => ({
           saveBtn: viewOnly ? false : true,
           allAction: true,
           downloadExcelBtn: true,
-          uploadExcelBtn: true,
+          uploadExcelBtn: viewOnly ? false : true,
           showRefresh: false,
           showCalculate: viewOnly ? false : true,
           showCalculateVisibility: true,

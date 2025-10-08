@@ -323,21 +323,21 @@ const KendoDataTablesReports = ({
   }
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-  const isDisabled =
-    !dataItem.isEditable && dataItem?.isEditable !== undefined
-  const rowClassName = [
-    className,
-    isDisabled ? 'custom-disabled-row' : '',
-    dataItem.isBold ? 'custom-bold-row' : '',
-  ]
-    .filter(Boolean)
-    .join(' ')
-  return (
-    <tr {...rest?.trProps} className={rowClassName}>
-      {rest.children}
-    </tr>
-  )
-}, [])
+    const isDisabled =
+      !dataItem.isEditable && dataItem?.isEditable !== undefined
+    const rowClassName = [
+      className,
+      isDisabled ? 'custom-disabled-row' : '',
+      dataItem.isBold ? 'custom-bold-row' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+    return (
+      <tr {...rest?.trProps} className={rowClassName}>
+        {rest.children}
+      </tr>
+    )
+  }, [])
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -649,6 +649,18 @@ const KendoDataTablesReports = ({
                 Export
               </Button>
             )}
+
+            {permissions?.showExport && (
+              <Button
+                variant='contained'
+                onClick={handleExport}
+                disabled={isButtonDisabled}
+                className='btn-save'
+              >
+                Export
+              </Button>
+            )}
+
             {permissions?.showFinalSubmit && (
               <Button
                 variant='contained'
