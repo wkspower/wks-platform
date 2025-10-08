@@ -182,14 +182,14 @@ const planCracker = {
       type: 'collapse',
       icon: icons.IconReport, // You can choose an appropriate icon
       children: [
-        {
-           id: 'production-target-basis',
-           title: i18n.t('menu.productionTargetBasis'),
-           type: 'item',
-           url: '/reports/production-target-basis',
-           icon: icons.IconFile,
-           breadcrumbs: true,
-         },  
+        // {
+        //    id: 'production-target-basis',
+        //    title: i18n.t('menu.productionTargetBasis'),
+        //    type: 'item',
+        //    url: '/reports/production-target-basis',
+        //    icon: icons.IconFile,
+        //    breadcrumbs: true,
+        //  },
 
         //  {
         //    id: 'aop-annual-cost-report',

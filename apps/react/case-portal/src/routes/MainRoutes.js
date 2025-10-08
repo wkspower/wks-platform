@@ -60,6 +60,7 @@ import MaintenanceSummary from 'components/kendo-data-tables/MaintenanceSummary'
 import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
 import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
 import TcsInput from 'components/kendo-data-tables/TcsInput'
+import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTargetBasis'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -388,6 +389,14 @@ export const MainRoutes = (
       {
         path: 'reports',
         children: [
+          {
+            path: 'production-target-basis',
+            element: (
+              <PrivateRoute routeId='production-target-basis'>
+                <ProductionTargetBasis />
+              </PrivateRoute>
+            ),
+          },
           {
             path: 'aop-annual-cost-report',
             element: (

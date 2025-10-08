@@ -93,6 +93,7 @@ const KendoDataTables = ({
   plantID = null,
   grades = [],
   allRedCell = [],
+  allRedCell2 = [],
   modifiedCells = [],
   setRows,
   columns,
@@ -621,6 +622,7 @@ const KendoDataTables = ({
       children,
       customModifiedCells,
       allRedCell,
+      allRedCell2,
     } = props
 
     const rowId = dataItem.id
@@ -648,8 +650,39 @@ const KendoDataTables = ({
         cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
     )
 
+    const getMonthNumber = (m) => {
+      if (m == null) return null
+      const map = {
+        january: 1,
+        february: 2,
+        march: 3,
+        april: 4,
+        may: 5,
+        june: 6,
+        july: 7,
+        august: 8,
+        september: 9,
+        october: 10,
+        november: 11,
+        december: 12,
+      }
+      const lower = String(m).trim().toLowerCase()
+      return map[lower] || Number(lower) || null
+    }
+
+    const isRedFromAllRedCell = allRedCell2?.some((cell) => {
+      const cellMonthNum = getMonthNumber(cell.month)
+      const fieldMonthNum = getMonthNumber(month)
+
+      const sameMonth = cellMonthNum === fieldMonthNum
+      const sameNormId =
+        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase()
+
+      return sameMonth && sameNormId
+    })
+
     let highlightColor
-    if (isEdited) {
+    if (isEdited || isRedFromAllRedCell) {
       highlightColor = 'orange'
     } else if (matchedCell?.mode === 'Propane(1Z)') {
       highlightColor = 'red'
@@ -868,7 +901,7 @@ const KendoDataTables = ({
 
   const handleHeaderSelectionChange = (event) => {
     const checked = event.nativeEvent.target.checked
-    console.log('Header checkbox changed. Checked:', checked)
+    // console.log('Header checkbox changed. Checked:', checked)
   }
 
   // console.log(
@@ -1221,6 +1254,7 @@ const KendoDataTables = ({
                 mode: 'multiple',
               }}
               allRedCell={allRedCell}
+              allRedCell2={allRedCell2}
               size='small'
               pageable={
                 rows?.length > 100
@@ -1699,6 +1733,7 @@ if (col.type === 'monthDropdown') {
                               {...props}
                               customModifiedCells={customModifiedCells}
                               allRedCell={allRedCell}
+                              allRedCell2={allRedCell2}
                               disableRedHighlight={disableRedHighlight}
                             />
                           ) : (

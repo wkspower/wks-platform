@@ -18,7 +18,7 @@ import {
 
 const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
 
-const ConsumptionNormsHistorianBasis = () => {
+const ProductionTargetBasis = () => {
   const keycloak = useSession()
 
   const [dataMap, setDataMap] = useState({})
@@ -27,7 +27,22 @@ const ConsumptionNormsHistorianBasis = () => {
   const [tabIndex, setTabIndex] = useState(0)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear, verticalChange } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -42,13 +57,6 @@ const ConsumptionNormsHistorianBasis = () => {
       timeoutIdsRef.current = []
     }
   }, [])
-
-  // Small helper used previously
-  function parseDDMMYYYY(dateStr) {
-    if (!dateStr) return null
-    const [day, month, year] = dateStr.split('-')
-    return new Date(`${year}-${month}-${day}`)
-  }
 
   const enrichColumns = useCallback((backendCols = []) => {
     return backendCols
@@ -151,31 +159,10 @@ const ConsumptionNormsHistorianBasis = () => {
     try {
       setLoading(true)
 
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
-      if (configData?.code !== 200) {
-        setLoading(false)
-        return
-      }
-      const StartDate = configData.data.find(
-        (d) => d.Name === 'StartDate',
-      )?.AttributeValue
-      const EndDate = configData.data.find(
-        (d) => d.Name === 'EndDate',
-      )?.AttributeValue
-      if (!StartDate || !EndDate) {
-        setGridNames([])
-        setDataMap({})
-        setLoading(false)
-        return
-      }
-
-      // Call the API that returns combined grids. Change REPORT_TYPE_FOR_ALL if needed.
-      const apiResponse = await DataService.getProductionVolDataBasisPe(
+      const apiResponse = await DataService.getProductionTargetBasis(
         keycloak,
-        REPORT_TYPE_FOR_ALL,
-        StartDate,
-        EndDate,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (apiResponse?.code !== 200) {
@@ -406,4 +393,4 @@ const ConsumptionNormsHistorianBasis = () => {
   )
 }
 
-export default ConsumptionNormsHistorianBasis
+export default ProductionTargetBasis

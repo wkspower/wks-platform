@@ -363,7 +363,7 @@ const MaintenanceTable = () => {
       )}
 
       {/* When PLANT_NAME IS cracker */}
-      {lowerVertName === 'cracker' && <MaintenanceProcessTable />}
+      {/* {lowerVertName === 'cracker' && <MaintenanceProcessTable />} */}
     </>
   )
 }

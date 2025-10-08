@@ -67,6 +67,7 @@ const NormalOpNormsScreenCracker = () => {
   const [modifiedCells, setModifiedCells] = useState({})
   const [modifiedCellsFinalNorms, setModifiedCellsFinalNorms] = useState({})
   const [allRedCell, setAllRedCell] = useState([])
+  const [allRedCell2, setAllRedCell2] = useState([])
 
   const dataGridStore = useSelector((s) => s.dataGridStore) || {}
   const { verticalChange, yearChanged, oldYear, plantObject, year } =
@@ -270,7 +271,7 @@ const NormalOpNormsScreenCracker = () => {
         format: '{0:#.###}',
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
-      { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
+      { field: 'remark', title: 'Remark', widthT: 140, editable: true },
     ],
     [headerMap],
   )
@@ -476,11 +477,29 @@ const NormalOpNormsScreenCracker = () => {
 
   const finalPermissions = useMemo(() => {
     const base = { ...baseFinalPermissions }
-    base.saveBtn = base.saveBtn
+    base.saveBtn = false
     base.showCalculate = base.showCalculate
 
     return getAdjustedPermissions(base, isOldYear)
   }, [baseFinalPermissions, finalIsTop, getAdjustedPermissions, isOldYear])
+
+  const getNormTransactions = async () => {
+    try {
+      const res =
+        await NormalOperationNormsApiService.getNormTransactions(keycloak)
+      if (res?.code == 200) {
+        const normalized = res?.data.map((obj) => ({
+          ...obj,
+          normParameterFKId: obj.normParameterFKId.toUpperCase(),
+        }))
+        setAllRedCell2(normalized)
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error)
+    } finally {
+      // handleMenuClose();
+    }
+  }
 
   // --- Data fetchers ---
   const fetchFinalNorms = useCallback(async () => {
@@ -514,6 +533,9 @@ const NormalOpNormsScreenCracker = () => {
     async (gradeIdParam) => {
       if (!lowerVertName) return
       setLoading(true)
+
+      getNormTransactions()
+
       try {
         if (lowerVertName === 'cracker') {
           const [bestResp, exprResp, yearlyResp, colorResp] = await Promise.all(
@@ -660,7 +682,7 @@ const NormalOpNormsScreenCracker = () => {
 
   const handleRemarkCellClickFinalNorms = useCallback((row) => {
     if (!row?.isEditable) return
-    console.log('row', row)
+    // console.log('row', row)
 
     setCurrentRemarkFinalNorms(row.remark || '')
     setCurrentRowIdFinalNorms(row.id)
@@ -1078,6 +1100,10 @@ const NormalOpNormsScreenCracker = () => {
             </FormControl>
 
             <Typography component='div' className='grid-title'>
+              <span style={{ color: 'orange', fontWeight: 'bold' }}>
+                Orange
+              </span>{' '}
+              - Overridden&nbsp;&nbsp;
               <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> -
               Propane (1Z)&nbsp;&nbsp;
               <span style={{ color: 'green', fontWeight: 'bold' }}>
@@ -1156,6 +1182,8 @@ const NormalOpNormsScreenCracker = () => {
                 plantID={PLANT_ID}
                 onGlobalCheckboxChange={handleGlobalCheckboxChange}
                 gridName='expression'
+                allRedCell2={allRedCell2}
+                showThreeColors={true}
               />
             </>
           ) : (
@@ -1191,6 +1219,7 @@ const NormalOpNormsScreenCracker = () => {
                 onGlobalCheckboxChange={handleGlobalCheckboxChange}
                 plantID={PLANT_ID}
                 gridName='main'
+                allRedCell2={allRedCell2}
                 showThreeColors={true}
               />
 
@@ -1226,6 +1255,8 @@ const NormalOpNormsScreenCracker = () => {
                 onGlobalCheckboxChange={handleGlobalCheckboxChange}
                 gridName='expression'
                 showCatChemUtilityCheckbox={true}
+                allRedCell2={allRedCell2}
+                showThreeColors={true}
               />
             </>
           )}

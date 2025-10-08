@@ -102,7 +102,8 @@ const WorkFlowMerge = () => {
     rowsBeforeChange: {},
   })
   const [rowModesModel, setRowModesModel] = useState({})
-  const siteName = JSON.parse(localStorage.getItem('selectedSite'))?.name?.toLowerCase() || ''
+  const siteName =
+    JSON.parse(localStorage.getItem('selectedSite'))?.name?.toLowerCase() || ''
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
@@ -550,26 +551,26 @@ const WorkFlowMerge = () => {
     'Plant Contribution Summary (T-22)',
   ]
   const customPETabs = [
-  'Annual AOP Cost',
-  'Plant Production Summary (T-14)',
-  'Month Wise Production Plan (T-16)',
-  'Month Wise Raw Data(T-18)',
-  'Turnaround Report(T-19A)',
-  'Annual Production Plan(T-15)',
-  'Plant Contribution(T-21)',
-  'Plant Contribution Summary (T-22)',
-]
+    'Annual AOP Cost',
+    'Plant Production Summary (T-14)',
+    'Month Wise Production Plan (T-16)',
+    'Month Wise Raw Data(T-18)',
+    'Turnaround Report(T-19A)',
+    'Annual Production Plan(T-15)',
+    'Plant Contribution(T-21)',
+    'Plant Contribution Summary (T-22)',
+  ]
 
-const customPPTabs = [
-  'Annual AOP Cost',
-  'Plant Production Summary (T-14)',
-  'Month Wise Production Plan (T-16)',
-  'Month Wise Raw Data(T-18)',
-  'Turnaround Report(T-19A)',
-  'Annual Production Plan(T-15)',
-  'Plant Contribution(T-21)',
-  'Plant Contribution Summary (T-22)',
-]
+  const customPPTabs = [
+    'Annual AOP Cost',
+    'Plant Production Summary (T-14)',
+    'Month Wise Production Plan (T-16)',
+    'Month Wise Raw Data(T-18)',
+    'Turnaround Report(T-19A)',
+    'Annual Production Plan(T-15)',
+    'Plant Contribution(T-21)',
+    'Plant Contribution Summary (T-22)',
+  ]
   const PETabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
@@ -615,15 +616,20 @@ const customPPTabs = [
   // Pick tabs based on vertical
 
   let activeTabs = defaultTabs
-if (lowerVertName === 'cracker') {
-  activeTabs = crackerTabs
-} else if (lowerVertName === 'elastomer') {
-  activeTabs = elastomerTabs
-} else if (lowerVertName === 'pe') {
-  activeTabs = siteName === 'nmd' ? customPETabs : PETabs
-} else if (lowerVertName === 'pp') {
-  activeTabs = siteName === 'nmd' ? customPPTabs : PPTabs
-}
+  if (lowerVertName === 'cracker') {
+    activeTabs = crackerTabs
+  } else if (
+    lowerVertName === 'elastomer' ||
+    lowerVertName === 'aromatics' ||
+    lowerVertName === 'pta' ||
+    lowerVertName === 'vcm'
+  ) {
+    activeTabs = elastomerTabs
+  } else if (lowerVertName === 'pe') {
+    activeTabs = siteName === 'nmd' ? customPETabs : PETabs
+  } else if (lowerVertName === 'pp') {
+    activeTabs = siteName === 'nmd' ? customPPTabs : PPTabs
+  }
   return (
     <div
       style={{
@@ -846,7 +852,10 @@ if (lowerVertName === 'cracker') {
         )}
 
         {/* For ELASTOMER */}
-        {lowerVertName === 'elastomer' && (
+        {(lowerVertName === 'elastomer' ||
+          lowerVertName === 'aromatics' ||
+          lowerVertName === 'pta' ||
+          lowerVertName === 'vcm') && (
           <>
             {tabIndex === 0 && (
               <ProductionAopView

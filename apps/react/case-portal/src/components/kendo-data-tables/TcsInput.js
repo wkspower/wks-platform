@@ -13,14 +13,26 @@ import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 const TcsInput = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, oldYear, plantID, yearChanged } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const PLANT_NAME = plantObject?.name?.toLowerCase()
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'crude'
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id
-  const plantName = JSON.parse(
-    localStorage.getItem('selectedPlant') || '{}',
-  )?.name?.toLowerCase()
 
   // State management
   const [snackbarData, setSnackbarData] = useState({
@@ -91,31 +103,27 @@ const TcsInput = () => {
             locked: true,
             editable: true,
           },
+
           {
-            title: 'DTA Complex',
+            title: 'Major Units Shutdown details',
             children: [
               {
-                title: 'Major Units Shutdown details',
-                children: [
-                  {
-                    field: 'sdTotalDuration',
-                    title: 'SD Total duration in days',
-                    width: 180,
-                    editable: true,
-                  },
-                  {
-                    field: 'tentativeMonth',
-                    title: 'Tentative Month',
-                    width: 150,
-                    editable: true,
-                  },
-                  {
-                    field: 'purposeOfShutdown',
-                    title: 'Purpose of Shutdown',
-                    width: 200,
-                    editable: true,
-                  },
-                ],
+                field: 'sdTotalDuration',
+                title: 'SD Total duration in days',
+                width: 180,
+                editable: true,
+              },
+              {
+                field: 'tentativeMonth',
+                title: 'Tentative Month',
+                width: 150,
+                editable: true,
+              },
+              {
+                field: 'purposeOfShutdown',
+                title: 'Purpose of Shutdown',
+                width: 200,
+                editable: true,
               },
             ],
           },
@@ -124,43 +132,38 @@ const TcsInput = () => {
       case 'Slowdown':
         return [
           {
-            title: 'DTA Complex',
+            title: 'Major Units Slowdown details',
             children: [
               {
-                title: 'Major Units Slowdown details',
-                children: [
-                  {
-                    field: 'units',
-                    title: 'Units',
-                    width: 150,
-                    locked: true,
-                    editable: true,
-                  },
-                  {
-                    field: 'tentativeDuration',
-                    title: 'Tentative Duration in days',
-                    width: 200,
-                    editable: true,
-                  },
-                  {
-                    field: 'throughputDuringSlowdown',
-                    title: 'Throughput during the Slowdown',
-                    width: 220,
-                    editable: true,
-                  },
-                  {
-                    field: 'tentativeMonth',
-                    title: 'Tentative Month',
-                    width: 150,
-                    editable: true,
-                  },
-                  {
-                    field: 'purposeOfSlowdown',
-                    title: 'Purpose of Slowdown',
-                    width: 200,
-                    editable: true,
-                  },
-                ],
+                field: 'units',
+                title: 'Units',
+                width: 150,
+                locked: true,
+                editable: true,
+              },
+              {
+                field: 'tentativeDuration',
+                title: 'Tentative Duration in days',
+                width: 200,
+                editable: true,
+              },
+              {
+                field: 'throughputDuringSlowdown',
+                title: 'Throughput during the Slowdown',
+                width: 220,
+                editable: true,
+              },
+              {
+                field: 'tentativeMonth',
+                title: 'Tentative Month',
+                width: 150,
+                editable: true,
+              },
+              {
+                field: 'purposeOfSlowdown',
+                title: 'Purpose of Slowdown',
+                width: 200,
+                editable: true,
               },
             ],
           },
@@ -248,7 +251,7 @@ const TcsInput = () => {
 
   // Mock data generator - replace with actual API call
   const generateMockData = (tabName) => {
-    if (plantName === 'dta') {
+    if (PLANT_NAME === 'dta') {
       switch (tabName) {
         case 'Unit Capacity':
           return [
@@ -458,7 +461,7 @@ const TcsInput = () => {
         default:
           return []
       }
-    } else if (plantName === 'sez') {
+    } else if (PLANT_NAME === 'sez') {
       switch (tabName) {
         case 'Unit Capacity':
           return [
@@ -782,16 +785,17 @@ const TcsInput = () => {
 
   // Load data when tab changes
   useEffect(() => {
-    if (keycloak && plantId && currentTabDisplay) {
+    if (keycloak && PLANT_ID && currentTabDisplay) {
       fetchTcsData(currentTabDisplay)
     }
   }, [
     tabIndex,
     fetchTcsData,
     keycloak,
-    plantId,
+    PLANT_ID,
     currentTabDisplay,
     yearChanged,
+    lowerVertName,
   ])
 
   return (

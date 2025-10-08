@@ -836,12 +836,12 @@ const DecokingConfig = () => {
           id='meg-grid-header'
         >
           <Typography component='span' className='grid-title'>
-            Summary
+            Maintenance Summary
           </Typography>
         </CustomAccordionSummary>
         <CustomAccordionDetails>
           <Box sx={{ width: '100%', margin: 0 }}>
-            <MaintenanceProcessTable viewOnly={true} />
+            <MaintenanceProcessTable />
           </Box>
         </CustomAccordionDetails>
       </CustomAccordion>

@@ -195,4 +195,11 @@ export const ShutdownConsumptionCrackerColumns = [
       monthNumber: monthIndex,
     }
   }),
+
+  {
+    field: 'remarks',
+    headerName: 'Remark',
+
+    editable: true,
+  },
 ]

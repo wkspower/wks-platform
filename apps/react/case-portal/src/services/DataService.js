@@ -154,6 +154,8 @@ export const DataService = {
   getPioImpactData,
   savePioImpactData,
   deletePIOImpact,
+
+  getProductionTargetBasis,
 }
 
 async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
@@ -3529,6 +3531,25 @@ async function getConfigurationExecutionDetailsNorms(keycloak) {
     return await Promise.reject(e)
   }
 }
+
+async function getProductionTargetBasis(keycloak, PLANT_ID, AOP_YEAR) {
+  let url = `${Config.CaseEngineUrl}/task/data-set-production-target-basis?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
 async function savePioImpactData(payload, keycloak) {
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')

@@ -108,16 +108,13 @@ async function shutdownConsumptionHistoryData(keycloak, gradeId) {
     return await Promise.reject(e)
   }
 }
-async function saveShutDownNormsData(plantId, turnAroundDetails, keycloak) {
-  const year = localStorage.getItem('year')
-
-  let plantId1 = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId1 = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption?plantId=${plantId1}`
+async function saveShutDownNormsData(
+  plantId,
+  turnAroundDetails,
+  keycloak,
+  AOP_YEAR,
+) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption?plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
