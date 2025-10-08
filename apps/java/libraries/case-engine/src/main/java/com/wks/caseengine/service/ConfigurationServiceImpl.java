@@ -114,11 +114,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		this.dataSource = dataSource;
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
+	public byte[] createExcel(String year, UUID plantFKId,String reportType, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
 		try {
 			System.out.println("Started the createExcel");
 			if (!isAfterSave) {
-				dtoList = getConfigurationData(year, plantFKId);
+				dtoList = getConfigurationDataForExcel(year, plantFKId,reportType);
 			}
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Boolean> isEditable = new ArrayList<>();
@@ -538,6 +538,110 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<ConfigurationDTO> getConfigurationDataForExcel(String year, UUID plantFKId,String reportType) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
+			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
+			List<Object[]> obj = new ArrayList<>();
+			if ((verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
+					|| (verticalName.equalsIgnoreCase("CRACKER")) || (verticalName.equalsIgnoreCase("VCM")) 
+					|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
+
+				String procedureName = verticalName + "_GetConfiguration";
+				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
+			} else {
+				obj = findData(year, plantFKId, viewName,reportType);
+			}
+
+			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
+			int i = 0;
+			for (Object[] row : obj) {
+				ConfigurationDTO configurationDTO = new ConfigurationDTO();
+				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
+
+				configurationDTO.setJan(
+						(row[1] != null && !row[1].toString().trim().isEmpty())
+								? Double.parseDouble(row[1].toString().trim())
+								: 0.0);
+				configurationDTO.setFeb(
+						(row[2] != null && !row[2].toString().trim().isEmpty()) ? Double.parseDouble(row[2].toString())
+								: 0.0);
+				configurationDTO.setMar(
+						(row[3] != null && !row[3].toString().trim().isEmpty()) ? Double.parseDouble(row[3].toString())
+								: 0.0);
+				configurationDTO.setApr(
+						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
+								: 0.0);
+				configurationDTO.setMay(
+						(row[5] != null && !row[5].toString().trim().isEmpty()) ? Double.parseDouble(row[5].toString())
+								: 0.0);
+				configurationDTO.setJun(
+						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
+								: 0.0);
+				configurationDTO.setJul(
+						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
+								: 0.0);
+				configurationDTO.setAug(
+						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
+								: 0.0);
+				configurationDTO.setSep(
+						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
+								: 0.0);
+				configurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty())
+						? Double.parseDouble(row[10].toString())
+						: 0.0);
+				configurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty())
+						? Double.parseDouble(row[11].toString())
+						: 0.0);
+				configurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty())
+						? Double.parseDouble(row[12].toString())
+						: 0.0);
+				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
+
+				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+					configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
+
+					configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
+					configurationDTO.setUOM(row[16] != null ? row[16].toString() : "");
+
+					configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
+					configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
+					configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
+					configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
+					configurationDTO.setProductName(row[21] != null ? row[21].toString() : "");
+
+				}
+
+				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
+						|| verticalName.equalsIgnoreCase("CRACKER") || (verticalName.equalsIgnoreCase("VCM")) 
+						|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
+
+					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
+					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
+					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
+					configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
+					configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
+				}
+
+				
+
+				configurationDTOList.add(configurationDTO);
+				if (row[14] == null) {
+					i++;
+				}
+
+			}
+
+			return configurationDTOList;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	
 	public List<ConfigurationDTO> getShutdownRateData(String year, UUID plantFKId) {
 		try {
@@ -1551,7 +1655,45 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Error fetching data with dynamic view name", e);
 		}
 	}
+	
+	public List<Object[]> findData(String year, UUID plantFKId, String viewName,String reportType) {
+		try {
+			String sql = "SELECT " + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, "
+					+ "    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, "
+					+ "    MAX(NAT.Remarks) AS Remarks, " + "    MAX(NAT.Id) AS NormAttributeTransaction_Id, "
+					+ "    MAX(NAT.AuditYear) AS AuditYear, " + "    MAX(NP.UOM) AS UOM, "
+					+ "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
+					+ "    NP.TypeDisplayName AS TypeDisplayName, " + "    NP.ConfigTypeName AS ConfigTypeName, "
+					+ "    NP.TypeName AS TypeName, MAX(NP.DisplayName) " + "FROM " + viewName + " NP "
+					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
+					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
+					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
+					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeDisplayName = :reportType " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
+					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
+					+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
+					+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
 
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
+			query.setParameter("plantFKId", plantFKId);
+			query.setParameter("reportType", reportType);
+
+			return query.getResultList();
+		} catch (Exception e) {
+			throw new RuntimeException("Error fetching data with dynamic view name", e);
+		}
+	}
 
 	public List<Object[]> findConfigurationIntermediateValues(String year, UUID plantFKId) {
 		try {
@@ -1700,7 +1842,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId,String reportType, MultipartFile file) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -1716,7 +1858,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords);
+				byte[] fileByteArray = createExcel(year, plantFKId,reportType, true, failedRecords);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);

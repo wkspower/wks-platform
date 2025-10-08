@@ -25,11 +25,11 @@ public interface ConfigurationService {
     public   List<Map<String, Object>>  getNormAttributeTransactionReceipe(String year, String plantId);
     public List<NormAttributeTransactionReceipeRequestDTO> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists);
     public AOPMessageVM getConfigurationIntermediateValuesData(String year, String plantId);
-    public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> list);
+    public byte[] createExcel(String year, UUID plantFKId, String reportType,boolean isAfterSave, List<ConfigurationDTO> list);
     public byte[] createShutdownRateExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> list);
     public byte[] createConfigurationConstantsExcel(String year, UUID plantFKId);
     public byte[] exportConfigData(String year, UUID plantFKId, boolean isAfterSave, List<NormAttributeTransactionReceipeRequestDTO> dtoList);
-    public AOPMessageVM importExcel(String year, UUID fromString, MultipartFile file);
+    public AOPMessageVM importExcel(String year, UUID fromString,String reportType, MultipartFile file);
     public AOPMessageVM importShutdownRateExcel(String year, UUID fromString, MultipartFile file);
     public AOPMessageVM importRecipe(String year, UUID fromString, MultipartFile file);
     public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId, MultipartFile file);

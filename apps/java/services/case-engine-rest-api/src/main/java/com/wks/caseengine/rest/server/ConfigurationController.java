@@ -138,11 +138,11 @@ public class ConfigurationController {
 	@GetMapping(value = "/configuration-export-excel")
 	public ResponseEntity<byte[]> exportConfigurationReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year
+            @RequestParam("year") String year,@RequestParam(required=false) String reportType
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId), false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId),reportType, false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -184,10 +184,10 @@ public class ConfigurationController {
 	@PostMapping(value = "/configuration-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,
+            @RequestParam("year") String year,@RequestParam(required=false) String reportType,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			return	configurationService.importExcel(year,UUID.fromString(plantId), file); 
+			return	configurationService.importExcel(year,UUID.fromString(plantId),reportType, file); 
 	}
 	
 	@PostMapping(value = "/shutdown-rate-import", consumes = "multipart/form-data")

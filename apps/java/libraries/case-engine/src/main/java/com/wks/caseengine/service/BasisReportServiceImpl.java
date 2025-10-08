@@ -90,7 +90,6 @@ public class BasisReportServiceImpl implements BasisReportService {
 
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    
-	    // 1. Fetching SP Name (Unchanged)
 	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 	    Sites site = siteRepository.findById(plant.getSiteFkId())
@@ -104,6 +103,8 @@ public class BasisReportServiceImpl implements BasisReportService {
 	        storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
 	    }else if(type.equalsIgnoreCase("OverallConsumption")) {
 	        storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionBasisReport";
+	    }else if(type.equalsIgnoreCase("ProductionTargetBasis")) {
+	        storedProcedure = vertical.getName() + "_" + site.getName() + "_ProductionTargetBasis";
 	    }
 	    
 	    try {
@@ -184,9 +185,7 @@ public class BasisReportServiceImpl implements BasisReportService {
 	        return aopMessageVM;
 	    }
 	}
-
-	
-	
+		
 	public List<Object[]> getReportDataForPE(String plantId, String aopYear, String PeriodFrom,
 			String PeriodTo) {
 

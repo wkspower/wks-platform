@@ -40,7 +40,6 @@ public class PIOImpactController {
 	@DeleteMapping("/pio-impact")
     public AOPMessageVM deletPIOImpact(@RequestParam UUID id) {	
 		return pioImpactService.deletePIOImpact(id);
-        
     }
 		
 }
