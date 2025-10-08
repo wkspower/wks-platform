@@ -1,9 +1,11 @@
+import React from 'react'
 import productionColumnsConstants from '../../../assets/kendo_config_meg constants.json'
 import productionColumns from '../../../assets/kendo_config_meg.json'
 import productionColumnsPE1 from '../../../assets/kendo_config_pe1.json'
 import productionColumnsPE2 from '../../../assets/kendo_config_pe2.json'
 import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
 import productionColumnsPE5 from '../../../assets/kendo_config_pe5.json'
+import pioImpactColumns from '../../../assets/kendo_config_pio_impact.json'
 
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
 import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
@@ -14,6 +16,7 @@ import disContineGradeChange from '../../../assets/kendo_config_disContineGradeC
 import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
 
 const getConfigByType = (configType) => {
+  console.log("Config Typess:", configType);
   switch (configType) {
     case 'meg':
       return productionColumns
@@ -21,6 +24,8 @@ const getConfigByType = (configType) => {
       return productionColumns
     case 'megConstants':
       return productionColumnsConstants
+    case 'pioImpact':
+       return pioImpactColumns
     case 'StartupLosses':
       return productionColumnsPE1
     case 'Configuration':

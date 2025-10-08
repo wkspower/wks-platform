@@ -1,0 +1,46 @@
+[
+  {
+    "field": "id",
+    "title": "ID",
+    "editable": false,
+    "width": 50,
+    "type": "number",
+    "hidden": true
+  },
+  {
+    "field": "description",
+    "title": "Description", 
+    "editable": true,
+    "widthT": 250,
+    "type": "text"
+  },
+  {
+    "field": "startMonth",
+    "title": "Start Month",
+    "editable": true,
+    "width": 120,
+    "type": "monthDropdown"
+  },
+  {
+    "field": "endMonth",
+    "title": "End Month",
+    "editable": true,
+    "width": 120,
+     "type": "monthDropdown"
+  },
+  {
+    "field": "value",
+    "title": "Value",
+    "editable": true,
+    "width": 120,
+    "type": "number",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "remarks",
+    "title": "Remarks",
+    "editable": true,
+    "width": 200,
+    "type": "text"
+  }
+]

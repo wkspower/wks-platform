@@ -26,7 +26,7 @@ import MonthCell from './Utilities-Kendo/MonthCell'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 import ProductCell from './Utilities-Kendo/ProductCell'
 import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
-
+import MonthDropdownEditor from './Utilities-Kendo/MonthDropdownEditor'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kendo/ColumnMenu1'
 import {
   isColumnMenuFilterActive,
@@ -347,6 +347,51 @@ const KendoDataTables = ({
 
     setRemarkDialogOpen(false)
   }
+  const handleAddRow1 = () => {
+  if (isButtonDisabled) return
+  setIsButtonDisabled(true)
+
+  // Generate a unique negative id for the new row
+  const newRowId = Date.now() * -1
+
+  // Build the new row with default values for PIO Impact or generic columns
+  const newRow = {
+    id: newRowId,
+    isNew: true,
+    description: '',
+    startMonth: null,
+    endMonth: null,
+    value: 0,
+    remarks: '',
+    Particulars: 'PIO Impact',
+    isEditable: true,
+    // Add all other columns as empty if needed:
+    ...Object.fromEntries(
+      (columns || [])
+        .filter(
+          col =>
+            ![
+              'id',
+              'description',
+              'startMonth',
+              'endMonth',
+              'value',
+              'remarks',
+              'Particulars',
+              'isEditable',
+              'isNew',
+            ].includes(col.field)
+        )
+        .map(col => [col.field, ''])
+    ),
+  }
+
+  setRows(prevRows => [newRow, ...prevRows])
+
+  setTimeout(() => {
+    setIsButtonDisabled(false)
+  }, 500)
+}
   const handleAddRow = () => {
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
@@ -424,6 +469,23 @@ const KendoDataTables = ({
       isColumnMenuSortActive(field, sort)
     )
   }
+  const MonthDisplayCell = (props) => {
+  const { dataItem, field, tdProps, children } = props
+  const value = dataItem[field]
+  
+  const monthNames = {
+    1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
+    7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'
+  }
+  
+  const displayValue = monthNames[value] || value
+
+  return (
+    <td {...tdProps} title={displayValue}>
+      {displayValue}
+    </td>
+  )
+}
 
   // console.log('rows?.length', rows?.length)
   const MaterialDisplayNameCell = (props) => {
@@ -950,6 +1012,16 @@ const KendoDataTables = ({
                   Add Item
                 </Button>
               )}
+              {permissions?.addButtons && (
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={handleAddRow1}
+                  disabled={isButtonDisabled}
+                >
+                  Add Items
+                </Button>
+              )}
 
               {permissions?.downloadExcelBtn && (
                 <Button
@@ -1454,25 +1526,44 @@ const KendoDataTables = ({
                     />
                   )
                 }
-
-                if (col.field === 'sapMaterialCode' && col.useMethodColors) {
-                  return (
-                    <GridColumn
-                      key={col.field}
-                      field={col.field}
-                      title={col.title || col.headerName}
-                      width={col.widthT}
-                      hidden={col.hidden}
-                      editable={col?.editable ? true : false}
-                      headerClassName={isActive ? 'active-column' : ''}
-                      cells={{
-                        data: MaterialDisplayNameCell,
-                        headerCell: SimpleHeaderWithTooltip,
-                      }}
-                      columnMenu={ColumnMenuCheckboxFilter}
-                    />
-                  )
-                }
+                
+if (col.field === 'sapMaterialCode' && col.useMethodColors) {
+  return (
+    <GridColumn
+      key={col.field}
+      field={col.field}
+      title={col.title || col.headerName}
+      width={col.widthT}
+      hidden={col.hidden}
+      editable={col?.editable ? true : false}
+      headerClassName={isActive ? 'active-column' : ''}
+      cells={{
+        data: MaterialDisplayNameCell,
+        headerCell: SimpleHeaderWithTooltip,
+      }}
+      columnMenu={ColumnMenuCheckboxFilter}
+    />
+  )
+}
+if (col.type === 'monthDropdown') {
+    return (
+      <GridColumn
+        key={col.field}
+        field={col.field}
+        title={col.title || col.headerName}
+        width={col.width}
+        hidden={col.hidden}
+        editable={col?.editable ? true : false}
+        headerClassName={isActive ? 'active-column' : ''}
+        cells={{
+          edit: { text: MonthDropdownEditor },
+          data: MonthDisplayCell,
+          headerCell: SimpleHeaderWithTooltip,
+        }}
+        columnMenu={ColumnMenuCheckboxFilter}
+      />
+    )
+  }
                 if (col?.field === 'DisplayName') {
                   return (
                     <GridColumn
