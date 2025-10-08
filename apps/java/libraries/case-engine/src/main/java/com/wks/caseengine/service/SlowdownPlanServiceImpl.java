@@ -4,18 +4,40 @@ import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.PersistenceContext;
+
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Session;
 import java.util.*;
 import java.util.regex.*;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
@@ -32,6 +54,7 @@ import com.wks.caseengine.repository.SlowdownPlanRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.utility.Utility;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 @Service
 public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
@@ -64,6 +87,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	
 	@Autowired
 	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
 
 
 	@Override
@@ -123,6 +149,337 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public byte[] slowdownExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave, List<ShutDownPlanDTO> dtoList) {
+		try {
+			
+			
+			if (!isAfterSave) {
+				 dtoList = findSlowdownDetailsByPlantIdAndType(UUID.fromString(plantId),maintenanceTypeName, year); 
+			}
+			String pattern = "dd-MM-yyyy hh:mm a";
+			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+			Workbook workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			
+			// Data rows
+			for (ShutDownPlanDTO dto : dtoList) {
+				//if (isAfterSave) {
+					List<Object> list = new ArrayList<>();
+					double durationDouble = dto.getDurationInHrs();
+					int hours = (int) durationDouble; 
+					int minutes = (int) Math.round((durationDouble - hours) * 100); 
+					String formattedDuration = String.format("%02d:%02d", hours, minutes);
+					list.add(dto.getDiscription());
+					if(dto.getProduct()!=null) {
+						UUID product=UUID.fromString(dto.getProduct());
+						Optional<NormParameters> normParameter= normParametersRepository.findById(product);
+						if(normParameter.isPresent()) {
+							list.add(normParameter.get().getDisplayName());
+						}
+					}
+					
+					list.add(formatter.format(dto.getMaintStartDateTime()));
+					list.add(formatter.format(dto.getMaintEndDateTime()));
+					list.add(formattedDuration);
+					list.add(dto.getRate());
+					list.add(dto.getRemark());
+					list.add(dto.getId());
+					list.add(dto.getProduct());
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				//}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			
+			innerHeaders.add("Shutdown Desc");
+			innerHeaders.add("Particulars");
+			innerHeaders.add("SD-From");
+			innerHeaders.add("SD-To");
+			innerHeaders.add("Duration (hrs)");
+			innerHeaders.add("Rate (TPH)");
+			innerHeaders.add("Shutdown Basis");
+			innerHeaders.add("Id");
+			innerHeaders.add("Product");
+			if (isAfterSave) {
+				innerHeaders.add("Status");
+				innerHeaders.add("Error Description");
+			}
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				
+				 
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+				}
+			}
+			
+			sheet.setColumnHidden(7, true);
+			sheet.setColumnHidden(8, true);
+			try {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@Override
+	public AOPMessageVM importSlowdownExcel(String year,UUID plantId, String maintenanceTypeName,MultipartFile file) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			List<ShutDownPlanDTO> data = readSlowdownData(file.getInputStream(), plantId, year);
+			List<ShutDownPlanDTO> failedList = saveShutdownData(plantId, data);
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = slowdownExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+	
+	public List<ShutDownPlanDTO> readSlowdownData(InputStream inputStream, UUID plantFKId, String year) {
+		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				ShutDownPlanDTO dto = new ShutDownPlanDTO();
+				try {
+					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
+					dto.setProductName(getStringCellValue(row.getCell(1), dto));
+					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
+					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
+					    try { 
+					        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm a"); 
+					        LocalDateTime dateTime = LocalDateTime.parse(maintStartDateTime, formatter); 
+					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
+					        dto.setMaintStartDateTime(date);
+					    } catch (Exception e) {
+					        dto.setSaveStatus("Failed");
+					        dto.setErrDescription("Invalid date/time format in cell 3.");
+					        e.printStackTrace();
+					    }
+					}
+					String maintEndDateTime = getStringCellValue(row.getCell(3), dto);
+					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
+					    try {
+					        
+					        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm a"); 
+					        LocalDateTime dateTime = LocalDateTime.parse(maintEndDateTime, formatter); 
+					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
+					        dto.setMaintEndDateTime(date);
+					    } catch (Exception e) {
+					        dto.setSaveStatus("Failed");
+					        dto.setErrDescription("Invalid date/time format in cell 4.");
+					        e.printStackTrace();
+					    }
+					}
+					
+					try {
+					    Instant startInstant = dto.getMaintStartDateTime().toInstant();
+					    Instant endInstant = dto.getMaintEndDateTime().toInstant();
+					    Duration duration = Duration.between(startInstant, endInstant);
+					    long totalMinutes = duration.toMinutes();
+					    long totalHours = totalMinutes / 60;
+					    long remainingMinutes = totalMinutes % 60;
+					    double durationInDecimalHours = (double) totalMinutes / 60.0;
+					    dto.setDurationInHrs(durationInDecimalHours);
+
+					} catch (Exception e) {
+					    dto.setSaveStatus("Failed");
+					    dto.setErrDescription("Error calculating duration between maintenance dates.");
+					    e.printStackTrace();
+					}
+					dto.setRate(getNumericCellValue(row.getCell(5), dto));
+					dto.setRemark(getStringCellValue(row.getCell(6), dto));
+					String idString = getStringCellValue(row.getCell(7), dto);
+					dto.setId(idString); 
+					String productIdString = getStringCellValue(row.getCell(8), dto);
+					if (productIdString == null || productIdString.isEmpty()) {
+						UUID productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName(),plantFKId);
+					    if(productId!=null) {
+					    	dto.setProductId(productId);
+					    }else {
+					    	 dto.setSaveStatus("Failed");
+						     dto.setErrDescription("Particular not found.");
+					    }
+						
+					} else {
+					    try {
+					        dto.setProductId(UUID.fromString(productIdString));
+					    } catch (IllegalArgumentException e) {
+					        dto.setSaveStatus("Failed");
+					        dto.setErrDescription("Product ID in cell 8 must be a valid UUID format.");
+					        e.printStackTrace();
+					    }
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+				dtoList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return dtoList;
+	}
+
+
+	private static String getStringCellValue(Cell cell, ShutDownPlanDTO dto) {
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			dto.setSaveStatus("Failed");
+			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	private static Double getNumericCellValue(Cell cell, ShutDownPlanDTO dto) {
+		if (cell == null)
+			return null;
+		if (cell.getCellType() == CellType.NUMERIC) {
+			return cell.getNumericCellValue();
+		} else if (cell.getCellType() == CellType.STRING) {
+			try {
+				return Double.parseDouble(cell.getStringCellValue().trim());
+			} catch (NumberFormatException e) {
+				dto.setSaveStatus("Failed");
+				dto.setErrDescription("Please enter numeric values");
+			}
+		}
+		return null;
+	}
+
+	public static Boolean getBooleanCellValue(Cell cell, ShutDownPlanDTO dto) {
+		if (cell == null)
+			return null;
+
+		CellType type = cell.getCellType();
+		if (type == CellType.FORMULA) {
+			type = cell.getCachedFormulaResultType();
+		}
+
+		switch (type) {
+			case BOOLEAN:
+				return cell.getBooleanCellValue();
+			case STRING:
+				String text = cell.getStringCellValue().trim().toLowerCase();
+				if ("true".equals(text))
+					return true;
+				if ("false".equals(text))
+					return false;
+				return null;
+			case NUMERIC:
+				double num = cell.getNumericCellValue();
+				if (num == 1.0)
+					return true;
+				if (num == 0.0)
+					return false;
+				return null;
+			case BLANK:
+			case _NONE:
+			default:
+				return null;
+		}
+	}
+
+
+
+	private CellStyle createBorderedStyle(Workbook wb) {
+		CellStyle style = wb.createCellStyle();
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	private CellStyle createBoldStyle(Workbook wb) {
+		Font font = wb.createFont();
+		font.setBold(true);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		return style;
+	}
+
+	private CellStyle createBoldBorderedStyle(Workbook workbook) {
+		CellStyle style = createBorderedStyle(workbook);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
+	}
+
 
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
