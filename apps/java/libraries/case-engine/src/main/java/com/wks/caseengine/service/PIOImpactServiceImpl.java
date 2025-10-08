@@ -10,15 +10,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.PIOImpactDTO;
 import com.wks.caseengine.entity.PIOImpact;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Sites;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PIOImpactRepository;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.SiteRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 @Service
 public class PIOImpactServiceImpl implements PIOImpactService {
 	
 	@Autowired
 	private PIOImpactRepository pioImpactRepository;
+	
+	@Autowired
+	private SiteRepository siteRepository;
+
+	@Autowired
+	private VerticalsRepository verticalRepository;
+	
+	@Autowired
+	private PlantsRepository plantsRepository;
 
 	@Override
 	public AOPMessageVM getPIOImpact(String year, String plantId) {
@@ -57,6 +72,12 @@ public class PIOImpactServiceImpl implements PIOImpactService {
 	@Override
 	public AOPMessageVM updatePIOImpact(String year, String plantId, List<PIOImpactDTO> pioImpactDTOs) {
 		List<PIOImpact> pioImpacts = new ArrayList<PIOImpact>();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+		Sites site = siteRepository.findById(plant.getSiteFkId())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 		try {
 			for(PIOImpactDTO pioImpactDTO :pioImpactDTOs) {
 				PIOImpact pioImpact = null;
@@ -73,10 +94,15 @@ public class PIOImpactServiceImpl implements PIOImpactService {
 				pioImpact.setRemarks(pioImpactDTO.getRemarks());
 				pioImpact.setStartMonth(pioImpactDTO.getStartMonth());
 				pioImpact.setValue(pioImpactDTO.getValue());
+				pioImpact.setPlantId(UUID.fromString(plantId));
+				pioImpact.setAopYear(year);
+				pioImpact.setSiteId(site.getId());
+				pioImpact.setVerticalId(vertical.getId());
 				pioImpacts.add(pioImpactRepository.save(pioImpact));
 			}
 		}catch(Exception e) {
-			throw new RuntimeException("Failed to fetch data", e);
+			e.printStackTrace();
+			throw new RuntimeException("Failed to update data", e);
 		}
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		aopMessageVM.setCode(200);
