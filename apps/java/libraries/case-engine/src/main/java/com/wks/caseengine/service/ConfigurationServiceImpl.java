@@ -150,8 +150,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					list.add(dto.getConfigTypeDisplayName());
 					list.add(dto.getTypeDisplayName());
 				}
-				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
-						|| verticalName.equalsIgnoreCase("CRACKER")) {
+				if ((verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
+						|| (verticalName.equalsIgnoreCase("CRACKER")) || (verticalName.equalsIgnoreCase("VCM")) 
+						|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
 					list.add(dto.getNormType());
 				}
 
