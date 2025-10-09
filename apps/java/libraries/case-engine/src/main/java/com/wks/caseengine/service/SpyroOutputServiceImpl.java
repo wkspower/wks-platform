@@ -18,9 +18,9 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
-
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -342,22 +342,78 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		try {
 			List<Object[]> results = getYieldData(plantId, year,procedureName);
 
+			double totalFiveFC2C3 = 0;
+			double totalFiveFPropane = 0;
+			double totalFiveFEthane = 0;
+			double totalFourFC2C3 = 0;
+			double totalFourFPropane = 0;
+			double totalFourFEthane = 0;
+			double totalFourFDC2C3 = 0;
+			double totalFourFDPropane = 0;
+			double totalFourFDEthane = 0;
+
 			for (Object[] row : results) {
-				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-				YieldDTO yieldDTO = new YieldDTO();
-				yieldDTO.setParticulars(row[0] != null ? row[0].toString() : " ");
-				yieldDTO.setFiveFC2C3(row[1] != null && !(row[1].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[1].toString()) : 0.0);
-				yieldDTO.setFiveFPropane(row[2] != null && !(row[2].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[2].toString()) : 0.0);
-				yieldDTO.setFiveFEthane(row[3] != null && !(row[3].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[3].toString()) : 0.0);
-				yieldDTO.setFourFC2C3(row[4] != null && !(row[4].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[4].toString()) : 0.0);
-				yieldDTO.setFourFPropane(row[5] != null && !(row[5].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[5].toString()) : 0.0);
-				yieldDTO.setFourFEthane(row[6] != null && !(row[6].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[6].toString()) : 0.0);
-				yieldDTO.setFourFDC2C3(row[7] != null && !(row[7].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[7].toString()) : 0.0);
-				yieldDTO.setFourFDPropane(row[8] != null && !(row[8].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[8].toString()) : 0.0);
-				yieldDTO.setFourFDEthane(row[9] != null && !(row[9].toString().trim().equalsIgnoreCase("")) ? Double.parseDouble(row[9].toString()) : 0.0);	
-				spyroOutputYieldDataList.add(yieldDTO); // Add the map to the list here
-				
+			    YieldDTO yieldDTO = new YieldDTO();
+			    yieldDTO.setParticulars(row[0] != null ? row[0].toString() : " ");
+
+			    double v1 = (row[1] != null && !row[1].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[1].toString()) : 0.0;
+			    double v2 = (row[2] != null && !row[2].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[2].toString()) : 0.0;
+			    double v3 = (row[3] != null && !row[3].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[3].toString()) : 0.0;
+			    double v4 = (row[4] != null && !row[4].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[4].toString()) : 0.0;
+			    double v5 = (row[5] != null && !row[5].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[5].toString()) : 0.0;
+			    double v6 = (row[6] != null && !row[6].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[6].toString()) : 0.0;
+			    double v7 = (row[7] != null && !row[7].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[7].toString()) : 0.0;
+			    double v8 = (row[8] != null && !row[8].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[8].toString()) : 0.0;
+			    double v9 = (row[9] != null && !row[9].toString().trim().isEmpty()) 
+			                ? Double.parseDouble(row[9].toString()) : 0.0;
+
+			    yieldDTO.setFiveFC2C3(v1);
+			    yieldDTO.setFiveFPropane(v2);
+			    yieldDTO.setFiveFEthane(v3);
+			    yieldDTO.setFourFC2C3(v4);
+			    yieldDTO.setFourFPropane(v5);
+			    yieldDTO.setFourFEthane(v6);
+			    yieldDTO.setFourFDC2C3(v7);
+			    yieldDTO.setFourFDPropane(v8);
+			    yieldDTO.setFourFDEthane(v9);
+
+			    // add to totals
+			    totalFiveFC2C3 += v1;
+			    totalFiveFPropane += v2;
+			    totalFiveFEthane += v3;
+			    totalFourFC2C3 += v4;
+			    totalFourFPropane += v5;
+			    totalFourFEthane += v6;
+			    totalFourFDC2C3 += v7;
+			    totalFourFDPropane += v8;
+			    totalFourFDEthane += v9;
+
+			    spyroOutputYieldDataList.add(yieldDTO);
 			}
+
+			// Now add the Total row
+			YieldDTO totalRow = new YieldDTO();
+			totalRow.setParticulars("Total");
+			totalRow.setFiveFC2C3(totalFiveFC2C3);
+			totalRow.setFiveFPropane(totalFiveFPropane);
+			totalRow.setFiveFEthane(totalFiveFEthane);
+			totalRow.setFourFC2C3(totalFourFC2C3);
+			totalRow.setFourFPropane(totalFourFPropane);
+			totalRow.setFourFEthane(totalFourFEthane);
+			totalRow.setFourFDC2C3(totalFourFDC2C3);
+			totalRow.setFourFDPropane(totalFourFDPropane);
+			totalRow.setFourFDEthane(totalFourFDEthane);
+
+			spyroOutputYieldDataList.add(totalRow);
+
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
 			aopMessageVM.setData(spyroOutputYieldDataList);
@@ -371,114 +427,93 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	}
 	
 	public byte[] exportYieldReport(String year, String plantId, boolean isAfterSave, List<YieldDTO> dtoList) {
-		try {
-			
-			AOPMessageVM aopMessageVM = getSpyroOutputYieldData(year,plantId);
-			
-			List<Boolean> isEditable = new ArrayList<>();
+	    try {
+	        AOPMessageVM aopMessageVM = getSpyroOutputYieldData(year,plantId);
+	        if (!isAfterSave) {
+	            dtoList = (List<YieldDTO>) aopMessageVM.getData();
+	        }
 
-			if (!isAfterSave) {
-				 dtoList = (List<YieldDTO>) aopMessageVM.getData();
-			}
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
 
-			Workbook workbook = new XSSFWorkbook();
+	        CellStyle normalStyle = workbook.createCellStyle();
+	        CellStyle totalRowStyle = workbook.createCellStyle();
+	        totalRowStyle.cloneStyleFrom(normalStyle);
+	        totalRowStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	        totalRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-			Sheet sheet = workbook.createSheet("Sheet1");
-			int currentRow = 0;
-			// List<List<Object>> rows = new ArrayList<>();
+	        int currentRow = 0;
 
-			List<List<Object>> rows = new ArrayList<>();
-			
-			// Data rows
-			for (YieldDTO dto : dtoList) {
-				//if (isAfterSave) {
-					List<Object> list = new ArrayList<>();
-					
-					list.add(dto.getParticulars());
-					list.add(dto.getFiveFC2C3());
-					list.add(dto.getFiveFPropane());
-					list.add(dto.getFiveFEthane());
-					list.add(dto.getFourFC2C3());
-					list.add(dto.getFourFPropane());
-					list.add(dto.getFourFEthane());
-					list.add(dto.getFourFDC2C3());
-					list.add(dto.getFourFDPropane());
-					list.add(dto.getFourFDEthane());
-					
-					
-					if (isAfterSave) {
-						list.add(dto.getSaveStatus());
-						list.add(dto.getErrDescription());
-					}
-					rows.add(list);
-				//}
-			}
+	        // (Ensure your header writing is here)
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Particulars");
+	        innerHeaders.add("5F-C2C3");
+	        innerHeaders.add("5F-Propane");
+	        innerHeaders.add("5F-Ethane");
+	        innerHeaders.add("4F-C2C3");
+	        innerHeaders.add("4F-Propane");
+	        innerHeaders.add("4F-Ethane");
+	        innerHeaders.add("4FD-C2C3");
+	        innerHeaders.add("4FD-Propane");
+	        innerHeaders.add("4FD-Ethane");
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(normalStyle);
+	        }
 
-			List<String> innerHeaders = new ArrayList<>();
-			
-			innerHeaders.add("Particulars");
-			innerHeaders.add("5F-C2C3");
-			innerHeaders.add("5F-Propane");
-			innerHeaders.add("5F-Ethane");
-			innerHeaders.add("4F-C2C3");
-			innerHeaders.add("4F-Propane");
-			innerHeaders.add("4F-Ethane");
-			innerHeaders.add("4FD-C2C3");
-			innerHeaders.add("4FD-Propane");
-			innerHeaders.add("4FD-Ethane");
-			// innerHeaders.add("NormParamterId");
-			 //innerHeaders.add("IsEditable");
-			if (isAfterSave) {
-				innerHeaders.add("Status");
-				innerHeaders.add("Error Description");
-			}
-			List<List<String>> headers = new ArrayList<>();
-			headers.add(innerHeaders);
+	        int dataRowCount = dtoList.size();
+	        for (int i = 0; i < dataRowCount; i++) {
+	            YieldDTO dto = dtoList.get(i);
+	            Row row = sheet.createRow(currentRow++);
+	            List<Object> rowData = new ArrayList<>();
+	            rowData.add(dto.getParticulars());
+	            rowData.add(dto.getFiveFC2C3());
+	            rowData.add(dto.getFiveFPropane());
+	            rowData.add(dto.getFiveFEthane());
+	            rowData.add(dto.getFourFC2C3());
+	            rowData.add(dto.getFourFPropane());
+	            rowData.add(dto.getFourFEthane());
+	            rowData.add(dto.getFourFDC2C3());
+	            rowData.add(dto.getFourFDPropane());
+	            rowData.add(dto.getFourFDEthane());
+	            if (isAfterSave) {
+	                rowData.add(dto.getSaveStatus());
+	                rowData.add(dto.getErrDescription());
+	            }
 
-			for (List<String> headerRowData : headers) {
-				Row headerRow = sheet.createRow(currentRow++);
-				for (int col = 0; col < headerRowData.size(); col++) {
-					Cell cell = headerRow.createCell(col);
-					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
-				}
-			}
-			for (List<Object> rowData : rows) {
-				
-				 
-				Row row = sheet.createRow(currentRow++);
-				for (int col = 0; col < rowData.size(); col++) {
-					Cell cell = row.createCell(col);
-					Object value = rowData.get(col);
+	            boolean isLastRow = (i == dataRowCount - 1);
+	            CellStyle styleToUse = isLastRow ? totalRowStyle : normalStyle;
 
-					if (value instanceof Number) {
-						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
-					} else if (value instanceof Boolean) {
-						cell.setCellValue((Boolean) value);
-					} else if (value != null) {
-						cell.setCellValue(value.toString());
-					} else {
-						cell.setCellValue("");
-					}
-				}
-			}
-			
-			//sheet.setColumnHidden(18, true);
-			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	                cell.setCellStyle(styleToUse);
+	            }
+	        }
 
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				workbook.write(outputStream);
-				workbook.close();
-				return outputStream.toByteArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
 	
 	@Override
@@ -512,42 +547,48 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	}
 	
 	public List<YieldDTO> readYieldData(InputStream inputStream, UUID plantFKId, String year) {
-		List<YieldDTO> yieldList = new ArrayList<>();
+	    List<YieldDTO> yieldList = new ArrayList<>();
 
-		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rowIterator = sheet.iterator();
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
 
-			if (rowIterator.hasNext())
-				rowIterator.next(); // Skip header
+	        int lastRowNum = sheet.getLastRowNum();  // highest row index (0-based)
+	        Iterator<Row> rowIterator = sheet.iterator();
 
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-				YieldDTO dto = new YieldDTO();
-				try {
-					dto.setParticulars(getStringCellValue(row.getCell(0), dto));
-					dto.setFiveFC2C3(getNumericCellValue(row.getCell(1), dto));
-					dto.setFiveFPropane(getNumericCellValue(row.getCell(2), dto));
-					dto.setFiveFEthane(getNumericCellValue(row.getCell(3), dto));
-					dto.setFourFC2C3(getNumericCellValue(row.getCell(4), dto));
-					dto.setFourFPropane(getNumericCellValue(row.getCell(5), dto));
-					dto.setFourFEthane(getNumericCellValue(row.getCell(6), dto));
-					dto.setFourFDC2C3(getNumericCellValue(row.getCell(7), dto));
-					dto.setFourFDPropane(getNumericCellValue(row.getCell(8), dto));
-					dto.setFourFDEthane(getNumericCellValue(row.getCell(9), dto));
-				} catch (Exception e) {
-					e.printStackTrace();
-					dto.setErrDescription(e.getMessage());
-					dto.setSaveStatus("Failed");
-				}
-				yieldList.add(dto);
-			}
+	        if (rowIterator.hasNext())
+	            rowIterator.next();  // skip header
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            if (row.getRowNum() == lastRowNum) {
+	                // skip the last row
+	                break;
+	            }
+	            YieldDTO dto = new YieldDTO();
+	            try {
+	                dto.setParticulars(getStringCellValue(row.getCell(0), dto));
+	                dto.setFiveFC2C3(getNumericCellValue(row.getCell(1), dto));
+	                dto.setFiveFPropane(getNumericCellValue(row.getCell(2), dto));
+	                dto.setFiveFEthane(getNumericCellValue(row.getCell(3), dto));
+	                dto.setFourFC2C3(getNumericCellValue(row.getCell(4), dto));
+	                dto.setFourFPropane(getNumericCellValue(row.getCell(5), dto));
+	                dto.setFourFEthane(getNumericCellValue(row.getCell(6), dto));
+	                dto.setFourFDC2C3(getNumericCellValue(row.getCell(7), dto));
+	                dto.setFourFDPropane(getNumericCellValue(row.getCell(8), dto));
+	                dto.setFourFDEthane(getNumericCellValue(row.getCell(9), dto));
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                dto.setErrDescription(e.getMessage());
+	                dto.setSaveStatus("Failed");
+	            }
+	            yieldList.add(dto);
+	        }
 
-		return yieldList;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return yieldList;
 	}
 	
 	private static String getStringCellValue(Cell cell, YieldDTO dto) {
