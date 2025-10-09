@@ -46,7 +46,7 @@ const TcsInput = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
 
   // Tab management
-  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown', 'ZCPP Shutdown', 'PCG Outlook', 'Crude Blend Window']
+  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown', 'CPP Shutdown', 'PCG Outlook', 'Crude Blend Window']
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -171,10 +171,10 @@ const TcsInput = () => {
             ],
           },
         ]
-      case 'ZCPP Shutdown':
+      case 'CPP Shutdown':
       return [
         {
-          title: "ZCPP Shutdown plan January'25 - March'26",
+          title: "CPP Shutdown plan January'25 - March'26",
           children: [
             { field: 'jmdCpp', title: 'JMD-CPP', width: 120, editable: true },
             { field: 'ibrDueDate', title: 'IBR Due date', width: 120, editable: true },
@@ -242,7 +242,7 @@ const TcsInput = () => {
           return shutdownRows
         case 'Slowdown':
           return slowdownRows
-        case 'ZCPP Shutdown':
+        case 'CPP Shutdown':
         return zcppShutdownRows
         case 'PCG Outlook':
           return gasifierRows
@@ -266,7 +266,7 @@ const TcsInput = () => {
       case 'Slowdown':
         setSlowdownRows(data)
         break
-      case 'ZCPP Shutdown':
+      case 'CPP Shutdown':
       setZcppShutdownRows(data)
       break
       case 'PCG Outlook':
@@ -311,7 +311,7 @@ const TcsInput = () => {
         setLoading(false)
       }
     },
-    [keycloak, setRowsForTab],
+    [keycloak, setRowsForTab,  PLANT_NAME],
   )
 
   // Mock data generator - replace with actual API call
@@ -319,7 +319,7 @@ const TcsInput = () => {
 
   // Mock data generator - replace with actual API call
   const generateMockData = (tabName) => {
-    if (PLANT_NAME === 'dta') {
+    if (PLANT_NAME === 'cdu1') {
       switch (tabName) {
         case 'Unit Capacity':
           return [
@@ -526,7 +526,7 @@ const TcsInput = () => {
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
           ]
-        case 'ZCPP Shutdown':
+        case 'CPP Shutdown':
         return [
           {
             id: 1,
@@ -802,7 +802,7 @@ const TcsInput = () => {
               purposeOfSlowdown: '',
             },
           ]
-        case 'ZCPP Shutdown':
+        case 'CPP Shutdown':
         return [
           {
             id: 1,
@@ -1033,6 +1033,7 @@ const TcsInput = () => {
     lowerVertName,
     PLANT_NAME,
   ])
+  console.log('plant name is', PLANT_NAME)
 
   return (
     <Box>
