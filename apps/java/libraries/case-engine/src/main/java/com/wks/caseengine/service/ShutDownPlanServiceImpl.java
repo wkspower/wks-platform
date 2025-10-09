@@ -7,6 +7,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.text.SimpleDateFormat;
@@ -144,41 +145,73 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
-			// List<List<Object>> rows = new ArrayList<>();
-
 			List<List<Object>> rows = new ArrayList<>();
-			
-			// Data rows
 			for (ShutDownPlanDTO dto : dtoList) {
-				//if (isAfterSave) {
-					List<Object> list = new ArrayList<>();
-					double durationDouble = dto.getDurationInHrs();
-					int hours = (int) durationDouble; 
-					int minutes = (int) Math.round((durationDouble - hours) * 100); 
+				List<Object> list = new ArrayList<>();
+				
+				try {
+					
+					Double durationObject = dto.getDurationInHrs();
+					double durationDouble = (durationObject != null) ? durationObject.doubleValue() : 0.0;
+					int hours = (int) durationDouble;
+					int minutes = (int) Math.round((durationDouble - hours) * 100);
 					String formattedDuration = String.format("%02d:%02d", hours, minutes);
+					
 					list.add(dto.getDiscription());
-					if(dto.getProduct()!=null) {
-						UUID product=UUID.fromString(dto.getProduct());
-						Optional<NormParameters> normParameter= normParametersRepository.findById(product);
-						if(normParameter.isPresent()) {
-							list.add(normParameter.get().getDisplayName());
+					String productString = dto.getProduct();
+					if (productString != null) {
+						try {
+							UUID product = UUID.fromString(productString);
+							Optional<NormParameters> normParameter = normParametersRepository.findById(product);
+							if (normParameter.isPresent()) {
+								list.add(normParameter.get().getDisplayName());
+							} else {
+								list.add(productString); 
+							}
+						} catch (IllegalArgumentException e) {
+							
+							list.add("Invalid Product ID");
+							throw new Exception("Invalid Product UUID: " + productString, e);
 						}
+					} else {
+						list.add(null);
 					}
 					
-					list.add(formatter.format(dto.getMaintStartDateTime()));
-					list.add(formatter.format(dto.getMaintEndDateTime()));
+					
+					Date startDate = dto.getMaintStartDateTime();
+					Date endDate = dto.getMaintEndDateTime();
+					
+					list.add(startDate != null ? formatter.format(startDate) : null);
+					list.add(endDate != null ? formatter.format(endDate) : null);
 					list.add(formattedDuration);
 					list.add(dto.getRemark());
 					list.add(dto.getId());
-					list.add(dto.getProduct());
+					list.add(productString);
+					
 					if (isAfterSave) {
 						list.add(dto.getSaveStatus());
 						list.add(dto.getErrDescription());
 					}
-					rows.add(list);
-				//}
+					
+				} catch (Exception e) {
+					list.clear(); 
+					list.add(dto.getDiscription());
+					list.add(null); 
+					list.add(null); 
+					list.add(null); 
+					list.add("00:00"); 
+					list.add(dto.getRemark());
+					list.add(dto.getId());
+					list.add(dto.getProduct());
+					
+					if (isAfterSave) {
+						list.add("Failed");
+						list.add("Processing Error: " + e.getMessage());
+					}
+				}
+				
+				rows.add(list);
 			}
-
 			List<String> innerHeaders = new ArrayList<>();
 			
 			innerHeaders.add("Shutdown Desc");
@@ -288,7 +321,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
 					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try { 
-					        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm a"); 
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintStartDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintStartDateTime(date);
@@ -302,7 +335,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try {
 					        
-					        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm a"); 
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintEndDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintEndDateTime(date);

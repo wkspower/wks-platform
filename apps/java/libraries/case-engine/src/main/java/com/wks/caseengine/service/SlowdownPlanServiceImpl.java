@@ -169,34 +169,81 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			
 			// Data rows
 			for (ShutDownPlanDTO dto : dtoList) {
-				//if (isAfterSave) {
-					List<Object> list = new ArrayList<>();
-					double durationDouble = dto.getDurationInHrs();
-					int hours = (int) durationDouble; 
-					int minutes = (int) Math.round((durationDouble - hours) * 100); 
-					String formattedDuration = String.format("%02d:%02d", hours, minutes);
-					list.add(dto.getDiscription());
-					if(dto.getProduct()!=null) {
-						UUID product=UUID.fromString(dto.getProduct());
-						Optional<NormParameters> normParameter= normParametersRepository.findById(product);
+				List<Object> list = new ArrayList<>();
+				
+				// Default values in case of exception
+				String formattedDuration = ""; 
+				String formattedStartDate = "";
+				String formattedEndDate = "";
+				
+				// --- Duration Parsing and Formatting ---
+				try {
+					Double durationObject = dto.getDurationInHrs();
+					if (durationObject != null) {
+						double durationDouble = durationObject.doubleValue();
+						int hours = (int) durationDouble; 
+						// Note: Assuming fractional part is in 100ths, not 60ths (e.g., 2.50 = 2h 50m)
+						int minutes = (int) Math.round((durationDouble - hours) * 100); 
+						formattedDuration = String.format("%02d:%02d", hours, minutes);
+					}
+				} catch (Exception e) {
+					formattedDuration = "Invalid Duration"; 
+				}
+				
+				list.add(dto.getDiscription());
+				
+				// --- Product/UUID Conversion and Lookup ---
+				if(dto.getProduct()!=null) {
+					try {
+						UUID product = UUID.fromString(dto.getProduct());
+						Optional<NormParameters> normParameter = normParametersRepository.findById(product);
 						if(normParameter.isPresent()) {
 							list.add(normParameter.get().getDisplayName());
+						} else {
+							list.add(dto.getProduct()); // Keep original product ID if not found
 						}
+					} catch (IllegalArgumentException e) {
+						// Handles UUID.fromString exception
+						list.add("Invalid Product ID"); 
+					} catch (Exception e) {
+						list.add("Error Product Lookup");
 					}
-					
-					list.add(formatter.format(dto.getMaintStartDateTime()));
-					list.add(formatter.format(dto.getMaintEndDateTime()));
-					list.add(formattedDuration);
-					list.add(dto.getRate());
-					list.add(dto.getRemark());
-					list.add(dto.getId());
-					list.add(dto.getProduct());
-					if (isAfterSave) {
-						list.add(dto.getSaveStatus());
-						list.add(dto.getErrDescription());
+				} else {
+					list.add(null); // Add null if product is null, maintaining column structure
+				}
+				
+				// --- Date/Time Formatting ---
+				try {
+					if (dto.getMaintStartDateTime() != null) {
+						formattedStartDate = formatter.format(dto.getMaintStartDateTime());
 					}
-					rows.add(list);
-				//}
+				} catch (Exception e) {
+					formattedStartDate = "Invalid Start Date";
+				}
+				list.add(formattedStartDate);
+				
+				try {
+					if (dto.getMaintEndDateTime() != null) {
+						formattedEndDate = formatter.format(dto.getMaintEndDateTime());
+					}
+				} catch (Exception e) {
+					formattedEndDate = "Invalid End Date";
+				}
+				list.add(formattedEndDate);
+				
+				// --- Adding the rest of the fields ---
+				list.add(formattedDuration);
+				list.add(dto.getRate());
+				list.add(dto.getRemark());
+				list.add(dto.getId());
+				list.add(dto.getProduct());
+				
+				if (isAfterSave) {
+					list.add(dto.getSaveStatus());
+					list.add(dto.getErrDescription());
+				}
+				
+				rows.add(list);
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
@@ -309,7 +356,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
 					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try { 
-					        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm a"); 
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintStartDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintStartDateTime(date);
@@ -323,7 +370,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try {
 					        
-					        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy hh:mm a"); 
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintEndDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintEndDateTime(date);
