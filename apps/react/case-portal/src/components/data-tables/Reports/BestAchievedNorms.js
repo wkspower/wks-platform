@@ -1,7 +1,6 @@
-import { Box, Button } from '@mui/material'
+import { Box, Button, Typography } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
 import {
   ExcelExport,
   ExcelExportColumn,
@@ -18,13 +17,16 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-const CALL_DELAY_MS = 200
+const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
 
 const BestAchievedNorms = () => {
   const keycloak = useSession()
+
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
+  const [tabIndex, setTabIndex] = useState(0)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
@@ -35,14 +37,17 @@ const BestAchievedNorms = () => {
     siteObject,
     verticalObject,
     year,
-  } = dataGridStore || {}
+  } = dataGridStore
 
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
+
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const timeoutIdsRef = useRef([])
-  const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
 
@@ -56,121 +61,114 @@ const BestAchievedNorms = () => {
     }
   }, [])
 
-  function parseDDMMYYYY(dateStr) {
-    if (!dateStr) return null
-    const [day, month, yearStr] = dateStr.split('-')
-    return new Date(`${yearStr}-${month}-${day}`)
-  }
-
   const enrichColumns = useCallback((backendCols = []) => {
-    const DEFAULT_MIN_WIDTH = 160
-
-    const cols = backendCols.map((col) => {
-      const isTextCol = col.type === 'string'
-      const isNumberCol = col.type === 'number'
-      return {
-        ...col,
-        title: col.title || col.field,
-        filterable: true,
-        filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-        align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.###}' } : {}),
-        editable: false,
-        isRightAlligned: isNumberCol ? 'numeric' : undefined,
-        hidden: col.field === 'Material_FK_Id',
-      }
-    })
-
-    if (cols.length > 17) {
-      return cols.map((c) => ({
-        widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
-        ...c,
-      }))
-    }
-
-    return cols
+    return backendCols
+      .filter((col) => col.field !== 'GRID_TYPE')
+      .map((col) => {
+        const isTextCol = col.type === 'string'
+        const isNumberCol = col.type === 'number'
+        return {
+          ...col,
+          title: col.title || col.field,
+          filterable: true,
+          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+          editable: false,
+          isRightAlligned: isNumberCol ? 'numeric' : undefined,
+          // hide Material FK field (both common casings)
+          hidden:
+            (col.field &&
+              (col.field === 'Material_FK_Id' ||
+                col.field === 'materialFkId')) ||
+            col.hidden,
+        }
+      })
   }, [])
 
-  const fetchDataForGrid = useCallback(
-    async (reportType) => {
-      try {
-        const apiResponse = await DataService.getBestAchievedNorms(
-          keycloak,
-          reportType,
-        )
+  // ---------------------------------------------------------------------------
+  // Infer columns from row objects (returns [{ field, title, type }])
+  // ---------------------------------------------------------------------------
+  function inferColumnsFromRows(rows = []) {
+    const fieldSet = new Set()
+    rows.forEach((r) => {
+      if (!r || typeof r !== 'object') return
+      Object.keys(r).forEach((k) => fieldSet.add(k))
+    })
 
-        if (apiResponse?.code !== 200) {
-          return { rows: [], columns: [] }
+    const fields = Array.from(fieldSet)
+
+    const cols = fields.map((f) => {
+      let detectedType = 'string'
+      for (const r of rows) {
+        if (!r) continue
+        const v = r?.[f]
+        if (v === undefined || v === null || v === '') continue
+        if (typeof v === 'number') {
+          detectedType = 'number'
+          break
         }
-
-        const backendCols = apiResponse.data.columns || []
-        const enrichedCols = enrichColumns(backendCols)
-
-        const dateFields = enrichedCols
-          .filter((c) => c.type === 'date')
-          .map((c) => c.field)
-        const numberFields = enrichedCols
-          .filter((c) => c.type === 'number')
-          .map((c) => c.field)
-
-        const rowsWithId = (apiResponse.data.data || []).map((item, index) => {
-          const parsedItem = { ...item }
-          dateFields.forEach((f) => {
-            parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
-          })
-          numberFields.forEach((f) => {
-            parsedItem[f] =
-              item?.[f] !== undefined && item?.[f] !== null
-                ? Number(item[f])
-                : null
-          })
-          return { ...parsedItem, id: index, isEditable: false }
-        })
-
-        return { rows: rowsWithId, columns: enrichedCols }
-      } catch (err) {
-        console.error(`Error fetching ${reportType}:`, err)
-        return { rows: [], columns: [] }
+        // detect date-like strings
+        const d = new Date(v)
+        if (!isNaN(d.getTime())) {
+          detectedType = 'date'
+          break
+        }
+        // numeric string (allow commas)
+        const numericCandidate = String(v).replace(/[,]/g, '')
+        if (!isNaN(Number(numericCandidate))) {
+          detectedType = 'number'
+          break
+        }
       }
-    },
-    [keycloak, enrichColumns],
-  )
+      return { field: f, title: f, type: detectedType }
+    })
 
-  const scheduleAndRunFetch = useCallback(
-    (reportType, delayMs) => {
-      const id = setTimeout(async () => {
-        activeRequestsRef.current += 1
-        if (isMountedRef.current) setLoading(true)
+    return cols
+  }
 
-        try {
-          const { rows, columns } = await fetchDataForGrid(reportType)
-          if (!isMountedRef.current) return
-          setDataMap((prev) => ({ ...prev, [reportType]: { rows, columns } }))
-        } catch (err) {
-          console.error(`Scheduled fetch failed for ${reportType}:`, err)
-        } finally {
-          activeRequestsRef.current -= 1
-          if (activeRequestsRef.current <= 0 && isMountedRef.current) {
-            activeRequestsRef.current = 0
-            setLoading(false)
-          }
-        }
-      }, delayMs)
+  // ---------------------------------------------------------------------------
+  // Normalize row values according to detected column types
+  // ---------------------------------------------------------------------------
+  function normalizeRowValues(row = {}, columns = []) {
+    const parsed = { ...row }
+    columns.forEach((c) => {
+      const raw = row[c.field]
+      if (raw === undefined || raw === null || raw === '') {
+        parsed[c.field] = raw === 0 ? 0 : null
+        return
+      }
+      if (c.type === 'number') {
+        parsed[c.field] =
+          typeof raw === 'number'
+            ? raw
+            : Number(String(raw).replace(/[,]/g, ''))
+        if (Number.isNaN(parsed[c.field])) parsed[c.field] = null
+        return
+      }
+      if (c.type === 'date') {
+        const d = new Date(raw)
+        parsed[c.field] = !isNaN(d.getTime()) ? d : null
+        return
+      }
+      // strings and objects left as-is (objects will be stringified during export)
+    })
+    return parsed
+  }
 
-      timeoutIdsRef.current.push(id)
-    },
-    [fetchDataForGrid],
-  )
-
+  // ---------------------------------------------------------------------------
+  // Fetch all grids in one call and build dataMap + gridNames
+  // The backend is expected to return: apiResponse.data = [ { gridName, data: [...] }, ... ]
+  // ---------------------------------------------------------------------------
   const fetchAllGrids = useCallback(async () => {
-    // clear previous timers
+    // clear previous timers if any
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
 
     try {
       setLoading(true)
 
-      const typeListResult = await DataService.getBestAchievedNorms(
+      const apiResponse = await DataService.getBestAchievedNorms(
         keycloak,
         'TYPE LIST',
       )
@@ -261,28 +259,59 @@ const BestAchievedNorms = () => {
 
       setAllRedCell(mergedData)
 
-      let types = []
-      if (typeListResult?.code === 200) {
-        types = (typeListResult?.data?.data ?? []).map((item) => item.TYPE)
-      } else {
+      if (apiResponse?.code !== 200) {
+        setGridNames([])
+        setDataMap({})
         setLoading(false)
         return
       }
 
-      const normalized = [...new Set(types)]
-      setGridNames(normalized)
+      // Support two possible shapes for convenience:
+      // 1) apiResponse.data is the array of grids
+      // 2) apiResponse.data.data is the array (older wrappers)
+      const gridsArray = Array.isArray(apiResponse.data)
+        ? apiResponse.data
+        : Array.isArray(apiResponse.data?.data)
+          ? apiResponse.data.data
+          : []
 
-      normalized.forEach((type, idx) => {
-        const delay = idx * CALL_DELAY_MS
-        scheduleAndRunFetch(type, delay)
+      if (!Array.isArray(gridsArray) || gridsArray.length === 0) {
+        setGridNames([])
+        setDataMap({})
+        setLoading(false)
+        return
+      }
+
+      const normalizedNames = gridsArray.map((g) => g.gridName)
+      setGridNames(normalizedNames)
+
+      const newMap = {}
+      gridsArray.forEach((g) => {
+        const rawRows = Array.isArray(g.data) ? g.data : []
+        const inferredCols =
+          Array.isArray(g.columns) && g.columns.length
+            ? g.columns
+            : inferColumnsFromRows(rawRows)
+        const enrichedCols = enrichColumns(inferredCols)
+
+        const rowsWithId = rawRows.map((r, i) => {
+          const parsed = normalizeRowValues(r, inferredCols)
+          return { ...parsed, id: i, isEditable: false }
+        })
+
+        newMap[g.gridName] = { rows: rowsWithId, columns: enrichedCols }
       })
+
+      if (isMountedRef.current) setDataMap(newMap)
     } catch (err) {
-      console.error('Error fetching TYPE_LIST or config:', err)
-      setLoading(false)
+      console.error('Error fetching all grids (new shape):', err)
+    } finally {
+      if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, scheduleAndRunFetch])
+  }, [keycloak, enrichColumns])
 
   useEffect(() => {
+    setTabIndex(0)
     fetchAllGrids()
     return () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
@@ -290,165 +319,149 @@ const BestAchievedNorms = () => {
     }
   }, [fetchAllGrids, plantID, oldYear, yearChanged])
 
-  // ---------- EXCEL EXPORT HELPERS (fixed to clone template sheet safely) ----------
-  // Build a single sheet containing styled cells that mimic RedHighlightCell2
-  const buildStyledSheet = useCallback(
-    (
-      name,
-      data = { rows: [], columns: [] },
-      opts = {},
-      templateSheet = null,
-    ) => {
-      const { allRedCell = [], showThreeColors = false } = opts
+  // ---------------------------------------------------------------------------
+  // Excel export helpers (keeps your existing implementation compatible)
+  // ---------------------------------------------------------------------------
 
-      // If a template sheet is provided (from workbookOptions), clone it into plain objects
-      // and then replace its rows with a fresh array we control. This avoids "rows.push is not a function".
-      let sheet
-      if (templateSheet) {
-        try {
-          sheet = JSON.parse(JSON.stringify(templateSheet))
-        } catch (err) {
-          // fallback to basic sheet if cloning fails for some reason
-          sheet = { title: name, rows: [] }
-        }
-        sheet.title = name || sheet.title || name
-        sheet.rows = [] // ensure rows is a plain array
-      } else {
-        sheet = { title: name, rows: [] }
+  // eslint-disable-next-line
+  const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
+  function sanitizeSheetName(name = '', fallback = 'Sheet') {
+    let s = String(name || '')
+      .replace(INVALID_SHEET_CHARS_RE, ' ')
+      .trim()
+    if (s.length === 0) s = fallback
+    if (s.length > 31) s = s.slice(0, 31)
+    return s
+  }
+
+  function normalizeCellValue(v) {
+    if (v === undefined || v === null) return ''
+    if (v instanceof Date) return v
+    if (typeof v === 'object') {
+      try {
+        return JSON.stringify(v)
+      } catch {
+        return String(v)
       }
+    }
+    return v
+  }
 
-      // helper to check matched cell (same logic as UI)
-      const findMatchedCell = (row, monthField) => {
-        const normId =
-          row.materialFKId ||
-          row.NormParameter_FK_Id ||
-          row.Material_FK_Id ||
-          row.NormParameterFKId ||
-          row.normParameterFKId
-        if (!normId) return null
-
-        return allRedCell?.find((cell) => {
-          const monthMatch =
-            (cell.month || '').toString().toLowerCase() ===
-            (monthField || '').toString().toLowerCase()
-          const cellNormId = (
-            cell.normParameterFKId ||
-            cell.NormParameter_FK_Id ||
-            cell.NormParameterFKId ||
-            ''
-          )
-            .toString()
-            .toLowerCase()
-          const normIdStr = (normId || '').toString().toLowerCase()
-          return monthMatch && cellNormId === normIdStr
-        })
-      }
-
-      // header row
-      sheet.rows.push({
-        cells: (data.columns || []).map((col) => ({
-          value: col.title || col.field,
-          bold: true,
-          background: '#E6E6E6',
-        })),
-      })
-
-      // data rows
-      ;(data.rows || []).forEach((row) => {
-        const cells = (data.columns || []).map((col) => {
-          const raw = row[col.field]
-          const cellValue =
-            raw instanceof Date
-              ? raw
-              : raw === undefined || raw === null
-                ? ''
-                : raw
-
-          const cell = { value: cellValue }
-
-          if (showThreeColors && col.field) {
-            const matched = findMatchedCell(row, col.field)
-            if (matched) {
-              if (matched.mode === 'Propane(1Z)') {
-                cell.background = '#FFD6D6' // light red
-                cell.color = '#9A0000' // dark red text
-                cell.bold = true
-              } else if (matched.mode === 'Propane(2Z)') {
-                cell.background = '#DFFFD8' // light green
-                cell.color = '#006400' // dark green text
-                cell.bold = true
-              }
-            }
-          }
-
-          return cell
-        })
-
-        sheet.rows.push({ cells })
-      })
-
-      return sheet
-    },
-    [],
-  )
-
-  // Combined export using hidden ExcelExport refs + built sheets (uses template sheet if possible)
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})
-    if (!keys.length) return
-
-    // pick a base ref to call .workbookOptions and .save
-    const firstKey = keys.find((k) => !!exportRefs.current[k])
+    const firstKey = keys.find((k) => exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
+    if (!baseRef || typeof baseRef.save !== 'function') return
 
-    // try to obtain template workbook options (may throw if ref not ready)
-    let baseTemplateOptions = null
-    try {
-      baseTemplateOptions =
-        typeof baseRef.workbookOptions === 'function'
-          ? baseRef.workbookOptions()
-          : null
-    } catch (err) {
-      baseTemplateOptions = null
-    }
-
-    // template sheet (if available) to clone; use first sheet as the template
-    const templateSheet =
-      baseTemplateOptions && Array.isArray(baseTemplateOptions.sheets)
-        ? baseTemplateOptions.sheets[0]
-        : null
-
-    // Build sheets in grid order (gridNames)
     const sheets = gridNames
-      .map((name, idx) => {
-        const d = dataMap[name] || { rows: [], columns: [] }
-        const showThree = idx === 0 // replicate your UI: first grid had showThreeColors
-        return buildStyledSheet(
-          name,
-          d,
-          { allRedCell, showThreeColors: showThree },
-          templateSheet,
+      .map((gridName, idx) => {
+        const d = dataMap[gridName] || { rows: [], columns: [] }
+        // filter out hidden columns (including Material_FK_Id / materialFkId)
+        let cols = (d.columns || []).filter(
+          (c) =>
+            !(
+              c &&
+              (c.field === 'Material_FK_Id' || c.field === 'materialFkId')
+            ) && !c.hidden,
         )
+        const rows = d.rows || []
+        if (!cols.length && !rows.length) return null
+
+        const sheetColumns = cols.map((c) => ({
+          autoWidth: true,
+          title: c.title || c.field || '',
+        }))
+
+        const headerRow = {
+          cells: cols.map((c) => ({ value: c.title || c.field || '' })),
+        }
+
+        // helper to find match for coloring (same logic as UI)
+        const findMatchedCell = (row, monthField) => {
+          const normId =
+            row.materialFKId ||
+            row.NormParameter_FK_Id ||
+            row.Material_FK_Id ||
+            row.NormParameterFKId ||
+            row.normParameterFKId
+          if (!normId) return null
+          return allRedCell?.find((cell) => {
+            const monthMatch =
+              (cell.month || '').toString().toLowerCase() ===
+              (monthField || '').toString().toLowerCase()
+            const cellNormId = (
+              cell.normParameterFKId ||
+              cell.NormParameter_FK_Id ||
+              cell.NormParameterFKId ||
+              ''
+            )
+              .toString()
+              .toLowerCase()
+            const normIdStr = (normId || '').toString().toLowerCase()
+            return monthMatch && cellNormId === normIdStr
+          })
+        }
+
+        const dataRows = rows.map((r) => ({
+          cells: cols.map((c) => {
+            const rawVal = normalizeCellValue(r?.[c.field])
+            const cell = { value: rawVal }
+
+            // Apply coloring for first sheet (replicate UI's showThreeColors === true for idx === 0)
+            if (idx === 0 && c.field) {
+              const monthCandidate = r.month || c.title || c.field || ''
+              const matched = findMatchedCell(r, monthCandidate)
+              if (matched) {
+                if (matched.mode === 'Propane(1Z)') {
+                  cell.background = '#FFD6D6' // light red
+                  cell.color = '#9A0000' // dark red text
+                  cell.bold = true
+                } else if (matched.mode === 'Propane(2Z)') {
+                  cell.background = '#DFFFD8' // light green
+                  cell.color = '#006400' // dark green text
+                  cell.bold = true
+                }
+              }
+            }
+
+            return cell
+          }),
+        }))
+
+        const sheetRows = [headerRow, ...dataRows]
+
+        return {
+          title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
+          columns: sheetColumns,
+          rows: sheetRows,
+        }
       })
       .filter(Boolean)
 
     if (!sheets.length) return
 
-    // Try to reuse baseTemplateOptions to keep other workbook meta; else create minimal options
-    const baseOptions = baseTemplateOptions ? { ...baseTemplateOptions } : {}
-    baseOptions.sheets = sheets
+    const workbookOptions = { sheets }
 
     try {
-      baseRef.save(baseOptions)
+      baseRef.save(workbookOptions)
     } catch (err) {
-      console.error('Export failed:', err)
+      console.error('Export save failed:', err)
     }
-  }, [gridNames, dataMap, allRedCell, buildStyledSheet])
+  }, [gridNames, dataMap, allRedCell])
 
-  const fileName = `Best Achieved Norms(Min CC)-DATA-SET.xlsx`
+  const currentDateTime = new Date()
+    .toISOString()
+    .replace(/T/, ' ')
+    .replace(/:/g, '-')
+    .split('.')[0]
+  const fileName = `Best Achhieved Basis (MIN CC).xlsx`
 
-  // ---------- UI render ----------
+  const renderTitle = (t) => t
+
+  const defaultTabs = ['TAB1']
+  let activeTabs = defaultTabs
+
   return (
     <div>
       <Backdrop
@@ -464,34 +477,40 @@ const BestAchievedNorms = () => {
         <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
         Propane (2Z)
       </Typography>
-
-      {/* Hidden ExcelExport instances for each grid (we keep these so we can call .save()) */}
+      {/* Hidden ExcelExport instances for each grid */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
-          const d = dataMap[name] || { rows: [], columns: [] }
+          const data = dataMap[name] || { rows: [], columns: [] }
           const setRef = (ref) => {
             if (ref) exportRefs.current[name] = ref
           }
           return (
             <ExcelExport
               key={`excel-${name}`}
-              data={d.rows}
+              data={data.rows}
               ref={setRef}
               fileName={fileName}
             >
-              {(d.columns || []).map((col) => (
-                <ExcelExportColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title || col.field}
-                />
-              ))}
+              {(data.columns || [])
+                .filter(
+                  (col) =>
+                    !col.hidden &&
+                    col.field !== 'Material_FK_Id' &&
+                    col.field !== 'materialFkId',
+                )
+                .map((col) => (
+                  <ExcelExportColumn
+                    key={col.field}
+                    field={col.field}
+                    title={col.title || col.field}
+                  />
+                ))}
             </ExcelExport>
           )
         })}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='8px'>
+      <Box display='flex' justifyContent='flex-end' mb='2px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -502,39 +521,39 @@ const BestAchievedNorms = () => {
       </Box>
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {gridNames.length === 0 && !loading && (
-          <Typography>No grids available.</Typography>
+        {tabIndex === 0 && (
+          <>
+            {gridNames.map((name, idx) => {
+              const d = dataMap[name] || { rows: [], columns: [] }
+              return (
+                <div key={name}>
+                  <CustomAccordion defaultExpanded disableGutters>
+                    <CustomAccordionSummary
+                      aria-controls={`${name}-content`}
+                      id={`${name}-header`}
+                    >
+                      <Typography component='span' className='grid-title'>
+                        {renderTitle(name)}
+                      </Typography>
+                    </CustomAccordionSummary>
+                    <CustomAccordionDetails>
+                      <Box sx={{ width: '100%', margin: 0 }}>
+                        <KendoDataGrid
+                          rows={d.rows}
+                          columns={d.columns}
+                          permissions={{ isHeight: d?.rows?.length > 15 }}
+                          {...(idx === 0
+                            ? { allRedCell: allRedCell, showThreeColors: true }
+                            : {})}
+                        />
+                      </Box>
+                    </CustomAccordionDetails>
+                  </CustomAccordion>
+                </div>
+              )
+            })}
+          </>
         )}
-
-        {gridNames.map((name, idx) => {
-          const d = dataMap[name] || { rows: [], columns: [] }
-          return (
-            <div key={name}>
-              <CustomAccordion defaultExpanded disableGutters>
-                <CustomAccordionSummary
-                  aria-controls={`${name}-content`}
-                  id={`${name}-header`}
-                >
-                  <Typography component='span' className='grid-title'>
-                    {name}
-                  </Typography>
-                </CustomAccordionSummary>
-                <CustomAccordionDetails>
-                  <Box sx={{ width: '100%', margin: 0 }}>
-                    <KendoDataGrid
-                      rows={d.rows}
-                      columns={d.columns}
-                      permissions={{ isHeight: d?.rows?.length > 15 }}
-                      {...(idx === 0
-                        ? { allRedCell: allRedCell, showThreeColors: true }
-                        : {})}
-                    />
-                  </Box>
-                </CustomAccordionDetails>
-              </CustomAccordion>
-            </div>
-          )
-        })}
       </Box>
     </div>
   )

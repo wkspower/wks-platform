@@ -836,7 +836,7 @@ const DecokingConfig = () => {
           id='meg-grid-header'
         >
           <Typography component='span' className='grid-title'>
-            Maintenance Summary
+            Maintenance Details
           </Typography>
         </CustomAccordionSummary>
         <CustomAccordionDetails>

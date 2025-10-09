@@ -1,8 +1,6 @@
 import { Box } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
-import { verticalEnums } from 'enums/verticalEnums'
-// import { usePermissions } from 'hooks/usePermissions'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -25,40 +23,34 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 
-const AopDesignBasis = () => {
-  const year = localStorage.getItem('year')
+const AopDesignBasisNorms = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    sitePlantChange,
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
   const isOldYear = oldYear?.oldYear
   const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
-  const vcmVertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-  const vcmVerticalName = vcmVertical?.toLowerCase().trim()
-  const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
-  const [configurationRows, setConfigurationRows] = useState([])
-  const [startUpRows, setStartUpRows] = useState([])
-  const [otherLossRows, setOtherLossRows] = useState([])
-  const [shutdownNormsRows, setShutdownRows] = useState([])
-  const [constantsRows, setConstantsRows] = useState([])
-  const [productionRows, setProductionRows] = useState([])
-  const [elastomerRows, setElastomerRows] = useState([])
-  const [productionRowsConstants, setProductionRowsConstants] = useState([])
-  const [pioImpactRows, setPioImpactRows] = useState([])
-  const [
-    productionRowsConstantsMannualEntry,
-    setProductionRowsConstantsMannualEntry,
-  ] = useState([])
-  const [gradeData, setGradeData] = useState([])
-  const [continiousGradeData, setContiniousGradeData] = useState([])
-  const [discontiniousGradeData, setDiscontiniousGradeData] = useState([])
-  const [tabs, setTabs] = useState([])
-  const [availableTabs, setAvailableTabs] = useState([])
   const [summary, setSummary] = useState('')
   const [debouncedSummary, setDebouncedSummary] = useState('')
   useEffect(() => {
@@ -79,10 +71,6 @@ const AopDesignBasis = () => {
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
-  const [gradeId, setGradeId] = React.useState(null)
-
-  // const { isReadOnly, isReadWrite, isFullAccess, isApproveOnly } =
-  //   usePermissions()
 
   const handleOpenDialog = () => {
     setOpenConfirmDialog(true)
@@ -94,278 +82,57 @@ const AopDesignBasis = () => {
     setOpenConfirmDialog(false)
     onLoad()
   }
-  const fetchPioImpactData = async () => {
-    setLoading(true)
-    try {
-      var data = await DataService.getPioImpactData(keycloak)
 
-      if (data?.code === 200) {
-        const formattedData = data.data.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          description: item.description,
-          startMonth: item.startMonth,
-          endMonth: item.endMonth,
-          value: item.value,
-          remarks: item.remarks,
-          Particulars: 'PIO Impact', // Assuming 'description' is the field to group by
-          isEditable: true,
-        }))
-
-        setPioImpactRows(formattedData)
-      } else {
-        setPioImpactRows([])
-      }
-    } catch (error) {
-      console.error('Error fetching PIO Impact data:', error)
-      setPioImpactRows([])
-    } finally {
-      setLoading(false)
-    }
-  }
   useEffect(() => {
-    if (tabIndex === 3 && lowerVertName === 'aromatics') {
-      fetchPioImpactData()
-    }
-  }, [tabIndex, lowerVertName])
+    if (!plantID || !AOP_YEAR) return
 
-  const fetchData = async (gradeId = null) => {
-    setProductionRows([])
-    setProductionRowsConstants([])
-    setProductionRowsConstantsMannualEntry([])
-    setLoading(true)
+    getConfigurationExecutionDetailsNorms()
+  }, [plantID, AOP_YEAR])
 
+  const saveSummary = async () => {
     try {
-      setLoading(true)
-      var data = []
-
-      data = await DataService.getCatalystSelectivityData(keycloak, gradeId)
-
-      if (
-        lowerVertName == verticalEnums.MEG ||
-        lowerVertName == verticalEnums.CRACKER ||
-        lowerVertName == verticalEnums.ELASTOMER ||
-        lowerVertName === 'aromatics'
-      ) {
-        data = data?.filter((item) => item.normType !== 'Report Manual Entry')
-        const formattedData = data.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          srNo: index + 1,
-          Particulars: item.normType,
-        }))
-        setProductionRows(formattedData)
-        if (data) {
-          setLoading(false)
-        }
-        // setRows(formattedData)
-      } else {
-        const groups = new Map()
-
-        data.forEach((item) => {
-          const ConfigTypeName = item.ConfigTypeName
-          const TypeName = item.TypeDisplayName
-          if (!groups.has(ConfigTypeName)) {
-            groups.set(ConfigTypeName, new Map())
-          }
-          const normGroup = groups.get(ConfigTypeName)
-          if (!normGroup.has(TypeName)) {
-            normGroup.set(TypeName, [])
-          }
-          normGroup.get(TypeName).push(item)
-        })
-        let groupId = 0
-        let shutdownRows = []
-        let startUpRows = []
-        let otherLossRows = []
-        let continiousGradeRows = []
-        let discontiniousGradeRows = []
-        let constantsRows = []
-        let configurationRows = []
-        groups.forEach((normGroup, ConfigTypeName) => {
-          let rowsForThisCategory = []
-          normGroup.forEach((items, TypeName) => {
-            items.forEach((item) => {
-              rowsForThisCategory.push({
-                ...item,
-                idFromApi: item.id,
-                originalRemark: item.remarks,
-                id: groupId++,
-              })
-            })
-          })
-          if (ConfigTypeName == 'Configuration') {
-            configurationRows = rowsForThisCategory
-          }
-          if (ConfigTypeName == 'ShutdownNorms') {
-            shutdownRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'StartupLosses') {
-            startUpRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'Otherlosses') {
-            otherLossRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'ContineGradeChange') {
-            continiousGradeRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'DisContineGradeChange') {
-            discontiniousGradeRows = rowsForThisCategory
-          } else if (ConfigTypeName == 'Constant') {
-            constantsRows = rowsForThisCategory
-          }
-        })
-
-        setShutdownRows(shutdownRows)
-        setStartUpRows(startUpRows)
-        setOtherLossRows(otherLossRows)
-        setContiniousGradeData(continiousGradeRows)
-        setDiscontiniousGradeData(discontiniousGradeRows)
-        setConstantsRows(constantsRows)
-        setConfigurationRows(configurationRows)
-      }
-      setLoading(false)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setLoading(false)
-    }
-  }
-
-  const fetchDataConstants = async () => {
-    setProductionRowsConstants([])
-    try {
-      var constantsRes =
-        await DataService.getCatalystSelectivityDataConstants(keycloak)
-      if (constantsRes?.code != 200) {
-        setProductionRowsConstants([])
-        return
-      }
-
-      var data = constantsRes?.data
-
-      const formattedData = data.map((item, index) => {
-        return {
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.Remarks,
-          srNo: index + 1,
-          Particulars: item.NormTypeName,
-          remarks: item.Remarks,
-        }
-      })
-
-      setProductionRowsConstants(formattedData)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    }
-  }
-
-  const fetchDataConstantsMnnualEntry = async () => {
-    setProductionRowsConstantsMannualEntry([])
-    try {
-      var constantsRes = await DataService.getCatalystSelectivityData(keycloak)
-      const formattedData = constantsRes.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: index,
-        originalRemark: item.remarks,
-        srNo: index + 1,
-        Particulars: item.normType,
-      }))
-      var data = formattedData?.filter(
-        (item) => item?.Particulars == 'Report Manual Entry',
+      const response = await DataService.saveSummaryAOPConsumptionNorm(
+        PLANT_ID,
+        AOP_YEAR,
+        summary,
+        keycloak,
       )
-      setProductionRowsConstantsMannualEntry(data)
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    }
-  }
-  const fetchGradeData = async () => {
-    setLoading(true)
-    try {
-      var data = await DataService.getPeConfigData(keycloak)
 
-      const formattedData = data?.map((item, index) => {
-        const converted = {}
-
-        Object.entries(item).forEach(([key, value]) => {
-          // Convert numeric strings to numbers
-          if (typeof value === 'string' && !isNaN(value)) {
-            converted[key] = value.includes('.')
-              ? parseFloat(value)
-              : parseInt(value, 10)
-          } else {
-            converted[key] = value
-          }
+      if (response?.code == 200) {
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
         })
+        setLoading(false)
+        setSnackbarOpen(true)
+        // setIsEdited(false)
+      } else {
+        setSnackbarData({
+          message: 'Saved Failed!',
+          severity: 'error',
+        })
+        setLoading(false)
+        // setSnackbarOpen(true)
+      }
 
-        return {
-          ...converted,
-          id: index,
-          TypeDisplayName: item?.TypeDisplayName
-            ? item?.TypeDisplayName
-            : 'Recipe',
-        }
-      })
+      //
 
-      setGradeData(formattedData)
+      // setLoading(false)
+      return response
     } catch (error) {
-      console.error('Error fetching grade data:', error)
+      console.error('Error saving Summary!', error)
     } finally {
-      setLoading(false)
-    }
-  }
-
-  const getConfigurationTabsMatrix = async () => {
-    setLoading(true)
-    try {
-      var response = await DataService.getConfigurationTabsMatrix(keycloak)
-      if (response?.code == 200) {
-        const parsedData = JSON.parse(response?.data)
-        setTabs(parsedData)
-        setLoading(false)
-      } else {
-        setTabs([])
-        setLoading(false)
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setTabs([])
-      setLoading(false)
-    }
-  }
-  const getConfigurationAvailableTabs = async () => {
-    setLoading(true)
-    try {
-      var response = await DataService.getConfigurationAvailableTabs(keycloak)
-      if (response?.code == 200) {
-        setAvailableTabs(response?.data?.configurationTypeList)
-        setLoading(false)
-      } else {
-        setAvailableTabs([])
-        setLoading(false)
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      setAvailableTabs([])
+      //
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    if (!plantID || !year) return
-    setTabIndex(0)
-
-    getConfigurationExecutionDetails()
-  }, [plantID, year])
-
-  useEffect(() => {
-    if (!plantID || !year) {
+    if (!plantID || !AOP_YEAR) {
       return
     }
-    getConfigurationExecutionDetails()
-    getAopSummary()
+    getConfigurationExecutionDetailsNorms()
+
     let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
     let verticalName = vertical?.toLowerCase()
     setTimeout(() => {
@@ -392,8 +159,8 @@ const AopDesignBasis = () => {
             (item) => item.Name === name,
           )?.AttributeValue,
         )
-      setStartDate(getDateValue('StartDate'))
-      setEndDate(getDateValue('EndDate'))
+      setStartDate(getDateValue('StartDateNorms'))
+      setEndDate(getDateValue('EndDateNorms'))
     } else {
       const today = new Date()
       const fallbackEndDate = new Date(today.getFullYear(), today.getMonth(), 0)
@@ -409,10 +176,7 @@ const AopDesignBasis = () => {
   useEffect(() => {
     computeAndSetDates()
   }, [computeAndSetDates])
-  const getTheId = (name) => {
-    const tab = availableTabs.find((tab) => tab.name === name)
-    return tab ? tab.id : null
-  }
+
   function formatDate(date) {
     if (!date) return ''
     const year = date?.getFullYear()
@@ -439,24 +203,11 @@ const AopDesignBasis = () => {
     }
     return formatted
   }
-  const getAopSummary = async () => {
-    try {
-      setSummary('')
-      var res = await DataService.getAopSummary(keycloak)
-      if (res?.code == 200) {
-        setSummary(res?.data?.summary)
-      } else {
-        setSummary('')
-      }
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    }
-  }
+
   const onLoadTest = async (startDateObj, endDateObj) => {
     setLoading1(true)
-    const plantId =
-      JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
-    const auditYear = localStorage.getItem('year')
+    const plantId = PLANT_ID
+    const auditYear = AOP_YEAR
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
     const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
@@ -476,7 +227,7 @@ const AopDesignBasis = () => {
     try {
       const response = await DataService.executeConfiguration(payload, keycloak)
       if (response?.code === 200) {
-        await getConfigurationExecutionDetails()
+        await getConfigurationExecutionDetailsNorms()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -484,7 +235,6 @@ const AopDesignBasis = () => {
           severity: 'error',
         })
       }
-      getAopSummary()
       return response
     } catch (error) {
       console.error('Execution Failed!', error)
@@ -494,28 +244,30 @@ const AopDesignBasis = () => {
     }
   }
   useEffect(() => {
-    if (!plantID || !year) {
+    if (!plantID || !AOP_YEAR) {
       return
     }
     hasExecutedRef.current = false
-    getConfigurationExecutionDetails()
+    getConfigurationExecutionDetailsNorms()
   }, [plantID])
 
-  const getConfigurationExecutionDetails = async () => {
+  const getConfigurationExecutionDetailsNorms = async () => {
     try {
       const response =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+        await DataService.getConfigurationExecutionDetailsNorms(keycloak)
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(
-          'getConfigurationExecutionDetails returned an empty array:',
+          'getConfigurationExecutionDetailsNorms returned an empty array:',
           response,
         )
       }
       const hasNoModifiedOn = details.length && !details[0]?.ModifiedOn
       if (hasNoModifiedOn && !hasExecutedRef.current) {
-        const startDateObj = details.find((item) => item.Name === 'StartDate')
-        const endDateObj = details.find((item) => item.Name === 'EndDate')
+        const startDateObj = details.find(
+          (item) => item.Name === 'StartDateNorms',
+        )
+        const endDateObj = details.find((item) => item.Name === 'EndDateNorms')
         hasExecutedRef.current = true
         await onLoadTest(startDateObj, endDateObj)
       } else {
@@ -523,7 +275,10 @@ const AopDesignBasis = () => {
         // setLoading1(false)
       }
     } catch (error) {
-      console.error('Error fetching getConfigurationExecutionDetails:', error)
+      console.error(
+        'Error fetching getConfigurationExecutionDetailsNorms:',
+        error,
+      )
     } finally {
       // setLoading1(false)
     }
@@ -540,14 +295,14 @@ const AopDesignBasis = () => {
     }
     setLoading1(true)
     const startDateObj = configurationExecutionDetails.find(
-      (item) => item.Name === 'StartDate',
+      (item) => item.Name === 'StartDateNorms',
     )
     const endDateObj = configurationExecutionDetails.find(
-      (item) => item.Name === 'EndDate',
+      (item) => item.Name === 'EndDateNorms',
     )
     if (!startDateObj?.Id || !endDateObj?.Id) {
       console.warn(
-        'StartDate or EndDate object is missing Id. Aborting execution.',
+        'StartDateNorms or EndDateNorms object is missing Id. Aborting execution.',
       )
       setSnackbarOpen(true)
       setSnackbarData({
@@ -571,7 +326,7 @@ const AopDesignBasis = () => {
         {
           apr: formatDate(startDate),
           UOM: '',
-          auditYear: localStorage.getItem('year'),
+          auditYear: AOP_YEAR,
           normParameterFKId: startDateObj?.NormParameter_FK_Id,
           remarks: 'Initiated',
           id: startDateObj?.Id || null,
@@ -580,7 +335,7 @@ const AopDesignBasis = () => {
         {
           apr: formatDate(endDate),
           UOM: '',
-          auditYear: localStorage.getItem('year'),
+          auditYear: AOP_YEAR,
           normParameterFKId: endDateObj?.NormParameter_FK_Id,
           remarks: 'Initiated',
           id: endDateObj?.Id || null,
@@ -594,8 +349,7 @@ const AopDesignBasis = () => {
           message: 'Execution Started Successfully!',
           severity: 'success',
         })
-        // setIsLoadEnabled(false)
-        getConfigurationExecutionDetails()
+        getConfigurationExecutionDetailsNorms()
         setLoading(false)
       } else {
         setSnackbarOpen(true)
@@ -604,7 +358,6 @@ const AopDesignBasis = () => {
           severity: 'error',
         })
       }
-      getAopSummary()
       return response
     } catch (error) {
       console.error('Execution Falied!', error)
@@ -615,73 +368,16 @@ const AopDesignBasis = () => {
     }
   }
 
-  useEffect(() => {
-    if (tabIndex >= tabs.length) {
-      setTabIndex(0)
-    }
-  }, [tabs])
-
   const startDateConfig = configurationExecutionDetails.find(
-    (item) => item.Name === 'StartDate',
+    (item) => item.Name === 'StartDateNorms',
   )
 
   const endDateConfig = configurationExecutionDetails.find(
-    (item) => item.Name === 'EndDate',
+    (item) => item.Name === 'EndDateNorms',
   )
 
   const startDateFromConfig = new Date(startDateConfig?.AttributeValue)
   const endDateDateFromConfig = new Date(endDateConfig?.AttributeValue)
-
-  const handleGradeChange = (gradeId) => {
-    setGradeId(gradeId)
-  }
-
-  const saveSummary = async () => {
-    try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      let year = localStorage.getItem('year')
-      const response = await DataService.saveSummaryAOPConsumptionNorm(
-        plantId,
-        year,
-        summary,
-        keycloak,
-      )
-
-      if (response?.code == 200) {
-        setSnackbarData({
-          message: 'Saved Successfully!',
-          severity: 'success',
-        })
-        setSummaryEdited(false)
-
-        setLoading(false)
-        setSnackbarOpen(true)
-        // setIsEdited(false)
-      } else {
-        setSnackbarData({
-          message: 'Saved Failed!',
-          severity: 'error',
-        })
-        setLoading(false)
-        // setSnackbarOpen(true)
-      }
-
-      //
-
-      // setLoading(false)
-      return response
-    } catch (error) {
-      console.error('Error saving Summary!', error)
-    } finally {
-      //
-      setLoading(false)
-    }
-  }
 
   const ConfigurationAccordian = useMemo(() => {
     return (
@@ -758,18 +454,6 @@ const AopDesignBasis = () => {
                   </Button>
                 )}
 
-                {!isOldYearFlag && (
-                  <Button
-                    variant='contained'
-                    // onClick={onLoad}
-                    onClick={saveSummary}
-                    className='btn-save'
-                    disabled={!summaryEdited}
-                    sx={{ alignSelf: 'flex-end' }}
-                  >
-                    Save
-                  </Button>
-                )}
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
@@ -780,22 +464,6 @@ const AopDesignBasis = () => {
                 )}
               </Box>
             </Box>
-            <TextField
-              label='AOP Design Basis'
-              multiline
-              // minRows={isAccordionExpanded ? 4 : 20}
-              minRows={lowerVertName === 'cracker' ? 6 : 2}
-              fullWidth
-              margin='normal'
-              variant='outlined'
-              disabled={isOldYear == 1}
-              value={summary}
-              onChange={(e) => {
-                setSummary(e.target.value)
-                setSummaryEdited(true)
-              }}
-              className='aop-design-basis'
-            />
           </CustomAccordionDetails>
         </CustomAccordion>
       </Box>
@@ -852,4 +520,4 @@ const AopDesignBasis = () => {
     </div>
   )
 }
-export default AopDesignBasis
+export default AopDesignBasisNorms

@@ -194,7 +194,10 @@ const ProductionTargetBasis = () => {
       const newMap = {}
       gridsArray.forEach((g) => {
         const rawRows = Array.isArray(g.data) ? g.data : []
-        const inferredCols = inferColumnsFromRows(rawRows)
+        const inferredCols =
+          Array.isArray(g.columns) && g.columns.length
+            ? g.columns
+            : inferColumnsFromRows(rawRows)
         const enrichedCols = enrichColumns(inferredCols)
 
         const rowsWithId = rawRows.map((r, i) => {
@@ -303,7 +306,7 @@ const ProductionTargetBasis = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Overall Consumption Basis.xlsx`
+  const fileName = `Production Target Basis.xlsx`
 
   const renderTitle = (t) => t
 

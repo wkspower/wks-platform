@@ -169,7 +169,7 @@ export default function AopBudget() {
 
     {
       field: 'budgetConstrains',
-      title: 'Budget Constrains',
+      title: 'Constraint',
       width: 200,
       editable: true,
     },
@@ -300,7 +300,7 @@ export default function AopBudget() {
       showTitleNameBusiness: true,
       titleName: 'Consumption Budget',
       adjustedPermissions: true,
-      // downloadExcelBtnFromUI: true,
+      downloadExcelBtnFromUI: false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
@@ -355,7 +355,7 @@ export default function AopBudget() {
 
       setSnackbarData({ message: 'Saved successfully!', severity: 'success' })
       setSnackbarOpen(true)
-      setModifiedCells({}) // <-- clear modified cells for Consumption
+      setModifiedCells({})
       setModifiedCellsP({})
       fetchData()
     } catch (err) {
@@ -476,22 +476,22 @@ export default function AopBudget() {
         <Grid container spacing={1}>
           {/* Design Basis Section */}
           <Grid item xs={6}>
-            {/* Apply 2px bottom margin to the container holding the title and button */}
-            <Grid container alignItems='center' sx={{ marginBottom: '2px' }}>
-              <Grid item xs={6}>
-                <div>Design Basis</div>
-              </Grid>
-
-              {/* The Save button is placed in the remaining space and justified to the end (right) */}
-              <Grid item xs={6} container justifyContent='flex-end'>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  className='btn-save'
-                  // Add your onClick handler here, e.g., onClick={handleSaveDesignBasis}
+            <Grid
+              container
+              alignItems='center'
+              justifyContent='space-between'
+              sx={{ marginBottom: 1 }}
+            >
+              <Grid item>
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 2,
+                  }}
                 >
-                  Save
-                </Button>
+                  Design Basis
+                  <span style={{ color: 'red' }}>*</span>
+                </div>
               </Grid>
             </Grid>
 
@@ -500,31 +500,30 @@ export default function AopBudget() {
               multiline
               minRows={3}
               fullWidth
-              // Setting margin='none' ensures the TextField doesn't add its own vertical space
               margin='none'
               variant='outlined'
               className='aop-design-basis'
             />
           </Grid>
 
-          {/* Remarks Section (Apply the same pattern here) */}
+          {/* Remarks Section */}
           <Grid item xs={6}>
-            {/* Apply 2px bottom margin to the container holding the title and button */}
-            <Grid container alignItems='center' sx={{ marginBottom: '2px' }}>
-              <Grid item xs={6}>
-                <div>Remarks</div>
-              </Grid>
-
-              {/* The Save button is placed in the remaining space and justified to the end (right) */}
-              <Grid item xs={6} container justifyContent='flex-end'>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  className='btn-save'
-                  // Add your onClick handler here, e.g., onClick={handleSaveRemarks}
+            <Grid
+              container
+              alignItems='center'
+              justifyContent='space-between'
+              sx={{ marginBottom: 1 }}
+            >
+              <Grid item>
+                <div
+                  style={{
+                    fontWeight: 600,
+                    marginBottom: 2,
+                  }}
                 >
-                  Save
-                </Button>
+                  Remarks
+                  <span style={{ color: 'red' }}>*</span>
+                </div>
               </Grid>
             </Grid>
 
@@ -533,11 +532,44 @@ export default function AopBudget() {
               multiline
               minRows={3}
               fullWidth
-              // Setting margin='none' ensures the TextField doesn't add its own vertical space
               margin='none'
               variant='outlined'
               className='aop-design-basis'
             />
+
+            {/* Buttons moved here */}
+            {/* <Box
+              mt={1.5}
+              display='flex'
+              gap={1}
+              justifyContent='flex-end'
+              flexWrap='wrap'
+            >
+              <Button
+                variant='contained'
+                color='primary'
+                className='btn-save'
+                onClick={handleSaveAll}
+              >
+                Save
+              </Button>
+              <Button
+                variant='contained'
+                color='primary'
+                className='btn-save'
+                onClick={handleExcelUpload}
+              >
+                Import
+              </Button>
+              <Button
+                variant='contained'
+                color='primary'
+                className='btn-save'
+                onClick={downloadExcelForConfiguration}
+              >
+                Export
+              </Button>
+            </Box> */}
           </Grid>
         </Grid>
       </Typography>
@@ -565,6 +597,7 @@ export default function AopBudget() {
         downloadExcelForConfiguration={downloadExcelForConfiguration}
         permissions={adjustedPermissionsC}
         groupBy='budgetType'
+        // setEditMode={setEditMode}
       />
 
       <KendoDataTables
@@ -587,6 +620,7 @@ export default function AopBudget() {
         handleRemarkCellClick={handleRemarkCellClickP}
         permissions={adjustedPermissionsP}
         groupBy='budgetType'
+        // setEditMode={setEditMode}
       />
       <Notification
         open={snackbarOpen}

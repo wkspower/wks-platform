@@ -25,6 +25,7 @@ import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinpu
 import KendoDataTables from './index'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import moment from '../../../node_modules/moment/moment'
+import AopDesignBasisNorms from './AopDesignBasisNorms'
 
 const CrakcerConstants = () => {
   const hasExecutedRef = useRef(false)
@@ -788,7 +789,7 @@ const CrakcerConstants = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      {ConfigurationAccordian}
+      <AopDesignBasisNorms />
       <Box>
         <KendoDataTables
           modifiedCells={modifiedCellsConstants}

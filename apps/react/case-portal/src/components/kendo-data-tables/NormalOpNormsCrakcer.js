@@ -521,6 +521,7 @@ const NormalOpNormsScreenCracker = () => {
         remark: item.remark || '',
         Particulars: item.normType || item.normParameterTypeDisplayName,
         Method: item.Method || item.method,
+        isEditable: false,
       }))
 
       setRowsBestFinalNorms(mappedWithMethod)
