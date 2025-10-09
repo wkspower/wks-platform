@@ -22,9 +22,24 @@ import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-s
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical
+  const plantName = plantObject?.name
+  const isOldYear = oldYear?.oldYear
   const [errorRows, setErrorRows] = useState(new Set())
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [rowModesModel, setRowModesModel] = useState({})
@@ -843,7 +858,101 @@ const SlowDown = ({ permissions }) => {
       console.error('Error deleting Record!', error)
     }
   }
-
+  const downloadExcelForConfiguration = async () => {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel download started!',
+          severity: 'success',
+        })
+    
+        try {
+          let response
+          response = await DataService.slowdownDetailsExport(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        } catch (error) {
+          console.error('Error downloading Excel:', error)
+          setSnackbarData({
+            message: 'Failed to download Excel.',
+            severity: 'error',
+          })
+        } finally {
+          setSnackbarOpen(true)
+        }
+      }
+    const uploadShutdownDetails = async (rawFile) => {
+           setLoading(true)
+       
+           try {
+             let response
+    
+             response = await DataService.ImportSlowdownDetails(
+               rawFile,
+               keycloak,
+               PLANT_ID,
+               AOP_YEAR,
+             )
+       
+             if (response?.code === 200) {
+               setSnackbarOpen(true)
+               setSnackbarData({
+                 message:response?.message || 'Uploaded Successfully!',
+                 severity: 'success',
+               })
+               setModifiedCells({})
+               fetchData()
+             } else if (response?.code === 400 && response?.data) {
+               const byteCharacters = atob(response.data)
+               const byteNumbers = Array.from(byteCharacters, (char) =>
+                 char.charCodeAt(0),
+               )
+               const byteArray = new Uint8Array(byteNumbers)
+       
+               const blob = new Blob([byteArray], {
+                 type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+               })
+       
+               const url = window.URL.createObjectURL(blob)
+               const link = document.createElement('a')
+               link.href = url
+               link.setAttribute('download', 'Error File - Shutdown.xlsx')
+               document.body.appendChild(link)
+               link.click()
+               link.remove()
+               window.URL.revokeObjectURL(url)
+       
+               setSnackbarOpen(true)
+               setSnackbarData({
+                 message: 'Partial data saved. Error file downloaded.',
+                 severity: 'warning',
+               })
+               fetchData()
+             } else {
+               setSnackbarOpen(true)
+               setSnackbarData({
+                 message: 'Upload Failed!',
+                 severity: 'error',
+               })
+             }
+       
+             return response
+           } catch (error) {
+             console.error('Error uploading xcel:', error)
+             setSnackbarOpen(true)
+             setSnackbarData({
+               message: 'Unexpected error occurred!',
+               severity: 'error',
+             })
+           } finally {
+             setLoading(false)
+           }
+         }
+       
+    const handleExcelUpload = (rawFile) => {
+        uploadShutdownDetails(rawFile)
+      }
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -871,8 +980,17 @@ const SlowDown = ({ permissions }) => {
       saveBtn: permissions?.saveBtn ?? true,
       customHeight: permissions?.customHeight,
       allAction: true,
-      downloadExcelBtnFromUI: true,
-      ExcelName: `${lowerVertName}_Slowdown / TA Activities`,
+      downloadExcelBtn: true,
+            uploadExcelBtn: (
+                    (lowerVertName === 'pe' &&
+                      plantName &&
+                      ['ldpe', 'lldpe1', 'lldpe2'].includes(plantName.toLowerCase()) &&
+                      siteObject?.name?.toLowerCase() === 'nmd') ||
+                    (lowerVertName === 'pp' &&
+                      plantName &&
+                      plantName.toLowerCase() === 'pp' &&
+                      siteObject?.name?.toLowerCase() === 'nmd')
+                  ),
     },
     isOldYear,
   )
@@ -957,6 +1075,8 @@ const SlowDown = ({ permissions }) => {
           focusFirstField={focusFirstField}
           allProducts={allProducts}
           disableRedHighlight={true}
+          handleExcelUpload={handleExcelUpload}
+          downloadExcelForConfiguration={downloadExcelForConfiguration}
         />
       )}
 
