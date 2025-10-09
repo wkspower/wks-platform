@@ -1,5 +1,5 @@
 import { DataService } from 'services/DataService'
-
+import { PIOImpactApiService } from 'services/Pio-Impact-api-service'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import getEnhancedAOPColDefs from 'components/data-tables/CommonHeader/kendo_ConfigHeader'
@@ -16,8 +16,21 @@ import KendoDataTablesReciepe from './index-reports-receipe'
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+    } = dataGridStore
+  
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -182,7 +195,7 @@ const SelectivityData = (props) => {
     remarks: row.remarks
   }))
       
-      response = await DataService.savePioImpactData(payload, keycloak)
+      response = await PIOImpactApiService.savePioImpactData(payload, keycloak, PLANT_ID, AOP_YEAR)
       
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -394,7 +407,7 @@ const SelectivityData = (props) => {
     getConfigurationExecutionDetails()
     //if (props?.configType === 'grades') fetchConfigData()
   }, [
-    sitePlantChange,
+    siteObject,
     oldYear,
     yearChanged,
     keycloak,
@@ -462,8 +475,8 @@ const SelectivityData = (props) => {
       editButton: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn: props?.configType === 'pioImpact' ? false : true,
-      uploadExcelBtn: props?.configType === 'pioImpact' ? false : true,
+      downloadExcelBtn:true,
+      uploadExcelBtn: true,
       showLoad: true,
       allAction: true,
       // showG: props?.configType === 'cracker_configuration' ? true : false,
@@ -509,6 +522,8 @@ const SelectivityData = (props) => {
     } else if (props?.configType === 'ShutdownNorms') {
       // Add shutdown rate specific download
       await DataService.getShutdownRateExcel(keycloak)
+    }else if (props?.configType === 'pioImpact') {
+      await PIOImpactApiService.exportPIOImpact(keycloak, PLANT_ID, AOP_YEAR) 
     } else if (props?.tabIndex != 1) {
       await DataService.getConfigurationExcel(keycloak, gradeId)
     } else {
@@ -568,6 +583,8 @@ const SelectivityData = (props) => {
     } else if (props?.configType === 'ShutdownNorms') {
       // Add shutdown rate specific upload
       response = await DataService.saveShutdownRateExcel(rawFile, keycloak)
+    } else if (props?.configType === 'pioImpact') {
+      response = await PIOImpactApiService.importPIOImpact(rawFile, keycloak, PLANT_ID, AOP_YEAR)
     } else if (props?.tabIndex != 1) {
       response = await DataService.saveConfigurationExcel(rawFile, keycloak)
     } else {
@@ -652,7 +669,7 @@ const SelectivityData = (props) => {
     }
 
     // If the row is saved, call backend API
-    const response = await DataService.deletePIOImpact(idFromApi, keycloak)
+    const response = await PIOImpactApiService.deletePIOImpact(idFromApi, keycloak)
     if (response?.code === 200 || response?.code === 204) {
       props?.setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
       setSnackbarOpen(true)

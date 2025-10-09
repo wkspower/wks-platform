@@ -6,6 +6,7 @@ import { verticalEnums } from 'enums/verticalEnums'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
+import { PIOImpactApiService } from 'services/Pio-Impact-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -28,11 +29,24 @@ import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinpu
 import SelectivityData from './SelectivityData'
 
 const ConfigurationTable = () => {
-  const year = localStorage.getItem('year')
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
@@ -99,7 +113,7 @@ const ConfigurationTable = () => {
  const fetchPioImpactData = async () => {
   setLoading(true)
   try {
-    var data = await DataService.getPioImpactData(keycloak)
+    var data = await PIOImpactApiService.getPioImpactData(keycloak, PLANT_ID, AOP_YEAR)
     console.log("PIO Impact Data from API:", data)
     if (data?.code === 200) {
       const formattedData = data.data.map((item, index) => ({
@@ -358,14 +372,14 @@ useEffect(() => {
   }
 
   useEffect(() => {
-    if (!plantID || !year) return
+    if (!plantID || !AOP_YEAR) return
     setTabIndex(0)
 
     getConfigurationExecutionDetails()
-  }, [plantID, year])
+  }, [plantID, AOP_YEAR])
 
   useEffect(() => {
-    if (!plantID || !year) {
+    if (!plantID || !AOP_YEAR) {
       return
     }
     getConfigurationExecutionDetails()
@@ -460,7 +474,7 @@ useEffect(() => {
     setLoading1(true)
     const plantId =
       JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
-    const auditYear = localStorage.getItem('year')
+    const auditYear = AOP_YEAR
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
     const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
@@ -498,12 +512,12 @@ useEffect(() => {
     }
   }
   useEffect(() => {
-    if (!plantID || !year) {
+    if (!PLANT_ID || !AOP_YEAR) {
       return
     }
     hasExecutedRef.current = false
     getConfigurationExecutionDetails()
-  }, [plantID])
+  }, [PLANT_ID])
 
   const getConfigurationExecutionDetails = async () => {
     try {
@@ -575,20 +589,20 @@ useEffect(() => {
         {
           apr: formatDate(startDate),
           UOM: '',
-          auditYear: localStorage.getItem('year'),
+          auditYear: AOP_YEAR,
           normParameterFKId: startDateObj?.NormParameter_FK_Id,
           remarks: 'Initiated',
           id: startDateObj?.Id || null,
-          plantId: plantId,
+          plantId: PLANT_ID,
         },
         {
           apr: formatDate(endDate),
           UOM: '',
-          auditYear: localStorage.getItem('year'),
+          auditYear: AOP_YEAR,
           normParameterFKId: endDateObj?.NormParameter_FK_Id,
           remarks: 'Initiated',
           id: endDateObj?.Id || null,
-          plantId: plantId,
+          plantId: PLANT_ID,
         },
       ]
       const response = await DataService.executeConfiguration(payload, keycloak)
@@ -779,7 +793,7 @@ useEffect(() => {
     const megTabs = isAromatics
       ? ['Configuration', 'Constants', 'Report Manual Entry', 'PIO Impact']
       : ['Configuration', 'Constants', 'Report Manual Entry']
-    const auditYear = localStorage.getItem('year')
+    const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
       const [start, end] = auditYear.split('-').map(Number)
@@ -886,7 +900,7 @@ useEffect(() => {
 
   if (lowerVertName === 'cracker') {
     const crackerTabs = ['Configuration', 'Constants']
-    const auditYear = localStorage.getItem('year')
+    const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
       const [start, end] = auditYear.split('-').map(Number)
@@ -961,7 +975,7 @@ useEffect(() => {
 
   if (lowerVertName === 'elastomer') {
     const elastomerTabs = ['Constants', 'Report Manual Entry']
-    const auditYear = localStorage.getItem('year')
+    const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
       const [start, end] = auditYear.split('-').map(Number)
@@ -1035,7 +1049,7 @@ useEffect(() => {
 
   if (lowerVertName === 'pta' || vcmVerticalName === 'vcm') {
     const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
-    const auditYear = localStorage.getItem('year')
+    const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
       const [start, end] = auditYear.split('-').map(Number)
