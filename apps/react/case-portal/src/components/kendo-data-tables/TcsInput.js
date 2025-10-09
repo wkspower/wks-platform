@@ -46,7 +46,7 @@ const TcsInput = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
 
   // Tab management
-  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown']
+  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown', 'Gasifier', 'Crude blend Window' ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -54,6 +54,8 @@ const TcsInput = () => {
   const [unitCapacityRows, setUnitCapacityRows] = useState([])
   const [shutdownRows, setShutdownRows] = useState([])
   const [slowdownRows, setSlowdownRows] = useState([])
+  const [gasifierRows, setGasifierRows] = useState([])
+  const [crudeBlendRows, setCrudeBlendRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
 
   const currentTabDisplay = tabs[tabIndex] || 'Unit Capacity'
@@ -168,6 +170,39 @@ const TcsInput = () => {
             ],
           },
         ]
+      case 'Gasifier':
+        return [
+          { field: 'srno', title: 'SRNO', width: 60, editable: false },
+          { field: 'particular', title: 'PArticular', width: 150, editable: true },
+          { field: 'jan', title: 'jan', width: 70, editable: true },
+          { field: 'feb', title: 'feb', width: 70, editable: true },
+          { field: 'march', title: 'march', width: 70, editable: true },
+          { field: 'apr', title: 'apr', width: 70, editable: true },
+          { field: 'may', title: 'may', width: 70, editable: true },
+          { field: 'june', title: 'june', width: 70, editable: true },
+          { field: 'july', title: 'july', width: 70, editable: true },
+          { field: 'aug', title: 'aug', width: 70, editable: true },
+          { field: 'sep', title: 'sep', width: 70, editable: true },
+          { field: 'oct', title: 'oct', width: 70, editable: true },
+          { field: 'nov', title: 'nov', width: 70, editable: true },
+          { field: 'dec', title: 'dec', width: 70, editable: true },
+        ]
+      case 'Crude blend Window':
+        return [
+          {
+            title: 'Crude blend Window',
+            children: [
+          { field: 'no', title: 'No', width: 60, editable: false },
+          { field: 'property', title: 'PROPERTY', width: 180, editable: true },
+          { field: 'stream', title: 'STREAM', width: 120, editable: true },
+          { field: 'unit', title: 'Unit', width: 80, editable: true },
+          { field: 'min', title: 'Min', width: 70, editable: true },
+          { field: 'max', title: 'Max', width: 70, editable: true },
+          { field: 'criticality', title: 'criticality', width: 90, editable: true },
+          { field: 'remarks', title: 'Remarks', width: 400, editable: true },
+        ],
+      },
+      ]
 
       default:
         return []
@@ -189,11 +224,15 @@ const TcsInput = () => {
           return shutdownRows
         case 'Slowdown':
           return slowdownRows
+        case 'Gasifier':
+          return gasifierRows
+        case 'Crude blend Window':
+          return crudeBlendRows
         default:
           return []
       }
     },
-    [unitCapacityRows, shutdownRows, slowdownRows],
+    [unitCapacityRows, shutdownRows, slowdownRows, gasifierRows, crudeBlendRows],
   )
 
   const setRowsForTab = useCallback((tabId, data) => {
@@ -207,6 +246,12 @@ const TcsInput = () => {
       case 'Slowdown':
         setSlowdownRows(data)
         break
+      case 'Gasifier':
+      setGasifierRows(data)
+      break
+      case 'Crude blend Window':
+      setCrudeBlendRows(data)
+      break
       default:
         console.warn('No state for tab:', tabId)
     }
@@ -225,7 +270,7 @@ const TcsInput = () => {
 
         // Mock data for demonstration - replace with actual API call
         const mockData = generateMockData(currentTabDisplay)
-
+        if (!PLANT_NAME) return []
         transformedData = mockData.map((item, index) => ({
           id: item.id || `row_${index}`,
           ...item,
@@ -458,6 +503,46 @@ const TcsInput = () => {
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
           ]
+        case 'Gasifier':
+      return [
+        {
+          id: 1,
+          srno: 1,
+          particular: 'Gasifier Availability',
+          jan: 2.9, feb: 2.8, march: 2.9, apr: 2.8, may: 2.9, june: 2.8,
+          july: 2.9, aug: 2.8, sep: 2.9, oct: 2.8, nov: 2.9, dec: 2.8,
+        },
+        { id: 2, 
+          srno: 2,
+          particular: 'SinGas Production',
+          jan: 6.0, feb: 6.0, march: 6.0, apr: 6.0, may: 6.0, june: 6.0,
+          july: 6.0, aug: 6.0, sep: 6.0, oct: 6.0, nov: 6.0, dec: 6.0,
+        }
+      ]
+      case 'Crude blend Window':
+          return [
+            {
+              id: 1, no: '1.1', property: 'API', stream: 'CDU feed', unit: 'degree', min: 26.0, max: '-', criticality: 2.0, remarks: 'Max acceptable API delta in successive crude blends change is 2 . For 330 KBPSD min API is 26 & for 345 KBPSD min API is 27.5'
+            },
+            {
+              id: 2, no: '1.2', property: 'TAN', stream: 'CDU feed', unit: 'mg KOH/gm', min: 1.3, max: '', criticality: 1.0, remarks: 'Upper TAN to be targeted for 1.2 + 0.1 margin of PIMS error'
+            },
+            {
+              id: 3, no: '1.3', property: 'Sulfur', stream: 'CDU feed', unit: 'Wt%', min: 1.1, max: 2.7, criticality: 1, remarks: '1. Lower limit is based on sulphur/TAN ratio with High TAN (>0.8) crude blend processing and CBA capacity.\n2. Considering AGTL Design for 2.7 WT%S @45.8 KTPD/326 KBPSD crude T\'put. At Higher T\'put of 330/335/340/345 Max S is limited at 2.66/2.63/2.59/2.55 WT%.'
+            },
+            {
+              id: 4, no: '1.4', property: 'K. Visc. @40°C', stream: 'CDU feed', unit: 'cSt', min: '', max: 27, criticality: 2, remarks: 'Max limit:- for Desalter performance. (High viscosity impacts performance adversely).\nDTA RTF crude charge pumps are designed to handle max viscosity 25 cSt crude blend.'
+            },
+            {
+              id: 5, no: '1.5', property: 'Asp to Resin ratio', stream: 'CDU feed', unit: '', min: '', max: 0.35, criticality: 2, remarks: 'While blending the Crudes having high Saturates (>50%), it is proposed to ensure the blend Colloidal Instability Index (CII) not to cross 1.0 and blend Asphaltene to Resin ratio remains less than 0.35.'
+            },
+            {
+              id: 6, no: '1.6', property: 'BS&W', stream: 'CDU feed', unit: 'vol %', min: '', max: 1.0, criticality: 1.0, remarks: 'This parameter is critical to ensure smooth desalter performance & unit reliability.'
+            },
+            {
+              id: 7, no: '1.7', property: 'Salts', stream: 'CDU feed', unit: 'ptb', min: '', max: 70.0, criticality: 1.0, remarks: 'This parameter is critical to ensure smooth desalter performance & unit reliability.'
+            }
+          ]
         default:
           return []
       }
@@ -651,6 +736,37 @@ const TcsInput = () => {
               purposeOfSlowdown: '',
             },
           ]
+        case 'Gasifier':
+      return [
+        {
+          id: 1,
+          srno: 1,
+          particular: 'Gasifier Availability',
+          jan: 4.3, feb: 4.3, march: 4.3, apr: 4.3, may: 4.3, june: 4.3,
+          july: 4.3, aug: 4.3, sep: 4.3, oct: 4.3, nov: 4.3, dec: 4.3,
+        },
+        { id: 2, 
+          srno: 2,
+          particular: 'SinGas Production',
+          jan: 9.1, feb: 8.9, march: 9.1, apr: 8.9, may: 9.1, june: 8.9,
+          july: 9.1, aug: 8.9, sep: 9.1, oct: 8.9, nov: 9.1, dec: 8.9,
+        }
+      ]
+      case 'Crude blend Window':
+          return [
+           {
+            id: 1, no: '1.1', property: 'API', stream: 'CDU feed', unit: 'degree', min: 24.0, max: '', criticality: 2.0, remarks: 'Max acceptable °API delta in successive crude blends change is 2° API.\nMin and Max limits are applicable for 380 KBPSD\nFor 290 KBPSD design API is 24.'
+          },
+          {
+            id: 2, no: '1.2', property: 'TAN', stream: 'CDU feed', unit: 'mg KOH/gm', min: 1.30, max: '', criticality: 1.0, remarks: 'Upper TAN to be targeted for 1.2 + 0.1 margin of PIMS error'
+          },
+          {
+            id: 3, no: '1.3', property: 'Sulfur', stream: 'CDU feed', unit: 'Wt%', min: 1.1, max: 2.7, criticality: 1, remarks: "Max limit is 2.7wt% 'S' With Acid gas transfer to SEZ PCG @24000 Nm3/hr."
+          },
+          {
+            id: 4, no: '1.4', property: 'K. Visc. @40°C', stream: 'CDU feed', unit: 'cSt', min: '', max: 42, criticality: 2, remarks: 'Max limit:-for Desalter performance.(High viscosity impacts the Desalter performance adversely)'
+          }
+          ]
         default:
           return []
       }
@@ -785,7 +901,7 @@ const TcsInput = () => {
 
   // Load data when tab changes
   useEffect(() => {
-    if (keycloak && PLANT_ID && currentTabDisplay) {
+    if (keycloak && PLANT_ID && currentTabDisplay && PLANT_NAME) {
       fetchTcsData(currentTabDisplay)
     }
   }, [
@@ -796,6 +912,7 @@ const TcsInput = () => {
     currentTabDisplay,
     yearChanged,
     lowerVertName,
+    PLANT_NAME,
   ])
 
   return (

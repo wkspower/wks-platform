@@ -76,6 +76,7 @@ export const dateFields = [
   'startDateIBR',
   'toDate',
   'fromDate',
+  'tentativeMonth',
 ]
 export const monthMap = {
   january: 1,
