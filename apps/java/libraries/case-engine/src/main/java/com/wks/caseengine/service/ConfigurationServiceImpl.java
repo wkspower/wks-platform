@@ -1680,7 +1680,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
 					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
 					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
-					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeDisplayName = :reportType " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
+					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeName = :reportType " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
 					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
 					+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
 					+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
