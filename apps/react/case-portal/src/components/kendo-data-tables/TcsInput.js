@@ -46,7 +46,7 @@ const TcsInput = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
 
   // Tab management
-  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown', 'Gasifier', 'Crude blend Window' ]
+  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown', 'ZCPP Shutdown', 'PCG Outlook', 'Crude Blend Window']
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -54,6 +54,7 @@ const TcsInput = () => {
   const [unitCapacityRows, setUnitCapacityRows] = useState([])
   const [shutdownRows, setShutdownRows] = useState([])
   const [slowdownRows, setSlowdownRows] = useState([])
+  const [zcppShutdownRows, setZcppShutdownRows] = useState([])
   const [gasifierRows, setGasifierRows] = useState([])
   const [crudeBlendRows, setCrudeBlendRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
@@ -170,35 +171,52 @@ const TcsInput = () => {
             ],
           },
         ]
-      case 'Gasifier':
+      case 'ZCPP Shutdown':
+      return [
+        {
+          title: "ZCPP Shutdown plan January'25 - March'26",
+          children: [
+            { field: 'jmdCpp', title: 'JMD-CPP', width: 120, editable: true },
+            { field: 'ibrDueDate', title: 'IBR Due date', width: 120, editable: true },
+            { title: 'GT maintenance', children: [
+              { field: 'gtMaintenance', title: 'MI/HGPI/CI/Mods', width: 180, editable: true },
+            ]},
+            { field: 'noOfDays', title: 'No. of days', width: 100, editable: true },
+            { field: 'shutdownDate', title: 'Shutdown date', width: 120, editable: true },
+            { field: 'startupDate', title: 'Startup date', width: 120, editable: true },
+            { field: 'majorJobs', title: 'Major jobs', width: 180, editable: true },
+          ]
+        }
+      ]
+      case 'PCG Outlook':
         return [
-          { field: 'srno', title: 'SRNO', width: 60, editable: false },
-          { field: 'particular', title: 'PArticular', width: 150, editable: true },
-          { field: 'jan', title: 'jan', width: 70, editable: true },
-          { field: 'feb', title: 'feb', width: 70, editable: true },
-          { field: 'march', title: 'march', width: 70, editable: true },
-          { field: 'apr', title: 'apr', width: 70, editable: true },
-          { field: 'may', title: 'may', width: 70, editable: true },
-          { field: 'june', title: 'june', width: 70, editable: true },
-          { field: 'july', title: 'july', width: 70, editable: true },
-          { field: 'aug', title: 'aug', width: 70, editable: true },
-          { field: 'sep', title: 'sep', width: 70, editable: true },
-          { field: 'oct', title: 'oct', width: 70, editable: true },
-          { field: 'nov', title: 'nov', width: 70, editable: true },
-          { field: 'dec', title: 'dec', width: 70, editable: true },
+          { field: 'srno', title: 'SL.No', width: 60, editable: false },
+          { field: 'particular', title: 'Product', width: 150, editable: true },
+          { field: 'jan', title: 'Jan-25', width: 70, editable: true },
+          { field: 'feb', title: 'Feb-25', width: 70, editable: true },
+          { field: 'march', title: 'March-25', width: 70, editable: true },
+          { field: 'apr', title: 'Apr-25', width: 70, editable: true },
+          { field: 'may', title: 'May-25', width: 70, editable: true },
+          { field: 'june', title: 'June-25', width: 70, editable: true },
+          { field: 'july', title: 'July-25', width: 70, editable: true },
+          { field: 'aug', title: 'Aug-25', width: 70, editable: true },
+          { field: 'sep', title: 'Sep-25', width: 70, editable: true },
+          { field: 'oct', title: 'Oct-25', width: 70, editable: true },
+          { field: 'nov', title: 'Nov-25', width: 70, editable: true },
+          { field: 'dec', title: 'Dec-25', width: 70, editable: true },
         ]
-      case 'Crude blend Window':
+      case 'Crude Blend Window':
         return [
           {
-            title: 'Crude blend Window',
+            title: 'Crude Blend Window',
             children: [
           { field: 'no', title: 'No', width: 60, editable: false },
-          { field: 'property', title: 'PROPERTY', width: 180, editable: true },
-          { field: 'stream', title: 'STREAM', width: 120, editable: true },
+          { field: 'property', title: 'Property', width: 180, editable: true },
+          { field: 'stream', title: 'Stream', width: 120, editable: true },
           { field: 'unit', title: 'Unit', width: 80, editable: true },
           { field: 'min', title: 'Min', width: 70, editable: true },
           { field: 'max', title: 'Max', width: 70, editable: true },
-          { field: 'criticality', title: 'criticality', width: 90, editable: true },
+          { field: 'criticality', title: 'Criticality', width: 90, editable: true },
           { field: 'remarks', title: 'Remarks', width: 400, editable: true },
         ],
       },
@@ -224,15 +242,17 @@ const TcsInput = () => {
           return shutdownRows
         case 'Slowdown':
           return slowdownRows
-        case 'Gasifier':
+        case 'ZCPP Shutdown':
+        return zcppShutdownRows
+        case 'PCG Outlook':
           return gasifierRows
-        case 'Crude blend Window':
+        case 'Crude Blend Window':
           return crudeBlendRows
         default:
           return []
       }
     },
-    [unitCapacityRows, shutdownRows, slowdownRows, gasifierRows, crudeBlendRows],
+    [unitCapacityRows, shutdownRows, slowdownRows, zcppShutdownRows, gasifierRows, crudeBlendRows],
   )
 
   const setRowsForTab = useCallback((tabId, data) => {
@@ -246,10 +266,13 @@ const TcsInput = () => {
       case 'Slowdown':
         setSlowdownRows(data)
         break
-      case 'Gasifier':
+      case 'ZCPP Shutdown':
+      setZcppShutdownRows(data)
+      break
+      case 'PCG Outlook':
       setGasifierRows(data)
       break
-      case 'Crude blend Window':
+      case 'Crude Blend Window':
       setCrudeBlendRows(data)
       break
       default:
@@ -451,7 +474,7 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 11.0,
               throughputDuringSlowdown: '170 KBPSD',
-              tentativeMonth: "Mar'25",
+              tentativeMonth: '2025-03-25',
               purposeOfSlowdown: 'Heater 1,2,3,4 Pigging',
             },
             {
@@ -459,7 +482,7 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 11.0,
               throughputDuringSlowdown: '170 KBPSD',
-              tentativeMonth: "Aug'25",
+              tentativeMonth: '2025-08-25',
               purposeOfSlowdown: 'Heater 1,2,3,4 Pigging',
             },
             {
@@ -467,7 +490,7 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 6.0,
               throughputDuringSlowdown: '160 KBPSD',
-              tentativeMonth: "Aug'25",
+              tentativeMonth: '2025-08-25',
               purposeOfSlowdown: 'Heater 5 Pigging',
             },
             {
@@ -475,7 +498,7 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 8.0,
               throughputDuringSlowdown: '206 KBPSD',
-              tentativeMonth: "Feb'25",
+              tentativeMonth: '2025-02-25',
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
             {
@@ -483,7 +506,7 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 8.0,
               throughputDuringSlowdown: '206 KBPSD',
-              tentativeMonth: "Apr'25",
+              tentativeMonth: '2025-04-25',
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
             {
@@ -491,7 +514,7 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 8.0,
               throughputDuringSlowdown: '206 KBPSD',
-              tentativeMonth: "Jun'25",
+              tentativeMonth: '2025-06-25',
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
             {
@@ -499,11 +522,54 @@ const TcsInput = () => {
               units: 'Coker-1',
               tentativeDuration: 8.0,
               throughputDuringSlowdown: '206 KBPSD',
-              tentativeMonth: "Oct'25",
+              tentativeMonth: '2025-10-25',
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
           ]
-        case 'Gasifier':
+        case 'ZCPP Shutdown':
+        return [
+          {
+            id: 1,
+            jmdCpp: 'GT-1/HRSG-1',
+            ibrDueDate: '2025-01-23',
+            gtMaintenance: 'MI',
+            noOfDays: 66,
+            shutdownDate: '2024-12-24',
+            startupDate: '2025-02-28',
+            majorJobs: 'HRSG Economiser & Side walls replacement'
+          },
+          {
+            id: 2,
+            jmdCpp: 'GT-6/HRSG-6',
+            ibrDueDate: '2025-03-07',
+            gtMaintenance: 'HGPI',
+            noOfDays: 70,
+            shutdownDate: '2025-03-01',
+            startupDate: '2025-05-10',
+            majorJobs: 'Rotor replacement, HRSG side walls, 70 days'
+          },
+          {
+            id: 3,
+            jmdCpp: 'GT-13/HRSG-13',
+            ibrDueDate: '2025-03-14',
+            gtMaintenance: 'CI',
+            noOfDays: 11,
+            shutdownDate: '2025-03-05',
+            startupDate: '2025-03-16',
+            majorJobs: 'HRSG side walls replacement'
+          },
+          {
+            id: 4,
+            jmdCpp: 'GT-4/HRSG-4',
+            ibrDueDate: '2025-05-13',
+            gtMaintenance: 'HGPI',
+            noOfDays: 30,
+            shutdownDate: '2025-03-17',
+            startupDate: '2025-04-16',
+            majorJobs: 'Turbine rotor replacement'
+          }
+        ]
+        case 'PCG Outlook':
       return [
         {
           id: 1,
@@ -519,7 +585,7 @@ const TcsInput = () => {
           july: 6.0, aug: 6.0, sep: 6.0, oct: 6.0, nov: 6.0, dec: 6.0,
         }
       ]
-      case 'Crude blend Window':
+      case 'Crude Blend Window':
           return [
             {
               id: 1, no: '1.1', property: 'API', stream: 'CDU feed', unit: 'degree', min: 26.0, max: '-', criticality: 2.0, remarks: 'Max acceptable API delta in successive crude blends change is 2 . For 330 KBPSD min API is 26 & for 345 KBPSD min API is 27.5'
@@ -736,7 +802,60 @@ const TcsInput = () => {
               purposeOfSlowdown: '',
             },
           ]
-        case 'Gasifier':
+        case 'ZCPP Shutdown':
+        return [
+          {
+            id: 1,
+            jmdCpp: 'GT-4/HRSG-4',
+            ibrDueDate: '2025-02-07',
+            gtMaintenance: 'HGPI',
+            noOfDays: 22,
+            shutdownDate: '2025-02-01',
+            startupDate: '2025-02-23',
+            majorJobs: 'IBR'
+          },
+          {
+            id: 2,
+            jmdCpp: 'GT-1/HRSG-1',
+            ibrDueDate: '2025-03-12',
+            gtMaintenance: 'IBR',
+            noOfDays: 11,
+            shutdownDate: '2025-02-24',
+            startupDate: '2025-03-07',
+            majorJobs: 'IBR'
+          },
+          {
+            id: 3,
+            jmdCpp: 'GT-6/HRSG-6',
+            ibrDueDate: '2025-04-13',
+            gtMaintenance: 'CI',
+            noOfDays: 14,
+            shutdownDate: '2025-03-08',
+            startupDate: '2025-03-23',
+            majorJobs: 'IBR'
+          },
+          {
+            id: 4,
+            jmdCpp: 'GT-5/HRSG-5',
+            ibrDueDate: '11-May-25',
+            gtMaintenance: 'IBR',
+            noOfDays: 11,
+            shutdownDate: '2025-05-01',
+            startupDate: '2025-05-12',
+            majorJobs: 'IBR'
+          },
+          {
+            id: 5,
+            jmdCpp: 'GT-2/HRSG-2',
+            ibrDueDate: '2025-08-20',
+            gtMaintenance: 'IBR',
+            noOfDays: 11,
+            shutdownDate: '2025-06-28',
+            startupDate: '2025-07-09',
+            majorJobs: 'IBR'
+          }
+        ]
+        case 'PCG Outlook':
       return [
         {
           id: 1,
@@ -752,7 +871,7 @@ const TcsInput = () => {
           july: 9.1, aug: 8.9, sep: 9.1, oct: 8.9, nov: 9.1, dec: 8.9,
         }
       ]
-      case 'Crude blend Window':
+      case 'Crude Blend Window':
           return [
            {
             id: 1, no: '1.1', property: 'API', stream: 'CDU feed', unit: 'degree', min: 24.0, max: '', criticality: 2.0, remarks: 'Max acceptable °API delta in successive crude blends change is 2° API.\nMin and Max limits are applicable for 380 KBPSD\nFor 290 KBPSD design API is 24.'
