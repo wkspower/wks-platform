@@ -24,5 +24,7 @@ public class PIOImpactDTO {
     private String plantId;
     private String siteId;
     private String verticalId;
+    private String saveStatus;
+	private String errDescription;
 
 }
