@@ -16,21 +16,21 @@ import KendoDataTablesReciepe from './index-reports-receipe'
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-    } = dataGridStore
-  
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const AOP_YEAR = year?.selectedYear
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
@@ -181,133 +181,145 @@ const SelectivityData = (props) => {
         plantId = parsedPlant.id
       }
 
-    var payload = []
-    var response
+      var payload = []
+      var response
 
-    if (props?.configType === 'pioImpact') {
-      // Handle PIO Impact data format
-      payload = newRow.map((row) => ({
-    id: row.idFromApi || null,
-    description: row.description,
-    startMonth: row.startMonth,
-    endMonth: row.endMonth,
-    value: row.value,
-    remarks: row.remarks
-  }))
-      
-      response = await PIOImpactApiService.savePioImpactData(payload, keycloak, PLANT_ID, AOP_YEAR)
-      
-      if (response?.code === 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'PIO Impact data saved successfully!',
-          severity: 'success',
-        })
-        setModifiedCells({})
-        
-        // Call the fetchData from props to refresh the data
-        if (props?.fetchData) {
-          props.fetchData()
+      if (props?.configType === 'pioImpact') {
+        // Handle PIO Impact data format
+        payload = newRow.map((row) => ({
+          id: row.idFromApi || null,
+          description: row.description,
+          startMonth: row.startMonth,
+          endMonth: row.endMonth,
+          value: row.value,
+          remarks: row.remarks,
+        }))
+
+        response = await PIOImpactApiService.savePioImpactData(
+          payload,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+
+        if (response?.code === 200) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'PIO Impact data saved successfully!',
+            severity: 'success',
+          })
+          setModifiedCells({})
+
+          // Call the fetchData from props to refresh the data
+          if (props?.fetchData) {
+            props.fetchData()
+          }
+
+          // Also save summary if needed
+          saveSummary(props?.summary)
+          props?.onSummaryEditChange(false)
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Failed to save PIO Impact data!',
+            severity: 'error',
+          })
         }
-        
-        // Also save summary if needed
-        saveSummary(props?.summary)
-        props?.onSummaryEditChange(false)
+
+        return response
+      } else if (props?.configType == 'megConstants') {
+        payload = newRow.map((row) => ({
+          apr: row.apr || row.ConstantValue || null,
+          may: row.apr || row.ConstantValue || null,
+          jun: row.apr || row.ConstantValue || null,
+          jul: row.apr || row.ConstantValue || null,
+          aug: row.apr || row.ConstantValue || null,
+          sep: row.apr || row.ConstantValue || null,
+          oct: row.apr || row.ConstantValue || null,
+          nov: row.apr || row.ConstantValue || null,
+          dec: row.apr || row.ConstantValue || null,
+          jan: row.apr || row.ConstantValue || null,
+          feb: row.apr || row.ConstantValue || null,
+          mar: row.apr || row.ConstantValue || null,
+          UOM: '',
+          auditYear: localStorage.getItem('year'),
+          normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
+          remarks: row.remarks,
+          id: row.idFromApi || null,
+        }))
+
+        response = await DataService.saveCatalystData(
+          plantId,
+          payload,
+          keycloak,
+        )
       } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Failed to save PIO Impact data!',
-          severity: 'error',
-        })
+        payload = newRow.map((row) => ({
+          apr: row.apr || row.ConstantValue || null,
+          may: row.may || null,
+          jun: row.jun || null,
+          jul: row.jul || null,
+          aug: row.aug || null,
+          sep: row.sep || null,
+          oct: row.oct || null,
+          nov: row.nov || null,
+          dec: row.dec || null,
+          jan: row.jan || null,
+          feb: row.feb || null,
+          mar: row.mar || null,
+          UOM: '',
+          auditYear: localStorage.getItem('year'),
+          normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
+          remarks: row.remarks,
+          id: row.idFromApi || null,
+        }))
+
+        response = await DataService.saveCatalystData(
+          plantId,
+          payload,
+          keycloak,
+        )
       }
-      
+
+      // Handle response for non-pioImpact types
+      if (props?.configType !== 'pioImpact') {
+        if (response) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Saved Successfully!',
+            severity: 'success',
+          })
+
+          setModifiedCells({})
+          setLoading(false)
+
+          saveSummary(props?.summary)
+          props?.onSummaryEditChange(false)
+
+          if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+            props?.fetchData(gradeId)
+          }
+        } else {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Data Saved Failed!',
+            severity: 'error',
+          })
+        }
+      }
+
       return response
+    } catch (error) {
+      console.error('Error saving Configuration data:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Error saving data!',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
     }
-    else if (props?.configType == 'megConstants') {
-      payload = newRow.map((row) => ({
-        apr: row.apr || row.ConstantValue || null,
-        may: row.apr || row.ConstantValue || null,
-        jun: row.apr || row.ConstantValue || null,
-        jul: row.apr || row.ConstantValue || null,
-        aug: row.apr || row.ConstantValue || null,
-        sep: row.apr || row.ConstantValue || null,
-        oct: row.apr || row.ConstantValue || null,
-        nov: row.apr || row.ConstantValue || null,
-        dec: row.apr || row.ConstantValue || null,
-        jan: row.apr || row.ConstantValue || null,
-        feb: row.apr || row.ConstantValue || null,
-        mar: row.apr || row.ConstantValue || null,
-        UOM: '',
-        auditYear: localStorage.getItem('year'),
-        normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
-        remarks: row.remarks,
-        id: row.idFromApi || null,
-      }))
-      
-      response = await DataService.saveCatalystData(plantId, payload, keycloak)
-    } else {
-      payload = newRow.map((row) => ({
-        apr: row.apr || row.ConstantValue || null,
-        may: row.may || null,
-        jun: row.jun || null,
-        jul: row.jul || null,
-        aug: row.aug || null,
-        sep: row.sep || null,
-        oct: row.oct || null,
-        nov: row.nov || null,
-        dec: row.dec || null,
-        jan: row.jan || null,
-        feb: row.feb || null,
-        mar: row.mar || null,
-        UOM: '',
-        auditYear: localStorage.getItem('year'),
-        normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
-        remarks: row.remarks,
-        id: row.idFromApi || null,
-      }))
-      
-      response = await DataService.saveCatalystData(plantId, payload, keycloak)
-    }
-
-    // Handle response for non-pioImpact types
-    if (props?.configType !== 'pioImpact') {
-      if (response) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Saved Successfully!',
-          severity: 'success',
-        })
-
-        setModifiedCells({})
-        setLoading(false)
-
-        saveSummary(props?.summary)
-        props?.onSummaryEditChange(false)
-
-        if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-          props?.fetchData(gradeId)
-        }
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Saved Failed!',
-          severity: 'error',
-        })
-      }
-    }
-
-    return response
-  } catch (error) {
-    console.error('Error saving Configuration data:', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error saving data!',
-      severity: 'error',
-    })
-  } finally {
-    setLoading(false)
   }
-}
 
   const handleUpdate = async (updatedRows) => {
     setLoading(true)
@@ -395,14 +407,14 @@ const SelectivityData = (props) => {
     )
       getAllGrades()
 
-   if (props?.configType !== 'grades') {
-    // Fix: Check if it's PIO Impact and call without gradeId
-    if (props?.configType === 'pioImpact') {
-      props?.fetchData()
-    } else {
-      props?.fetchData(gradeId)
+    if (props?.configType !== 'grades') {
+      // Fix: Check if it's PIO Impact and call without gradeId
+      if (props?.configType === 'pioImpact') {
+        props?.fetchData()
+      } else {
+        props?.fetchData(gradeId)
+      }
     }
-  }
 
     getConfigurationExecutionDetails()
     //if (props?.configType === 'grades') fetchConfigData()
@@ -475,7 +487,7 @@ const SelectivityData = (props) => {
       editButton: false,
       saveWithRemark: true,
       saveBtn: true,
-      downloadExcelBtn:true,
+      downloadExcelBtn: true,
       uploadExcelBtn: true,
       showLoad: true,
       allAction: true,
@@ -485,15 +497,18 @@ const SelectivityData = (props) => {
       // marginTop: props?.configType === 'cracker_configuration' ? true : false,
       marginTop: false,
       isHeight: lowerVertName !== 'meg' && props?.rows?.length > 10,
-      defaultNewRow: props?.configType === 'pioImpact' ? {
-      description: '',
-      startMonth: 'Apr',
-      endMonth: 'Mar',
-      value: 0,
-      remarks: '',
-      Particulars: 'PIO Impact',
-      isEditable: true
-    } : null,
+      defaultNewRow:
+        props?.configType === 'pioImpact'
+          ? {
+              description: '',
+              startMonth: 'Apr',
+              endMonth: 'Mar',
+              value: 0,
+              remarks: '',
+              Particulars: 'PIO Impact',
+              isEditable: true,
+            }
+          : null,
     },
     isOldYear,
   )
@@ -517,18 +532,18 @@ const SelectivityData = (props) => {
     })
 
     try {
-     if (props?.configType === 'grades') {
-      await DataService.getRecipeExcel(keycloak)
-    } else if (props?.configType === 'ShutdownNorms') {
-      // Add shutdown rate specific download
-      await DataService.getShutdownRateExcel(keycloak)
-    }else if (props?.configType === 'pioImpact') {
-      await PIOImpactApiService.exportPIOImpact(keycloak, PLANT_ID, AOP_YEAR) 
-    } else if (props?.tabIndex != 1) {
-      await DataService.getConfigurationExcel(keycloak, gradeId)
-    } else {
-      await DataService.getConfigurationExcelConstants(keycloak)
-    }
+      if (props?.configType === 'grades') {
+        await DataService.getRecipeExcel(keycloak)
+      } else if (props?.configType === 'ShutdownNorms') {
+        // Add shutdown rate specific download
+        await DataService.getShutdownRateExcel(keycloak)
+      } else if (props?.configType === 'pioImpact') {
+        await PIOImpactApiService.exportPIOImpact(keycloak, PLANT_ID, AOP_YEAR)
+      } else if (props?.tabIndex != 1) {
+        await DataService.getConfigurationExcel(keycloak, gradeId)
+      } else {
+        await DataService.getConfigurationExcelConstants(keycloak)
+      }
 
       // If no error is thrown, the request was successful
       setSnackbarData({
@@ -579,17 +594,25 @@ const SelectivityData = (props) => {
       }
       var response
       if (props?.configType === 'grades') {
-      response = await DataService.saveRecipeExcel(rawFile, keycloak)
-    } else if (props?.configType === 'ShutdownNorms') {
-      // Add shutdown rate specific upload
-      response = await DataService.saveShutdownRateExcel(rawFile, keycloak)
-    } else if (props?.configType === 'pioImpact') {
-      response = await PIOImpactApiService.importPIOImpact(rawFile, keycloak, PLANT_ID, AOP_YEAR)
-    } else if (props?.tabIndex != 1) {
-      response = await DataService.saveConfigurationExcel(rawFile, keycloak)
-    } else {
-      response = await DataService.saveConfigurationExcelConstants(rawFile, keycloak)
-    }
+        response = await DataService.saveRecipeExcel(rawFile, keycloak)
+      } else if (props?.configType === 'ShutdownNorms') {
+        // Add shutdown rate specific upload
+        response = await DataService.saveShutdownRateExcel(rawFile, keycloak)
+      } else if (props?.configType === 'pioImpact') {
+        response = await PIOImpactApiService.importPIOImpact(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (props?.tabIndex != 1) {
+        response = await DataService.saveConfigurationExcel(rawFile, keycloak)
+      } else {
+        response = await DataService.saveConfigurationExcelConstants(
+          rawFile,
+          keycloak,
+        )
+      }
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -600,11 +623,14 @@ const SelectivityData = (props) => {
         setLoading(false)
 
         if (props?.configType === 'grades') {
-        fetchConfigData() // This was missing!
-      } else if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-        props?.fetchData(gradeId)
-      }
-    } else if (response?.code === 400 && response?.data) {
+          fetchConfigData() // This was missing!
+        } else if (
+          props?.configType !== 'grades' &&
+          lowerVertName !== 'cracker'
+        ) {
+          props?.fetchData(gradeId)
+        }
+      } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = new Array(byteCharacters.length)
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -649,55 +675,60 @@ const SelectivityData = (props) => {
       setLoading(false)
     }
   }
-  
+
   const deleteRowData = async (paramsForDelete) => {
-  setLoading(true)
-  try {
-    const { idFromApi, id } = paramsForDelete
-    const deleteId = id
+    setLoading(true)
+    try {
+      const { idFromApi, id } = paramsForDelete
+      const deleteId = id
 
-    // If the row is not saved to backend, just remove it locally
-    if (!idFromApi) {
-      setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
-      setLoading(false)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Unsaved row deleted!',
-        severity: 'info',
-      })
-      return
-    }
-
-    // If the row is saved, call backend API
-    const response = await PIOImpactApiService.deletePIOImpact(idFromApi, keycloak)
-    if (response?.code === 200 || response?.code === 204) {
-      props?.setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'PIO Impact record deleted successfully!',
-        severity: 'success',
-      })
-        if (props?.configType === 'pioImpact' && props?.fetchData) {
-        await props.fetchData()
+      // If the row is not saved to backend, just remove it locally
+      if (!idFromApi) {
+        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+        setLoading(false)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Unsaved row deleted!',
+          severity: 'info',
+        })
+        return
       }
-    } else {
+
+      // If the row is saved, call backend API
+      const response = await PIOImpactApiService.deletePIOImpact(
+        idFromApi,
+        keycloak,
+      )
+      if (response?.code === 200 || response?.code === 204) {
+        props?.setRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteId),
+        )
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'PIO Impact record deleted successfully!',
+          severity: 'success',
+        })
+        if (props?.configType === 'pioImpact' && props?.fetchData) {
+          await props.fetchData()
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Failed to delete PIO Impact record!',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error deleting PIO Impact record', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Failed to delete PIO Impact record!',
+        message: 'Error deleting record!',
         severity: 'error',
       })
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Error deleting PIO Impact record', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error deleting record!',
-      severity: 'error',
-    })
-  } finally {
-    setLoading(false)
   }
-}
 
   if (props?.configType == 'grades') {
     return (
