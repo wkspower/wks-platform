@@ -25,6 +25,12 @@ public class BasisReportController {
 		return ResponseEntity.status(response.getCode()).body(response);
 	}
 	
+	@GetMapping(value="/data-set-production-target")
+	public ResponseEntity<AOPMessageVM> getProductionTarget(@RequestParam String plantId,@RequestParam String year){
+		AOPMessageVM response=basisReportService.getProductionTarget(plantId,year);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
+	
 	@GetMapping(value="/report/norms-basis/mode")
 	public AOPMessageVM getNormBasisReportCracker(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="type", required=false) String type,@RequestParam(value="mode", required=false) String mode){
 		return basisReportService.getNormBasisReportCracker(plantId,year,type,mode);

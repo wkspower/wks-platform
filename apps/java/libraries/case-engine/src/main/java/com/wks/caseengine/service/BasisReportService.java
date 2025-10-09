@@ -5,6 +5,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 public interface BasisReportService {
 	
 	public AOPMessageVM getNormhistorian(String plantId, String aopYear, String periodFrom, String periodTo,String type);
+	public AOPMessageVM getProductionTarget(String plantId, String aopYear);
 	public AOPMessageVM getNormBasisReportCracker( String plantId, String aopYear, String type,String mode);
 	public AOPMessageVM getBestAchievedCracker( String plantId, String aopYear, String reportType);
 	public AOPMessageVM calculateBestAchieved( String year, String plantId,String periodTo, String periodFrom);
