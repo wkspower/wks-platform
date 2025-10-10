@@ -172,25 +172,58 @@ const KendoDataTablesCracker = ({
       })),
     )
   }
-  const itemChange = useCallback(
-    (e) => {
-      setIsRowEdited(true)
-      const { dataItem, field, value } = e
-      const itemId = dataItem.id
-      setRows((prev) =>
-        prev.map((r) => {
-          if (r.id !== itemId) return r
-          const updated = { ...r, [field]: value }
-          return updated
-        }),
-      )
-      setModifiedCells((prev) => {
-        const base = { ...dataItem, [field]: value }
-        return { ...prev, [itemId]: base }
-      })
-    },
-    [setRows, setModifiedCells],
+  function calcPreCoilReplacementRunLength(actualRunLength, reduction) {
+  if (
+    actualRunLength === null ||
+    actualRunLength === undefined ||
+    reduction === null ||
+    reduction === undefined
   )
+    return null
+  const val =
+    Number(actualRunLength) -
+    (Number(actualRunLength) * Number(reduction)) / 100
+  return isNaN(val) ? null : Number(val.toFixed(2))
+}
+  const itemChange = useCallback(
+  (e) => {
+    setIsRowEdited(true)
+    const { dataItem, field, value } = e
+    const itemId = dataItem.id
+    setRows((prev) =>
+      prev.map((r) => {
+        if (r.id !== itemId) return r
+        const updated = { ...r, [field]: value }
+        // Auto-calculate preCrDays
+        if (
+          field === 'actualRunLength' ||
+          field === 'reduction'
+        ) {
+          updated.preCrDays = calcPreCoilReplacementRunLength(
+            field === 'actualRunLength' ? value : updated.actualRunLength,
+            field === 'reduction' ? value : updated.reduction
+          )
+        }
+        return updated
+      }),
+    )
+    setModifiedCells((prev) => {
+      const base = { ...dataItem, [field]: value }
+      // Auto-calculate preCrDays in modified cells too
+      if (
+        field === 'actualRunLength' ||
+        field === 'reduction'
+      ) {
+        base.preCrDays = calcPreCoilReplacementRunLength(
+          field === 'actualRunLength' ? value : base.actualRunLength,
+          field === 'reduction' ? value : base.reduction
+        )
+      }
+      return { ...prev, [itemId]: base }
+    })
+  },
+  [setRows, setModifiedCells],
+)
   const handleRemarkSave = () => {
     setRows((prevRows) => {
       let updatedRow = null

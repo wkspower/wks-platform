@@ -120,7 +120,7 @@ export const ibrPlanColumns = [
   {
     field: 'preCrDays',
     title: 'Pre Coil Replacement',
-    editable: true,
+    editable: false,
     width: 200,
     filter: false,
     type: 'number',

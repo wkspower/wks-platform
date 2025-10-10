@@ -128,6 +128,19 @@ const DecokingConfig = () => {
       setRunningDurationRows(data)
     }
   }, [])
+  function calcPreCoilReplacementRunLength(actualRunLength, reduction) {
+  if (
+    actualRunLength === null ||
+    actualRunLength === undefined ||
+    reduction === null ||
+    reduction === undefined
+  )
+    return null
+  const val =
+    Number(actualRunLength) -
+    (Number(actualRunLength) * Number(reduction)) / 100
+  return isNaN(val) ? null : Math.ceil(val) // <-- round up to nearest integer
+}
 
   const fetchData = useCallback(
     async (screen = null) => {
@@ -175,6 +188,7 @@ const DecokingConfig = () => {
                 shutDownEndDate: toDateObject(item.shutDownEndDate),
                 actualRunLength: item.actualRunLength || null,
                 reduction: item.reduction || null,
+                preCrDays: calcPreCoilReplacementRunLength(item.actualRunLength, item.reduction),
               }))
 
               setRowsForTab(currentTab, processedData, 2)
@@ -311,12 +325,68 @@ const DecokingConfig = () => {
       : { overlap: false }
   }
 
+  function rangesOverlap(startA, endA, startB, endB) {
+  if (!startA || !endA || !startB || !endB) return false
+  return startA <= endB && startB <= endA
+}
+
+// Check if TA dates overlap with IBR or Maintenance dates in any row
+function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
+  for (const row of rows) {
+    const ibrStart = row.ibrStartDate ? new Date(row.ibrStartDate) : null
+    const ibrEnd = row.ibrEndDate ? new Date(row.ibrEndDate) : null
+    // const maintStart = row.shutDownStartDate ? new Date(row.shutDownStartDate) : null
+    // const maintEnd = row.shutDownEndDate ? new Date(row.shutDownEndDate) : null
+
+    if (rangesOverlap(taStart, taEnd, ibrStart, ibrEnd)) {
+      return `TA dates overlap with IBR dates for Furnace ${row.displayName || row.id + 1}.`
+    }
+  }
+  return null
+}
+
   const saveChangesSdTa = React.useCallback(async () => {
     try {
-      if (dateError) {
+      const { startLimit, endLimit } = getAopYearLimits()
+    // Validate TA dates only on Save
+    if (
+      !globalTaStartDate ||
+      !globalTaEndDate ||
+      (startLimit && globalTaStartDate < startLimit) ||
+      (endLimit && globalTaStartDate > endLimit) ||
+      (startLimit && globalTaEndDate < startLimit) ||
+      (endLimit && globalTaEndDate > endLimit)
+    ) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `TA dates must be between ${formatDateDDMMYYYY(startLimit)} 
+        and ${formatDateDDMMYYYY(endLimit)} for selected year.`,
+        severity: 'error',
+      })
+      setDateError(true)
+      setLoading(false)
+      return
+    }
+    if (globalTaStartDate > globalTaEndDate) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Start date must be before or equal to End date.',
+        severity: 'error',
+      })
+      setDateError(true)
+      setLoading(false)
+      return
+    }
+    setDateError(false)
+    const taOverlapMsg = checkTaDateOverlapWithRows(
+      globalTaStartDate,
+      globalTaEndDate,
+      ibrScreen2Rows
+    )
+    if (taOverlapMsg) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: taOverlapMsg,
         severity: 'error',
       })
       setLoading(false)
@@ -450,7 +520,12 @@ const DecokingConfig = () => {
         taEndDate: formatIfDate(row?.taEndDate) || null,
         shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
         shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
-        preCrDays: row?.preCrDays ? Number(row.preCrDays) : null,
+        preCrDays: row?.actualRunLength != null && row?.reduction != null
+        ? Math.ceil(
+            Number(row.actualRunLength) -
+            (Number(row.actualRunLength) * Number(row.reduction)) / 100
+          )
+        : null,
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
         remarks: row.remarks || '',
         isCr: row?.isCr ? true : false,
@@ -747,17 +822,33 @@ const DecokingConfig = () => {
       setLoading(false)
     }
   }
-  useEffect(() => {
-  if (
-    globalTaStartDate &&
-    globalTaEndDate &&
-    new Date(globalTaStartDate) > new Date(globalTaEndDate)
-  ) {
-    setDateError(true)
-  } else {
-    setDateError(false)
+  function getAopYearLimits() {
+  const yearStr = localStorage.getItem('year') // e.g. "2025-26"
+  let startLimit, endLimit
+  if (yearStr) {
+    const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10))
+    if (!isNaN(startYear) && !isNaN(endYear)) {
+      startLimit = new Date(`${startYear}-04-01T00:00:00`)
+      // If endYear is 2 digits, prefix with 20
+      const endYearFull = endYear < 100 ? 2000 + endYear : endYear
+      endLimit = new Date(`${endYearFull}-03-31T23:59:59`)
+    }
   }
-}, [globalTaStartDate, globalTaEndDate])
+  return { startLimit, endLimit }
+}
+
+// ...existing code...
+
+// Validation for TA dates
+
+
+function formatDateDDMMYYYY(date) {
+  if (!(date instanceof Date) || isNaN(date)) return ''
+  const d = date.getDate().toString().padStart(2, '0')
+  const m = (date.getMonth() + 1).toString().padStart(2, '0')
+  const y = date.getFullYear()
+  return `${d}/${m}/${y}`
+}
   const rowClass = (row) => (row.isError ? 'row-error' : '')
   return (
     <Box>
@@ -781,7 +872,8 @@ const DecokingConfig = () => {
               onChange={(e) => setGlobalTaStartDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
-              max={globalTaEndDate || undefined}
+              min={getAopYearLimits().startLimit}
+              max={globalTaEndDate ? globalTaEndDate : getAopYearLimits().endLimit}
             />
           </Box>
 
@@ -796,7 +888,8 @@ const DecokingConfig = () => {
               onChange={(e) => setGlobalTaEndDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
-              min={globalTaStartDate || undefined}
+              min={globalTaStartDate ? globalTaStartDate : getAopYearLimits().startLimit}
+              max={getAopYearLimits().endLimit}
             />
           </Box>
         </Box>
