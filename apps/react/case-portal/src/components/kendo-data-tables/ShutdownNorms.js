@@ -148,9 +148,9 @@ const ShutdownNorms = () => {
         }
         setShutdownMonths(data)
 
-        if (lowerVertName == 'cracker') {
-          setShutdownMonths([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-        }
+        // if (lowerVertName == 'cracker') {
+        //   setShutdownMonths([1])
+        // }
       } catch (error) {
         console.error('Error in loadData:', error)
       }

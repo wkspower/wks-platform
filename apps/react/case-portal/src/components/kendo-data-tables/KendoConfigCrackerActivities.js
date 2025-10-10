@@ -562,9 +562,7 @@ const DecokingConfig = () => {
       allAction: true,
       showTitleName: true,
       showAccordian: true,
-      showCalculate: true,
-      showCalculateVisibility:
-        Object.keys(calculationObject || {}).length > 0 ? true : false,
+      showCalculate: false,
     },
     isOldYear,
   )

@@ -1,6 +1,7 @@
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import Typography from '@mui/material/Typography'
 import {
   ExcelExport,
   ExcelExportColumn,
@@ -8,7 +9,8 @@ import {
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
+import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -16,303 +18,339 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-const MonthWiseRawData = () => {
-  const keycloak = useSession()
+const MONTH_GRID_NAME = 'Final Norms'
+const MODE_GRADES = ['4F', '5F', '4F+D']
+const MODE_TYPES = ['Best Achieved']
 
+export default function MonthWiseRawData() {
+  const keycloak = useSession()
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
-  const [tabIndex, setTabIndex] = useState(0)
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const {
-    verticalChange,
-    yearChanged,
-    oldYear,
-    plantID,
-    plantObject,
-    siteObject,
-    verticalObject,
-    year,
-  } = dataGridStore
-
-  const PLANT_ID = plantObject?.id
-  const SITE_ID = siteObject?.id
-  const VERTICAL_ID = verticalObject?.id
-  const AOP_YEAR = year?.selectedYear
-
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
-
-  const timeoutIdsRef = useRef([])
+  const { plantID, yearChanged, oldYear } = dataGridStore
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
 
   useEffect(() => {
     return () => {
       isMountedRef.current = false
-      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-      timeoutIdsRef.current = []
     }
   }, [])
 
+  function parseDDMMYYYY(dateStr) {
+    if (!dateStr) return null
+    const [day, month, year] = String(dateStr).split('-')
+    return new Date(`${year}-${month}-${day}`)
+  }
+
   const enrichColumns = useCallback((backendCols = []) => {
-    return backendCols
-      .filter((col) => col.field !== 'GRID_TYPE')
-      .map((col) => {
-        const isTextCol = col.type === 'string'
-        const isNumberCol = col.type === 'number'
-        return {
-          ...col,
-          title: col.title || col.field,
-          filterable: true,
-          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
-          editable: false,
-          isRightAlligned: isNumberCol ? 'numeric' : undefined,
-        }
-      })
+    return backendCols.map((col) => {
+      const isTextCol = col.type === 'string'
+      const isNumberCol = col.type === 'number'
+      return {
+        ...col,
+        title: col.title || col.field,
+        filterable: true,
+        filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+        align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+        ...(isNumberCol ? { format: '{0:#.###}' } : {}),
+        editable: false,
+        isRightAlligned: isNumberCol ? 'numeric' : undefined,
+      }
+    })
   }, [])
 
-  // ---------------------------------------------------------------------------
-  // Infer columns from row objects (returns [{ field, title, type }])
-  // ---------------------------------------------------------------------------
-  function inferColumnsFromRows(rows = []) {
-    const fieldSet = new Set()
-    rows.forEach((r) => {
-      if (!r || typeof r !== 'object') return
-      Object.keys(r).forEach((k) => fieldSet.add(k))
-    })
+  // build columns from the 0th record as requested (used for mode-wise fallback)
+  const MODE_COLUMNS_ORDER = [
+    'sapMaterialCode',
+    'normType',
+    'materialDisplayName',
+    'uom',
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+    'january',
+    'february',
+    'march',
+  ]
 
-    const fields = Array.from(fieldSet)
-
-    const cols = fields.map((f) => {
-      let detectedType = 'string'
-      for (const r of rows) {
-        if (!r) continue
-        const v = r?.[f]
-        if (v === undefined || v === null || v === '') continue
-        if (typeof v === 'number') {
-          detectedType = 'number'
-          break
-        }
-        // detect date-like strings
-        const d = new Date(v)
-        if (!isNaN(d.getTime())) {
-          detectedType = 'date'
-          break
-        }
-        // numeric string (allow commas)
-        const numericCandidate = String(v).replace(/[,]/g, '')
-        if (!isNaN(Number(numericCandidate))) {
-          detectedType = 'number'
-          break
-        }
-      }
-      return { field: f, title: f, type: detectedType }
-    })
-
-    return cols
+  const FIELD_TITLE_MAP = {
+    sapMaterialCode: 'SAP Mat Code',
+    normType: 'Type',
+    materialDisplayName: 'Particular',
+    uom: 'UOM',
+    april: 'April',
+    may: 'May',
+    june: 'June',
+    july: 'July',
+    august: 'August',
+    september: 'September',
+    october: 'October',
+    november: 'November',
+    december: 'December',
+    january: 'January',
+    february: 'February',
+    march: 'March',
   }
 
-  // ---------------------------------------------------------------------------
-  // Normalize row values according to detected column types
-  // ---------------------------------------------------------------------------
-  function normalizeRowValues(row = {}, columns = []) {
-    const parsed = { ...row }
-    columns.forEach((c) => {
-      const raw = row[c.field]
-      if (raw === undefined || raw === null || raw === '') {
-        parsed[c.field] = raw === 0 ? 0 : null
-        return
-      }
-      if (c.type === 'number') {
-        parsed[c.field] =
-          typeof raw === 'number'
-            ? raw
-            : Number(String(raw).replace(/[,]/g, ''))
-        if (Number.isNaN(parsed[c.field])) parsed[c.field] = null
-        return
-      }
-      if (c.type === 'date') {
-        const d = new Date(raw)
-        parsed[c.field] = !isNaN(d.getTime()) ? d : null
-        return
-      }
-      // strings and objects left as-is (objects will be stringified during export)
-    })
-    return parsed
-  }
-
-  // ---------------------------------------------------------------------------
-  // Fetch all grids in one call and build dataMap + gridNames
-  // The backend is expected to return: apiResponse.data = [ { gridName, data: [...] }, ... ]
-  // ---------------------------------------------------------------------------
-  const fetchAllGrids = useCallback(async () => {
-    // clear previous timers if any
-    timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-    timeoutIdsRef.current = []
-
-    try {
-      setLoading(true)
-
-      const apiResponse = await DataService.getProductionReports(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        'rawData',
+  const columnsFromFirstRow = (firstRow = {}) => {
+    const first = firstRow || {}
+    return MODE_COLUMNS_ORDER.map((f) => {
+      const sample = first[f]
+      let type = 'string'
+      if (typeof sample === 'number') type = 'number'
+      else if (typeof sample === 'string' && sample.split('-').length === 3)
+        type = 'date'
+      else if (
+        sample !== undefined &&
+        sample !== null &&
+        sample !== '' &&
+        !isNaN(sample)
       )
+        type = 'number'
+      return { field: f, title: FIELD_TITLE_MAP[f] || f, type }
+    })
+  }
 
-      if (apiResponse?.code !== 200) {
-        setGridNames([])
-        setDataMap({})
-        setLoading(false)
-        return
+  const fetchModeWiseGrids = useCallback(async () => {
+    const modeMap = {}
+    for (const grade of MODE_GRADES) {
+      for (const mode of MODE_TYPES) {
+        try {
+          const resp =
+          await NormalOperationNormsApiService.getModeWiseNormsDataworkflow(
+              keycloak,
+              grade,
+              mode,
+            )
+          if (resp?.code !== 200) continue
+
+        // Get data and columns from response
+        const raw = resp.data?.data || [] // Changed from mcuNormsValueDTOList to data
+        const backendCols = resp.data?.columns || null
+
+        let cols = []
+        let enriched = []
+
+        if (backendCols && backendCols.length > 0) {
+          // Use backend column definitions
+          cols = backendCols
+          enriched = enrichColumns(cols)
+        } else {
+          // Fallback: generate columns from first row if no backend columns
+          const first = raw[0] || {}
+          cols = Object.keys(first).map((field) => {
+            const sample = first[field]
+            let type = 'string'
+            
+            if (typeof sample === 'number') {
+              type = 'number'
+            } else if (typeof sample === 'boolean') {
+              type = 'boolean'
+            } else if (typeof sample === 'string' && sample.split('-').length === 3) {
+              type = 'date'
+            } else if (
+              sample !== undefined &&
+              sample !== null &&
+              sample !== '' &&
+              !isNaN(sample)
+            ) {
+              type = 'number'
+            }
+            
+            return { 
+              field, 
+              title: field.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim(), 
+              type,
+              editable: false
+            }
+          })
+          enriched = enrichColumns(cols)
+        }
+
+          const rowsWithId = raw.map((r, idx) => {
+            const parsed = { ...r }
+            cols
+              .filter((c) => c.type === 'date')
+              .forEach((c) => {
+                parsed[c.field] = parsed[c.field]
+                  ? parseDDMMYYYY(parsed[c.field])
+                  : null
+              })
+            cols
+              .filter((c) => c.type === 'number')
+              .forEach((c) => {
+                parsed[c.field] =
+                  parsed[c.field] !== undefined && parsed[c.field] !== null
+                    ? Number(parsed[c.field])
+                    : null
+              })
+            return { ...parsed, id: `${grade}_${mode}_${idx}` }
+          })
+
+          const key = `${grade} - ${mode}`
+          modeMap[key] = { rows: rowsWithId, columns: enriched }
+        } catch (err) {
+          console.error(`Mode grid fetch failed for ${grade} - ${mode}:`, err)
+        }
+      }
+    }
+    return modeMap
+  }, [keycloak, enrichColumns])
+
+  const fetchAndPrepare = useCallback(async () => {
+    setLoading(true)
+    try {
+      const REPORT_TYPES = [
+        'Raw Material',
+        'By Products',
+        'Cat Chem',
+        'Utility Consumption',
+      ]
+
+      const nextDataMap = {}
+      const nextGridNames = []
+      let globalEnrichedCols = null // if one report returns columns, reuse for others
+
+      for (const reportType of REPORT_TYPES) {
+        try {
+          // NOTE: adjust call if your API expects different signature
+          const apiResponse =
+            await CrackerReportsApiDataService.finalNormsReport(
+              keycloak,
+              reportType,
+            )
+
+          if (!isMountedRef.current) return
+
+          if (apiResponse?.code !== 200) {
+            console.warn(
+              `finalNormsReport failed for ${reportType}`,
+              apiResponse,
+            )
+            continue
+          }
+
+          const backendCols = apiResponse.data?.columns || null
+          // prefer backend-provided columns
+          if (!globalEnrichedCols && backendCols && backendCols.length) {
+            globalEnrichedCols = enrichColumns(backendCols)
+          }
+
+          const rawRows = apiResponse.data?.data || []
+          let enrichedCols = globalEnrichedCols
+
+          // fallback: derive columns from first row if no backend columns present yet
+          if (!enrichedCols) {
+            const sample = rawRows[0] || {}
+            const cols = columnsFromFirstRow(sample)
+            enrichedCols = enrichColumns(cols)
+            globalEnrichedCols = enrichedCols
+          }
+
+          const dateFields = (enrichedCols || [])
+            .filter((c) => c.type === 'date')
+            .map((c) => c.field)
+          const numberFields = (enrichedCols || [])
+            .filter((c) => c.type === 'number')
+            .map((c) => c.field)
+
+          const rowsWithId = (rawRows || []).map((item, index) => {
+            const parsedItem = { ...item }
+            dateFields.forEach((f) => {
+              parsedItem[f] = item?.[f] ? parseDDMMYYYY(item[f]) : null
+            })
+            numberFields.forEach((f) => {
+              parsedItem[f] =
+                item?.[f] !== undefined && item?.[f] !== null
+                  ? Number(item[f])
+                  : null
+            })
+            return {
+              ...parsedItem,
+              id: `${reportType.replace(/\s+/g, '_')}_${index}`,
+              isEditable: false,
+            }
+          })
+
+          const key = `${MONTH_GRID_NAME} - ${reportType}`
+          nextDataMap[key] = { rows: rowsWithId, columns: enrichedCols }
+          nextGridNames.push(key)
+        } catch (err) {
+          console.error(`Error fetching report type ${reportType}:`, err)
+        }
       }
 
-      // Support two possible shapes for convenience:
-      // 1) apiResponse.data is the array of grids
-      // 2) apiResponse.data.data is the array (older wrappers)
-      const gridsArray = Array.isArray(apiResponse.data)
-        ? apiResponse.data
-        : Array.isArray(apiResponse.data?.data)
-          ? apiResponse.data.data
-          : []
+      // fetch the 9 mode-wise grids and append below existing grids
+      const modeMap = await fetchModeWiseGrids()
 
-      if (!Array.isArray(gridsArray) || gridsArray.length === 0) {
-        setGridNames([])
-        setDataMap({})
-        setLoading(false)
-        return
-      }
+      const mergedDataMap = { ...nextDataMap, ...modeMap }
+      const mergedNames = [...nextGridNames, ...Object.keys(modeMap)]
 
-      const normalizedNames = gridsArray.map((g) => g.gridName)
-      setGridNames(normalizedNames)
+      if (!isMountedRef.current) return
 
-      const newMap = {}
-      gridsArray.forEach((g) => {
-        const rawRows = Array.isArray(g.data) ? g.data : []
-        const inferredCols =
-          Array.isArray(g.columns) && g.columns.length
-            ? g.columns
-            : inferColumnsFromRows(rawRows)
-        const enrichedCols = enrichColumns(inferredCols)
-
-        const rowsWithId = rawRows.map((r, i) => {
-          const parsed = normalizeRowValues(r, inferredCols)
-          return { ...parsed, id: i, isEditable: false }
-        })
-
-        newMap[g.gridName] = { rows: rowsWithId, columns: enrichedCols }
-      })
-
-      if (isMountedRef.current) setDataMap(newMap)
+      setDataMap(mergedDataMap)
+      setGridNames(mergedNames)
     } catch (err) {
-      console.error('Error fetching all grids (new shape):', err)
+      console.error('Error fetching month-wise raw data:', err)
+      setDataMap({})
+      setGridNames([])
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [keycloak, enrichColumns, fetchModeWiseGrids])
 
   useEffect(() => {
-    setTabIndex(0)
-    fetchAllGrids()
-    return () => {
-      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-      timeoutIdsRef.current = []
-    }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
-
-  // ---------------------------------------------------------------------------
-  // Excel export helpers (keeps your existing implementation compatible)
-  // ---------------------------------------------------------------------------
-
-  // eslint-disable-next-line
-  const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
-  function sanitizeSheetName(name = '', fallback = 'Sheet') {
-    let s = String(name || '')
-      .replace(INVALID_SHEET_CHARS_RE, ' ')
-      .trim()
-    if (s.length === 0) s = fallback
-    if (s.length > 31) s = s.slice(0, 31)
-    return s
-  }
-
-  function normalizeCellValue(v) {
-    if (v === undefined || v === null) return ''
-    if (v instanceof Date) return v
-    if (typeof v === 'object') {
-      try {
-        return JSON.stringify(v)
-      } catch {
-        return String(v)
-      }
-    }
-    return v
-  }
+    fetchAndPrepare()
+  }, [fetchAndPrepare, plantID, oldYear, yearChanged])
 
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})
+    if (!keys.length) return
+
     const firstKey = keys.find((k) => exportRefs.current[k])
     if (!firstKey) return
     const baseRef = exportRefs.current[firstKey]
-    if (!baseRef || typeof baseRef.save !== 'function') return
+    const baseOptions = baseRef?.workbookOptions?.()
+    if (!baseOptions) return
 
     const sheets = gridNames
-      .map((gridName, idx) => {
-        const d = dataMap[gridName] || { rows: [], columns: [] }
-        const cols = d.columns || []
-        const rows = d.rows || []
-        if (!cols.length && !rows.length) return null
-
-        const sheetColumns = cols.map((c) => ({
-          autoWidth: true,
-          title: c.title || c.field || '',
-        }))
-
-        const headerRow = {
-          cells: cols.map((c) => ({ value: c.title || c.field || '' })),
-        }
-
-        const dataRows = rows.map((r) => ({
-          cells: cols.map((c) => ({ value: normalizeCellValue(r?.[c.field]) })),
-        }))
-
-        const sheetRows = [headerRow, ...dataRows]
-
-        return {
-          title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
-          columns: sheetColumns,
-          rows: sheetRows,
+      .map((name) => {
+        const ref = exportRefs.current[name]
+        try {
+          const opts = ref?.workbookOptions?.()
+          return opts?.sheets?.[0] ? { ...opts.sheets[0] } : null
+        } catch {
+          return null
         }
       })
       .filter(Boolean)
 
     if (!sheets.length) return
 
-    const workbookOptions = { sheets }
+    sheets.forEach((s, idx) => {
+      s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
+    })
 
-    try {
-      baseRef.save(workbookOptions)
-    } catch (err) {
-      console.error('Export save failed:', err)
-    }
-  }, [gridNames, dataMap])
+    baseOptions.sheets = sheets
+    baseRef.save(baseOptions)
+  }, [gridNames])
 
   const currentDateTime = new Date()
     .toISOString()
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Production Target Basis.xlsx`
+  const fileName = `NMD_Month_Wise_Raw_Data.xlsx`
 
   const renderTitle = (t) => t
-
-  const PETabs = ['Steady State Norm Basis', 'Overall Consumption Norm Basis']
-  const defaultTabs = ['Steady State Norm Basis']
-  let activeTabs = defaultTabs
-  if (lowerVertName === 'pe') activeTabs = PETabs
 
   return (
     <div>
@@ -323,7 +361,7 @@ const MonthWiseRawData = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Hidden ExcelExport instances for each grid */}
+      {/* Hidden Excel exports for each grid (including the mode grids) */}
       <div style={{ display: 'none' }}>
         {gridNames.map((name) => {
           const data = dataMap[name] || { rows: [], columns: [] }
@@ -349,7 +387,7 @@ const MonthWiseRawData = () => {
         })}
       </div>
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
+      {/* <Box display='flex' justifyContent='flex-end' mb='8px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}
@@ -357,42 +395,40 @@ const MonthWiseRawData = () => {
         >
           Export
         </Button>
-      </Box>
+      </Box> */}
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {tabIndex === 0 && (
-          <>
-            {gridNames.map((name) => {
-              const d = dataMap[name] || { rows: [], columns: [] }
-              return (
-                <div key={name}>
-                  <CustomAccordion defaultExpanded disableGutters>
-                    <CustomAccordionSummary
-                      aria-controls={`${name}-content`}
-                      id={`${name}-header`}
-                    >
-                      <Typography component='span' className='grid-title'>
-                        {renderTitle(name)}
-                      </Typography>
-                    </CustomAccordionSummary>
-                    <CustomAccordionDetails>
-                      <Box sx={{ width: '100%', margin: 0 }}>
-                        <KendoDataGrid
-                          rows={d.rows}
-                          columns={d.columns}
-                          permissions={{ isHeight: d?.rows?.length > 15 }}
-                        />
-                      </Box>
-                    </CustomAccordionDetails>
-                  </CustomAccordion>
-                </div>
-              )
-            })}
-          </>
+        {gridNames.length === 0 && !loading && (
+          <Typography>No grids available.</Typography>
         )}
+
+        {gridNames.map((name) => {
+          const d = dataMap[name] || { rows: [], columns: [] }
+          return (
+            <div key={name}>
+              <CustomAccordion defaultExpanded disableGutters>
+                <CustomAccordionSummary
+                  aria-controls={`${name}-content`}
+                  id={`${name}-header`}
+                >
+                  <Typography component='span' className='grid-title'>
+                    {renderTitle(name)}
+                  </Typography>
+                </CustomAccordionSummary>
+                <CustomAccordionDetails>
+                  <Box sx={{ width: '100%', margin: 0 }}>
+                    <KendoDataGrid
+                      rows={d.rows}
+                      columns={d.columns}
+                      permissions={{ isHeight: d?.rows?.length > 15 }}
+                    />
+                  </Box>
+                </CustomAccordionDetails>
+              </CustomAccordion>
+            </div>
+          )
+        })}
       </Box>
     </div>
   )
 }
-
-export default MonthWiseRawData

@@ -1303,16 +1303,17 @@ const KendoDataTablesCrackerRunLength = ({
                   Export
                 </Button>
               )}
-              {/* {permissions?.uploadExcelBtn && (
-                <Tooltip>
-                  <span title='Import Data'>
+
+              {permissions?.uploadExcelBtn && (
+                <Tooltip title='Import Data'>
+                  <span>
                     <Button
-                      variant='outlined'
-                      size='large'
+                      variant='contained'
+                      className='btn-save'
                       onClick={triggerFileUpload}
                       disabled={isButtonDisabled}
                     >
-                      <UploadIcon fontSize='small' />
+                      Import
                     </Button>
                   </span>
                   <input
@@ -1323,7 +1324,8 @@ const KendoDataTablesCrackerRunLength = ({
                     style={{ display: 'none' }}
                   />
                 </Tooltip>
-              )} */}
+              )}
+
               {permissions?.saveBtn && (
                 <Button
                   variant='contained'
@@ -1643,6 +1645,23 @@ const KendoDataTablesCrackerRunLength = ({
               Export
             </button>
           </div>
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '8px',
+            }}
+          >
+            <button
+              className='btn-save'
+              onClick={onFileChange}
+              disabled={rowsPopUp?.length === 0}
+            >
+              Import
+            </button>
+          </div>
+
           <div style={{ marginTop: '12px' }}>{renderGridDayWise()}</div>
 
           <Backdrop
