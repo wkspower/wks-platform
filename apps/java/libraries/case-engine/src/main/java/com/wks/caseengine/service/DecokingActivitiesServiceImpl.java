@@ -31,7 +31,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -647,7 +647,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			List<DecokeRunLengthDTO> data = readExcel(file.getInputStream(), plantFKId, year);
 			System.out.println("Ended Read run length in importExcel");
 			System.out.println("Started Save run length in importExcel");
-			AOPMessageVM vm = updateDecokingActivitiesRunLengthData(year, plantFKId.toString(), reportType, data);
+			AOPMessageVM vm = updateDecokingActivitiesRunLengthExcel(year, plantFKId.toString(), reportType, data);
 			List<DecokeRunLengthDTO> failedRecords = (List<DecokeRunLengthDTO>) vm.getData();
 			System.out.println("Ended Save run length in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -816,6 +816,111 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		aopMessageVM.setMessage("Data Updated successfully");
 		aopMessageVM.setData(failedList);
 		return aopMessageVM;
+	}
+	
+	public AOPMessageVM updateDecokingActivitiesRunLengthExcel(String year, String plantId, String reportType,
+	        List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
+	    List<DecokeRunLengthDTO> failedList = new ArrayList<>();
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    String newyear = nextAcademicYear(year);
+	    UUID plantUuid;
+	    try {
+	        plantUuid = UUID.fromString(plantId);
+	    } catch (IllegalArgumentException e) {
+	        aopMessageVM.setCode(400);
+	        aopMessageVM.setMessage("Invalid Plant ID format.");
+	        aopMessageVM.setData(decokeRunLengthDTOList); // Return all as failed due to initial config error
+	        return aopMessageVM;
+	    }
+
+	    final UUID finalPlantUuid = plantUuid; // Use a final variable inside the stream/loop
+
+	    for (DecokeRunLengthDTO decokeRunLengthDTO : decokeRunLengthDTOList) {
+	        if (decokeRunLengthDTO.getSaveStatus() != null && decokeRunLengthDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+	            failedList.add(decokeRunLengthDTO);
+	            continue;
+	        }
+
+	        try {
+	            UUID decokeRunLengthUuid;
+	            try {
+	                decokeRunLengthUuid = UUID.fromString(decokeRunLengthDTO.getId());
+	            } catch (IllegalArgumentException e) {
+	                decokeRunLengthDTO.setSaveStatus("Failed: Invalid ID format");
+	                failedList.add(decokeRunLengthDTO);
+	                continue;
+	            }
+	            Optional<DecokeRunLength> decokeRunLengthOpt = decokeRunLengthRepository.findById(decokeRunLengthUuid);
+	            if (!decokeRunLengthOpt.isPresent()) {
+	                decokeRunLengthDTO.setSaveStatus("Failed: Record not found with ID: " + decokeRunLengthDTO.getId());
+	                failedList.add(decokeRunLengthDTO);
+	                continue;
+	            }
+
+	            DecokeRunLength decokeRunLength = decokeRunLengthOpt.get();
+	            decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
+	            decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
+	            decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
+	            decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
+	            decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
+	            decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
+	            String dateString = decokeRunLengthDTO.getDate();
+	            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	            LocalDate parsedDate;
+	            try {
+	                parsedDate = LocalDate.parse(dateString, fmt);
+	            } catch (DateTimeParseException ex) {
+	                decokeRunLengthDTO.setSaveStatus("Failed: Invalid date format: " + dateString);
+	                failedList.add(decokeRunLengthDTO);
+	                continue;
+	            }
+
+	            decokeRunLength.setDate(parsedDate);
+	            decokeRunLength.setPlantFkId(finalPlantUuid);
+	            decokeRunLength.setAopYear(year);
+	            decokeRunLengthRepository.save(decokeRunLength);
+
+	        } catch (DataAccessException ex) {
+	            decokeRunLengthDTO.setSaveStatus("Failed: Database Error - " + ex.getMessage());
+	            failedList.add(decokeRunLengthDTO);
+	            ex.printStackTrace();
+	        } catch (Exception ex) {
+	            decokeRunLengthDTO.setSaveStatus("Failed: Unexpected Error - " + ex.getMessage());
+	            failedList.add(decokeRunLengthDTO);
+	            ex.printStackTrace();
+	        }
+	    }
+	    try {
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("Furnace-run-length");
+	        for (ScreenMapping screenMapping : screenMappingList) {
+	            AopCalculation aopCalculation = new AopCalculation();
+	            aopCalculation.setAopYear(year);
+	            aopCalculation.setIsChanged(true);
+	            aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	            aopCalculation.setPlantId(finalPlantUuid);
+	            aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	            aopCalculationRepository.save(aopCalculation);
+	        }
+	    } catch (DataAccessException ex) {
+	        ex.printStackTrace();
+	        aopMessageVM.setCode(201); 
+	        aopMessageVM.setMessage("Data Updated successfully, but failed to update dependent calculation flags.");
+	        aopMessageVM.setData(failedList);
+	        return aopMessageVM;
+	    }
+	    if (failedList.isEmpty()) {
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("All data updated successfully");
+	    } else if (failedList.size() < decokeRunLengthDTOList.size()) {
+	        aopMessageVM.setCode(202); 
+	        aopMessageVM.setMessage("Partial success: Some records failed to update.");
+	    } else {
+	        aopMessageVM.setCode(400); 
+	        aopMessageVM.setMessage("All records failed to update.");
+	    }
+
+	    aopMessageVM.setData(failedList);
+	    return aopMessageVM;
 	}
 	
 	public static String nextAcademicYear(String yearStr) {
