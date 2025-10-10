@@ -9,7 +9,7 @@
   },
   {
     "field": "description",
-    "title": "Description", 
+    "title": "Description",
     "editable": true,
     "widthT": 250,
     "type": "text"
@@ -26,14 +26,14 @@
     "title": "End Month",
     "editable": true,
     "width": 120,
-     "type": "monthDropdown"
+    "type": "monthDropdown"
   },
   {
     "field": "value",
     "title": "Value",
     "editable": true,
     "width": 120,
-    "type": "number",
+    "type": "negativeNumber",
     "format": "{0:#.##}"
   },
   {

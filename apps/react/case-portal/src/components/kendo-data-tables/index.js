@@ -51,6 +51,7 @@ import { useSelector } from 'react-redux'
 import { Checkbox } from '../../../node_modules/@progress/kendo-react-inputs/index'
 import LimitCellEditor from './Utilities-Kendo/LimitCellEditor'
 import BudgetConstrainsCellEditor from './Utilities-Kendo/BudgetConstrainsCellEditor'
+import { NoSpinnerNumericEditorNegative } from './Utilities-Kendo/negativeNumbericColumns'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -1720,6 +1721,48 @@ const KendoDataTables = ({
                       format={col.format}
                       sortable={false}
                       width={col?.widthT}
+                    />
+                  )
+                }
+
+                if (col.type === 'negativeNumber') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.widthT}
+                      hidden={col.hidden}
+                      className={`
+                  ${col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'}
+                  ${col?.isBold ? 'bold-text' : ''}
+                `}
+                      editable={col?.editable ? true : false}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        edit: { text: NoSpinnerNumericEditorNegative },
+                        data: (props) =>
+                          showThreeColors ? (
+                            <RedHighlightCell2
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              allRedCell={allRedCell}
+                              allRedCell2={allRedCell2}
+                              disableRedHighlight={disableRedHighlight}
+                            />
+                          ) : (
+                            <RedHighlightCell
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              allRedCell={allRedCell}
+                              disableRedHighlight={disableRedHighlight}
+                            />
+                          ),
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                      filter='numeric'
+                      format={col.format}
                     />
                   )
                 }

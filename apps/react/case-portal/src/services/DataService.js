@@ -156,6 +156,10 @@ export const DataService = {
   shutdownDetailsExport,
   slowdownDetailsExport,
   ImportSlowdownDetails,
+
+  getConfigurationExcelType,
+
+  getProductionReports,
 }
 
 async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
@@ -3533,7 +3537,7 @@ async function getConfigurationExecutionDetailsNorms(keycloak) {
 }
 
 async function getProductionTargetBasis(keycloak, PLANT_ID, AOP_YEAR) {
-  let url = `${Config.CaseEngineUrl}/task/data-set-production-target-basis?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  let url = `${Config.CaseEngineUrl}/task/data-set-production-target?plantId=${PLANT_ID}&year=${AOP_YEAR}`
 
   const headers = {
     Accept: 'application/json',
@@ -3648,6 +3652,54 @@ export async function slowdownDetailsExport(keycloak, plantId, year) {
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
     console.error('Error exporting Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function getConfigurationExcelType(keycloak, PLANT_ID, AOP_YEAR, type) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=${type}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'Production & Norms Basis.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error Editing Config data:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function getProductionReports(keycloak, PLANT_ID, AOP_YEAR, REPORT_TYPE) {
+  let url = `${Config.CaseEngineUrl}/task/production-reports?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${REPORT_TYPE}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
     return Promise.reject(e)
   }
 }

@@ -535,12 +535,20 @@ const SelectivityData = (props) => {
       if (props?.configType === 'grades') {
         await DataService.getRecipeExcel(keycloak)
       } else if (props?.configType === 'ShutdownNorms') {
-        // Add shutdown rate specific download
         await DataService.getShutdownRateExcel(keycloak)
       } else if (props?.configType === 'pioImpact') {
         await PIOImpactApiService.exportPIOImpact(keycloak, PLANT_ID, AOP_YEAR)
       } else if (props?.tabIndex != 1) {
-        await DataService.getConfigurationExcel(keycloak, gradeId)
+        if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+          await DataService.getConfigurationExcelType(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            props?.configType,
+          )
+        } else {
+          await DataService.getConfigurationExcel(keycloak, gradeId)
+        }
       } else {
         await DataService.getConfigurationExcelConstants(keycloak)
       }
@@ -555,27 +563,6 @@ const SelectivityData = (props) => {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to download Excel.',
-        severity: 'error',
-      })
-    } finally {
-      // optional cleanup or logging
-    }
-  }
-
-  const handleLoad = async () => {
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Execution Started !',
-      severity: 'success',
-    })
-
-    try {
-      await DataService.getConfigurationExcel(keycloak)
-    } catch (error) {
-      console.error('Error!', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Failed to Execute SP.',
         severity: 'error',
       })
     } finally {

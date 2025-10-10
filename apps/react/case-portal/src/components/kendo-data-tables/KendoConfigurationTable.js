@@ -110,44 +110,53 @@ const ConfigurationTable = () => {
     setOpenConfirmDialog(false)
     onLoad()
   }
- const fetchPioImpactData = async () => {
-  setLoading(true)
-  try {
-    var data = await PIOImpactApiService.getPioImpactData(keycloak, PLANT_ID, AOP_YEAR)
-    console.log("PIO Impact Data from API:", data)
-    if (data?.code === 200) {
-      const formattedData = data.data.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: index,
-        originalRemark: item.remarks,
-        description: item.description,
-        startMonth: item.startMonth,
-        endMonth: item.endMonth,
-        value: item.value,
-        remarks: item.remarks,
-        Particulars: 'PIO Impact', // Assuming 'description' is the field to group by
-        isEditable: true,
-      }))
-      console.log("Formatted PIO Impact Data:", formattedData) // Add this debug log
-      setPioImpactRows(formattedData)
-    } else {
+  const fetchPioImpactData = async () => {
+    setLoading(true)
+    try {
+      var data = await PIOImpactApiService.getPioImpactData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      if (data?.code === 200) {
+        const formattedData = data.data.map((item, index) => ({
+          ...item,
+          idFromApi: item.id,
+          id: index,
+          originalRemark: item.remarks,
+          description: item.description,
+          startMonth: item.startMonth,
+          endMonth: item.endMonth,
+          value: item.value,
+          remarks: item.remarks,
+          Particulars: 'PIO Impact',
+          isEditable: true,
+        }))
+
+        setPioImpactRows(formattedData)
+      } else {
+        setPioImpactRows([])
+      }
+    } catch (error) {
+      console.error('Error fetching PIO Impact data:', error)
       setPioImpactRows([])
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Error fetching PIO Impact data:', error)
-    setPioImpactRows([])
-  } finally {
-    setLoading(false)
   }
-}
-useEffect(() => {
-  console.log("Tab changed - tabIndex:", tabIndex, "lowerVertName:", lowerVertName)
-  if (tabIndex === 3 && lowerVertName === 'aromatics') { // PIO Impact tab
-    console.log("Fetching PIO Impact data...")
-    fetchPioImpactData()
-  }
-}, [tabIndex, lowerVertName])
+  useEffect(() => {
+    console.log(
+      'Tab changed - tabIndex:',
+      tabIndex,
+      'lowerVertName:',
+      lowerVertName,
+    )
+    if (tabIndex === 3 && lowerVertName === 'aromatics') {
+      // PIO Impact tab
+      console.log('Fetching PIO Impact data...')
+      fetchPioImpactData()
+    }
+  }, [tabIndex, lowerVertName])
 
   const fetchData = async (gradeId = null) => {
     setProductionRows([])
@@ -866,11 +875,9 @@ useEffect(() => {
                   />
                 )
               case 'pio impact':
-                console.log("PIO IMPACT CASE MATCHED!")
-                console.log("Rows being passed:", pioImpactRows)
                 return (
                   <SelectivityData
-                    rows={pioImpactRows} // You'll need to create a new state for PIO Impact data
+                    rows={pioImpactRows}
                     loading={loading}
                     fetchData={fetchPioImpactData}
                     setRows={setPioImpactRows}

@@ -46,7 +46,14 @@ const TcsInput = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
 
   // Tab management
-  const rawTabsStatic = ['Unit Capacity', 'Shutdown', 'Slowdown', 'CPP Shutdown', 'PCG Outlook', 'Crude Blend Window']
+  const rawTabsStatic = [
+    'Unit Capacity',
+    'Shutdown',
+    'Slowdown',
+    'CPP Units SD Plan',
+    'PCG Outlook',
+    'Crude Blend Window',
+  ]
   const [tabs, setTabs] = useState(rawTabsStatic)
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -171,23 +178,56 @@ const TcsInput = () => {
             ],
           },
         ]
-      case 'CPP Shutdown':
-      return [
-        {
-          title: "CPP Shutdown plan January'25 - March'26",
-          children: [
-            { field: 'jmdCpp', title: 'JMD-CPP', width: 120, editable: true },
-            { field: 'ibrDueDate', title: 'IBR Due date', width: 120, editable: true },
-            { title: 'GT maintenance', children: [
-              { field: 'gtMaintenance', title: 'MI/HGPI/CI/Mods', width: 180, editable: true },
-            ]},
-            { field: 'noOfDays', title: 'No. of days', width: 100, editable: true },
-            { field: 'shutdownDate', title: 'Shutdown date', width: 120, editable: true },
-            { field: 'startupDate', title: 'Startup date', width: 120, editable: true },
-            { field: 'majorJobs', title: 'Major jobs', width: 180, editable: true },
-          ]
-        }
-      ]
+      case 'CPP Units SD Plan':
+        return [
+          {
+            title: "CPP Shutdown plan January'25 - March'26",
+            children: [
+              { field: 'jmdCpp', title: 'JMD-CPP', width: 120, editable: true },
+              {
+                field: 'ibrDueDate',
+                title: 'IBR Due date',
+                width: 120,
+                editable: true,
+              },
+              {
+                title: 'GT maintenance',
+                children: [
+                  {
+                    field: 'gtMaintenance',
+                    title: 'MI/HGPI/CI/Mods',
+                    width: 180,
+                    editable: true,
+                  },
+                ],
+              },
+              {
+                field: 'noOfDays',
+                title: 'No. of days',
+                width: 100,
+                editable: true,
+              },
+              {
+                field: 'shutdownDate',
+                title: 'Shutdown date',
+                width: 120,
+                editable: true,
+              },
+              {
+                field: 'startupDate',
+                title: 'Startup date',
+                width: 120,
+                editable: true,
+              },
+              {
+                field: 'majorJobs',
+                title: 'Major jobs',
+                width: 180,
+                editable: true,
+              },
+            ],
+          },
+        ]
       case 'PCG Outlook':
         return [
           { field: 'srno', title: 'SL.No', width: 60, editable: false },
@@ -210,17 +250,32 @@ const TcsInput = () => {
           {
             title: 'Crude Blend Window',
             children: [
-          { field: 'no', title: 'No', width: 60, editable: false },
-          { field: 'property', title: 'Property', width: 180, editable: true },
-          { field: 'stream', title: 'Stream', width: 120, editable: true },
-          { field: 'unit', title: 'Unit', width: 80, editable: true },
-          { field: 'min', title: 'Min', width: 70, editable: true },
-          { field: 'max', title: 'Max', width: 70, editable: true },
-          { field: 'criticality', title: 'Criticality', width: 90, editable: true },
-          { field: 'remarks', title: 'Remarks', width: 400, editable: true },
-        ],
-      },
-      ]
+              { field: 'no', title: 'No', width: 60, editable: false },
+              {
+                field: 'property',
+                title: 'Property',
+                width: 180,
+                editable: true,
+              },
+              { field: 'stream', title: 'Stream', width: 120, editable: true },
+              { field: 'unit', title: 'Unit', width: 80, editable: true },
+              { field: 'min', title: 'Min', width: 70, editable: true },
+              { field: 'max', title: 'Max', width: 70, editable: true },
+              {
+                field: 'criticality',
+                title: 'Criticality',
+                width: 90,
+                editable: true,
+              },
+              {
+                field: 'remarks',
+                title: 'Remarks',
+                width: 400,
+                editable: true,
+              },
+            ],
+          },
+        ]
 
       default:
         return []
@@ -242,8 +297,8 @@ const TcsInput = () => {
           return shutdownRows
         case 'Slowdown':
           return slowdownRows
-        case 'CPP Shutdown':
-        return zcppShutdownRows
+        case 'CPP Units SD Plan':
+          return zcppShutdownRows
         case 'PCG Outlook':
           return gasifierRows
         case 'Crude Blend Window':
@@ -252,7 +307,14 @@ const TcsInput = () => {
           return []
       }
     },
-    [unitCapacityRows, shutdownRows, slowdownRows, zcppShutdownRows, gasifierRows, crudeBlendRows],
+    [
+      unitCapacityRows,
+      shutdownRows,
+      slowdownRows,
+      zcppShutdownRows,
+      gasifierRows,
+      crudeBlendRows,
+    ],
   )
 
   const setRowsForTab = useCallback((tabId, data) => {
@@ -266,15 +328,15 @@ const TcsInput = () => {
       case 'Slowdown':
         setSlowdownRows(data)
         break
-      case 'CPP Shutdown':
-      setZcppShutdownRows(data)
-      break
+      case 'CPP Units SD Plan':
+        setZcppShutdownRows(data)
+        break
       case 'PCG Outlook':
-      setGasifierRows(data)
-      break
+        setGasifierRows(data)
+        break
       case 'Crude Blend Window':
-      setCrudeBlendRows(data)
-      break
+        setCrudeBlendRows(data)
+        break
       default:
         console.warn('No state for tab:', tabId)
     }
@@ -311,7 +373,7 @@ const TcsInput = () => {
         setLoading(false)
       }
     },
-    [keycloak, setRowsForTab,  PLANT_NAME],
+    [keycloak, setRowsForTab],
   )
 
   // Mock data generator - replace with actual API call
@@ -319,7 +381,7 @@ const TcsInput = () => {
 
   // Mock data generator - replace with actual API call
   const generateMockData = (tabName) => {
-    if (PLANT_NAME === 'cdu1') {
+    if (PLANT_NAME === 'dta') {
       switch (tabName) {
         case 'Unit Capacity':
           return [
@@ -526,88 +588,172 @@ const TcsInput = () => {
               purposeOfSlowdown: 'Heater 5 Online Spalling of all 4 cells',
             },
           ]
-        case 'CPP Shutdown':
-        return [
-          {
-            id: 1,
-            jmdCpp: 'GT-1/HRSG-1',
-            ibrDueDate: '2025-01-23',
-            gtMaintenance: 'MI',
-            noOfDays: 66,
-            shutdownDate: '2024-12-24',
-            startupDate: '2025-02-28',
-            majorJobs: 'HRSG Economiser & Side walls replacement'
-          },
-          {
-            id: 2,
-            jmdCpp: 'GT-6/HRSG-6',
-            ibrDueDate: '2025-03-07',
-            gtMaintenance: 'HGPI',
-            noOfDays: 70,
-            shutdownDate: '2025-03-01',
-            startupDate: '2025-05-10',
-            majorJobs: 'Rotor replacement, HRSG side walls, 70 days'
-          },
-          {
-            id: 3,
-            jmdCpp: 'GT-13/HRSG-13',
-            ibrDueDate: '2025-03-14',
-            gtMaintenance: 'CI',
-            noOfDays: 11,
-            shutdownDate: '2025-03-05',
-            startupDate: '2025-03-16',
-            majorJobs: 'HRSG side walls replacement'
-          },
-          {
-            id: 4,
-            jmdCpp: 'GT-4/HRSG-4',
-            ibrDueDate: '2025-05-13',
-            gtMaintenance: 'HGPI',
-            noOfDays: 30,
-            shutdownDate: '2025-03-17',
-            startupDate: '2025-04-16',
-            majorJobs: 'Turbine rotor replacement'
-          }
-        ]
-        case 'PCG Outlook':
-      return [
-        {
-          id: 1,
-          srno: 1,
-          particular: 'Gasifier Availability',
-          jan: 2.9, feb: 2.8, march: 2.9, apr: 2.8, may: 2.9, june: 2.8,
-          july: 2.9, aug: 2.8, sep: 2.9, oct: 2.8, nov: 2.9, dec: 2.8,
-        },
-        { id: 2, 
-          srno: 2,
-          particular: 'SinGas Production',
-          jan: 6.0, feb: 6.0, march: 6.0, apr: 6.0, may: 6.0, june: 6.0,
-          july: 6.0, aug: 6.0, sep: 6.0, oct: 6.0, nov: 6.0, dec: 6.0,
-        }
-      ]
-      case 'Crude Blend Window':
+        case 'CPP Units SD Plan':
           return [
             {
-              id: 1, no: '1.1', property: 'API', stream: 'CDU feed', unit: 'degree', min: 26.0, max: '-', criticality: 2.0, remarks: 'Max acceptable API delta in successive crude blends change is 2 . For 330 KBPSD min API is 26 & for 345 KBPSD min API is 27.5'
+              id: 1,
+              jmdCpp: 'GT-1/HRSG-1',
+              ibrDueDate: '2025-01-23',
+              gtMaintenance: 'MI',
+              noOfDays: 66,
+              shutdownDate: '2024-12-24',
+              startupDate: '2025-02-28',
+              majorJobs: 'HRSG Economiser & Side walls replacement',
             },
             {
-              id: 2, no: '1.2', property: 'TAN', stream: 'CDU feed', unit: 'mg KOH/gm', min: 1.3, max: '', criticality: 1.0, remarks: 'Upper TAN to be targeted for 1.2 + 0.1 margin of PIMS error'
+              id: 2,
+              jmdCpp: 'GT-6/HRSG-6',
+              ibrDueDate: '2025-03-07',
+              gtMaintenance: 'HGPI',
+              noOfDays: 70,
+              shutdownDate: '2025-03-01',
+              startupDate: '2025-05-10',
+              majorJobs: 'Rotor replacement, HRSG side walls, 70 days',
             },
             {
-              id: 3, no: '1.3', property: 'Sulfur', stream: 'CDU feed', unit: 'Wt%', min: 1.1, max: 2.7, criticality: 1, remarks: '1. Lower limit is based on sulphur/TAN ratio with High TAN (>0.8) crude blend processing and CBA capacity.\n2. Considering AGTL Design for 2.7 WT%S @45.8 KTPD/326 KBPSD crude T\'put. At Higher T\'put of 330/335/340/345 Max S is limited at 2.66/2.63/2.59/2.55 WT%.'
+              id: 3,
+              jmdCpp: 'GT-13/HRSG-13',
+              ibrDueDate: '2025-03-14',
+              gtMaintenance: 'CI',
+              noOfDays: 11,
+              shutdownDate: '2025-03-05',
+              startupDate: '2025-03-16',
+              majorJobs: 'HRSG side walls replacement',
             },
             {
-              id: 4, no: '1.4', property: 'K. Visc. @40°C', stream: 'CDU feed', unit: 'cSt', min: '', max: 27, criticality: 2, remarks: 'Max limit:- for Desalter performance. (High viscosity impacts performance adversely).\nDTA RTF crude charge pumps are designed to handle max viscosity 25 cSt crude blend.'
+              id: 4,
+              jmdCpp: 'GT-4/HRSG-4',
+              ibrDueDate: '2025-05-13',
+              gtMaintenance: 'HGPI',
+              noOfDays: 30,
+              shutdownDate: '2025-03-17',
+              startupDate: '2025-04-16',
+              majorJobs: 'Turbine rotor replacement',
+            },
+          ]
+        case 'PCG Outlook':
+          return [
+            {
+              id: 1,
+              srno: 1,
+              particular: 'Gasifier Availability',
+              jan: 2.9,
+              feb: 2.8,
+              march: 2.9,
+              apr: 2.8,
+              may: 2.9,
+              june: 2.8,
+              july: 2.9,
+              aug: 2.8,
+              sep: 2.9,
+              oct: 2.8,
+              nov: 2.9,
+              dec: 2.8,
             },
             {
-              id: 5, no: '1.5', property: 'Asp to Resin ratio', stream: 'CDU feed', unit: '', min: '', max: 0.35, criticality: 2, remarks: 'While blending the Crudes having high Saturates (>50%), it is proposed to ensure the blend Colloidal Instability Index (CII) not to cross 1.0 and blend Asphaltene to Resin ratio remains less than 0.35.'
+              id: 2,
+              srno: 2,
+              particular: 'SinGas Production',
+              jan: 6.0,
+              feb: 6.0,
+              march: 6.0,
+              apr: 6.0,
+              may: 6.0,
+              june: 6.0,
+              july: 6.0,
+              aug: 6.0,
+              sep: 6.0,
+              oct: 6.0,
+              nov: 6.0,
+              dec: 6.0,
+            },
+          ]
+        case 'Crude Blend Window':
+          return [
+            {
+              id: 1,
+              no: '1.1',
+              property: 'API',
+              stream: 'CDU feed',
+              unit: 'degree',
+              min: 26.0,
+              max: '-',
+              criticality: 2.0,
+              remarks:
+                'Max acceptable API delta in successive crude blends change is 2 . For 330 KBPSD min API is 26 & for 345 KBPSD min API is 27.5',
             },
             {
-              id: 6, no: '1.6', property: 'BS&W', stream: 'CDU feed', unit: 'vol %', min: '', max: 1.0, criticality: 1.0, remarks: 'This parameter is critical to ensure smooth desalter performance & unit reliability.'
+              id: 2,
+              no: '1.2',
+              property: 'TAN',
+              stream: 'CDU feed',
+              unit: 'mg KOH/gm',
+              min: 1.3,
+              max: '',
+              criticality: 1.0,
+              remarks:
+                'Upper TAN to be targeted for 1.2 + 0.1 margin of PIMS error',
             },
             {
-              id: 7, no: '1.7', property: 'Salts', stream: 'CDU feed', unit: 'ptb', min: '', max: 70.0, criticality: 1.0, remarks: 'This parameter is critical to ensure smooth desalter performance & unit reliability.'
-            }
+              id: 3,
+              no: '1.3',
+              property: 'Sulfur',
+              stream: 'CDU feed',
+              unit: 'Wt%',
+              min: 1.1,
+              max: 2.7,
+              criticality: 1,
+              remarks:
+                "1. Lower limit is based on sulphur/TAN ratio with High TAN (>0.8) crude blend processing and CBA capacity.\n2. Considering AGTL Design for 2.7 WT%S @45.8 KTPD/326 KBPSD crude T'put. At Higher T'put of 330/335/340/345 Max S is limited at 2.66/2.63/2.59/2.55 WT%.",
+            },
+            {
+              id: 4,
+              no: '1.4',
+              property: 'K. Visc. @40°C',
+              stream: 'CDU feed',
+              unit: 'cSt',
+              min: '',
+              max: 27,
+              criticality: 2,
+              remarks:
+                'Max limit:- for Desalter performance. (High viscosity impacts performance adversely).\nDTA RTF crude charge pumps are designed to handle max viscosity 25 cSt crude blend.',
+            },
+            {
+              id: 5,
+              no: '1.5',
+              property: 'Asp to Resin ratio',
+              stream: 'CDU feed',
+              unit: '',
+              min: '',
+              max: 0.35,
+              criticality: 2,
+              remarks:
+                'While blending the Crudes having high Saturates (>50%), it is proposed to ensure the blend Colloidal Instability Index (CII) not to cross 1.0 and blend Asphaltene to Resin ratio remains less than 0.35.',
+            },
+            {
+              id: 6,
+              no: '1.6',
+              property: 'BS&W',
+              stream: 'CDU feed',
+              unit: 'vol %',
+              min: '',
+              max: 1.0,
+              criticality: 1.0,
+              remarks:
+                'This parameter is critical to ensure smooth desalter performance & unit reliability.',
+            },
+            {
+              id: 7,
+              no: '1.7',
+              property: 'Salts',
+              stream: 'CDU feed',
+              unit: 'ptb',
+              min: '',
+              max: 70.0,
+              criticality: 1.0,
+              remarks:
+                'This parameter is critical to ensure smooth desalter performance & unit reliability.',
+            },
           ]
         default:
           return []
@@ -802,89 +948,146 @@ const TcsInput = () => {
               purposeOfSlowdown: '',
             },
           ]
-        case 'CPP Shutdown':
-        return [
-          {
-            id: 1,
-            jmdCpp: 'GT-4/HRSG-4',
-            ibrDueDate: '2025-02-07',
-            gtMaintenance: 'HGPI',
-            noOfDays: 22,
-            shutdownDate: '2025-02-01',
-            startupDate: '2025-02-23',
-            majorJobs: 'IBR'
-          },
-          {
-            id: 2,
-            jmdCpp: 'GT-1/HRSG-1',
-            ibrDueDate: '2025-03-12',
-            gtMaintenance: 'IBR',
-            noOfDays: 11,
-            shutdownDate: '2025-02-24',
-            startupDate: '2025-03-07',
-            majorJobs: 'IBR'
-          },
-          {
-            id: 3,
-            jmdCpp: 'GT-6/HRSG-6',
-            ibrDueDate: '2025-04-13',
-            gtMaintenance: 'CI',
-            noOfDays: 14,
-            shutdownDate: '2025-03-08',
-            startupDate: '2025-03-23',
-            majorJobs: 'IBR'
-          },
-          {
-            id: 4,
-            jmdCpp: 'GT-5/HRSG-5',
-            ibrDueDate: '11-May-25',
-            gtMaintenance: 'IBR',
-            noOfDays: 11,
-            shutdownDate: '2025-05-01',
-            startupDate: '2025-05-12',
-            majorJobs: 'IBR'
-          },
-          {
-            id: 5,
-            jmdCpp: 'GT-2/HRSG-2',
-            ibrDueDate: '2025-08-20',
-            gtMaintenance: 'IBR',
-            noOfDays: 11,
-            shutdownDate: '2025-06-28',
-            startupDate: '2025-07-09',
-            majorJobs: 'IBR'
-          }
-        ]
-        case 'PCG Outlook':
-      return [
-        {
-          id: 1,
-          srno: 1,
-          particular: 'Gasifier Availability',
-          jan: 4.3, feb: 4.3, march: 4.3, apr: 4.3, may: 4.3, june: 4.3,
-          july: 4.3, aug: 4.3, sep: 4.3, oct: 4.3, nov: 4.3, dec: 4.3,
-        },
-        { id: 2, 
-          srno: 2,
-          particular: 'SinGas Production',
-          jan: 9.1, feb: 8.9, march: 9.1, apr: 8.9, may: 9.1, june: 8.9,
-          july: 9.1, aug: 8.9, sep: 9.1, oct: 8.9, nov: 9.1, dec: 8.9,
-        }
-      ]
-      case 'Crude Blend Window':
+        case 'ZCPP Shutdown':
           return [
-           {
-            id: 1, no: '1.1', property: 'API', stream: 'CDU feed', unit: 'degree', min: 24.0, max: '', criticality: 2.0, remarks: 'Max acceptable °API delta in successive crude blends change is 2° API.\nMin and Max limits are applicable for 380 KBPSD\nFor 290 KBPSD design API is 24.'
-          },
-          {
-            id: 2, no: '1.2', property: 'TAN', stream: 'CDU feed', unit: 'mg KOH/gm', min: 1.30, max: '', criticality: 1.0, remarks: 'Upper TAN to be targeted for 1.2 + 0.1 margin of PIMS error'
-          },
-          {
-            id: 3, no: '1.3', property: 'Sulfur', stream: 'CDU feed', unit: 'Wt%', min: 1.1, max: 2.7, criticality: 1, remarks: "Max limit is 2.7wt% 'S' With Acid gas transfer to SEZ PCG @24000 Nm3/hr."
-          },
-          {
-            id: 4, no: '1.4', property: 'K. Visc. @40°C', stream: 'CDU feed', unit: 'cSt', min: '', max: 42, criticality: 2, remarks: 'Max limit:-for Desalter performance.(High viscosity impacts the Desalter performance adversely)'
-          }
+            {
+              id: 1,
+              jmdCpp: 'GT-4/HRSG-4',
+              ibrDueDate: '2025-02-07',
+              gtMaintenance: 'HGPI',
+              noOfDays: 22,
+              shutdownDate: '2025-02-01',
+              startupDate: '2025-02-23',
+              majorJobs: 'IBR',
+            },
+            {
+              id: 2,
+              jmdCpp: 'GT-1/HRSG-1',
+              ibrDueDate: '2025-03-12',
+              gtMaintenance: 'IBR',
+              noOfDays: 11,
+              shutdownDate: '2025-02-24',
+              startupDate: '2025-03-07',
+              majorJobs: 'IBR',
+            },
+            {
+              id: 3,
+              jmdCpp: 'GT-6/HRSG-6',
+              ibrDueDate: '2025-04-13',
+              gtMaintenance: 'CI',
+              noOfDays: 14,
+              shutdownDate: '2025-03-08',
+              startupDate: '2025-03-23',
+              majorJobs: 'IBR',
+            },
+            {
+              id: 4,
+              jmdCpp: 'GT-5/HRSG-5',
+              ibrDueDate: '11-May-25',
+              gtMaintenance: 'IBR',
+              noOfDays: 11,
+              shutdownDate: '2025-05-01',
+              startupDate: '2025-05-12',
+              majorJobs: 'IBR',
+            },
+            {
+              id: 5,
+              jmdCpp: 'GT-2/HRSG-2',
+              ibrDueDate: '2025-08-20',
+              gtMaintenance: 'IBR',
+              noOfDays: 11,
+              shutdownDate: '2025-06-28',
+              startupDate: '2025-07-09',
+              majorJobs: 'IBR',
+            },
+          ]
+        case 'PCG Outlook':
+          return [
+            {
+              id: 1,
+              srno: 1,
+              particular: 'Gasifier Availability',
+              jan: 4.3,
+              feb: 4.3,
+              march: 4.3,
+              apr: 4.3,
+              may: 4.3,
+              june: 4.3,
+              july: 4.3,
+              aug: 4.3,
+              sep: 4.3,
+              oct: 4.3,
+              nov: 4.3,
+              dec: 4.3,
+            },
+            {
+              id: 2,
+              srno: 2,
+              particular: 'SinGas Production',
+              jan: 9.1,
+              feb: 8.9,
+              march: 9.1,
+              apr: 8.9,
+              may: 9.1,
+              june: 8.9,
+              july: 9.1,
+              aug: 8.9,
+              sep: 9.1,
+              oct: 8.9,
+              nov: 9.1,
+              dec: 8.9,
+            },
+          ]
+        case 'Crude Blend Window':
+          return [
+            {
+              id: 1,
+              no: '1.1',
+              property: 'API',
+              stream: 'CDU feed',
+              unit: 'degree',
+              min: 24.0,
+              max: '',
+              criticality: 2.0,
+              remarks:
+                'Max acceptable °API delta in successive crude blends change is 2° API.\nMin and Max limits are applicable for 380 KBPSD\nFor 290 KBPSD design API is 24.',
+            },
+            {
+              id: 2,
+              no: '1.2',
+              property: 'TAN',
+              stream: 'CDU feed',
+              unit: 'mg KOH/gm',
+              min: 1.3,
+              max: '',
+              criticality: 1.0,
+              remarks:
+                'Upper TAN to be targeted for 1.2 + 0.1 margin of PIMS error',
+            },
+            {
+              id: 3,
+              no: '1.3',
+              property: 'Sulfur',
+              stream: 'CDU feed',
+              unit: 'Wt%',
+              min: 1.1,
+              max: 2.7,
+              criticality: 1,
+              remarks:
+                "Max limit is 2.7wt% 'S' With Acid gas transfer to SEZ PCG @24000 Nm3/hr.",
+            },
+            {
+              id: 4,
+              no: '1.4',
+              property: 'K. Visc. @40°C',
+              stream: 'CDU feed',
+              unit: 'cSt',
+              min: '',
+              max: 42,
+              criticality: 2,
+              remarks:
+                'Max limit:-for Desalter performance.(High viscosity impacts the Desalter performance adversely)',
+            },
           ]
         default:
           return []
@@ -1033,7 +1236,6 @@ const TcsInput = () => {
     lowerVertName,
     PLANT_NAME,
   ])
-  console.log('plant name is', PLANT_NAME)
 
   return (
     <Box>
