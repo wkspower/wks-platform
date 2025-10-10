@@ -1309,7 +1309,13 @@ const ProductionvolumeData = ({ permissions }) => {
       if (response?.code === 200 && data) {
         // Conversion logic
         const isTPD = unit === 'TPD'
-        const formatted = data.map((item, index) => ({
+        const formatted = data.map((item, index) => {
+        // Check for vertical and site
+        const isPEorPP =
+          VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp'
+        const isNMD =
+          siteObject?.name?.toLowerCase() === 'nmd'
+        return {
           ...item,
           idFromApi: item?.id,
           productName: item?.materialDisplayName,
@@ -1360,7 +1366,12 @@ const ProductionvolumeData = ({ permissions }) => {
               ? (item.march * 24).toFixed(2)
               : item.march || null,
           isEditable: false,
-        }))
+          remarks:
+            isPEorPP && isNMD
+              ? 'System Generated'
+              : item.remarks?.trim() || null,
+        }
+      })
         setRowsMaxCapacity(formatted)
       } else {
         setRowsMaxCapacity([])

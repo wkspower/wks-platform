@@ -60,7 +60,13 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-
+  function isLeapYear(yearStr) {
+  // yearStr is like "2025-26"
+  if (!yearStr) return false
+  const year = parseInt(yearStr.split('-')[0], 10)
+  if (!year) return false
+  return (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)
+}
   const saveChanges = useCallback(async () => {
     try {
       setLoading(true)
@@ -79,6 +85,42 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         setLoading(false)
         return
       }
+      // --- MONTHLY SUM VALIDATION (move here) ---
+      const febDays =
+     isLeapYear(AOP_YEAR) ? 29 : 28
+    const monthDays = {
+      January: 31,
+      February: febDays,
+      March: 31,
+      April: 30,
+      May: 31,
+      June: 30,
+      July: 31,
+      August: 31,
+      September: 30,
+      October: 31,
+      November: 30,
+      December: 31,
+}
+    for (const row of data) {
+      const month = row.monthName
+      if (month && monthDays[month]) {
+        const sum =
+          Number(row.fourF || 0) +
+          Number(row.fiveF || 0) +
+          Number(row.fourFD || 0)
+        if (sum !== monthDays[month]) {
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: `Sum of 4F, 5F, and 4F with Demo for ${month} must be ${monthDays[month]} days. Current sum: ${sum}`,
+            severity: 'error',
+          })
+          setLoading(false)
+          return
+        }
+      }
+    }
+    // --- END VALIDATION ---
 
       const validationMessage = validateFields(data, ['remarks'])
       if (validationMessage) {

@@ -381,7 +381,7 @@ const TcsInput = () => {
 
   // Mock data generator - replace with actual API call
   const generateMockData = (tabName) => {
-    if (PLANT_NAME === 'dta') {
+    if (PLANT_NAME === 'cdu1') {
       switch (tabName) {
         case 'Unit Capacity':
           return [

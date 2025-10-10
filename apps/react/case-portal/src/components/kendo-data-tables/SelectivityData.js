@@ -488,7 +488,10 @@ const SelectivityData = (props) => {
       saveWithRemark: true,
       saveBtn: true,
       downloadExcelBtn: true,
-      uploadExcelBtn: true,
+      uploadExcelBtn:
+                       props?.configType === 'ShutdownNorms'
+                       ? (verticalObject?.name === 'PE' && siteObject?.name === 'NMD' && plantObject?.name === 'LDPE')
+                      : true,
       showLoad: true,
       allAction: true,
       // showG: props?.configType === 'cracker_configuration' ? true : false,
