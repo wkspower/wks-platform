@@ -46,6 +46,7 @@ const DecokingConfig = () => {
   const [currentRemarkRunLength, setCurrentRemarkRunLength] = useState('')
   const [currentRowIdRunLength, setCurrentRowId3] = useState(null)
   const [calculationObject, setCalculationObject] = useState([])
+  const [dateError, setDateError] = useState(false)
   //my chnage
   const [modifiedCellsSdTa, setModifiedCellsSdTa] = React.useState({})
   const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
@@ -312,6 +313,15 @@ const DecokingConfig = () => {
 
   const saveChangesSdTa = React.useCallback(async () => {
     try {
+      if (dateError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Start date must be before or equal to End date.',
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
       if (Object.keys(modifiedCellsSdTa).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -739,6 +749,17 @@ const DecokingConfig = () => {
       setLoading(false)
     }
   }
+  useEffect(() => {
+  if (
+    globalTaStartDate &&
+    globalTaEndDate &&
+    new Date(globalTaStartDate) > new Date(globalTaEndDate)
+  ) {
+    setDateError(true)
+  } else {
+    setDateError(false)
+  }
+}, [globalTaStartDate, globalTaEndDate])
   const rowClass = (row) => (row.isError ? 'row-error' : '')
   return (
     <Box>
@@ -762,6 +783,7 @@ const DecokingConfig = () => {
               onChange={(e) => setGlobalTaStartDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
+              max={globalTaEndDate || undefined}
             />
           </Box>
 
@@ -776,6 +798,7 @@ const DecokingConfig = () => {
               onChange={(e) => setGlobalTaEndDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
+              min={globalTaStartDate || undefined}
             />
           </Box>
         </Box>
