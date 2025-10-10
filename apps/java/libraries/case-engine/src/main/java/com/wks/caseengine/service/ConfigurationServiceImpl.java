@@ -2394,14 +2394,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	                dtoList = failedDtos;
 	            }
 	        }
-
-	        
 	        List<Map<String, Object>> data = getNormAttributeTransactionReceipe(year, plantFKId.toString());
 	        List<NormParameters> normParametersList = normParametersService.getAllGrades(plantFKId.toString());
-
-	        
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("Recipe");
+	        innerHeaders.add("UOM");
 	        for (NormParameters normParameters : normParametersList) {
 	            innerHeaders.add(normParameters.getDisplayName());
 	        }
@@ -2446,6 +2443,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	            } else {
 	                list.add("");  
 	            }
+	            if (rec.containsKey("UOM")) {
+	                newMap.put("UOM", rec.get("UOM"));
+	                list.add(rec.get("UOM"));
+	            } else {
+	                list.add("");  
+	            }
 
 	            
 	            for (Map.Entry<String, Object> e : rec.entrySet()) {
@@ -2460,7 +2463,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	           
 	            for (String header : innerHeaders) {
-	                if (header.equalsIgnoreCase("Recipe") || header.equalsIgnoreCase("RecipeId")
+	                if (header.equalsIgnoreCase("Recipe") || header.equalsIgnoreCase("RecipeId") || header.equalsIgnoreCase("UOM")
 	                        || (isAfterSave && (header.equalsIgnoreCase("Status") || header.equalsIgnoreCase("Error Description")))) {
 	                    continue;
 	                }
@@ -2610,7 +2613,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			    dto.setRecId(recId);
 
 			    
-			    for (int col = 1; col < lastColIndex; col++) {
+			    for (int col = 2; col < lastColIndex; col++) {
 			        String header = allHeaders.get(col);
 			        Cell valueCell = row.getCell(col);
 			        Double numeric = getNumericCellValue(valueCell, dto);
