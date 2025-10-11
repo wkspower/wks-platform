@@ -44,6 +44,10 @@ public interface NormParametersRepository extends JpaRepository<NormParameters, 
     @Query(value = "SELECT Id FROM NormParameters WHERE Name = :name and Plant_FK_Id = :plantId", nativeQuery = true)
 	List<UUID> findNormParameterIds(@Param("name") String name,@Param("plantId") UUID plantId);
 
-	
+    @Query(value = "SELECT Id FROM NormParameters WHERE Plant_FK_Id = :plantFKId AND Name = :name AND Type = :type", nativeQuery = true)
+    UUID findIdByPlantFkIdAndNameAndType(@Param("plantFKId") UUID plantFKId,
+                                         @Param("name") String name,
+                                         @Param("type") String type);
+
 
 }

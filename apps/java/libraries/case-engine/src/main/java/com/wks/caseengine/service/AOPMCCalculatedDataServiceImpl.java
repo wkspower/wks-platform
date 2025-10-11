@@ -12,6 +12,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.rest.entity.Plant;
 import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
@@ -40,6 +41,8 @@ import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUDesignCapacity;
+import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
@@ -49,6 +52,8 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUValueCapacityRepository;
+import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -86,6 +91,12 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Autowired
 	private MCUValueCapacityRepository mcuValueCapacityRepository;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private NormAttributeTransactionsRepository normAttributeTransactionRepository;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public AOPMCCalculatedDataServiceImpl(DataSource dataSource) {
@@ -255,6 +266,15 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 						failedList.add(aOPMCCalculatedDataDTO);
 						continue;
 					}
+					Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+							.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+					Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+							.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+					
+					if(vertical.getName().equalsIgnoreCase("Cracker")) {
+						updateMaxEthyleneProduction( aOPMCCalculatedDataDTO, plant, year);
+					}
+					
 					aOPMCCalculatedData = aOPMCCalculatedDataOptional.get();
 					aOPMCCalculatedData.setId(UUID.fromString(aOPMCCalculatedDataDTO.getId()));
 					aOPMCCalculatedData.setModifiedOn(new Date());
@@ -309,6 +329,68 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to edit data", ex);
 		}
+	}
+	
+	public void updateMaxEthyleneProduction(AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO,Plants plant,String year) {
+		
+			String materialId=aOPMCCalculatedDataDTO.getMaterialFKId();
+			Optional<NormParameters> normParametersOpt=normParametersRepository.findById(UUID.fromString(materialId));
+			NormParameters normParameters=normParametersOpt.get();
+			if(normParameters.getName().equalsIgnoreCase("4F") || normParameters.getName().equalsIgnoreCase("5F") || normParameters.getName().equalsIgnoreCase("4F+D"))
+			{
+				UUID normParameter=	normParametersRepository.findIdByPlantFkIdAndNameAndType(plant.getId(),"Max Ethylene Production",normParameters.getName());
+				List<NormAttributeTransactions>	normAttributeTransactions=normAttributeTransactionRepository.findByNormParameterIdAndAuditYear(normParameter,year);
+				for(NormAttributeTransactions normAttributeTransaction:normAttributeTransactions) {
+					int month=normAttributeTransaction.getAopMonth();
+					Double value=getValue(month,aOPMCCalculatedDataDTO);
+					normAttributeTransaction.setAttributeValue(value.toString());
+					normAttributeTransactionRepository.save(normAttributeTransaction);
+				}
+			}
+	}
+	
+	public Double getValue(int month, AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO) {
+	    switch (month) {
+	        case 1: {
+	            return aOPMCCalculatedDataDTO.getJanuary();
+	        }
+	        case 2: {
+	            return aOPMCCalculatedDataDTO.getFebruary();
+	        }
+	        case 3: {
+	            return aOPMCCalculatedDataDTO.getMarch();
+	        }
+	        case 4: {
+	            return aOPMCCalculatedDataDTO.getApril();
+	        }
+	        case 5: {
+	            return aOPMCCalculatedDataDTO.getMay();
+	        }
+	        case 6: {
+	            return aOPMCCalculatedDataDTO.getJune();
+	        }
+	        case 7: {
+	            return aOPMCCalculatedDataDTO.getJuly();
+	        }
+	        case 8: {
+	            return aOPMCCalculatedDataDTO.getAugust();
+	        }
+	        case 9: {
+	            return aOPMCCalculatedDataDTO.getSeptember();
+	        }
+	        case 10: {
+	            return aOPMCCalculatedDataDTO.getOctober();
+	        }
+	        case 11: {
+	            return aOPMCCalculatedDataDTO.getNovember();
+	        }
+	        case 12: {
+	            return aOPMCCalculatedDataDTO.getDecember();
+	        }
+	        default:
+	            // Handle invalid month input, e.g., return null or throw an exception
+	            return null;
+	    }
 	}
 
 	@Override
