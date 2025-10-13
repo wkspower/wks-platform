@@ -139,7 +139,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			if (!isAfterSave) {
 				 dtoList = findMaintenanceDetailsByPlantIdAndType(UUID.fromString(plantId),maintenanceTypeName, year); 
 			}
-			String pattern = "dd-MM-yyyy hh:mm a";
+			String pattern = "dd-MM-yyyy HH:mm";
 			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
 			Workbook workbook = new XSSFWorkbook();
 
@@ -319,10 +319,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					dto.setAudityear(year);
 					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
+					dto.setProductId(normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName(),plantFKId));
 					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
 					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try { 
-					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.US);
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintStartDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintStartDateTime(date);
@@ -336,7 +337,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try {
 					        
-					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.US);
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintEndDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintEndDateTime(date);
