@@ -626,9 +626,9 @@ const WorkFlowMerge = () => {
   ) {
     activeTabs = elastomerTabs
   } else if (lowerVertName === 'pe') {
-    activeTabs = siteName === 'nmd' ? customPETabs : PETabs
+    activeTabs = customPETabs
   } else if (lowerVertName === 'pp') {
-    activeTabs = siteName === 'nmd' ? customPPTabs : PPTabs
+    activeTabs = customPPTabs
   }
   return (
     <div

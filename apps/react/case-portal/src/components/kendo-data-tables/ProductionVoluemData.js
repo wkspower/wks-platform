@@ -999,6 +999,142 @@ const ProductionvolumeData = ({ permissions }) => {
     },
   ]
 
+  const colDefs_max_achieved_capacity_pe_pp = [
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      widthT: 100,
+
+      editable: true,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: true,
+    },
+    {
+      field: 'april',
+      title: headerMap[4],
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+      format: '{0:#.##}',
+      type: 'number',
+    },
+    {
+      field: 'may',
+      title: headerMap[5],
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      format: '{0:#.##}',
+      type: 'number',
+    },
+    {
+      field: 'june',
+      title: headerMap[6],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'july',
+      format: '{0:#.##}',
+      title: headerMap[7],
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'august',
+      title: headerMap[8],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'september',
+      title: headerMap[9],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'october',
+      title: headerMap[10],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'november',
+      title: headerMap[11],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'december',
+      title: headerMap[12],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'january',
+      title: headerMap[1],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'february',
+      title: headerMap[2],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+    {
+      field: 'march',
+      title: headerMap[3],
+      format: '{0:#.##}',
+      editable: true,
+
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+    },
+  ]
+
   const colDefs_non_editable = [
     {
       field: 'idFromApi',
@@ -1441,8 +1577,7 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
   const percentageTitle =
-    (VERTICAL_NAME === 'pp' && siteObject?.name?.toLowerCase() === 'nmd') ||
-    (VERTICAL_NAME === 'pe' && siteObject?.name?.toLowerCase() === 'nmd')
+    VERTICAL_NAME === 'pp' || VERTICAL_NAME === 'pe'
       ? 'Current MCU'
       : VERTICAL_NAME === 'cracker'
         ? 'Max Achieved Capacity (Ethylene)'
@@ -1652,6 +1787,12 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const conditionForFirst = !permissions?.hideSummary
+  let max_achieved_capacity = []
+  if (VERTICAL_NAME == 'pe' || VERTICAL_NAME == 'pp') {
+    max_achieved_capacity = colDefs_max_achieved_capacity_pe_pp
+  } else {
+    max_achieved_capacity = colDefs_max_achieved_capacity
+  }
 
   return (
     <div>
@@ -1701,7 +1842,7 @@ const ProductionvolumeData = ({ permissions }) => {
       {conditionForFirst && (
         <KendoDataTables
           setRows={setRowsMaxCapacity}
-          columns={colDefs_max_achieved_capacity}
+          columns={max_achieved_capacity}
           rows={rowsMaxCapacity}
           fetchData={fetchMaxCapacityData}
           permissions={adjustedPermissionsGrid1}

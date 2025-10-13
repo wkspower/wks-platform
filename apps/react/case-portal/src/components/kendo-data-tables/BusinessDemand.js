@@ -288,8 +288,7 @@ const BusinessDemand = ({ permissions }) => {
     }
   }
   const percentageTitle =
-    (lowerVertName === 'pp' && siteObject?.name?.toLowerCase() === 'nmd') ||
-    (lowerVertName === 'pe' && siteObject?.name?.toLowerCase() === 'nmd')
+    lowerVertName === 'pp' || lowerVertName === 'pe'
       ? 'Business Demand Data (%)'
       : 'Business Demand Data'
 
