@@ -26,6 +26,10 @@ const getConfigByType = (configType) => {
       return productionColumnsConstants
     case 'pioImpact':
       return pioImpactColumns
+
+    case 'shutdownData':
+      return pioImpactColumns
+
     case 'StartupLosses':
       return productionColumnsPE1
     case 'Configuration':
@@ -102,7 +106,7 @@ const getEnhancedAOPColDefs = ({
 
   var enhancedColDefs = []
 
-  if (configType == 'pioImpact') {
+  if (configType == 'pioImpact' || configType == 'shutdownData') {
     enhancedColDefs = config.map((col) => {
       if (headerMap && headerMap[col.title]) {
         return {

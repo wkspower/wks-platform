@@ -2025,11 +2025,12 @@ async function maintenacegetdata(keycloak, budgetCategory) {
     return await Promise.reject(e)
   }
 }
-async function savemaintenacegetdata(maintenancedetails, keycloak) {
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const parsedPlant = JSON.parse(storedPlant)
-  var year = localStorage.getItem('year')
-
+async function savemaintenacegetdata(
+  maintenancedetails,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   // Only encode plantId and year, leave budgetCategory as-is
   const url = `${Config.CaseEngineUrl}/task/budget-maintenance`
   const headers = {
@@ -2049,16 +2050,13 @@ async function savemaintenacegetdata(maintenancedetails, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function maintenaceExportdata(keycloak, budgetCategory) {
-  const year = localStorage.getItem('year')
-  let plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-
-  let url = `${Config.CaseEngineUrl}/task/budget-maintenance-export-excel?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}`
+async function maintenaceExportdata(
+  keycloak,
+  budgetCategory,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/budget-maintenance-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
   //  if (budgetCategory) {
   //     url += `&budgetCategory=${encodeURIComponent(budgetCategory)}`
   //   }
@@ -2093,11 +2091,8 @@ async function maintenaceExportdata(keycloak, budgetCategory) {
   }
 }
 
-async function maintenaceImportExceldata(file, keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  const url = `${Config.CaseEngineUrl}/task/budget-maintenance-import-excel?plantId=${plantId}&year=${year}`
+async function maintenaceImportExceldata(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/budget-maintenance-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', file)
 

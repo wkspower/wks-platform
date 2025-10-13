@@ -606,102 +606,102 @@ const ShutDown = ({ permissions }) => {
       console.error('Error deleting Record', error)
     }
   }
-  
+
   const downloadExcelForConfiguration = async () => {
-      setSnackbarOpen(true)
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'success',
+    })
+
+    try {
+      let response
+      response = await DataService.shutdownDetailsExport(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+    } catch (error) {
+      console.error('Error downloading Excel:', error)
       setSnackbarData({
-        message: 'Excel download started!',
-        severity: 'success',
+        message: 'Failed to download Excel.',
+        severity: 'error',
       })
-  
-      try {
-        let response
-        response = await DataService.shutdownDetailsExport(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      } catch (error) {
-        console.error('Error downloading Excel:', error)
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+  const uploadShutdownDetails = async (rawFile) => {
+    setLoading(true)
+
+    try {
+      let response
+
+      response = await DataService.ImportShutdownDetails(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Failed to download Excel.',
+          message: response?.message || 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File - Shutdown.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
           severity: 'error',
         })
-      } finally {
-        setSnackbarOpen(true)
       }
-    }
-   const uploadShutdownDetails = async (rawFile) => {
-       setLoading(true)
-   
-       try {
-         let response
 
-         response = await DataService.ImportShutdownDetails(
-           rawFile,
-           keycloak,
-           PLANT_ID,
-           AOP_YEAR,
-         )
-   
-         if (response?.code === 200) {
-           setSnackbarOpen(true)
-           setSnackbarData({
-             message:response?.message || 'Uploaded Successfully!',
-             severity: 'success',
-           })
-           setModifiedCells({})
-           fetchData()
-         } else if (response?.code === 400 && response?.data) {
-           const byteCharacters = atob(response.data)
-           const byteNumbers = Array.from(byteCharacters, (char) =>
-             char.charCodeAt(0),
-           )
-           const byteArray = new Uint8Array(byteNumbers)
-   
-           const blob = new Blob([byteArray], {
-             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-           })
-   
-           const url = window.URL.createObjectURL(blob)
-           const link = document.createElement('a')
-           link.href = url
-           link.setAttribute('download', 'Error File - Shutdown.xlsx')
-           document.body.appendChild(link)
-           link.click()
-           link.remove()
-           window.URL.revokeObjectURL(url)
-   
-           setSnackbarOpen(true)
-           setSnackbarData({
-             message: 'Partial data saved. Error file downloaded.',
-             severity: 'warning',
-           })
-           fetchData()
-         } else {
-           setSnackbarOpen(true)
-           setSnackbarData({
-             message: 'Upload Failed!',
-             severity: 'error',
-           })
-         }
-   
-         return response
-       } catch (error) {
-         console.error('Error uploading xcel:', error)
-         setSnackbarOpen(true)
-         setSnackbarData({
-           message: 'Unexpected error occurred!',
-           severity: 'error',
-         })
-       } finally {
-         setLoading(false)
-       }
-     }
-   
-     const handleExcelUpload = (rawFile) => {
-       uploadShutdownDetails(rawFile)
-     }
+      return response
+    } catch (error) {
+      console.error('Error uploading xcel:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Unexpected error occurred!',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExcelUpload = (rawFile) => {
+    uploadShutdownDetails(rawFile)
+  }
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -732,16 +732,8 @@ const ShutDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
-      uploadExcelBtn: (
-                    (lowerVertName === 'pe' &&
-                      plantName &&
-                      ['ldpe', 'lldpe1', 'lldpe2'].includes(plantName.toLowerCase()) &&
-                      siteObject?.name?.toLowerCase() === 'nmd') ||
-                    (lowerVertName === 'pp' &&
-                      plantName &&
-                      plantName.toLowerCase() === 'pp' &&
-                      siteObject?.name?.toLowerCase() === 'nmd')
-                  ),
+      uploadExcelBtn:
+        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
     },
     isOldYear,
   )

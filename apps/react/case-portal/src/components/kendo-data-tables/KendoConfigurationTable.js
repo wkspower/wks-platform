@@ -66,6 +66,7 @@ const ConfigurationTable = () => {
   const [elastomerRows, setElastomerRows] = useState([])
   const [productionRowsConstants, setProductionRowsConstants] = useState([])
   const [pioImpactRows, setPioImpactRows] = useState([])
+  const [shutdownDataRows, setShutdownDataRows] = useState([])
   const [
     productionRowsConstantsMannualEntry,
     setProductionRowsConstantsMannualEntry,
@@ -116,6 +117,7 @@ const ConfigurationTable = () => {
     setProductionRowsConstants([])
     setProductionRowsConstantsMannualEntry([])
     setPioImpactRows([])
+    setShutdownDataRows([])
     setLoading(true)
 
     try {
@@ -128,12 +130,14 @@ const ConfigurationTable = () => {
         lowerVertName == verticalEnums.MEG ||
         lowerVertName == verticalEnums.CRACKER ||
         lowerVertName == verticalEnums.ELASTOMER ||
-        lowerVertName === 'aromatics'
+        lowerVertName === 'aromatics' ||
+        lowerVertName === 'pta'
       ) {
         data = data?.filter(
           (item) =>
             item.normType !== 'Report Manual Entry' &&
-            item.normType !== 'PIO Impact',
+            item.normType !== 'PIO Impact' &&
+            item.normType !== 'Shutdown',
         )
         const formattedData = data.map((item, index) => ({
           ...item,
@@ -249,6 +253,7 @@ const ConfigurationTable = () => {
   const fetchDataConstantsMnnualEntry = async () => {
     setProductionRowsConstantsMannualEntry([])
     setPioImpactRows([])
+    setShutdownDataRows([])
     try {
       var constantsRes = await DataService.getCatalystSelectivityData(keycloak)
 
@@ -268,8 +273,14 @@ const ConfigurationTable = () => {
       var dataPioImpact = formattedData?.filter(
         (item) => item?.Particulars == 'PIO Impact',
       )
+
+      var shutdownData = formattedData?.filter(
+        (item) => item?.Particulars == 'Shutdown',
+      )
+
       setProductionRowsConstantsMannualEntry(data)
       setPioImpactRows(dataPioImpact)
+      setShutdownDataRows(shutdownData)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -283,8 +294,12 @@ const ConfigurationTable = () => {
         const converted = {}
 
         Object.entries(item).forEach(([key, value]) => {
-          // Convert numeric strings to numbers
-          if (typeof value === 'string' && !isNaN(value)) {
+          if (
+            key !== 'UOM' &&
+            typeof value === 'string' &&
+            value.trim() !== '' &&
+            !isNaN(value)
+          ) {
             converted[key] = value.includes('.')
               ? parseFloat(value)
               : parseInt(value, 10)
@@ -760,15 +775,27 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    (lowerVertName == 'meg' || lowerVertName === 'aromatics') &&
+    (lowerVertName == 'meg' ||
+      lowerVertName === 'aromatics' ||
+      lowerVertName === 'pta') &&
     lowerVertName !== 'cracker' &&
     lowerVertName !== 'elastomer'
   ) {
     const isAromatics = lowerVertName === 'aromatics'
+    const isPta = lowerVertName === 'pta'
+
     const megTabs = isAromatics
       ? ['Configuration', 'Constants', 'Report Manual Entry', 'PIO Impact']
-      : ['Configuration', 'Constants', 'Report Manual Entry']
-    // : ['Configuration', 'Constants', 'Report Manual Entry']
+      : isPta
+        ? [
+            'Configuration',
+            'Constants',
+            'Report Manual Entry',
+            'PIO Impact',
+            'Shutdown',
+          ]
+        : ['Configuration', 'Constants', 'Report Manual Entry']
+
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
@@ -854,6 +881,22 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='3'
+                  />
+                )
+
+              case 'Shutdown':
+                return (
+                  <SelectivityData
+                    rows={shutdownDataRows}
+                    loading={loading}
+                    fetchData={fetchDataConstantsMnnualEntry}
+                    setRows={setShutdownDataRows}
+                    configType='shutdownData'
+                    groupBy='Shutdown'
+                    summaryEdited={summaryEdited}
+                    summary={debouncedSummary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='4'
                   />
                 )
               default:
@@ -1021,7 +1064,7 @@ const ConfigurationTable = () => {
     )
   }
 
-  if (lowerVertName === 'pta' || vcmVerticalName === 'vcm') {
+  if (vcmVerticalName === 'vcm') {
     const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''

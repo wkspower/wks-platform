@@ -363,7 +363,10 @@ const SelectivityData = (props) => {
 
     if (props?.configType !== 'grades') {
       // Fix: Check if it's PIO Impact and call without gradeId
-      if (props?.configType === 'pioImpact') {
+      if (
+        props?.configType === 'pioImpact' ||
+        props?.configType === 'shutdownData'
+      ) {
         props?.fetchData()
       } else {
         props?.fetchData(gradeId)
@@ -392,7 +395,7 @@ const SelectivityData = (props) => {
         id: index,
         TypeDisplayName: item?.TypeDisplayName
           ? item?.TypeDisplayName
-          : 'Recipe',
+          : 'Particulars',
       }))
 
       props?.setRows(data)
@@ -670,8 +673,6 @@ const SelectivityData = (props) => {
             setRows={props?.setRows}
             title='Configuration'
             summaryEdited={props?.summaryEdited}
-            // isCellEditable={isCellEditable}
-            // paginationOptions={[100, 200, 300]}
             saveChanges={saveChanges}
             snackbarData={snackbarData}
             snackbarOpen={snackbarOpen}

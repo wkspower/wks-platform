@@ -18,7 +18,6 @@ import { validateFields } from 'utils/validationUtils'
 import { Grid, TextField } from '../../../node_modules/@mui/material/index'
 export default function AopBudget() {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
 
   const [row, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -30,11 +29,27 @@ export default function AopBudget() {
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const PLANT_NAME = plantObject?.name
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
+  const thisYear = AOP_YEAR
 
   // second grid states
   const [rowsP, setRowsP] = useState([])
@@ -54,14 +69,6 @@ export default function AopBudget() {
     return `${start - 1}-${(end - 1).toString().slice(-2)}`
   }, [thisYear])
 
-  const verticalName = useMemo(() => {
-    const stored = localStorage.getItem('selectedVertical')
-    try {
-      return stored ? JSON.parse(stored).name?.toLowerCase() : ''
-    } catch (e) {
-      return ''
-    }
-  }, [])
   const monthFields = [
     {
       field: 'apr',
@@ -188,13 +195,12 @@ export default function AopBudget() {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-      const plantName = plantObject?.name
-
       // Fetch for Consumption Budget
       const resConsumption = await DataService.maintenacegetdata(
         keycloak,
         'ConsumptionBudget',
+        PLANT_ID,
+        AOP_YEAR,
       )
       const mapped = (resConsumption?.data || []).map((item, index) => ({
         ...item,
@@ -210,6 +216,8 @@ export default function AopBudget() {
       const resProcurement = await DataService.maintenacegetdata(
         keycloak,
         'ProcurementBudget',
+        PLANT_ID,
+        AOP_YEAR,
       )
       const mappedP = (resProcurement?.data || []).map((item, index) => ({
         ...item,
@@ -232,7 +240,6 @@ export default function AopBudget() {
   useEffect(() => {
     fetchData()
   }, [fetchData, yearChanged, plantID, keycloak])
-  const year = thisYear
   const handleCalculate = () => {}
   const handleCalculateP = () => {}
 
@@ -266,6 +273,7 @@ export default function AopBudget() {
   const adjustedPermissionsP = getAdjustedPermissionsP(
     {
       saveBtn: true,
+      addButton: true,
       allAction: true,
       showTitleNameBusiness: true,
       titleName: 'Procurement Budget',
@@ -299,6 +307,7 @@ export default function AopBudget() {
       saveBtn: true,
       showTitleNameBusiness: true,
       titleName: 'Consumption Budget',
+      addButton: true,
       adjustedPermissions: true,
       downloadExcelBtnFromUI: false,
       downloadExcelBtn: true,
@@ -367,9 +376,8 @@ export default function AopBudget() {
   }
   const downloadExcelForConfiguration = async () => {
     setLoading(true)
-    const storedplant = localStorage.getItem('selectedPlant')
     try {
-      await DataService.maintenaceExportdata(keycloak)
+      await DataService.maintenaceExportdata(keycloak, PLANT_ID, AOP_YEAR)
 
       setSnackbarData({ message: 'Export started!', severity: 'success' })
       setSnackbarOpen(true)
@@ -384,11 +392,14 @@ export default function AopBudget() {
     setLoading(true)
 
     try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const plantId = storedPlant ? JSON.parse(storedPlant)?.id : ''
       let response
 
-      response = await DataService.maintenaceImportExceldata(rawFile, keycloak)
+      response = await DataService.maintenaceImportExceldata(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -449,9 +460,6 @@ export default function AopBudget() {
     budgetMaintenanceExcelFile(rawFile)
   }
 
-  const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-  const plantName = plantObject?.name
-
   return (
     <Box>
       <Backdrop
@@ -461,7 +469,7 @@ export default function AopBudget() {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {plantName?.toLowerCase() === 'eoeg' && (
+      {PLANT_NAME?.toLowerCase() === 'eoeg' && (
         <Typography component='div' className='grid-title'>
           <div>Planning Plant : 40N0 </div>
           <div>Maintenance Plant : 40N3</div>

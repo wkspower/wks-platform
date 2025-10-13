@@ -120,6 +120,7 @@ const KendoDataTablesReports = ({
   handleUnitChange = () => {},
   handleRemarkCellClick = () => {},
   handleExport = () => {},
+  groupBy = null,
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -130,6 +131,15 @@ const KendoDataTablesReports = ({
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+
+  const initialGroup = groupBy
+    ? [
+        {
+          field: groupBy,
+          dir: undefined,
+        },
+      ]
+    : []
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
@@ -706,6 +716,7 @@ const KendoDataTablesReports = ({
               mode: 'multiple',
             }}
             autoProcessData={true}
+            {...(initialGroup.length > 0 ? { defaultGroup: initialGroup } : {})}
             dataItemKey='id'
             editField='inEdit'
             editable={{ mode: 'incell' }}
