@@ -354,7 +354,20 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					dto.setAudityear(year);
 					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
-					dto.setProductId(normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName(),plantFKId));
+					if(dto.getProductName()!=null) {
+						UUID productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName(),plantFKId);
+						if(productId!=null) {
+							dto.setProductId(productId);
+						}else {
+							dto.setSaveStatus("Failed");
+					        dto.setErrDescription("Particulars not found");
+						}
+						
+					}else {
+						dto.setSaveStatus("Failed");
+				        dto.setErrDescription("Please enter particulars");
+					}
+					
 					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
 					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try { 
@@ -400,6 +413,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					}
 					dto.setRate(getNumericCellValue(row.getCell(5), dto));
 					dto.setRemark(getStringCellValue(row.getCell(6), dto));
+					if(dto.getRemark()==null) {
+						dto.setSaveStatus("Failed");
+					    dto.setErrDescription("Please enter remark");
+					}
 					String idString = getStringCellValue(row.getCell(7), dto);
 					dto.setId(idString); 
 					String productIdString = getStringCellValue(row.getCell(8), dto);
