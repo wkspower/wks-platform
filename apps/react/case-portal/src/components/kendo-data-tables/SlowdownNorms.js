@@ -489,7 +489,11 @@ const SlowdownNorms = () => {
       saveWithRemark: false,
       saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
       showCalculate:
-        lowerVertName == 'meg' || lowerVertName == 'elastomer' ? false : true,
+        lowerVertName == 'meg' ||
+        lowerVertName == 'elastomer' ||
+        lowerVertName == 'aromatics'
+          ? false
+          : true,
 
       allAction: true,
       dropdownLabel:

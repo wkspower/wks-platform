@@ -634,6 +634,10 @@ const CrackerConfig = () => {
                     setSnackbarData={setSnackbarData}
                     modifiedCells={modifiedCells}
                     setModifiedCells={setModifiedCells}
+                    handleExcelUpload={handleExcelUpload}
+                    downloadExcelForConfiguration={
+                      downloadExcelForConfiguration
+                    }
                   />
                 </Box>
               )

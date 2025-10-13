@@ -22,6 +22,7 @@ import {
   Typography,
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
+import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 
 const AopDesignBasisNorms = () => {
   const hasExecutedRef = useRef(false)
@@ -88,44 +89,6 @@ const AopDesignBasisNorms = () => {
 
     getConfigurationExecutionDetailsNorms()
   }, [plantID, AOP_YEAR])
-
-  const saveSummary = async () => {
-    try {
-      const response = await DataService.saveSummaryAOPConsumptionNorm(
-        PLANT_ID,
-        AOP_YEAR,
-        summary,
-        keycloak,
-      )
-
-      if (response?.code == 200) {
-        setSnackbarData({
-          message: 'Saved Successfully!',
-          severity: 'success',
-        })
-        setLoading(false)
-        setSnackbarOpen(true)
-        // setIsEdited(false)
-      } else {
-        setSnackbarData({
-          message: 'Saved Failed!',
-          severity: 'error',
-        })
-        setLoading(false)
-        // setSnackbarOpen(true)
-      }
-
-      //
-
-      // setLoading(false)
-      return response
-    } catch (error) {
-      console.error('Error saving Summary!', error)
-    } finally {
-      //
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
     if (!plantID || !AOP_YEAR) {
@@ -225,7 +188,10 @@ const AopDesignBasisNorms = () => {
       createPayloadItem(endDateObj, formatDate(endDate)),
     ]
     try {
-      const response = await DataService.executeConfiguration(payload, keycloak)
+      const response = await DataService.executeConfigurationNorms(
+        payload,
+        keycloak,
+      )
       if (response?.code === 200) {
         await getConfigurationExecutionDetailsNorms()
       } else {
@@ -290,10 +256,12 @@ const AopDesignBasisNorms = () => {
         message: 'Please Choose Valid Dates!',
         severity: 'warning',
       })
-
       return
     }
+
     setLoading1(true)
+    setLoading(true)
+
     const startDateObj = configurationExecutionDetails.find(
       (item) => item.Name === 'StartDateNorms',
     )
@@ -309,19 +277,15 @@ const AopDesignBasisNorms = () => {
         message: 'Start/End date configuration is incomplete.',
         severity: 'error',
       })
+      setLoading(false)
+      setLoading1(false)
       return
     }
-    setLoading(true)
-    try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
 
+    try {
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
+
       const payload = [
         {
           apr: formatDate(startDate),
@@ -330,7 +294,7 @@ const AopDesignBasisNorms = () => {
           normParameterFKId: startDateObj?.NormParameter_FK_Id,
           remarks: 'Initiated',
           id: startDateObj?.Id || null,
-          plantId: plantId,
+          plantId: PLANT_ID,
         },
         {
           apr: formatDate(endDate),
@@ -339,30 +303,92 @@ const AopDesignBasisNorms = () => {
           normParameterFKId: endDateObj?.NormParameter_FK_Id,
           remarks: 'Initiated',
           id: endDateObj?.Id || null,
-          plantId: plantId,
+          plantId: PLANT_ID,
         },
       ]
-      const response = await DataService.executeConfiguration(payload, keycloak)
-      if (response) {
+
+      const response = await DataService.executeConfigurationNorms(
+        payload,
+        keycloak,
+      )
+
+      if (!response || response?.code !== 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Execution Started Successfully!',
-          severity: 'success',
-        })
-        getConfigurationExecutionDetailsNorms()
-        setLoading(false)
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Execution Falied!',
+          message: 'Execution Failed!',
           severity: 'error',
         })
+        return response
       }
+
+      // Execution started — show user and refresh details
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Execution Started Successfully!',
+        severity: 'success',
+      })
+      await getConfigurationExecutionDetailsNorms()
+
+      // Run the three loads in parallel and wait for all to finish
+      const [r1, r2, r3] = await Promise.all([
+        NormalOperationNormsApiService.load1(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          formatDate(endDate),
+          formatDate(startDate),
+        ),
+        NormalOperationNormsApiService.load2(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          formatDate(endDate),
+          formatDate(startDate),
+        ),
+        NormalOperationNormsApiService.load3(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          formatDate(endDate),
+          formatDate(startDate),
+        ),
+      ])
+
+      // all finished — check statuses
+      const ok1 = r1?.code === 200
+      const ok2 = r2?.code === 200
+      const ok3 = r3?.code === 200
+
+      if (ok1 && ok2 && ok3) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Execution completed successfully!',
+          severity: 'success',
+        })
+      } else {
+        // build a helpful message about which one(s) failed
+        const failed = []
+        if (!ok1) failed.push('load1')
+        if (!ok2) failed.push('load2')
+        if (!ok3) failed.push('load3')
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Some Execution failed: ${failed.join(', ')}.`,
+          severity: 'error',
+        })
+        console.error('Load results:', { r1, r2, r3 })
+      }
+
       return response
     } catch (error) {
-      console.error('Execution Falied!', error)
-      setLoading(false)
+      console.error('Execution Failed!', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: error?.message || 'Execution Failed!',
+        severity: 'error',
+      })
     } finally {
+      // stop loaders only after all work (or error handling) is done
       setLoading(false)
       setLoading1(false)
     }

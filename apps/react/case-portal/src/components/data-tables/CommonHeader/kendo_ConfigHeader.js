@@ -16,7 +16,7 @@ import disContineGradeChange from '../../../assets/kendo_config_disContineGradeC
 import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
 
 const getConfigByType = (configType) => {
-  console.log("Config Typess:", configType);
+  console.log('Config Typess:', configType)
   switch (configType) {
     case 'meg':
       return productionColumns
@@ -25,7 +25,7 @@ const getConfigByType = (configType) => {
     case 'megConstants':
       return productionColumnsConstants
     case 'pioImpact':
-       return pioImpactColumns
+      return pioImpactColumns
     case 'StartupLosses':
       return productionColumnsPE1
     case 'Configuration':
@@ -80,6 +80,12 @@ const getEnhancedAOPColDefs = ({
         editable: false,
         width1: 200,
       },
+      {
+        field: 'UOM',
+        title: 'UOM',
+        editable: false,
+        width1: 200,
+      },
     ]
     allGradesReciepes?.forEach((field) => {
       config.push({
@@ -94,19 +100,37 @@ const getEnhancedAOPColDefs = ({
     config = getConfigByType(configType)
   }
 
-  const enhancedColDefs = config.map((col) => {
-    if (headerMap && headerMap[col.title]) {
-      return {
-        ...col,
-        title: headerMap[col.title],
-        align: 'right',
-        type: 'number',
-        format: '{0:#.##}',
-      }
-    }
+  var enhancedColDefs = []
 
-    return col
-  })
+  if (configType == 'pioImpact') {
+    enhancedColDefs = config.map((col) => {
+      if (headerMap && headerMap[col.title]) {
+        return {
+          ...col,
+          title: headerMap[col.title],
+          align: 'right',
+          type: 'negativeNumber',
+          format: '{0:#.##}',
+        }
+      }
+
+      return col
+    })
+  } else {
+    enhancedColDefs = config.map((col) => {
+      if (headerMap && headerMap[col.title]) {
+        return {
+          ...col,
+          title: headerMap[col.title],
+          align: 'right',
+          type: 'number',
+          format: '{0:#.##}',
+        }
+      }
+
+      return col
+    })
+  }
 
   return enhancedColDefs
 }

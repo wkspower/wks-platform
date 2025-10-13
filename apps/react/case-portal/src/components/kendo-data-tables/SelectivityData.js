@@ -184,50 +184,7 @@ const SelectivityData = (props) => {
       var payload = []
       var response
 
-      if (props?.configType === 'pioImpact') {
-        // Handle PIO Impact data format
-        payload = newRow.map((row) => ({
-          id: row.idFromApi || null,
-          description: row.description,
-          startMonth: row.startMonth,
-          endMonth: row.endMonth,
-          value: row.value,
-          remarks: row.remarks,
-        }))
-
-        response = await PIOImpactApiService.savePioImpactData(
-          payload,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-
-        if (response?.code === 200) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'PIO Impact data saved successfully!',
-            severity: 'success',
-          })
-          setModifiedCells({})
-
-          // Call the fetchData from props to refresh the data
-          if (props?.fetchData) {
-            props.fetchData()
-          }
-
-          // Also save summary if needed
-          saveSummary(props?.summary)
-          props?.onSummaryEditChange(false)
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Failed to save PIO Impact data!',
-            severity: 'error',
-          })
-        }
-
-        return response
-      } else if (props?.configType == 'megConstants') {
+      if (props?.configType == 'megConstants') {
         payload = newRow.map((row) => ({
           apr: row.apr || row.ConstantValue || null,
           may: row.apr || row.ConstantValue || null,
@@ -281,31 +238,28 @@ const SelectivityData = (props) => {
         )
       }
 
-      // Handle response for non-pioImpact types
-      if (props?.configType !== 'pioImpact') {
-        if (response) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Saved Successfully!',
-            severity: 'success',
-          })
+      if (response) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
 
-          setModifiedCells({})
-          setLoading(false)
+        setModifiedCells({})
+        setLoading(false)
 
-          saveSummary(props?.summary)
-          props?.onSummaryEditChange(false)
+        saveSummary(props?.summary)
+        props?.onSummaryEditChange(false)
 
-          if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
-            props?.fetchData(gradeId)
-          }
-        } else {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Data Saved Failed!',
-            severity: 'error',
-          })
+        if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+          props?.fetchData(gradeId)
         }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
       }
 
       return response
@@ -465,9 +419,9 @@ const SelectivityData = (props) => {
     if (isOldYear != 1) return permissions
     return {
       ...permissions,
-      showAction: props?.configType === 'pioImpact' ? true : false,
-      addButtons: props?.configType === 'pioImpact' ? true : false,
-      deleteButton: props?.configType === 'pioImpact' ? true : false,
+      showAction: false,
+      addButtons: false,
+      deleteButton: false,
       editButton: false,
       showUnit: false,
       saveWithRemark: false,
@@ -481,17 +435,14 @@ const SelectivityData = (props) => {
 
   const adjustedPermissions = getAdjustedPermissions(
     {
-      showAction: props?.configType === 'pioImpact' ? true : false,
-      addButtons: props?.configType === 'pioImpact' ? true : false,
-      deleteButton: props?.configType === 'pioImpact' ? true : false,
+      showAction: false,
+      addButtons: false,
+      deleteButton: false,
       editButton: false,
       saveWithRemark: true,
       saveBtn: true,
       downloadExcelBtn: true,
-      uploadExcelBtn:
-                       props?.configType === 'ShutdownNorms'
-                       ? (verticalObject?.name === 'PE' && siteObject?.name === 'NMD' && plantObject?.name === 'LDPE')
-                      : true,
+      uploadExcelBtn: true,
       showLoad: true,
       allAction: true,
       // showG: props?.configType === 'cracker_configuration' ? true : false,
@@ -500,18 +451,6 @@ const SelectivityData = (props) => {
       // marginTop: props?.configType === 'cracker_configuration' ? true : false,
       marginTop: false,
       isHeight: lowerVertName !== 'meg' && props?.rows?.length > 10,
-      defaultNewRow:
-        props?.configType === 'pioImpact'
-          ? {
-              description: '',
-              startMonth: 'Apr',
-              endMonth: 'Mar',
-              value: 0,
-              remarks: '',
-              Particulars: 'PIO Impact',
-              isEditable: true,
-            }
-          : null,
     },
     isOldYear,
   )
@@ -539,8 +478,6 @@ const SelectivityData = (props) => {
         await DataService.getRecipeExcel(keycloak)
       } else if (props?.configType === 'ShutdownNorms') {
         await DataService.getShutdownRateExcel(keycloak)
-      } else if (props?.configType === 'pioImpact') {
-        await PIOImpactApiService.exportPIOImpact(keycloak, PLANT_ID, AOP_YEAR)
       } else if (props?.tabIndex != 1) {
         if (lowerVertName == 'pe' || lowerVertName == 'pp') {
           await DataService.getConfigurationExcelType(
@@ -588,13 +525,6 @@ const SelectivityData = (props) => {
       } else if (props?.configType === 'ShutdownNorms') {
         // Add shutdown rate specific upload
         response = await DataService.saveShutdownRateExcel(rawFile, keycloak)
-      } else if (props?.configType === 'pioImpact') {
-        response = await PIOImpactApiService.importPIOImpact(
-          rawFile,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
       } else if (props?.tabIndex != 1) {
         response = await DataService.saveConfigurationExcel(rawFile, keycloak)
       } else {

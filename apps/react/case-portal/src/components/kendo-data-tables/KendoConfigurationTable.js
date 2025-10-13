@@ -110,58 +110,12 @@ const ConfigurationTable = () => {
     setOpenConfirmDialog(false)
     onLoad()
   }
-  const fetchPioImpactData = async () => {
-    setLoading(true)
-    try {
-      var data = await PIOImpactApiService.getPioImpactData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-      if (data?.code === 200) {
-        const formattedData = data.data.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          description: item.description,
-          startMonth: item.startMonth,
-          endMonth: item.endMonth,
-          value: item.value,
-          remarks: item.remarks,
-          Particulars: 'PIO Impact',
-          isEditable: true,
-        }))
-
-        setPioImpactRows(formattedData)
-      } else {
-        setPioImpactRows([])
-      }
-    } catch (error) {
-      console.error('Error fetching PIO Impact data:', error)
-      setPioImpactRows([])
-    } finally {
-      setLoading(false)
-    }
-  }
-  useEffect(() => {
-    console.log(
-      'Tab changed - tabIndex:',
-      tabIndex,
-      'lowerVertName:',
-      lowerVertName,
-    )
-    if (tabIndex === 3 && lowerVertName === 'aromatics') {
-      // PIO Impact tab
-      console.log('Fetching PIO Impact data...')
-      fetchPioImpactData()
-    }
-  }, [tabIndex, lowerVertName])
 
   const fetchData = async (gradeId = null) => {
     setProductionRows([])
     setProductionRowsConstants([])
     setProductionRowsConstantsMannualEntry([])
+    setPioImpactRows([])
     setLoading(true)
 
     try {
@@ -176,7 +130,11 @@ const ConfigurationTable = () => {
         lowerVertName == verticalEnums.ELASTOMER ||
         lowerVertName === 'aromatics'
       ) {
-        data = data?.filter((item) => item.normType !== 'Report Manual Entry')
+        data = data?.filter(
+          (item) =>
+            item.normType !== 'Report Manual Entry' &&
+            item.normType !== 'PIO Impact',
+        )
         const formattedData = data.map((item, index) => ({
           ...item,
           idFromApi: item.id,
@@ -290,8 +248,10 @@ const ConfigurationTable = () => {
 
   const fetchDataConstantsMnnualEntry = async () => {
     setProductionRowsConstantsMannualEntry([])
+    setPioImpactRows([])
     try {
       var constantsRes = await DataService.getCatalystSelectivityData(keycloak)
+
       const formattedData = constantsRes.map((item, index) => ({
         ...item,
         idFromApi: item.id,
@@ -300,10 +260,16 @@ const ConfigurationTable = () => {
         srNo: index + 1,
         Particulars: item.normType,
       }))
+
       var data = formattedData?.filter(
         (item) => item?.Particulars == 'Report Manual Entry',
       )
+
+      var dataPioImpact = formattedData?.filter(
+        (item) => item?.Particulars == 'PIO Impact',
+      )
       setProductionRowsConstantsMannualEntry(data)
+      setPioImpactRows(dataPioImpact)
     } catch (error) {
       console.error('Error fetching data:', error)
     }
@@ -802,6 +768,7 @@ const ConfigurationTable = () => {
     const megTabs = isAromatics
       ? ['Configuration', 'Constants', 'Report Manual Entry', 'PIO Impact']
       : ['Configuration', 'Constants', 'Report Manual Entry']
+    // : ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
@@ -879,7 +846,7 @@ const ConfigurationTable = () => {
                   <SelectivityData
                     rows={pioImpactRows}
                     loading={loading}
-                    fetchData={fetchPioImpactData}
+                    fetchData={fetchDataConstantsMnnualEntry}
                     setRows={setPioImpactRows}
                     configType='pioImpact'
                     groupBy='PIO Impact'

@@ -480,7 +480,11 @@ const ShutdownNorms = () => {
 
       saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
       showCalculate:
-        lowerVertName == 'meg' || lowerVertName == 'elastomer' ? false : true,
+        lowerVertName == 'meg' ||
+        lowerVertName == 'elastomer' ||
+        lowerVertName == 'aromatics'
+          ? false
+          : true,
       showCalculateVisibility:
         lowerVertName != 'meg' &&
         Object.keys(calculationObject || {}).length > 0

@@ -1,46 +1,120 @@
 [
   {
-    "field": "id",
-    "title": "ID",
+    "field": "Particulars",
+    "title": "Type",
+    "widthT": 200,
     "editable": false,
-    "width": 50,
-    "type": "number",
     "hidden": true
   },
   {
-    "field": "description",
-    "title": "Description",
-    "editable": true,
-    "widthT": 250,
-    "type": "text"
+    "field": "normParameterFKId",
+
+    "hidden": true
   },
   {
-    "field": "startMonth",
-    "title": "Start Month",
-    "editable": true,
-    "width": 120,
-    "type": "monthDropdown"
+    "field": "productName",
+    "title": "Particulars",
+    "widthT": 140,
+    "editable": false
   },
   {
-    "field": "endMonth",
-    "title": "End Month",
-    "editable": true,
-    "width": 120,
-    "type": "monthDropdown"
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "widthT": 60
   },
   {
-    "field": "value",
-    "title": "Value",
-    "editable": true,
-    "width": 120,
+    "field": "apr",
+    "title": 4,
     "type": "negativeNumber",
-    "format": "{0:#.##}"
+    "editable": true
+  },
+  {
+    "field": "may",
+    "title": 5,
+    "type": "negativeNumber",
+    "editable": true
+  },
+  {
+    "field": "jun",
+    "title": 6,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "jul",
+    "title": 7,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "aug",
+    "title": 8,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "sep",
+    "title": 9,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "oct",
+    "title": 10,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "nov",
+    "title": 11,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "dec",
+    "title": 12,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "jan",
+    "title": 1,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "feb",
+    "title": 2,
+    "type": "negativeNumber",
+
+    "editable": true
+  },
+  {
+    "field": "mar",
+    "title": 3,
+    "type": "negativeNumber",
+
+    "editable": true
   },
   {
     "field": "remarks",
-    "title": "Remarks",
-    "editable": true,
-    "width": 200,
-    "type": "text"
+    "title": "Remark",
+    "widthT": 130,
+    "editable": true
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true
   }
 ]

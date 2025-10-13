@@ -76,6 +76,7 @@ const DecokingConfig = () => {
     })
     setModifiedCellsSdTa(newModifiedCells)
   }, [globalTaStartDate, globalTaEndDate])
+
   const handleRemarkCellClick2 = (dataItem) => {
     setCurrentRemarkSdTa(dataItem.remarks || '')
     setCurrentRowId2(dataItem.id)
@@ -129,18 +130,18 @@ const DecokingConfig = () => {
     }
   }, [])
   function calcPreCoilReplacementRunLength(actualRunLength, reduction) {
-  if (
-    actualRunLength === null ||
-    actualRunLength === undefined ||
-    reduction === null ||
-    reduction === undefined
-  )
-    return null
-  const val =
-    Number(actualRunLength) -
-    (Number(actualRunLength) * Number(reduction)) / 100
-  return isNaN(val) ? null : Math.ceil(val) // <-- round up to nearest integer
-}
+    if (
+      actualRunLength === null ||
+      actualRunLength === undefined ||
+      reduction === null ||
+      reduction === undefined
+    )
+      return null
+    const val =
+      Number(actualRunLength) -
+      (Number(actualRunLength) * Number(reduction)) / 100
+    return isNaN(val) ? null : Math.ceil(val) // <-- round up to nearest integer
+  }
 
   const fetchData = useCallback(
     async (screen = null) => {
@@ -188,7 +189,10 @@ const DecokingConfig = () => {
                 shutDownEndDate: toDateObject(item.shutDownEndDate),
                 actualRunLength: item.actualRunLength || null,
                 reduction: item.reduction || null,
-                preCrDays: calcPreCoilReplacementRunLength(item.actualRunLength, item.reduction),
+                preCrDays: calcPreCoilReplacementRunLength(
+                  item.actualRunLength,
+                  item.reduction,
+                ),
               }))
 
               setRowsForTab(currentTab, processedData, 2)
@@ -326,72 +330,143 @@ const DecokingConfig = () => {
   }
 
   function rangesOverlap(startA, endA, startB, endB) {
-  if (!startA || !endA || !startB || !endB) return false
-  return startA <= endB && startB <= endA
-}
-
-// Check if TA dates overlap with IBR or Maintenance dates in any row
-function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
-  for (const row of rows) {
-    const ibrStart = row.ibrStartDate ? new Date(row.ibrStartDate) : null
-    const ibrEnd = row.ibrEndDate ? new Date(row.ibrEndDate) : null
-    // const maintStart = row.shutDownStartDate ? new Date(row.shutDownStartDate) : null
-    // const maintEnd = row.shutDownEndDate ? new Date(row.shutDownEndDate) : null
-
-    if (rangesOverlap(taStart, taEnd, ibrStart, ibrEnd)) {
-      return `TA dates overlap with IBR dates for Furnace ${row.displayName || row.id + 1}.`
-    }
+    if (!startA || !endA || !startB || !endB) return false
+    return startA <= endB && startB <= endA
   }
-  return null
-}
 
-  const saveChangesSdTa = React.useCallback(async () => {
+  // Check if TA dates overlap with IBR or Maintenance dates in any row
+  function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
+    for (const row of rows) {
+      const ibrStart = row.ibrStartDate ? new Date(row.ibrStartDate) : null
+      const ibrEnd = row.ibrEndDate ? new Date(row.ibrEndDate) : null
+      // const maintStart = row.shutDownStartDate ? new Date(row.shutDownStartDate) : null
+      // const maintEnd = row.shutDownEndDate ? new Date(row.shutDownEndDate) : null
+
+      if (rangesOverlap(taStart, taEnd, ibrStart, ibrEnd)) {
+        return `TA dates overlap with IBR dates for Furnace ${row.displayName || row.id + 1}.`
+      }
+    }
+    return null
+  }
+
+  const saveChangesSdTa = async () => {
+    if (globalTaStartDate && globalTaEndDate) {
+      saveChangesSdTa1()
+    } else saveChangesSdTa2()
+  }
+
+  const saveChangesSdTa2 = React.useCallback(async () => {
     try {
       const { startLimit, endLimit } = getAopYearLimits()
-    // Validate TA dates only on Save
-    if (
-      !globalTaStartDate ||
-      !globalTaEndDate ||
-      (startLimit && globalTaStartDate < startLimit) ||
-      (endLimit && globalTaStartDate > endLimit) ||
-      (startLimit && globalTaEndDate < startLimit) ||
-      (endLimit && globalTaEndDate > endLimit)
-    ) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: `TA dates must be between ${formatDateDDMMYYYY(startLimit)} 
+
+      setDateError(false)
+
+      var rawData = Object.values(modifiedCellsSdTa)
+
+      const dateFields = ['ibrStartDate', 'ibrEndDate']
+      const allRows = [...ibrScreen2Rows] // get all rows, not just modified
+      let hasDateError = false
+
+      for (const record of allRows) {
+        record.isError = false // reset previous errors
+        for (const field of dateFields) {
+          let dateValue = record[field]
+          if (typeof dateValue === 'string') {
+            // Only accept DD-MM-YYYY format
+            const ddmmyyyyRegex = /^(\d{2})-(\d{2})-(\d{4})$/
+            const match = dateValue.match(ddmmyyyyRegex)
+            if (match) {
+              // month is 1-based in JS Date
+              const day = match[1],
+                month = match[2],
+                year = match[3]
+              dateValue = new Date(`${year}-${month}-${day}T00:00:00`)
+            } else {
+              // Invalid format, mark as error
+              dateValue = null
+            }
+          }
+        }
+      }
+
+      const requiredFields = ['idFromApi']
+
+      var rawData1 = getRows('IBR Plan')[2]
+      // Overlap validation
+      const result = validateAllDateOverlaps(rawData1)
+      if (result.overlap) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: result.message,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+
+      const validationMessage = validateFields(rawData, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+      postIbr2(rawData)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    }
+  }, [modifiedCellsSdTa])
+
+  const saveChangesSdTa1 = React.useCallback(async () => {
+    try {
+      const { startLimit, endLimit } = getAopYearLimits()
+      // Validate TA dates only on Save
+      if (
+        !globalTaStartDate ||
+        !globalTaEndDate ||
+        (startLimit && globalTaStartDate < startLimit) ||
+        (endLimit && globalTaStartDate > endLimit) ||
+        (startLimit && globalTaEndDate < startLimit) ||
+        (endLimit && globalTaEndDate > endLimit)
+      ) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `TA dates must be between ${formatDateDDMMYYYY(startLimit)} 
         and ${formatDateDDMMYYYY(endLimit)} for selected year.`,
-        severity: 'error',
-      })
-      setDateError(true)
-      setLoading(false)
-      return
-    }
-    if (globalTaStartDate > globalTaEndDate) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Start date must be before or equal to End date.',
-        severity: 'error',
-      })
-      setDateError(true)
-      setLoading(false)
-      return
-    }
-    setDateError(false)
-    const taOverlapMsg = checkTaDateOverlapWithRows(
-      globalTaStartDate,
-      globalTaEndDate,
-      ibrScreen2Rows
-    )
-    if (taOverlapMsg) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: taOverlapMsg,
-        severity: 'error',
-      })
-      setLoading(false)
-      return
-    }
+          severity: 'error',
+        })
+        setDateError(true)
+        setLoading(false)
+        return
+      }
+      if (globalTaStartDate > globalTaEndDate) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Start date must be before or equal to End date.',
+          severity: 'error',
+        })
+        setDateError(true)
+        setLoading(false)
+        return
+      }
+      setDateError(false)
+      const taOverlapMsg = checkTaDateOverlapWithRows(
+        globalTaStartDate,
+        globalTaEndDate,
+        ibrScreen2Rows,
+      )
+      if (taOverlapMsg) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: taOverlapMsg,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
       if (Object.keys(modifiedCellsSdTa).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -426,32 +501,9 @@ function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
               dateValue = null
             }
           }
-
-          // if (
-          //   startLimit &&
-          //   endLimit &&
-          //   (!dateValue || dateValue < startLimit || dateValue > endLimit)
-          // ) {
-          //   record.isError = true
-          //   hasDateError = true
-          // }
         }
       }
 
-      // if (hasDateError) {
-      //   setRowsForTab('IBR Plan', [...allRows], 2) // update all rows
-      //   const formatDate = (date) =>
-      //     `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1)
-      //       .toString()
-      //       .padStart(2, '0')}-${date.getFullYear()}`
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({
-      //     message: `All dates must be between ${formatDate(startLimit)} and ${formatDate(endLimit)} for selected year.`,
-      //     severity: 'error',
-      //   })
-      //   setLoading(false)
-      //   return
-      // }
       const requiredFields = ['idFromApi']
 
       var rawData1 = getRows('IBR Plan')[2]
@@ -520,12 +572,83 @@ function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
         taEndDate: formatIfDate(row?.taEndDate) || null,
         shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
         shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
-        preCrDays: row?.actualRunLength != null && row?.reduction != null
-        ? Math.ceil(
-            Number(row.actualRunLength) -
-            (Number(row.actualRunLength) * Number(row.reduction)) / 100
-          )
-        : null,
+        preCrDays:
+          row?.actualRunLength != null && row?.reduction != null
+            ? Math.ceil(
+                Number(row.actualRunLength) -
+                  (Number(row.actualRunLength) * Number(row.reduction)) / 100,
+              )
+            : null,
+        postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
+        remarks: row.remarks || '',
+        isCr: row?.isCr ? true : false,
+        actualRunLength: row?.actualRunLength
+          ? Number(row.actualRunLength)
+          : null,
+        reduction: row?.reduction ? Number(row.reduction) : null,
+      }))
+
+      const response = await DataService.postIbr(plantId, payload, keycloak)
+
+      if (response?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCellsSdTa({})
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
+    } finally {
+      fetchData(2)
+      fetchData(3)
+      setLoading(false)
+    }
+  }
+  const postIbr2 = async (newRow) => {
+    setLoading(true)
+    try {
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      const formatIfDate = (value) => {
+        if (!value) return ''
+        const parsed = moment.utc(
+          value,
+          ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A'],
+          true,
+        )
+        return parsed.isValid()
+          ? new Date(parsed.add(1, 'day').format('YYYY-MM-DD'))
+          : value
+      }
+
+      const payload = newRow.map((row) => ({
+        id: row?.idFromApi || null,
+        ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
+        ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
+        taStartDate: null,
+        taEndDate: null,
+        shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
+        shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
+        preCrDays:
+          row?.actualRunLength != null && row?.reduction != null
+            ? Math.ceil(
+                Number(row.actualRunLength) -
+                  (Number(row.actualRunLength) * Number(row.reduction)) / 100,
+              )
+            : null,
         postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
         remarks: row.remarks || '',
         isCr: row?.isCr ? true : false,
@@ -823,32 +946,33 @@ function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
     }
   }
   function getAopYearLimits() {
-  const yearStr = localStorage.getItem('year') // e.g. "2025-26"
-  let startLimit, endLimit
-  if (yearStr) {
-    const [startYear, endYear] = yearStr.split('-').map((y) => parseInt(y.trim(), 10))
-    if (!isNaN(startYear) && !isNaN(endYear)) {
-      startLimit = new Date(`${startYear}-04-01T00:00:00`)
-      // If endYear is 2 digits, prefix with 20
-      const endYearFull = endYear < 100 ? 2000 + endYear : endYear
-      endLimit = new Date(`${endYearFull}-03-31T23:59:59`)
+    const yearStr = localStorage.getItem('year') // e.g. "2025-26"
+    let startLimit, endLimit
+    if (yearStr) {
+      const [startYear, endYear] = yearStr
+        .split('-')
+        .map((y) => parseInt(y.trim(), 10))
+      if (!isNaN(startYear) && !isNaN(endYear)) {
+        startLimit = new Date(`${startYear}-04-01T00:00:00`)
+        // If endYear is 2 digits, prefix with 20
+        const endYearFull = endYear < 100 ? 2000 + endYear : endYear
+        endLimit = new Date(`${endYearFull}-03-31T23:59:59`)
+      }
     }
+    return { startLimit, endLimit }
   }
-  return { startLimit, endLimit }
-}
 
-// ...existing code...
+  // ...existing code...
 
-// Validation for TA dates
+  // Validation for TA dates
 
-
-function formatDateDDMMYYYY(date) {
-  if (!(date instanceof Date) || isNaN(date)) return ''
-  const d = date.getDate().toString().padStart(2, '0')
-  const m = (date.getMonth() + 1).toString().padStart(2, '0')
-  const y = date.getFullYear()
-  return `${d}/${m}/${y}`
-}
+  function formatDateDDMMYYYY(date) {
+    if (!(date instanceof Date) || isNaN(date)) return ''
+    const d = date.getDate().toString().padStart(2, '0')
+    const m = (date.getMonth() + 1).toString().padStart(2, '0')
+    const y = date.getFullYear()
+    return `${d}/${m}/${y}`
+  }
   const rowClass = (row) => (row.isError ? 'row-error' : '')
   return (
     <Box>
@@ -873,7 +997,9 @@ function formatDateDDMMYYYY(date) {
               style={{ height: '80px' }}
               size={'medium'}
               min={getAopYearLimits().startLimit}
-              max={globalTaEndDate ? globalTaEndDate : getAopYearLimits().endLimit}
+              max={
+                globalTaEndDate ? globalTaEndDate : getAopYearLimits().endLimit
+              }
             />
           </Box>
 
@@ -888,7 +1014,11 @@ function formatDateDDMMYYYY(date) {
               onChange={(e) => setGlobalTaEndDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
-              min={globalTaStartDate ? globalTaStartDate : getAopYearLimits().startLimit}
+              min={
+                globalTaStartDate
+                  ? globalTaStartDate
+                  : getAopYearLimits().startLimit
+              }
               max={getAopYearLimits().endLimit}
             />
           </Box>

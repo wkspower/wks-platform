@@ -6,7 +6,7 @@ import {
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
@@ -19,7 +19,133 @@ import {
 
 const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
 
-const BestAchievedNorms = () => {
+// ---------------------------------------------------------------------------
+// Helpers (kept lightweight / optimized)
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line
+const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
+function sanitizeSheetName(name = '', fallback = 'Sheet') {
+  let s = String(name || '')
+    .replace(INVALID_SHEET_CHARS_RE, ' ')
+    .trim()
+  if (s.length === 0) s = fallback
+  if (s.length > 31) s = s.slice(0, 31)
+  return s
+}
+
+function normalizeCellValue(v) {
+  if (v === undefined || v === null) return ''
+  if (v instanceof Date) return v
+  if (typeof v === 'object') {
+    try {
+      return JSON.stringify(v)
+    } catch {
+      return String(v)
+    }
+  }
+  return v
+}
+
+// Optimized single-pass column inference
+function inferColumnsFromRows(rows = []) {
+  const stats = {} // { field: { sawNumber, sawDate, sawNonEmpty } }
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    if (!r || typeof r !== 'object') continue
+    for (const [k, v] of Object.entries(r)) {
+      if (!stats[k])
+        stats[k] = { sawNumber: false, sawDate: false, sawNonEmpty: false }
+      if (v === undefined || v === null || v === '') continue
+      stats[k].sawNonEmpty = true
+      if (typeof v === 'number') {
+        stats[k].sawNumber = true
+        continue
+      }
+      const numericCandidate = String(v).replace(/[,]/g, '')
+      if (!isNaN(Number(numericCandidate))) {
+        stats[k].sawNumber = true
+        continue
+      }
+      const d = new Date(v)
+      if (!isNaN(d.getTime())) {
+        stats[k].sawDate = true
+      }
+    }
+  }
+
+  return Object.keys(stats).map((f) => {
+    const st = stats[f]
+    let type = 'string'
+    if (st.sawNumber) type = 'number'
+    else if (st.sawDate) type = 'date'
+    return { field: f, title: f, type }
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Lightweight GridPanel component so we can memoize rows/cols per-grid
+// ---------------------------------------------------------------------------
+function GridPanel({
+  name,
+  d,
+  idx,
+  expanded,
+  setExpanded,
+  allRedCellList,
+  showColors,
+}) {
+  const isExpanded = expanded === name
+
+  // memoize row/column arrays to keep stable refs for KendoDataGrid and avoid re-renders
+  const memoized = useMemo(
+    () => ({
+      rows: d?.rows || [],
+      columns: d?.columns || [],
+    }),
+    [d?.rows, d?.columns],
+  )
+
+  return (
+    <div key={name}>
+      <CustomAccordion
+        expanded={isExpanded}
+        onChange={() => setExpanded(isExpanded ? null : name)}
+        disableGutters
+      >
+        <CustomAccordionSummary
+          aria-controls={`${name}-content`}
+          id={`${name}-header`}
+        >
+          <Typography component='span' className='grid-title'>
+            {name}
+          </Typography>
+        </CustomAccordionSummary>
+        <CustomAccordionDetails>
+          <Box sx={{ width: '100%', margin: 0 }}>
+            {isExpanded ? (
+              <KendoDataGrid
+                rows={memoized.rows}
+                columns={memoized.columns}
+                permissions={{ isHeight: memoized.rows.length > 15 }}
+                {...(idx === 0 && showColors
+                  ? { allRedCell: allRedCellList, showThreeColors: true }
+                  : {})}
+              />
+            ) : (
+              <Box sx={{ py: 2 }}>Click to load grid</Box>
+            )}
+          </Box>
+        </CustomAccordionDetails>
+      </CustomAccordion>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+export default function BestAchievedNorms() {
   const keycloak = useSession()
 
   const [dataMap, setDataMap] = useState({})
@@ -49,9 +175,18 @@ const BestAchievedNorms = () => {
 
   const timeoutIdsRef = useRef([])
   const isMountedRef = useRef(true)
-  const exportRefs = useRef({})
 
-  const [allRedCell, setAllRedCell] = useState([])
+  // store the red-cells list and a lookup map for O(1) matching
+  const [allRedCellList, setAllRedCellList] = useState([])
+  const redLookupRef = useRef(new Map())
+
+  // accordion expanded state — start collapsed; after fetch, open first grid only
+  const [expanded, setExpanded] = useState(null)
+
+  // export control (dynamic ExcelExport mount)
+  const [isExporting, setIsExporting] = useState(false)
+  const workbookRef = useRef(null)
+  const excelExportRef = useRef(null)
 
   useEffect(() => {
     return () => {
@@ -61,71 +196,36 @@ const BestAchievedNorms = () => {
     }
   }, [])
 
+  // ---------------------------------------------------------------------------
+  // Column enrichment (kept same except optimized hidden logic)
+  // ---------------------------------------------------------------------------
   const enrichColumns = useCallback((backendCols = []) => {
-    return backendCols
-      .filter((col) => col.field !== 'GRID_TYPE')
-      .map((col) => {
-        const isTextCol = col.type === 'string'
-        const isNumberCol = col.type === 'number'
-        return {
-          ...col,
-          title: col.title || col.field,
-          filterable: true,
-          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
-          editable: false,
-          isRightAlligned: isNumberCol ? 'numeric' : undefined,
-          // hide Material FK field (both common casings)
-          hidden:
-            (col.field &&
-              (col.field === 'Material_FK_Id' ||
-                col.field === 'materialFkId')) ||
-            col.hidden,
-        }
-      })
-  }, [])
+    const filteredCols = backendCols.filter((col) => col.field !== 'GRID_TYPE')
+    const applyFixedWidth = filteredCols.length > 15
+    const fixedWidth = applyFixedWidth ? 150 : undefined
 
-  // ---------------------------------------------------------------------------
-  // Infer columns from row objects (returns [{ field, title, type }])
-  // ---------------------------------------------------------------------------
-  function inferColumnsFromRows(rows = []) {
-    const fieldSet = new Set()
-    rows.forEach((r) => {
-      if (!r || typeof r !== 'object') return
-      Object.keys(r).forEach((k) => fieldSet.add(k))
-    })
-
-    const fields = Array.from(fieldSet)
-
-    const cols = fields.map((f) => {
-      let detectedType = 'string'
-      for (const r of rows) {
-        if (!r) continue
-        const v = r?.[f]
-        if (v === undefined || v === null || v === '') continue
-        if (typeof v === 'number') {
-          detectedType = 'number'
-          break
-        }
-        // detect date-like strings
-        const d = new Date(v)
-        if (!isNaN(d.getTime())) {
-          detectedType = 'date'
-          break
-        }
-        // numeric string (allow commas)
-        const numericCandidate = String(v).replace(/[,]/g, '')
-        if (!isNaN(Number(numericCandidate))) {
-          detectedType = 'number'
-          break
-        }
+    return filteredCols.map((col) => {
+      const isTextCol = col.type === 'string'
+      const isNumberCol = col.type === 'number'
+      return {
+        ...col,
+        title: col.title || col.field,
+        filterable: true,
+        filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+        align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+        ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+        editable: false,
+        isRightAlligned: isNumberCol ? 'numeric' : undefined,
+        // hide Material FK field (both common casings)
+        hidden:
+          (col.field &&
+            (col.field === 'Material_FK_Id' || col.field === 'materialFkId')) ||
+          col.hidden,
+        // set fixed width when total cols > 15
+        ...(fixedWidth ? { widthT: fixedWidth } : {}),
       }
-      return { field: f, title: f, type: detectedType }
     })
-
-    return cols
-  }
+  }, [])
 
   // ---------------------------------------------------------------------------
   // Normalize row values according to detected column types
@@ -157,8 +257,7 @@ const BestAchievedNorms = () => {
   }
 
   // ---------------------------------------------------------------------------
-  // Fetch all grids in one call and build dataMap + gridNames
-  // The backend is expected to return: apiResponse.data = [ { gridName, data: [...] }, ... ]
+  // Fetch all grids in one call and build dataMap + gridNames (batched setState)
   // ---------------------------------------------------------------------------
   const fetchAllGrids = useCallback(async () => {
     // clear previous timers if any
@@ -173,7 +272,7 @@ const BestAchievedNorms = () => {
         'TYPE LIST',
       )
 
-      let code1 = NormalOperationNormsApiService.BestAchivedColorCodes(
+      const code1 = NormalOperationNormsApiService.BestAchivedColorCodes(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -192,55 +291,6 @@ const BestAchievedNorms = () => {
         '4F+D',
       )
 
-      // code1 = {
-      //   code: 200,
-      //   message: 'Data fetched successfully',
-      //   data: {
-      //     data: [
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'January',
-      //         mode: 'Propane(1Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'March',
-      //         mode: 'Propane(1Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'April',
-      //         mode: 'Propane(1Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'June',
-      //         mode: 'Propane(1Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'October',
-      //         mode: 'Propane(2Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'May',
-      //         mode: 'Propane(2Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'June',
-      //         mode: 'Propane(2Z)',
-      //       },
-      //       {
-      //         NormParameter_FK_Id: '1583B754-AAE9-46C9-8D1B-761A8933F1B5',
-      //         month: 'July',
-      //         mode: 'Propane(2Z)',
-      //       },
-      //     ],
-      //   },
-      // }
-
       const [res1, res2, res3] = await Promise.all([code1, code2, code3])
 
       const mergedData = [
@@ -257,18 +307,33 @@ const BestAchievedNorms = () => {
         ).toUpperCase(),
       }))
 
-      setAllRedCell(mergedData)
+      // build O(1) lookup map keyed by `${normId}|${month}`
+      const redLookup = new Map()
+      mergedData.forEach((cell) => {
+        const normId = (
+          cell.normParameterFKId ||
+          cell.NormParameter_FK_Id ||
+          cell.normParameterFKId ||
+          ''
+        )
+          .toString()
+          .toLowerCase()
+        const month = (cell.month || '').toString().toLowerCase()
+        const key = `${normId}|${month}`
+        redLookup.set(key, cell.mode)
+      })
 
+      // build dataMap and gridNames in local vars (batch setState)
       if (apiResponse?.code !== 200) {
-        setGridNames([])
-        setDataMap({})
-        setLoading(false)
+        if (isMountedRef.current) {
+          setAllRedCellList(mergedData)
+          redLookupRef.current = redLookup
+          setGridNames([])
+          setDataMap({})
+        }
         return
       }
 
-      // Support two possible shapes for convenience:
-      // 1) apiResponse.data is the array of grids
-      // 2) apiResponse.data.data is the array (older wrappers)
       const gridsArray = Array.isArray(apiResponse.data)
         ? apiResponse.data
         : Array.isArray(apiResponse.data?.data)
@@ -276,17 +341,20 @@ const BestAchievedNorms = () => {
           : []
 
       if (!Array.isArray(gridsArray) || gridsArray.length === 0) {
-        setGridNames([])
-        setDataMap({})
-        setLoading(false)
+        if (isMountedRef.current) {
+          setAllRedCellList(mergedData)
+          redLookupRef.current = redLookup
+          setGridNames([])
+          setDataMap({})
+        }
         return
       }
 
       const normalizedNames = gridsArray.map((g) => g.gridName)
-      setGridNames(normalizedNames)
 
       const newMap = {}
-      gridsArray.forEach((g) => {
+      for (let i = 0; i < gridsArray.length; i++) {
+        const g = gridsArray[i]
         const rawRows = Array.isArray(g.data) ? g.data : []
         const inferredCols =
           Array.isArray(g.columns) && g.columns.length
@@ -294,21 +362,30 @@ const BestAchievedNorms = () => {
             : inferColumnsFromRows(rawRows)
         const enrichedCols = enrichColumns(inferredCols)
 
-        const rowsWithId = rawRows.map((r, i) => {
+        const rowsWithId = rawRows.map((r, idx) => {
           const parsed = normalizeRowValues(r, inferredCols)
-          return { ...parsed, id: i, isEditable: false }
+          return { ...parsed, id: idx, isEditable: false }
         })
 
         newMap[g.gridName] = { rows: rowsWithId, columns: enrichedCols }
-      })
+      }
 
-      if (isMountedRef.current) setDataMap(newMap)
+      if (isMountedRef.current) {
+        setAllRedCellList(mergedData)
+        redLookupRef.current = redLookup
+        setGridNames(normalizedNames)
+        setDataMap(newMap)
+        // set first grid expanded for better UX but avoid expanding all
+        setExpanded((prev) =>
+          prev === null && normalizedNames.length ? normalizedNames[0] : prev,
+        )
+      }
     } catch (err) {
       console.error('Error fetching all grids (new shape):', err)
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [keycloak, enrichColumns, PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
     setTabIndex(0)
@@ -320,40 +397,9 @@ const BestAchievedNorms = () => {
   }, [fetchAllGrids, plantID, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
-  // Excel export helpers (keeps your existing implementation compatible)
+  // Export helpers: build workbookOptions, then mount ExcelExport briefly to call save()
   // ---------------------------------------------------------------------------
-
-  // eslint-disable-next-line
-  const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
-  function sanitizeSheetName(name = '', fallback = 'Sheet') {
-    let s = String(name || '')
-      .replace(INVALID_SHEET_CHARS_RE, ' ')
-      .trim()
-    if (s.length === 0) s = fallback
-    if (s.length > 31) s = s.slice(0, 31)
-    return s
-  }
-
-  function normalizeCellValue(v) {
-    if (v === undefined || v === null) return ''
-    if (v instanceof Date) return v
-    if (typeof v === 'object') {
-      try {
-        return JSON.stringify(v)
-      } catch {
-        return String(v)
-      }
-    }
-    return v
-  }
-
   const exportAllGrids = useCallback(() => {
-    const keys = Object.keys(exportRefs.current || {})
-    const firstKey = keys.find((k) => exportRefs.current[k])
-    if (!firstKey) return
-    const baseRef = exportRefs.current[firstKey]
-    if (!baseRef || typeof baseRef.save !== 'function') return
-
     const sheets = gridNames
       .map((gridName, idx) => {
         const d = dataMap[gridName] || { rows: [], columns: [] }
@@ -377,7 +423,7 @@ const BestAchievedNorms = () => {
           cells: cols.map((c) => ({ value: c.title || c.field || '' })),
         }
 
-        // helper to find match for coloring (same logic as UI)
+        // helper to find match for coloring (use lookup map for O(1))
         const findMatchedCell = (row, monthField) => {
           const normId =
             row.materialFKId ||
@@ -386,21 +432,9 @@ const BestAchievedNorms = () => {
             row.NormParameterFKId ||
             row.normParameterFKId
           if (!normId) return null
-          return allRedCell?.find((cell) => {
-            const monthMatch =
-              (cell.month || '').toString().toLowerCase() ===
-              (monthField || '').toString().toLowerCase()
-            const cellNormId = (
-              cell.normParameterFKId ||
-              cell.NormParameter_FK_Id ||
-              cell.NormParameterFKId ||
-              ''
-            )
-              .toString()
-              .toLowerCase()
-            const normIdStr = (normId || '').toString().toLowerCase()
-            return monthMatch && cellNormId === normIdStr
-          })
+          const key = `${String(normId).toLowerCase()}|${(monthField || '').toString().toLowerCase()}`
+          const mode = redLookupRef.current?.get(key)
+          return mode ? { mode } : null
         }
 
         const dataRows = rows.map((r) => ({
@@ -442,13 +476,30 @@ const BestAchievedNorms = () => {
     if (!sheets.length) return
 
     const workbookOptions = { sheets }
+    workbookRef.current = workbookOptions
+    setIsExporting(true)
+  }, [gridNames, dataMap])
 
-    try {
-      baseRef.save(workbookOptions)
-    } catch (err) {
-      console.error('Export save failed:', err)
-    }
-  }, [gridNames, dataMap, allRedCell])
+  // When exporting, once ExcelExport is mounted, call save(workbookOptions)
+  useEffect(() => {
+    if (!isExporting) return
+    // give React a tick to mount the ExcelExport
+    const t = setTimeout(() => {
+      try {
+        if (excelExportRef.current && workbookRef.current) {
+          excelExportRef.current.save(workbookRef.current)
+        } else {
+          console.error('ExcelExport ref or workbookOptions missing')
+        }
+      } catch (err) {
+        console.error('Export save failed:', err)
+      } finally {
+        workbookRef.current = null
+        setIsExporting(false)
+      }
+    }, 0)
+    return () => clearTimeout(t)
+  }, [isExporting])
 
   const currentDateTime = new Date()
     .toISOString()
@@ -477,38 +528,17 @@ const BestAchievedNorms = () => {
         <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
         Propane (2Z)
       </Typography>
-      {/* Hidden ExcelExport instances for each grid */}
-      <div style={{ display: 'none' }}>
-        {gridNames.map((name) => {
-          const data = dataMap[name] || { rows: [], columns: [] }
-          const setRef = (ref) => {
-            if (ref) exportRefs.current[name] = ref
-          }
-          return (
-            <ExcelExport
-              key={`excel-${name}`}
-              data={data.rows}
-              ref={setRef}
-              fileName={fileName}
-            >
-              {(data.columns || [])
-                .filter(
-                  (col) =>
-                    !col.hidden &&
-                    col.field !== 'Material_FK_Id' &&
-                    col.field !== 'materialFkId',
-                )
-                .map((col) => (
-                  <ExcelExportColumn
-                    key={col.field}
-                    field={col.field}
-                    title={col.title || col.field}
-                  />
-                ))}
-            </ExcelExport>
-          )
-        })}
-      </div>
+
+      {/* transient ExcelExport: only mounted during actual export */}
+      {isExporting && (
+        <div style={{ display: 'none' }}>
+          <ExcelExport
+            data={[]}
+            ref={(r) => (excelExportRef.current = r)}
+            fileName={fileName}
+          />
+        </div>
+      )}
 
       <Box display='flex' justifyContent='flex-end' mb='2px'>
         <Button
@@ -526,30 +556,16 @@ const BestAchievedNorms = () => {
             {gridNames.map((name, idx) => {
               const d = dataMap[name] || { rows: [], columns: [] }
               return (
-                <div key={name}>
-                  <CustomAccordion defaultExpanded disableGutters>
-                    <CustomAccordionSummary
-                      aria-controls={`${name}-content`}
-                      id={`${name}-header`}
-                    >
-                      <Typography component='span' className='grid-title'>
-                        {renderTitle(name)}
-                      </Typography>
-                    </CustomAccordionSummary>
-                    <CustomAccordionDetails>
-                      <Box sx={{ width: '100%', margin: 0 }}>
-                        <KendoDataGrid
-                          rows={d.rows}
-                          columns={d.columns}
-                          permissions={{ isHeight: d?.rows?.length > 15 }}
-                          {...(idx === 0
-                            ? { allRedCell: allRedCell, showThreeColors: true }
-                            : {})}
-                        />
-                      </Box>
-                    </CustomAccordionDetails>
-                  </CustomAccordion>
-                </div>
+                <GridPanel
+                  key={name}
+                  name={name}
+                  d={d}
+                  idx={idx}
+                  expanded={expanded}
+                  setExpanded={setExpanded}
+                  allRedCellList={allRedCellList}
+                  showColors={true}
+                />
               )
             })}
           </>
@@ -558,5 +574,3 @@ const BestAchievedNorms = () => {
     </div>
   )
 }
-
-export default BestAchievedNorms
