@@ -117,13 +117,15 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 					map.put("nov", (row[20] == null || row[20].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[20].toString()));
 					map.put("dec", (row[21] == null || row[21].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[21].toString()));
 					map.put("isEditable", row[22]);
-					spyroInputDataList.add(map); // Add the map to the list here
+					spyroInputDataList.add(map);
 				} else {
 					if (type.equalsIgnoreCase("Composition")) {
 						if (row[4].toString().contains("C2/C3") || row[4].toString().contains("Hexene Purge Gas")
 								|| row[4].toString().contains("BPCL Kochi Propylene")
 								|| row[4].toString().contains("Import Propane") || row[4].toString().contains("FCC C3")
-								|| row[4].toString().contains("LDPE Off Gas")) {
+								|| row[4].toString().contains("LDPE Off Gas")
+								|| row[4].toString().contains("Shale Ethane")
+								) {
 
 							map.put("normParameterFKID", row[2]);
 							map.put("particulars", row[3]);
@@ -143,7 +145,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 							map.put("nov", (row[20] == null || row[20].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[20].toString()));
 							map.put("dec", (row[21] == null || row[21].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[21].toString()));
 							map.put("isEditable", row[22]);
-							spyroInputDataList.add(map); // Add the map to the list here
+							spyroInputDataList.add(map); 
 						}
 					}
 				}

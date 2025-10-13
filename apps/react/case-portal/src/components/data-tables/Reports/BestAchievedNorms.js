@@ -95,7 +95,11 @@ function GridPanel({
   allRedCellList,
   showColors,
 }) {
-  const isExpanded = expanded === name
+  // Support both the old single-expanded-value API (for safety) and the new Set-based API:
+  const isExpanded =
+    expanded && typeof expanded.has === 'function'
+      ? expanded.has(name)
+      : expanded === name
 
   // memoize row/column arrays to keep stable refs for KendoDataGrid and avoid re-renders
   const memoized = useMemo(
@@ -106,11 +110,33 @@ function GridPanel({
     [d?.rows, d?.columns],
   )
 
+  const handleToggle = () => {
+    // If expanded is a Set, toggle membership
+    if (
+      expanded &&
+      typeof expanded.has === 'function' &&
+      typeof setExpanded === 'function'
+    ) {
+      setExpanded((prev) => {
+        const next = new Set(prev || [])
+        if (next.has(name)) next.delete(name)
+        else next.add(name)
+        return next
+      })
+      return
+    }
+
+    // Fallback to original single-value behavior for compatibility
+    if (typeof setExpanded === 'function') {
+      setExpanded(isExpanded ? null : name)
+    }
+  }
+
   return (
     <div key={name}>
       <CustomAccordion
         expanded={isExpanded}
-        onChange={() => setExpanded(isExpanded ? null : name)}
+        onChange={handleToggle}
         disableGutters
       >
         <CustomAccordionSummary
@@ -180,8 +206,8 @@ export default function BestAchievedNorms() {
   const [allRedCellList, setAllRedCellList] = useState([])
   const redLookupRef = useRef(new Map())
 
-  // accordion expanded state — start collapsed; after fetch, open first grid only
-  const [expanded, setExpanded] = useState(null)
+  // accordion expanded state — start with a Set so we can expand multiple independently
+  const [expanded, setExpanded] = useState(() => new Set())
 
   // export control (dynamic ExcelExport mount)
   const [isExporting, setIsExporting] = useState(false)
@@ -375,10 +401,8 @@ export default function BestAchievedNorms() {
         redLookupRef.current = redLookup
         setGridNames(normalizedNames)
         setDataMap(newMap)
-        // set first grid expanded for better UX but avoid expanding all
-        setExpanded((prev) =>
-          prev === null && normalizedNames.length ? normalizedNames[0] : prev,
-        )
+        // set all grids expanded on first load
+        setExpanded(new Set(normalizedNames))
       }
     } catch (err) {
       console.error('Error fetching all grids (new shape):', err)

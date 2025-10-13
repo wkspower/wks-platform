@@ -996,10 +996,10 @@ const DecokingConfig = () => {
               onChange={(e) => setGlobalTaStartDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
-              min={getAopYearLimits().startLimit}
-              max={
-                globalTaEndDate ? globalTaEndDate : getAopYearLimits().endLimit
-              }
+              // min={getAopYearLimits().startLimit}
+              // max={
+              //   globalTaEndDate ? globalTaEndDate : getAopYearLimits().endLimit
+              // }
             />
           </Box>
 
@@ -1014,12 +1014,12 @@ const DecokingConfig = () => {
               onChange={(e) => setGlobalTaEndDate(e.value)}
               style={{ height: '80px' }}
               size={'medium'}
-              min={
-                globalTaStartDate
-                  ? globalTaStartDate
-                  : getAopYearLimits().startLimit
-              }
-              max={getAopYearLimits().endLimit}
+              // min={
+              //   globalTaStartDate
+              //     ? globalTaStartDate
+              //     : getAopYearLimits().startLimit
+              // }
+              // max={getAopYearLimits().endLimit}
             />
           </Box>
         </Box>

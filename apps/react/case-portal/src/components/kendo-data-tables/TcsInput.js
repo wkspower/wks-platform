@@ -9,6 +9,7 @@ import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
+import KendoDataTablesReportsTcs from './index-reports-tcs-input'
 
 const TcsInput = () => {
   const keycloak = useSession()
@@ -76,7 +77,7 @@ const TcsInput = () => {
       case 'Unit Capacity':
         return [
           {
-            field: 'units',
+            field: 'Particulars',
             title: 'Units',
             widthT: 120,
             locked: true,
@@ -105,11 +106,10 @@ const TcsInput = () => {
             ],
           },
         ]
-
       case 'Shutdown':
         return [
           {
-            field: 'units',
+            field: 'Particulars',
             title: 'Units',
             width: 150,
             locked: true,
@@ -140,14 +140,13 @@ const TcsInput = () => {
             ],
           },
         ]
-
       case 'Slowdown':
         return [
           {
             title: 'Major Units Slowdown details',
             children: [
               {
-                field: 'units',
+                field: 'Particulars',
                 title: 'Units',
                 width: 150,
                 locked: true,
@@ -396,7 +395,7 @@ const TcsInput = () => {
         return [
           {
             id: 1,
-            units: 'CDU1',
+            Particulars: 'CDU1',
             uom: 'KBPSD',
             kbpsd: 345.0,
             remarks:
@@ -404,7 +403,7 @@ const TcsInput = () => {
           },
           {
             id: 2,
-            units: 'CDU2',
+            Particulars: 'CDU2',
             uom: 'KBPSD',
             kbpsd: 345.0,
             remarks:
@@ -412,35 +411,35 @@ const TcsInput = () => {
           },
           {
             id: 3,
-            units: 'DHT1',
+            Particulars: 'DHT1',
             uom: 'KBPSD',
             kbpsd: 80.0,
             remarks: 'Grade wise max. capacity : BS III: 100 kbpsd',
           },
           {
             id: 4,
-            units: 'DHT2',
+            Particulars: 'DHT2',
             uom: 'KBPSD',
             kbpsd: 100.0,
             remarks: 'BS - VI: D1: 80 KBPSD, D2: 60 KBPSD',
           },
           {
             id: 5,
-            units: 'VGOHT1',
+            Particulars: 'VGOHT1',
             uom: 'KBPSD',
             kbpsd: 104.5,
             remarks: '',
           },
           {
             id: 6,
-            units: 'VGOHT2',
+            Particulars: 'VGOHT2',
             uom: 'KBPSD',
             kbpsd: 104.5,
             remarks: '',
           },
           {
             id: 7,
-            units: 'FCCU',
+            Particulars: 'FCCU',
             uom: 'KBPSD',
             kbpsd: 215,
             remarks: '',
@@ -448,7 +447,7 @@ const TcsInput = () => {
 
           {
             id: 26,
-            units: 'HPIB',
+            Particulars: 'HPIB',
             uom: 'TPD',
             kbpsd: '1. HPIB : 409.5 TPD',
             remarks: '2. Butene-1 : 195 TPD at 130% capacity; 3. MTBE: 816 TPD',
@@ -458,7 +457,7 @@ const TcsInput = () => {
         return [
           {
             id: 1,
-            units: 'CDU#1',
+            Particulars: 'CDU#1',
             sdTotalDuration: 28.0,
             tentativeMonth: '05-Jan-25',
             purposeOfShutdown:
@@ -466,7 +465,7 @@ const TcsInput = () => {
           },
           {
             id: 2,
-            units: 'Sat LPG Merox-331',
+            Particulars: 'Sat LPG Merox-331',
             sdTotalDuration: 15.0,
             tentativeMonth: '05-Jan-25',
             purposeOfShutdown:
@@ -474,7 +473,7 @@ const TcsInput = () => {
           },
           {
             id: 3,
-            units: 'KMU1',
+            Particulars: 'KMU1',
             sdTotalDuration: 18.0,
             tentativeMonth: '05-Jan-25',
             purposeOfShutdown:
@@ -482,7 +481,7 @@ const TcsInput = () => {
           },
           {
             id: 4,
-            units: 'KMU2',
+            Particulars: 'KMU2',
             sdTotalDuration: 18.0,
             tentativeMonth: '20-Jan-25',
             purposeOfShutdown:
@@ -490,7 +489,7 @@ const TcsInput = () => {
           },
           {
             id: 5,
-            units: 'CBA-3',
+            Particulars: 'CBA-3',
             sdTotalDuration: 31.0,
             tentativeMonth: '05-Jan-25',
             purposeOfShutdown:
@@ -498,7 +497,7 @@ const TcsInput = () => {
           },
           {
             id: 6,
-            units: 'SWS-3 With CDU-1 S/D',
+            Particulars: 'SWS-3 With CDU-1 S/D',
             sdTotalDuration: 12.0,
             tentativeMonth: '05-Jan-25',
             purposeOfShutdown:
@@ -506,7 +505,7 @@ const TcsInput = () => {
           },
           {
             id: 7,
-            units: 'SWS-4 With CDU-1 S/D',
+            Particulars: 'SWS-4 With CDU-1 S/D',
             sdTotalDuration: 12.0,
             tentativeMonth: '17-Jan-25',
             purposeOfShutdown:
@@ -514,7 +513,7 @@ const TcsInput = () => {
           },
           {
             id: 8,
-            units: 'PP Line-C',
+            Particulars: 'PP Line-C',
             sdTotalDuration: 16.0,
             tentativeMonth: '05-Jan-25',
             purposeOfShutdown:
@@ -522,7 +521,7 @@ const TcsInput = () => {
           },
           {
             id: 9,
-            units: 'PP Line-B',
+            Particulars: 'PP Line-B',
             sdTotalDuration: 16.0,
             tentativeMonth: '05-Jun-25',
             purposeOfShutdown:
@@ -530,7 +529,7 @@ const TcsInput = () => {
           },
           {
             id: 10,
-            units: 'HPIB',
+            Particulars: 'HPIB',
             sdTotalDuration: 27.0,
             tentativeMonth: '01-Nov-25',
             purposeOfShutdown:
@@ -541,7 +540,7 @@ const TcsInput = () => {
         return [
           {
             id: 1,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 11.0,
             throughputDuringSlowdown: '170 KBPSD',
             tentativeMonth: '2025-03-25',
@@ -549,7 +548,7 @@ const TcsInput = () => {
           },
           {
             id: 2,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 11.0,
             throughputDuringSlowdown: '170 KBPSD',
             tentativeMonth: '2025-08-25',
@@ -557,7 +556,7 @@ const TcsInput = () => {
           },
           {
             id: 3,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 6.0,
             throughputDuringSlowdown: '160 KBPSD',
             tentativeMonth: '2025-08-25',
@@ -565,7 +564,7 @@ const TcsInput = () => {
           },
           {
             id: 4,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 8.0,
             throughputDuringSlowdown: '206 KBPSD',
             tentativeMonth: '2025-02-25',
@@ -573,7 +572,7 @@ const TcsInput = () => {
           },
           {
             id: 5,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 8.0,
             throughputDuringSlowdown: '206 KBPSD',
             tentativeMonth: '2025-04-25',
@@ -581,7 +580,7 @@ const TcsInput = () => {
           },
           {
             id: 6,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 8.0,
             throughputDuringSlowdown: '206 KBPSD',
             tentativeMonth: '2025-06-25',
@@ -589,7 +588,7 @@ const TcsInput = () => {
           },
           {
             id: 7,
-            units: 'Coker-1',
+            Particulars: 'Coker-1',
             tentativeDuration: 8.0,
             throughputDuringSlowdown: '206 KBPSD',
             tentativeMonth: '2025-10-25',
@@ -773,7 +772,7 @@ const TcsInput = () => {
     //       return [
     //         {
     //           id: 1,
-    //           units: 'CDU1',
+    //           Particulars: 'CDU1',
     //           uom: 'KBPSD',
     //           kbpsd: 345.0,
     //           remarks:
@@ -781,7 +780,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 2,
-    //           units: 'CDU2',
+    //           Particulars: 'CDU2',
     //           uom: 'KBPSD',
     //           kbpsd: 345.0,
     //           remarks:
@@ -789,42 +788,42 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 3,
-    //           units: 'DHT1',
+    //           Particulars: 'DHT1',
     //           uom: 'KBPSD',
     //           kbpsd: 80.0,
     //           remarks: 'Grade wise max. capacity : BS III: 100 kbpsd',
     //         },
     //         {
     //           id: 4,
-    //           units: 'DHT2',
+    //           Particulars: 'DHT2',
     //           uom: 'KBPSD',
     //           kbpsd: 100.0,
     //           remarks: 'BS - VI: D1: 80 KBPSD, D2: 60 KBPSD',
     //         },
     //         {
     //           id: 5,
-    //           units: 'VGOHT1',
+    //           Particulars: 'VGOHT1',
     //           uom: 'KBPSD',
     //           kbpsd: 104.5,
     //           remarks: '',
     //         },
     //         {
     //           id: 6,
-    //           units: 'VGOHT2',
+    //           Particulars: 'VGOHT2',
     //           uom: 'KBPSD',
     //           kbpsd: 104.5,
     //           remarks: '',
     //         },
     //         {
     //           id: 7,
-    //           units: 'FCCU',
+    //           Particulars: 'FCCU',
     //           uom: 'KBPSD',
     //           kbpsd: 215,
     //           remarks: '',
     //         },
     //         {
     //           id: 8,
-    //           units: 'HPIB',
+    //           Particulars: 'HPIB',
     //           uom: 'TPD',
     //           kbpsd: 409.5,
     //           remarks:
@@ -835,7 +834,7 @@ const TcsInput = () => {
     //       return [
     //         {
     //           id: 1,
-    //           units: 'CDU-3',
+    //           Particulars: 'CDU-3',
     //           uom: 'KBPSD',
     //           kbpsd: 380,
     //           remarks:
@@ -843,7 +842,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 2,
-    //           units: 'CDU-4',
+    //           Particulars: 'CDU-4',
     //           uom: 'KBPSD',
     //           kbpsd: 380,
     //           remarks:
@@ -851,42 +850,42 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 3,
-    //           units: 'DHDS-1',
+    //           Particulars: 'DHDS-1',
     //           uom: 'KBPSD',
     //           kbpsd: 150,
     //           remarks: '',
     //         },
     //         {
     //           id: 4,
-    //           units: 'DHDS-2',
+    //           Particulars: 'DHDS-2',
     //           uom: 'KBPSD',
     //           kbpsd: 170,
     //           remarks: '',
     //         },
     //         {
     //           id: 5,
-    //           units: 'VGOHT-3',
+    //           Particulars: 'VGOHT-3',
     //           uom: 'KBPSD',
     //           kbpsd: 125,
     //           remarks: '',
     //         },
     //         {
     //           id: 6,
-    //           units: 'VGOHT-4',
+    //           Particulars: 'VGOHT-4',
     //           uom: 'KBPSD',
     //           kbpsd: 125,
     //           remarks: '',
     //         },
     //         {
     //           id: 7,
-    //           units: 'FCCU',
+    //           Particulars: 'FCCU',
     //           uom: 'KBPSD',
     //           kbpsd: 220,
     //           remarks: 'Note 1: (205K VGO/LSWR + 15K Naphtha)',
     //         },
     //         {
     //           id: 8,
-    //           units: 'FCCU',
+    //           Particulars: 'FCCU',
     //           uom: 'KBPSD',
     //           kbpsd: 215,
     //           remarks: 'Note 2: 215 KBPSD with VGO/LSWR',
@@ -896,7 +895,7 @@ const TcsInput = () => {
     //       return [
     //         {
     //           id: 1,
-    //           units: 'CDU3',
+    //           Particulars: 'CDU3',
     //           tentativeDuration: 120.0,
     //           throughputDuringSlowdown: 360,
     //           tentativeMonth: '01-11-2024 to 28-02-2025',
@@ -905,7 +904,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 2,
-    //           units: 'CDU3',
+    //           Particulars: 'CDU3',
     //           tentativeDuration: 10.0,
     //           throughputDuringSlowdown: 360,
     //           tentativeMonth: 'Based on more fouling of Exchangers',
@@ -914,7 +913,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 3,
-    //           units: 'CDU4',
+    //           Particulars: 'CDU4',
     //           tentativeDuration: 120.0,
     //           throughputDuringSlowdown: 360,
     //           tentativeMonth: '01-11-2024 to 28-02-2025',
@@ -923,7 +922,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 4,
-    //           units: 'CDU4',
+    //           Particulars: 'CDU4',
     //           tentativeDuration: 10.0,
     //           throughputDuringSlowdown: 365,
     //           tentativeMonth: 'Based on more fouling of Exchangers',
@@ -932,7 +931,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 5,
-    //           units: 'FCC-2',
+    //           Particulars: 'FCC-2',
     //           tentativeDuration: 12.5,
     //           throughputDuringSlowdown: 110,
     //           tentativeMonth: "Jan-Feb'25",
@@ -941,7 +940,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 6,
-    //           units: 'Alkylation',
+    //           Particulars: 'Alkylation',
     //           tentativeDuration: 14.0,
     //           throughputDuringSlowdown: 7,
     //           tentativeMonth: "Aug'25",
@@ -950,7 +949,7 @@ const TcsInput = () => {
     //         },
     //         {
     //           id: 7,
-    //           units: 'Alkylation',
+    //           Particulars: 'Alkylation',
     //           tentativeDuration: 8.0,
     //           throughputDuringSlowdown: 7.5,
     //           tentativeMonth: "Aug'25",
@@ -1127,7 +1126,9 @@ const TcsInput = () => {
       }
 
       const requiredFields =
-        currentTabDisplay === 'Unit Capacity' ? ['units'] : ['units']
+        currentTabDisplay === 'Unit Capacity'
+          ? ['Particulars']
+          : ['Particulars']
       const validationMessage = validateFields(data, requiredFields)
 
       if (validationMessage) {
@@ -1301,7 +1302,7 @@ const TcsInput = () => {
 
           return (
             <Box key={currentTabDisplay}>
-              <KendoDataTablesReports
+              <KendoDataTablesReportsTcs
                 rows={rows}
                 setRows={setRowsForCurrent}
                 fetchData={() => fetchTcsData(currentTabDisplay)}
@@ -1328,13 +1329,17 @@ const TcsInput = () => {
                 permissions={{
                   customHeight: { mainBox: '32vh', otherBox: '100%' },
                   textAlignment: 'center',
+                  allAction: true,
+                  addButton: true,
                   remarksEditable: true,
                   showCalculate: false,
                   showExport: true,
+                  showImport: true,
                   saveBtnForRemark: true,
                   saveBtn: true,
                   showWorkFlowBtns: true,
                   showTitle: true,
+                  tabIndex: tabIndex,
                 }}
               />
             </Box>

@@ -95,7 +95,7 @@ export const monthMap = {
   november: 11,
   december: 12,
 }
-const KendoDataTablesReports = ({
+const KendoDataTablesReportsTcs = ({
   allRedCell = [],
   modifiedCells = [],
   title = '',
@@ -120,7 +120,7 @@ const KendoDataTablesReports = ({
   handleUnitChange = () => {},
   handleRemarkCellClick = () => {},
   handleExport = () => {},
-  groupBy = null,
+  // groupBy = null,
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -132,14 +132,14 @@ const KendoDataTablesReports = ({
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
 
-  const initialGroup = groupBy
-    ? [
-        {
-          field: groupBy,
-          dir: undefined,
-        },
-      ]
-    : []
+  // const initialGroup = groupBy
+  //   ? [
+  //       {
+  //         field: groupBy,
+  //         dir: undefined,
+  //       },
+  //     ]
+  //   : []
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
@@ -242,6 +242,15 @@ const KendoDataTablesReports = ({
   }
 
   const handleAddRow = () => {
+    if (permissions?.tabIndex) {
+      if (
+        permissions?.tabIndex == 1 ||
+        permissions?.tabIndex == 2 ||
+        permissions?.tabIndex == 3 ||
+        permissions?.tabIndex == 4
+      )
+        return
+    }
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
     const newRowId = rows.length
@@ -252,6 +261,8 @@ const KendoDataTablesReports = ({
       isNew: true,
       ...Object.fromEntries(columns.map((col) => [col.field, ''])),
     }
+
+    // console.log('newRow', newRow)
 
     setRows((prevRows) => [newRow, ...prevRows])
 
@@ -727,7 +738,7 @@ const KendoDataTablesReports = ({
               mode: 'multiple',
             }}
             autoProcessData={true}
-            {...(initialGroup.length > 0 ? { defaultGroup: initialGroup } : {})}
+            // {...(initialGroup.length > 0 ? { defaultGroup: initialGroup } : {})}
             dataItemKey='id'
             editField='inEdit'
             editable={{ mode: 'incell' }}
@@ -855,4 +866,4 @@ const KendoDataTablesReports = ({
   )
 }
 
-export default KendoDataTablesReports
+export default KendoDataTablesReportsTcs

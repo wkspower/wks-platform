@@ -273,7 +273,7 @@ export default function AopBudget() {
   const adjustedPermissionsP = getAdjustedPermissionsP(
     {
       saveBtn: true,
-      addButton: true,
+      addButton: false,
       allAction: true,
       showTitleNameBusiness: true,
       titleName: 'Procurement Budget',
@@ -307,7 +307,7 @@ export default function AopBudget() {
       saveBtn: true,
       showTitleNameBusiness: true,
       titleName: 'Consumption Budget',
-      addButton: true,
+      addButton: false,
       adjustedPermissions: true,
       downloadExcelBtnFromUI: false,
       downloadExcelBtn: true,
