@@ -531,7 +531,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                }
 	            }
 	        }
-	        if("ELASTOMER".equalsIgnoreCase(verticalName)) {
+	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
 	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month);
 	        	if(count==1) {
@@ -593,7 +593,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	        String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 	        
-	        if("ELASTOMER".equalsIgnoreCase(verticalName)) {
+	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
 	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month);
 	        	if(count==1) {
