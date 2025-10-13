@@ -351,6 +351,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				Row row = rowIterator.next();
 				ShutDownPlanDTO dto = new ShutDownPlanDTO();
 				try {
+					dto.setAudityear(year);
 					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
 					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
