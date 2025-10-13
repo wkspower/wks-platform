@@ -45,37 +45,37 @@ public class PlantContributionSummaryT22 {
     private String uom;
 
     @Column(name = "Price")
-    private double price;
+    private Double price;
 
     @Column(name = "Actual1")
-    private double actual1;
+    private Double actual1;
 
     @Column(name = "Actual2")
-    private double actual2;
+    private Double actual2;
 
     @Column(name = "Actual3")
-    private double actual3;
+    private Double actual3;
 
     @Column(name = "Actual4")
-    private double actual4;
+    private Double actual4;
 
     @Column(name = "BudgetCurrentYear")
-    private double budgetCurrentYear;
+    private Double budgetCurrentYear;
 
     @Column(name = "Actual1Cost")
-    private double actual1Cost;
+    private Double actual1Cost;
 
     @Column(name = "Actual2Cost")
-    private double actual2Cost;
+    private Double actual2Cost;
 
     @Column(name = "Actual3Cost")
-    private double actual3Cost;
+    private Double actual3Cost;
 
     @Column(name = "Actual4Cost")
-    private double actual4Cost;
+    private Double actual4Cost;
 
     @Column(name = "BudgetCurrentYearCost")
-    private double budgetCurrentYearCost;
+    private Double budgetCurrentYearCost;
 
     @Column(name = "Plant_FK_Id", columnDefinition = "uniqueidentifier")
     private UUID plantFkId;

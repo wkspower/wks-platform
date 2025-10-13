@@ -18,14 +18,14 @@ public class PlantContributionSummaryDTO {
 
     private UUID id;
 
-    private double actualLastYear;
+    private Double actualLastYear;
 
-    private double actualTwoYearsAgo;
+    private Double actualTwoYearsAgo;
 
-    private double actualThreeYearsAgo;
+    private Double actualThreeYearsAgo;
 
-    private double actualFourYearsAgo;
+    private Double actualFourYearsAgo;
 
-    private double budgetCurrent;
+    private Double budgetCurrent;
 
 }
