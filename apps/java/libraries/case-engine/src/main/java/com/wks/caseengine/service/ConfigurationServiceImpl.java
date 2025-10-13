@@ -297,11 +297,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				
 				List<Object> list = new ArrayList<>();
 				list.add(dto.getTypeDisplayName());
+				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getTypeDisplayName());
 				list.add(dto.getProductName());
+				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getProductName());
 				list.add(dto.getApr());
+				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getApr());
 				list.add(dto.getRemarks());
+				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getRemarks());
 				list.add(dto.getNormParameterFKId());
+				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getNormParameterFKId());
 				list.add(dto.getId());
+				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getId());
 				isEditable.add(dto.getIsEditable());
 				
 				if (isAfterSave) {
@@ -658,17 +664,26 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (Object[] row : obj) {
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
+				System.out.println("NormParameterFKId = "+configurationDTO.getNormParameterFKId());
 
 				configurationDTO.setApr(
 						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
 								: 0.0);
+				System.out.println("Apr = "+configurationDTO.getApr());
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
+				System.out.println("Remarks = "+configurationDTO.getRemarks());
 					configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
+					System.out.println("ConfigTypeDisplayName = "+configurationDTO.getConfigTypeDisplayName());
 					configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
+					System.out.println("TypeDisplayName = "+configurationDTO.getTypeDisplayName());
 					configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
+					System.out.println("ConfigTypeName = "+configurationDTO.getConfigTypeName());
 					configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
+					System.out.println("TypeName = "+configurationDTO.getTypeName());
 					configurationDTO.setProductName(row[21] != null ? row[21].toString() : "");
+					System.out.println("ProductName = "+configurationDTO.getProductName());
 					configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
+					System.out.println("Id = "+configurationDTO.getId());
 				configurationDTOList.add(configurationDTO);
 				if (row[14] == null) {
 					i++;
