@@ -148,10 +148,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			if (!isAfterSave) {
 				 dtoList = findMaintenanceDetailsByPlantIdAndType(UUID.fromString(plantId),maintenanceTypeName, year); 
 			}
-			String pattern = "dd-MM-yyyy HH:mm:ss";
+			String pattern = "dd-MM-yyyy HH:mm";
 			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
 			Workbook workbook = new XSSFWorkbook();
-            CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm:ss");
+            CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm");
 
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
@@ -346,7 +346,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
 					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try { 
-					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.US);
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintStartDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintStartDateTime(date);
@@ -360,7 +360,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try {
 					        
-					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.US);
+					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 					        LocalDateTime dateTime = LocalDateTime.parse(maintEndDateTime, formatter); 
 					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
 					        dto.setMaintEndDateTime(date);
