@@ -450,7 +450,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return dtoList;
 	}
 
