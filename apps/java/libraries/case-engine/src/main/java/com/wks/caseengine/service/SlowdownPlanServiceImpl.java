@@ -589,7 +589,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		String year=null;
-			
+		List<ShutDownPlanDTO> failedList = new ArrayList<ShutDownPlanDTO>();
 		try {
 			UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
 			if (plantMaintenanceId == null) {
@@ -603,6 +603,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
 			}
 			for (ShutDownPlanDTO shutDownPlanDTO : shutDownPlanDTOList) {
+				if (shutDownPlanDTO.getSaveStatus() != null
+						&& shutDownPlanDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(shutDownPlanDTO);
+					continue;
+				}
 				year=shutDownPlanDTO.getAudityear();
 				PlantMaintenanceTransaction plantMaintenanceTransaction =null;
 				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
@@ -662,7 +667,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
-			return shutDownPlanDTOList;
+			return failedList;
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
