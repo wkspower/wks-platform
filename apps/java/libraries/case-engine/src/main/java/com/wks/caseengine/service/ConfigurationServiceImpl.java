@@ -269,7 +269,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	
 	public byte[] createShutdownRateExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
 		try {
-			System.out.println("Started the createExcel");
+			
 			if (!isAfterSave) {
 				dtoList = getShutdownRateData(year, plantFKId);
 			}
@@ -297,17 +297,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				
 				List<Object> list = new ArrayList<>();
 				list.add(dto.getTypeDisplayName());
-				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getTypeDisplayName());
 				list.add(dto.getProductName());
-				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getProductName());
 				list.add(dto.getApr());
-				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getApr());
 				list.add(dto.getRemarks());
-				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getRemarks());
 				list.add(dto.getNormParameterFKId());
-				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getNormParameterFKId());
 				list.add(dto.getId());
-				System.out.println("list.add(dto.getTypeDisplayName());" +dto.getId());
 				isEditable.add(dto.getIsEditable());
 				
 				if (isAfterSave) {
@@ -1657,7 +1651,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
 					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
 					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
-					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeDisplayName = 'Shutdown Rate' " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
+					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeName = 'ShutdownNorms' " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
 					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
 					+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
 					+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
