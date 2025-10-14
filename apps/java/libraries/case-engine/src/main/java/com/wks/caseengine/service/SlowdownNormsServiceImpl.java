@@ -458,34 +458,60 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		return aopMessageVM;
 	}
 	
-	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String siteId, String verticalId,
-			String finYear) {
-		String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
-
-		try (Connection connection = dataSource.getConnection();
-				CallableStatement stmt = connection.prepareCall(callSql)) {
-
-			// Set parameters
+	@Override
+	@Transactional
+	public AOPMessageVM calculateSlowdownNorms(String year, String plantId) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalcuateSlowdownNorms";
+			int result = executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
+					vertical.getId().toString(), year);
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
+					"slowdown-norms");
+			
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(result);
+			return aopMessageVM;
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to execute stored procedure data", ex);
+		}
+		
+	}
+	
+	public int executeDynamicUpdateProcedure(String procedureName,
+            String plantId,
+            String siteId,
+            String verticalId,
+            String finYear) {
+			String callSql = "{call " + procedureName + "(?, ?, ?, ?)}";
+			
+			try (Connection connection = dataSource.getConnection();
+			CallableStatement stmt = connection.prepareCall(callSql)) {
+			
 			stmt.setString(1, plantId);
 			stmt.setString(2, siteId);
 			stmt.setString(3, verticalId);
 			stmt.setString(4, finYear);
-
-			// Execute the stored procedure
+			
 			int rowsAffected = stmt.executeUpdate();
-
 			
 			if (!connection.getAutoCommit()) {
-				connection.commit();
+			connection.commit();
 			}
-
+			
 			return rowsAffected;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return 0;
+			
+			} catch (SQLException e) {
+			// wrap and rethrow
+			throw new RuntimeException("Failed to execute stored procedure: " + procedureName, e);
+			}
 		}
-	}
 	
 	@Override
 	public AOPMessageVM getSlowdownNormsDynamicColumns(String auditYear, UUID plantId) {

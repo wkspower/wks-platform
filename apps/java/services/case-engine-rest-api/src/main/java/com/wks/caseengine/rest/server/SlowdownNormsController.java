@@ -50,10 +50,14 @@ public class SlowdownNormsController {
 	    }
 	 
 	 @GetMapping(value = "/calculate-slowdown-consumption")
-		public AOPMessageVM getCalculateSlowdownNorms(@RequestParam String year, @RequestParam String plantId) {
+		public AOPMessageVM calculateSlowdownConsumption(@RequestParam String year, @RequestParam String plantId) {
 			return slowdownNormsService.getCalculateSlowdownNorms(year, plantId);
 		}
 	 
+	 	@GetMapping(value = "/calculate-slowdown-norms")
+		public AOPMessageVM calculateSlowdownNorms(@RequestParam String year, @RequestParam String plantId) {
+			return slowdownNormsService.calculateSlowdownNorms(year, plantId);
+		}
 		
 		@GetMapping("/slowdown-consumption-columns")
 		  public AOPMessageVM getSlowdownNormsDynamicColumns(@RequestParam String year,@RequestParam String plantId){

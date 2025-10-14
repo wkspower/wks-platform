@@ -14,6 +14,7 @@ public interface SlowdownNormsService {
 	public List<SlowdownNormsValueDTO> getSlowdownNormsSPData(String year, String plantId);
 	public List getSlowdownMonths(UUID plantId,String maintenanceName,String year,String gradeId);
 	public AOPMessageVM getCalculateSlowdownNorms(String year,String plantId);
+	public AOPMessageVM calculateSlowdownNorms(String year,String plantId);
 	public AOPMessageVM getSlowdownNormsDynamicColumns(String auditYear,  UUID plantId);
 	public AOPMessageVM getSlowdownNormsConfigurationData(String plantId,String year);
 	public AOPMessageVM saveSlowdownNormsConfigurationData( String plantId, String year,  List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList);
