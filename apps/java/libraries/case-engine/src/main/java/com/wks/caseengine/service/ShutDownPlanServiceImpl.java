@@ -949,14 +949,21 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					// Updating an existing record
 
 					try {
+						Boolean changed=false;
 						Optional<PlantMaintenanceTransaction> plantMaintenance = shutDownPlanRepository
 								.findById(UUID.fromString(shutDownPlanDTO.getId()));
 
 						if (plantMaintenance.isPresent()) {
 							PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
-							plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
+							
+							if(!plantMaintenanceTransaction.getDiscription().equalsIgnoreCase(shutDownPlanDTO.getDiscription())) {
+								changed=true;
+							}
 							plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 							if (shutDownPlanDTO.getProductId() != null) {
+								if(!(plantMaintenanceTransaction.getNormParametersFKId().toString().equalsIgnoreCase(shutDownPlanDTO.getProductId().toString()))) {
+									changed=true;
+								}
 								plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
 							}
 							if (shutDownPlanDTO.getDurationInHrs() != null) {
@@ -973,9 +980,25 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							// plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
 							plantMaintenanceTransaction
 									.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
+							Date entityEndDate = plantMaintenanceTransaction.getMaintEndDateTime();
+							Date dtoEndDate = shutDownPlanDTO.getMaintEndDateTime();
+							if(!(entityEndDate != null && dtoEndDate != null && entityEndDate.compareTo(dtoEndDate) == 0)) {
+								changed=true;
+							}
 							plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
+							Date entityStartDate = plantMaintenanceTransaction.getMaintStartDateTime();
+							Date dtoStartDate = shutDownPlanDTO.getMaintStartDateTime();
+							if(!(entityStartDate != null && dtoStartDate != null && entityStartDate.compareTo(dtoStartDate) == 0)) {
+								changed=true;
+							}
 							plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
-							plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+							if(changed && (plantMaintenanceTransaction.getRemarks().equalsIgnoreCase(shutDownPlanDTO.getRemark()))){
+								shutDownPlanDTO.setSaveStatus("Failed");
+								shutDownPlanDTO.setErrDescription("Please update remark");
+								failedList.add(shutDownPlanDTO);
+								continue;
+							}
+							plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 							// Save updated record
 							plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
 						} else {
