@@ -143,8 +143,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	    }
 	public byte[] shutdownExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave, List<ShutDownPlanDTO> dtoList) {
 		try {
-			
-			
 			if (!isAfterSave) {
 				 dtoList = findMaintenanceDetailsByPlantIdAndType(UUID.fromString(plantId),maintenanceTypeName, year); 
 			}
@@ -313,13 +311,49 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		return null;
 	}
 	
+	private static String getCellAsString(Cell cell, ShutDownPlanDTO dto, FormulaEvaluator evaluator) {
+	    if (cell == null) {
+	        return null;
+	    }
+	    try {
+	        CellType cellType = cell.getCellType();
+	        DataFormatter dataFormatter = new DataFormatter();  // formats as shown in Excel
+	        if (cellType == CellType.NUMERIC) {
+	            if (DateUtil.isCellDateFormatted(cell)) {
+	                Date date = cell.getDateCellValue();
+	                SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+	                return sdf.format(date);
+	            } else {
+	                // it's a plain number; format it as shown
+	                return dataFormatter.formatCellValue(cell, evaluator);
+	            }
+	        } else if (cellType == CellType.STRING) {
+	            return cell.getStringCellValue().trim();
+	        } else if (cellType == CellType.FORMULA) {
+	            // evaluate formula then get formatted value
+	            return dataFormatter.formatCellValue(cell, evaluator);
+	        } else if (cellType == CellType.BLANK) {
+	            return null;
+	        } else {
+	            // fallback
+	            return dataFormatter.formatCellValue(cell, evaluator);
+	        }
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Error reading cell: " + e.getMessage());
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+	
 	public List<ShutDownPlanDTO> readShutdownData(InputStream inputStream, UUID plantFKId, String year) {
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 			Sheet sheet = workbook.getSheetAt(0);
 			Iterator<Row> rowIterator = sheet.iterator();
-
+			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 			if (rowIterator.hasNext())
 				rowIterator.next(); // Skip header
 
@@ -343,7 +377,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						dto.setSaveStatus("Failed");
 				        dto.setErrDescription("Please enter particulars");
 					}
-					String maintStartDateTime = getStringCellValue(row.getCell(2), dto);
+					
+					String maintStartDateTime = getCellAsString(row.getCell(2), dto, evaluator);
 					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try { 
 					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
@@ -356,7 +391,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					        e.printStackTrace();
 					    }
 					}
-					String maintEndDateTime = getStringCellValue(row.getCell(3), dto);
+					
+					String maintEndDateTime = getCellAsString(row.getCell(3), dto, evaluator);
 					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
 					    try {
 					        
