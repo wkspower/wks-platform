@@ -431,25 +431,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 					String idString = getStringCellValue(row.getCell(6), dto);
 					dto.setId(idString); 
-					String productIdString = getStringCellValue(row.getCell(7), dto);
-					if (productIdString == null || productIdString.isEmpty()) {
-						UUID productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName(),plantFKId);
-					    if(productId!=null) {
-					    	dto.setProductId(productId);
-					    }else {
-					    	 dto.setSaveStatus("Failed");
-						     dto.setErrDescription("Particular not found.");
-					    }
-						
-					} else {
-					    try {
-					        dto.setProductId(UUID.fromString(productIdString));
-					    } catch (IllegalArgumentException e) {
-					        dto.setSaveStatus("Failed");
-					        dto.setErrDescription("Product ID in cell 7 must be a valid UUID format.");
-					        e.printStackTrace();
-					    }
-					}
+					/*
+					 * String productIdString = getStringCellValue(row.getCell(7), dto); if
+					 * (productIdString == null || productIdString.isEmpty()) { UUID
+					 * productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(
+					 * dto.getProductName(),plantFKId); if(productId!=null) {
+					 * dto.setProductId(productId); }else { dto.setSaveStatus("Failed");
+					 * dto.setErrDescription("Particular not found."); }
+					 * 
+					 * } else { try { dto.setProductId(UUID.fromString(productIdString)); } catch
+					 * (IllegalArgumentException e) { dto.setSaveStatus("Failed");
+					 * dto.setErrDescription("Product ID in cell 7 must be a valid UUID format.");
+					 * e.printStackTrace(); } }
+					 */
 					
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -962,7 +956,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
 							plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark());
 							plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
-
+							if (shutDownPlanDTO.getProductId() != null) {
+								plantMaintenanceTransaction.setNormParametersFKId(shutDownPlanDTO.getProductId());
+							}
 							if (shutDownPlanDTO.getDurationInHrs() != null) {
 								// plantMaintenanceTransaction.setDurationInMins((int)
 								// (shutDownPlanDTO.getDurationInHrs() * 60));
