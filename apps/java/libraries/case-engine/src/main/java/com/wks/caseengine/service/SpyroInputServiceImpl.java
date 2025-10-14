@@ -290,23 +290,32 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 	    	System.out.println(newValue);
 	    }
 	    
-
 	    Optional<NormAttributeTransactions> existingOpt = 
 	        normAttributeTransactionsRepository
 	            .findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
-
+	    Boolean losses=false;
 	    if (existingOpt.isPresent()) {
 	        // ----- Updating existing record -----
 	        NormAttributeTransactions existing = existingOpt.get();
 	        String existingRemarks = Optional.ofNullable(existing.getRemarks()).orElse("").trim();
 	        String existingValue = Optional.ofNullable(existing.getAttributeValue()).orElse("").trim();
-
-	        if (existingRemarks.equalsIgnoreCase(newRemarks) && !existingValue.equalsIgnoreCase(newValue)) {
-	            spyroInputDTO.setSaveStatus("Failed");
-	            spyroInputDTO.setErrDescription("Please add/update remark");
-	            return;
+	        Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterFKId);
+	        List<NormParameters>  normParametersList= normParametersRepository.findByPlantAndDisplayNameAndNormTypeAndDependantAttribute(UUID.fromString(plantId),"Losses",2,"Input");
+	        for(NormParameters normParameters:normParametersList) {
+	        	if(normParameters.getId().toString().equalsIgnoreCase(normParametersOpt.get().getId().toString())) {
+	        		losses=true;
+	        		break;
+	        	}
 	        }
-
+	        
+	        if(!losses) {
+	        	if (existingRemarks.equalsIgnoreCase(newRemarks) && !existingValue.equalsIgnoreCase(newValue)) {
+		            spyroInputDTO.setSaveStatus("Failed");
+		            spyroInputDTO.setErrDescription("Please add/update remark");
+		            return;
+		        }
+	        }
+	        
 	        // Proceed to update because remarks changed (or both changed)
 	        existing.setRemarks(newRemarks);
 	        existing.setAttributeValue(newValue);
@@ -316,11 +325,13 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 	    } else {
 	        // ----- Creating a new record -----
-	        if (newRemarks.isEmpty()) {
-	            spyroInputDTO.setSaveStatus("Failed");
-	            spyroInputDTO.setErrDescription("Please add/update remark");
-	            return;
-	        }
+	    	if(!losses) {
+		        if (newRemarks.isEmpty()) {
+		            spyroInputDTO.setSaveStatus("Failed");
+		            spyroInputDTO.setErrDescription("Please add/update remark");
+		            return;
+		        }
+	    	}
 
 	        NormAttributeTransactions newRecord = new NormAttributeTransactions();
 	        newRecord.setCreatedOn(new Date());
