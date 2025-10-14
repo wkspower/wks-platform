@@ -18,6 +18,7 @@ import java.util.UUID;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BusinessDemand;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
@@ -569,6 +570,14 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+		
+		Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterFKId);
+		if(normParametersOpt.get().getDependantAttributeId()!=null && normParametersOpt.get().getDependantAttributeId().equalsIgnoreCase("Output")){
+			if(attributeValue!=null) {
+				attributeValue = attributeValue/24.0;
+			}
+			
+		}
 
 		NormAttributeTransactions normAttributeTransactions;
 
