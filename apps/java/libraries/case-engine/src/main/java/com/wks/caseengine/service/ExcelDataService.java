@@ -49,4 +49,7 @@ public interface ExcelDataService {
 
     List<List<Object>> getPlantContributionFiveYearSummaryReport(String plantId, String year, String reportType,
             List<String> headers);
+
+    List<List<Object>> getShutdownNormsData(String plantId, String year, String dataInput,
+            List<String> headers);
 }

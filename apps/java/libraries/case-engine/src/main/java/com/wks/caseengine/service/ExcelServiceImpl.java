@@ -184,6 +184,9 @@ public class ExcelServiceImpl implements ExcelService {
                             rows = excelDataService.getPlantContributionFiveYearSummaryReport(plantId, year,
                                     dataInput, headers);
                         } else if (sheetName.equalsIgnoreCase("MonthWiseProductionPlanCracker")) {
+                                rows = excelDataService.getFinalNormsProductionReport(plantId, year, dataInput,
+                                        headers);
+                        } else if (sheetName.equalsIgnoreCase("OptimiserInputCracker")) {
                             if (tableId.equalsIgnoreCase("SpyroInputReport4F")
                                     || tableId.equalsIgnoreCase("SpyroInputReport5F")
                                     || tableId.equalsIgnoreCase("SpyroInputReport4FD")) {
@@ -194,11 +197,7 @@ public class ExcelServiceImpl implements ExcelService {
                                     || tableId.equalsIgnoreCase("SpyroOutputReport4FD")) {
                                 rows = excelDataService.getSpyroOutputReport(plantId, year,
                                         dataInput, headers);
-                            } else {
-                                rows = excelDataService.getFinalNormsProductionReport(plantId, year, dataInput,
-                                        headers);
-
-                            }
+                            } 
                         } else if (sheetName.equalsIgnoreCase("MonthWiseRawDataCracker")) {
 
                             if (tableId.equalsIgnoreCase("FinalNormsRawMaterials")
@@ -218,6 +217,10 @@ public class ExcelServiceImpl implements ExcelService {
                         } else if (sheetName.equalsIgnoreCase("FurnaceDataCracker")) {
                             rows = excelDataService.getFurnaceReport(plantId, year,
                                     dataInput, headers);
+                        } else if (sheetName.equalsIgnoreCase("ShutDownCrackerCracker")) {
+                            rows = excelDataService.getShutdownNormsData(plantId, year,
+                                    dataInput, headers);
+                        
                         } else {
                             rows = (List<List<Object>>) table.get("rows");
                         }

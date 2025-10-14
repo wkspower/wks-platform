@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.dto.SpyroInputDTO;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.ExcelConfigurations;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
@@ -36,6 +37,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.ExcelConfigurationsRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
@@ -78,6 +80,8 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	@Autowired
+	private ExcelConfigurationsRepository excelConfigurationsRepository;
 
 	@Override
 	public AOPMessageVM getSpyroInputData(String year, String plantId, String Mode, String type) {
@@ -145,7 +149,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 							map.put("nov", (row[20] == null || row[20].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[20].toString()));
 							map.put("dec", (row[21] == null || row[21].toString().isEmpty()) ? 0.0 : Double.parseDouble(row[21].toString()));
 							map.put("isEditable", row[22]);
-							spyroInputDataList.add(map); 
+							spyroInputDataList.add(map); // Add the map to the list here
 						}
 					}
 				}
@@ -162,8 +166,6 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		}
 
 	}
-	
-	
 
 	public List<Object[]> getData(String plantId, String AopYear, String siteId,
 			String verticalId, String Mode, String procedureName) {
@@ -190,62 +192,62 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 	@Override
 	public AOPMessageVM updateSpyroInputData(List<SpyroInputDTO> spyroInputDTOList, String plantFKId, String year) {
-	    AOPMessageVM aopMessageVM = new AOPMessageVM();
-	    UUID plantId;
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		UUID plantId;
 
-	    try {
-	        plantId = UUID.fromString(plantFKId);
+		try {
+			plantId = UUID.fromString(plantFKId);
 
-	        for (SpyroInputDTO spyroInputDTO : spyroInputDTOList) {
-	            if ("Failed".equalsIgnoreCase(spyroInputDTO.getSaveStatus())) {
-	                continue;
-	            }
+			for (SpyroInputDTO spyroInputDTO : spyroInputDTOList) {
+				if ("Failed".equalsIgnoreCase(spyroInputDTO.getSaveStatus())) {
+					continue;
+				}
 
-	            UUID normParameterFKId = UUID.fromString(spyroInputDTO.getNormParameterFKID());
-	            Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
-	            if (!optionNormParameters.isPresent()) {
-	                spyroInputDTO.setSaveStatus("Failed");
-	                spyroInputDTO.setErrDescription("Norm Parameter not found");
-	                continue;
-	            }
+				UUID normParameterFKId = UUID.fromString(spyroInputDTO.getNormParameterFKID());
+				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
+				if (!optionNormParameters.isPresent()) {
+					spyroInputDTO.setSaveStatus("Failed");
+					spyroInputDTO.setErrDescription("Norm Parameter not found");
+					continue;
+				}
 
-	            if (!optionNormParameters.get().getIsEditable()) {
-	                continue;
-	            }
+				if (!optionNormParameters.get().getIsEditable()) {
+					continue;
+				}
 
-	            for (int month = 1; month <= 12; month++) {
-	                Double attributeValue = getAttributeValue(spyroInputDTO, month);
-	                saveData(normParameterFKId, month, attributeValue, spyroInputDTO, plantFKId, year);
-	            }
-	        }
+				for (int month = 1; month <= 12; month++) {
+					Double attributeValue = getAttributeValue(spyroInputDTO, month);
+					saveData(normParameterFKId, month, attributeValue, spyroInputDTO, plantFKId, year);
+				}
+			}
 
-	        // Mark AOP calculations for dependent screens after processing inputs
-	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-input");
-	        for (ScreenMapping screenMapping : screenMappingList) {
-	            AopCalculation aopCalculation = new AopCalculation();
-	            aopCalculation.setAopYear(year);
-	            aopCalculation.setIsChanged(true);
-	            aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-	            aopCalculation.setPlantId(plantId);
-	            aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-	            aopCalculationRepository.save(aopCalculation);
-	        }
+			// Mark AOP calculations for dependent screens after processing inputs
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("spyro-input");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(plantId);
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 
-	        // Filter only failed records using Stream API
-	        List<SpyroInputDTO> failedList = spyroInputDTOList.stream()
-	            .filter(dto -> "Failed".equalsIgnoreCase(dto.getSaveStatus()))
-	            .collect(Collectors.toList());
+			// Filter only failed records using Stream API
+			List<SpyroInputDTO> failedList = spyroInputDTOList.stream()
+					.filter(dto -> "Failed".equalsIgnoreCase(dto.getSaveStatus()))
+					.collect(Collectors.toList());
 
-	        aopMessageVM.setCode(200);
-	        aopMessageVM.setMessage("Data updated successfully");
-	        aopMessageVM.setData(failedList);
-	        return aopMessageVM;
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data updated successfully");
+			aopMessageVM.setData(failedList);
+			return aopMessageVM;
 
-	    } catch (IllegalArgumentException e) {
-	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-	    } catch (Exception ex) {
-	        throw new RuntimeException("Failed to update Spyro input data", ex);
-	    }
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to update Spyro input data", ex);
+		}
 	}
 
 	public Double getAttributeValue(SpyroInputDTO spyroInputDTO, Integer i) {
@@ -299,14 +301,14 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 	        NormAttributeTransactions existing = existingOpt.get();
 	        String existingRemarks = Optional.ofNullable(existing.getRemarks()).orElse("").trim();
 	        String existingValue = Optional.ofNullable(existing.getAttributeValue()).orElse("").trim();
-	        Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterFKId);
-	        List<NormParameters>  normParametersList= normParametersRepository.findByPlantAndDisplayNameAndNormTypeAndDependantAttribute(UUID.fromString(plantId),"Losses",2,"Input");
-	        for(NormParameters normParameters:normParametersList) {
-	        	if(normParameters.getId().toString().equalsIgnoreCase(normParametersOpt.get().getId().toString())) {
-	        		losses=true;
-	        		break;
-	        	}
-	        }
+	        //Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterFKId);
+	        // List<NormParameters>  normParametersList= normParametersRepository.findByPlantAndDisplayNameAndNormTypeAndDependantAttribute(UUID.fromString(plantId),"Losses",2,"Input");
+	        // for(NormParameters normParameters:normParametersList) {
+	        // 	if(normParameters.getId().toString().equalsIgnoreCase(normParametersOpt.get().getId().toString())) {
+	        // 		losses=true;
+	        // 		break;
+	        // 	}
+	        // }
 	        
 	        if(!losses) {
 	        	if (existingRemarks.equalsIgnoreCase(newRemarks) && !existingValue.equalsIgnoreCase(newValue)) {
@@ -333,121 +335,127 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		        }
 	    	}
 
-	        NormAttributeTransactions newRecord = new NormAttributeTransactions();
-	        newRecord.setCreatedOn(new Date());
-	        newRecord.setAttributeValueVersion("V1");
-	        newRecord.setUserName(Utility.getUserName());
-	        newRecord.setNormParameterFKId(normParameterFKId);
-	        newRecord.setAopMonth(i);
-	        newRecord.setAuditYear(year);
-	        newRecord.setRemarks(newRemarks);
-	        newRecord.setAttributeValue(newValue);
+			NormAttributeTransactions newRecord = new NormAttributeTransactions();
+			newRecord.setCreatedOn(new Date());
+			newRecord.setAttributeValueVersion("V1");
+			newRecord.setUserName(Utility.getUserName());
+			newRecord.setNormParameterFKId(normParameterFKId);
+			newRecord.setAopMonth(i);
+			newRecord.setAuditYear(year);
+			newRecord.setRemarks(newRemarks);
+			newRecord.setAttributeValue(newValue);
 
-	        normAttributeTransactionsRepository.save(newRecord);
-	    }
+			normAttributeTransactionsRepository.save(newRecord);
+		}
 	}
 
 	public byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
 			Map<String, List<SpyroInputDTO>> mapForExcel) {
 		try {
-			String structureJson = getJson();
-			ObjectMapper mapper = new ObjectMapper();
-			Map<String, List<List<Object>>> data = new HashMap<>();
-			Map<String, Object> structure = mapper.readValue(structureJson, Map.class);
-			Map<String, List<Map<String, Object>>> spyroInputDataListMap = new HashMap<>();
-			if (!isAfterSave) {
-				AOPMessageVM vm = getSpyroInputData(year, plantId, mode, "Composition");
-				List<Map<String, Object>> spyroInputDataList = (List<Map<String, Object>>) vm.getData();
-				spyroInputDataListMap = Utility.groupByNormParameterTypeName(spyroInputDataList);
-			}
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Optional<ExcelConfigurations> optExcelConfiguration = excelConfigurationsRepository
+					.findByExcelIdAndVerticalFkId("spyroInput", plant.getVerticalFKId());
 
-			for (String sheetName : structure.keySet()) {
-				Map<String, Object> sheetData = (Map<String, Object>) structure.get(sheetName);
-				List<Map<String, Object>> tables = (List<Map<String, Object>>) sheetData.get(ExcelConstants.TABLES);
+			if (optExcelConfiguration.isPresent()) {
+				String structureJson = optExcelConfiguration.get().getJsonValue();
 
-				for (Map<String, Object> table : tables) {
-					String title = (String) table.get(ExcelConstants.TITLE);
-					String tableId = (String) table.get(ExcelConstants.TABLEID);
-					String dataInput = (String) table.get(ExcelConstants.DATA_INPUT);
-					List<String> headers = (List<String>) table.get(ExcelConstants.HEADERS);
-					boolean hideTable = (boolean) table.get(ExcelConstants.HIDE_TABLE);
-					Integer startingIndexofMonths = (Integer) table.get(ExcelConstants.STARTING_INDEX_OF_MONTHS);
-					List<List<String>> headersOuterTitles = (List<List<String>>) table
-							.get(ExcelConstants.HEADERSTITLES);
-					headersOuterTitles.get(0).addAll(startingIndexofMonths,
-							excelUtilityService.getAcademicYearMonths(year));
-					List<List<Object>> dataList = new ArrayList<>();
-					if (isAfterSave) {
-						if(!mapForExcel.containsKey(tableId)){
-							hideTable = true;
-							continue;
-						}
-						headers.add("saveStatus");
-						headers.add("errDescription");
-						headersOuterTitles.get(0).add("SaveStatus");
-						headersOuterTitles.get(0).add("ErrDescription");
+				// String structureJson = getJson();
+				ObjectMapper mapper = new ObjectMapper();
+				Map<String, List<List<Object>>> data = new HashMap<>();
+				Map<String, Object> structure = mapper.readValue(structureJson, Map.class);
+				Map<String, List<Map<String, Object>>> spyroInputDataListMap = new HashMap<>();
+				if (!isAfterSave) {
+					AOPMessageVM vm = getSpyroInputData(year, plantId, mode, "Composition");
+					List<Map<String, Object>> spyroInputDataList = (List<Map<String, Object>>) vm.getData();
+					spyroInputDataListMap = Utility.groupByNormParameterTypeName(spyroInputDataList);
+				}
 
+				for (String sheetName : structure.keySet()) {
+					Map<String, Object> sheetData = (Map<String, Object>) structure.get(sheetName);
+					List<Map<String, Object>> tables = (List<Map<String, Object>>) sheetData.get(ExcelConstants.TABLES);
 
-						for (SpyroInputDTO dto : mapForExcel.get(tableId)) {
-
-							List<Object> list = new ArrayList<>();
-							for (String fieldName : headers) {
-								String methodName = "get" + capitalize(fieldName);
-								Method method = dto.getClass().getMethod(methodName);
-								Object value = method.invoke(dto);
-								list.add(value);
-							}
-							list.add(tableId);
-							UUID normParameterFKId = UUID.fromString(dto.getNormParameterFKID());
-							Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
-							if(optionNormParameters.isPresent()) {
-								list.add(optionNormParameters.get().getIsEditable());
-							}
-							
-							dataList.add(list);
-						}
-
-					} else {
-
-						List<Map<String, Object>> spyroInputDataList = new ArrayList<>();
-						if (dataInput.equalsIgnoreCase("Composition")) {
-							if(spyroInputDataListMap.containsKey(title)){
-								spyroInputDataList = spyroInputDataListMap.get(title);
-							}else{
+					for (Map<String, Object> table : tables) {
+						String title = (String) table.get(ExcelConstants.TITLE);
+						String tableId = (String) table.get(ExcelConstants.TABLEID);
+						String dataInput = (String) table.get(ExcelConstants.DATA_INPUT);
+						List<String> headers = (List<String>) table.get(ExcelConstants.HEADERS);
+						boolean hideTable = (boolean) table.get(ExcelConstants.HIDE_TABLE);
+						Integer startingIndexofMonths = (Integer) table.get(ExcelConstants.STARTING_INDEX_OF_MONTHS);
+						List<List<String>> headersOuterTitles = (List<List<String>>) table
+								.get(ExcelConstants.HEADERSTITLES);
+						headersOuterTitles.get(0).addAll(startingIndexofMonths,
+								excelUtilityService.getAcademicYearMonths(year));
+						List<List<Object>> dataList = new ArrayList<>();
+						if (isAfterSave) {
+							if (!mapForExcel.containsKey(tableId)) {
 								hideTable = true;
 								continue;
 							}
-						} else {
-							AOPMessageVM vm = getSpyroInputData(year, plantId, mode, dataInput);
-							spyroInputDataList = (List<Map<String, Object>>) vm.getData();
-							System.out.println("sheetName " + sheetName + " " + spyroInputDataList);
-						}
+							headers.add("saveStatus");
+							headers.add("errDescription");
+							headersOuterTitles.get(0).add("SaveStatus");
+							headersOuterTitles.get(0).add("ErrDescription");
 
-						if(spyroInputDataList==null ||spyroInputDataList.isEmpty()){
-							hideTable = true;
-							continue;
-						}
-						// Data rows
-						for (Map<String, Object> map : spyroInputDataList) {
-							List<Object> list = new ArrayList<>();
-							for (String header : headers) {
-								System.out.println("header " + header);
-								list.add(map.get(header));
+							for (SpyroInputDTO dto : mapForExcel.get(tableId)) {
+
+								List<Object> list = new ArrayList<>();
+								for (String fieldName : headers) {
+									String methodName = "get" + capitalize(fieldName);
+									Method method = dto.getClass().getMethod(methodName);
+									Object value = method.invoke(dto);
+									list.add(value);
+								}
+								list.add(tableId);
+								UUID normParameterFKId = UUID.fromString(dto.getNormParameterFKID());
+								Optional<NormParameters> optionNormParameters = normParametersRepository
+										.findById(normParameterFKId);
+								if (optionNormParameters.isPresent()) {
+									list.add(optionNormParameters.get().getIsEditable());
+								}
+
+								dataList.add(list);
 							}
-							list.add(tableId);
-							list.add(map.get("isEditable"));
-							dataList.add(list);
+
+						} else {
+
+							List<Map<String, Object>> spyroInputDataList = new ArrayList<>();
+							if (dataInput.equalsIgnoreCase("Composition")) {
+								if (spyroInputDataListMap.containsKey(title)) {
+									spyroInputDataList = spyroInputDataListMap.get(title);
+								} else {
+									hideTable = true;
+									continue;
+								}
+							} else {
+								AOPMessageVM vm = getSpyroInputData(year, plantId, mode, dataInput);
+								spyroInputDataList = (List<Map<String, Object>>) vm.getData();
+								System.out.println("sheetName " + sheetName + " " + spyroInputDataList);
+							}
+
+							if (spyroInputDataList == null || spyroInputDataList.isEmpty()) {
+								hideTable = true;
+								continue;
+							}
+							// Data rows
+							for (Map<String, Object> map : spyroInputDataList) {
+								List<Object> list = new ArrayList<>();
+								for (String header : headers) {
+									System.out.println("header " + header);
+									list.add(map.get(header));
+								}
+								list.add(tableId);
+								list.add(map.get("isEditable"));
+								dataList.add(list);
+							}
+
 						}
 
+						data.put(tableId, dataList);
 					}
-
-					
-					data.put(tableId, dataList);
 				}
-			}
-			
-			return excelUtilityService.generateFlexibleExcel(structure, data);
 
+				return excelUtilityService.generateFlexibleExcel(structure, data);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -520,52 +528,51 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		Map<String, List<SpyroInputDTO>> map = new HashMap<>();
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 
-			
-				Sheet sheet = workbook.getSheetAt(0);
-				Iterator<Row> rowIterator = sheet.iterator();
-				List<SpyroInputDTO> spyroInputDTOs = new ArrayList<>();
-				if (rowIterator.hasNext())
-					rowIterator.next(); // Skip header
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+			List<SpyroInputDTO> spyroInputDTOs = new ArrayList<>();
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
 
-				while (rowIterator.hasNext()) {
-					Row row = rowIterator.next();
-					Cell tableIdCell = row.getCell(16, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                	if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
-                    	continue;
-                	}
-
-					SpyroInputDTO dto = new SpyroInputDTO();
-
-					try {
-						
-						dto.setParticulars(getStringCellValue(row.getCell(0), dto));
-						dto.setUom(getStringCellValue(row.getCell(1), dto));
-						dto.setAuditYear(year);
-						dto.setApr(getNumericCellValue(row.getCell(2), dto));
-						dto.setMay(getNumericCellValue(row.getCell(3), dto));
-						dto.setJun(getNumericCellValue(row.getCell(4), dto));
-						dto.setJul(getNumericCellValue(row.getCell(5), dto));
-						dto.setAug(getNumericCellValue(row.getCell(6), dto));
-						dto.setSep(getNumericCellValue(row.getCell(7), dto));
-						dto.setOct(getNumericCellValue(row.getCell(8), dto));
-						dto.setNov(getNumericCellValue(row.getCell(9), dto));
-						dto.setDec(getNumericCellValue(row.getCell(10), dto));
-						dto.setJan(getNumericCellValue(row.getCell(11), dto));
-						dto.setFeb(getNumericCellValue(row.getCell(12), dto));
-						dto.setMar(getNumericCellValue(row.getCell(13), dto));
-						dto.setRemarks(getStringCellValue(row.getCell(14), dto));
-						dto.setNormParameterFKID(getStringCellValue(row.getCell(15), dto));
-						dto.setTableId(getStringCellValue(row.getCell(16), dto));
-
-					} catch (Exception e) {
-						e.printStackTrace();
-						dto.setErrDescription(e.getMessage());
-						dto.setSaveStatus("Failed");
-					}
-					map.putIfAbsent(dto.getTableId(), new ArrayList<>());
-
-					map.get(dto.getTableId()).add(dto);
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				Cell tableIdCell = row.getCell(16, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+				if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
+					continue;
 				}
+
+				SpyroInputDTO dto = new SpyroInputDTO();
+
+				try {
+
+					dto.setParticulars(getStringCellValue(row.getCell(0), dto));
+					dto.setUom(getStringCellValue(row.getCell(1), dto));
+					dto.setAuditYear(year);
+					dto.setApr(getNumericCellValue(row.getCell(2), dto));
+					dto.setMay(getNumericCellValue(row.getCell(3), dto));
+					dto.setJun(getNumericCellValue(row.getCell(4), dto));
+					dto.setJul(getNumericCellValue(row.getCell(5), dto));
+					dto.setAug(getNumericCellValue(row.getCell(6), dto));
+					dto.setSep(getNumericCellValue(row.getCell(7), dto));
+					dto.setOct(getNumericCellValue(row.getCell(8), dto));
+					dto.setNov(getNumericCellValue(row.getCell(9), dto));
+					dto.setDec(getNumericCellValue(row.getCell(10), dto));
+					dto.setJan(getNumericCellValue(row.getCell(11), dto));
+					dto.setFeb(getNumericCellValue(row.getCell(12), dto));
+					dto.setMar(getNumericCellValue(row.getCell(13), dto));
+					dto.setRemarks(getStringCellValue(row.getCell(14), dto));
+					dto.setNormParameterFKID(getStringCellValue(row.getCell(15), dto));
+					dto.setTableId(getStringCellValue(row.getCell(16), dto));
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+				map.putIfAbsent(dto.getTableId(), new ArrayList<>());
+
+				map.get(dto.getTableId()).add(dto);
+			}
 
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to read Data", e);
@@ -640,510 +647,510 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 
 	String getJson() {
 		return "{\r\n" + //
-						"    \"SpyroInput\": {\r\n" + //
-						"        \"columnCount\":13,\r\n" + //
-						"        \"tables\": [\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t \r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Feed\",\r\n" + //
-						"                \"tableId\":\"Feed\",\r\n" + //
-						"                \"dataInput\":\"Feed\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"Composition\",\r\n" + //
-						"                \"title\":\"BPCL Kochi Propylene\",\r\n" + //
-						"                \"tableId\":\"BPCL_Kochi_Propylene\",\r\n" + //
-						"                \"dataInput\":\"Composition\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"C2/C3\",\r\n" + //
-						"                \"tableId\":\"C2_C3\",\r\n" + //
-						"                \"dataInput\":\"Composition\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"FCC C3\",\r\n" + //
-						"                \"tableId\":\"FCC_C3\",\r\n" + //
-						"                \"dataInput\":\"Composition\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Hexene Purge Gas\",\r\n" + //
-						"                \"tableId\":\"Hexene_Purge_Gas\",\r\n" + //
-						"                \"dataInput\":\"Composition\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Import Propane\",\r\n" + //
-						"                \"tableId\":\"Import_Propane\",\r\n" + //
-						"                \"dataInput\":\"Composition\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"LDPE Off Gas\",\r\n" + //
-						"                \"tableId\":\"LDPE_Off_Gas\",\r\n" + //
-						"                \"dataInput\":\"Composition\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"             {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Hydrogenation\",\r\n" + //
-						"                \"tableId\":\"Hydrogenation\",\r\n" + //
-						"                \"dataInput\":\"Hydrogenation\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Recovery\",\r\n" + //
-						"                \"tableId\":\"Recovery\",\r\n" + //
-						"                \"dataInput\":\"Recovery\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Optimizing\",\r\n" + //
-						"                \"tableId\":\"Optimizing\",\r\n" + //
-						"                \"dataInput\":\"Optimizing\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            },\r\n" + //
-						"            {\r\n" + //
-						"                \"startRow\": 0,\r\n" + //
-						"                \"headers\": [\r\n" + //
-						"\t\t\t\t\t\"particulars\", \r\n" + //
-						"\t\t\t\t\t\"uom\", \r\n" + //
-						"\t\t\t\t\t\"apr\", \r\n" + //
-						"\t\t\t\t\t\"may\", \r\n" + //
-						"\t\t\t\t\t\"jun\", \r\n" + //
-						"\t\t\t\t\t\"jul\", \r\n" + //
-						"\t\t\t\t\t\"aug\", \r\n" + //
-						"\t\t\t\t\t\"sep\", \r\n" + //
-						"\t\t\t\t\t\"oct\", \r\n" + //
-						"\t\t\t\t\t\"nov\", \r\n" + //
-						"\t\t\t\t\t\"dec\",\r\n" + //
-						"                    \"jan\", \r\n" + //
-						"\t\t\t\t\t\"feb\", \r\n" + //
-						"\t\t\t\t\t\"mar\", \r\n" + //
-						"\t\t\t\t\t\"remarks\",\r\n" + //
-						"                    \"normParameterFKID\"\r\n" + //
-						"                ],\r\n" + //
-						"                \"startingIndexOfMonths\":2,\r\n" + //
-						"                \"hideTable\":false,\r\n" + //
-						"                \"textBeforeTitle\":\"\",\r\n" + //
-						"                \"title\":\"Furnace\",\r\n" + //
-						"                \"tableId\":\"Furnace\",\r\n" + //
-						"                \"dataInput\":\"Furnace\",\r\n" + //
-						"                \"isColumnMergeRequired\":false,\r\n" + //
-						"                \"isRowMergeRequired\":false,\r\n" + //
-						"                \"headersTitles\":[[\r\n" + //
-						"                    \"Particulars\",\r\n" + //
-						"                    \"UOM\",\r\n" + //
-						"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
-						"                \"rows\": [],\r\n" + //
-						"                \"hiddenColumns\":[15,16,18],\r\n" + //
-						"                \"styles\": {\r\n" + //
-						"                    \"boldColumns\": [\r\n" + //
-						"                        0\r\n" + //
-						"                    ],\r\n" + //
-						"                    \"borders\": true\r\n" + //
-						"                },\r\n" + //
-						"                \"autoMerge\": {\r\n" + //
-						"                    \"columns\": [],\r\n" + //
-						"                    \"rows\": []\r\n" + //
-						"                }\r\n" + //
-						"            }\r\n" + //
-						"\r\n" + //
-						"        ]\r\n" + //
-						"    }\r\n" + //
-						"    \r\n" + //
-						"}";
+				"    \"SpyroInput\": {\r\n" + //
+				"        \"columnCount\":13,\r\n" + //
+				"        \"tables\": [\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t \r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Feed\",\r\n" + //
+				"                \"tableId\":\"Feed\",\r\n" + //
+				"                \"dataInput\":\"Feed\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"Composition\",\r\n" + //
+				"                \"title\":\"BPCL Kochi Propylene\",\r\n" + //
+				"                \"tableId\":\"BPCL_Kochi_Propylene\",\r\n" + //
+				"                \"dataInput\":\"Composition\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"C2/C3\",\r\n" + //
+				"                \"tableId\":\"C2_C3\",\r\n" + //
+				"                \"dataInput\":\"Composition\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"FCC C3\",\r\n" + //
+				"                \"tableId\":\"FCC_C3\",\r\n" + //
+				"                \"dataInput\":\"Composition\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Hexene Purge Gas\",\r\n" + //
+				"                \"tableId\":\"Hexene_Purge_Gas\",\r\n" + //
+				"                \"dataInput\":\"Composition\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Import Propane\",\r\n" + //
+				"                \"tableId\":\"Import_Propane\",\r\n" + //
+				"                \"dataInput\":\"Composition\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"LDPE Off Gas\",\r\n" + //
+				"                \"tableId\":\"LDPE_Off_Gas\",\r\n" + //
+				"                \"dataInput\":\"Composition\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"             {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Hydrogenation\",\r\n" + //
+				"                \"tableId\":\"Hydrogenation\",\r\n" + //
+				"                \"dataInput\":\"Hydrogenation\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Recovery\",\r\n" + //
+				"                \"tableId\":\"Recovery\",\r\n" + //
+				"                \"dataInput\":\"Recovery\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Optimizing\",\r\n" + //
+				"                \"tableId\":\"Optimizing\",\r\n" + //
+				"                \"dataInput\":\"Optimizing\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            },\r\n" + //
+				"            {\r\n" + //
+				"                \"startRow\": 0,\r\n" + //
+				"                \"headers\": [\r\n" + //
+				"\t\t\t\t\t\"particulars\", \r\n" + //
+				"\t\t\t\t\t\"uom\", \r\n" + //
+				"\t\t\t\t\t\"apr\", \r\n" + //
+				"\t\t\t\t\t\"may\", \r\n" + //
+				"\t\t\t\t\t\"jun\", \r\n" + //
+				"\t\t\t\t\t\"jul\", \r\n" + //
+				"\t\t\t\t\t\"aug\", \r\n" + //
+				"\t\t\t\t\t\"sep\", \r\n" + //
+				"\t\t\t\t\t\"oct\", \r\n" + //
+				"\t\t\t\t\t\"nov\", \r\n" + //
+				"\t\t\t\t\t\"dec\",\r\n" + //
+				"                    \"jan\", \r\n" + //
+				"\t\t\t\t\t\"feb\", \r\n" + //
+				"\t\t\t\t\t\"mar\", \r\n" + //
+				"\t\t\t\t\t\"remarks\",\r\n" + //
+				"                    \"normParameterFKID\"\r\n" + //
+				"                ],\r\n" + //
+				"                \"startingIndexOfMonths\":2,\r\n" + //
+				"                \"hideTable\":false,\r\n" + //
+				"                \"textBeforeTitle\":\"\",\r\n" + //
+				"                \"title\":\"Furnace\",\r\n" + //
+				"                \"tableId\":\"Furnace\",\r\n" + //
+				"                \"dataInput\":\"Furnace\",\r\n" + //
+				"                \"isColumnMergeRequired\":false,\r\n" + //
+				"                \"isRowMergeRequired\":false,\r\n" + //
+				"                \"headersTitles\":[[\r\n" + //
+				"                    \"Particulars\",\r\n" + //
+				"                    \"UOM\",\r\n" + //
+				"                    \"Remark\",\"NormParameterFKID\"]],\r\n" + //
+				"                \"rows\": [],\r\n" + //
+				"                \"hiddenColumns\":[15,16,18],\r\n" + //
+				"                \"styles\": {\r\n" + //
+				"                    \"boldColumns\": [\r\n" + //
+				"                        0\r\n" + //
+				"                    ],\r\n" + //
+				"                    \"borders\": true\r\n" + //
+				"                },\r\n" + //
+				"                \"autoMerge\": {\r\n" + //
+				"                    \"columns\": [],\r\n" + //
+				"                    \"rows\": []\r\n" + //
+				"                }\r\n" + //
+				"            }\r\n" + //
+				"\r\n" + //
+				"        ]\r\n" + //
+				"    }\r\n" + //
+				"    \r\n" + //
+				"}";
 	}
 
 }
