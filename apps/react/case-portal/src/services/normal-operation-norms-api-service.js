@@ -65,15 +65,8 @@ async function CrackerConstantsImport(file, keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function CrackerConstantsExport(keycloak, PLANT_ID, AOP_YEAR) {
-  const year = localStorage.getItem('year')
-  let plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-
-  const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantFKId=${encodeURIComponent(PLANT_ID)}`
+  
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants-norms-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantFKId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
     'Content-Type': 'application/json',

@@ -917,7 +917,7 @@ const SlowDown = ({ permissions }) => {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Shutdown.xlsx')
+        link.setAttribute('download', 'Error File - Slowdown.xlsx')
         document.body.appendChild(link)
         link.click()
         link.remove()
