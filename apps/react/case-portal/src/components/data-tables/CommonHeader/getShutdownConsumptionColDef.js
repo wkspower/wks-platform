@@ -15,6 +15,8 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.PTA]: ShutdownConsumptionPtaColumns,
   [verticalEnums.ELASTOMER]: ShutdownConsumptionElastomerColumns,
   [verticalEnums.AROMATICS]: ShutdownConsumptionElastomerColumns,
+  [verticalEnums.VCM]: ShutdownConsumptionElastomerColumns,
+  [verticalEnums.PTA]: ShutdownConsumptionElastomerColumns,
   [verticalEnums.MEG]: ShutdownConsumptionMegColumns,
   [verticalEnums.CRACKER]: ShutdownConsumptionCrackerColumns,
 }

@@ -126,6 +126,12 @@ const ConfigurationTable = () => {
 
       data = await DataService.getCatalystSelectivityData(keycloak, gradeId)
 
+      const distinctReportTypes = [
+        ...new Set(data.map((item) => item.normType).filter(Boolean)),
+      ]
+      setReportTypes(distinctReportTypes)
+
+
       if (
         lowerVertName == verticalEnums.MEG ||
         lowerVertName == verticalEnums.CRACKER ||
@@ -249,6 +255,8 @@ const ConfigurationTable = () => {
       console.error('Error fetching data:', error)
     }
   }
+
+  const [reportTypes, setReportTypes] = useState([])
 
   const fetchDataConstantsMnnualEntry = async () => {
     setProductionRowsConstantsMannualEntry([])
@@ -374,13 +382,12 @@ const ConfigurationTable = () => {
     }
     getConfigurationExecutionDetails()
     getAopSummary()
-    let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-    let verticalName = vertical?.toLowerCase()
+
     setTimeout(() => {
       if (
-        verticalName != 'cracker' &&
-        verticalName != 'meg' &&
-        verticalName != 'elastomer'
+        lowerVertName != 'cracker' &&
+        lowerVertName != 'meg' &&
+        lowerVertName != 'elastomer'
       ) {
         getConfigurationTabsMatrix()
         getConfigurationAvailableTabs()
@@ -462,20 +469,18 @@ const ConfigurationTable = () => {
   }
   const onLoadTest = async (startDateObj, endDateObj) => {
     setLoading1(true)
-    const plantId =
-      JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id || ''
-    const auditYear = AOP_YEAR
+
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
     const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
     const createPayloadItem = (obj, date) => ({
       apr: date,
       UOM: '',
-      auditYear,
+      AOP_YEAR,
       normParameterFKId: obj?.NormParameter_FK_Id,
       remarks: 'Initiated',
       id: obj?.Id || null,
-      plantId,
+      PLANT_ID,
     })
     const payload = [
       createPayloadItem(startDateObj, formatDate(startDate)),
@@ -566,13 +571,6 @@ const ConfigurationTable = () => {
     }
     setLoading(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
       const payload = [
@@ -836,6 +834,7 @@ const ConfigurationTable = () => {
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='0'
+                    reportTypes={reportTypes}
                   />
                 )
               case 'constants':
@@ -866,6 +865,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
+                    reportTypes={reportTypes}
                   />
                 )
               case 'pio impact':
@@ -881,6 +881,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='3'
+                    reportTypes={reportTypes}
                   />
                 )
 
@@ -897,6 +898,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='4'
+                    reportTypes={reportTypes}
                   />
                 )
               default:

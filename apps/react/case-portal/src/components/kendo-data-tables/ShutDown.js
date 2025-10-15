@@ -82,7 +82,7 @@ const ShutDown = ({ permissions }) => {
         })
         return
       }
-      const yearStr = localStorage.getItem('year') // e.g. "2025-26"
+      const yearStr = AOP_YEAR
       let startLimit, endLimit
       if (yearStr) {
         const [startYear, endYear] = yearStr
@@ -350,7 +350,7 @@ const ShutDown = ({ permissions }) => {
     try {
       let plantId = ''
 
-      const storedPlant = localStorage.getItem('selectedPlant')
+      const storedPlant = AOP_YEAR
       if (storedPlant) {
         const parsedPlant = JSON.parse(storedPlant)
         plantId = parsedPlant.id
@@ -383,7 +383,7 @@ const ShutDown = ({ permissions }) => {
         })(),
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-        audityear: localStorage.getItem('year'),
+        audityear: AOP_YEAR,
         id: row.idFromApi || null,
         remark: row.remark || 'null',
       }))

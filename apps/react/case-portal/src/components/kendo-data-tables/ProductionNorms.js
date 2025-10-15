@@ -19,21 +19,38 @@ const ProductionNorms = ({ permissions }) => {
   const keycloak = useSession()
 
   const apiRef = useGridApiRef()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const [_plantID, set_PlantID] = useState('')
 
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
+
+  const headerMap = generateHeaderNames(AOP_YEAR)
+
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('')
   const [rows, setRows] = useState([])
@@ -115,23 +132,18 @@ const ProductionNorms = ({ permissions }) => {
     setLoading(true)
 
     try {
-      let plantId = ''
+      let plantId = PLANT_ID
       const isKiloTon = selectedUnit != ('MT' || 'MT/Month')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
 
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
         aopStatus: row.aopStatus || null,
-        aopYear: localStorage.getItem('year'),
+        aopYear: AOP_YEAR,
         plantFKId: plantId,
         materialFKId: row.normParametersFKId,
-        siteFKId: JSON.parse(localStorage.getItem('selectedSiteId')).id,
-        verticalFKId: localStorage.getItem('verticalId'),
+        siteFKId: SITE_ID,
+        verticalFKId: VERTICAL_ID,
         april:
           row.april === 0
             ? 0
@@ -264,16 +276,9 @@ const ProductionNorms = ({ permissions }) => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
       const data = await ProductionNormsApiService.handleCalculate(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
       if (data?.code == 200) {
@@ -448,7 +453,7 @@ const ProductionNorms = ({ permissions }) => {
         })
       }
 
-      const fiscalYear = localStorage.getItem('year')
+      const fiscalYear = AOP_YEAR
       const startYear = parseInt(fiscalYear.split('-')[0], 10)
       const nextYear = startYear + 1
 

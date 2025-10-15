@@ -19,12 +19,12 @@ import { useSession } from 'SessionStoreContext'
 
 import KendoDataGrid from 'components/Kendo-Report-DataGrid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import {
   CustomAccordion,
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
+import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
@@ -42,7 +42,23 @@ const NormsHistorianBasis = () => {
   const [colsCurrentYear, setColsCurrentYear] = useState([])
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, verticalChange, yearChanged, oldYear } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -52,10 +68,7 @@ const NormsHistorianBasis = () => {
   const [selectedUnit, setSelectedUnit] = useState('')
   const [units, setUnits] = useState([])
 
-  const isOldYear = oldYear?.oldYear === 1
-
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
@@ -161,7 +174,7 @@ const NormsHistorianBasis = () => {
 
   useEffect(() => {
     fetchAllData(selectedUnit)
-  }, [yearChanged, keycloak, plantID, selectedUnit])
+  }, [AOP_YEAR, keycloak, PLANT_ID, selectedUnit])
 
   useEffect(() => {
     if (lowerVertName == 'cracker') {
@@ -171,7 +184,7 @@ const NormsHistorianBasis = () => {
       setUnits(['TPH', 'TPD'])
       setSelectedUnit('TPH')
     }
-  }, [yearChanged, keycloak, plantID, lowerVertName])
+  }, [AOP_YEAR, keycloak, PLANT_ID, lowerVertName])
 
   useEffect(() => {
     const timers = [

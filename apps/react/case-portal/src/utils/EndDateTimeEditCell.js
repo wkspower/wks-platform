@@ -3,8 +3,27 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
+import { useSelector } from 'react-redux'
 
 export const EndDateTimeEditCell = ({ id, field, value, api }) => {
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
   const row = api.getRow(id)
   const startDate = row?.maintStartDateTime
     ? dayjs(row.maintStartDateTime)
@@ -14,7 +33,7 @@ export const EndDateTimeEditCell = ({ id, field, value, api }) => {
     value && dayjs(value).isValid() ? dayjs(value) : null,
   )
 
-  const yearRange = localStorage.getItem('year') || ''
+  const yearRange = AOP_YEAR
   const [startYearStr] = yearRange.split('-')
   const startYear = parseInt(startYearStr, 10)
 

@@ -78,6 +78,8 @@ export const MainRoutes = (
   const ProductionVolumeDataBasisElement =
     verticalName == 'PE' ||
     verticalName == 'AROMATICS' ||
+    verticalName == 'VCM' ||
+    verticalName == 'PTA' ||
     verticalName == 'ELASTOMER' ||
     verticalName == 'PP' ? (
       <ProductionVolumeDataBasisPe />
@@ -87,6 +89,8 @@ export const MainRoutes = (
   const NormsHistorianBasisElement =
     verticalName == 'ELASTOMER' ||
     verticalName == 'PE' ||
+    verticalName == 'VCM' ||
+    verticalName == 'PTA' ||
     verticalName == 'AROMATICS' ||
     verticalName == 'PP' ? (
       <NormsHistorianBasisPe />

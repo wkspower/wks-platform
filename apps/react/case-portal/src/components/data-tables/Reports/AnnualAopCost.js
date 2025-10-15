@@ -61,19 +61,32 @@ const AnnualAopCost = () => {
   const [showGrids, setShowGrids] = useState({})
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const isOldYear = oldYear?.oldYear === 1
 
   const fetchData = async (reportType, setState) => {
     try {
-      const selectedDropdown = localStorage.getItem('year')
       const data = await DataService.getAnnualCostAopReport(
         keycloak,
         reportType,
-        selectedDropdown,
+        AOP_YEAR,
       )
       if (data?.code === 200) {
         if (reportType === 'price') {
@@ -101,7 +114,7 @@ const AnnualAopCost = () => {
     }
   }
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const colsProduction = getKendoColumns({ headerMap, type: 'Production' })
   const colsPrice = getKendoColumns({
@@ -152,7 +165,7 @@ const AnnualAopCost = () => {
     return () => {
       isCancelled = true
     }
-  }, [plantID, yearChanged, keycloak])
+  }, [PLANT_ID, AOP_YEAR, keycloak])
 
   useEffect(() => {
     const timers = [

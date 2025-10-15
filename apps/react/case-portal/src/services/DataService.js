@@ -2785,7 +2785,7 @@ async function exportSpyroInputExcel(keycloak, mode) {
 }
 
 //--
-async function getConfigurationExcel(keycloak) {
+async function getConfigurationExcel(keycloak, reportType) {
   var year = localStorage.getItem('year')
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -2793,6 +2793,7 @@ async function getConfigurationExcel(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
+
   const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${year}&plantId=${plantId}`
 
   const headers = {
@@ -2800,14 +2801,22 @@ async function getConfigurationExcel(keycloak) {
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     Authorization: `Bearer ${keycloak.token}`,
   }
+
+  const body = JSON.stringify(reportType)
+
   try {
     const resp = await fetch(url, {
-      method: 'GET',
+      method: 'POST', // changed from GET to POST since we’re sending a body
       headers,
+      body,
     })
+
     if (!resp.ok) {
-      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+      throw new Error(
+        `Failed to export data: ${resp.status} ${resp.statusText}`,
+      )
     }
+
     const blob = await resp.blob()
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -2818,10 +2827,11 @@ async function getConfigurationExcel(keycloak) {
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error Editing Config data:', e)
+    console.error('Error exporting Config data:', e)
     return Promise.reject(e)
   }
 }
+
 async function getConfigurationExcelConstants(keycloak) {
   var year = localStorage.getItem('year')
   var plantId = ''
@@ -3676,21 +3686,34 @@ export async function slowdownDetailsExport(keycloak, plantId, year) {
   }
 }
 
-async function getConfigurationExcelType(keycloak, PLANT_ID, AOP_YEAR, type) {
-  const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=${type}`
+async function getConfigurationExcelType(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  reportType,
+) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     Authorization: `Bearer ${keycloak.token}`,
   }
+
+  const body = JSON.stringify(reportType)
+
   try {
     const resp = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers,
+      body,
     })
+
     if (!resp.ok) {
-      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+      throw new Error(
+        `Failed to export data: ${resp.status} ${resp.statusText}`,
+      )
     }
+
     const blob = await resp.blob()
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -3701,7 +3724,7 @@ async function getConfigurationExcelType(keycloak, PLANT_ID, AOP_YEAR, type) {
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error Editing Config data:', e)
+    console.error('Error exporting Config data:', e)
     return Promise.reject(e)
   }
 }

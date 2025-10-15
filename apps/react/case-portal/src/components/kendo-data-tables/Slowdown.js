@@ -129,12 +129,7 @@ const SlowDown = ({ permissions }) => {
   const saveSlowDownData = async (newRow) => {
     setLoading(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
+      var plantId = PLANT_ID
 
       const slowDownDetailsMEG = newRow.map((row) => ({
         productId: (() => {
@@ -155,7 +150,7 @@ const SlowDown = ({ permissions }) => {
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
         rate: row.rate,
-        audityear: localStorage.getItem('year'),
+        audityear: AOP_YEAR,
         id: row.idFromApi || null,
         rateEO: row.rateEO,
         rateEOE: row.rateEOE,
@@ -172,7 +167,7 @@ const SlowDown = ({ permissions }) => {
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
         rate: row.rate,
-        audityear: localStorage.getItem('year'),
+        audityear: AOP_YEAR,
         id: row.idFromApi || null,
         rateEO: null,
         rateEOE: null,
@@ -215,13 +210,9 @@ const SlowDown = ({ permissions }) => {
   const saveSlowDownConfigurationData = async (row) => {
     setLoading(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      const year = localStorage.getItem('year')
+      var plantId = PLANT_ID
+
+      const year = AOP_YEAR
 
       const response = await DataService.saveSlowdownConfigData(
         plantId,
@@ -275,7 +266,7 @@ const SlowDown = ({ permissions }) => {
         })
         return
       }
-      const yearStr = localStorage.getItem('year') // e.g. "2025-26"
+      const yearStr = AOP_YEAR
       let startLimit, endLimit
       if (yearStr) {
         const [startYear, endYear] = yearStr

@@ -16,7 +16,6 @@ import disContineGradeChange from '../../../assets/kendo_config_disContineGradeC
 import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
 
 const getConfigByType = (configType) => {
-  console.log('Config Typess:', configType)
   switch (configType) {
     case 'meg':
       return productionColumns
@@ -26,10 +25,8 @@ const getConfigByType = (configType) => {
       return productionColumnsConstants
     case 'pioImpact':
       return pioImpactColumns
-
     case 'shutdownData':
       return pioImpactColumns
-
     case 'StartupLosses':
       return productionColumnsPE1
     case 'Configuration':
@@ -40,31 +37,24 @@ const getConfigByType = (configType) => {
       return productionColumnsPE3
     case 'Constants':
       return productionColumnsPE5
-
     case 'production':
       return productionColumns
     case 'consumption':
       return productionColumns
     case 'cracker_configuration':
       return productionColumns
-
     case 'cracker_composition':
       return cracker_composition
-
     case 'cracker':
       return crackerColumns
-
     case 'cracker_constants':
       return cracker_constants
     case 'cracker_yield':
       return cracker_yield
-
     case 'ContineGradeChange':
       return contineGradeChange
-
     case 'DisContineGradeChange':
       return disContineGradeChange
-
     default:
       return productionColumns
   }

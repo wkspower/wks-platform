@@ -750,11 +750,12 @@ const CrakcerConstants = () => {
 
     try {
       let response
-      response = await NormalOperationNormsApiService.CrackerConstantsExport(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      response =
+        await NormalOperationNormsApiService.criteriaForBestAchivedExcelExport(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
     } catch (error) {
       console.error('Error downloading Excel:', error)
       setSnackbarData({

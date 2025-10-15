@@ -9,14 +9,28 @@ import { validateFields } from 'utils/validationUtils'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
-import MaintenanceProcessTable from './processTable'
 
 const MaintenanceTable = () => {
   const keycloak = useSession()
-  const { verticalChange, yearChanged, oldYear, plantID } = useSelector(
-    (s) => s.dataGridStore,
-  )
-  const lowerVertName = verticalChange?.selectedVertical?.toLowerCase()
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const dataConfig = useMemo(
     () => ({
@@ -30,7 +44,7 @@ const MaintenanceTable = () => {
     [plantID],
   )
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -89,11 +103,8 @@ const MaintenanceTable = () => {
   const saveCrackerMaintenanceData = async (newRows) => {
     setLoading(true)
     try {
-      let plantId = ''
-      let year = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) plantId = JSON.parse(storedPlant)?.id
-      year = localStorage.getItem('year') || ''
+      let plantId = PLANT_ID
+      let year = AOP_YEAR
 
       const decokePlanningDTOList = newRows.map((row) => ({
         fourFD: row.fourFD,
@@ -181,8 +192,8 @@ const MaintenanceTable = () => {
   }, [plantID, keycloak])
 
   const handleCalculate = useCallback(async () => {
-    const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}').id
-    const year = localStorage.getItem('year')
+    const plantId = PLANT_ID
+    const year = AOP_YEAR
     try {
       const result =
         await MaintenanceDetailsApiService.handleCalculateMaintenance(

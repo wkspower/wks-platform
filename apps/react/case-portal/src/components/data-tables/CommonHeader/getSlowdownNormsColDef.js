@@ -14,7 +14,8 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.PTA]: SlowdownNormsPtaColumns,
   [verticalEnums.ELASTOMER]: SlowdownNormsElastomerColumns,
   [verticalEnums.MEG]: SlowdownNormsMegColumns,
-  [verticalEnums.AROMATICS]: SlowdownNormsElastomerColumns, // Using Elastomer columns
+  [verticalEnums.AROMATICS]: SlowdownNormsElastomerColumns,
+  [verticalEnums.VCM]: SlowdownNormsElastomerColumns,
 }
 
 const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
@@ -23,8 +24,6 @@ const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
 
   let safeShutdownMonths = Array.isArray(slowdownMonths) ? slowdownMonths : []
-
-  // console.log('safeShutdownMonths', safeShutdownMonths)
 
   const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
 

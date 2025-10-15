@@ -15,15 +15,34 @@ import {
 } from '../../../../node_modules/@mui/material/index'
 import ProductionNorms from '../ProductionNorms'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import { useSelector } from 'react-redux'
 
 const MonthwiseProduction = () => {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
+
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const {
+    verticalChange,
+    yearChanged,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -36,25 +55,13 @@ const MonthwiseProduction = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-  const handleRemarkCellClick = (row) => {
-    // console.log(row)
-    setCurrentRemark(row.Remark || '')
-    setCurrentRowId(row.id)
-    setRemarkDialogOpen(true)
-  }
+
   let oldYear = ''
-  if (thisYear && thisYear.includes('-')) {
-    const [start, end] = thisYear.split('-').map(Number)
+  if (AOP_YEAR && AOP_YEAR.includes('-')) {
+    const [start, end] = AOP_YEAR.split('-').map(Number)
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
 
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-  }
-  const formatValueToThreeDecimalsZero = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-  }
-  const isOldYear = oldYear?.oldYear === 1
   const columns = [
     {
       field: 'RowNo',
@@ -190,8 +197,7 @@ const MonthwiseProduction = () => {
   }
 
   const [loading, setLoading] = useState(false)
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
+
   const fetchData = async () => {
     try {
       setLoading(true)
@@ -216,7 +222,7 @@ const MonthwiseProduction = () => {
   }
   useEffect(() => {
     fetchData()
-  }, [year, plantId])
+  }, [AOP_YEAR, PLANT_ID])
   const processRowUpdate = React.useCallback((newRow, oldRow) => {
     const rowId = newRow.id
     const updatedFields = []
@@ -269,40 +275,10 @@ const MonthwiseProduction = () => {
         ThroughputActual: row?.ThroughputActual,
       }))
 
-      // const hasEmptyThroughput = rowsToUpdate?.some(
-      //   (row) =>
-      //     row.ThroughputActual === null ||
-      //     row.ThroughputActual === undefined ||
-      //     row.ThroughputActual === '',
-      // )
-
-      // if (hasEmptyThroughput) {
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({
-      //     message: 'Please fill in Actual Throughput before saving.',
-      //     severity: 'error',
-      //   })
-      //   setLoading(false)
-      //   return
-      // }
-
-      // const requiredFields = ['remarks', 'ThroughputActual']
-
-      // const validationMessage = validateFields(data, requiredFields)
-      // if (validationMessage) {
-      //   setSnackbarOpen(true)
-      //   setSnackbarData({
-      //     message: validationMessage,
-      //     severity: 'error',
-      //   })
-      //   setLoading(false)
-      //   return
-      // }
-
       const res = await DataService.saveMonthwiseProduction(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
       )
 
       if (res?.code == 200) {
@@ -336,16 +312,10 @@ const MonthwiseProduction = () => {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
+
       const res = await DataService.handleCalculateMonthwiseProduction(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 

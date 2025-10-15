@@ -17,8 +17,6 @@ import { useSelector } from 'react-redux'
 import { validateFields } from 'utils/validationUtils'
 export default function MaintenanceSummary() {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
-
   const [row, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [openSaveDialog, setOpenSaveDialog] = useState(false)
@@ -47,7 +45,8 @@ export default function MaintenanceSummary() {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
+  const thisYear = AOP_YEAR
 
   // second grid states
   const [rowsP, setRowsP] = useState([])
@@ -67,14 +66,6 @@ export default function MaintenanceSummary() {
     return `${start - 1}-${(end - 1).toString().slice(-2)}`
   }, [thisYear])
 
-  const verticalName = useMemo(() => {
-    const stored = localStorage.getItem('selectedVertical')
-    try {
-      return stored ? JSON.parse(stored).name?.toLowerCase() : ''
-    } catch (e) {
-      return ''
-    }
-  }, [])
   const monthFields = [
     {
       field: 'apr',
@@ -191,9 +182,6 @@ export default function MaintenanceSummary() {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-      const plantName = plantObject?.name
-
       // Fetch for Consumption Budget
       const resConsumption = await DataService.maintenacegetdata(
         keycloak,
@@ -363,7 +351,6 @@ export default function MaintenanceSummary() {
   }
   const downloadExcelForConfiguration = async () => {
     setLoading(true)
-    const storedplant = localStorage.getItem('selectedPlant')
     try {
       await DataService.maintenaceExportdata(keycloak)
 
@@ -380,8 +367,6 @@ export default function MaintenanceSummary() {
     setLoading(true)
 
     try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const plantId = storedPlant ? JSON.parse(storedPlant)?.id : ''
       let response
 
       response = await DataService.maintenaceImportExceldata(rawFile, keycloak)
