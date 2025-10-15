@@ -404,6 +404,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						UUID productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName().trim(),plantFKId);
 						if(productId!=null) {
 							dto.setProductId(productId);
+							dto.setProduct(productId.toString());
 						}else {
 							dto.setSaveStatus("Failed");
 					        dto.setErrDescription("Particulars not found");
