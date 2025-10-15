@@ -888,7 +888,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					plantMaintenanceTransaction
 							.setDiscription(shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription()
 									: "Default Description");
+					
+					List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown",plantId.toString(),year,shutDownPlanDTO.getDiscription());
 
+					if(obj.size()>0) {
+						shutDownPlanDTO.setSaveStatus("Failed");
+						shutDownPlanDTO.setErrDescription("The Description"+shutDownPlanDTO.getDiscription()+"already exists in the list. please enter unique description to avoid duplication.");
+						failedList.add(shutDownPlanDTO);
+						continue;
+					}
 					if (shutDownPlanDTO.getDurationInHrs() != null) {
 						
 						plantMaintenanceTransaction

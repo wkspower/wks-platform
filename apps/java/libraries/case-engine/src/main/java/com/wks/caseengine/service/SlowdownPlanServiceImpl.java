@@ -180,19 +180,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			// Data rows
 			for (ShutDownPlanDTO dto : dtoList) {
 				List<Object> list = new ArrayList<>();
-				
-				// Default values in case of exception
 				String formattedDuration = ""; 
 				String formattedStartDate = "";
 				String formattedEndDate = "";
-				
-				// --- Duration Parsing and Formatting ---
 				try {
 					Double durationObject = dto.getDurationInHrs();
 					if (durationObject != null) {
 						double durationDouble = durationObject.doubleValue();
 						int hours = (int) durationDouble; 
-						// Note: Assuming fractional part is in 100ths, not 60ths (e.g., 2.50 = 2h 50m)
 						int minutes = (int) Math.round((durationDouble - hours) * 100); 
 						formattedDuration = String.format("%02d:%02d", hours, minutes);
 					}
@@ -201,8 +196,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				}
 				
 				list.add(dto.getDiscription());
-				
-				// --- Product/UUID Conversion and Lookup ---
 				if(dto.getProduct()!=null) {
 					try {
 						UUID product = UUID.fromString(dto.getProduct());
@@ -614,7 +607,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 					plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 					plantMaintenanceTransaction.setId(UUID.randomUUID());
-					
+					List<Object[]> obj=slowdownPlanRepository.findDiscriptionByPlantIdAndType("Slowdown",plantId.toString(),year,shutDownPlanDTO.getDiscription());
+					if(obj.size()>0) {
+						shutDownPlanDTO.setSaveStatus("Failed");
+						shutDownPlanDTO.setErrDescription("The Description"+shutDownPlanDTO.getDiscription()+"already exists in the list. please enter unique description to avoid duplication.");
+						failedList.add(shutDownPlanDTO);
+						continue;
+					}
 				} else {
 
 					 plantMaintenanceTransaction = slowdownPlanRepository
