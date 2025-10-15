@@ -364,6 +364,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					dto.setAudityear(year);
 					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
+					dto.setProduct(getStringCellValue(row.getCell(1), dto));
 					if(dto.getProductName()!=null) {
 						UUID productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName().trim(),plantFKId);
 						if(productId!=null) {
