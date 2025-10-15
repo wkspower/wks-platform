@@ -32,7 +32,7 @@ public interface ShutDownPlanRepository extends JpaRepository<PlantMaintenanceTr
         @Param("maintenanceTypeName") String maintenanceTypeName, @Param("plantId") String plantId,  @Param("year") String year);
 
 	@Query(value = "SELECT " +
-            "pm.Discription, " +
+            "pm.Discription " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +

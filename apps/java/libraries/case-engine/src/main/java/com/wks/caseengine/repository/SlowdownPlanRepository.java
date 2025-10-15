@@ -35,7 +35,7 @@ public interface SlowdownPlanRepository extends JpaRepository<PlantMaintenanceTr
         //List<Object[]> findSlowdownPlanDetailsByPlantIdAndType(String maintenanceTypeName, String plantId, String year);
 
 	@Query(value = "SELECT " +
-            "pm.Discription, " +
+            "pm.Discription " +
             "FROM PlantMaintenanceTransaction pm " +
             "JOIN PlantMaintenance pmt ON pm.PlantMaintenance_FK_Id = pmt.Id " +
             "JOIN MaintenanceTypes mt ON pmt.MaintenanceType_FK_Id = mt.Id " +

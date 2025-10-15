@@ -407,7 +407,25 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				try {
 					dto.setAudityear(year);
 					
-					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
+					String desc = getStringCellValue(row.getCell(0), dto);
+					dto.setDiscription(desc);
+
+					// Only do duplicate check if desc is non-null
+					if (desc != null) {
+					    boolean exists = dtoList.stream()
+					        .anyMatch(existing -> desc.equals(existing.getDiscription()));
+					    if (exists) {
+					        dto.setSaveStatus("Failed");
+					        dto.setErrDescription("Description cannot be duplicate");
+					        // You may decide to skip adding this dto further
+					    } else {
+					        dtoList.add(dto);
+					    }
+					} else {
+					    // Handle when desc is null if needed
+					    dtoList.add(dto);
+					}
+
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
 					if(dto.getProductName()!=null) {
 						UUID productId=normParametersRepository.findNormParameterIdByDisplayNameAndPlant(dto.getProductName().trim(),plantFKId);

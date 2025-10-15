@@ -114,11 +114,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		this.dataSource = dataSource;
 	}
 
-	public byte[] createExcel(String year, UUID plantFKId,String reportType, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
+	public byte[] createExcel(String year, UUID plantFKId,List<String> reportTypes, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
 		try {
 			System.out.println("Started the createExcel");
 			if (!isAfterSave) {
-				dtoList = getConfigurationDataForExcel(year, plantFKId,reportType);
+				dtoList = getConfigurationDataForExcel(year, plantFKId,reportTypes);
 			}
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Boolean> isEditable = new ArrayList<>();
@@ -540,24 +540,27 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 	
-	public List<ConfigurationDTO> getConfigurationDataForExcel(String year, UUID plantFKId,String reportType) {
+	public List<ConfigurationDTO> getConfigurationDataForExcel(String year, UUID plantFKId,List<String> reportTypes) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
-			if ((verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
+			Boolean vertical=(verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
 					|| (verticalName.equalsIgnoreCase("CRACKER")) || (verticalName.equalsIgnoreCase("VCM")) 
-					|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
-
+					|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"));
+			if (vertical) {
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
 			} else {
-				obj = findData(year, plantFKId, viewName,reportType);
+				obj = findData(year, plantFKId, viewName,reportTypes.get(0));
 			}
 
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
 			int i = 0;
 			for (Object[] row : obj) {
+				if(vertical && !reportTypes.contains(row[16].toString())) {
+					continue;
+				}
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
 
@@ -985,6 +988,103 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	@Override
+	public byte[] exportConfigurationConstantsNorms(String year, String plantId) {
+		try {
+
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			String procedureName = verticalName + "_GetConfigurationForNorms_Constant";
+			List<Object[]> obj = new ArrayList<>();
+			if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
+					|| verticalName.equalsIgnoreCase("CRACKER") || verticalName.equalsIgnoreCase("VCM")
+					|| verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
+				obj = findConstantsByYearAndPlantFkId(year, plantId, procedureName);
+			}
+			Workbook workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			
+			List<List<Object>> rows = new ArrayList<>();
+			// Data rows
+			for (Object[] row : obj) {
+
+				List<Object> list = new ArrayList<>();
+				boolean isEditable;
+				Object flagObj = row[8];
+				if (flagObj instanceof Boolean) {
+					isEditable = (Boolean) flagObj;
+				} else if (flagObj instanceof Number) {
+					isEditable = ((Number) flagObj).intValue() == 1;
+				} else {
+					isEditable = false; // or default
+				}
+				if (isEditable) {
+					list.add(row[0]);
+					list.add(row[3]);
+					list.add(row[4]);
+					list.add(row[5]);
+					list.add(row[7]);
+					list.add(row[1]);
+					
+					rows.add(list);
+				}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			innerHeaders.add("Type");
+			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
+			innerHeaders.add("Value");
+			innerHeaders.add("Remark");
+			innerHeaders.add("NormParameter_FK_Id");
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+
+				}
+			}
+			sheet.setColumnHidden(5, true);
+						try {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 		public AOPMessageVM getConfigurationConstants(String year, String plantFKId) {
 		try {
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -1852,7 +1952,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId,String reportType, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId,List<String> reportTypes, MultipartFile file) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -1868,7 +1968,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId,reportType, true, failedRecords);
+				byte[] fileByteArray = createExcel(year, plantFKId,reportTypes, true, failedRecords);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
@@ -2153,8 +2253,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 		return null;
 	}
-
-	
 
 	@Override
 	public byte[] createConfigurationConstantsExcel(String year, UUID plantFKId) {
