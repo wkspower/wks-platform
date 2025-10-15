@@ -547,7 +547,7 @@ const CrackerConfig = () => {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Spyro Output.xlsx')
+        link.setAttribute('download', 'Error File - Optimizer Output.xlsx')
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -573,7 +573,7 @@ const CrackerConfig = () => {
 
       return response
     } catch (error) {
-      console.error('Error uploading Spyro Output Excel:', error)
+      console.error('Error uploading Optimizer Output Excel:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Unexpected error occurred!',

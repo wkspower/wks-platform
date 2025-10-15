@@ -73,6 +73,7 @@ export const DataService = {
   handleCalculateNormalOpsNorms1,
 
   handleCalculateSlowdownNorms,
+  handleCalculateSlowdownNormsPP,
   updatePeConfigData,
   getPeConfigData,
   getAllGrades,
@@ -279,6 +280,30 @@ async function handleCalculateSlowdownNorms(plantId, year, keycloak) {
   const year1 = localStorage.getItem('year')
   //  const url = `${Config.CaseEngineUrl}/task/getCalculatedShutdownNorms?year=${year1}&plantId=${plantId}`
   const url = `${Config.CaseEngineUrl}/task/getSlowdownNormsSPData?year=${year1}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json()
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function handleCalculateSlowdownNormsPP(plantId, year, keycloak) {
+  const year1 = localStorage.getItem('year')
+  //  const url = `${Config.CaseEngineUrl}/task/getCalculatedShutdownNorms?year=${year1}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/calculate-slowdown-norms?plantId=${plantId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -2086,7 +2111,7 @@ async function maintenaceExportdata(
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e)
+    console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
   }
 }
@@ -2579,7 +2604,7 @@ async function importSpyroOutputExcel(file, keycloak, mode) {
     })
     return json(keycloak, resp) // assuming `json()` handles response properly
   } catch (e) {
-    console.error('Error importing Spyro Input Excel:', e)
+    console.error('Error importing Optimizer Input Excel:', e)
     return await Promise.reject(e)
   }
 }
@@ -2604,7 +2629,7 @@ async function importSpyroOutputExcelYield(file, keycloak, mode) {
     })
     return json(keycloak, resp) // assuming `json()` handles response properly
   } catch (e) {
-    console.error('Error importing Spyro Input Excel:', e)
+    console.error('Error importing Optimizer Input Excel:', e)
     return await Promise.reject(e)
   }
 }
@@ -2640,13 +2665,13 @@ async function exportSpyroOutputExcel(keycloak, mode) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `SpyroOutput_${mode || 'Export'}.xlsx`
+    a.download = `Optimizer_Output_${mode || 'Export'}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e)
+    console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
   }
 }
@@ -2688,7 +2713,7 @@ async function exportSpyroOutputExcelYield(keycloak, mode) {
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e)
+    console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
   }
 }
@@ -2712,7 +2737,7 @@ async function importSpyroInputExcel(file, keycloak, mode) {
     })
     return json(keycloak, resp) // assuming `json()` handles response properly
   } catch (e) {
-    console.error('Error importing Spyro Input Excel:', e)
+    console.error('Error importing Optimizer Input Excel:', e)
     return await Promise.reject(e)
   }
 }
@@ -2748,13 +2773,13 @@ async function exportSpyroInputExcel(keycloak, mode) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `SpyroInput_${mode || 'Export'}.xlsx`
+    a.download = `Optimizer_Input_${mode || 'Export'}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e)
+    console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
   }
 }

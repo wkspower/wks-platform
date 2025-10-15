@@ -132,9 +132,7 @@ const BusinessDemand = ({ permissions }) => {
         setLoading(false)
         return
       }
-      const isPPorPE_NMD =
-        (lowerVertName === 'pp' || lowerVertName === 'pe') &&
-        siteObject?.name?.toLowerCase() === 'nmd'
+      const isPPorPE_NMD = lowerVertName === 'pp' || lowerVertName === 'pe'
       //
 
       if (isPPorPE_NMD) {
@@ -316,19 +314,9 @@ const BusinessDemand = ({ permissions }) => {
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' ||
-        (lowerVertName == 'pe' &&
-          plantObject?.name?.toLowerCase() === 'ldpe' &&
-          siteObject?.name?.toLowerCase() === 'nmd')
-          ? true
-          : false,
+        lowerVertName == 'cracker' || lowerVertName == 'pe' ? true : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' ||
-        (lowerVertName == 'pe' &&
-          plantObject?.name?.toLowerCase() === 'ldpe' &&
-          siteObject?.name?.toLowerCase() === 'nmd')
-          ? true
-          : false,
+        lowerVertName == 'cracker' || lowerVertName == 'pe' ? true : false,
     },
     isOldYear,
   )

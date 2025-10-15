@@ -104,7 +104,7 @@ async function businessDemandExport(keycloak, PLANT_ID, AOP_YEAR) {
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e)
+    console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
   }
 }
@@ -126,7 +126,7 @@ async function businessDemandImport(file, keycloak, PLANT_ID, AOP_YEAR) {
     })
     return json(keycloak, resp) // assuming `json()` handles response properly
   } catch (e) {
-    console.error('Error importing Spyro Input Excel:', e)
+    console.error('Error importing Optimizer Input Excel:', e)
     return await Promise.reject(e)
   }
 }

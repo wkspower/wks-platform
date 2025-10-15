@@ -101,7 +101,7 @@ async function CrackerConstantsExport(keycloak, PLANT_ID, AOP_YEAR) {
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Spyro Input Excel:', e)
+    console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
   }
 }

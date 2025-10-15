@@ -466,7 +466,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalcuateSlowdownNorms";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateSlowdownNorms";
 			int result = executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
 			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,

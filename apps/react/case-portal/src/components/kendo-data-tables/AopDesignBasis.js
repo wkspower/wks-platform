@@ -692,7 +692,7 @@ const AopDesignBasis = () => {
             id='meg-grid-header'
           >
             <Typography className='grid-title'>
-              AOP Historical Period Basis
+              AOP Historical Period Basis for Production Target
             </Typography>
           </CustomAccordionSummary>
           <CustomAccordionDetails>

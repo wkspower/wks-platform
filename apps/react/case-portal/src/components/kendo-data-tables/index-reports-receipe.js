@@ -153,14 +153,7 @@ const KendoDataTablesReciepe = ({
     const plantName = plantObject?.name?.toLowerCase()
     
     // Check if conditions are met for showing export/import buttons
-    return (
-      (verticalName === 'pe' && 
-       siteName === 'nmd' && 
-       (plantName === 'ldpe' || plantName === 'lldpe1' || plantName === 'lldpe2')) ||
-      (verticalName === 'pp' && 
-       siteName === 'nmd' && 
-       plantName === 'pp')
-    )
+    return verticalName === 'pe' || verticalName === 'pp'
   }
   const initialGroup = groupBy
     ? [
@@ -520,16 +513,17 @@ const KendoDataTablesReciepe = ({
             )}
             
             {/* Export Button */}
-            {permissions?.downloadExcelBtn && shouldShowExportImportButtons() && (
-              <Button
-                variant='contained'
-                className='btn-save'
-                onClick={downloadExcelForConfiguration}
-                disabled={isButtonDisabled}
-              >
-                Export
-              </Button>
-            )}
+            {permissions?.downloadExcelBtn &&
+              shouldShowExportImportButtons() && (
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={downloadExcelForConfiguration}
+                  disabled={isButtonDisabled}
+                >
+                  Export
+                </Button>
+              )}
 
             {/* Import Button */}
             {permissions?.uploadExcelBtn && shouldShowExportImportButtons() && (

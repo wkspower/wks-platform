@@ -399,13 +399,13 @@ const CrackerConfig = () => {
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Error saving Spyro data!',
+          message: 'Error saving Optimizer data!',
           severity: 'error',
         })
       }
       return response
     } catch (error) {
-      console.error('Error saving Spyro Input data!', error)
+      console.error('Error saving Optimizer Input data!', error)
     } finally {
       setLoading(false)
     }
@@ -445,7 +445,7 @@ const CrackerConfig = () => {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Spyro Input.xlsx')
+        link.setAttribute('download', 'Error File - Optimizer Input.xlsx')
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -462,7 +462,7 @@ const CrackerConfig = () => {
 
       return response
     } catch (error) {
-      console.error('Error uploading Spyro Input Excel:', error)
+      console.error('Error uploading Optimizer Input Excel:', error)
     } finally {
       setLoading(false)
       fetchCrackerRows(currentTabDisplay, selectMode)

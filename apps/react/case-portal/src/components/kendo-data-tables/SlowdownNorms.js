@@ -425,12 +425,20 @@ const SlowdownNorms = () => {
         plantId = parsedPlant.id
       }
 
-      const response = await DataService.handleCalculateSlowdownNorms(
-        plantId,
-        year,
-        keycloak,
-      )
-
+      var response = []
+      if (lowerVertName == 'pp') {
+        response = await DataService.handleCalculateSlowdownNormsPP(
+          plantId,
+          year,
+          keycloak,
+        )
+      } else {
+        response = await DataService.handleCalculateSlowdownNorms(
+          plantId,
+          year,
+          keycloak,
+        )
+      }
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({

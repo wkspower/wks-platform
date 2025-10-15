@@ -71,14 +71,14 @@ export const ibrPlanColumns = [
 
   {
     field: 'shutDownStartDate',
-    title: 'Maint. Start Date (Coil Replacem.)',
+    title: 'Slowdown Start Date',
     editable: true,
     widthT: 220,
     filter: false,
   },
   {
     field: 'shutDownEndDate',
-    title: 'Maint. End Date (Coil Replacem.)',
+    title: 'Slowdown End Date',
     editable: true,
     width: 220,
     filter: false,

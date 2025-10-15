@@ -884,7 +884,7 @@ const ConfigurationTable = () => {
                   />
                 )
 
-              case 'Shutdown':
+              case 'shutdown':
                 return (
                   <SelectivityData
                     rows={shutdownDataRows}

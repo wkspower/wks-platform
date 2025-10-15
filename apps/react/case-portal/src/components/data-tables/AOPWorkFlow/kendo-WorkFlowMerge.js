@@ -41,6 +41,8 @@ import PlantContributionLastFourYears from '../Reports-kendo/kendo-PlantContribu
 import BestAchievedReport from '../Reports/BestAchievedReport'
 import MonthWiseRawData from '../Reports/MonthWiseRawData'
 import FurnaceRawData from '../Reports/FurnaceRawData'
+import OptimizerReport from '../Reports/OptimizerReport'
+import TurnaroundReportCracker from '../Reports/TurnaroundReportCracker'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -594,9 +596,11 @@ const WorkFlowMerge = () => {
   ]
 
   const crackerTabs = [
+    'Optimizer Input / Output',
     'Month Wise Production Plan',
-    'Month Wise Raw Data',
+    'Month Wise Norms',
     'Furnace Data',
+    'Turnaround',
     'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
   ]
@@ -836,11 +840,21 @@ const WorkFlowMerge = () => {
         {/* For CRACKER */}
         {lowerVertName === 'cracker' && (
           <>
-            {tabIndex === 0 && <BestAchievedReport />}
+            {/* {tabIndex === 0 && <BestAchievedReport />}
             {tabIndex === 1 && <MonthWiseRawData />}
             {tabIndex === 2 && <FurnaceRawData />}
             {tabIndex === 3 && <PlantContribution />}
             {tabIndex === 4 && <PlantContributionLastFourYears />}
+ */}
+
+            {tabIndex === 0 && <OptimizerReport />}
+            {tabIndex === 1 && <BestAchievedReport />}
+            {tabIndex === 2 && <MonthWiseRawData />}
+            {tabIndex === 3 && <FurnaceRawData />}
+            {tabIndex === 4 && <TurnaroundReportCracker />}
+
+            {tabIndex === 5 && <PlantContribution />}
+            {tabIndex === 6 && <PlantContributionLastFourYears />}
 
             <Notification
               open={snackbarOpen}

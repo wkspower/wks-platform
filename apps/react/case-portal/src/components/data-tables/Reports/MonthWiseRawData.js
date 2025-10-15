@@ -1,11 +1,7 @@
-import { Box, Button } from '@mui/material'
+import { Box } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
-import {
-  ExcelExport,
-  ExcelExportColumn,
-} from '@progress/kendo-react-excel-export'
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -125,55 +121,61 @@ export default function MonthWiseRawData() {
       for (const mode of MODE_TYPES) {
         try {
           const resp =
-          await NormalOperationNormsApiService.getModeWiseNormsDataworkflow(
+            await NormalOperationNormsApiService.getModeWiseNormsDataworkflow(
               keycloak,
               grade,
               mode,
             )
           if (resp?.code !== 200) continue
 
-        // Get data and columns from response
-        const raw = resp.data?.data || [] // Changed from mcuNormsValueDTOList to data
-        const backendCols = resp.data?.columns || null
+          // Get data and columns from response
+          const raw = resp.data?.data || []
+          const backendCols = resp.data?.columns || null
 
-        let cols = []
-        let enriched = []
+          let cols = []
+          let enriched = []
 
-        if (backendCols && backendCols.length > 0) {
-          // Use backend column definitions
-          cols = backendCols
-          enriched = enrichColumns(cols)
-        } else {
-          // Fallback: generate columns from first row if no backend columns
-          const first = raw[0] || {}
-          cols = Object.keys(first).map((field) => {
-            const sample = first[field]
-            let type = 'string'
-            
-            if (typeof sample === 'number') {
-              type = 'number'
-            } else if (typeof sample === 'boolean') {
-              type = 'boolean'
-            } else if (typeof sample === 'string' && sample.split('-').length === 3) {
-              type = 'date'
-            } else if (
-              sample !== undefined &&
-              sample !== null &&
-              sample !== '' &&
-              !isNaN(sample)
-            ) {
-              type = 'number'
-            }
-            
-            return { 
-              field, 
-              title: field.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim(), 
-              type,
-              editable: false
-            }
-          })
-          enriched = enrichColumns(cols)
-        }
+          if (backendCols && backendCols.length > 0) {
+            // Use backend column definitions
+            cols = backendCols
+            enriched = enrichColumns(cols)
+          } else {
+            // Fallback: generate columns from first row if no backend columns
+            const first = raw[0] || {}
+            cols = Object.keys(first).map((field) => {
+              const sample = first[field]
+              let type = 'string'
+
+              if (typeof sample === 'number') {
+                type = 'number'
+              } else if (typeof sample === 'boolean') {
+                type = 'boolean'
+              } else if (
+                typeof sample === 'string' &&
+                sample.split('-').length === 3
+              ) {
+                type = 'date'
+              } else if (
+                sample !== undefined &&
+                sample !== null &&
+                sample !== '' &&
+                !isNaN(sample)
+              ) {
+                type = 'number'
+              }
+
+              return {
+                field,
+                title: field
+                  .replace(/([A-Z])/g, ' $1')
+                  .replace(/_/g, ' ')
+                  .trim(),
+                type,
+                editable: false,
+              }
+            })
+            enriched = enrichColumns(cols)
+          }
 
           const rowsWithId = raw.map((r, idx) => {
             const parsed = { ...r }
@@ -195,7 +197,10 @@ export default function MonthWiseRawData() {
             return { ...parsed, id: `${grade}_${mode}_${idx}` }
           })
 
-          const key = `${grade} - ${mode}`
+          // Display-only grid title: map '4F' -> 'F' and drop the "- Best Achieved" suffix
+          const displayGrade = grade
+          const key = displayGrade
+
           modeMap[key] = { rows: rowsWithId, columns: enriched }
         } catch (err) {
           console.error(`Mode grid fetch failed for ${grade} - ${mode}:`, err)
@@ -232,7 +237,7 @@ export default function MonthWiseRawData() {
 
           if (apiResponse?.code !== 200) {
             console.warn(
-              `finalNormsReport failed for ${reportType}`,
+              `MonthWiseNormsReport failed for ${reportType}`,
               apiResponse,
             )
             continue
@@ -311,45 +316,6 @@ export default function MonthWiseRawData() {
     fetchAndPrepare()
   }, [fetchAndPrepare, plantID, oldYear, yearChanged])
 
-  const exportAllGrids = useCallback(() => {
-    const keys = Object.keys(exportRefs.current || {})
-    if (!keys.length) return
-
-    const firstKey = keys.find((k) => exportRefs.current[k])
-    if (!firstKey) return
-    const baseRef = exportRefs.current[firstKey]
-    const baseOptions = baseRef?.workbookOptions?.()
-    if (!baseOptions) return
-
-    const sheets = gridNames
-      .map((name) => {
-        const ref = exportRefs.current[name]
-        try {
-          const opts = ref?.workbookOptions?.()
-          return opts?.sheets?.[0] ? { ...opts.sheets[0] } : null
-        } catch {
-          return null
-        }
-      })
-      .filter(Boolean)
-
-    if (!sheets.length) return
-
-    sheets.forEach((s, idx) => {
-      s.title = gridNames[idx] || s.title || `Sheet${idx + 1}`
-    })
-
-    baseOptions.sheets = sheets
-    baseRef.save(baseOptions)
-  }, [gridNames])
-
-  const currentDateTime = new Date()
-    .toISOString()
-    .replace(/T/, ' ')
-    .replace(/:/g, '-')
-    .split('.')[0]
-  const fileName = `NMD_Month_Wise_Raw_Data.xlsx`
-
   const renderTitle = (t) => t
 
   return (
@@ -361,47 +327,7 @@ export default function MonthWiseRawData() {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* Hidden Excel exports for each grid (including the mode grids) */}
-      <div style={{ display: 'none' }}>
-        {gridNames.map((name) => {
-          const data = dataMap[name] || { rows: [], columns: [] }
-          const setRef = (ref) => {
-            if (ref) exportRefs.current[name] = ref
-          }
-          return (
-            <ExcelExport
-              key={`excel-${name}`}
-              data={data.rows}
-              ref={setRef}
-              fileName={fileName}
-            >
-              {(data.columns || []).map((col) => (
-                <ExcelExportColumn
-                  key={col.field}
-                  field={col.field}
-                  title={col.title || col.field}
-                />
-              ))}
-            </ExcelExport>
-          )
-        })}
-      </div>
-
-      {/* <Box display='flex' justifyContent='flex-end' mb='8px'>
-        <Button
-          variant='contained'
-          onClick={exportAllGrids}
-          className='btn-save'
-        >
-          Export
-        </Button>
-      </Box> */}
-
       <Box display='flex' flexDirection='column' gap={2}>
-        {gridNames.length === 0 && !loading && (
-          <Typography>No grids available.</Typography>
-        )}
-
         {gridNames.map((name) => {
           const d = dataMap[name] || { rows: [], columns: [] }
           return (
