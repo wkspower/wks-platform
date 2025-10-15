@@ -12,5 +12,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
     public List<NormParameters> getAllGrades(String plantId);
     
     public AOPMessageVM getNormParameters(String plantId,String year,String type);
+    
+    public AOPMessageVM getAllProducts(String plantId,String year);
 
  }

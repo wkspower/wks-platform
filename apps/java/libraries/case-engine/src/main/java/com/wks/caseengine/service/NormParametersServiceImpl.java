@@ -6,13 +6,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
- import org.springframework.stereotype.Service;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
- import com.wks.caseengine.entity.NormParameters;
+import com.wks.caseengine.dto.product.ProductDTO;
+import com.wks.caseengine.entity.NormParameters;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -29,7 +34,10 @@ import jakarta.persistence.Query;
  	
  	@Autowired
 	private PlantsRepository plantsRepository;
-
+ 	
+ 	@Autowired
+	private VerticalsRepository verticalRepository;
+	
  	@Override
  	public List<NormParameters> findAllByType(String type) {
  		return	normParametersRepository.findAllByType(type);
@@ -80,6 +88,39 @@ import jakarta.persistence.Query;
 		
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public AOPMessageVM getAllProducts(String plantId, String year) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+		List<ProductDTO> productDTOList = new ArrayList<>();
+		String viewName="vw"+vertical.getName()+"GradeDetails";
+		String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId and aopYear = :year";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("plantFkId", plantId);
+        query.setParameter("year", year);
+        
+        List<Object[]> data= query.getResultList();
+		for (Object[] obj : data) {
+			ProductDTO productDTO = new ProductDTO();
+	
+			// Convert UUID to String (Avoid using Long)
+			productDTO.setId(obj[0] != null ? obj[0].toString() : null);
+	
+			productDTO.setName((String) obj[1]);
+			productDTO.setDisplayName((String) obj[2]);
+			productDTOList.add(productDTO);
+		}
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(productDTOList);
+		aopMessageVM.setMessage("Data fetched successfully");
+		return aopMessageVM;
+		
 	}
 
  }
