@@ -55,6 +55,7 @@ import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
+import com.wks.caseengine.repository.ShutDownPlanRepository;
 import com.wks.caseengine.repository.SlowdownPlanRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.utility.Utility;
@@ -95,6 +96,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private ShutDownPlanRepository shutDownPlanRepository;
 
 
 	@Override
@@ -521,6 +525,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					}
 					String idString = getStringCellValue(row.getCell(7), dto);
 					dto.setId(idString); 
+					if(dto.getId()==null) {
+						List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown",plantFKId.toString(),year,dto.getDiscription());
+
+						if(obj.size()>0) {
+							dto.setSaveStatus("Failed");
+							dto.setErrDescription("The Description"+dto.getDiscription()+"already exists in the list. please enter unique description to avoid duplication.");
+						}
+					}
 					/*
 					 * String productIdString = getStringCellValue(row.getCell(8), dto); if
 					 * (productIdString == null || productIdString.isEmpty()) { UUID
@@ -669,13 +681,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 					plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 					plantMaintenanceTransaction.setId(UUID.randomUUID());
-					List<Object[]> obj=slowdownPlanRepository.findDiscriptionByPlantIdAndType("Slowdown",plantId.toString(),year,shutDownPlanDTO.getDiscription());
-					if(obj.size()>0) {
-						shutDownPlanDTO.setSaveStatus("Failed");
-						shutDownPlanDTO.setErrDescription("The Description"+shutDownPlanDTO.getDiscription()+"already exists in the list. please enter unique description to avoid duplication.");
-						failedList.add(shutDownPlanDTO);
-						continue;
-					}
+					
 				} else {
 
 					 plantMaintenanceTransaction = slowdownPlanRepository

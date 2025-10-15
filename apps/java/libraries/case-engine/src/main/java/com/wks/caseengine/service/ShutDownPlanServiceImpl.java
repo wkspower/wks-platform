@@ -499,6 +499,14 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 					String idString = getStringCellValue(row.getCell(6), dto);
 					dto.setId(idString); 
+					if(dto.getId()==null) {
+						List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown",plantFKId.toString(),year,dto.getDiscription());
+
+						if(obj.size()>0) {
+							dto.setSaveStatus("Failed");
+							dto.setErrDescription("The Description"+dto.getDiscription()+"already exists in the list. please enter unique description to avoid duplication.");
+						}
+					}
 					/*
 					 * String productIdString = getStringCellValue(row.getCell(7), dto); if
 					 * (productIdString == null || productIdString.isEmpty()) { UUID
@@ -955,14 +963,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							.setDiscription(shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription()
 									: "Default Description");
 					
-					List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown",plantId.toString(),year,shutDownPlanDTO.getDiscription());
-
-					if(obj.size()>0) {
-						shutDownPlanDTO.setSaveStatus("Failed");
-						shutDownPlanDTO.setErrDescription("The Description"+shutDownPlanDTO.getDiscription()+"already exists in the list. please enter unique description to avoid duplication.");
-						failedList.add(shutDownPlanDTO);
-						continue;
-					}
+					
 					if (shutDownPlanDTO.getDurationInHrs() != null) {
 						
 						plantMaintenanceTransaction
