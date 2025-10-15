@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.NormParameterDTO;
 import com.wks.caseengine.dto.product.ProductDTO;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
@@ -98,7 +99,7 @@ import jakarta.persistence.Query;
 
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 				.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-		List<ProductDTO> productDTOList = new ArrayList<>();
+		List<NormParameterDTO> productDTOList = new ArrayList<>();
 		String viewName="vw"+vertical.getName()+"GradeDetails";
 		String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId and aopYear = :year";
         Query query = entityManager.createNativeQuery(sql);
@@ -107,14 +108,14 @@ import jakarta.persistence.Query;
         
         List<Object[]> data= query.getResultList();
 		for (Object[] obj : data) {
-			ProductDTO productDTO = new ProductDTO();
+			NormParameterDTO normParameterDTO = new NormParameterDTO();
 	
 			// Convert UUID to String (Avoid using Long)
-			productDTO.setId(obj[0] != null ? obj[0].toString() : null);
+			normParameterDTO.setId(obj[0] != null ? obj[0].toString() : null);
 	
-			productDTO.setName((String) obj[1]);
-			productDTO.setDisplayName((String) obj[2]);
-			productDTOList.add(productDTO);
+			normParameterDTO.setName((String) obj[1]);
+			normParameterDTO.setDisplayName((String) obj[2]);
+			productDTOList.add(normParameterDTO);
 		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setData(productDTOList);
