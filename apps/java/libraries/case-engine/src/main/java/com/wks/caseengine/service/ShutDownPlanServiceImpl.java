@@ -56,6 +56,11 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class ShutDownPlanServiceImpl implements ShutDownPlanService {
@@ -345,7 +350,20 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        return null;
 	    }
 	}
+	
+	private static LocalDateTime[] parseFinancialYearBounds(String fy) {
+	    String[] parts = fy.split("-");
+	    if (parts.length != 2) {
+	        throw new IllegalArgumentException("Invalid financial year format: " + fy);
+	    }
+	    int startYear = Integer.parseInt(parts[0].trim());
+	    // Use startYear + 1
+	    int endYear = startYear + 1;
 
+	    LocalDateTime start = LocalDateTime.of(startYear, 4, 1, 0, 0, 0);
+	    LocalDateTime end   = LocalDateTime.of(endYear, 3, 31, 23, 59, 59);
+	    return new LocalDateTime[]{ start, end };
+	}
 	
 	public List<ShutDownPlanDTO> readShutdownData(InputStream inputStream, UUID plantFKId, String year) {
 		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
@@ -362,6 +380,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 				ShutDownPlanDTO dto = new ShutDownPlanDTO();
 				try {
 					dto.setAudityear(year);
+					
+					
 					dto.setDiscription(getStringCellValue(row.getCell(0), dto));
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
 					
@@ -380,35 +400,63 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 				        dto.setErrDescription("Please enter particulars");
 					}
 					
-					String maintStartDateTime = getCellAsString(row.getCell(2), dto, evaluator);
-					if (maintStartDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
-					    try { 
-					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-					        LocalDateTime dateTime = LocalDateTime.parse(maintStartDateTime, formatter); 
-					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
-					        dto.setMaintStartDateTime(date);
-					    } catch (Exception e) {
-					        dto.setSaveStatus("Failed");
-					        dto.setErrDescription("Invalid date/time format in cell 3.");
-					        e.printStackTrace();
-					    }
-					}
-					
-					String maintEndDateTime = getCellAsString(row.getCell(3), dto, evaluator);
-					if (maintEndDateTime != null && !"Failed".equals(dto.getSaveStatus())) {
-					    try {
-					        
-					    	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-					        LocalDateTime dateTime = LocalDateTime.parse(maintEndDateTime, formatter); 
-					        Date date = Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()); 					        
-					        dto.setMaintEndDateTime(date);
-					    } catch (Exception e) {
-					        dto.setSaveStatus("Failed");
-					        dto.setErrDescription("Invalid date/time format in cell 4.");
-					        e.printStackTrace();
-					    }
-					}
-					
+					LocalDateTime[] bounds = parseFinancialYearBounds(year);
+				    LocalDateTime fyStart = bounds[0];
+				    LocalDateTime fyEnd   = bounds[1];
+				    
+				    String mantStartStr = getCellAsString(row.getCell(2), dto, evaluator);
+				    LocalDateTime ldtStart = null;
+				    if (mantStartStr != null) {
+				        try {
+				            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+				            ldtStart = LocalDateTime.parse(mantStartStr, fmt);
+				            
+				            // Check within financial year
+				            if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
+				                dto.setSaveStatus("Failed");
+				                dto.setErrDescription("Start date/time is outside the financial year " + year);
+				                Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
+				                dto.setMaintStartDateTime(startDate);
+				            } else {
+				                Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
+				                dto.setMaintStartDateTime(startDate);
+				            }
+				        } catch (Exception ex) {
+				            dto.setSaveStatus("Failed");
+				            dto.setErrDescription("Invalid date/time format in cell 3.");
+				            ex.printStackTrace();
+				        }
+				    }
+				    
+				    String mantEndStr = getCellAsString(row.getCell(3), dto, evaluator);
+				    if (mantEndStr != null) {
+				        try {
+				            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+				            LocalDateTime ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
+				            
+				            // Check within financial year
+				            if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
+				                dto.setSaveStatus("Failed");
+				                dto.setErrDescription("End date/time is outside the financial year " + year);
+				                Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+				                dto.setMaintEndDateTime(endDate);
+				            } else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
+				                // Also check end >= start
+				                dto.setSaveStatus("Failed");
+				                dto.setErrDescription("End date/time cannot be before start date/time.");
+				                Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+				                dto.setMaintEndDateTime(endDate);
+				            } else {
+				                Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+				                dto.setMaintEndDateTime(endDate);
+				            }
+				        } catch (Exception ex) {
+				            dto.setSaveStatus("Failed");
+				            dto.setErrDescription("Invalid date/time format in cell 4.");
+				            ex.printStackTrace();
+				        }
+				    }
+									
 					try {
 					    Instant startInstant = dto.getMaintStartDateTime().toInstant();
 					    Instant endInstant = dto.getMaintEndDateTime().toInstant();
