@@ -16,10 +16,8 @@ const ShutdownNorms = () => {
   const [gradeId, setGradeId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
-  const menu = useSelector((state) => state.dataGridStore)
   const [shutdownMonths, setShutdownMonths] = useState([])
-  const { yearChanged, oldYear, plantID } = menu
-  const isOldYear = oldYear?.oldYear
+ 
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState([])
@@ -27,14 +25,14 @@ const ShutdownNorms = () => {
     message: '',
     severity: 'info',
   })
-  const [_plantID, set_PlantID] = useState('')
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
-
+    yearChanged,
+    oldYear,
+    plantID,
     plantObject,
     siteObject,
     verticalObject,
@@ -50,20 +48,17 @@ const ShutdownNorms = () => {
   const [calculationObject, setCalculationObject] = useState([])
   const [grades, setGrades] = useState([])
 
-  const PLANT_ID = plantObject?.id
+   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+  const headerMap = generateHeaderNames(AOP_YEAR)
+  const isOldYear = oldYear?.oldYear
 
   const PLANT_NAME = plantObject?.name
   const SITE_NAME = siteObject?.name
   const VERTICAL_NAME = verticalObject?.name
-  const AOP_YEAR = year?.selectedYear
 
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
 
   const keycloak = useSession()
 
@@ -346,18 +341,11 @@ const ShutdownNorms = () => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      let plantId = ''
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+      
       const response =
         await ShutdownNormsApiService.handleCalculateShutdownNorms(
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
 

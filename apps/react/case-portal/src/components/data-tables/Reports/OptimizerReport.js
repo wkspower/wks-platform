@@ -404,16 +404,8 @@ const OptimizerReport = () => {
     try {
       setCalculating(true)
 
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      let plantId = null
 
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      if (!plantId || !year) {
+      if (!PLANT_ID || !AOP_YEAR) {
         throw new Error('Plant ID or year not found in localStorage')
       }
 

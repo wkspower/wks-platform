@@ -19,8 +19,24 @@ import { useSelector } from 'react-redux'
 import { format } from '@progress/kendo-intl'
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
 
-  const thisYear = localStorage.getItem('year')
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const thisYear = AOP_YEAR
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -62,7 +78,6 @@ const AnnualProductionPlan = () => {
   const [currentRowId3, setCurrentRowId3] = useState(null)
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [rows, setRows] = useState()
-  const { oldYear } = useSelector((s) => s.dataGridStore)
   const isOldYear = oldYear?.oldYear === 1
   const formatValueToThreeDecimals = (params) => {
     const dateRegex =
@@ -263,7 +278,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
     { field: 'periodTo', headerName: 'Period to', editable: true, flex: 1 },
   ]
 
-  const year4 = localStorage.getItem('year')
+  const year4 = AOP_YEAR
   const year3 = `${+year4.split('-')[0] - 1}-${+year4.split('-')[1] - 1}`
   const year2 = `${+year3.split('-')[0] - 1}-${+year3.split('-')[1] - 1}`
   const year1 = `${+year2.split('-')[0] - 1}-${+year2.split('-')[1] - 1}`
@@ -364,8 +379,6 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
   ]
 
   const [loading, setLoading] = useState(false)
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
 
   const fetchData = async (type) => {
     try {
@@ -449,7 +462,7 @@ if (type === 'maxRate') {
     fetchData('OperatingHrs')
     fetchData('AverageHourlyRate')
     fetchData('ProductionPerformance')
-  }, [year, keycloak, plantId])
+  }, [AOP_YEAR, keycloak, PLANT_ID])
 
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()
@@ -457,17 +470,10 @@ if (type === 'maxRate') {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      var plantId = plantId
+    
       const res = await DataService.calculateAnnualProductionPlanData(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 
@@ -524,8 +530,8 @@ if (type === 'maxRate') {
       }))
       const res = await DataService.saveAnnualProduction(
         {
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           reportType: 'assumptions',
           dataList,
         },
@@ -582,8 +588,8 @@ if (type === 'maxRate') {
       }))
       const res = await DataService.saveAnnualProduction(
         {
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           reportType: 'maxRate',
           dataList,
         },
@@ -639,8 +645,8 @@ if (type === 'maxRate') {
       }))
       const res = await DataService.saveAnnualProduction(
         {
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           reportType: 'OperatingHrs',
           dataList,
         },
@@ -710,8 +716,8 @@ if (type === 'maxRate') {
       }))
       const res = await DataService.saveAnnualProduction(
         {
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           reportType: 'AverageHourlyrate',
           dataList,
         },

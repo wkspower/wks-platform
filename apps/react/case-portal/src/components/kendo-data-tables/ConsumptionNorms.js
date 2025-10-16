@@ -21,17 +21,29 @@ const ConsumptionNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+    } = dataGridStore
+  
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const AOP_YEAR = year?.selectedYear
+  
+    const isOldYear = oldYear?.oldYear
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const [isAccordionExpanded, setIsAccordionExpanded] = useState(true)
 
   const [open1, setOpen1] = useState(false)
 
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-
-  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
-    dataGridStore
-  //const isOldYear = oldYear?.oldYear
-  const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
@@ -73,18 +85,7 @@ const ConsumptionNorms = () => {
   const saveEditedData = async (newRows) => {
     setLoading(true)
     try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      let siteID =
-        JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-
-      let verticalId = localStorage.getItem('verticalId')
-
+      
       const businessData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
@@ -99,17 +100,17 @@ const ConsumptionNorms = () => {
         feb: row.feb || null,
         march: row.march || null,
         aopRemarks: row.aopRemarks || null,
-        aopYear: localStorage.getItem('year'),
-        plantFkId: plantId,
-        siteFkId: siteID,
-        verticalFkId: verticalId,
+        aopYear: AOP_YEAR,
+        plantFkId: PLANT_ID,
+        siteFkId: SITE_ID,
+        verticalFkId: VERTICAL_ID,
         materialFkId: row.NormParametersId,
         id: row.idFromApi || null,
         aopCaseId: '2025-26-NormsAOP',
         aopStatus: 'Saved',
       }))
       const response = await ConsumptionNormsApiService.saveAOPConsumptionNorm(
-        plantId,
+        PLANT_ID,
         businessData,
         keycloak,
       )
@@ -143,9 +144,8 @@ const ConsumptionNorms = () => {
     setLoading(true)
 
     setTimeout(() => {
-      const lowerVertName = JSON.parse(
-        localStorage.getItem('selectedVertical'),
-      )?.name?.toLowerCase()
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase()
 
       if (lowerVertName == 'meg') {
         try {
@@ -372,18 +372,11 @@ const ConsumptionNorms = () => {
 
   const handleCalculateMeg = async () => {
     try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      var plantId = plantId
+   
       const data =
         await ConsumptionNormsApiService.handleCalculateonsumptionNorms(
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
 
