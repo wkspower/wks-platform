@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.NormParameterDTO;
-import com.wks.caseengine.dto.product.ProductDTO;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Verticals;
