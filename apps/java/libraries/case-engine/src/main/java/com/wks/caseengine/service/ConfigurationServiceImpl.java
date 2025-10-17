@@ -2175,7 +2175,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	private static Double getNumericCellValue(Cell cell, ConfigurationDTO dto) {
-		if (cell == null)
+		if (cell == null || cell.toString().equalsIgnoreCase(""))
 			return null;
 		if (cell.getCellType() == CellType.NUMERIC) {
 			return cell.getNumericCellValue();
