@@ -16,7 +16,13 @@
     "field": "productName",
     "title": "Particulars",
     "editable": false,
-    "widthT": 300
+    "widthT": 130
+  },
+  {
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "widthT": 100
   },
   {
     "field": "apr",
@@ -25,13 +31,13 @@
     "align": "left",
     "headerAlign": "left",
     "type": "number",
-    "format": "{0:#.##}" 
+    "format": "{0:#.##}",
+    "widthT": 200
   },
   {
     "field": "remarks",
     "title": "Remark",
     "editable": true,
-    "renderCell": "renderRemarkCell",
-    "widthT": 300
+    "renderCell": "renderRemarkCell"
   }
 ]

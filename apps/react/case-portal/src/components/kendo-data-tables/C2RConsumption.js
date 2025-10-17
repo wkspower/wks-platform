@@ -3,54 +3,32 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import getEnhancedColDefsByProducts from 'components/data-tables/CommonHeader/Kendo_ProductionAopHeaderByProducts'
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-
+import { ProductionNormsApiService } from 'services/production-norms-api-service'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
-import { ProductionNormsApiService } from 'services/production-norms-api-service'
 
-const ProductionNorms = ({ permissions }) => {
+const C2RConsumption = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
-
   const apiRef = useGridApiRef()
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const [_plantID, set_PlantID] = useState('')
-
-  const {
-    verticalChange,
-    yearChanged,
-    oldYear,
-    plantID,
-    plantObject,
-    siteObject,
-    verticalObject,
-    year,
-  } = dataGridStore
-
-  const PLANT_ID = plantObject?.id
-  const SITE_ID = siteObject?.id
-  const VERTICAL_ID = verticalObject?.id
-  const AOP_YEAR = year?.selectedYear
-
+  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
-
-  const headerMap = generateHeaderNames(AOP_YEAR)
-
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('')
   const [rows, setRows] = useState([])
@@ -68,9 +46,7 @@ const ProductionNorms = ({ permissions }) => {
     if (plantID?.plantId) {
       set_PlantID(plantID?.plantId)
     }
-    // setSelectedUnit('')
   }, [plantID])
-  // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
 
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
@@ -104,18 +80,6 @@ const ProductionNorms = ({ permissions }) => {
         }
 
         if (calculatebtnClicked == false) {
-          //Consition changed if permissions?.saveBtn --> SET TO FALSE
-          //UNCOMMENT THE CODE IF permissions?.saveBtn --> SET TO TRUE
-          // if (editedData.length === 0) {
-          //   setSnackbarOpen(true)
-          //   setSnackbarData({
-          //     message: 'No Records to Save!',
-          //     severity: 'info',
-          //   })
-          //   setCalculatebtnClicked(false)
-          //   return
-          // }
-          // updateProductNormData(editedData)
           updateProductNormData(rowsToSave)
         } else {
           updateProductNormData(rowsToSave)
@@ -132,18 +96,23 @@ const ProductionNorms = ({ permissions }) => {
     setLoading(true)
 
     try {
-      let plantId = PLANT_ID
+      let plantId = ''
       const isKiloTon = selectedUnit != ('MT' || 'MT/Month')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
 
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
         aopStatus: row.aopStatus || null,
-        aopYear: AOP_YEAR,
+        aopYear: localStorage.getItem('year'),
         plantFKId: plantId,
         materialFKId: row.normParametersFKId,
-        siteFKId: SITE_ID,
-        verticalFKId: VERTICAL_ID,
+        siteFKId: JSON.parse(localStorage.getItem('selectedSiteId')).id,
+        verticalFKId: localStorage.getItem('verticalId'),
         april:
           row.april === 0
             ? 0
@@ -276,9 +245,16 @@ const ProductionNorms = ({ permissions }) => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
+      const year = localStorage.getItem('year')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+      var plantId = plantId
       const data = await ProductionNormsApiService.handleCalculate(
-        PLANT_ID,
-        AOP_YEAR,
+        plantId,
+        year,
         keycloak,
       )
       if (data?.code == 200) {
@@ -378,9 +354,6 @@ const ProductionNorms = ({ permissions }) => {
       }
 
       let dataSet = response?.data?.aopDTOList
-      // if (lowerVertName === 'cracker') {
-      //   dataSet = rowDataForCracker
-      // }
 
       var data = dataSet
         ?.map((product) => ({
@@ -453,7 +426,7 @@ const ProductionNorms = ({ permissions }) => {
         })
       }
 
-      const fiscalYear = AOP_YEAR
+      const fiscalYear = localStorage.getItem('year')
       const startYear = parseInt(fiscalYear.split('-')[0], 10)
       const nextYear = startYear + 1
 
@@ -693,10 +666,6 @@ const ProductionNorms = ({ permissions }) => {
     headerMap,
   })
 
-  const productionColumnsByProducts = getEnhancedColDefsByProducts({
-    headerMap,
-  })
-
   const handleUnitChange = (unit) => {
     setSelectedUnit(unit)
   }
@@ -727,50 +696,18 @@ const ProductionNorms = ({ permissions }) => {
           addButton: permissions?.addButton ?? false,
           deleteButton: permissions?.deleteButton ?? false,
           editButton: permissions?.editButton ?? false,
-          showUnit: permissions?.showUnit ?? true,
           saveWithRemark: permissions?.saveWithRemark ?? true,
           showCalculate: permissions?.showCalculate ?? true,
           allAction: permissions?.allAction ?? true,
           showNote: true,
-          showCalculateVisibility:
-            calculationObject && Object.keys(calculationObject).length > 0
-              ? permissions?.showCalculate ?? true
-              : false,
           saveBtn: permissions?.saveBtn ?? false,
-          units:
-            lowerVertName === 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
           customHeight: permissions?.customHeight,
           downloadExcelBtnFromUI: !permissions?.hideExportBtn,
-          ExcelName: `${lowerVertName}_Month wise Production plan`,
-          unitForExcelToadd:
-            lowerVertName === 'cracker' ? selectedUnit || 'MT/Month' : null,
+          ExcelName: `${lowerVertName}_Month wise Con plan`,
         },
         isOldYear,
       ),
     [permissions, calculationObject, lowerVertName, selectedUnit, isOldYear],
-  )
-
-  const adjustedPermissionsByProducts = getAdjustedPermissions(
-    {
-      showAction: permissions?.showAction ?? false,
-      addButton: permissions?.addButton ?? false,
-      deleteButton: permissions?.deleteButton ?? false,
-      editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? false,
-      saveWithRemark: permissions?.saveWithRemark ?? false,
-      showCalculate: permissions?.showCalculate ?? false,
-      allAction: permissions?.allAction ?? true,
-      showCalculateVisibility:
-        calculationObject && Object.keys(calculationObject).length > 0
-          ? permissions?.showCalculate ?? true
-          : false,
-      saveBtn: permissions?.saveBtn ?? false,
-      units: lowerVertName == 'cracker' ? ['MT/Month', 'TPH'] : ['MT', 'KT'],
-      downloadExcelBtnFromUI: !permissions?.hideExportBtn,
-      ExcelName: `${lowerVertName}_Production Target`,
-      customHeight: permissions?.customHeight,
-    },
-    isOldYear,
   )
 
   return (
@@ -812,25 +749,9 @@ const ProductionNorms = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
         selectedUOM={'UOM'}
-        note={
-          !permissions?.hideNoteText && lowerVertName !== 'cracker'
-            ? '* MT per Annum'
-            : ''
-        }
       />
-
-      {lowerVertName === 'meg' && !permissions?.hideNoteText && (
-        <KendoDataTables
-          columns={productionColumnsByProducts}
-          rows={rowsByProducts}
-          setRows={setRowsByProducts}
-          title={'By Products'}
-          fetchData={fetchDataByProducts}
-          permissions={adjustedPermissionsByProducts}
-        />
-      )}
     </div>
   )
 }
 
-export default ProductionNorms
+export default C2RConsumption

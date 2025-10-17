@@ -98,7 +98,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       window.open(fileURL, '_blank')
       return true
     } catch (e) {
-      console.error('Error fetching PDF:', e)
+      console.error('Error fetching file:', e)
       return Promise.reject(e)
     }
   }
@@ -108,13 +108,13 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
       let baseurl = ''
       baseurl =
         'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx?%2fAOP&rs:Command=Render'
-    const params = new URLSearchParams({
-      'verticalId': VERTICAL_ID,
-      'siteId': SITE_ID,
-      'plantId': PLANT_ID,
-      'finYear': AOP_YEAR
-    })
-    const url = `${baseurl}?${params.toString()}`
+      const params = new URLSearchParams({
+        verticalId: VERTICAL_ID,
+        siteId: SITE_ID,
+        plantId: PLANT_ID,
+        finYear: AOP_YEAR,
+      })
+      const url = `${baseurl}?${params.toString()}`
 
       window.open(url, '_blank')
       return true

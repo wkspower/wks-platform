@@ -131,7 +131,6 @@ const ConfigurationTable = () => {
       ]
       setReportTypes(distinctReportTypes)
 
-
       if (
         lowerVertName == verticalEnums.MEG ||
         lowerVertName == verticalEnums.CRACKER ||
@@ -145,6 +144,7 @@ const ConfigurationTable = () => {
             item.normType !== 'PIO Impact' &&
             item.normType !== 'Shutdown',
         )
+
         const formattedData = data.map((item, index) => ({
           ...item,
           idFromApi: item.id,
@@ -701,25 +701,27 @@ const ConfigurationTable = () => {
                       style={{ height: '80px' }}
                       size={'medium'}
                     />
+
+                    {/* Load Button */}
+                    {!isOldYearFlag && (
+                      <Button
+                        variant='contained'
+                        // onClick={onLoad}
+                        onClick={handleOpenDialog}
+                        className='btn-load'
+                        // disabled={!isLoadEnabled}
+                        sx={{ alignSelf: 'flex-end' }}
+                      >
+                        Load
+                      </Button>
+                    )}
                   </Box>
                 )}
-                {/* Load Button */}
-                {!isOldYearFlag && (
-                  <Button
-                    variant='contained'
-                    // onClick={onLoad}
-                    onClick={handleOpenDialog}
-                    className='btn-load'
-                    // disabled={!isLoadEnabled}
-                    sx={{ alignSelf: 'flex-end' }}
-                  >
-                    Load
-                  </Button>
-                )}
+
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
-                    sx={{ whiteSpace: 'normal' }}
+                    sx={{ whiteSpace: 'normal' }} // <-- added alignSelf
                   >
                     {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
                   </Typography>

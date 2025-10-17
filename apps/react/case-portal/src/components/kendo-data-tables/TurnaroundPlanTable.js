@@ -140,7 +140,7 @@ const TurnaroundPlanTable = () => {
 
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Turnaround Plan data Saved Successfully!',
+        message: 'Saved Successfully!',
         severity: 'success',
       })
       return response

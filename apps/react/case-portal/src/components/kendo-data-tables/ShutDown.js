@@ -396,7 +396,7 @@ const ShutDown = ({ permissions }) => {
 
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Shutdown data Saved Successfully!',
+        message: 'Saved Successfully!',
         severity: 'success',
       })
 
@@ -438,13 +438,13 @@ const ShutDown = ({ permissions }) => {
       setSnackbarOpen(true)
 
       setSnackbarData({
-        message: 'Shutdown data Updated successfully!',
+        message: 'Updated successfully!',
         severity: 'success',
       })
 
       return response
     } catch (error) {
-      console.error('Error saving Shutdown data:', error)
+      console.error('Error saving  data:', error)
     } finally {
       fetchData()
     }
@@ -493,7 +493,7 @@ const ShutDown = ({ permissions }) => {
       setRows(formattedData)
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching Shutdown data:', error)
+      console.error('Error fetching data:', error)
       setLoading(false)
     }
   }
@@ -526,6 +526,8 @@ const ShutDown = ({ permissions }) => {
         let data = []
         if (lowerVertName === 'meg') {
           data = await DataService.getAllProducts(keycloak, null)
+        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+          data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(keycloak, 'Production')
         }
@@ -538,6 +540,12 @@ const ShutDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
+        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+          productList = data?.data.map((product) => ({
+            id: product.displayName,
+            displayName: product.displayName,
+            realId: product.id,
+          }))
         } else {
           productList = data.map((product) => ({
             id: product.displayName,

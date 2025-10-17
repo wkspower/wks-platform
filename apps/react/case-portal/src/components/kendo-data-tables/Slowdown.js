@@ -570,7 +570,7 @@ const SlowDown = ({ permissions }) => {
 
       return response
     } catch (error) {
-      console.error('Error saving Slowdown data:', error)
+      console.error('Error saving data:', error)
     } finally {
       fetchData()
 
@@ -752,7 +752,9 @@ const SlowDown = ({ permissions }) => {
         var data = []
         if (lowerVertName == 'meg')
           data = await DataService.getAllProducts(keycloak, null)
-        else {
+        else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+          data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
+        } else {
           data = await DataService.getAllProductsAll(keycloak, 'Production')
         }
         var productList = []
@@ -764,6 +766,12 @@ const SlowDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
+        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+          productList = data?.data.map((product) => ({
+            id: product.displayName,
+            displayName: product.displayName,
+            realId: product.id,
+          }))
         } else {
           productList = data.map((product) => ({
             id: product.displayname,

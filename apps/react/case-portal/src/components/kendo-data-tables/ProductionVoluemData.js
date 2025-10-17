@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
@@ -15,6 +15,12 @@ import KendoDataTables from './index'
 import { validateFields } from 'utils/validationUtils'
 import { ProductionVolumeDataApiService } from 'services/production-volume-data-api-service'
 import { DataService } from 'services/DataService'
+import {
+  getColDefsDesignCapacity,
+  getColDefsMaxAchievedCapacity,
+  getColDefsNonEditable,
+  getColDefsPercentageSummary,
+} from './Utilities-Kendo/productionTargetColDefs'
 
 const ProductionvolumeData = ({ permissions }) => {
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
@@ -548,767 +554,10 @@ const ProductionvolumeData = ({ permissions }) => {
     })
   }
 
-  const colDefs_percentage_summary = [
-    {
-      field: 'idFromApi',
-      title: 'ID',
-      hidden: true,
-    },
-    {
-      field: 'aopCaseId',
-      title: 'Case ID',
-
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'materialFKId',
-      title: 'Particulars',
-      widthT: 100,
-
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      title: 'Particulars',
-      widthT: 100,
-      editable: false,
-    },
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: false,
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'may',
-      title: headerMap[5],
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'july',
-      format: '{0:#.##}',
-      title: headerMap[7],
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'august',
-      title: headerMap[8],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      format: '{0:#.##}',
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-
-    {
-      field: 'avgTph',
-      title: 'AVG',
-
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'isEditable',
-      title: 'isEditable',
-      hidden: true,
-    },
-    {
-      widthT: 150,
-      field: 'remarks',
-      title: 'Remark',
-    },
-  ]
-
-  const colDefs_design_capacity = [
-    {
-      field: 'materialFKId',
-      title: 'Particulars',
-      widthT: 100,
-
-      editable: true,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      title: 'Particulars',
-      widthT: 100,
-      editable: true,
-    },
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: true,
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'may',
-      title: headerMap[5],
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'july',
-      format: '{0:#.##}',
-      title: headerMap[7],
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'august',
-      title: headerMap[8],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'remarks',
-      title: 'Remark',
-      editable: true,
-      align: 'left',
-      headerAlign: 'left',
-      widthT: 150,
-    },
-  ]
-  const colDefs_max_achieved_capacity = [
-    {
-      field: 'materialFKId',
-      title: 'Particulars',
-      widthT: 100,
-
-      editable: true,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      title: 'Particulars',
-      widthT: 100,
-      editable: true,
-    },
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: true,
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'may',
-      title: headerMap[5],
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'july',
-      format: '{0:#.##}',
-      title: headerMap[7],
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'august',
-      title: headerMap[8],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-
-    {
-      widthT: 150,
-      field: 'remarks',
-      title: 'Remark',
-    },
-  ]
-
-  const colDefs_max_achieved_capacity_pe_pp = [
-    {
-      field: 'materialFKId',
-      title: 'Particulars',
-      widthT: 100,
-
-      editable: true,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      title: 'Particulars',
-      widthT: 100,
-      editable: true,
-    },
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: true,
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'may',
-      title: headerMap[5],
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'july',
-      format: '{0:#.##}',
-      title: headerMap[7],
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'august',
-      title: headerMap[8],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      format: '{0:#.##}',
-      editable: true,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-  ]
-
-  const colDefs_non_editable = [
-    {
-      field: 'idFromApi',
-      title: 'ID',
-      hidden: true,
-    },
-    {
-      field: 'aopCaseId',
-      title: 'Case ID',
-      hidden: true,
-    },
-
-    {
-      field: 'normParametersFKId',
-      title: 'Particulars',
-      widthT: 100,
-
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'productName',
-      title: 'Particulars',
-
-      widthT: 100,
-
-      editable: false,
-    },
-
-    {
-      field: 'april',
-      title: headerMap[4],
-      editable: false,
-      align: 'left',
-      headerAlign: 'left',
-      format: '{0:#.##}',
-
-      type: 'number',
-    },
-    {
-      field: 'may',
-      title: headerMap[5],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'june',
-      title: headerMap[6],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'july',
-      title: headerMap[7],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'august',
-      title: headerMap[8],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'september',
-      title: headerMap[9],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'october',
-      title: headerMap[10],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'november',
-      title: headerMap[11],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'december',
-      title: headerMap[12],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'january',
-      title: headerMap[1],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'february',
-      title: headerMap[2],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-    {
-      field: 'march',
-      title: headerMap[3],
-      format: '{0:#.##}',
-
-      editable: false,
-
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number',
-    },
-
-    {
-      field: 'avgTph',
-      title: 'AVG',
-
-      editable: false,
-      hidden: true,
-    },
-    {
-      field: 'isEditable',
-      title: 'isEditable',
-      hidden: true,
-    },
-  ]
+  const colDefs_percentage_summary = getColDefsPercentageSummary(headerMap)
+  const colDefs_design_capacity = getColDefsDesignCapacity(headerMap)
+  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(headerMap)
+  const colDefs_non_editable = getColDefsNonEditable(headerMap)
 
   useEffect(() => {
     setModifiedCellsDesignCapacity({})
@@ -1595,8 +844,12 @@ const ProductionvolumeData = ({ permissions }) => {
       saveBtn: false,
       units: ['TPH', 'TPD'],
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      showTitleNameBusiness: true,
       titleName: percentageTitle,
+
+      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      titleAndInformation: 'Max Achieved Capacity (Ethylene)',
+
+      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
       ExcelName: `${VERTICAL_NAME}_Max Achieved Capacity`,
@@ -1621,7 +874,11 @@ const ProductionvolumeData = ({ permissions }) => {
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
       ExcelName: `${VERTICAL_NAME}_Design Capacity`,
 
-      showTitleNameBusiness: true,
+      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      titleAndInformation: 'Design Capacity (Ethylene)',
+
+      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Design Capacity (Ethylene)'
@@ -1650,11 +907,29 @@ const ProductionvolumeData = ({ permissions }) => {
           : false,
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       uploadExcelBtn: permissions?.hideUploadExcel ? false : true,
-      showTitleNameBusiness: true,
+
+      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      titleAndInformation: 'Current Operating Capacity (Ethylene)',
+
+      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Current Operating Capacity (Ethylene)'
           : 'Current Operating Capacity',
+    },
+    isOldYear,
+  )
+
+  const adjustedPermissionsLast = getAdjustedPermissions(
+    {
+      allAction: true,
+      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      titleAndInformation: 'Percentage Summary (Ethylene)',
+      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      titleName:
+        VERTICAL_NAME === 'cracker'
+          ? 'Percentage Summary (Ethylene)'
+          : 'Percentage Summary',
     },
     isOldYear,
   )
@@ -1788,11 +1063,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const conditionForFirst = !permissions?.hideSummary
   let max_achieved_capacity = []
-  if (VERTICAL_NAME == 'pe' || VERTICAL_NAME == 'pp') {
-    max_achieved_capacity = colDefs_max_achieved_capacity_pe_pp
-  } else {
-    max_achieved_capacity = colDefs_max_achieved_capacity
-  }
+
+  max_achieved_capacity = colDefs_max_achieved_capacity
 
   return (
     <div>
@@ -1892,17 +1164,13 @@ const ProductionvolumeData = ({ permissions }) => {
       {/* PERCENTAGE_SUMMARY */}
       {!permissions?.hideSummary && (
         <>
-          <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-            {VERTICAL_NAME === 'cracker'
-              ? 'Percentage Summary (Ethylene)'
-              : 'Percentage Summary'}
-          </Typography>
           <KendoDataTables
             setRows={setRowsPercentageSummary}
             columns={colDefs_percentage_summary}
             rows={rowsPercentageSummary}
             title='Production target Reference'
             fetchData={fetchData}
+            permissions={adjustedPermissionsLast}
           />
         </>
       )}

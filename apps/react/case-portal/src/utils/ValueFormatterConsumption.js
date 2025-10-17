@@ -9,6 +9,9 @@ export default function ValueFormatterConsumption() {
   if (VERTICAL_NAME === 'aromatics') {
     return '{0:0.000}'
   }
+  if (VERTICAL_NAME === 'cracker') {
+    return '{0:0.0000}'
+  }
 
   return '{0:00.00}'
 }

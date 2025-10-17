@@ -1,6 +1,8 @@
 import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
 import { Tooltip } from '@progress/kendo-react-tooltip'
+import { Tooltip as MuiTooltip } from '@mui/material'
+
 import '@progress/kendo-theme-default/dist/all.css'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
@@ -12,11 +14,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
   MenuItem,
   TextField,
   Typography,
 } from '../../../node_modules/@mui/material/index'
 import '../../kendo-data-grid.css'
+import InfoIcon from '@mui/icons-material/Info'
+import HelpIcon from '@mui/icons-material/Help'
 
 import Notification from 'components/Utilities/Notification'
 import { SvgIcon } from '../../../node_modules/@progress/kendo-react-common/index'
@@ -1013,6 +1018,43 @@ const KendoDataTables = ({
                 <Typography component='div' className='grid-title'>
                   {titleName}
                 </Typography>
+              )}
+
+              {permissions?.showTitleAndInformation && (
+                <Box display='flex' alignItems='center'>
+                  <Typography
+                    component='div'
+                    className='grid-title'
+                    sx={{
+                      ...(permissions?.marginBottom && {
+                        marginBottom: '10px',
+                      }),
+                    }}
+                  >
+                    {permissions?.titleName}
+                  </Typography>
+
+                  <MuiTooltip
+                    title={
+                      permissions?.titleAndInformation ||
+                      'No information available'
+                    }
+                  >
+                    <IconButton
+                      size='medium'
+                      sx={{
+                        ml: 0,
+                        backgroundColor: 'transparent',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        padding: '4px',
+                      }}
+                    >
+                      <HelpIcon fontSize='small' />
+                    </IconButton>
+                  </MuiTooltip>
+                </Box>
               )}
 
               {permissions?.showTitleNameBusiness && (

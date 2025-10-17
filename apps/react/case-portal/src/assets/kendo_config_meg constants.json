@@ -2,7 +2,6 @@
   {
     "field": "Particulars",
     "title": "Type",
-
     "groupable": true,
     "headerClass": "bold-header",
     "filterable": "false",
@@ -21,22 +20,21 @@
     "editable": false,
     "align": "left",
     "headerAlign": "left",
-    "widthT": 80
+    "widthT": 100
   },
   {
     "field": "ConstantValue",
     "title": "Value",
     "editable": true,
     "type": "number",
-    "format": "{0:#.##}"
+    "format": "{0:#.##}",
+    "widthT": 200
   },
 
   {
     "field": "remarks",
     "title": "Remark",
-
-    "editable": true,
-    "widthT": 400
+    "editable": true
   },
 
   {

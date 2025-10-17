@@ -8,6 +8,7 @@ export const BusinessDemandDataApiService = {
 
   businessDemandImport,
   businessDemandExport,
+  aopDesignBasisBluePrint,
 }
 async function getBDData(keycloak, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/business-demand?year=${year}&plantId=${plantId}`
@@ -128,5 +129,23 @@ async function businessDemandImport(file, keycloak, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.error('Error importing Optimizer Input Excel:', e)
     return await Promise.reject(e)
+  }
+}
+
+async function aopDesignBasisBluePrint() {
+  var url = `${window.location.origin}/files/Blue Print.docx`
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+    })
+
+    const blob = await resp.blob()
+    const fileURL = window.URL.createObjectURL(blob)
+    window.open(fileURL, '_blank')
+    return true
+  } catch (e) {
+    console.error('Error fetching file:', e)
+    return Promise.reject(e)
   }
 }

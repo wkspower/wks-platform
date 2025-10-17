@@ -20,10 +20,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  IconButton,
   TextField,
+  Tooltip,
   Typography,
 } from '../../../node_modules/@mui/material/index'
+import InfoIcon from '@mui/icons-material/Info'
+
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 
 const AopDesignBasis = () => {
   const year = localStorage.getItem('year')
@@ -632,8 +637,9 @@ const AopDesignBasis = () => {
   const startDateFromConfig = new Date(startDateConfig?.AttributeValue)
   const endDateDateFromConfig = new Date(endDateConfig?.AttributeValue)
 
-  const handleGradeChange = (gradeId) => {
-    setGradeId(gradeId)
+  const aopDesignBasisBluePrint = async () => {
+    const response =
+      await BusinessDemandDataApiService.aopDesignBasisBluePrint(keycloak)
   }
 
   const saveSummary = async () => {
@@ -686,6 +692,28 @@ const AopDesignBasis = () => {
   const ConfigurationAccordian = useMemo(() => {
     return (
       <Box sx={{ mb: '0px' }}>
+        <Box display='flex' alignItems='center'>
+          <Typography className='text-note' variant='body2'>
+            *AOP Design Basis Blue Print
+          </Typography>
+          <Tooltip title='AOP Design Basis Blue Print'>
+            <IconButton
+              size='medium'
+              sx={{
+                ml: 1,
+                backgroundColor: 'transparent',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                },
+                padding: '6px',
+              }}
+              onClick={() => aopDesignBasisBluePrint()}
+            >
+              <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
+
         <CustomAccordion defaultExpanded disableGutters>
           <CustomAccordionSummary
             aria-controls='meg-grid-content'
@@ -742,38 +770,40 @@ const AopDesignBasis = () => {
                       style={{ height: '80px' }}
                       size={'medium'}
                     />
+
+                    {/* Load Button */}
+                    {!isOldYearFlag && (
+                      <Button
+                        variant='contained'
+                        // onClick={onLoad}
+                        onClick={handleOpenDialog}
+                        className='btn-save'
+                        // disabled={!isLoadEnabled}
+                        sx={{ alignSelf: 'flex-end' }}
+                      >
+                        Load
+                      </Button>
+                    )}
+
+                    {!isOldYearFlag && (
+                      <Button
+                        variant='contained'
+                        // onClick={onLoad}
+                        onClick={saveSummary}
+                        className='btn-save'
+                        disabled={!summaryEdited}
+                        sx={{ alignSelf: 'flex-end' }}
+                      >
+                        Save
+                      </Button>
+                    )}
                   </Box>
                 )}
-                {/* Load Button */}
-                {!isOldYearFlag && (
-                  <Button
-                    variant='contained'
-                    // onClick={onLoad}
-                    onClick={handleOpenDialog}
-                    className='btn-save'
-                    // disabled={!isLoadEnabled}
-                    sx={{ alignSelf: 'flex-end' }}
-                  >
-                    Load
-                  </Button>
-                )}
 
-                {!isOldYearFlag && (
-                  <Button
-                    variant='contained'
-                    // onClick={onLoad}
-                    onClick={saveSummary}
-                    className='btn-save'
-                    disabled={!summaryEdited}
-                    sx={{ alignSelf: 'flex-end' }}
-                  >
-                    Save
-                  </Button>
-                )}
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
-                    sx={{ whiteSpace: 'normal' }}
+                    sx={{ whiteSpace: 'normal' }} // <-- added alignSelf
                   >
                     {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
                   </Typography>

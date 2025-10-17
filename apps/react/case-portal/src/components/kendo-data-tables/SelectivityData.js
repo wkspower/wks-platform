@@ -500,8 +500,6 @@ const SelectivityData = (props) => {
             report_t = reportTypes.filter((type) => type == 'Shutdown')
           }
 
-          console.log('report_t', report_t)
-
           await DataService.getConfigurationExcel(keycloak, report_t)
         }
       } else {

@@ -303,20 +303,29 @@ const BusinessDemand = ({ permissions }) => {
       units: ['TPH', 'TPD'],
       showTitleNameBusiness: true,
       titleName: percentageTitle,
-      downloadExcelBtnFromUI:
-        lowerVertName == 'cracker' ||
-        (lowerVertName == 'pe' &&
-          plantObject?.name?.toLowerCase() === 'ldpe' &&
-          siteObject?.name?.toLowerCase() === 'nmd')
-          ? false
-          : true,
+
       ExcelName: `${lowerVertName}_Business Demand Data`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' || lowerVertName == 'pe' ? true : false,
+        lowerVertName == 'cracker' ||
+        lowerVertName == 'pe' ||
+        lowerVertName == 'pp'
+          ? true
+          : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' || lowerVertName == 'pe' ? true : false,
+        lowerVertName == 'cracker' ||
+        lowerVertName == 'pe' ||
+        lowerVertName == 'pp'
+          ? true
+          : false,
+
+      downloadExcelBtnFromUI:
+        lowerVertName == 'cracker' ||
+        lowerVertName == 'pe' ||
+        lowerVertName == 'pp'
+          ? false
+          : true,
     },
     isOldYear,
   )

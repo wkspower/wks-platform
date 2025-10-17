@@ -161,6 +161,7 @@ export const DataService = {
   getConfigurationExcelType,
 
   getProductionReports,
+  gradeDetails,
 }
 
 async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
@@ -3744,5 +3745,21 @@ async function getProductionReports(keycloak, PLANT_ID, AOP_YEAR, REPORT_TYPE) {
   } catch (e) {
     console.log(e)
     return Promise.reject(e)
+  }
+}
+
+async function gradeDetails(keycloak, AOP_YEAR, PLANT_ID) {
+  const url = `${Config.CaseEngineUrl}/task/products?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
