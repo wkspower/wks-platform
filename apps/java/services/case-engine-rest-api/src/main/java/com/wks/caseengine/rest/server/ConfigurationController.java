@@ -36,6 +36,11 @@ public class ConfigurationController {
 		return configurationService.getConfigurationData(year,plantFKId);
 	}
 	
+	@GetMapping(value="/monthly-production-manual-entry")
+	public List<ConfigurationDTO> getMonthlyProductionData(@RequestParam String year,@RequestParam UUID plantId) {
+		return configurationService.getMonthlyProductionData(year,plantId);
+	}
+	
 	@GetMapping(value="/calculate-steady-norms")
 	public AOPMessageVM calculateSteadyNorms(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String periodTo,@RequestParam(required=false) String periodFrom){
 		return	configurationService.calculateSteadyNorms(year, plantId,periodTo,periodFrom);

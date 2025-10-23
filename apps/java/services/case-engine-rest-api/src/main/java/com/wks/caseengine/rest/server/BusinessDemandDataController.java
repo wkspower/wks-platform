@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.BusinessDemandDataService;
 
@@ -35,6 +36,11 @@ public class BusinessDemandDataController {
 	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
 		System.out.println(plantId);
 		return businessDemandDataService.getBusinessDemandData(year,plantId);	
+	}
+	
+	@GetMapping(value="/business-demand-manual-entry")
+	public List<ConfigurationDTO> getBusinessDemand(@RequestParam String year,@RequestParam UUID plantId) {
+		return businessDemandDataService.getBusinessDemand(year,plantId);
 	}
 	
 	@GetMapping(value = "/business-demand-export")
