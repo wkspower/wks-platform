@@ -93,4 +93,10 @@ public class BudgetMaintenance {
 	
 	@Column(name = "ModifiedOn")
 	private Date modifiedOn;
+	
+	@Column(name = "Symbol")
+	private String symbol;
+	
+	@Column(name="PercentChange")
+	private Double percentChange;
 }

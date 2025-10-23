@@ -675,41 +675,41 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<BudgetMaintenance> budgetMaintenanceList=null;
 		
-		UUID plant=null;
-		if(plantId!=null && (!plantId.equalsIgnoreCase("ALL"))) {
-			plant=UUID.fromString(plantId);
-			 budgetMaintenanceList	= budgetMaintenanceRepository.findByPlantIdAndAOPYear(plant,year,budgetCategory);
-		}else {
-			 budgetMaintenanceList	= budgetMaintenanceRepository.findByAOPYear(year,budgetCategory);
-			
-		}
+		
+		List<Object[]> obj=findByYearAndPlantFkId( year, UUID.fromString(plantId),"vwBudgetMaintenance",budgetCategory);
 		List<BudgetMaintenanceDto> budgetMaintenanceDtoList = new ArrayList<BudgetMaintenanceDto>();
 		try {
 			
-			for(BudgetMaintenance budgetMaintenance:budgetMaintenanceList) {
-				BudgetMaintenanceDto budgetMaintenanceDto = new BudgetMaintenanceDto();
-				budgetMaintenanceDto.setAopYear(budgetMaintenance.getAopYear());
-				budgetMaintenanceDto.setApr(budgetMaintenance.getApr());
-				budgetMaintenanceDto.setMay(budgetMaintenance.getMay());
-				budgetMaintenanceDto.setJun(budgetMaintenance.getJun());
-				budgetMaintenanceDto.setJul(budgetMaintenance.getJul());
-				budgetMaintenanceDto.setAug(budgetMaintenance.getAug());
-				budgetMaintenanceDto.setSep(budgetMaintenance.getSep());
-				budgetMaintenanceDto.setOct(budgetMaintenance.getOct());
-				budgetMaintenanceDto.setNov(budgetMaintenance.getNov());
-				budgetMaintenanceDto.setDec(budgetMaintenance.getDec());
-				budgetMaintenanceDto.setJan(budgetMaintenance.getJan());
-				budgetMaintenanceDto.setFeb(budgetMaintenance.getFeb());
-				budgetMaintenanceDto.setMar(budgetMaintenance.getMar());
-				budgetMaintenanceDto.setBudgetCategory(budgetMaintenance.getBudgetCategory());
-				budgetMaintenanceDto.setBudgetType(budgetMaintenance.getBudgetType());
-				budgetMaintenanceDto.setCostName(budgetMaintenance.getCostName());
-				budgetMaintenanceDto.setId(budgetMaintenance.getId());
-				budgetMaintenanceDto.setPlantId(plant);
-				budgetMaintenanceDto.setPlantName(budgetMaintenance.getPlantName());
-				budgetMaintenanceDto.setRemark(budgetMaintenance.getRemark());
-				budgetMaintenanceDto.setIsEditable(budgetMaintenance.getIsEditable());
-				budgetMaintenanceDtoList.add(budgetMaintenanceDto);
+			
+			for (Object[] row : obj) {
+			    BudgetMaintenanceDto dto = new BudgetMaintenanceDto();
+
+			    int i = 0;
+			    dto.setId(row[i++] != null ? UUID.fromString(row[i - 1].toString()) : null);
+			    dto.setPlantId(row[i++] != null ? UUID.fromString(row[i - 1].toString()) : null);
+			    dto.setPlantName((String) row[i++]);
+			    dto.setCostName((String) row[i++]);
+			    dto.setBudgetType((String) row[i++]);
+			    dto.setBudgetCategory((String) row[i++]);
+			    dto.setApr(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setMay(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setJun(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setJul(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setAug(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setSep(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setOct(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setNov(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setDec(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setJan(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setFeb(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setMar(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setRemark((String) row[i++]);
+			    dto.setAopYear(row[i++] != null ? row[i - 1].toString() : null);
+			    dto.setIsEditable(row[i++] != null ? Boolean.valueOf(row[i - 1].toString()) : null);
+			    dto.setUpdatedBy((String) row[i++]);
+			    dto.setModifiedOn((Date) row[i++]);
+			   
+			    budgetMaintenanceDtoList.add(dto);
 			}
 		}catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
@@ -722,6 +722,30 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		aopMessageVM.setMessage("Data fetched successfully");
 		return aopMessageVM;
 	}
+	
+	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String viewName,String budgetCategory) {
+		try {
+			String sql = "SELECT Id, PlantId, PlantName, CostName, BudgetType, BudgetCategory, "
+			           + "Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, Jan, Feb, Mar, "
+			           + "Remark, AOPYear, IsEditable, UpdatedBy, ModifiedOn, Sequence, "
+			           + "PercentChange, Symbol "
+			           + "FROM " + viewName + " "
+			           + "WHERE (AOPYear = :year AND AOPYear IS NOT NULL) "
+			           + "AND PlantId = :plantFkId AND BudgetCategory = :budgetCategory order by Sequence";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
+			query.setParameter("plantFkId", plantFkId);
+			query.setParameter("budgetCategory", budgetCategory);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	
 	public byte[] createExcel(String year, String plantId, boolean isAfterSave,
 	        Map<String, List<BudgetMaintenanceDto>> mapForExcel) {
