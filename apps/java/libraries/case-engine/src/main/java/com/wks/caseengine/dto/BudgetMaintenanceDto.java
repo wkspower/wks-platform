@@ -65,5 +65,7 @@ public class BudgetMaintenanceDto {
 	private String saveStatus;
 	private String errDescription;
 	 private String tableId;
+	 private String symbol;
+	 private Double percentChange;
 }
 

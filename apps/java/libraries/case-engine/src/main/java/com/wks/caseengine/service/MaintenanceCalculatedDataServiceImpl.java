@@ -708,6 +708,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    dto.setIsEditable(row[i++] != null ? Boolean.valueOf(row[i - 1].toString()) : null);
 			    dto.setUpdatedBy((String) row[i++]);
 			    dto.setModifiedOn((Date) row[i++]);
+			    dto.setPercentChange(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setSymbol(row[i++] != null ? row[i - 1].toString() : null);
 			   
 			    budgetMaintenanceDtoList.add(dto);
 			}
