@@ -944,6 +944,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		budgetMaintenance.setRemark(budgetMaintenanceDto.getRemark());
 		budgetMaintenance.setModifiedOn(new Date());
 		budgetMaintenance.setUpdatedBy(Utility.getUserName());
+		budgetMaintenance.setSymbol(budgetMaintenanceDto.getSymbol());
+		budgetMaintenance.setPercentChange(budgetMaintenanceDto.getPercentChange());
 		return budgetMaintenanceRepository.save(budgetMaintenance);
 	}
 	
