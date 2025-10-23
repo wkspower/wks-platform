@@ -67,5 +67,6 @@ public class BudgetMaintenanceDto {
 	 private String tableId;
 	 private String symbol;
 	 private Double percentChange;
+	 private Integer sequence;
 }
 
