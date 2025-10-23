@@ -709,8 +709,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    dto.setUpdatedBy((String) row[i++]);
 			    dto.setModifiedOn((Date) row[i++]);
 			    dto.setSequence(row[i++] != null ? ((Number) row[i - 1]).intValue() : null);
-			    dto.setPercentChange(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setSymbol(row[i++] != null ? row[i - 1].toString() : null);
+			    dto.setPercentChange(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setSymbol(row[i++] != null ? row[i - 1].toString() : "");
 			   
 			    budgetMaintenanceDtoList.add(dto);
 			}
