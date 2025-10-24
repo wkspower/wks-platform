@@ -675,11 +675,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<BudgetMaintenance> budgetMaintenanceList=null;
 		
-		
 		List<Object[]> obj=findByYearAndPlantFkId( year, UUID.fromString(plantId),"vwBudgetMaintenance",budgetCategory);
 		List<BudgetMaintenanceDto> budgetMaintenanceDtoList = new ArrayList<BudgetMaintenanceDto>();
 		try {
-			
 			
 			for (Object[] row : obj) {
 			    BudgetMaintenanceDto dto = new BudgetMaintenanceDto();
@@ -691,18 +689,18 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    dto.setCostName((String) row[i++]);
 			    dto.setBudgetType((String) row[i++]);
 			    dto.setBudgetCategory((String) row[i++]);
-			    dto.setApr(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setMay(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setJun(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setJul(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setAug(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setSep(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setOct(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setNov(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setDec(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setJan(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setFeb(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
-			    dto.setMar(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : null);
+			    dto.setApr(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setMay(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setJun(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setJul(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setAug(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setSep(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setOct(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setNov(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setDec(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setJan(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setFeb(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
+			    dto.setMar(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
 			    dto.setRemark((String) row[i++]);
 			    dto.setAopYear(row[i++] != null ? row[i - 1].toString() : null);
 			    dto.setIsEditable(row[i++] != null ? Boolean.valueOf(row[i - 1].toString()) : null);
@@ -1017,7 +1015,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 				while (rowIterator.hasNext()) {
 					Row row = rowIterator.next();
-					Cell tableIdCell = row.getCell(18, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					Cell tableIdCell = row.getCell(20, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                 	if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
                     	continue;
                 	}
@@ -1028,26 +1026,28 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 						dto.setBudgetType(getStringCellValue(row.getCell(0), dto));
 						dto.setPlantName(getStringCellValue(row.getCell(1), dto));
 						dto.setCostName(getStringCellValue(row.getCell(2), dto));
+						dto.setPercentChange(getNumericCellValue(row.getCell(3), dto));
+						dto.setSymbol(getStringCellValue(row.getCell(4), dto));
 						dto.setAopYear(year);
-						dto.setApr(getNumericCellValue(row.getCell(3), dto));
-						dto.setMay(getNumericCellValue(row.getCell(4), dto));
-						dto.setJun(getNumericCellValue(row.getCell(5), dto));
-						dto.setJul(getNumericCellValue(row.getCell(6), dto));
-						dto.setAug(getNumericCellValue(row.getCell(7), dto));
-						dto.setSep(getNumericCellValue(row.getCell(8), dto));
-						dto.setOct(getNumericCellValue(row.getCell(9), dto));
-						dto.setNov(getNumericCellValue(row.getCell(10), dto));
-						dto.setDec(getNumericCellValue(row.getCell(11), dto));
-						dto.setJan(getNumericCellValue(row.getCell(12), dto));
-						dto.setFeb(getNumericCellValue(row.getCell(13), dto));
-						dto.setMar(getNumericCellValue(row.getCell(14), dto));
-						dto.setRemark(getStringCellValue(row.getCell(15), dto));
-						String id=getStringCellValue(row.getCell(16), dto);
+						dto.setApr(getNumericCellValue(row.getCell(5), dto));
+						dto.setMay(getNumericCellValue(row.getCell(6), dto));
+						dto.setJun(getNumericCellValue(row.getCell(7), dto));
+						dto.setJul(getNumericCellValue(row.getCell(8), dto));
+						dto.setAug(getNumericCellValue(row.getCell(9), dto));
+						dto.setSep(getNumericCellValue(row.getCell(10), dto));
+						dto.setOct(getNumericCellValue(row.getCell(11), dto));
+						dto.setNov(getNumericCellValue(row.getCell(12), dto));
+						dto.setDec(getNumericCellValue(row.getCell(13), dto));
+						dto.setJan(getNumericCellValue(row.getCell(14), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(15), dto));
+						dto.setMar(getNumericCellValue(row.getCell(16), dto));
+						dto.setRemark(getStringCellValue(row.getCell(17), dto));
+						String id=getStringCellValue(row.getCell(18), dto);
 						if(id!=null) {
 							dto.setId(UUID.fromString(id));
 						}
 						
-						dto.setTableId(getStringCellValue(row.getCell(18), dto));
+						dto.setTableId(getStringCellValue(row.getCell(20), dto));
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -1224,7 +1224,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	String getJson() {
 	    return "{\r\n" + //
 	            "    \"BudgetMaintenance\": {\r\n" + //
-	            "        \"columnCount\":19,\r\n" + //
+	            "        \"columnCount\":21,\r\n" + //
 	            "        \"tables\": [\r\n" + //
 	            "            {\r\n" + //
 	            "                \"startRow\": 0,\r\n" + //
@@ -1233,6 +1233,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"budgetType\", \r\n" + //
 	            "\t\t\t\t\t\"plantName\", \r\n" + //
 	            "\t\t\t\t\t\"costName\", \r\n" + //
+	            "\t\t\t\t\t\"percentChange\", \r\n" + //
+	            "\t\t\t\t\t\"symbol\", \r\n" + //
 	            "\t\t\t\t\t\"apr\", \r\n" + //
 	            "\t\t\t\t\t\"may\", \r\n" + //
 	            "\t\t\t\t\t\"jun\", \r\n" + //
@@ -1249,7 +1251,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
-	            "                \"startingIndexOfMonths\":3,\r\n" + //
+	            "                \"startingIndexOfMonths\":5,\r\n" + //
 	            "                \"hideTable\":false,\r\n" + //
 	            "                \"textBeforeTitle\":\"\",\r\n" + //
 				"                \"title\":\"Consumption Budget\",\r\n" + //
@@ -1261,9 +1263,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                    \"Type\",\r\n" + //
 	            "                    \"Plant\",\r\n" + //
 	            "                    \"Cost\",\r\n" + //
+	            "                    \"% Change\",\r\n" + //
+	            "                    \"+VE/-VE\",\r\n" + //
 	            "                    \"Remark\",\"Id\",\"Is Editable\"]],\r\n" + //
 	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
+	            "                \"hiddenColumns\":[18,19,20],\r\n" + //
 	            "                \"styles\": {\r\n" + //
 	            "                    \"boldColumns\": [\r\n" + //
 	            "                        0\r\n" + //
@@ -1281,6 +1285,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"budgetType\", \r\n" + //
 	            "\t\t\t\t\t\"plantName\", \r\n" + //
 	            "\t\t\t\t\t\"costName\", \r\n" + //
+	            "\t\t\t\t\t\"percentChange\", \r\n" + //
+	            "\t\t\t\t\t\"symbol\", \r\n" + //
 	            "\t\t\t\t\t\"apr\", \r\n" + //
 	            "\t\t\t\t\t\"may\", \r\n" + //
 	            "\t\t\t\t\t\"jun\", \r\n" + //
@@ -1297,7 +1303,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
-	            "                \"startingIndexOfMonths\":3,\r\n" + //
+	            "                \"startingIndexOfMonths\":5,\r\n" + //
 	            "                \"hideTable\":false,\r\n" + //
 	            "                \"textBeforeTitle\":\"\",\r\n" + //
 	            "                \"title\":\"Procurement Budget\",\r\n" + //
@@ -1309,9 +1315,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                    \"Type\",\r\n" + //
 	            "                    \"Plant\",\r\n" + //
 	            "                    \"Cost\",\r\n" + //
+	            "                    \"% Change\",\r\n" + //
+	            "                    \"+VE/-VE\",\r\n" + //
 	            "                    \"Remark\",\"Id\",\"Is Editable\"]],\r\n" + //
 	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
+	            "                \"hiddenColumns\":[18,19,20],\r\n" + //
 	            "                \"styles\": {\r\n" + //
 	            "                    \"boldColumns\": [\r\n" + //
 	            "                        0\r\n" + //
