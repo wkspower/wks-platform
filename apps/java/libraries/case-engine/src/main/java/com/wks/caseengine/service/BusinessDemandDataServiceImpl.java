@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
+import com.wks.caseengine.dto.BusinessDemandMonthlyDTO;
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
@@ -137,7 +138,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 		}
 	}
 	
-	public List<ConfigurationDTO> getBusinessDemand(String year, UUID plantFKId) {
+	public AOPMessageVM getBusinessDemand(String year, UUID plantFKId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Object[]> obj = new ArrayList<>();
@@ -145,49 +147,24 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 				String procedureName = verticalName + "_GetBusinessDemandMonthly";
 				obj = getData(year, plantFKId, procedureName);
 			
-			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
+			List<BusinessDemandMonthlyDTO> configurationDTOList = new ArrayList<BusinessDemandMonthlyDTO>();
 			int i = 0;
 			for (Object[] row : obj) {
-				ConfigurationDTO configurationDTO = new ConfigurationDTO();
+				BusinessDemandMonthlyDTO configurationDTO = new BusinessDemandMonthlyDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
 
-				configurationDTO.setJan(
-						(row[1] != null && !row[1].toString().trim().isEmpty())
-								? Double.parseDouble(row[1].toString().trim())
-								: 0.0);
-				configurationDTO.setFeb(
-						(row[2] != null && !row[2].toString().trim().isEmpty()) ? Double.parseDouble(row[2].toString())
-								: 0.0);
-				configurationDTO.setMar(
-						(row[3] != null && !row[3].toString().trim().isEmpty()) ? Double.parseDouble(row[3].toString())
-								: 0.0);
-				configurationDTO.setApr(
-						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
-								: 0.0);
-				configurationDTO.setMay(
-						(row[5] != null && !row[5].toString().trim().isEmpty()) ? Double.parseDouble(row[5].toString())
-								: 0.0);
-				configurationDTO.setJun(
-						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
-								: 0.0);
-				configurationDTO.setJul(
-						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
-								: 0.0);
-				configurationDTO.setAug(
-						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
-								: 0.0);
-				configurationDTO.setSep(
-						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
-								: 0.0);
-				configurationDTO.setOct((row[10] != null && !row[10].toString().trim().isEmpty())
-						? Double.parseDouble(row[10].toString())
-						: 0.0);
-				configurationDTO.setNov((row[11] != null && !row[11].toString().trim().isEmpty())
-						? Double.parseDouble(row[11].toString())
-						: 0.0);
-				configurationDTO.setDec((row[12] != null && !row[12].toString().trim().isEmpty())
-						? Double.parseDouble(row[12].toString())
-						: 0.0);
+				configurationDTO.setJan(row[1] != null ? row[1].toString() : "Propane MIN");
+				configurationDTO.setFeb(row[2] != null ? row[2].toString() : "Propane MIN");
+				configurationDTO.setMar(row[3] != null ? row[3].toString() : "Propane MIN");
+				configurationDTO.setApr(row[4] != null ? row[4].toString() : "Propane MIN");
+				configurationDTO.setMay(row[5] != null ? row[5].toString() : "Propane MIN");
+				configurationDTO.setJun(row[6] != null ? row[6].toString() : "Propane MIN");
+				configurationDTO.setJul(row[7] != null ? row[7].toString() : "Propane MIN");
+				configurationDTO.setAug(row[8] != null ? row[8].toString() : "Propane MIN");
+				configurationDTO.setSep(row[9] != null ? row[9].toString() : "Propane MIN");
+				configurationDTO.setOct(row[10] != null ? row[10].toString() : "Propane MIN");
+				configurationDTO.setNov(row[11] != null ? row[11].toString() : "Propane MIN");
+				configurationDTO.setDec(row[12] != null ? row[12].toString() : "Propane MIN");
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
@@ -200,8 +177,10 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					i++;
 				}
 			}
-
-			return configurationDTOList;
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(configurationDTOList);
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {

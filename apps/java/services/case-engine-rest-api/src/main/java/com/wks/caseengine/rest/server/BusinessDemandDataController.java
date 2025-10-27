@@ -39,7 +39,7 @@ public class BusinessDemandDataController {
 	}
 	
 	@GetMapping(value="/business-demand-manual-entry")
-	public List<ConfigurationDTO> getBusinessDemand(@RequestParam String year,@RequestParam UUID plantId) {
+	public AOPMessageVM getBusinessDemand(@RequestParam String year,@RequestParam UUID plantId) {
 		return businessDemandDataService.getBusinessDemand(year,plantId);
 	}
 	

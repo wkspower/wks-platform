@@ -11,7 +11,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface BusinessDemandDataService {
 	public	List<BusinessDemandDataDTO> getBusinessDemandData(String year, String plantId);
-	public List<ConfigurationDTO> getBusinessDemand(String year, UUID plantFKId);
+	public AOPMessageVM getBusinessDemand(String year, UUID plantFKId);
 	public byte[] exportBusinessDemand(String year, String plantFKId,boolean isAfterSave,List<BusinessDemandDataDTO> dtoList);
 	public 	List<BusinessDemandDataDTO>  saveBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTO);
 	public 	List<BusinessDemandDataDTO>  editBusinessDemandData(List<BusinessDemandDataDTO> businessDemandDataDTO);
