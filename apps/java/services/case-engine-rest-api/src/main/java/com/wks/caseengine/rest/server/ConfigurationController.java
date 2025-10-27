@@ -46,6 +46,11 @@ public class ConfigurationController {
 		return	configurationService.calculateSteadyNorms(year, plantId,periodTo,periodFrom);
 	}
 	
+	@GetMapping(value="/carry-forward")
+	public AOPMessageVM carryForward(@RequestParam String year,@RequestParam String plantId){
+		return	configurationService.carryForward(year, plantId);
+	}
+	
 	@GetMapping(value="/configuration/intermediate-values")
 	public AOPMessageVM getConfigurationIntermediateValues(@RequestParam String year,@RequestParam UUID plantFKId) {
 		return configurationService.getConfigurationIntermediateValues(year,plantFKId);

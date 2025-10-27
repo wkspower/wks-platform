@@ -984,6 +984,52 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return aopMessageVM;
 	}
 	
+	@Override
+	public AOPMessageVM carryForward(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			String storedProcedure = "CarryForwardRecords";
+			Integer result=  executeCarryForward(storedProcedure, plantId, year);
+			
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return aopMessageVM;
+	}
+	
+	public int executeCarryForward(String procedureName, String plantId,
+			String aopYear) {
+		try {
+			
+			String callSql = "{call " + procedureName + "(?, ?)}";
+
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+	            stmt.setString(1, plantId); 
+	            stmt.setString(2, aopYear); 
+	           int rowsAffected = stmt.executeUpdate();
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	public int executeUpdateProcedure(String procedureName, String plantId,
 			String aopYear,String PeriodTo,String PeriodFrom) {
 		try {
@@ -1014,7 +1060,6 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
 
 
 	public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId) {
