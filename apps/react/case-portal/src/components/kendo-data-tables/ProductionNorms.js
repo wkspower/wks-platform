@@ -7,11 +7,11 @@ import getEnhancedColDefsByProducts from 'components/data-tables/CommonHeader/Ke
 import React, { useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 
+import { ProductionNormsApiService } from 'services/production-norms-api-service'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
-import { ProductionNormsApiService } from 'services/production-norms-api-service'
 
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -732,6 +732,12 @@ const ProductionNorms = ({ permissions }) => {
           showCalculate: permissions?.showCalculate ?? true,
           allAction: permissions?.allAction ?? true,
           showNote: true,
+
+          showTitleNameBusiness: true,
+          titleName: permissions?.title
+            ? permissions?.title
+            : 'Month wise Production plan',
+
           showCalculateVisibility:
             calculationObject && Object.keys(calculationObject).length > 0
               ? permissions?.showCalculate ?? true

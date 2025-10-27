@@ -16,6 +16,7 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { validateFields } from 'utils/validationUtils'
 import { Grid, TextField } from '../../../node_modules/@mui/material/index'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 export default function AopBudget() {
   const keycloak = useSession()
 
@@ -69,13 +70,15 @@ export default function AopBudget() {
     return `${start - 1}-${(end - 1).toString().slice(-2)}`
   }, [thisYear])
 
+  const FORMATE_DECIMAL = ValueFormatterProduction()
+
   const monthFields = [
     {
       field: 'apr',
       index: 4,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -83,7 +86,7 @@ export default function AopBudget() {
       index: 5,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -91,7 +94,7 @@ export default function AopBudget() {
       index: 6,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -99,7 +102,7 @@ export default function AopBudget() {
       index: 7,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -107,7 +110,7 @@ export default function AopBudget() {
       index: 8,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -115,7 +118,7 @@ export default function AopBudget() {
       index: 9,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -123,7 +126,7 @@ export default function AopBudget() {
       index: 10,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -131,7 +134,7 @@ export default function AopBudget() {
       index: 11,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -139,7 +142,7 @@ export default function AopBudget() {
       index: 12,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -147,7 +150,7 @@ export default function AopBudget() {
       index: 1,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -155,7 +158,7 @@ export default function AopBudget() {
       index: 2,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
     {
@@ -163,25 +166,22 @@ export default function AopBudget() {
       index: 3,
       editable: true,
       type: 'number',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
       width: 120,
     },
   ]
 
   const columns = [
     { field: 'plantName', title: 'Plant', width: 120 },
-
     { field: 'costName', title: 'Cost', width: 120 },
     { field: 'budgetType', title: 'Budget Type', width: 120, hidden: true },
-
     {
-      field: 'budgetConstrains',
-      title: 'Constraint',
-      width: 200,
+      field: 'percentChange', //percentChange
+      title: '% Change',
+      width: 210,
       editable: true,
     },
-    { field: 'calc', title: 'Calculate', width: 120 },
-
+    { field: 'symbol', title: '+VE/-VE', width: 120 },
     ...monthFields.map(({ field, index, editable, type, format, width }) => ({
       field,
       title: headerMap[index],
@@ -192,6 +192,7 @@ export default function AopBudget() {
     })),
     { field: 'remark', title: 'Remark', editable: true, width: 120 },
   ]
+
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
@@ -207,8 +208,8 @@ export default function AopBudget() {
         plantName: item.plantName || item.plantName || '',
         IsEditable: item.isEditable,
         originalRemark: item.remark?.trim() || '',
-        budgetConstrains: '',
-        calc: '+',
+        percentChange: item?.percentChange || null,
+        originalPercentChange: item?.percentChange || null,
       }))
       setRows(mapped)
 
@@ -223,9 +224,9 @@ export default function AopBudget() {
         ...item,
         plantName: item.plantName || item.plantName || '',
         IsEditable: item.isEditable,
-        originalRemark: item.remark?.trim() || '', // add this
-        budgetConstrains: '',
-        calc: '+',
+        originalRemark: item.remark?.trim() || '',
+        percentChange: item?.percentChange || null,
+        originalPercentChange: item?.percentChange || null,
       }))
       setRowsP(mappedP)
     } catch (err) {
@@ -261,12 +262,13 @@ export default function AopBudget() {
       ...permissions,
       showAction: false,
       addButton: false,
-      deleteButton: false,
+
       editButton: false,
       showUnit: false,
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
+      resetButton: true,
     }
   }
 
@@ -283,6 +285,7 @@ export default function AopBudget() {
       uploadExcelBtn: false,
       ExcelName: `${lowerVertName}_Monthly Procurement Budget`,
       constarins: ['+', '-'],
+      resetButton: true,
     },
     isOldYear,
   )
@@ -292,12 +295,13 @@ export default function AopBudget() {
       ...permissions,
       showAction: false,
       addButton: false,
-      deleteButton: false,
+
       editButton: false,
       showUnit: false,
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
+      resetButton: true,
     }
   }
 
@@ -314,6 +318,7 @@ export default function AopBudget() {
       uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
       constarins: ['+', '-'],
+      resetButton: true,
     },
     isOldYear,
   )
@@ -460,6 +465,10 @@ export default function AopBudget() {
     budgetMaintenanceExcelFile(rawFile)
   }
 
+  const resetRowData1 = async (paramsForDelete) => {}
+
+  const resetRowData2 = async (paramsForDelete) => {}
+
   return (
     <Box>
       <Backdrop
@@ -488,13 +497,13 @@ export default function AopBudget() {
               container
               alignItems='center'
               justifyContent='space-between'
-              sx={{ marginBottom: 1 }}
+              sx={{ marginBottom: 0.5 }}
             >
               <Grid item>
                 <div
                   style={{
                     fontWeight: 600,
-                    marginBottom: 2,
+                    marginBottom: 0.5,
                   }}
                 >
                   Design Basis
@@ -520,13 +529,13 @@ export default function AopBudget() {
               container
               alignItems='center'
               justifyContent='space-between'
-              sx={{ marginBottom: 1 }}
+              sx={{ marginBottom: 0.5 }}
             >
               <Grid item>
                 <div
                   style={{
                     fontWeight: 600,
-                    marginBottom: 2,
+                    marginBottom: 0.5,
                   }}
                 >
                   Remarks
@@ -544,40 +553,6 @@ export default function AopBudget() {
               variant='outlined'
               className='aop-design-basis'
             />
-
-            {/* Buttons moved here */}
-            {/* <Box
-              mt={1.5}
-              display='flex'
-              gap={1}
-              justifyContent='flex-end'
-              flexWrap='wrap'
-            >
-              <Button
-                variant='contained'
-                color='primary'
-                className='btn-save'
-                onClick={handleSaveAll}
-              >
-                Save
-              </Button>
-              <Button
-                variant='contained'
-                color='primary'
-                className='btn-save'
-                onClick={handleExcelUpload}
-              >
-                Import
-              </Button>
-              <Button
-                variant='contained'
-                color='primary'
-                className='btn-save'
-                onClick={downloadExcelForConfiguration}
-              >
-                Export
-              </Button>
-            </Box> */}
           </Grid>
         </Grid>
       </Typography>
@@ -605,6 +580,8 @@ export default function AopBudget() {
         downloadExcelForConfiguration={downloadExcelForConfiguration}
         permissions={adjustedPermissionsC}
         groupBy='budgetType'
+        resetRowData={resetRowData1}
+
         // setEditMode={setEditMode}
       />
 
@@ -628,6 +605,8 @@ export default function AopBudget() {
         handleRemarkCellClick={handleRemarkCellClickP}
         permissions={adjustedPermissionsP}
         groupBy='budgetType'
+        resetRowData={resetRowData2}
+
         // setEditMode={setEditMode}
       />
       <Notification

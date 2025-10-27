@@ -519,9 +519,7 @@ const MonthwiseProduction = () => {
         handleCalculate={handleCalculate}
         handleRemarkCellClick={handleRemarkCellClick}
       />
-      <Typography component='div' className='grid-title' sx={{ mt: 1 }}>
-        Main Products - Production for the budget year{' '}
-      </Typography>
+
       <ProductionNorms
         permissions={{
           showAction: false,
@@ -538,6 +536,7 @@ const MonthwiseProduction = () => {
           hideByProducts: true,
           hideNoteText: true,
           hideExportBtn: true,
+          title: 'Main Products - Production for the budget year',
         }}
       />
       <Notification

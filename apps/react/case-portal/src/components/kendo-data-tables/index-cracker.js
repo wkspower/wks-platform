@@ -173,57 +173,51 @@ const KendoDataTablesCracker = ({
     )
   }
   function calcPreCoilReplacementRunLength(actualRunLength, reduction) {
-  if (
-    actualRunLength === null ||
-    actualRunLength === undefined ||
-    reduction === null ||
-    reduction === undefined
-  )
-    return null
-  const val =
-    Number(actualRunLength) -
-    (Number(actualRunLength) * Number(reduction)) / 100
-  return isNaN(val) ? null : Number(val.toFixed(2))
-}
+    if (
+      actualRunLength === null ||
+      actualRunLength === undefined ||
+      reduction === null ||
+      reduction === undefined
+    )
+      return null
+    const val =
+      Number(actualRunLength) -
+      (Number(actualRunLength) * Number(reduction)) / 100
+    return isNaN(val) ? null : Number(val.toFixed(2))
+  }
   const itemChange = useCallback(
-  (e) => {
-    setIsRowEdited(true)
-    const { dataItem, field, value } = e
-    const itemId = dataItem.id
-    setRows((prev) =>
-      prev.map((r) => {
-        if (r.id !== itemId) return r
-        const updated = { ...r, [field]: value }
-        // Auto-calculate preCrDays
-        if (
-          field === 'actualRunLength' ||
-          field === 'reduction'
-        ) {
-          updated.preCrDays = calcPreCoilReplacementRunLength(
-            field === 'actualRunLength' ? value : updated.actualRunLength,
-            field === 'reduction' ? value : updated.reduction
+    (e) => {
+      setIsRowEdited(true)
+      const { dataItem, field, value } = e
+      const itemId = dataItem.id
+      setRows((prev) =>
+        prev.map((r) => {
+          if (r.id !== itemId) return r
+          const updated = { ...r, [field]: value }
+          // Auto-calculate preCrDays
+          if (field === 'actualRunLength' || field === 'reduction') {
+            updated.preCrDays = calcPreCoilReplacementRunLength(
+              field === 'actualRunLength' ? value : updated.actualRunLength,
+              field === 'reduction' ? value : updated.reduction,
+            )
+          }
+          return updated
+        }),
+      )
+      setModifiedCells((prev) => {
+        const base = { ...dataItem, [field]: value }
+        // Auto-calculate preCrDays in modified cells too
+        if (field === 'actualRunLength' || field === 'reduction') {
+          base.preCrDays = calcPreCoilReplacementRunLength(
+            field === 'actualRunLength' ? value : base.actualRunLength,
+            field === 'reduction' ? value : base.reduction,
           )
         }
-        return updated
-      }),
-    )
-    setModifiedCells((prev) => {
-      const base = { ...dataItem, [field]: value }
-      // Auto-calculate preCrDays in modified cells too
-      if (
-        field === 'actualRunLength' ||
-        field === 'reduction'
-      ) {
-        base.preCrDays = calcPreCoilReplacementRunLength(
-          field === 'actualRunLength' ? value : base.actualRunLength,
-          field === 'reduction' ? value : base.reduction
-        )
-      }
-      return { ...prev, [itemId]: base }
-    })
-  },
-  [setRows, setModifiedCells],
-)
+        return { ...prev, [itemId]: base }
+      })
+    },
+    [setRows, setModifiedCells],
+  )
   const handleRemarkSave = () => {
     setRows((prevRows) => {
       let updatedRow = null
@@ -294,17 +288,17 @@ const KendoDataTablesCracker = ({
     )
   }
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-  const isDisabled =
-    !dataItem.isEditable && dataItem?.isEditable !== undefined
-  let rowClassName = className || ''
-  if (dataItem.isError) rowClassName += ' error-row'
-  if (isDisabled) rowClassName += ' custom-disabled-row'
-  return (
-    <tr {...rest?.trProps} className={rowClassName.trim()}>
-      {rest.children}
-    </tr>
-  )
-}, [])
+    const isDisabled =
+      !dataItem.isEditable && dataItem?.isEditable !== undefined
+    let rowClassName = className || ''
+    if (dataItem.isError) rowClassName += ' error-row'
+    if (isDisabled) rowClassName += ' custom-disabled-row'
+    return (
+      <tr {...rest?.trProps} className={rowClassName.trim()}>
+        {rest.children}
+      </tr>
+    )
+  }, [])
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -314,7 +308,7 @@ const KendoDataTablesCracker = ({
         {...restThProps}
         aria-sort={ariaSort}
         title={props.title}
-        style={{ padding: '0px', borderRight: '1px solid #b4b4b4ff' }}
+        style={{ padding: '0px', borderRight: '1px solid #878787' }}
       >
         <Tooltip
           position='top'

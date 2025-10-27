@@ -27,6 +27,7 @@ const ShutDown = ({ permissions }) => {
     siteObject,
     verticalObject,
     year,
+    screenTitle,
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
@@ -34,6 +35,7 @@ const ShutDown = ({ permissions }) => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical
+  const SCREEN_NAME = screenTitle?.title
 
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const plantName = plantObject?.name
@@ -141,7 +143,7 @@ const ShutDown = ({ permissions }) => {
         if (plantName?.toLowerCase() === 'ldpe') {
           requiredFields = ['discription', 'remark', 'productName1']
         } else {
-          requiredFields = ['discription', 'remark']
+          requiredFields = ['discription', 'remark', 'productName1']
         }
       } else if (lowerVertName === 'pp') {
         requiredFields = ['discription', 'remark']
@@ -348,14 +350,6 @@ const ShutDown = ({ permissions }) => {
   const saveShutdownData = async (newRow) => {
     setLoading(true)
     try {
-      let plantId = ''
-
-      const storedPlant = AOP_YEAR
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
       const shutdownDetails = newRow.map((row) => ({
         productId: (() => {
           if (
@@ -389,7 +383,7 @@ const ShutDown = ({ permissions }) => {
       }))
 
       const response = await DataService.saveShutdownData(
-        plantId,
+        PLANT_ID,
         shutdownDetails,
         keycloak,
       )
@@ -570,9 +564,9 @@ const ShutDown = ({ permissions }) => {
   const colDefs = useMemo(() => {
     switch (lowerVertName) {
       case verticalEnums.PE:
-        if (plantName?.toLowerCase() != 'ldpe') {
-          return ShutDownAllColumns
-        }
+        // if (plantName?.toLowerCase() != 'ldpe') {
+        //   return ShutDownAllColumns
+        // }
 
         return ShutDownPeColumns
 
@@ -740,6 +734,10 @@ const ShutDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
+
+      showTitleNameBusiness: true,
+      titleName: `${SCREEN_NAME}`,
+
       uploadExcelBtn:
         lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
     },

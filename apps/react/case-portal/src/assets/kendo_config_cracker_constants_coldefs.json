@@ -16,8 +16,6 @@
     "field": "ConstantValue",
     "title": "Value",
     "editable": true,
-    "format": "{0:#.##}",
-
     "type": "number"
   },
 

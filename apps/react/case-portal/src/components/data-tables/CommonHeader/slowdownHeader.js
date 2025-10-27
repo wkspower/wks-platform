@@ -124,7 +124,7 @@ const useEnhancedSlowdownColDefs = ({ allProducts, handleRemarkCellClick }) => {
               }}
               onDoubleClick={() => handleRemarkCellClick(params.row)}
             >
-              {displayText || (isEditable ? 'Click to add remark' : '')}
+              {displayText || (isEditable ? 'Add remark' : '')}
             </div>
           </Tooltip>
         )

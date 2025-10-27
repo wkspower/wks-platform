@@ -94,17 +94,17 @@ header {
 
 .custom-title-font {
   font-family: 'Roboto', sans-serif !important;
-  font-weight: bold;
+  font-weight: 600;
   white-space: nowrap;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
 }
 
 .custom-title-dropdown {
   font-family: 'Roboto', sans-serif !important;
-  font-weight: bold;
+  /* font-weight: bold; */
   white-space: nowrap;
   color: white;
-  font-size: 0.8rem;
+  font-size: 0.65rem;
 }
 .custom-title-dropdown-content {
   font-family: 'Roboto', sans-serif !important;
@@ -113,40 +113,43 @@ header {
 }
 
 .custom-title-dropdown-content .MuiSelect-select {
-  font-size: 0.8rem;
-  padding: 4px 8px;
+  font-size: 0.7rem; /* reduced from 0.7rem */
+  padding: 3px 4px; /* slightly smaller padding */
   min-height: unset;
-  line-height: 2.5;
+  line-height: 2.2;
 }
 
 .custom-title-dropdown-content .MuiMenuItem-root {
-  font-size: 0.8rem;
-  padding: 4px 8px;
-}
-
-.role-name {
-  /* font-weight: 800; */
-  font-family: 'Roboto', sans-serif !important;
-  color: black;
-  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
-  margin: 12px;
-  font-size: 0.8rem;
+  font-size: 0.7rem; /* reduced from 0.7rem */
+  padding: 3px 4px; /* smaller padding */
 }
 
 .grid-title {
-  /* font-weight: 800; */
   font-family: 'Roboto', sans-serif !important;
   font-weight: bold;
-  margin-left: 5px;
-  /* margin-top: 25px; */
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
   font-size: 0.8rem;
+}
+
+.button-title {
+  font-family: 'Roboto', sans-serif !important;
+  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+  font-size: 0.7rem;
+  font-weight: 550;
+}
+
+.accordian-title {
+  /* Use a numerical weight like 550 or 550 for a "half-bold" look */
+  font-weight: 550;
+  font-family: 'Roboto', sans-serif !important;
+  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+  font-size: 0.7rem;
 }
 
 .grid-header {
   font-family: 'Roboto', sans-serif !important;
   font-size: 12px;
-  margin-top: 5px;
+  /* margin-top: 5px; */
   margin-bottom: 5px;
 }
 
@@ -251,20 +254,20 @@ main.MuiBox-root.css-vognfw {
 }
 
 .dropdown-select .MuiInputBase-root {
-  font-size: 0.75rem;
-  height: 30px;
+  font-size: 0.65rem;
+  height: 25px;
 }
 
 .dropdown-select .MuiInputLabel-root {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
 }
 
 .dropdown-select .MuiMenuItem-root {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
 }
 
 .MuiPaper-root .MuiMenuItem-root {
-  font-size: 0.75rem !important;
+  font-size: 0.65rem !important;
   min-height: 28px;
   padding: 2px 8px;
 }

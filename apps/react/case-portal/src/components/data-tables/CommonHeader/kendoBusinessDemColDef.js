@@ -5,6 +5,7 @@ import { BusinessDemandPpColumns } from 'components/colums/PpColums'
 import { BusinessDemandPtaColumns } from 'components/colums/PtaColums'
 import { verticalEnums } from 'enums/verticalEnums'
 import { useSelector } from 'react-redux'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const colDefsCache = new Map()
 
@@ -20,6 +21,7 @@ const kendoBusinessDemColDef = ({ headerMap }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
+  const FORMATE_DECIMAL = ValueFormatterProduction()
 
   const cacheKey = `${lowerVertName}_${headerMap ? JSON.stringify(headerMap) : 'no_map'}`
 
@@ -37,7 +39,7 @@ const kendoBusinessDemColDef = ({ headerMap }) => {
       ...col,
       title: headerMap[col.title],
       align: 'right',
-      format: '{0:#.###}',
+      format: FORMATE_DECIMAL,
     }
   })
 

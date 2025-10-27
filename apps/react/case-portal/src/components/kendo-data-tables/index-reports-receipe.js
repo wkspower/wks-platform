@@ -45,6 +45,7 @@ import {
 } from './Utilities-Kendo/durationHelpers'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 export const particulars = [
   'normParameterId',
@@ -143,15 +144,16 @@ const KendoDataTablesReciepe = ({
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+
   const shouldShowExportImportButtons = () => {
     const verticalObject = JSON.parse(localStorage.getItem('selectedVertical'))
     const siteObject = JSON.parse(localStorage.getItem('selectedSite'))
     const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-    
+
     const verticalName = verticalObject?.name?.toLowerCase()
     const siteName = siteObject?.name?.toLowerCase()
     const plantName = plantObject?.name?.toLowerCase()
-    
+
     // Check if conditions are met for showing export/import buttons
     return verticalName === 'pe' || verticalName === 'pp'
   }
@@ -362,7 +364,7 @@ const KendoDataTablesReciepe = ({
         {...restThProps}
         aria-sort={ariaSort}
         title={props.title}
-        style={{ padding: '0px', borderRight: '1px solid #b4b4b4ff' }}
+        style={{ padding: '0px', borderRight: '1px solid #878787' }}
       >
         <Tooltip
           position='top'
@@ -388,6 +390,26 @@ const KendoDataTablesReciepe = ({
 
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
+      const FORMATE_DECIMAL = ValueFormatterProduction()
+
+      if (col.field === 'UOM') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            editable={col.editable || false}
+            format={FORMATE_DECIMAL}
+            width='65px'
+            cells={{
+              edit: { text: NoSpinnerNumericEditor },
+              data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+          />
+        )
+      }
 
       if (col.type === 'number') {
         return (
@@ -396,9 +418,9 @@ const KendoDataTablesReciepe = ({
             field={col.field}
             title={col.title || col.headerName}
             editable={col.editable || false}
-            format={col.format || '{0:#.###}'}
+            format={FORMATE_DECIMAL}
             className={'k-number-right'}
-            width='200px'
+            width='150px'
             cells={{
               edit: { text: NoSpinnerNumericEditor },
               data: toolTipRenderer,
@@ -415,8 +437,8 @@ const KendoDataTablesReciepe = ({
           field={col.field}
           title={col.title || col.headerName}
           editable={col.editable || false}
-          format={col.format || '{0:#.###}'}
-          width='200px'
+          format={FORMATE_DECIMAL}
+          width='150px'
           cells={{
             edit: { text: NoSpinnerNumericEditor },
             data: toolTipRenderer,
@@ -497,6 +519,18 @@ const KendoDataTablesReciepe = ({
                 {title}
               </Typography>
             )}
+
+            {permissions?.showTitleNameBusiness && (
+              <Typography
+                component='div'
+                className='grid-title'
+                sx={{
+                  ...(permissions?.marginBottom && { marginBottom: '10px' }),
+                }}
+              >
+                {permissions?.titleName}
+              </Typography>
+            )}
           </Box>
 
           {/* RIGHT: Buttons */}
@@ -511,7 +545,7 @@ const KendoDataTablesReciepe = ({
                 Add Item
               </Button>
             )}
-            
+
             {/* Export Button */}
             {permissions?.downloadExcelBtn &&
               shouldShowExportImportButtons() && (

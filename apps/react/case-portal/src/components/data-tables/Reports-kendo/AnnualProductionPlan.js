@@ -401,25 +401,26 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
             ? moment(item.periodTo, 'DD-MMM-YY').toDate()
             : null,
         }))
-if (type === 'maxRate') {
-  const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/;
+        if (type === 'maxRate') {
+          const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
 
-  res = res.map((item) => {
-    const value = item.maxHourlyRateValue;
-    const num = parseFloat(value);
+          res = res.map((item) => {
+            const value = item.maxHourlyRateValue
+            const num = parseFloat(value)
 
-    return {
-      ...item,
-      maxHourlyRateValue:
-        typeof value === 'string' && !dateRegex.test(value.trim()) && !isNaN(num)
-          ? num   // ✅ keep raw number
-          : typeof value === 'number'
-          ? value // ✅ keep as number
-          : value,
-    };
-  });
-}
-
+            return {
+              ...item,
+              maxHourlyRateValue:
+                typeof value === 'string' &&
+                !dateRegex.test(value.trim()) &&
+                !isNaN(num)
+                  ? num // ? keep raw number
+                  : typeof value === 'number'
+                    ? value // ? keep as number
+                    : value,
+            }
+          })
+        }
 
         switch (type) {
           case 'assumptions':

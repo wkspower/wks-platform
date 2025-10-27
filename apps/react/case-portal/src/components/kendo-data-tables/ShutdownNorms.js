@@ -16,8 +16,10 @@ const ShutdownNorms = () => {
   const [gradeId, setGradeId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
+  const menu = useSelector((state) => state.dataGridStore)
   const [shutdownMonths, setShutdownMonths] = useState([])
- 
+  const { yearChanged, oldYear, plantID } = menu
+  const isOldYear = oldYear?.oldYear
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState([])
@@ -25,14 +27,14 @@ const ShutdownNorms = () => {
     message: '',
     severity: 'info',
   })
+  const [_plantID, set_PlantID] = useState('')
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
-    yearChanged,
-    oldYear,
-    plantID,
+    screenTitle,
     plantObject,
     siteObject,
     verticalObject,
@@ -48,17 +50,21 @@ const ShutdownNorms = () => {
   const [calculationObject, setCalculationObject] = useState([])
   const [grades, setGrades] = useState([])
 
-   const PLANT_ID = plantObject?.id
+  const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const AOP_YEAR = year?.selectedYear
-  const headerMap = generateHeaderNames(AOP_YEAR)
-  const isOldYear = oldYear?.oldYear
 
   const PLANT_NAME = plantObject?.name
   const SITE_NAME = siteObject?.name
   const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const SCREEN_NAME = screenTitle?.title
 
+  useEffect(() => {
+    if (plantID?.plantId) {
+      set_PlantID(plantID?.plantId)
+    }
+  }, [plantID])
 
   const keycloak = useSession()
 
@@ -216,7 +222,7 @@ const ShutdownNorms = () => {
 
         setSnackbarOpen(true)
         setSnackbarData({
-          message: `Data Saved Successfully!`,
+          message: `Saved Successfully!`,
           severity: 'success',
         })
         setModifiedCells({})
@@ -341,11 +347,18 @@ const ShutdownNorms = () => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      
+      const year = localStorage.getItem('year')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      let plantId = ''
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
       const response =
         await ShutdownNormsApiService.handleCalculateShutdownNorms(
-          PLANT_ID,
-          AOP_YEAR,
+          plantId,
+          year,
           keycloak,
         )
 
@@ -480,13 +493,18 @@ const ShutdownNorms = () => {
           : false,
 
       showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      marginBottom:
+        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       dropdownLabel:
         lowerVertName === 'pe' || lowerVertName === 'pp'
           ? 'Select Grade'
           : 'Select Mode',
       allAction: true,
       downloadExcelBtnFromUI: true,
-      ExcelName: `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_Shutdown Consumption (Quantity)`,
+
+      showTitleNameBusiness: true,
+      titleName: SCREEN_NAME,
+      ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
     },
     isOldYear,
   )

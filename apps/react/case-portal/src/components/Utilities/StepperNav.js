@@ -1,9 +1,21 @@
-import { Step, StepLabel, Stepper } from '@mui/material'
+import React from 'react'
+import {
+  Box,
+  Step,
+  StepLabel,
+  Stepper,
+  Tooltip,
+  Typography,
+} from '@mui/material'
 import { verticalEnums } from 'enums/verticalEnums'
+import { drawerWidth } from 'config'
 import { useMenuContext } from 'menu/menuProvider'
 import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useLocation, useNavigate } from 'react-router-dom'
+
+// Toggle between fixed and sticky behavior here
+const USE_FIXED = true // set to false to use position: 'sticky'
 
 export default function StepperNav() {
   const location = useLocation()
@@ -18,6 +30,7 @@ export default function StepperNav() {
   const [steps, setSteps] = useState([])
 
   const { items: menuItems } = useMenuContext()
+  const { drawerOpen } = useSelector((state) => state.menu)
   const collectItems = useCallback(
     (nodes) =>
       nodes.flatMap((node) => {
@@ -28,14 +41,10 @@ export default function StepperNav() {
           return collectItems(node.children)
         }
         return []
-        //   if (!planGroup?.children) return []
-        //   return planGroup.children.map((item) => {
-        //     const slug = item.url.split('/').pop()
-        //     return { label: item.title, url: item.url, key: slug }
       }),
     [],
   )
-  // }
+
   const buildSteps = useCallback(
     (menuArr) => {
       const planGroup = menuArr
@@ -43,14 +52,7 @@ export default function StepperNav() {
         .find((c) => c.id === 'production-norms-plan')
 
       if (!planGroup?.children) return []
-
-      // 2. Prepare an array to collect �step items�
-
-      // 2.a If the child itself is a leaf item (has a valid `url`), include it
       const allItems = collectItems(planGroup.children)
-      // 2.b Otherwise, if it�s a collapse and has children, include each grandchild
-
-      // 3. Map each collected item into the shape { label, url, key }
       return allItems.map((item) => {
         const slug = item.url.split('/').pop()
         return { label: item.title, url: item.url, key: slug }
@@ -72,43 +74,56 @@ export default function StepperNav() {
     } else {
       setSteps(newSteps)
     }
-    // Derive current path slug
     const currentSlug = location.pathname.split('/').pop()
     const found = newSteps.some((s) => s.key === currentSlug)
 
-    // If current path isn't one of our steps, redirect to the first
     if (newSteps.length && !found) {
       navigate(newSteps[0].url, { replace: true })
     }
-  }, [menuItems, lowerVertName, plantName])
+  }, [
+    menuItems,
+    lowerVertName,
+    plantName,
+    buildSteps,
+    navigate,
+    location.pathname,
+  ])
 
   const currentPath = location.pathname.split('/').pop()
   const activeStep = steps.findIndex((s) => s.key === currentPath)
 
-  // -- Render Stepper ----------------------tested
-  return (
-    <>
-      <Stepper
-        nonLinear
-        alternativeLabel
-        activeStep={activeStep >= 0 ? activeStep : 0}
-        sx={{
-          '& .MuiStepLabel-label': {
-            fontWeight: 'normal',
-          },
-          '& .MuiStepLabel-label.Mui-active': {
-            fontWeight: 'bold',
-            color: '#000',
-          },
-          '& .MuiStepLabel-alternativeLabel': {
-            marginTop: '2px !important',
-          },
-          '& .MuiStepConnector-alternativeLabel': {
-            top: '16px',
-          },
-        }}
-      >
-        {steps.map((step) => (
+  // Helper to return first 15 characters then ellipsis
+  const getAbbrev = (label) => {
+    if (!label) return ''
+    const text = label.trim()
+    return text.length <= 15 ? text : `${text.slice(0, 15)}…`
+  }
+
+  // shared Stepper element so we don't duplicate mapping logic
+  const StepperElement = (
+    <Stepper
+      nonLinear
+      alternativeLabel
+      activeStep={activeStep >= 0 ? activeStep : 0}
+      sx={{
+        '& .MuiStepLabel-label': {
+          fontWeight: 'normal',
+        },
+        '& .MuiStepLabel-label.Mui-active': {
+          fontWeight: 'bold',
+          color: '#000',
+        },
+        '& .MuiStepLabel-alternativeLabel': {
+          marginTop: '2px !important',
+        },
+        '& .MuiStepConnector-alternativeLabel': {
+          top: '16px',
+        },
+      }}
+    >
+      {steps.map((step) => {
+        const abbrev = getAbbrev(step.label)
+        return (
           <Step
             key={step.key}
             onClick={() => navigate(step.url)}
@@ -118,25 +133,66 @@ export default function StepperNav() {
                 color: '#0100cb',
               },
             }}
+            aria-label={step.label}
           >
-            <StepLabel sx={{ cursor: 'pointer' }}>{step.label}</StepLabel>
+            {/* Tooltip shows full label on hover; visible text is abbreviated */}
+            <StepLabel sx={{ cursor: 'pointer' }}>
+              <Tooltip title={step.label} enterDelay={200} arrow>
+                <Typography
+                  variant='caption'
+                  sx={{
+                    minWidth: 28,
+                    display: 'inline-block',
+                    textAlign: 'center',
+                    fontWeight: (theme) =>
+                      activeStep === steps.findIndex((s) => s.key === step.key)
+                        ? '700'
+                        : '500',
+                  }}
+                >
+                  {abbrev}
+                </Typography>
+              </Tooltip>
+            </StepLabel>
           </Step>
-        ))}
-      </Stepper>
+        )
+      })}
+    </Stepper>
+  )
 
-      {/* <Typography
-        variant='body2'
-        sx={{
-          textAlign: 'left',
-          fontWeight: 'bold',
-          ml: '20px',
-          mb: '10px',
-          mt: '10px',
-          fontSize: '1rem',
-        }}
-      >
-        {verticalName} / {siteName} / {plantName}
-      </Typography> */}
+  return (
+    <>
+      {USE_FIXED ? (
+        <>
+          {/* Fixed to viewport (below AppBar if present) */}
+          <Box
+            sx={{
+              position: 'fixed',
+              top: '42px',
+              left: drawerOpen ? `${drawerWidth + 12}px` : '12px',
+              right: '12px',
+              zIndex: (theme) => (theme.zIndex?.appBar ?? 1100) + 1,
+              bgcolor: 'background.paper',
+              boxShadow: 1,
+              borderBottom: '1px solid',
+              borderLeft: '1px solid',
+              borderRight: '1px solid',
+              borderColor: 'divider',
+              py: 0,
+              transition: 'left 200ms ease',
+            }}
+          >
+            <Box>{StepperElement}</Box>
+          </Box>
+
+          {/* Spacer so fixed element doesn't cover content */}
+          <Box
+            sx={{ height: (theme) => theme?.mixins?.toolbar?.minHeight ?? 64 }}
+          />
+        </>
+      ) : (
+        <Box>{StepperElement}</Box>
+      )}
     </>
   )
 }

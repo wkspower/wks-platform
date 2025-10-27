@@ -27,6 +27,7 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import SelectivityData from './SelectivityData'
+import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
@@ -650,7 +651,7 @@ const ConfigurationTable = () => {
             aria-controls='meg-grid-content'
             id='meg-grid-header'
           >
-            <Typography className='grid-title'>
+            <Typography className='accordian-title'>
               AOP Historical Period Basis
             </Typography>
           </CustomAccordionSummary>
@@ -674,7 +675,7 @@ const ConfigurationTable = () => {
                 {true && (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography
-                      className='grid-title'
+                      className='button-title'
                       sx={{ whiteSpace: 'nowrap' }}
                     >
                       Start Date
@@ -688,7 +689,7 @@ const ConfigurationTable = () => {
                       size={'medium'}
                     />
                     <Typography
-                      className='grid-title'
+                      className='button-title'
                       sx={{ whiteSpace: 'nowrap' }}
                     >
                       End Date
@@ -706,10 +707,8 @@ const ConfigurationTable = () => {
                     {!isOldYearFlag && (
                       <Button
                         variant='contained'
-                        // onClick={onLoad}
                         onClick={handleOpenDialog}
                         className='btn-load'
-                        // disabled={!isLoadEnabled}
                         sx={{ alignSelf: 'flex-end' }}
                       >
                         Load
@@ -721,29 +720,33 @@ const ConfigurationTable = () => {
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
-                    sx={{ whiteSpace: 'normal' }} // <-- added alignSelf
+                    sx={{ whiteSpace: 'normal' }}
                   >
                     {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
                   </Typography>
                 )}
               </Box>
             </Box>
-            <TextField
-              label='AOP Design Basis'
-              multiline
-              // minRows={isAccordionExpanded ? 4 : 20}
-              minRows={lowerVertName === 'cracker' ? 6 : 2}
-              fullWidth
-              margin='normal'
-              variant='outlined'
-              disabled={isOldYear == 1}
-              value={summary}
-              onChange={(e) => {
-                setSummary(e.target.value)
-                setSummaryEdited(true)
-              }}
-              className='aop-design-basis'
-            />
+            <Box
+              sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1 }}
+            >
+              <Typography
+                className='button-title'
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                AOP Design Basis
+              </Typography>
+
+              <TextArea
+                value={summary}
+                rows={3}
+                onChange={(e) => {
+                  setSummary(e.target.value)
+                  setSummaryEdited(true)
+                }}
+                // style={{ width: '50%' }}
+              />
+            </Box>
           </CustomAccordionDetails>
         </CustomAccordion>
       </Box>
@@ -785,7 +788,7 @@ const ConfigurationTable = () => {
     const isPta = lowerVertName === 'pta'
 
     const megTabs = isAromatics
-      ? ['Configuration', 'Constants', 'Report Manual Entry', 'PIO Impact']
+      ? ['Configuration', 'Constants', 'PIO Impact']
       : isPta
         ? [
             'Configuration',
@@ -822,6 +825,7 @@ const ConfigurationTable = () => {
 
           {(() => {
             const currentTab = megTabs[tabIndex]?.toLowerCase()
+            const currentTabDisplayName = megTabs[tabIndex]
             switch (currentTab) {
               case 'configuration':
                 return (
@@ -837,6 +841,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='0'
                     reportTypes={reportTypes}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'constants':
@@ -852,6 +857,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'report manual entry':
@@ -867,7 +873,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
-                    reportTypes={reportTypes}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'pio impact':
@@ -884,6 +890,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='3'
                     reportTypes={reportTypes}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
 
@@ -901,6 +908,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='4'
                     reportTypes={reportTypes}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               default:
@@ -944,6 +952,7 @@ const ConfigurationTable = () => {
           />
           {(() => {
             const currentTab = crackerTabs[tabIndex]?.toLowerCase()
+            const currentTabDisplayName = crackerTabs[tabIndex]
 
             switch (currentTab) {
               case 'configuration':
@@ -960,6 +969,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='0'
                     setGradeId={handleGradeChange}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'constants':
@@ -975,6 +985,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
 
@@ -1021,6 +1032,7 @@ const ConfigurationTable = () => {
           />
           {(() => {
             const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
+            const currentTabDisplayName = elastomerTabs[tabIndex]
             switch (currentTab) {
               case 'constants':
                 return (
@@ -1035,6 +1047,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'report manual entry':
@@ -1050,6 +1063,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               default:
@@ -1095,6 +1109,7 @@ const ConfigurationTable = () => {
           />
           {(() => {
             const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
+            const currentTabDisplayName = elastomerTabs[tabIndex]
             switch (currentTab) {
               case 'configuration':
                 return (
@@ -1109,6 +1124,7 @@ const ConfigurationTable = () => {
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='0'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'constants':
@@ -1124,6 +1140,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case 'report manual entry':
@@ -1139,6 +1156,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               default:
@@ -1194,6 +1212,12 @@ const ConfigurationTable = () => {
         <Box>
           {(() => {
             const currentTabId = tabs[tabIndex]?.toLowerCase()
+
+            const currentTabInfo = availableTabs.find(
+              (tab) => tab.id.toLowerCase() === currentTabId,
+            )
+            const currentTabDisplayName = currentTabInfo?.displayName
+
             switch (currentTabId) {
               case getTheId('Configuration'):
                 return (
@@ -1207,6 +1231,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('StartupLosses'):
@@ -1221,6 +1246,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('Otherlosses'):
@@ -1235,6 +1261,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('ShutdownNorms'):
@@ -1249,6 +1276,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('Constant'):
@@ -1263,6 +1291,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('Receipe'):
@@ -1277,6 +1306,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('ContineGradeChange'):
@@ -1290,6 +1320,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
               case getTheId('DisContineGradeChange'):
@@ -1303,6 +1334,7 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
                   />
                 )
 

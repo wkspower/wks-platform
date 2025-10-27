@@ -47,6 +47,7 @@ const NormalOpNormsScreen = () => {
     plantObject,
     siteObject,
     verticalObject,
+    screenTitle,
     year,
   } = dataGridStore
   const isOldYear = oldYear?.oldYear
@@ -57,6 +58,7 @@ const NormalOpNormsScreen = () => {
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
+  const SCREEN_NAME = screenTitle?.title
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
@@ -552,17 +554,21 @@ const NormalOpNormsScreen = () => {
       saveBtn: true,
       showCalculate: true,
       downloadExcelBtnFromUI: false,
-      ExcelName: `${lowerVertName}_BestAcheived(Min CC)`,
       showCheckbox: false,
-      marginBottom: false,
       showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      marginBottom:
+        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+
       dropdownLabel:
         lowerVertName === 'pe' || lowerVertName === 'pp'
           ? 'Select Grade'
           : 'Select Mode',
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
-      titleName: 'Best Achieved (Min CC)',
+
+      showTitleNameBusiness: true,
+      titleName: SCREEN_NAME,
+
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
@@ -729,7 +735,7 @@ const NormalOpNormsScreen = () => {
         />
       )}
 
-      {true && lowerVertName === 'meg' && (
+      {lowerVertName === 'meg' && (
         <Box sx={{ width: '100%', marginTop: 1 }}>
           <CustomAccordion defaultExpanded disableGutters>
             <CustomAccordionSummary

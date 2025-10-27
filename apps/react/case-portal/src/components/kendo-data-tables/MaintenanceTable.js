@@ -3,7 +3,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
@@ -11,8 +10,8 @@ import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 
 const MaintenanceTable = () => {
-  const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
+  const keycloak = useSession()
   const {
     verticalChange,
     yearChanged,
@@ -22,16 +21,16 @@ const MaintenanceTable = () => {
     siteObject,
     verticalObject,
     year,
+    screenTitle,
   } = dataGridStore
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
-
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const SCREEN_NAME = screenTitle?.title
+  const lowerVertName = vertName?.toLowerCase()
   const dataConfig = useMemo(
     () => ({
       isCracker: lowerVertName === 'cracker',
@@ -106,7 +105,7 @@ const MaintenanceTable = () => {
       let plantId = PLANT_ID
       let year = AOP_YEAR
 
-      const decokePlanningDTOList = newRows.map((row) => ({
+      const payloadData = newRows.map((row) => ({
         fourFD: row.fourFD,
         aopYear: year,
         totalSAD: row.totalSAD,
@@ -138,7 +137,7 @@ const MaintenanceTable = () => {
           {
             plantId,
             year,
-            decokePlanningDTOList,
+            payloadData,
           },
           keycloak,
         )
@@ -325,8 +324,11 @@ const MaintenanceTable = () => {
           saveBtn: dataConfig.isCracker,
           allAction: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `${lowerVertName}_Maintenance Details`,
+          ExcelName: `${lowerVertName}_${SCREEN_NAME}`,
           showRefresh: false,
+
+          showTitleNameBusiness: true,
+          titleName: SCREEN_NAME,
         },
         oldYear?.oldYear,
       ),
@@ -335,46 +337,40 @@ const MaintenanceTable = () => {
 
   return (
     <>
-      {/* When PLANT_NAME is NOT cracker */}
-      {lowerVertName !== 'cracker' && (
-        <div>
-          <Backdrop
-            open={loading}
-            sx={{ color: '#fff', zIndex: (t) => t.zIndex.drawer + 1 }}
-          >
-            <CircularProgress color='inherit' />
-          </Backdrop>
+      <div>
+        <Backdrop
+          open={loading}
+          sx={{ color: '#fff', zIndex: (t) => t.zIndex.drawer + 1 }}
+        >
+          <CircularProgress color='inherit' />
+        </Backdrop>
 
-          <KendoDataTables
-            columns={basecols}
-            rows={rows}
-            setRows={setRows}
-            fetchData={fetchData}
-            handleCalculate={handleCalculate}
-            deleteId={deleteId}
-            setDeleteId={setDeleteId}
-            open1={open1}
-            setOpen1={setOpen1}
-            snackbarOpen={snackbarOpen}
-            setSnackbarOpen={setSnackbarOpen}
-            snackbarData={snackbarData}
-            setSnackbarData={setSnackbarData}
-            permissions={adjustedPermissions}
-            saveChanges={saveChanges}
-            modifiedCells={modifiedCells}
-            setModifiedCells={setModifiedCells}
-            handleRemarkCellClick={handleRemarkCellClick}
-            remarkDialogOpen={remarkDialogOpen}
-            setRemarkDialogOpen={setRemarkDialogOpen}
-            currentRemark={currentRemark}
-            setCurrentRemark={setCurrentRemark}
-            currentRowId={currentRowId}
-          />
-        </div>
-      )}
-
-      {/* When PLANT_NAME IS cracker */}
-      {/* {lowerVertName === 'cracker' && <MaintenanceProcessTable />} */}
+        <KendoDataTables
+          columns={basecols}
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchData}
+          handleCalculate={handleCalculate}
+          deleteId={deleteId}
+          setDeleteId={setDeleteId}
+          open1={open1}
+          setOpen1={setOpen1}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          snackbarData={snackbarData}
+          setSnackbarData={setSnackbarData}
+          permissions={adjustedPermissions}
+          saveChanges={saveChanges}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          handleRemarkCellClick={handleRemarkCellClick}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+        />
+      </div>
     </>
   )
 }

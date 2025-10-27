@@ -2,7 +2,6 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-// import DataGridTable from '../ASDataGrid'
 // import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
@@ -29,22 +28,7 @@ const SlowdownNorms = () => {
   const [grades, setGrades] = useState([])
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-    } = dataGridStore
-  
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const AOP_YEAR = year?.selectedYear
+  const { sitePlantChange, yearChanged, oldYear, plantID } = menu
   //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
 
@@ -59,11 +43,13 @@ const SlowdownNorms = () => {
     severity: 'info',
   })
 
-  const headerMap = generateHeaderNames(AOP_YEAR)
+  const headerMap = generateHeaderNames(localStorage.getItem('year'))
 
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({}) // Track row edit state
 
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
@@ -232,7 +218,14 @@ const SlowdownNorms = () => {
   const saveSlowdownNormsData = async (newRows) => {
     setLoading(true)
     try {
-     
+      let plantId = ''
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const isTPH = selectedUnit == 'TPD'
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
       const businessData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april * 24 : row.april || null,
         may: isTPH && row.may ? row.may * 24 : row.may || null,
@@ -252,8 +245,8 @@ const SlowdownNorms = () => {
         march: isTPH && row.march ? row.march * 24 : row.march || null,
         remark: row.remarks,
         remarks: row.remarks,
-        financialYear: AOP_YEAR,
-        plantId: PLANT_ID,
+        financialYear: localStorage.getItem('year'),
+        plantId: plantId,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
         materialFkId: row.materialFkId || null,
@@ -268,7 +261,7 @@ const SlowdownNorms = () => {
         // console.log(title)
 
         const response = await DataService.saveSlowdownNormsData(
-          PLANT_ID,
+          plantId,
           businessData,
           keycloak,
         )
@@ -423,17 +416,25 @@ const SlowdownNorms = () => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
+      const year = localStorage.getItem('year')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      let plantId = ''
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
       var response = []
       if (lowerVertName == 'pp') {
         response = await DataService.handleCalculateSlowdownNormsPP(
-          PLANT_ID,
-          AOP_YEAR,
+          plantId,
+          year,
           keycloak,
         )
       } else {
         response = await DataService.handleCalculateSlowdownNorms(
-          PLANT_ID,
-          AOP_YEAR,
+          plantId,
+          year,
           keycloak,
         )
       }
@@ -508,6 +509,8 @@ const SlowdownNorms = () => {
           : 'Select Grade',
       downloadExcelBtnFromUI: true,
       showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      marginBottom:
+        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
 
       ExcelName: `${lowerVertName}_Slowdown Consumption (Norms/Quantity)`,
       showCalculateVisibility:
@@ -603,18 +606,6 @@ const SlowdownNorms = () => {
           grades={grades}
           calculatebtnClicked={calculatebtnClicked}
           handleGradeChange={handleGradeChange}
-
-          // permissions={{
-          //   showAction: false,
-          //   addButton: false,
-          //   deleteButton: false,
-          //   editButton: false,
-          //   showUnit: false,
-          //   units: ['TPH', 'TPD'],
-          //   saveWithRemark: false,
-          //   saveBtn: true,
-          //   showCalculate: lowerVertName == 'meg' ? false : false,
-          // }}
         />
       )}
     </div>

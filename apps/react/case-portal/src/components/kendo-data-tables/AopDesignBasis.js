@@ -810,10 +810,10 @@ const AopDesignBasis = () => {
                 )}
               </Box>
             </Box>
+
             <TextField
-              label='AOP Design Basis'
+              // label='AOP Design Basis'
               multiline
-              // minRows={isAccordionExpanded ? 4 : 20}
               minRows={lowerVertName === 'cracker' ? 6 : 2}
               fullWidth
               margin='normal'

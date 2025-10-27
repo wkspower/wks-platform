@@ -1,19 +1,17 @@
-import React from 'react'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
+import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
+import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
+import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
+import cracker_yield from '../../../assets/kendo_config_cracker_yield_coldefs.json'
+import disContineGradeChange from '../../../assets/kendo_config_disContineGradeChange.json'
 import productionColumnsConstants from '../../../assets/kendo_config_meg constants.json'
 import productionColumns from '../../../assets/kendo_config_meg.json'
 import productionColumnsPE1 from '../../../assets/kendo_config_pe1.json'
 import productionColumnsPE2 from '../../../assets/kendo_config_pe2.json'
-import productionColumnsPE3 from '../../../assets/kendo_config_pe3.json'
+import colDefsShutdownRate from '../../../assets/kendo_config_pe3.json'
 import productionColumnsPE5 from '../../../assets/kendo_config_pe5.json'
 import pioImpactColumns from '../../../assets/kendo_config_pio_impact.json'
-
-import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
-import cracker_constants from '../../../assets/kendo_config_cracker_constants_coldefs.json'
-import cracker_yield from '../../../assets/kendo_config_cracker_yield_coldefs.json'
-import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
-
-import disContineGradeChange from '../../../assets/kendo_config_disContineGradeChange.json'
-import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
 
 const getConfigByType = (configType) => {
   switch (configType) {
@@ -34,7 +32,7 @@ const getConfigByType = (configType) => {
     case 'Otherlosses':
       return productionColumnsPE2
     case 'ShutdownNorms':
-      return productionColumnsPE3
+      return colDefsShutdownRate
     case 'Constants':
       return productionColumnsPE5
     case 'production':
@@ -66,6 +64,8 @@ const getEnhancedAOPColDefs = ({
   configType,
 }) => {
   var config = []
+  const FORMATE_DECIMAL = ValueFormatterProduction()
+
   if (configType == 'grades') {
     config = [
       {
@@ -78,7 +78,7 @@ const getEnhancedAOPColDefs = ({
         field: 'UOM',
         title: 'UOM',
         editable: false,
-        width1: 200,
+        width1: 85,
       },
     ]
     allGradesReciepes?.forEach((field) => {
@@ -96,7 +96,23 @@ const getEnhancedAOPColDefs = ({
 
   var enhancedColDefs = []
 
-  if (configType == 'pioImpact' || configType == 'shutdownData') {
+  if (
+    configType == 'ShutdownNorms' ||
+    configType == 'cracker_constants' ||
+    configType == 'megConstants'
+  ) {
+    enhancedColDefs = config.map((col) => {
+      if (col?.title == 'Value') {
+        return {
+          ...col,
+          type: 'number',
+          format: FORMATE_DECIMAL,
+        }
+      }
+
+      return col
+    })
+  } else if (configType == 'pioImpact' || configType == 'shutdownData') {
     enhancedColDefs = config.map((col) => {
       if (headerMap && headerMap[col.title]) {
         return {
@@ -104,7 +120,7 @@ const getEnhancedAOPColDefs = ({
           title: headerMap[col.title],
           align: 'right',
           type: 'negativeNumber',
-          format: '{0:#.##}',
+          format: FORMATE_DECIMAL,
         }
       }
 
@@ -118,7 +134,7 @@ const getEnhancedAOPColDefs = ({
           title: headerMap[col.title],
           align: 'right',
           type: 'number',
-          format: '{0:#.##}',
+          format: FORMATE_DECIMAL,
         }
       }
 

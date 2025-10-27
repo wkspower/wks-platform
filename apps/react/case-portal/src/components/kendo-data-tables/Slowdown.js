@@ -19,6 +19,7 @@ import { Box, Tab, Tabs } from '../../../node_modules/@mui/material/index'
 import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/gridEditRowModel'
 import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -31,12 +32,17 @@ const SlowDown = ({ permissions }) => {
     siteObject,
     verticalObject,
     year,
+    screenTitle,
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
+  const SCREEN_NAME = screenTitle?.title
+
+  const FORMATE_DECIMAL = ValueFormatterProduction()
+
   const vertName = verticalChange?.selectedVertical
   const plantName = plantObject?.name
   const isOldYear = oldYear?.oldYear
@@ -211,9 +217,7 @@ const SlowDown = ({ permissions }) => {
     setLoading(true)
     try {
       var plantId = PLANT_ID
-
       const year = AOP_YEAR
-
       const response = await DataService.saveSlowdownConfigData(
         plantId,
         year,
@@ -222,7 +226,6 @@ const SlowDown = ({ permissions }) => {
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
-
         setSnackbarData({
           message: 'Saved Successfully!',
           severity: 'success',
@@ -324,6 +327,7 @@ const SlowDown = ({ permissions }) => {
       // Select required fields based on vertical
       const requiredFields = ['discription', 'remark']
       const requiredFieldsForElastomer = ['discription', 'remark', 'rate']
+      const requiredFieldsForPe = ['discription', 'remark', 'rate']
       const requiredFieldsForMeg = [
         'discription',
         'remark',
@@ -336,7 +340,9 @@ const SlowDown = ({ permissions }) => {
           ? requiredFieldsForElastomer
           : lowerVertName === 'meg'
             ? requiredFieldsForMeg
-            : requiredFields
+            : lowerVertName === 'pe'
+              ? requiredFieldsForPe
+              : requiredFields
 
       // Missing required fields
       for (const record of data) {
@@ -728,7 +734,7 @@ const SlowDown = ({ permissions }) => {
           hidden: removedCols.includes(item.field),
           ...(item.field !== 'particulars' &&
             item.field.toLowerCase() !== 'uom' && {
-              format: '{0:#.###}',
+              format: FORMATE_DECIMAL,
               type: 'number',
             }),
         }))
@@ -857,6 +863,7 @@ const SlowDown = ({ permissions }) => {
       console.error('Error deleting Record!', error)
     }
   }
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -980,6 +987,10 @@ const SlowDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
+
+      showTitleNameBusiness: true,
+      titleName: SCREEN_NAME,
+
       uploadExcelBtn:
         lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
     },
@@ -1099,6 +1110,8 @@ const SlowDown = ({ permissions }) => {
             onlyCellUpdate: true,
             downloadExcelBtnFromUI: true,
             ExcelName: `${lowerVertName}_Slowdown Activities Configuration`,
+            showTitleNameBusiness: true,
+            titleName: 'Configuration',
           }}
           handleCancelClick={handleCancelClick}
           groupBy='Particulars'

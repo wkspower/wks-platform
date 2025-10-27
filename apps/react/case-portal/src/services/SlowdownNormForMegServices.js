@@ -2,8 +2,8 @@ import Config from 'consts/index'
 import { json } from './request'
 
 export class SlowdownNormForMegServices {
-  static async getSlowdownNormsDataForMeg({ keycloak, plantId, year }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption?plantId=${plantId}&year=${year}`
+  static async getSlowdownNormsDataForMeg({ keycloak, PLANT_ID, year }) {
+    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption?plantId=${PLANT_ID}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -17,8 +17,8 @@ export class SlowdownNormForMegServices {
       return await Promise.reject(e)
     }
   }
-  static async getSlowdownNormsColumnsForMeg({ keycloak, plantId, year }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption-columns?plantId=${plantId}&year=${year}`
+  static async getSlowdownNormsColumnsForMeg({ keycloak, PLANT_ID, year }) {
+    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption-columns?plantId=${PLANT_ID}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -32,8 +32,8 @@ export class SlowdownNormForMegServices {
       return await Promise.reject(e)
     }
   }
-  static async getSlowdownNormsCalculateForMeg({ keycloak, plantId, year }) {
-    const url = `${Config.CaseEngineUrl}/task/calculate-slowdown-consumption?plantId=${plantId}&year=${year}`
+  static async getSlowdownNormsCalculateForMeg({ keycloak, PLANT_ID, year }) {
+    const url = `${Config.CaseEngineUrl}/task/calculate-slowdown-consumption?plantId=${PLANT_ID}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -47,8 +47,13 @@ export class SlowdownNormForMegServices {
       return await Promise.reject(e)
     }
   }
-  static async updateSlowdownNormsForMeg({ keycloak, plantId, year, payload }) {
-    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption?plantId=${plantId}&year=${year}`
+  static async updateSlowdownNormsForMeg({
+    keycloak,
+    PLANT_ID,
+    year,
+    payload,
+  }) {
+    const url = `${Config.CaseEngineUrl}/task/slowdown-consumption?plantId=${PLANT_ID}&year=${year}`
     const headers = {
       Accept: 'application/json',
       'Content-Type': 'application/json',

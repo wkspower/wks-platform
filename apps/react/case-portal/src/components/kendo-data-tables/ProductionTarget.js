@@ -1,20 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { useSession } from 'SessionStoreContext'
 import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
+import { useSession } from 'SessionStoreContext'
 import getEnhancedProductionColDefs from '../data-tables/CommonHeader/Kendo_ProductionVolumeHeader'
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { useDispatch } from 'react-redux'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
-import { Typography } from '../../../node_modules/@mui/material/index'
-// import { usePermissions } from 'hooks/usePermissions'
-import KendoDataTables from './index'
-import { validateFields } from 'utils/validationUtils'
-import { ProductionVolumeDataApiService } from 'services/production-volume-data-api-service'
 import { DataService } from 'services/DataService'
+import { ProductionVolumeDataApiService } from 'services/production-volume-data-api-service'
+import { validateFields } from 'utils/validationUtils'
+import KendoDataTables from './index'
 import {
   getColDefsDesignCapacity,
   getColDefsDesignCapacityPEPP,
@@ -22,12 +19,8 @@ import {
   getColDefsNonEditable,
   getColDefsPercentageSummary,
 } from './Utilities-Kendo/productionTargetColDefs'
-import ProductionTarget from './ProductionTarget'
 
-const ProductionvolumeData = ({ permissions }) => {
-  // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
-  //   usePermissions()
-
+const ProductionTarget = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
@@ -35,11 +28,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const [enableSaveAddBtnDesignCapacity, setEnableSaveAddBtnDesignCapacity] =
     useState(false)
   const [_plantID, set_PlantID] = useState('')
-
   const keycloak = useSession()
-
   const [calculationObject, setCalculationObject] = useState([])
-
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -52,21 +42,17 @@ const ProductionvolumeData = ({ permissions }) => {
     verticalObject,
     year,
   } = dataGridStore
-  //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
-
   const PLANT_ID = plantObject?.id
   const VERTICAL_ID = verticalObject?.id
   const SITE_ID = siteObject?.id
   const AOP_YEAR = year?.selectedYear
-
   const PLANT_NAME = plantObject?.name?.toLowerCase()
   const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
   const IS_PE_PP =
     verticalObject?.name?.toLowerCase() == 'pe' ||
     verticalObject?.name?.toLowerCase() == 'pp'
   const SITE_NAME = siteObject?.name?.toLowerCase()
-
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -77,11 +63,8 @@ const ProductionvolumeData = ({ permissions }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [unitDesignCapacity, setUnitDesignCapacity] = useState('TPH')
-  const [unitMaxCapacity, setUnitMaxCapacity] = useState('TPH')
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [loading, setLoading] = useState(false)
-
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [remarkDialogOpenDesignCapacity, setRemarkDialogOpenDesignCapacity] =
     useState(false)
@@ -96,7 +79,6 @@ const ProductionvolumeData = ({ permissions }) => {
   const dispatch = useDispatch()
   const [rowsDesignCapacity, setRowsDesignCapacity] = useState([])
   const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
-
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -128,19 +110,15 @@ const ProductionvolumeData = ({ permissions }) => {
       'february',
       'march',
     ]
-
     const values = months.map((month) => row[month] || 0)
     const sum = values.reduce((acc, val) => acc + val, 0)
     const avg = (sum / values.length).toFixed(2)
-
     return avg === '0.00' ? null : avg
   }
-
   const editAOPMCCalculatedData = async (newRows) => {
     setLoading(true)
     try {
       const isTPH = selectedUnit == 'TPD'
-
       const aopmccCalculatedData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april / 24 : row.april || null,
         may: isTPH && row.may ? row.may / 24 : row.may || null,
@@ -158,7 +136,6 @@ const ProductionvolumeData = ({ permissions }) => {
         february:
           isTPH && row.february ? row.february / 24 : row.february || null,
         march: isTPH && row.march ? row.march / 24 : row.march || null,
-
         financialYear: AOP_YEAR,
         plantFKId: PLANT_ID,
         siteFKId: SITE_ID,
@@ -218,7 +195,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const editDesignCapacityData = async (newRows) => {
     setLoading(true)
     try {
-      const isTPH = unitDesignCapacity === 'TPD'
+      const isTPH = selectedUnit === 'TPD'
 
       const months = [
         'april',
@@ -263,7 +240,7 @@ const ProductionvolumeData = ({ permissions }) => {
         })
         setModifiedCellsDesignCapacity({})
         setEnableSaveAddBtnDesignCapacity(false)
-        fetchDesignCapacityData(unitDesignCapacity)
+        fetchDesignCapacityData(selectedUnit)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -313,7 +290,7 @@ const ProductionvolumeData = ({ permissions }) => {
     } catch (error) {
       console.log('Facing issue at saving data', error)
     }
-  }, [modifiedCellsDesignCapacity, unitDesignCapacity])
+  }, [modifiedCellsDesignCapacity, selectedUnit])
 
   //
   const saveChanges = React.useCallback(async () => {
@@ -582,11 +559,11 @@ const ProductionvolumeData = ({ permissions }) => {
   })
 
   const handleUnitChangeDesignCapacity = (unit) => {
-    setUnitDesignCapacity(unit)
+    setSelectedUnit(unit)
   }
 
   const handleUnitChangeMaxCapacity = (unit) => {
-    setUnitMaxCapacity(unit)
+    setSelectedUnit(unit)
   }
 
   const handleUnitChangeMain = (unit) => {
@@ -601,7 +578,7 @@ const ProductionvolumeData = ({ permissions }) => {
     }
   }
 
-  const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
+  const fetchDesignCapacityData = async (unit = selectedUnit) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     setLoading(true)
@@ -685,7 +662,7 @@ const ProductionvolumeData = ({ permissions }) => {
       setLoading(false)
     }
   }
-  const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
+  const fetchMaxCapacityData = async (unit = selectedUnit) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     setLoading(true)
@@ -768,12 +745,12 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   useEffect(() => {
-    fetchDesignCapacityData(unitDesignCapacity)
-  }, [unitDesignCapacity, plantID, yearChanged, keycloak])
+    fetchDesignCapacityData(selectedUnit)
+  }, [selectedUnit, plantID, yearChanged, keycloak])
 
   useEffect(() => {
-    fetchMaxCapacityData(unitMaxCapacity)
-  }, [unitMaxCapacity, plantID, yearChanged, keycloak])
+    fetchMaxCapacityData(selectedUnit)
+  }, [selectedUnit, plantID, yearChanged, keycloak])
 
   useEffect(() => {
     fetchData()
@@ -846,7 +823,7 @@ const ProductionvolumeData = ({ permissions }) => {
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? true,
+      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: false,
@@ -902,7 +879,7 @@ const ProductionvolumeData = ({ permissions }) => {
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? true,
+      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? true,
@@ -1074,10 +1051,6 @@ const ProductionvolumeData = ({ permissions }) => {
 
   max_achieved_capacity = colDefs_max_achieved_capacity
 
-  if (VERTICAL_NAME?.toLowerCase() == 'meg' && conditionForFirst) {
-    return <ProductionTarget />
-  }
-
   return (
     <div>
       <Backdrop
@@ -1114,8 +1087,8 @@ const ProductionvolumeData = ({ permissions }) => {
           currentRowId={currentRowIdDesignCapacity}
           setEnableSaveAddBtn={setEnableSaveAddBtnDesignCapacity}
           permissions={adjustedPermissionsGrid2}
-          selectedUnit={unitDesignCapacity}
-          setSelectedUnit={setUnitDesignCapacity}
+          selectedUnit={selectedUnit}
+          setSelectedUnit={setSelectedUnit}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
@@ -1130,8 +1103,8 @@ const ProductionvolumeData = ({ permissions }) => {
           rows={rowsMaxCapacity}
           fetchData={fetchMaxCapacityData}
           permissions={adjustedPermissionsGrid1}
-          selectedUnit={unitMaxCapacity}
-          setSelectedUnit={setUnitMaxCapacity}
+          selectedUnit={selectedUnit}
+          setSelectedUnit={setSelectedUnit}
           handleUnitChange={handleUnitChangeMaxCapacity}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
@@ -1190,4 +1163,4 @@ const ProductionvolumeData = ({ permissions }) => {
   )
 }
 
-export default ProductionvolumeData
+export default ProductionTarget

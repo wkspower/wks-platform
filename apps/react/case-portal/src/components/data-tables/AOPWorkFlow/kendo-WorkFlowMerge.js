@@ -78,34 +78,20 @@ const WorkFlowMerge = () => {
   const [actionDisabled, setActionDisabled] = useState(false)
   const [text, setText] = useState('')
   const [taskId, setTaskId] = useState('')
+  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const {
-    verticalChange,
-    yearChanged,
-    oldYear,
-    plantID,
-    plantObject,
-    siteObject,
-    verticalObject,
-    year,
-  } = dataGridStore
-
-  const PLANT_ID = plantObject?.id
-  const SITE_ID = siteObject?.id
-  const VERTICAL_ID = verticalObject?.id
-  const AOP_YEAR = year?.selectedYear
-
-  const isOldYear = oldYear?.oldYear
+  const { sitePlantChange, verticalChange, yearChanged, oldYear, plantID } =
+    dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
   const [businessKey, setBusinessKey] = useState('')
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})
   const [status, setStatus] = useState('')
   const [caseId, setCaseId] = useState('')
   const [role, setRole] = useState('')
+  const isOldYear = oldYear?.oldYear === 1
   // UI feedback
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [tabIndex, setTabIndex] = useState(0)
@@ -118,7 +104,8 @@ const WorkFlowMerge = () => {
     rowsBeforeChange: {},
   })
   const [rowModesModel, setRowModesModel] = useState({})
-
+  const siteName =
+    JSON.parse(localStorage.getItem('selectedSite'))?.name?.toLowerCase() || ''
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
@@ -130,69 +117,79 @@ const WorkFlowMerge = () => {
   const handleExport = () => {
     handleExportAll()
   }
+  const year = localStorage.getItem('year')
 
   const handleCalculate = async () => {
     try {
       setLoadingCalculate(true)
 
-      if (!PLANT_ID || !AOP_YEAR) {
-        throw new Error('PLANT_ID or AOP_YEAR not found ')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      let plantId = null
+
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      if (!plantId || !year) {
+        throw new Error('Plant ID or year not found in localStorage')
       }
 
       // Wait for all API calls to complete
       const [data, res1, res2, res3, res4, res5, res6, res7] =
         await Promise.all([
           DataService.handleCalculateAnnualAopCostMiisContribution(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.handleCalculateProductionVolData2(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.handleCalculatePlantProductionData(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.handleCalculateMonthwiseProduction(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.calculateTurnAroundPlanReportData(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.calculateAnnualProductionPlanData(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.handleCalculatePlantConsumptionData(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
           DataService.calculatePlantContributionReportData(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
 
           DataService.calculatePlantContributionSummaryYearly(
-            PLANT_ID,
-            AOP_YEAR,
+            plantId,
+            year,
             keycloak,
           ),
 
           lowerVertName === 'meg' || lowerVertName === 'pe'
             ? DataService.calculatePlantContributionReportData(
-                PLANT_ID,
-                AOP_YEAR,
+                plantId,
+                year,
                 keycloak,
               )
             : Promise.resolve(null),
@@ -243,8 +240,17 @@ const WorkFlowMerge = () => {
     try {
       setLoading(true)
 
-      if (!PLANT_ID || !AOP_YEAR) {
-        throw new Error('PLANT_ID or AOP_YEAR not found')
+      const storedPlant = localStorage.getItem('selectedPlant')
+      const year = localStorage.getItem('year')
+      let plantId = null
+
+      if (storedPlant) {
+        const parsedPlant = JSON.parse(storedPlant)
+        plantId = parsedPlant.id
+      }
+
+      if (!plantId || !year) {
+        throw new Error('Plant ID or year not found in localStorage')
       }
 
       const payload = postmanData
@@ -342,7 +348,7 @@ const WorkFlowMerge = () => {
     try {
       const { headers, keys, results } = await DataService.getWorkflowData(
         keycloak,
-        PLANT_ID,
+        plantId,
       )
       const numericKeys = getNumericKeysInAllRows(results)
       const formatted = results.map((row, idx) => ({
@@ -425,12 +431,13 @@ const WorkFlowMerge = () => {
           ],
         },
         workflowDTO: {
-          year: AOP_YEAR,
-          plantFkId: PLANT_ID,
+          year: localStorage.getItem('year'),
+          plantFkId:
+            JSON.parse(localStorage.getItem('selectedPlant'))?.id || '',
           caseDefId: caseId || caseData.caseDefinitionId,
           // caseId: result.businessKey,
-          siteFKId: SITE_ID,
-          verticalFKId: VERTICAL_ID,
+          siteFKId: JSON.parse(localStorage.getItem('selectedSite'))?.id || '',
+          verticalFKId: localStorage.getItem('verticalId'),
         },
         variables: caseData.attributes,
         // allData: rows,
@@ -464,7 +471,7 @@ const WorkFlowMerge = () => {
 
   useEffect(() => {
     getCaseId()
-  }, [PLANT_ID, AOP_YEAR])
+  }, [plantId, year])
 
   // handle reject click
   const handleRejectClick = () => {
@@ -516,7 +523,7 @@ const WorkFlowMerge = () => {
   const saveChanges = async () => {
     try {
       // console.log(rows, 'workflowDto')
-      await DataService.saveAnnualWorkFlowData(keycloak, rows, PLANT_ID)
+      await DataService.saveAnnualWorkFlowData(keycloak, rows, plantId)
       setSnackbarData({
         message: 'Data Saved Successfully!',
         severity: 'success',

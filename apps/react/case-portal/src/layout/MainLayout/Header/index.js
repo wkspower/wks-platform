@@ -18,8 +18,8 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
   const mainHeader = (
     <Toolbar
       sx={{
-        minHeight: '48px !important',
-        py: 0.5,
+        minHeight: '38px !important',
+        py: 0,
       }}
     >
       <IconButton
@@ -31,7 +31,7 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
         sx={{
           color: '#FFFFFF',
           fontSize: '1.5rem',
-          ml: { xs: 0, lg: -2 },
+          ml: { xs: 0, lg: -3 },
         }}
       >
         {!open ? <MenuOutlined /> : <CloseOutlined />}

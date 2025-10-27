@@ -127,7 +127,7 @@ const getEnhancedColDefs = ({
                 }}
                 onDoubleClick={() => handleRemarkCellClick(params.row)}
               >
-                {displayText || (isEditable ? 'Click to add remark' : '')}
+                {displayText || (isEditable ? 'Add remark' : '')}
               </div>
             </Tooltip>
           )

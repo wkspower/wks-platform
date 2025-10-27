@@ -91,10 +91,11 @@
   border-bottom: 1px solid #d6d6d6;
   font-size: 0.8rem;
 }
-.kendo-data-grid .k-grid-content .k-grid-table td:last-child:after,
+/* .kendo-data-grid .k-grid-content .k-grid-table td:last-child:after,
 .kendo-data-grid .k-grid-content .k-grid-table th:last-child:after {
   border-right: none;
-}
+} */
+
 .kendo-data-grid .k-grid-content .k-grid-table td:after {
   content: '';
   position: absolute;

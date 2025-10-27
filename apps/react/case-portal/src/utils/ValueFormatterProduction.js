@@ -7,7 +7,7 @@ export default function ValueFormatterProduction() {
   const VERTICAL_NAME = dataGridStore?.verticalObject?.name?.toLowerCase()
 
   if (VERTICAL_NAME === 'aromatics') {
-    return '{0:0.00}'
+    return '{0:0.000}'
   }
 
   return '{0:0.00}'

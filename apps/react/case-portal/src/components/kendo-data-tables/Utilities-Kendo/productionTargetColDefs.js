@@ -30,7 +30,12 @@ export function getColDefsDesignCapacity(headerMap = {}) {
       editable: true,
       hidden: true,
     },
-    { field: 'productName', title: 'Particulars', widthT: 100, editable: true },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
     ...generateMonthColumns(headerMap, true),
     {
       field: 'remarks',
@@ -40,6 +45,25 @@ export function getColDefsDesignCapacity(headerMap = {}) {
       headerAlign: 'left',
       widthT: 150,
     },
+  ]
+}
+
+export function getColDefsDesignCapacityPEPP(headerMap = {}) {
+  return [
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
+    ...generateMonthColumns(headerMap, false),
   ]
 }
 

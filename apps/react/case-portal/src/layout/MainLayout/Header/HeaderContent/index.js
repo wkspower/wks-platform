@@ -25,11 +25,11 @@ import {
 } from 'store/reducers/dataGridStore'
 import MobileSection from './MobileSection'
 import Profile from './Profile/index'
-import Search from './Search'
 
 // import Logo from '../../../assets/images/ril-logo2.png'
 import Logo from 'assets/images/ril-logo2.png'
-import { Skeleton } from '../../../../../node_modules/@progress/kendo-react-indicators/index'
+import DropdownSkeleton from 'utils/DropdownSkeleton'
+// import { Skeleton } from '../../../../../node_modules/@progress/kendo-react-indicators/index'
 
 // Utility to parse the Keycloak ?allowed? JSON
 function parseAllowed(raw) {
@@ -90,12 +90,15 @@ export default function HeaderContent({ keycloak }) {
       const data = await DataService.getAllSites(keycloak)
       setFullDetails(data || [])
     } catch (error) {
-      console.error('Error fetching sites', error)
+      console.error('Error fetching data', error)
       setFullDetails([])
     } finally {
-      setHeaderLoading(false)
+      setTimeout(() => {
+        setHeaderLoading(false)
+      }, 2000)
     }
   }
+
   useEffect(() => {
     fetchAllSites()
   }, [keycloak])
@@ -174,31 +177,17 @@ export default function HeaderContent({ keycloak }) {
       return
     }
     const vertObj = fullDetails.find((v) => v.id === selectedVertical)
-
-    // console.log('vertObj', vertObj)
-
     const siteObj = vertObj?.sites.find((s) => s.id === selectedSite)
-
-    // console.log('siteObj', siteObj)
-
     const allowedPlants = allowedMap[selectedVertical]?.[selectedSite] || []
-
-    // console.log('allowedPlants', allowedPlants)
 
     const list = (siteObj?.plants || [])
       .filter((p) => allowedPlants.includes(p.id))
       .map((p) => ({ id: p.id, name: p.displayName }))
-
     setPlants(list)
-
-    // console.log('list', list)
 
     if (list.length) {
       const defP = list[0]
       setSelectedPlant(defP.id)
-      // console.log('defP.id', defP.id)
-      // console.log('defP.name', defP.name)
-
       localStorage.setItem(
         'selectedPlant',
         JSON.stringify({ id: defP.id, name: defP.name }),
@@ -218,7 +207,7 @@ export default function HeaderContent({ keycloak }) {
 
   useEffect(() => {
     async function fetchYears() {
-      setHeaderLoading(true)
+      // setHeaderLoading(true)
       try {
         var resp = await DataService.getAopyears(keycloak)
         if (resp?.length) {
@@ -236,9 +225,9 @@ export default function HeaderContent({ keycloak }) {
           }
         }
       } catch (err) {
-        console.error('Error fetching AOP years', err)
+        console.error('Error fetching data', err)
       } finally {
-        setHeaderLoading(false)
+        // setHeaderLoading(false)
       }
     }
     fetchYears()
@@ -371,16 +360,18 @@ export default function HeaderContent({ keycloak }) {
           justifyContent: 'space-between',
           alignItems: 'center',
           width: '100%',
+          // py: 0, // 4px top/bottom
         }}
       >
         {/* LEFT SIDE: Logo + Title */}
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Box sx={{ ml: 2 }}>
-            <img src={Logo} alt='RIL Logo' style={{ height: 40 }} />
+          <Box sx={{ ml: 0 }}>
+            <img src={Logo} alt='RIL Logo' style={{ height: 32 }} />
           </Box>
+
           <Box sx={{ ml: 1 }}>
             <Typography
-              variant='body1'
+              variant='body2'
               color='white'
               className='custom-title-font'
             >
@@ -393,17 +384,20 @@ export default function HeaderContent({ keycloak }) {
         <Stack direction='row' spacing={1} alignItems='center'>
           {/* Year */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body1' className='custom-title-dropdown'>
+            <Typography variant='body2' className='custom-title-dropdown'>
               Year:
             </Typography>
             {headerLoading ? (
-              <Skeleton variant='rectangle' width={100} height={40} />
+              <DropdownSkeleton />
             ) : (
-              <FormControl sx={{ minWidth: 100 }}>
+              <FormControl sx={{ width: 80 }}>
                 <Select
                   value={selectedYear}
                   onChange={handleYearChange}
                   className='custom-title-dropdown-content'
+                  MenuProps={{
+                    PaperProps: { style: { maxHeight: 200 } },
+                  }}
                 >
                   {aopYears.map((y) => (
                     <MenuItem key={y.AOPYear} value={y.AOPYear}>
@@ -417,17 +411,20 @@ export default function HeaderContent({ keycloak }) {
 
           {/* Vertical */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body1' className='custom-title-dropdown'>
+            <Typography variant='body2' className='custom-title-dropdown'>
               Vertical:
             </Typography>
             {headerLoading ? (
-              <Skeleton variant='rectangle' width={100} height={40} />
+              <DropdownSkeleton />
             ) : (
-              <FormControl sx={{ minWidth: 100 }}>
+              <FormControl sx={{ width: 100 }}>
                 <Select
                   value={selectedVertical}
                   onChange={handleVertChange}
                   className='custom-title-dropdown-content'
+                  MenuProps={{
+                    PaperProps: { style: { maxHeight: 200 } },
+                  }}
                 >
                   {verticals.map((v) => (
                     <MenuItem key={v.id} value={v.id}>
@@ -441,18 +438,21 @@ export default function HeaderContent({ keycloak }) {
 
           {/* Site */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body1' className='custom-title-dropdown'>
+            <Typography variant='body2' className='custom-title-dropdown'>
               Site:
             </Typography>
             {headerLoading ? (
-              <Skeleton variant='rectangle' width={100} height={40} />
+              <DropdownSkeleton />
             ) : (
-              <FormControl sx={{ minWidth: 100 }}>
+              <FormControl sx={{ width: 80 }}>
                 <Select
                   value={selectedSite}
                   onChange={handleSiteChange}
                   disabled={!sites.length}
                   className='custom-title-dropdown-content'
+                  MenuProps={{
+                    PaperProps: { style: { maxHeight: 200 } },
+                  }}
                 >
                   {sites.map((s) => (
                     <MenuItem key={s.id} value={s.id}>
@@ -466,18 +466,21 @@ export default function HeaderContent({ keycloak }) {
 
           {/* Plant */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body1' className='custom-title-dropdown'>
+            <Typography variant='body2' className='custom-title-dropdown'>
               Plant:
             </Typography>
             {headerLoading ? (
-              <Skeleton variant='rectangle' width={100} height={40} />
+              <DropdownSkeleton />
             ) : (
-              <FormControl sx={{ minWidth: 100 }}>
+              <FormControl sx={{ width: 100 }}>
                 <Select
                   value={selectedPlant}
                   onChange={handlePlantChange}
                   disabled={!plants.length}
                   className='custom-title-dropdown-content'
+                  MenuProps={{
+                    PaperProps: { style: { maxHeight: 200 } },
+                  }}
                 >
                   {plants.map((p) => (
                     <MenuItem key={p.id} value={p.id}>

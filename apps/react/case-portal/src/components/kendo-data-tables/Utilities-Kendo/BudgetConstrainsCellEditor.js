@@ -1,5 +1,5 @@
 import { DropDownList } from '@progress/kendo-react-dropdowns'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 
 const BudgetConstrainsCellEditor = (props) => {
   const { dataItem, field, onChange, ...tdProps } = props
@@ -27,7 +27,12 @@ const BudgetConstrainsCellEditor = (props) => {
     'jan',
     'feb',
     'mar',
-  ]
+  ] // helper to parse numeric percent safely (keeps 0.0)
+  const parsePercent = (v) => {
+    if (v === undefined || v === null || v === '') return NaN
+    const n = Number(v)
+    return isNaN(n) ? NaN : n
+  }
 
   const currentValueObj = useMemo(
     () => allOptions.find((opt) => opt.value === dataItem[field]) || null,
@@ -35,11 +40,39 @@ const BudgetConstrainsCellEditor = (props) => {
   )
 
   // helper to safely parse numeric percent from the row
+  // const getPercentFromRow = () => {
+  //   const raw = dataItem?.percentChange
+  //   if (raw === undefined || raw === null || raw === '') return NaN
+  //   const n = Number(raw)
+  //   return isNaN(n) ? NaN : n
+  // }
+
+  // ---------- NEW: clear dropdown when percentChange differs from original ----------
+  useEffect(() => {
+    if (typeof onChange !== 'function') return
+
+    const p = parsePercent(dataItem?.percentChange)
+    const orig = parsePercent(dataItem?.originalPercentChange)
+
+    const bothNaN = isNaN(p) && isNaN(orig)
+    const isDifferent = !bothNaN && p !== orig
+
+    if (
+      isDifferent &&
+      dataItem[field] !== null &&
+      dataItem[field] !== undefined &&
+      dataItem[field] !== ''
+    ) {
+      onChange({ dataItem, field, value: null })
+    }
+  }, [
+    dataItem?.percentChange,
+    dataItem?.originalPercentChange, // <- remove dataItem?.[field] from deps
+  ])
+
+  // ---------- rest of handler ----------
   const getPercentFromRow = () => {
-    const raw = dataItem?.budgetConstrains
-    if (raw === undefined || raw === null || raw === '') return NaN
-    const n = Number(raw)
-    return isNaN(n) ? NaN : n
+    return parsePercent(dataItem?.percentChange)
   }
 
   if (typeof onChange === 'function') {
@@ -89,10 +122,7 @@ const BudgetConstrainsCellEditor = (props) => {
         value={currentValueObj}
         onChange={handleChange}
         style={{ width: '100%' }}
-        disabled={
-          dataItem?.budgetConstrains === '' ||
-          dataItem?.budgetConstrains === undefined
-        }
+        disabled={dataItem?.percentChange == dataItem?.originalPercentChange}
       />
     )
   }
