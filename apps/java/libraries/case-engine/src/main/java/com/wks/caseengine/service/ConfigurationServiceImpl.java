@@ -442,7 +442,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Object[]> obj = new ArrayList<>();
 			
-				String procedureName = verticalName + "_GetConfiguration";
+				String procedureName = verticalName + "_GetC2R_C3RProduction";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
 			
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
