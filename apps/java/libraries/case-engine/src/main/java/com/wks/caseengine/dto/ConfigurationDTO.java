@@ -41,6 +41,7 @@ public class ConfigurationDTO {
 	private String productName;
     private String saveStatus;
     private String errDescription;
+    private String type;
    // private String normParameterDisplayName;
 
 }
