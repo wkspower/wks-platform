@@ -1074,7 +1074,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
   max_achieved_capacity = colDefs_max_achieved_capacity
 
-  if (VERTICAL_NAME?.toLowerCase() == 'meg' && conditionForFirst) {
+  if (VERTICAL_NAME?.toLowerCase() == 'aromatics' && conditionForFirst) {
     return <ProductionTarget />
   }
 

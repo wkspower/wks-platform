@@ -93,9 +93,9 @@ export default function HeaderContent({ keycloak }) {
       console.error('Error fetching data', error)
       setFullDetails([])
     } finally {
-      setTimeout(() => {
-        setHeaderLoading(false)
-      }, 2000)
+      // setTimeout(() => {
+      setHeaderLoading(false)
+      // }, 2000)
     }
   }
 

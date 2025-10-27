@@ -178,7 +178,7 @@ export default function AopBudget() {
     {
       field: 'percentChange', //percentChange
       title: '% Change',
-      width: 210,
+      width: 225,
       editable: true,
     },
     { field: 'symbol', title: '+VE/-VE', width: 120 },
@@ -268,7 +268,7 @@ export default function AopBudget() {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
-      resetButton: true,
+      resetButton: false,
     }
   }
 
@@ -285,7 +285,7 @@ export default function AopBudget() {
       uploadExcelBtn: false,
       ExcelName: `${lowerVertName}_Monthly Procurement Budget`,
       constarins: ['+', '-'],
-      resetButton: true,
+      resetButton: false,
     },
     isOldYear,
   )
@@ -301,7 +301,7 @@ export default function AopBudget() {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
-      resetButton: true,
+      resetButton: false,
     }
   }
 
@@ -318,7 +318,7 @@ export default function AopBudget() {
       uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
       constarins: ['+', '-'],
-      resetButton: true,
+      resetButton: false,
     },
     isOldYear,
   )
