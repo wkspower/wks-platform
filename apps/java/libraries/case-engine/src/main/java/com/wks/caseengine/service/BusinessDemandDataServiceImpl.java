@@ -142,7 +142,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Object[]> obj = new ArrayList<>();
 			
-				String procedureName = verticalName + "_GetConfiguration";
+				String procedureName = verticalName + "_GetBusinessDemandMonthly";
 				obj = getData(year, plantFKId, procedureName);
 			
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
@@ -194,8 +194,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
 					configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
 					configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
-				
-				configurationDTOList.add(configurationDTO);
+					configurationDTO.setType(row[19] != null ? row[19].toString() : "");				
+					configurationDTOList.add(configurationDTO);
 				if (row[14] == null) {
 					i++;
 				}
