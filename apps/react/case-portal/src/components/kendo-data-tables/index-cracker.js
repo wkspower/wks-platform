@@ -485,6 +485,7 @@ const KendoDataTablesCracker = ({
                     onRemarkClick={handleRemarkCellClick}
                   />
                 ),
+                headerCell: SimpleHeaderWithTooltip,
               }}
               columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               hidden={col.hidden}
@@ -619,6 +620,7 @@ const KendoDataTablesCracker = ({
                     />
                   </td>
                 ),
+                headerCell: SimpleHeaderWithTooltip,
               }}
             />
           )

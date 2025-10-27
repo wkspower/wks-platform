@@ -61,6 +61,7 @@ import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
 import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
 import TcsInput from 'components/kendo-data-tables/TcsInput'
 import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTargetBasis'
+import NormsHistorianBasisAromatics from 'components/data-tables/Reports/NormsHistorianBasisAromatics'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -81,8 +82,15 @@ export const MainRoutes = (
     ) : (
       <ProductionVolumeDataBasis />
     )
+
   const NormsHistorianBasisElement =
-    verticalName != 'MEG' ? <NormsHistorianBasisPe /> : <NormsHistorianBasis />
+    (verticalName || '').toLowerCase() === 'meg' ? (
+      <NormsHistorianBasis />
+    ) : (verticalName || '').toLowerCase() === 'aromatics' ? (
+      <NormsHistorianBasisAromatics />
+    ) : (
+      <NormsHistorianBasisPe />
+    )
 
   let routes = {
     path: '/',

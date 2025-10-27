@@ -1,4 +1,3 @@
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import contineGradeChange from '../../../assets/kendo_config_contineGradeChange.json'
 import crackerColumns from '../../../assets/kendo_config_cracker_coldefs.json'
 import cracker_composition from '../../../assets/kendo_config_cracker_composition.json'
@@ -64,7 +63,6 @@ const getEnhancedAOPColDefs = ({
   configType,
 }) => {
   var config = []
-  const FORMATE_DECIMAL = ValueFormatterProduction()
 
   if (configType == 'grades') {
     config = [
@@ -106,7 +104,7 @@ const getEnhancedAOPColDefs = ({
         return {
           ...col,
           type: 'number',
-          format: FORMATE_DECIMAL,
+          format: '{0:0.00}',
         }
       }
 
@@ -120,7 +118,7 @@ const getEnhancedAOPColDefs = ({
           title: headerMap[col.title],
           align: 'right',
           type: 'negativeNumber',
-          format: FORMATE_DECIMAL,
+          format: '{0:0.00}',
         }
       }
 
@@ -134,7 +132,7 @@ const getEnhancedAOPColDefs = ({
           title: headerMap[col.title],
           align: 'right',
           type: 'number',
-          format: FORMATE_DECIMAL,
+          format: '{0:0.00}',
         }
       }
 

@@ -119,7 +119,6 @@ const KendoDataTables = ({
   handleDeleteSelected = () => {},
   saveChanges = () => {},
   deleteRowData = () => {},
-  resetRowData = () => {},
   handleAddPlantSite = () => {},
   handleCalculate = () => {},
   handleLoad = () => {},
@@ -146,6 +145,7 @@ const KendoDataTables = ({
   showThreeColors = false,
 }) => {
   const _export = useRef(null)
+  const _grid = React.useRef(undefined)
 
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [openResetDialogeBox, setOpenResetDialogeBox] = useState(false)
@@ -1206,7 +1206,6 @@ const KendoDataTables = ({
               allRedCell={allRedCell}
               allRedCell2={allRedCell2}
               size='small'
-              adaptive={true}
               pageable={
                 rows?.length > 100
                   ? {
@@ -1942,22 +1941,6 @@ const KendoDataTables = ({
                   }}
                 />
               )}
-
-              {permissions?.resetButton && (
-                <GridColumn
-                  key='actions'
-                  field='actions'
-                  title='Action'
-                  width={40}
-                  className='k-text-center'
-                  filterable={false}
-                  editable={false}
-                  cells={{
-                    data: ResetActionsCell,
-                    headerCell: SimpleHeaderWithTooltip,
-                  }}
-                />
-              )}
             </Grid>
           </ExcelExport>
         </Tooltip>
@@ -2051,27 +2034,6 @@ const KendoDataTables = ({
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Dialog
-        open={openResetDialogeBox}
-        onClose={() => setOpenResetDialogeBox(false)}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogTitle id='alert-dialog-title'>{'Reset ?'}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to reset this row?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenResetDialogeBox(false)}>Cancel</Button>
-          <Button onClick={resetTheRecord} autoFocus>
-            Reset
-          </Button>
-        </DialogActions>
-      </Dialog>
-
       <Dialog
         open={openSaveDialogeBox}
         onClose={closeSaveDialogeBox}

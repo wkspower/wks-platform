@@ -477,11 +477,11 @@ const ConfigurationTable = () => {
     const createPayloadItem = (obj, date) => ({
       apr: date,
       UOM: '',
-      AOP_YEAR,
+      auditYear: AOP_YEAR,
       normParameterFKId: obj?.NormParameter_FK_Id,
       remarks: 'Initiated',
       id: obj?.Id || null,
-      PLANT_ID,
+      plantId: PLANT_ID,
     })
     const payload = [
       createPayloadItem(startDateObj, formatDate(startDate)),
