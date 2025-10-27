@@ -306,10 +306,29 @@ const WorkFlowMerge = () => {
     ],
   }
 
-  function getNumericKeysInAllRows(rows) {
+  function getNumericKeysInAllRows(rows = []) {
     if (!Array.isArray(rows) || rows.length === 0) return []
-    return Object.keys(rows[0]).filter((key) =>
-      rows.every((row) => row[key] === '' || !isNaN(Number(row[key]))),
+
+    // collect every key that appears in any row
+    const allKeys = Array.from(
+      rows.reduce((set, row) => {
+        if (row && typeof row === 'object') {
+          Object.keys(row).forEach((k) => set.add(k))
+        }
+        return set
+      }, new Set()),
+    )
+
+    return allKeys.filter((key) =>
+      rows.every((row) => {
+        const v = row?.[key]
+        // ignore missing / null / empty-string values (they don't disqualify the key)
+        if (v === undefined || v === null || String(v).trim() === '')
+          return true
+
+        const n = Number(String(v).trim())
+        return Number.isFinite(n)
+      }),
     )
   }
 

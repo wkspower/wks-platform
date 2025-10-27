@@ -427,7 +427,11 @@ const ProductionVolumeDataBasisPe = () => {
                       <Box sx={{ width: '100%', margin: 0 }}>
                         <KendoDataGrid
                           rows={d.rows}
-                          columns={d.columns}
+                          columns={d.columns?.map((col) => ({
+                            ...col,
+                            widthT:
+                              d?.columns?.length > 20 ? '150px' : undefined,
+                          }))}
                           permissions={{ isHeight: d?.rows?.length > 15 }}
                         />
                       </Box>

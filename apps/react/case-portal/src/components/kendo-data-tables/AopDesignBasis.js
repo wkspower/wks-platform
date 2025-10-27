@@ -29,6 +29,7 @@ import InfoIcon from '@mui/icons-material/Info'
 
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
+import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
 
 const AopDesignBasis = () => {
   const year = localStorage.getItem('year')
@@ -811,21 +812,26 @@ const AopDesignBasis = () => {
               </Box>
             </Box>
 
-            <TextField
-              // label='AOP Design Basis'
-              multiline
-              minRows={lowerVertName === 'cracker' ? 6 : 2}
-              fullWidth
-              margin='normal'
-              variant='outlined'
-              disabled={isOldYear == 1}
-              value={summary}
-              onChange={(e) => {
-                setSummary(e.target.value)
-                setSummaryEdited(true)
-              }}
-              className='aop-design-basis'
-            />
+            <Box
+              sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1 }}
+            >
+              <Typography
+                className='button-title'
+                sx={{ whiteSpace: 'nowrap' }}
+              >
+                AOP Design Basis
+              </Typography>
+
+              <TextArea
+                value={summary}
+                rows={6}
+                onChange={(e) => {
+                  setSummary(e.target.value)
+                  setSummaryEdited(true)
+                }}
+                // className='aop-design-basis'
+              />
+            </Box>
           </CustomAccordionDetails>
         </CustomAccordion>
       </Box>
