@@ -17,8 +17,7 @@ import {
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
-import PropaneBusiness from './Propanebusiness'
-
+import PropaneBusiness  from 'components/kendo-data-tables/PropaneBusiness'
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const keycloak = useSession()
@@ -507,7 +506,9 @@ const BusinessDemand = ({ permissions }) => {
       {lowerVertName == 'cracker' && (
         <>
           <Box sx={{ width: '100%', margin: 0 }}>
-            <PropaneBusiness />
+            <PropaneBusiness
+            permissions={adjustedPermissions}
+       />
           </Box>
         </>
       )}
