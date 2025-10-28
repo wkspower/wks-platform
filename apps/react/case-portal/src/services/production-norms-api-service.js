@@ -4,6 +4,7 @@ export const ProductionNormsApiService = {
   updateProductNormData,
   handleCalculate,
   getAOPData,
+  monthlyProductionC2rC3R,
 }
 async function updateProductNormData(turnAroundDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/monthly-production` // Corrected endpoint
@@ -60,6 +61,21 @@ async function getAOPData(keycloak, type) {
     plantId = parsedPlant.id
   }
   const url = `${Config.CaseEngineUrl}/task/monthly-production?plantId=${plantId}&year=${year}&type=${type}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function monthlyProductionC2rC3R(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/monthly-production-manual-entry?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

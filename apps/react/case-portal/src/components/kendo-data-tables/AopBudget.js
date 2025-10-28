@@ -10,13 +10,15 @@ import {
 } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useSession } from 'SessionStoreContext'
-import { DataService } from 'services/DataService'
+
 import KendoDataTables from './index'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { validateFields } from 'utils/validationUtils'
 import { Grid, TextField } from '../../../node_modules/@mui/material/index'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
+import { AOPMaintenanceApiService } from 'services/aop-maintenance-api-service'
 export default function AopBudget() {
   const keycloak = useSession()
 
@@ -28,6 +30,12 @@ export default function AopBudget() {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
+  const [designRemarks, setDesignRemarks] = useState('')
+  const [designBasis, setDesignBasis] = useState('')
+  const [
+    designBasisAndDesignRemarksEdited,
+    setDesignBasisAndDesignRemarksEdited,
+  ] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -172,32 +180,32 @@ export default function AopBudget() {
   ]
 
   const columns = [
-    { field: 'plantName', title: 'Plant', width: 120 },
-    { field: 'costName', title: 'Cost', width: 120 },
-    { field: 'budgetType', title: 'Budget Type', width: 120, hidden: true },
+    { field: 'plantName', title: 'Plant', widthT: 70 },
+    { field: 'costName', title: 'Cost', widthT: 80 },
+    { field: 'budgetType', title: 'Budget Type', widthT: 80, hidden: true },
     {
-      field: 'percentChange', //percentChange
-      title: '% Change',
-      width: 225,
+      field: 'percentChange',
+      title: '% Change (+/-)',
+      widthT: 100,
       editable: true,
+      type: 'percentChange',
     },
-    { field: 'symbol', title: '+VE/-VE', width: 120 },
+    // { field: 'symbol', title: '+VE/-VE', width: 120 },
     ...monthFields.map(({ field, index, editable, type, format, width }) => ({
       field,
       title: headerMap[index],
-      editable, // Make sure this is passed through
+      editable,
       type,
       format,
-      width,
     })),
-    { field: 'remark', title: 'Remark', editable: true, width: 120 },
+    { field: 'remark', title: 'Remark', editable: true, widthT: 100 },
   ]
 
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       // Fetch for Consumption Budget
-      const resConsumption = await DataService.maintenacegetdata(
+      const resConsumption = await AOPMaintenanceApiService.maintenacegetdata(
         keycloak,
         'ConsumptionBudget',
         PLANT_ID,
@@ -214,7 +222,7 @@ export default function AopBudget() {
       setRows(mapped)
 
       // Fetch for Procurement Budget
-      const resProcurement = await DataService.maintenacegetdata(
+      const resProcurement = await AOPMaintenanceApiService.maintenacegetdata(
         keycloak,
         'ProcurementBudget',
         PLANT_ID,
@@ -238,9 +246,43 @@ export default function AopBudget() {
     }
   }, [keycloak, yearChanged, plantID])
 
+  const fetchDesignRemarksAndDesignBasis = useCallback(async () => {
+    setLoading(true)
+    try {
+      const resDesignBasis = await AOPMaintenanceApiService.designBasis(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setDesignBasis(resDesignBasis?.data)
+
+      const resDesignRemarks = await AOPMaintenanceApiService.designRemarks(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setDesignRemarks(resDesignRemarks?.data)
+    } catch (err) {
+      console.error('fetchData error', err)
+      setDesignBasis(null)
+      setDesignRemarks(null)
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak, yearChanged, plantID])
+
   useEffect(() => {
     fetchData()
-  }, [fetchData, yearChanged, plantID, keycloak])
+    fetchDesignRemarksAndDesignBasis()
+  }, [
+    fetchData,
+    fetchDesignRemarksAndDesignBasis,
+    yearChanged,
+    plantID,
+    keycloak,
+  ])
   const handleCalculate = () => {}
   const handleCalculateP = () => {}
 
@@ -269,6 +311,7 @@ export default function AopBudget() {
       saveBtn: false,
       isOldYear: isOldYear,
       resetButton: false,
+      percentChangeLogic: true,
     }
   }
 
@@ -286,6 +329,7 @@ export default function AopBudget() {
       ExcelName: `${lowerVertName}_Monthly Procurement Budget`,
       constarins: ['+', '-'],
       resetButton: false,
+      percentChangeLogic: true,
     },
     isOldYear,
   )
@@ -302,6 +346,7 @@ export default function AopBudget() {
       saveBtn: false,
       isOldYear: isOldYear,
       resetButton: false,
+      percentChangeLogic: true,
     }
   }
 
@@ -319,6 +364,7 @@ export default function AopBudget() {
       ExcelName: `${lowerVertName}_Monthly Consumption Budget`,
       constarins: ['+', '-'],
       resetButton: false,
+      percentChangeLogic: true,
     },
     isOldYear,
   )
@@ -337,12 +383,16 @@ export default function AopBudget() {
       const consumptionData = Object.values(modifiedCells)
       const procurementData = Object.values(modifiedCellsP)
 
-      if (!consumptionData.length && !procurementData.length) {
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+      if (!designBasisAndDesignRemarksEdited) {
+        setSnackbarData({
+          message: 'Please update Design Basis & Design Remarks',
+          severity: 'error',
+        })
         setSnackbarOpen(true)
         setLoading(false)
         return
       }
+
       const requiredFields = ['remark']
       const validationMessageC = validateFields(consumptionData, requiredFields)
       const validationMessageP = validateFields(procurementData, requiredFields)
@@ -364,14 +414,46 @@ export default function AopBudget() {
         ...procurementData.map((row) => omitFields(row, fieldsToOmit)),
       ]
 
+      // Helper: if percentChange is only a plain number, prefix with '+'
+      const prefixPlusForNumericPercent = (row) => {
+        if (!row || row.percentChange == null) return row
+        const raw = String(row.percentChange).trim()
+        // match only digits with optional decimal (no signs, no %)
+        if (/^[0-9]+(\.[0-9]+)?$/.test(raw)) {
+          return { ...row, percentChange: `+${raw}` }
+        }
+        return row
+      }
+
+      const processedRows = allRows.map(prefixPlusForNumericPercent)
+
+      await AOPMaintenanceApiService.saveDesignRemarks(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        designRemarks,
+      )
+
+      await AOPMaintenanceApiService.saveDesignBasis(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        designBasis,
+      )
+
       // Send as array payload
-      await DataService.savemaintenacegetdata(allRows, keycloak)
+      await AOPMaintenanceApiService.savemaintenacegetdata(
+        processedRows,
+        keycloak,
+      )
 
       setSnackbarData({ message: 'Saved successfully!', severity: 'success' })
       setSnackbarOpen(true)
       setModifiedCells({})
       setModifiedCellsP({})
+      designBasisAndDesignRemarksEdited(false)
       fetchData()
+      fetchDesignRemarksAndDesignBasis()
     } catch (err) {
       setSnackbarData({ message: 'Save failed!', severity: 'error' })
       setSnackbarOpen(true)
@@ -382,7 +464,11 @@ export default function AopBudget() {
   const downloadExcelForConfiguration = async () => {
     setLoading(true)
     try {
-      await DataService.maintenaceExportdata(keycloak, PLANT_ID, AOP_YEAR)
+      await AOPMaintenanceApiService.maintenaceExportdata(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       setSnackbarData({ message: 'Export started!', severity: 'success' })
       setSnackbarOpen(true)
@@ -399,7 +485,7 @@ export default function AopBudget() {
     try {
       let response
 
-      response = await DataService.maintenaceImportExceldata(
+      response = await AOPMaintenanceApiService.maintenaceImportExceldata(
         rawFile,
         keycloak,
         PLANT_ID,
@@ -414,6 +500,7 @@ export default function AopBudget() {
         })
         setModifiedCells({})
         fetchData()
+        fetchDesignRemarksAndDesignBasis()
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = Array.from(byteCharacters, (char) =>
@@ -440,6 +527,7 @@ export default function AopBudget() {
           severity: 'warning',
         })
         fetchData()
+        fetchDesignRemarksAndDesignBasis()
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -512,14 +600,13 @@ export default function AopBudget() {
               </Grid>
             </Grid>
 
-            <TextField
-              label='Design Basis'
-              multiline
-              minRows={3}
-              fullWidth
-              margin='none'
-              variant='outlined'
-              className='aop-design-basis'
+            <TextArea
+              value={designBasis}
+              rows={3}
+              onChange={(e) => {
+                setDesignBasis(e.target.value)
+                setDesignBasisAndDesignRemarksEdited(true)
+              }}
             />
           </Grid>
 
@@ -544,14 +631,13 @@ export default function AopBudget() {
               </Grid>
             </Grid>
 
-            <TextField
-              label='Remarks'
-              multiline
-              minRows={3}
-              fullWidth
-              margin='none'
-              variant='outlined'
-              className='aop-design-basis'
+            <TextArea
+              value={designRemarks}
+              rows={3}
+              onChange={(e) => {
+                setDesignRemarks(e.target.value)
+                setDesignBasisAndDesignRemarksEdited(true)
+              }}
             />
           </Grid>
         </Grid>
@@ -581,6 +667,7 @@ export default function AopBudget() {
         permissions={adjustedPermissionsC}
         groupBy='budgetType'
         resetRowData={resetRowData1}
+        summaryEdited={designBasisAndDesignRemarksEdited}
 
         // setEditMode={setEditMode}
       />
@@ -606,7 +693,7 @@ export default function AopBudget() {
         permissions={adjustedPermissionsP}
         groupBy='budgetType'
         resetRowData={resetRowData2}
-
+        summaryEdited={designBasisAndDesignRemarksEdited}
         // setEditMode={setEditMode}
       />
       <Notification

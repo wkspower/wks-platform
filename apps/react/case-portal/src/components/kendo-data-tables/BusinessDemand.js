@@ -17,6 +17,7 @@ import {
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
+import PropaneBusiness from './Propanebusiness'
 
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -502,6 +503,14 @@ const BusinessDemand = ({ permissions }) => {
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
       />
+
+      {lowerVertName == 'cracker' && (
+        <>
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <PropaneBusiness />
+          </Box>
+        </>
+      )}
     </div>
   )
 }

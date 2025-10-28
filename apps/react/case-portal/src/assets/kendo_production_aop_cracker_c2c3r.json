@@ -1,0 +1,104 @@
+[
+  {
+    "field": "productName",
+    "title": "Particular",
+    "editable": false,
+    "width": 125
+  },
+
+  {
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "width": 80
+  },
+
+  {
+    "field": "apr",
+    "title": "4",
+    "editable": true,
+    "type": "number"
+  },
+  {
+    "field": "may",
+    "title": "5",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "jun",
+    "title": "6",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "jul",
+    "title": "7",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "aug",
+    "title": "8",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "sep",
+    "title": "9",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "oct",
+    "title": "10",
+    "type": "number",
+    "editable": true,
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "nov",
+    "title": "11",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "dec",
+    "title": "12",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "jan",
+    "title": "1",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "feb",
+    "title": "2",
+    "editable": true,
+    "align": "left",
+    "type": "number"
+  },
+  {
+    "field": "mar",
+    "title": "3",
+    "type": "number",
+    "editable": true,
+    "align": "left"
+  },
+  {
+    "field": "remarks",
+    "title": "Remarks"
+  }
+]

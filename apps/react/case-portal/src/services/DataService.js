@@ -7,10 +7,7 @@ export const DataService = {
   getAllSites,
   getShutDownPlantData,
   getAllProducts,
-  maintenacegetdata,
-  savemaintenacegetdata,
-  maintenaceExportdata,
-  maintenaceImportExceldata,
+
   getAllProductsAll,
   getIbrPlanData,
   getShutdownActivitiesData,
@@ -162,6 +159,7 @@ export const DataService = {
 
   getProductionReports,
   gradeDetails,
+  carryForwardRecords,
 }
 
 async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
@@ -2030,114 +2028,6 @@ async function getAllProducts(keycloak) {
   }
 }
 
-async function maintenacegetdata(keycloak, budgetCategory) {
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const parsedPlant = JSON.parse(storedPlant)
-  var year = localStorage.getItem('year')
-
-  // Only encode plantId and year, leave budgetCategory as-is
-  const url = `${Config.CaseEngineUrl}/task/budget-maintenance?plantId=${encodeURIComponent(parsedPlant.id)}&year=${encodeURIComponent(year)}&budgetCategory=${budgetCategory}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-async function savemaintenacegetdata(
-  maintenancedetails,
-  keycloak,
-  PLANT_ID,
-  AOP_YEAR,
-) {
-  // Only encode plantId and year, leave budgetCategory as-is
-  const url = `${Config.CaseEngineUrl}/task/budget-maintenance`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(maintenancedetails),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-async function maintenaceExportdata(
-  keycloak,
-  budgetCategory,
-  PLANT_ID,
-  AOP_YEAR,
-) {
-  let url = `${Config.CaseEngineUrl}/task/budget-maintenance-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
-  //  if (budgetCategory) {
-  //     url += `&budgetCategory=${encodeURIComponent(budgetCategory)}`
-  //   }
-  const headers = {
-    'Content-Type': 'application/json',
-    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-
-    if (!resp.ok) {
-      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
-    }
-
-    const blob = await resp.blob()
-    const urlBlob = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = urlBlob
-    a.download = `maintenancebudget_${budgetCategory || 'Export'}.xlsx`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    window.URL.revokeObjectURL(urlBlob)
-  } catch (e) {
-    console.error('Error exporting Optimizer Input Excel:', e)
-    return Promise.reject(e)
-  }
-}
-
-async function maintenaceImportExceldata(file, keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/budget-maintenance-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const formData = new FormData()
-  formData.append('file', file)
-
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: formData,
-    })
-    return json(keycloak, resp) // assuming `json()` handles response properly
-  } catch (e) {
-    console.error('Error importing Budget Maintenance Excel:', e)
-    return await Promise.reject(e)
-  }
-}
 async function getSlowdownMonths(keycloak, gradeId) {
   const storedPlant = localStorage.getItem('selectedPlant')
   var year = localStorage.getItem('year')
@@ -3750,6 +3640,22 @@ async function getProductionReports(keycloak, PLANT_ID, AOP_YEAR, REPORT_TYPE) {
 
 async function gradeDetails(keycloak, AOP_YEAR, PLANT_ID) {
   const url = `${Config.CaseEngineUrl}/task/products?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function carryForwardRecords(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/carry-forward?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

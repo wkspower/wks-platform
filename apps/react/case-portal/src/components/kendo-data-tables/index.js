@@ -8,6 +8,8 @@ import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports-kend
 import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 import Notification from 'components/Utilities/Notification'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
+
 import { useSelector } from 'react-redux'
 import {
   Box,
@@ -221,10 +223,51 @@ const KendoDataTables = ({
       if (dataItem?.field === 'ParticularsType') return
 
       const itemId = dataItem.id
+
+      // months list in the order you provided
+      const months = [
+        'apr',
+        'may',
+        'jun',
+        'jul',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+        'jan',
+        'feb',
+        'mar',
+      ]
+
+      // Helper: return numeric percent if input contains at least one digit, otherwise null.
+      const parsePctOrNull = (v) => {
+        if (v == null) return null
+        const s = String(v).replace('%', '').trim()
+        // if there are no digits at all, treat as invalid (e.g. "+", "-", "", "+%")
+        if (!/[0-9]/.test(s)) return null
+        // remove leading plus sign for parsing, keep minus sign
+        const cleaned = s.replace(/^\+/, '')
+        const n = Number(cleaned)
+        return Number.isFinite(n) ? n : null
+      }
+
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
+
+          // percentChange logic: adjust months if enabled and percentChange field changed
+          if (field === 'percentChange' && permissions?.percentChangeLogic) {
+            const pct = parsePctOrNull(value)
+            if (pct !== null) {
+              const factor = 1 + pct / 100
+              months.forEach((m) => {
+                const original = Number(r[m]) || 0
+                updated[m] = Number((original * factor).toFixed(2))
+              })
+            }
+          }
 
           if (
             'maintStartDateTime' in updated &&
@@ -252,6 +295,7 @@ const KendoDataTables = ({
           return updated
         }),
       )
+
       if (permissions?.onlyCellUpdate) {
         setModifiedCells((prev) => {
           const updated = { ...(prev[itemId] || {}) }
@@ -262,12 +306,24 @@ const KendoDataTables = ({
             updated.NormParameter_FK_Id = dataItem.NormParameter_FK_Id
           }
 
-          const result = {
+          // percentChange: only set month fields when percent is numeric
+          if (field === 'percentChange' && permissions?.percentChangeLogic) {
+            const pct = parsePctOrNull(value)
+            if (pct !== null) {
+              const factor = 1 + pct / 100
+              months.forEach((m) => {
+                if (m in dataItem) {
+                  const original = Number(dataItem[m]) || 0
+                  updated[m] = Number((original * factor).toFixed(2))
+                }
+              })
+            }
+          }
+
+          return {
             ...prev,
             [itemId]: updated,
           }
-
-          return result
         })
       } else {
         const uniqueItemId = permissions?.showCheckbox
@@ -280,6 +336,7 @@ const KendoDataTables = ({
             ...dataItem,
             [field]: value,
           }
+
           if (
             'maintStartDateTime' in base &&
             'maintEndDateTime' in base &&
@@ -299,13 +356,42 @@ const KendoDataTables = ({
             }
           }
 
+          // percentChange logic: mutate base for all months (only when numeric)
+          if (field === 'percentChange' && permissions?.percentChangeLogic) {
+            const pct = parsePctOrNull(value)
+            if (pct !== null) {
+              const factor = 1 + pct / 100
+              months.forEach((m) => {
+                const original = Number(dataItem[m]) || 0
+                base[m] = Number((original * factor).toFixed(2))
+              })
+            }
+          }
+
           return { ...prev, [uniqueItemId]: base }
         })
       }
-      setCustomModifiedCells((prev) => ({
-        ...prev,
-        [itemId]: { ...(prev[itemId] || {}), [field]: value },
-      }))
+
+      // customModifiedCells: always set per-row custom changes (include months if percentChange)
+      setCustomModifiedCells((prev) => {
+        const base = { ...(prev[itemId] || {}), [field]: value }
+
+        if (field === 'percentChange' && permissions?.percentChangeLogic) {
+          const pct = parsePctOrNull(value)
+          if (pct !== null) {
+            const factor = 1 + pct / 100
+            months.forEach((m) => {
+              const original = Number(dataItem[m]) || 0
+              base[m] = Number((original * factor).toFixed(2))
+            })
+          }
+        }
+
+        return {
+          ...prev,
+          [itemId]: base,
+        }
+      })
     },
     [setRows, setModifiedCells, setCustomModifiedCells],
   )
@@ -1118,7 +1204,7 @@ const KendoDataTables = ({
                   </MenuItem>
 
                   {/* Render the correct unit options dynamically */}
-                  {permissions?.units.map((unit) => (
+                  {permissions?.units?.map((unit) => (
                     <MenuItem key={unit} value={unit}>
                       {unit}
                     </MenuItem>
@@ -1258,7 +1344,6 @@ const KendoDataTables = ({
                             'toDate',
                             'periodTo',
                             'periodFrom',
-
                             'toDateReport',
                             'fromDateReport',
                           ].includes(col.field)
@@ -1653,6 +1738,49 @@ const KendoDataTables = ({
                       format={col.format}
                       sortable={false}
                       width={col?.widthT}
+                    />
+                  )
+                }
+
+                if (col.type === 'propaneDropdown') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.width}
+                      hidden={col.hidden}
+                      editable={col?.editable ? true : false}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        edit: { text: PropaneDropdown }, // <-- Use your custom editor here
+                        data: MonthDisplayCell,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
+
+                if (col.type === 'percentChange') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.widthT}
+                      hidden={col.hidden}
+                      className={'k-number-right'}
+                      editable={col?.editable ? true : false}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        edit: { text: NoSpinnerNumericEditorNegative },
+                        data: toolTipRenderer,
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                      filter='numeric'
+                      format={col.format}
                     />
                   )
                 }

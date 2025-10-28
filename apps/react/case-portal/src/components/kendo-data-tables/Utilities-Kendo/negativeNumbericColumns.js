@@ -12,8 +12,8 @@ export const NoSpinnerNumericEditorNegative = ({
 
   const handleChange = (e) => {
     const val = e.target.value
-    // ✅ Allow negative numbers too
-    if (val === '' || /^-?\d*(\.\d*)?$/.test(val)) {
+    // ✅ Allow leading + or - and decimals while typing
+    if (val === '' || /^[-+]?\d*(\.\d*)?$/.test(val)) {
       setLocalValue(val)
     }
   }
