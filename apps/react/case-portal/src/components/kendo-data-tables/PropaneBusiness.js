@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 import KendoDataTables from './index'
-import { validateFields } from 'utils/validationUtils'
+
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
@@ -157,19 +157,7 @@ const PropaneBusiness = ({ permissions }) => {
         setLoading(false)
         return
       }
-      const requiredFields = ['normParameterId', 'remark']
       
-    const validationMessage = validateFields(data, requiredFields)
-
-    if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-        message: validationMessage,
-        severity: 'error',
-        })
-        setLoading(false)
-        return
-    }
       const payload = editedRows.map((row) => ({
         apr: row.apr || null,
         may: row.may || null,
