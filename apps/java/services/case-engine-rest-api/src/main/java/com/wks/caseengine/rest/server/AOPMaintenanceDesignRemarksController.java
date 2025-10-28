@@ -28,8 +28,8 @@ public class AOPMaintenanceDesignRemarksController {
 	}
 	
 	@PostMapping(value="/maintenance-design-remarks")
-	public AOPMessageVM updateMaintenanceDesignRemarks(@RequestParam String plantId,@RequestParam String year,@RequestBody List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs){
-		 return  aopMaintenanceDesignRemarksService.updateMaintenanceDesignRemarks(plantId,year,aopMaintenanceDesignRemarksDTOs);
+	public AOPMessageVM updateMaintenanceDesignRemarks(@RequestParam String plantId,@RequestParam String year,@RequestParam String summary){
+		 return  aopMaintenanceDesignRemarksService.updateMaintenanceDesignRemarks(plantId,year,summary);
 	}
 	
 	  

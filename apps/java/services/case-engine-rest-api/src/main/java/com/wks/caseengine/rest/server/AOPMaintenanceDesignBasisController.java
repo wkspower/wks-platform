@@ -29,8 +29,8 @@ public class AOPMaintenanceDesignBasisController {
 	}
 	
 	@PostMapping(value="/maintenance-design-basis")
-	public AOPMessageVM updateMaintenanceDesignBasis(@RequestParam String plantId,@RequestParam String year,@RequestBody List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs){
-		 return  aopMaintenanceDesignBasisService.updateMaintenanceDesignBasis(plantId,year,aopMaintenanceDesignRemarksDTOs);
+	public AOPMessageVM updateMaintenanceDesignBasis(@RequestParam String plantId,@RequestParam String year,@RequestParam String summary){
+		 return  aopMaintenanceDesignBasisService.updateMaintenanceDesignBasis(plantId,year,summary);
 	}
 	
 	  

@@ -53,7 +53,7 @@ public class AOPMaintenanceDesignBasisServiceImpl implements AOPMaintenanceDesig
 
 	@Override
 	public AOPMessageVM updateMaintenanceDesignBasis(String plantId, String year,
-			List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs) {
+			String summary) {
 		try {
 			AOPMaintenanceDesignBasis aopMaintenanceDesignBasis = aopMaintenanceDesignBasisRepository.getData(UUID.fromString(plantId),year);
 
@@ -62,7 +62,7 @@ public class AOPMaintenanceDesignBasisServiceImpl implements AOPMaintenanceDesig
 				 aopMaintenanceDesignBasis.setAopYear(year);
 				 aopMaintenanceDesignBasis.setPlantFkId(UUID.fromString(plantId));
 			}
-			aopMaintenanceDesignBasis.setSummary(aopMaintenanceDesignBasis.getSummary());
+			aopMaintenanceDesignBasis.setSummary(summary);
 			aopMaintenanceDesignBasis.setUpdatedBy(Utility.getUserName());
 			aopMaintenanceDesignBasis.setUpdatedDateTime(new java.util.Date());
 
