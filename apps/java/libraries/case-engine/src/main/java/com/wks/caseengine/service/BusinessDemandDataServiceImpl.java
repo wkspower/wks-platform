@@ -39,6 +39,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.BusinessDemandDataDTO;
@@ -167,7 +169,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 				configurationDTO.setDec(row[12] != null ? row[12].toString() : "Propane MIN");
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
-					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
+					configurationDTO.setUom(row[15] != null ? row[15].toString() : "");
 					configurationDTO.setNormType(row[16] != null ? row[16].toString() : "");
 					configurationDTO.setIsEditable(row[17] != null ? ((Boolean) row[17]).booleanValue() : null);
 					configurationDTO.setProductName(row[18] != null ? row[18].toString() : "");
@@ -674,6 +676,36 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 		normAttributeTransactionsRepository.save(normAttributeTransactions);
 	}
 	
+	void saveValue(UUID normParameterFKId, Integer i, String attributeValue, String remark, String plantId,
+			String year) {
+
+		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
+				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
+		
+		NormAttributeTransactions normAttributeTransactions;
+
+		if (existingRecord.isPresent()) {
+			normAttributeTransactions = existingRecord.get();
+			normAttributeTransactions.setModifiedOn(new Date());
+		} else {
+
+			normAttributeTransactions = new NormAttributeTransactions();
+			normAttributeTransactions.setCreatedOn(new Date());
+			normAttributeTransactions.setAttributeValueVersion("V1");
+			normAttributeTransactions.setUserName(Utility.getUserName());
+			normAttributeTransactions.setNormParameterFKId(normParameterFKId);
+			normAttributeTransactions.setAopMonth(i);
+			normAttributeTransactions.setAuditYear(year);
+		}
+
+		normAttributeTransactions
+				.setAttributeValue(attributeValue != null ? attributeValue.toString() : "0.0");
+		normAttributeTransactions.setRemarks(remark);
+		normAttributeTransactions.setUserName(Utility.getUserName());
+		normAttributeTransactionsRepository.save(normAttributeTransactions);
+	}
+
+	
 	public Double getAttributeValue(BusinessDemandDataDTO businessDemandDataDTO, Integer i) {
 		switch (i) {
 			case 1:
@@ -705,6 +737,36 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 		return businessDemandDataDTO.getJan();
 	}
 
+	public String getValue(BusinessDemandMonthlyDTO businessDemandDataDTO, Integer i) {
+		switch (i) {
+			case 1:
+				return businessDemandDataDTO.getJan();
+			case 2:
+				return businessDemandDataDTO.getFeb();
+			case 3:
+				return businessDemandDataDTO.getMar();
+			case 4:
+				return businessDemandDataDTO.getApr();
+			case 5:
+				return businessDemandDataDTO.getMay();
+			case 6:
+				return businessDemandDataDTO.getJun();
+			case 7:
+				return businessDemandDataDTO.getJul();
+			case 8:
+				return businessDemandDataDTO.getAug();
+			case 9:
+				return businessDemandDataDTO.getSep();
+			case 10:
+				return businessDemandDataDTO.getOct();
+			case 11:
+				return businessDemandDataDTO.getNov();
+			case 12:
+				return businessDemandDataDTO.getDec();
+
+		}
+		return businessDemandDataDTO.getJan();
+	}
 
 
 	@Override
@@ -773,5 +835,62 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Override
+	public AOPMessageVM saveBusinessDemand(String year, String plantFKId,
+			List<BusinessDemandMonthlyDTO> businessDemandMonthlyDTOs) {
+		try {
+			List<BusinessDemandMonthlyDTO> failedList = new ArrayList<>();
+			
+			for (BusinessDemandMonthlyDTO businessDemandMonthlyDTO : businessDemandMonthlyDTOs) {
+				if (businessDemandMonthlyDTO.getSaveStatus() != null
+						&& businessDemandMonthlyDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(businessDemandMonthlyDTO);
+					continue;
+				}
+
+				UUID normParameterFKId = UUID.fromString(businessDemandMonthlyDTO.getNormParameterFKId());
+
+				Optional<NormParameters> optionNormParameters = normParametersRepository.findById(normParameterFKId);
+				if (!optionNormParameters.isPresent()) {
+					businessDemandMonthlyDTO.setSaveStatus("Failed");
+					businessDemandMonthlyDTO.setErrDescription("Norm Paramter not found");
+					failedList.add(businessDemandMonthlyDTO);
+					continue;
+				}
+				if (optionNormParameters.isPresent() && (!optionNormParameters.get().getIsEditable())) {
+					continue;
+				}
+
+				for (int i = 1; i <= 12; i++) {
+					String attributeValue = getValue(businessDemandMonthlyDTO, i);
+
+					saveValue(optionNormParameters.get().getId(), i, attributeValue,businessDemandMonthlyDTO.getRemarks(), plantFKId, year);
+					if(businessDemandMonthlyDTO.getSaveStatus()!=null && businessDemandMonthlyDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+						failedList.add(businessDemandMonthlyDTO);
+					}
+				}
+			}
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("configuration");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantFKId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(failedList);
+			aopMessageVM.setMessage("Data updated successfully");
+			return aopMessageVM;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to save data", ex);
+		}
+	}
+
 
 }

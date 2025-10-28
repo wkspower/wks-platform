@@ -30,7 +30,7 @@ public class BusinessDemandMonthlyDTO {
     private String dec;
     private String remarks;
     private String auditYear;
-    private String UOM;
+    private String uom;
     private String lossCategory;
     private String normType;
     private String ConfigTypeDisplayName;
