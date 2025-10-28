@@ -31,17 +31,17 @@ public class AOPMaintenanceDesignRemarksServiceImpl implements AOPMaintenanceDes
 		List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs = new ArrayList<AOPMaintenanceDesignRemarksDTO>();
 		try {
 			AOPMaintenanceDesignRemarks row = aopMaintenanceDesignRemarksRepository.getData(UUID.fromString(plantId),year);
-
+				if(row!=null) {
+					AOPMaintenanceDesignRemarksDTO aopMaintenanceDesignRemarksDTO = new AOPMaintenanceDesignRemarksDTO();
+					aopMaintenanceDesignRemarksDTO.setId(row.getId());
+					aopMaintenanceDesignRemarksDTO.setPlantFkId(row.getPlantFkId());
+					aopMaintenanceDesignRemarksDTO.setAopYear(row.getAopYear());
+					aopMaintenanceDesignRemarksDTO.setSummary(row.getSummary());
+					aopMaintenanceDesignRemarksDTO.setUpdatedBy(row.getUpdatedBy());
+					aopMaintenanceDesignRemarksDTO.setUpdatedDateTime(row.getUpdatedDateTime());
+					aopMaintenanceDesignRemarksDTOs.add(aopMaintenanceDesignRemarksDTO);
 			
-				AOPMaintenanceDesignRemarksDTO aopMaintenanceDesignRemarksDTO = new AOPMaintenanceDesignRemarksDTO();
-				aopMaintenanceDesignRemarksDTO.setId(row.getId());
-				aopMaintenanceDesignRemarksDTO.setPlantFkId(row.getPlantFkId());
-				aopMaintenanceDesignRemarksDTO.setAopYear(row.getAopYear());
-				aopMaintenanceDesignRemarksDTO.setSummary(row.getSummary());
-				aopMaintenanceDesignRemarksDTO.setUpdatedBy(row.getUpdatedBy());
-				aopMaintenanceDesignRemarksDTO.setUpdatedDateTime(row.getUpdatedDateTime());
-				aopMaintenanceDesignRemarksDTOs.add(aopMaintenanceDesignRemarksDTO);
-		
+				}
 			aopMessageVM.setCode(200);
 			aopMessageVM.setData(aopMaintenanceDesignRemarksDTOs);
 			aopMessageVM.setMessage("Data fetched successfully");
