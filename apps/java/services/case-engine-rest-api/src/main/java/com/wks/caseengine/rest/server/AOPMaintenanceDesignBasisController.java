@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.AOPMaintenanceDesignRemarksDTO;
+import com.wks.caseengine.dto.AOPSummaryDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 @RestController
@@ -29,8 +30,8 @@ public class AOPMaintenanceDesignBasisController {
 	}
 	
 	@PostMapping(value="/maintenance-design-basis")
-	public AOPMessageVM updateMaintenanceDesignBasis(@RequestParam String plantId,@RequestParam String year,@RequestParam String summary){
-		 return  aopMaintenanceDesignBasisService.updateMaintenanceDesignBasis(plantId,year,summary);
+	public AOPMessageVM updateMaintenanceDesignBasis(@RequestParam String plantId,@RequestParam String year,@RequestBody AOPSummaryDTO aopSummaryDTO){
+		return  aopMaintenanceDesignBasisService.updateMaintenanceDesignBasis(plantId,year,aopSummaryDTO.getSummary());
 	}
 	
 	  
