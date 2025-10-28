@@ -113,8 +113,17 @@ public class AOPServiceImpl implements AOPService {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<AOPDTO> aOPDTOList = new ArrayList<>();
 		try {
-			List<Object[]> obj = aopRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId), type);
-
+			List<Object[]> obj=null;
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			if(vertical.getName().equalsIgnoreCase("AROMATICS")) {
+				String procedureName=vertical.getName()+"_"+site.getName()+"_"+"GetAOP";
+				obj = getData(year,plant.getId(),site.getId(),vertical.getId(),procedureName);
+			}else {
+				 obj = aopRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId), type);
+			}
+			
 			for (Object[] row : obj) {
 				AOPDTO aopDTO = new AOPDTO();
 
@@ -163,6 +172,27 @@ public class AOPServiceImpl implements AOPService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<Object[]> getData(String finYear, UUID plantId,UUID siteId,UUID verticalId, String procedureName) {
+		try {
+
+			String sql = "EXEC " + procedureName
+					+ " @plantId = :plantId, @finYear = :finYear, @siteId = :siteId, @verticalId = :verticalId";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("finYear", finYear);
+			query.setParameter("siteId", siteId);
+			query.setParameter("verticalId", verticalId);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 	@Override
 	public List<AOPDTO> updateAOP(List<AOPDTO> aOPDTOList) {
