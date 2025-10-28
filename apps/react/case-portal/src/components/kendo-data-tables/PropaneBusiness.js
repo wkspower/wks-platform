@@ -114,7 +114,7 @@ const PropaneBusiness = ({ permissions }) => {
   // To use dynamic year headers:
   const columns = [
     { field: 'productName', title: 'Particulars', editable: false },
-    { field: 'UOM', title: 'UOM', editable: false },
+    { field: 'uom', title: 'UOM', editable: false, widthT: 55 },
     { field: 'normType', title: 'Norm Type', editable: false, hidden: true },
     ...dynamicYearMonthColumns,
     { field: 'remarks', title: 'Remarks', editable: true },
@@ -182,7 +182,7 @@ const PropaneBusiness = ({ permissions }) => {
         jan: row.jan || null,
         feb: row.feb || null,
         mar: row.mar || null,
-        UOM: row.UOM || '',
+        uom: row.uom || '',
         auditYear: AOP_YEAR,
         normParameterFKId:
           row.normParameterFKId || row.normParameterId || row.id,
