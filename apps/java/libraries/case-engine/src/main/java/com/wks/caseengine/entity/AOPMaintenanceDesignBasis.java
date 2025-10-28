@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "AOPMaintenanceDesignRemarks", schema = "dbo")
+@Table(name = "AOPMaintenanceDesignBasis", schema = "dbo")
 @Getter
 @Setter
 public class AOPMaintenanceDesignBasis {
