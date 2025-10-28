@@ -2,13 +2,14 @@ import Config from '../consts'
 import { json } from './request'
 export const BusinessDemandDataApiService = {
   getBDData,
-
+  getBDssData,
   saveBusinessDemandData,
   deleteBusinessDemandData,
 
   businessDemandImport,
   businessDemandExport,
   aopDesignBasisBluePrint,
+  savepropanebusiness,
 }
 async function getBDData(keycloak, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/business-demand?year=${year}&plantId=${plantId}`
@@ -147,5 +148,41 @@ async function aopDesignBasisBluePrint() {
   } catch (e) {
     console.error('Error fetching file:', e)
     return Promise.reject(e)
+  }
+}
+async function getBDssData(keycloak, plantId, year) {
+  // changed URL to backend path /business-demand-data
+  const url = `${Config.CaseEngineUrl}/task/business-demand-manual-entry?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function savepropanebusiness(plantId, turnAroundDetails, keycloak) {
+  var year = localStorage.getItem('year')
+  const url = `${Config.CaseEngineUrl}/task/business-demand-manual-entry?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(turnAroundDetails),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

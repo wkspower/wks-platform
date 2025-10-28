@@ -189,11 +189,7 @@ const PropaneBusiness = ({ permissions }) => {
         remarks: row.remarks,
         id: row.id,
       }))
-      const response = await DataService.saveCatalystData(
-        PLANT_ID,
-        payload,
-        keycloak,
-      )
+    const response = await BusinessDemandDataApiService.savepropanebusiness(PLANT_ID, payload, keycloak)
       if (response?.code === 200) {
         setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
         setSnackbarOpen(true)
