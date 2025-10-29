@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 import KendoDataTables from './index'
-
+import { validateFields } from 'utils/validationUtils'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
@@ -147,59 +147,87 @@ const PropaneBusiness = ({ permissions }) => {
   useEffect(() => {
     fetchData()
   }, [PLANT_ID, SITE_ID, VERTICAL_ID, AOP_YEAR, keycloak])
+
   const savePropaneBusiness = async () => {
-    setLoading(true)
-    try {
-      // Only send edited rows
-      const editedRows = Object.values(modifiedCells)
-      if (editedRows.length === 0) {
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setSnackbarOpen(true)
-        setLoading(false)
-        return
-      }
-      
-      const payload = editedRows.map((row) => ({
-        apr: row.apr || null,
-        may: row.may || null,
-        jun: row.jun || null,
-        jul: row.jul || null,
-        aug: row.aug || null,
-        sep: row.sep || null,
-        oct: row.oct || null,
-        nov: row.nov || null,
-        dec: row.dec || null,
-        jan: row.jan || null,
-        feb: row.feb || null,
-        mar: row.mar || null,
-        uom: row.uom || '',
-        auditYear: AOP_YEAR,
+  setLoading(true)
+  try {
+    const editedRows = Object.values(modifiedCells)
+    if (editedRows.length === 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    const requiredFields = ['remarks']
+    const validationMessage = validateFields(editedRows, requiredFields)
+    if (validationMessage) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationMessage,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+    // Prepare payload like NormalOpNorms
+    const businessData = editedRows.map(row => ({
+      apr: row.apr || null,
+      may: row.may || null,
+      jun: row.jun || null,
+      jul: row.jul || null,
+      aug: row.aug || null,
+      sep: row.sep || null,
+      oct: row.oct || null,
+      nov: row.nov || null,
+      dec: row.dec || null,
+      jan: row.jan || null,
+      feb: row.feb || null,
+      mar: row.mar || null,
+      uom: row.uom || '',
+      auditYear: AOP_YEAR,
         normParameterFKId:
           row.normParameterFKId || row.normParameterId || row.id,
         remarks: row.remarks,
         id: row.id,
       }))
+
+    if (businessData.length > 0) {
       const response = await BusinessDemandDataApiService.savepropanebusiness(
         PLANT_ID,
-        payload,
-        keycloak,
+        businessData,
+        keycloak
       )
+
       if (response?.code === 200) {
-        setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
         setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
         setModifiedCells({})
         fetchData()
       } else {
-        setSnackbarData({ message: 'Save Failed!', severity: 'error' })
         setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Save Failed!',
+          severity: 'error',
+        })
       }
-    } catch (error) {
-      setSnackbarData({ message: 'Error saving data!', severity: 'error' })
-      setSnackbarOpen(true)
-    } finally {
-      setLoading(false)
     }
+  } catch (error) {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Error saving data!',
+      severity: 'error',
+    })
+  } finally {
+    setLoading(false)
   }
+}
   // Remark dialog logic
   const handleRemarkCellClick = (dataItem) => {
     setCurrentRemark(dataItem.remarks || '')
@@ -235,7 +263,7 @@ const PropaneBusiness = ({ permissions }) => {
   )
 
   return (
-    <div style={{ marginTop: 32 }}>
+    <div>
       <KendoDataTables
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
