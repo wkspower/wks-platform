@@ -1153,4 +1153,53 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 				"}";
 	}
 
+	@Override
+	public AOPMessageVM getModes(String year, String plantId, String type) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+		String viewName = "vw" + verticalName + "Modes";
+		List<Map<String, Object>> modes = new ArrayList<>();
+		try {
+			List<Object[]> obj = findByYearAndPlantId(year, UUID.fromString(plantId),type, viewName);
+			for(Object[] row:obj) {
+				Map<String, Object> map = new HashMap<>();
+				map.put("name", (row[7] != null ? row[7].toString() : ""));
+				map.put("displayName", (row[8] != null ? row[8].toString() : ""));
+				modes.add(map);
+			}
+			
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(modes);
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+	
+	public List<Object[]> findByYearAndPlantId(String year, UUID plantId,String type, String viewName) {
+		try {
+			String sql = "SELECT " + "Id,VerticalId, SiteId, PlantId, AOPYear, DisplayOrder, Type, ModeName, DisplayName "
+					 + "FROM " + viewName + " "
+					+ " WHERE (AOPYear = :year AND AOPYear IS NOT NULL) " + "AND PlantId = :plantId AND Type = :type "
+					+ " ORDER BY DisplayOrder";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
+			query.setParameter("plantId", plantId);
+			query.setParameter("type", type);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+
 }

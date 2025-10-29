@@ -71,6 +71,9 @@ public class SpyroInputController {
 			return	spyroInputService.importExcel(year, plantId, mode, file); 
 	}
 
-
+	@GetMapping(value="/modes")
+	public AOPMessageVM getModes(@RequestParam String year,@RequestParam String plantId,@RequestParam String type){
+		return	spyroInputService.getModes(year, plantId, type);
+	}
 		
 }
