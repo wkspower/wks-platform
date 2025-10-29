@@ -389,9 +389,9 @@ const CrakcerConstants = () => {
                   marginTop: '5px',
                 }}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   <Typography
-                    className='grid-title'
+                    className='button-title'
                     sx={{ whiteSpace: 'nowrap' }}
                   >
                     Start Date
@@ -404,20 +404,24 @@ const CrakcerConstants = () => {
                     style={{ height: '80px' }}
                     size={'medium'}
                   />
-                  <Typography
-                    className='grid-title'
-                    sx={{ whiteSpace: 'nowrap' }}
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
                   >
-                    End Date
-                  </Typography>
-                  <DatePicker
-                    id='end-date'
-                    format='dd-MM-yyyy'
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.value)}
-                    style={{ height: '80px' }}
-                    size={'medium'}
-                  />
+                    <Typography
+                      className='button-title'
+                      sx={{ whiteSpace: 'nowrap' }}
+                    >
+                      End Date
+                    </Typography>
+                    <DatePicker
+                      id='end-date'
+                      format='dd-MM-yyyy'
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.value)}
+                      style={{ height: '80px' }}
+                      size={'medium'}
+                    />
+                  </Box>
                   {!isOldYearFlag && (
                     <Button
                       variant='contained'

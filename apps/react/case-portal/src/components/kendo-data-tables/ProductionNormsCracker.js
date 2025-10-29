@@ -595,7 +595,7 @@ const ProductionNormsCracker = ({ permissions }) => {
           allAction: true,
           showNote: true,
           showTitleNameBusiness: true,
-          titleName: 'Month wise Production plan1',
+          titleName: 'Month wise Production plan',
           showCalculateVisibility: false,
           saveBtn: false,
           units: ['MT/Month', 'TPH'],

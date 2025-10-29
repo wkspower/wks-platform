@@ -435,35 +435,46 @@ const AopDesignBasisNorms = () => {
                 }}
               >
                 {true && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                      className='grid-title'
-                      sx={{ whiteSpace: 'nowrap' }}
+                  <Box
+                    sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}
+                  >
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
                     >
-                      Start Date
-                    </Typography>
-                    <DatePicker
-                      id='start-date'
-                      format='dd-MM-yyyy'
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.value)}
-                      style={{ height: '80px' }}
-                      size={'medium'}
-                    />
-                    <Typography
-                      className='grid-title'
-                      sx={{ whiteSpace: 'nowrap' }}
+                      <Typography
+                        className='button-title'
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        Start Date
+                      </Typography>
+                      <DatePicker
+                        id='start-date'
+                        format='dd-MM-yyyy'
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.value)}
+                        style={{ height: '80px' }}
+                        size={'medium'}
+                      />{' '}
+                    </Box>
+                    {/* End Date */}
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
                     >
-                      End Date
-                    </Typography>
-                    <DatePicker
-                      id='end-date'
-                      format='dd-MM-yyyy'
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.value)}
-                      style={{ height: '80px' }}
-                      size={'medium'}
-                    />
+                      <Typography
+                        className='button-title'
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        End Date
+                      </Typography>
+                      <DatePicker
+                        id='end-date'
+                        format='dd-MM-yyyy'
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.value)}
+                        style={{ height: '80px' }}
+                        size={'medium'}
+                      />{' '}
+                    </Box>
                     {/* Load Button */}
                     {!isOldYearFlag && (
                       <Button
@@ -483,7 +494,10 @@ const AopDesignBasisNorms = () => {
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
-                    sx={{ whiteSpace: 'normal' }} // <-- added alignSelf
+                    sx={{
+                      whiteSpace: 'normal',
+                      alignSelf: 'flex-end', // ?? ensures it's bottom-aligned with the button
+                    }}
                   >
                     {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
                   </Typography>
