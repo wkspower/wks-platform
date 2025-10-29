@@ -498,7 +498,8 @@ const SlowdownNorms = () => {
       showCalculate:
         lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||
-        lowerVertName == 'aromatics'
+        lowerVertName == 'aromatics' ||
+        lowerVertName == 'pta'
           ? false
           : true,
 
