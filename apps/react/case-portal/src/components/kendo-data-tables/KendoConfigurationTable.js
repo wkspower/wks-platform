@@ -75,6 +75,10 @@ const ConfigurationTable = () => {
   const [gradeData, setGradeData] = useState([])
   const [continiousGradeData, setContiniousGradeData] = useState([])
   const [discontiniousGradeData, setDiscontiniousGradeData] = useState([])
+
+  const [reportManualEntry, setReportManualEntry] = useState([])
+  const [PIO, setPIO] = useState([])
+
   const [tabs, setTabs] = useState([])
   const [availableTabs, setAvailableTabs] = useState([])
   const [summary, setSummary] = useState('')
@@ -136,8 +140,7 @@ const ConfigurationTable = () => {
         lowerVertName == verticalEnums.MEG ||
         lowerVertName == verticalEnums.CRACKER ||
         lowerVertName == verticalEnums.ELASTOMER ||
-        lowerVertName === 'aromatics' ||
-        lowerVertName === 'pta'
+        lowerVertName === 'aromatics'
       ) {
         data = data?.filter(
           (item) =>
@@ -182,6 +185,9 @@ const ConfigurationTable = () => {
         let discontiniousGradeRows = []
         let constantsRows = []
         let configurationRows = []
+        let PIORows = []
+        let reportManualEntryRows = []
+
         groups.forEach((normGroup, ConfigTypeName) => {
           let rowsForThisCategory = []
           normGroup.forEach((items, TypeName) => {
@@ -209,6 +215,10 @@ const ConfigurationTable = () => {
             discontiniousGradeRows = rowsForThisCategory
           } else if (ConfigTypeName == 'Constant') {
             constantsRows = rowsForThisCategory
+          } else if (ConfigTypeName == 'Report Manual Entry') {
+            reportManualEntryRows = rowsForThisCategory
+          } else if (ConfigTypeName == 'PIO Impact') {
+            PIORows = rowsForThisCategory
           }
         })
 
@@ -219,6 +229,8 @@ const ConfigurationTable = () => {
         setDiscontiniousGradeData(discontiniousGradeRows)
         setConstantsRows(constantsRows)
         setConfigurationRows(configurationRows)
+        setReportManualEntry(reportManualEntryRows)
+        setPIO(PIORows)
       }
       setLoading(false)
     } catch (error) {
@@ -474,6 +486,7 @@ const ConfigurationTable = () => {
     const today = new Date()
     const endDate = new Date(today.getFullYear(), today.getMonth(), 0)
     const startDate = new Date(today.getFullYear() - 5, today.getMonth(), 1)
+
     const createPayloadItem = (obj, date) => ({
       apr: date,
       UOM: '',
@@ -483,6 +496,7 @@ const ConfigurationTable = () => {
       id: obj?.Id || null,
       plantId: PLANT_ID,
     })
+
     const payload = [
       createPayloadItem(startDateObj, formatDate(startDate)),
       createPayloadItem(endDateObj, formatDate(endDate)),
@@ -673,35 +687,48 @@ const ConfigurationTable = () => {
                 }}
               >
                 {true && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography
-                      className='button-title'
-                      sx={{ whiteSpace: 'nowrap' }}
+                  <Box
+                    sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}
+                  >
+                    {/* Start Date */}
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
                     >
-                      Start Date
-                    </Typography>
-                    <DatePicker
-                      id='start-date'
-                      format='dd-MM-yyyy'
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.value)}
-                      style={{ height: '80px' }}
-                      size={'medium'}
-                    />
-                    <Typography
-                      className='button-title'
-                      sx={{ whiteSpace: 'nowrap' }}
+                      <Typography
+                        className='button-title'
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        Start Date
+                      </Typography>
+                      <DatePicker
+                        id='start-date'
+                        format='dd-MM-yyyy'
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.value)}
+                        style={{ height: '80px' }}
+                        size='medium'
+                      />
+                    </Box>
+
+                    {/* End Date */}
+                    <Box
+                      sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
                     >
-                      End Date
-                    </Typography>
-                    <DatePicker
-                      id='end-date'
-                      format='dd-MM-yyyy'
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.value)}
-                      style={{ height: '80px' }}
-                      size={'medium'}
-                    />
+                      <Typography
+                        className='button-title'
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        End Date
+                      </Typography>
+                      <DatePicker
+                        id='end-date'
+                        format='dd-MM-yyyy'
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.value)}
+                        style={{ height: '80px' }}
+                        size='medium'
+                      />
+                    </Box>
 
                     {/* Load Button */}
                     {!isOldYearFlag && (
@@ -720,15 +747,25 @@ const ConfigurationTable = () => {
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
                     className='summary-title'
-                    sx={{ whiteSpace: 'normal' }}
+                    sx={{
+                      whiteSpace: 'normal',
+                      alignSelf: 'flex-end', // ?? ensures it's bottom-aligned with the button
+                    }}
                   >
                     {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}
                   </Typography>
                 )}
               </Box>
             </Box>
+
             <Box
-              sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1 }}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column', // ?? stack vertically
+                alignItems: 'flex-start',
+                gap: 0,
+                mt: 1,
+              }}
             >
               <Typography
                 className='button-title'
@@ -778,26 +815,15 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    (lowerVertName == 'meg' ||
-      lowerVertName === 'aromatics' ||
-      lowerVertName === 'pta') &&
+    (lowerVertName == 'meg' || lowerVertName === 'aromatics') &&
     lowerVertName !== 'cracker' &&
     lowerVertName !== 'elastomer'
   ) {
     const isAromatics = lowerVertName === 'aromatics'
-    const isPta = lowerVertName === 'pta'
 
     const megTabs = isAromatics
       ? ['Configuration', 'Constants', 'PIO Impact']
-      : isPta
-        ? [
-            'Configuration',
-            'Constants',
-            'Report Manual Entry',
-            'PIO Impact',
-            'Shutdown',
-          ]
-        : ['Configuration', 'Constants', 'Report Manual Entry']
+      : ['Configuration', 'Constants', 'Report Manual Entry']
 
     const auditYear = AOP_YEAR
     let displayYear = ''
@@ -826,6 +852,7 @@ const ConfigurationTable = () => {
           {(() => {
             const currentTab = megTabs[tabIndex]?.toLowerCase()
             const currentTabDisplayName = megTabs[tabIndex]
+
             switch (currentTab) {
               case 'configuration':
                 return (
@@ -1331,6 +1358,36 @@ const ConfigurationTable = () => {
                     setRows={setDiscontiniousGradeData}
                     fetchData={fetchData}
                     configType='DisContineGradeChange'
+                    summary={debouncedSummary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
+                  />
+                )
+
+              case getTheId('Report Manual Entry'):
+                return (
+                  <SelectivityData
+                    rows={reportManualEntry}
+                    loading={loading}
+                    setRows={setReportManualEntry}
+                    fetchData={fetchData}
+                    configType='Report Manual Entry'
+                    summary={debouncedSummary}
+                    summaryEdited={summaryEdited}
+                    onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
+                  />
+                )
+
+              case getTheId('PIO Impact'):
+                return (
+                  <SelectivityData
+                    rows={PIO}
+                    loading={loading}
+                    setRows={setPIO}
+                    fetchData={fetchData}
+                    configType='PIO Impact'
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}

@@ -241,25 +241,25 @@ export default function RelPerf() {
       field: 'bestAchieved',
       title: 'Best Achieved',
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     {
       field: 'aop',
       title: `FY${startYear.slice(-2)} AOP`,
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     {
       field: 'actual',
       title: `FY${startYear.slice(-2)} Actual`,
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     {
       field: 'plann',
       title: `FY${endYear} Plan`,
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     { field: 'limit', title: 'Limit', editable: true },
     {
@@ -424,25 +424,25 @@ export default function RelPerf() {
       field: 'bestAchieved',
       title: 'Best Achieved',
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     {
       field: 'aop',
       title: `FY${startYear.slice(-2)} AOP`,
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     {
       field: 'actual',
       title: `FY${startYear.slice(-2)} Actual`,
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     {
       field: 'plann',
       title: `FY${endYear} Plan`,
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
     },
     // { field: 'limit', title: 'Limit', editable: true },
 
@@ -671,27 +671,27 @@ export default function RelPerf() {
         return
       }
 
-      // ?? Additional validation for UOM = '%'
-      const invalidPercentRows = data.filter((row) => {
-        if (row?.uom === '%') {
-          const fieldsToCheck = ['actual', 'aop', 'bestAchieved', 'plann']
-          return fieldsToCheck.some((key) => {
-            const value = parseFloat(row[key])
-            return isNaN(value) || value < 1 || value > 100
-          })
-        }
-        return false
-      })
+      // // ?? Additional validation for UOM = '%'
+      // const invalidPercentRows = data.filter((row) => {
+      //   if (row?.uom === '%') {
+      //     const fieldsToCheck = ['actual', 'aop', 'bestAchieved', 'plann']
+      //     return fieldsToCheck.some((key) => {
+      //       const value = parseFloat(row[key])
+      //       return isNaN(value) || value < 1 || value > 100
+      //     })
+      //   }
+      //   return false
+      // })
 
-      if (invalidPercentRows.length > 0) {
-        setSnackbarOpenReliabilityPerformance(true)
-        setSnackbarDataReliabilityPerformance({
-          message: 'For rows with UOM as %, values must be between 1 and 100.',
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
+      // if (invalidPercentRows.length > 0) {
+      //   setSnackbarOpenReliabilityPerformance(true)
+      //   setSnackbarDataReliabilityPerformance({
+      //     message: 'For rows with UOM as %, values must be between 1 and 100.',
+      //     severity: 'error',
+      //   })
+      //   setLoading(false)
+      //   return
+      // }
 
       // ? Proceed to save if validation passes
       saveReliabilityPerformance(data)

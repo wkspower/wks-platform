@@ -628,7 +628,7 @@ export default function AopBudget() {
                 <div
                   style={{
                     fontWeight: 600,
-                    marginBottom: 0.5,
+                    // marginBottom: 0.5,
                   }}
                 >
                   Design Basis
@@ -653,13 +653,13 @@ export default function AopBudget() {
               container
               alignItems='center'
               justifyContent='space-between'
-              sx={{ marginBottom: 0.5 }}
+              // sx={{ marginBottom: 0.5 }}
             >
               <Grid item>
                 <div
                   style={{
                     fontWeight: 600,
-                    marginBottom: 0.5,
+                    // marginBottom: 0.5,
                   }}
                 >
                   Remarks

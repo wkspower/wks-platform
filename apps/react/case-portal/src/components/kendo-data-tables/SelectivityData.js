@@ -86,7 +86,9 @@ const SelectivityData = (props) => {
   const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
 
   const headerMap = generateHeaderNames(AOP_YEAR)
+
   const headerMapForPrevYear = generateHeaderNames(prevYearFormatted)
+
   const [isEdited, setIsEdited] = useState(false)
 
   const handleGradeChange = (gradeId) => {
@@ -397,7 +399,9 @@ const SelectivityData = (props) => {
     }
   }
 
-  const type = props?.configType === 'megConstantsMannualEntry'
+  const type =
+    props?.configType === 'megConstantsMannualEntry' ||
+    props?.configType === 'Report Manual Entry'
   const selectedHeaderMap = !type ? headerMap : headerMapForPrevYear
 
   const productionColumns = getEnhancedAOPColDefs({
@@ -440,7 +444,10 @@ const SelectivityData = (props) => {
       allAction: true,
 
       showTitleNameBusiness: true,
-      titleName: props?.currentTabDisplayName,
+      titleName:
+        props?.currentTabDisplayName === 'Report Manual Entry'
+          ? `${props?.currentTabDisplayName} (${prevYearFormatted})`
+          : props?.currentTabDisplayName,
 
       // showG: props?.configType === 'cracker_configuration' ? true : false,
       showG: false,
@@ -476,7 +483,11 @@ const SelectivityData = (props) => {
       } else if (props?.configType === 'ShutdownNorms') {
         await DataService.getShutdownRateExcel(keycloak)
       } else if (props?.tabIndex != 1) {
-        if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+        if (
+          lowerVertName == 'pe' ||
+          lowerVertName == 'pp' ||
+          lowerVertName == 'pta'
+        ) {
           await DataService.getConfigurationExcelType(
             keycloak,
             PLANT_ID,
@@ -484,7 +495,6 @@ const SelectivityData = (props) => {
             [props?.configType],
           )
         } else {
-
           var report_t = []
 
           if (props?.tabIndex == 0) {
@@ -709,6 +719,7 @@ const SelectivityData = (props) => {
       </div>
     )
   }
+
   return (
     <div>
       <Box>

@@ -450,6 +450,9 @@ const ProductionNorms = ({ permissions }) => {
           return {
             ...transformedItem,
             averageTPH: total,
+            _displayNameLower: String(
+              transformedItem.displayName || '',
+            ).toLowerCase(),
           }
         })
       }
@@ -525,6 +528,9 @@ const ProductionNorms = ({ permissions }) => {
           return {
             ...transformedItem,
             averageTPH: total,
+            _displayNameLower: String(
+              transformedItem.displayName || '',
+            ).toLowerCase(),
           }
         })
       }
@@ -543,6 +549,54 @@ const ProductionNorms = ({ permissions }) => {
         'feb',
         'march',
       ]
+
+      const mapTrainNumberToLabel = (val) => {
+        if (val === null || val === undefined || val === '') return val
+
+        const parsed = parseFloat(String(val).trim())
+        if (Number.isNaN(parsed)) return val
+
+        const candidates = [parsed]
+        if (Math.abs(parsed) < 0.1) candidates.push(parsed * 1000)
+
+        for (const num of candidates) {
+          const rounded = Math.round(num)
+          if (Math.abs(num - rounded) <= TOL) {
+            if (rounded === 1) return 'Single'
+            if (rounded === 2) return 'Two'
+            if (rounded === 3) return 'Three'
+          }
+        }
+
+        return val
+      }
+
+      if (
+        lowerVertName === 'aromatics' &&
+        Array.isArray(formattedData) &&
+        formattedData.length
+      ) {
+        const trainIndex = formattedData.findIndex(
+          (r) =>
+            String(r._displayNameLower || r.displayName || '').toLowerCase() ===
+            'train',
+        )
+        if (trainIndex !== -1) {
+          monthFields.forEach((m) => {
+            const original = formattedData[trainIndex][m]
+            if (
+              original !== undefined &&
+              original !== null &&
+              original !== ''
+            ) {
+              formattedData[trainIndex][m] = mapTrainNumberToLabel(original)
+            }
+          })
+          formattedData[trainIndex].averageTPH =
+            formattedData[trainIndex].averageTPH || ''
+        }
+      }
+
       const totalsRow = {
         id: formattedData.length,
         displayName: 'Total',
@@ -555,10 +609,19 @@ const ProductionNorms = ({ permissions }) => {
           return acc
         }, {}),
       }
-      totalsRow.averageTPH = monthFields.reduce(
-        (sum, field) => sum + (parseFloat(totalsRow[field]) || 0),
-        0,
-      )
+
+      if (
+        lowerVertName == 'aromatics' &&
+        row.displayName.toLowerCase() === 'train'
+      ) {
+        totalsRow.averageTPH = '-'
+      } else {
+        totalsRow.averageTPH = monthFields.reduce(
+          (sum, field) => sum + (parseFloat(totalsRow[field]) || 0),
+          0,
+        )
+      }
+
       let finalData = []
 
       if (formattedData.length > 0) {
@@ -572,7 +635,6 @@ const ProductionNorms = ({ permissions }) => {
       }
 
       setRows(finalData)
-
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -593,13 +655,11 @@ const ProductionNorms = ({ permissions }) => {
       if (response?.code != 200) {
         setRows([])
         setLoading(false)
-
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Error fetching data. Please try again.',
           severity: 'error',
         })
-
         return
       }
 
@@ -824,7 +884,9 @@ const ProductionNorms = ({ permissions }) => {
         permissions={adjustedPermissions}
         selectedUOM={'UOM'}
         note={
-          !permissions?.hideNoteText && lowerVertName !== 'cracker'
+          !permissions?.hideNoteText &&
+          lowerVertName !== 'cracker' &&
+          lowerVertName !== 'aromatics'
             ? '* MT per Annum'
             : ''
         }

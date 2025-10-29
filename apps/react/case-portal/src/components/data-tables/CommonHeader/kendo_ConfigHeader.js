@@ -52,6 +52,10 @@ const getConfigByType = (configType) => {
       return contineGradeChange
     case 'DisContineGradeChange':
       return disContineGradeChange
+
+    case 'Report Manual Entry':
+      return disContineGradeChange
+
     default:
       return productionColumns
   }
