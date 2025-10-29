@@ -135,6 +135,7 @@ const PropaneBusiness = ({ permissions }) => {
         inEdit: false,
         originalRemark: item.remarks || '', // Store original
         remarks: item.remarks || '', // Editable field
+        Particulars: 'Type',
       }))
       setRows(formattedData)
     } catch (error) {
@@ -178,7 +179,11 @@ const PropaneBusiness = ({ permissions }) => {
         remarks: row.remarks,
         id: row.id,
       }))
-    const response = await BusinessDemandDataApiService.savepropanebusiness(PLANT_ID, payload, keycloak)
+      const response = await BusinessDemandDataApiService.savepropanebusiness(
+        PLANT_ID,
+        payload,
+        keycloak,
+      )
       if (response?.code === 200) {
         setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
         setSnackbarOpen(true)
@@ -252,7 +257,7 @@ const PropaneBusiness = ({ permissions }) => {
         setCurrentRowId={setCurrentRowId}
         handleRemarkCellClick={handleRemarkCellClick}
         permissions={adjustedPermissions}
-        groupBy='normType'
+        groupBy='Particulars'
         // Add other props as needed
       />
     </div>

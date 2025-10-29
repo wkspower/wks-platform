@@ -24,13 +24,12 @@
     "title": "Value",
     "editable": true,
     "type": "number",
-    "widthT": 140
+    "widthT": 120
   },
 
   {
     "field": "remarks",
     "title": "Remark",
-    "editable": true,
-    "widthT": 300
+    "editable": true
   }
 ]

@@ -17,6 +17,8 @@ async function saveDesignRemarks(
   maintenancedetails,
 ) {
   // Only encode plantId and year, leave budgetCategory as-is
+  const payload = { summary: maintenancedetails }
+
   const url = `${Config.CaseEngineUrl}/task/maintenance-design-remarks?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
@@ -27,7 +29,7 @@ async function saveDesignRemarks(
     const resp = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify(maintenancedetails),
+      body: JSON.stringify(payload),
     })
     return json(keycloak, resp)
   } catch (e) {
@@ -43,6 +45,8 @@ async function saveDesignBasis(
   maintenancedetails,
 ) {
   // Only encode plantId and year, leave budgetCategory as-is
+  const payload = { summary: maintenancedetails }
+
   const url = `${Config.CaseEngineUrl}/task/maintenance-design-basis?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
@@ -53,7 +57,7 @@ async function saveDesignBasis(
     const resp = await fetch(url, {
       method: 'POST',
       headers,
-      body: JSON.stringify(maintenancedetails),
+      body: JSON.stringify(payload),
     })
     return json(keycloak, resp)
   } catch (e) {

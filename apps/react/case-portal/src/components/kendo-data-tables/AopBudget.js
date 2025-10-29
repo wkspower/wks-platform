@@ -37,6 +37,11 @@ export default function AopBudget() {
     setDesignBasisAndDesignRemarksEdited,
   ] = useState(false)
 
+  const [
+    designBasisAndDesignRemarksEdited2,
+    setDesignBasisAndDesignRemarksEdited2,
+  ] = useState(false)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
@@ -186,7 +191,7 @@ export default function AopBudget() {
     {
       field: 'percentChange',
       title: '% Change (+/-)',
-      widthT: 100,
+      widthT: 105,
       editable: true,
       type: 'percentChange',
     },
@@ -200,6 +205,25 @@ export default function AopBudget() {
     })),
     { field: 'remark', title: 'Remark', editable: true, widthT: 100 },
   ]
+
+  const formatPercentChange = (value) => {
+    if (value == null || value === '') return null // keep null/empty as-is
+
+    const raw = String(value).trim()
+
+    // If it already starts with + or -, leave as-is
+    if (/^[+-]/.test(raw)) return raw
+
+    // Convert to number safely
+    const num = Number(raw)
+    if (isNaN(num)) return raw // not a valid number, leave it alone
+
+    // If number is exactly 0, make it null
+    if (num === 0) return null
+
+    // If number > 0, prefix "+"
+    return num > 0 ? `+${num}` : `${num}`
+  }
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -216,7 +240,7 @@ export default function AopBudget() {
         plantName: item.plantName || item.plantName || '',
         IsEditable: item.isEditable,
         originalRemark: item.remark?.trim() || '',
-        percentChange: item?.percentChange || null,
+        percentChange: formatPercentChange(item?.percentChange),
         originalPercentChange: item?.percentChange || null,
       }))
       setRows(mapped)
@@ -255,7 +279,7 @@ export default function AopBudget() {
         AOP_YEAR,
       )
 
-      setDesignBasis(resDesignBasis?.data)
+      setDesignBasis(resDesignBasis?.data[0]?.summary)
 
       const resDesignRemarks = await AOPMaintenanceApiService.designRemarks(
         keycloak,
@@ -263,7 +287,7 @@ export default function AopBudget() {
         AOP_YEAR,
       )
 
-      setDesignRemarks(resDesignRemarks?.data)
+      setDesignRemarks(resDesignRemarks?.data[0]?.summary)
     } catch (err) {
       console.error('fetchData error', err)
       setDesignBasis(null)
@@ -376,6 +400,34 @@ export default function AopBudget() {
     })
     return result
   }
+
+  const saveSummary = async () => {
+    try {
+      await AOPMaintenanceApiService.saveDesignRemarks(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        designRemarks,
+      )
+
+      await AOPMaintenanceApiService.saveDesignBasis(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        designBasis,
+      )
+
+      fetchDesignRemarksAndDesignBasis()
+      setDesignBasisAndDesignRemarksEdited(false)
+      setDesignBasisAndDesignRemarksEdited2(false)
+    } catch (err) {
+      // setSnackbarData({ message: 'Save failed!', severity: 'error' })
+      // setSnackbarOpen(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleSaveAll = async () => {
     setLoading(true)
     try {
@@ -383,7 +435,10 @@ export default function AopBudget() {
       const consumptionData = Object.values(modifiedCells)
       const procurementData = Object.values(modifiedCellsP)
 
-      if (!designBasisAndDesignRemarksEdited) {
+      if (
+        !designBasisAndDesignRemarksEdited &&
+        !designBasisAndDesignRemarksEdited2
+      ) {
         setSnackbarData({
           message: 'Please update Design Basis & Design Remarks',
           severity: 'error',
@@ -405,20 +460,16 @@ export default function AopBudget() {
         setLoading(false)
         return
       }
-      // Fields to omit from payload
       const fieldsToOmit = ['isEditable', 'IsEditable']
 
-      // Combine and clean all modified rows
       const allRows = [
         ...consumptionData.map((row) => omitFields(row, fieldsToOmit)),
         ...procurementData.map((row) => omitFields(row, fieldsToOmit)),
       ]
 
-      // Helper: if percentChange is only a plain number, prefix with '+'
       const prefixPlusForNumericPercent = (row) => {
         if (!row || row.percentChange == null) return row
         const raw = String(row.percentChange).trim()
-        // match only digits with optional decimal (no signs, no %)
         if (/^[0-9]+(\.[0-9]+)?$/.test(raw)) {
           return { ...row, percentChange: `+${raw}` }
         }
@@ -427,33 +478,19 @@ export default function AopBudget() {
 
       const processedRows = allRows.map(prefixPlusForNumericPercent)
 
-      await AOPMaintenanceApiService.saveDesignRemarks(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        designRemarks,
-      )
-
-      await AOPMaintenanceApiService.saveDesignBasis(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        designBasis,
-      )
-
+      saveSummary()
       // Send as array payload
       await AOPMaintenanceApiService.savemaintenacegetdata(
         processedRows,
         keycloak,
       )
 
-      setSnackbarData({ message: 'Saved successfully!', severity: 'success' })
       setSnackbarOpen(true)
+      setSnackbarData({ message: 'Saved successfully!', severity: 'success' })
       setModifiedCells({})
       setModifiedCellsP({})
-      designBasisAndDesignRemarksEdited(false)
+
       fetchData()
-      fetchDesignRemarksAndDesignBasis()
     } catch (err) {
       setSnackbarData({ message: 'Save failed!', severity: 'error' })
       setSnackbarOpen(true)
@@ -636,7 +673,7 @@ export default function AopBudget() {
               rows={3}
               onChange={(e) => {
                 setDesignRemarks(e.target.value)
-                setDesignBasisAndDesignRemarksEdited(true)
+                setDesignBasisAndDesignRemarksEdited2(true)
               }}
             />
           </Grid>
@@ -693,7 +730,7 @@ export default function AopBudget() {
         permissions={adjustedPermissionsP}
         groupBy='budgetType'
         resetRowData={resetRowData2}
-        summaryEdited={designBasisAndDesignRemarksEdited}
+        summaryEdited={designBasisAndDesignRemarksEdited2}
         // setEditMode={setEditMode}
       />
       <Notification
