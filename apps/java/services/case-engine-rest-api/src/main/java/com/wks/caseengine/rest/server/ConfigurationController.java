@@ -194,11 +194,12 @@ public class ConfigurationController {
 	@GetMapping(value = "/shutdown-rate-export")
 	public ResponseEntity<byte[]> exportShutdownRate(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year
+            @RequestParam("year") String year,
+            @RequestParam("type") String type
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = configurationService.createShutdownRateExcel(year,UUID.fromString(plantId), false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = configurationService.createShutdownRateExcel(year,UUID.fromString(plantId),type, false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -227,9 +228,10 @@ public class ConfigurationController {
 	public AOPMessageVM importShutdownRateExcel(
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
+            @RequestParam("type") String type,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId), file); 
+			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId),type, file); 
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")

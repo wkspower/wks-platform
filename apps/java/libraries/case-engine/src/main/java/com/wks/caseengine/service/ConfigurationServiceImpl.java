@@ -267,11 +267,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 	}
 	
-	public byte[] createShutdownRateExcel(String year, UUID plantFKId, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
+	public byte[] createShutdownRateExcel(String year, UUID plantFKId,String type, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
 		try {
 			
 			if (!isAfterSave) {
-				dtoList = getShutdownRateData(year, plantFKId);
+				dtoList = getShutdownRateData(year, plantFKId,type);
 			}
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			List<Boolean> isEditable = new ArrayList<>();
@@ -720,13 +720,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	
-	public List<ConfigurationDTO> getShutdownRateData(String year, UUID plantFKId) {
+	public List<ConfigurationDTO> getShutdownRateData(String year, UUID plantFKId,String type) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
 			 
-				obj = findShutdownRate(year, plantFKId, viewName);
+				obj = findShutdownRate(year, plantFKId,type, viewName);
 			
 
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
@@ -1837,7 +1837,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 	
-	public List<Object[]> findShutdownRate(String year, UUID plantFKId, String viewName) {
+	public List<Object[]> findShutdownRate(String year, UUID plantFKId,String type, String viewName) {
 		try {
 			String sql = "SELECT " + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
 					+ "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
@@ -1860,7 +1860,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
 					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
 					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
-					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeName = 'ShutdownNorms' " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
+					+ "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeName = :type " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
 					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
 					+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
 					+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
@@ -1868,6 +1868,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("year", year);
 			query.setParameter("plantFKId", plantFKId);
+			query.setParameter("type", type);
 
 			return query.getResultList();
 		} catch (Exception e) {
@@ -2024,7 +2025,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 	
 	@Override
-	public AOPMessageVM importShutdownRateExcel(String year, UUID plantFKId, MultipartFile file) {
+	public AOPMessageVM importShutdownRateExcel(String year, UUID plantFKId,String type, MultipartFile file) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -2040,7 +2041,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createShutdownRateExcel(year, plantFKId, true, failedRecords);
+				byte[] fileByteArray = createShutdownRateExcel(year, plantFKId,type, true, failedRecords);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
