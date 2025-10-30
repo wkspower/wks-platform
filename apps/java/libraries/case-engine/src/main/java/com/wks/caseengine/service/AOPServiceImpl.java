@@ -136,19 +136,19 @@ public class AOPServiceImpl implements AOPService {
 
 				// Directly parsing Double values
 
-				aopDTO.setApril(row[6] != null ? Double.valueOf(row[6].toString()) : null);
-				aopDTO.setMay(row[7] != null ? Double.valueOf(row[7].toString()) : null);
-				aopDTO.setJune(row[8] != null ? Double.valueOf(row[8].toString()) : null);
-				aopDTO.setJuly(row[9] != null ? Double.valueOf(row[9].toString()) : null);
-				aopDTO.setAug(row[10] != null ? Double.valueOf(row[10].toString()) : null);
-				aopDTO.setSep(row[11] != null ? Double.valueOf(row[11].toString()) : null);
-				aopDTO.setOct(row[12] != null ? Double.valueOf(row[12].toString()) : null);
-				aopDTO.setNov(row[13] != null ? Double.valueOf(row[13].toString()) : null);
-				aopDTO.setDec(row[14] != null ? Double.valueOf(row[14].toString()) : null);
-				aopDTO.setJan(row[15] != null ? Double.valueOf(row[15].toString()) : null);
-				aopDTO.setFeb(row[16] != null ? Double.valueOf(row[16].toString()) : null);
-				aopDTO.setMarch(row[17] != null ? Double.valueOf(row[17].toString()) : null);
-				aopDTO.setAvgTPH(row[18] != null ? Double.valueOf(row[18].toString()) : null);
+				aopDTO.setApril(row[6] != null && !row[6].toString().trim().isEmpty() ? Double.valueOf(row[6].toString()) : null);
+				aopDTO.setMay(row[7] != null && !row[7].toString().trim().isEmpty() ? Double.valueOf(row[7].toString()) : null);
+				aopDTO.setJune(row[8] != null && !row[8].toString().trim().isEmpty()? Double.valueOf(row[8].toString()) : null);
+				aopDTO.setJuly(row[9] != null && !row[9].toString().trim().isEmpty()? Double.valueOf(row[9].toString()) : null);
+				aopDTO.setAug(row[10] != null && !row[10].toString().trim().isEmpty()? Double.valueOf(row[10].toString()) : null);
+				aopDTO.setSep(row[11] != null && !row[11].toString().trim().isEmpty()? Double.valueOf(row[11].toString()) : null);
+				aopDTO.setOct(row[12] != null && !row[12].toString().trim().isEmpty()? Double.valueOf(row[12].toString()) : null);
+				aopDTO.setNov(row[13] != null && !row[13].toString().trim().isEmpty()? Double.valueOf(row[13].toString()) : null);
+				aopDTO.setDec(row[14] != null && !row[14].toString().trim().isEmpty()? Double.valueOf(row[14].toString()) : null);
+				aopDTO.setJan(row[15] != null && !row[15].toString().trim().isEmpty()? Double.valueOf(row[15].toString()) : null);
+				aopDTO.setFeb(row[16] != null && !row[16].toString().trim().isEmpty()? Double.valueOf(row[16].toString()) : null);
+				aopDTO.setMarch(row[17] != null && !row[17].toString().trim().isEmpty()? Double.valueOf(row[17].toString()) : null);
+				aopDTO.setAvgTPH(row[18] != null && !row[18].toString().trim().isEmpty()? Double.valueOf(row[18].toString()) : null);
 				aopDTO.setRemark(row[19] != null ? row[19].toString() : null);
 				aopDTO.setDisplayOrder(row[20] != null ? Integer.valueOf(row[20].toString()) : null);
 				aopDTO.setIsEditable(row[21] != null ? Boolean.valueOf(row[21].toString()) : null);
