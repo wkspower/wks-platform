@@ -98,7 +98,11 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		String procedureName = vertical.getName() + "_" + site.getName() + "_GetSpyroInput";
 		try {
 			List<Object[]> results = getData(plantId, year, siteId, verticalId, Mode, procedureName);
-
+			List<String> types=null;
+			if(type.equalsIgnoreCase("Composition")) {
+				String storedProcedure=vertical.getName()+"_GetCompositionNorms";
+				 types= getTypes( plantId,  year,  siteId, storedProcedure);
+			}
 			for (Object[] row : results) {
 				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
 				if (!type.equalsIgnoreCase("Composition") && row[4].toString().contains(type)) {
@@ -123,13 +127,9 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 					map.put("isEditable", row[22]);
 					spyroInputDataList.add(map);
 				} else {
+					
 					if (type.equalsIgnoreCase("Composition")) {
-						if (row[4].toString().contains("C2/C3") || row[4].toString().contains("Hexene Purge Gas")
-								|| row[4].toString().contains("BPCL Kochi Propylene")
-								|| row[4].toString().contains("Import Propane") || row[4].toString().contains("FCC C3")
-								|| row[4].toString().contains("LDPE Off Gas")
-								|| row[4].toString().contains("Shale Ethane")
-								) {
+						if (types.contains(row[4].toString())) {
 
 							map.put("normParameterFKID", row[2]);
 							map.put("particulars", row[3]);
@@ -182,6 +182,26 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 			query.setParameter("verticalId", verticalId);
 			query.setParameter("Mode", Mode);
 
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<String> getTypes(String plantId, String aopYear, String siteId,String procedureName) {
+		try {
+
+			String sql = "EXEC " + procedureName +
+					" @plantId = :plantId,@siteId = :siteId, @aopYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("siteId", siteId);
+		
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);
