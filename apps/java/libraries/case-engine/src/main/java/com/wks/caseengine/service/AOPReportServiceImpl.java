@@ -575,7 +575,100 @@ public class AOPReportServiceImpl implements AOPReportService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
+	@Override
+	public AOPMessageVM getSpecificConsumptionNormsReport(String reportType, String plantId, String year) {
+		try {
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			List<Map<String, Object>> plantProductionData = new ArrayList<>();
+
+			List<Object[]> obj = getSpecificConsumptionNormsData(plantId, year, reportType);
+			
+			if (reportType.equalsIgnoreCase("RawMaterial") || reportType.equalsIgnoreCase("ByProduct") 
+					|| reportType.equalsIgnoreCase("CatChem") || reportType.equalsIgnoreCase("Utilities") 
+					|| reportType.equalsIgnoreCase("QualityParameters") || reportType.equalsIgnoreCase("OtherVariable")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("materialID", row[1]);
+					map.put("utilityName", row[2]);
+					map.put("unit", row[3]);
+					map.put("design", row[4]);
+					map.put("bestAchievedSinceLastFourYears", row[5]);
+					map.put("globalBenchmark", row[6]);
+					map.put("actualFourYearsAgo", row[7]);
+					map.put("actualThreeYearsAgo", row[8]);
+					map.put("actualTwoYearsAgo", row[9]);
+					map.put("actualLastYear", row[10]);
+					map.put("budgetLastYear", row[11]);
+					map.put("budgetProposed", row[12]);
+					
+					plantProductionData.add(map);
+					
+				}
+			} else if (reportType.equalsIgnoreCase("PackingConsumables")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("rowNo", row[0]);
+					map.put("material", row[1]);
+					map.put("uom", row[2]);
+					map.put("bestAchieved", row[3]);
+					map.put("globalBenchmark", row[4]);
+					map.put("actualFourYearsAgo", row[5]);
+					map.put("actualThreeYearsAgo", row[6]);
+					map.put("actualTwoYearsAgo", row[7]);
+					map.put("budgetCurrent", row[8]);
+					map.put("actualCurrent", row[9]);
+					map.put("ratePerUnit", row[10]);
+					map.put("budgetRsPerMT", row[11]);
+					map.put("actualRsPerMT", row[12]);
+					map.put("proposedRsPerMT", row[13]);
+					
+					plantProductionData.add(map);
+				}
+			} else if (reportType.equalsIgnoreCase("OtherCost")) {
+				for (Object[] row : obj) {
+					Map<String, Object> map = new HashMap<>();
+					map.put("sno", row[0]);
+					map.put("materialID", row[1]);
+					map.put("utilityName", row[2]);
+					map.put("unit", row[3]);
+					map.put("design", row[4]);
+					map.put("bestAchievedSinceLastFourYears", row[5]);
+					map.put("globalBenchmark", row[6]);
+					map.put("actualFourYearsAgo", row[7]);
+					map.put("actualThreeYearsAgo", row[8]);
+					map.put("actualTwoYearsAgo", row[9]);
+					map.put("actualLastYear", row[10]);
+					map.put("budgetLastYear", row[11]);
+					map.put("budgetProposed", row[12]);
+					map.put("StoresAndSpares", row[13]);
+					
+					plantProductionData.add(map);
+				}
+			}  else {
+				Map<String, Object> map = new HashMap<>();
+				map.put("Message", "Invalid report type");
+				plantProductionData.add(map);
+			}
+
+			// Final result map
+			Map<String, Object> finalResult = new HashMap<>();
+			finalResult.put("plantProductionData", plantProductionData);
+
+			// Set response
+			aopMessageVM.setCode(200);
+			aopMessageVM.setMessage("Data fetched successfully");
+			aopMessageVM.setData(finalResult);
+			return aopMessageVM;
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	public List<Object[]> getPlantContributionData(String plantId, String aopYear, String reportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
@@ -594,6 +687,31 @@ public class AOPReportServiceImpl implements AOPReportService {
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
 			query.setParameter("reportType", reportType);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<Object[]> getSpecificConsumptionNormsData(String plantId, String aopYear, String category) {
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = verticalName + "_" + site.getName() + "_SpecificConsumptionNormsReport";
+			
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @aopYear = :aopYear, @category = :category";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("category", category);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {

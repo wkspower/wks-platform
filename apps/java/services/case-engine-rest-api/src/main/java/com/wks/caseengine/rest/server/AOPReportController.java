@@ -51,6 +51,11 @@ public class AOPReportController {
 		return aopReportService.getPlantContributionFiveYearSummaryReport(reportType,plantId,year);
 	}
 	
+	@GetMapping(value="/specific-consumption-norms")
+	public AOPMessageVM getSpecificConsumptionNormsReport(@RequestParam(required=false) String reportType,@RequestParam String plantId,@RequestParam String year) {
+		return aopReportService.getSpecificConsumptionNormsReport(reportType,plantId,year);
+	}
+	
 	@PostMapping(value="/report-plant-contribution-summary-yearly")
 	public AOPMessageVM updatePlantContributionFiveYearSummaryReport(@RequestBody List<PlantContributionSummaryDTO> plantContributionSummaryDTOs) {
 		return aopReportService.updatePlantContributionFiveYearSummaryReport(plantContributionSummaryDTOs);
