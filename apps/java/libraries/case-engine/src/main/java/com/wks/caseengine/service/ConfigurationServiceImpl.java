@@ -146,12 +146,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 				List<Object> list = new ArrayList<>();
 
-				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
 					list.add(dto.getConfigTypeDisplayName());
 					list.add(dto.getTypeDisplayName());
 				}
 				if ((verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
-						|| (verticalName.equalsIgnoreCase("CRACKER")) || (verticalName.equalsIgnoreCase("VCM")) 
+						|| (verticalName.equalsIgnoreCase("CRACKER")) 
 						|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
 					list.add(dto.getNormType());
 				}
@@ -183,7 +183,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
 				innerHeaders.add("Category");
 
 			}
@@ -243,7 +243,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 			}
 
-			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
 				sheet.setColumnHidden(17, true);
 			} else {
 				sheet.setColumnHidden(16, true);
@@ -619,7 +619,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
 			Boolean vertical=(verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
-					|| (verticalName.equalsIgnoreCase("CRACKER")) || (verticalName.equalsIgnoreCase("VCM")) 
+					|| (verticalName.equalsIgnoreCase("CRACKER"))  
 					|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"));
 			if (vertical) {
 				String procedureName = verticalName + "_GetConfiguration";
@@ -676,7 +676,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						: 0.0);
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 
-				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
 					configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
 
 					configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
@@ -691,7 +691,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
-						|| verticalName.equalsIgnoreCase("CRACKER") || (verticalName.equalsIgnoreCase("VCM")) 
+						|| verticalName.equalsIgnoreCase("CRACKER")  
 						|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
 
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
@@ -734,27 +734,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			for (Object[] row : obj) {
 				ConfigurationDTO configurationDTO = new ConfigurationDTO();
 				configurationDTO.setNormParameterFKId(row[0] != null ? row[0].toString() : "");
-				System.out.println("NormParameterFKId = "+configurationDTO.getNormParameterFKId());
-
+				
 				configurationDTO.setApr(
 						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
 								: 0.0);
-				System.out.println("Apr = "+configurationDTO.getApr());
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
-				System.out.println("Remarks = "+configurationDTO.getRemarks());
 					configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
-					System.out.println("ConfigTypeDisplayName = "+configurationDTO.getConfigTypeDisplayName());
 					configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
-					System.out.println("TypeDisplayName = "+configurationDTO.getTypeDisplayName());
 					configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
-					System.out.println("ConfigTypeName = "+configurationDTO.getConfigTypeName());
 					configurationDTO.setTypeName(row[20] != null ? row[20].toString() : "");
-					System.out.println("TypeName = "+configurationDTO.getTypeName());
 					configurationDTO.setProductName(row[21] != null ? row[21].toString() : "");
-					System.out.println("ProductName = "+configurationDTO.getProductName());
 					configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
-					System.out.println("Id = "+configurationDTO.getId());
-				configurationDTOList.add(configurationDTO);
+					configurationDTOList.add(configurationDTO);
 				if (row[14] == null) {
 					i++;
 				}
