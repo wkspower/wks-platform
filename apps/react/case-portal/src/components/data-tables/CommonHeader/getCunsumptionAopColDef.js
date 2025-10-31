@@ -37,7 +37,7 @@ const getCunsumptionAopColDef = ({ headerMap }) => {
       ...col,
       title: headerMap[col.title],
       align: 'right',
-      format: '{0:#.###}',
+      format: '{0:0.000}',
     }
   })
 

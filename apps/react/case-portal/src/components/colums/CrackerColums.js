@@ -22,7 +22,7 @@ export const CrackerColums = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -32,7 +32,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -42,7 +42,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -52,7 +52,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
 
@@ -63,7 +63,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -73,7 +73,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -83,7 +83,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -93,7 +93,7 @@ export const CrackerColums = [
 
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -102,7 +102,7 @@ export const CrackerColums = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -111,7 +111,7 @@ export const CrackerColums = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -120,7 +120,7 @@ export const CrackerColums = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   {
@@ -129,7 +129,7 @@ export const CrackerColums = [
     editable: true,
     width: 120,
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
   { field: 'remark', title: 'Remarks', widthT: 200, editable: true },
@@ -159,7 +159,7 @@ export const CrackerColumsForYearlyNorms = [
     editable: true,
 
     align: 'right',
-    format: '{0:#.###}',
+    format: '{0:0.0000}',
     type: 'number',
   },
 ]
@@ -189,7 +189,7 @@ export const ShutdownConsumptionCrackerColumns = [
       field: monthField,
 
       type: 'number',
-      format: '{0:#.###}',
+      format: '{0:0.0000}',
       editable: false,
       isDisabled: true,
       monthNumber: monthIndex,

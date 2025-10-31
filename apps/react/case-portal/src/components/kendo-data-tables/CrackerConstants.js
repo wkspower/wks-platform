@@ -494,12 +494,13 @@ const CrakcerConstants = () => {
     {
       field: 'DisplayName',
       title: 'Particulars',
+      widthT: '200px',
     },
 
     {
       field: 'UOM',
       title: 'UOM',
-
+      widthT: '60px',
       editable: false,
     },
 
@@ -509,6 +510,7 @@ const CrakcerConstants = () => {
       editable: true,
       align: 'right',
       format: valueFormat,
+      widthT: '200px',
       type: 'number',
     },
     {
@@ -675,6 +677,7 @@ const CrakcerConstants = () => {
   }
   const uploadCrackerConstant = async (rawFile) => {
     setLoading(true)
+    setLoading1(true)
 
     try {
       let response
@@ -689,10 +692,10 @@ const CrakcerConstants = () => {
       if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Uploaded Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
-        setModifiedCells({})
+        setModifiedCellsConstants({})
         fetchData()
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
@@ -722,6 +725,8 @@ const CrakcerConstants = () => {
           message: 'Partial data saved. Error file downloaded.',
           severity: 'warning',
         })
+        setLoading(false)
+        setLoading1(false)
         fetchData()
       } else {
         setSnackbarOpen(true)
@@ -729,6 +734,8 @@ const CrakcerConstants = () => {
           message: 'Upload Failed!',
           severity: 'error',
         })
+        setLoading(false)
+        setLoading1(false)
       }
 
       return response

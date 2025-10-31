@@ -3331,7 +3331,7 @@ async function saveRecipeExcel(file, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getShutdownRateExcel(keycloak) {
+async function getShutdownRateExcel(keycloak, type) {
   var year = localStorage.getItem('year')
   var plantId = ''
   const storedPlant = localStorage.getItem('selectedPlant')
@@ -3339,7 +3339,7 @@ async function getShutdownRateExcel(keycloak) {
     const parsedPlant = JSON.parse(storedPlant)
     plantId = parsedPlant.id
   }
-  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-export?year=${year}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-export?year=${year}&plantId=${plantId}&type=${type}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -3360,7 +3360,7 @@ async function getShutdownRateExcel(keycloak) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'shutdown_rate.xlsx'
+    a.download = `${props?.configType}_Excel.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3371,10 +3371,10 @@ async function getShutdownRateExcel(keycloak) {
   }
 }
 
-async function saveShutdownRateExcel(file, keycloak) {
+async function saveShutdownRateExcel(file, keycloak, type) {
   const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
   const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-import?plantId=${plantId}&year=${year}`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-import?plantId=${plantId}&year=${year}&type=${type}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {

@@ -109,7 +109,7 @@
 /* Disabled cells */
 .kendo-data-grid .disabled-cell {
   background-color: rgba(233, 233, 233, 0.3);
-  border: 1px solid #d0d0d0;
+  border: 1px solid #878787;
   border-radius: 0;
 }
 

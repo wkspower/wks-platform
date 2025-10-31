@@ -305,6 +305,24 @@ const ProductionNorms = ({ permissions }) => {
 
   const rowDataForCracker = [
     {
+      displayName: 'Train',
+      april: 1,
+      may: 1,
+      june: 2,
+      july: 1,
+      aug: 2,
+      sep: 1,
+      oct: 2,
+      nov: 1,
+      dec: 2,
+      jan: 1,
+      feb: 2,
+      march: 1,
+      averageTPH: '',
+      isEditable: false,
+      aopStatus: '',
+    },
+    {
       displayName: 'Ethyelene',
       april: 13420,
       may: 12875,
@@ -551,6 +569,7 @@ const ProductionNorms = ({ permissions }) => {
       ]
 
       const mapTrainNumberToLabel = (val) => {
+        const TOL = 0.0001
         if (val === null || val === undefined || val === '') return val
 
         const parsed = parseFloat(String(val).trim())
@@ -610,16 +629,19 @@ const ProductionNorms = ({ permissions }) => {
         }, {}),
       }
 
-      if (
-        lowerVertName == 'aromatics' &&
-        row.displayName.toLowerCase() === 'train'
-      ) {
-        totalsRow.averageTPH = '-'
-      } else {
-        totalsRow.averageTPH = monthFields.reduce(
-          (sum, field) => sum + (parseFloat(totalsRow[field]) || 0),
-          0,
-        )
+      totalsRow.averageTPH = monthFields.reduce(
+        (sum, field) => sum + (parseFloat(totalsRow[field]) || 0),
+        0,
+      )
+
+      const trainRow = formattedData.find(
+        (r) =>
+          String(r._displayNameLower || r.displayName || '').toLowerCase() ===
+          'train',
+      )
+
+      if (lowerVertName === 'aromatics' && trainRow) {
+        trainRow.averageTPH = '-'
       }
 
       let finalData = []

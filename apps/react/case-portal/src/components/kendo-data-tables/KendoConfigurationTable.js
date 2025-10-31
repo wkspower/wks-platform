@@ -382,10 +382,32 @@ const ConfigurationTable = () => {
     }
   }
 
+  const carryForwardRecords = async () => {
+    try {
+      const response = await DataService.carryForwardRecords(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (response && response.code === 200) {
+        console.log('Carry forward successful, status 200.')
+      } else {
+        console.warn(
+          `Carry forward request completed but status was not 200: ${response?.status}`,
+        )
+      }
+    } catch (error) {
+      console.error('Error fetching getConfigurationExecutionDetails:', error)
+    } finally {
+      // setLoading1(false)
+    }
+  }
+
   useEffect(() => {
     if (!plantID || !AOP_YEAR) return
     setTabIndex(0)
-
+    carryForwardRecords()
     getConfigurationExecutionDetails()
   }, [plantID, AOP_YEAR])
 

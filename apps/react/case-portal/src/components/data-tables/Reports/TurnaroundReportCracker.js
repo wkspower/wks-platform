@@ -107,7 +107,7 @@ const TurnaroundReportCracker = () => {
         field: monthField,
 
         type: 'number',
-        format: '{0:#.###}',
+        format: '{0:0.000}',
         editable: false,
         isDisabled: true,
         monthNumber: monthIndex,

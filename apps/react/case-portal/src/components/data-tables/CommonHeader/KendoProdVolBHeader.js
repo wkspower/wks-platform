@@ -1,6 +1,10 @@
 import NumericInputOnly from 'utils/NumericInputOnly'
 
-export default function getKendoProductionColumns({ headerMap, type, valueFormat }) {
+export default function getKendoProductionColumns({
+  headerMap,
+  type,
+  valueFormat,
+}) {
   let rawCols
   switch (type) {
     case 'MC':
@@ -31,7 +35,7 @@ export default function getKendoProductionColumns({ headerMap, type, valueFormat
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
       isRightAlligned: isTextCol ? 'text' : 'numeric',
-      format: isTextCol ? undefined : valueFormat || '{0:#.###}', 
+      format: isTextCol ? undefined : valueFormat || '{0:0.000}',
       editable: false,
       align: isTextCol ? 'left' : 'right',
     }

@@ -70,7 +70,8 @@ export default function MaintenanceSummary() {
   // Construct the SSRS URL. Use the ReportServer or ReportManager URL you need.
   // Example uses ReportViewer.aspx path you had.
   const src = useMemo(() => {
-    const base = 'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx'
+    const base =
+      'https://sjmnpb174.in.ril.com/ReportServer/Pages/ReportViewer.aspx'
     // if your report path is /AOPReport/ConsumptionBudgetSummarySiteWise
     const reportPath = '%2fAOPReport%2fConsumptionBudgetSummarySiteWise' // encoded '/AOPReport/ConsumptionBudgetSummarySiteWise'
     const params = new URLSearchParams({

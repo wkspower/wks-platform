@@ -134,7 +134,7 @@ async function businessDemandImport(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 async function aopDesignBasisBluePrint() {
-  var url = `${window.location.origin}/files/Blue Print.docx`
+  var url = `${window.location.origin}/files/Blue Print Cracker.docx`
 
   try {
     const resp = await fetch(url, {

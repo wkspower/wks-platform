@@ -47,12 +47,6 @@ const MonthwiseProduction = () => {
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
   const isOldYear = oldYear?.oldYear === 1
-  const formatValueToThreeDecimals = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-  }
-  const formatValueToThreeDecimalsZero = (params) => {
-    return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-  }
 
   const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
   const verticalName = vertical?.toLowerCase()
@@ -142,7 +136,7 @@ const MonthwiseProduction = () => {
         },
         {
           field: 'MEGThroughput',
-          title: 'Throughput, TPH',
+          title: 'MEG Throughput, TPH',
           width: 150,
           editable: false,
           type: 'number',
@@ -324,38 +318,6 @@ const MonthwiseProduction = () => {
   useEffect(() => {
     fetchData()
   }, [year, plantId])
-
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-
-    return newRow
-  }, [])
 
   const defaultCustomHeight = { mainBox: '34vh', otherBox: '112%' }
 

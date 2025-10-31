@@ -984,7 +984,7 @@ const DecokingConfig = () => {
       </Backdrop>
 
       <LocalizationProvider dateAdapter={AdapterMoment}>
-        <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', gap: 1, mb: 0, alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography className='grid-title' sx={{ whiteSpace: 'nowrap' }}>
               TA Start Date

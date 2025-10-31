@@ -83,7 +83,8 @@ export default function PlantBudgetSummary() {
   const AOP_YEAR = year?.selectedYear
 
   const src = useMemo(() => {
-    const base = 'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx'
+    const base =
+      'https://sjmnpb174.in.ril.com/ReportServer/Pages/ReportViewer.aspx'
     const reportPath = '%2fAOP'
     const params = new URLSearchParams({
       '': reportPath,

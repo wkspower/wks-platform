@@ -10,7 +10,7 @@ export default function ValueFormatterConsumption() {
     return '{0:0.000}'
   }
   if (VERTICAL_NAME === 'cracker') {
-    return '{0:0.000}'
+    return '{0:0.0000}'
   }
 
   return '{0:0.000}'

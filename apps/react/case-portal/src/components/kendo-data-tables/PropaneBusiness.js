@@ -257,7 +257,7 @@ const PropaneBusiness = ({ permissions }) => {
       ...permissions,
       downloadExcelBtn: false,
       uploadExcelBtn: false,
-      titleName: 'Propane Business Demand',
+      titleName: '',
     },
     isOldYear,
   )
@@ -270,7 +270,7 @@ const PropaneBusiness = ({ permissions }) => {
         setRows={setRows}
         columns={columns}
         rows={rows}
-        title='Propane Business Demand'
+        title=''
         fetchData={fetchData}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

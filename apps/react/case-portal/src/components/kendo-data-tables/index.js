@@ -936,6 +936,13 @@ const KendoDataTables = ({
     return Math.round(Math.min(needed, maxVH, available))
   }, [rows?.length])
 
+  useEffect(() => {
+    const modes = permissions?.modes
+    if (Array.isArray(modes) && modes.length && selectMode === undefined) {
+      setSelectMode(modes[0])
+    }
+  }, [permissions?.modes])
+
   const CHECK_TYPES = ['cat chem', 'utility consumption']
   const CHECK_TYPES2 = ['raw material', 'by products']
 
@@ -1216,11 +1223,8 @@ const KendoDataTables = ({
               {permissions?.showModes && (
                 <TextField
                   select
-                  value={selectMode || permissions?.modes?.[0]}
-                  onChange={(e) => {
-                    setSelectMode(e.target.value)
-                    // fetchData()
-                  }}
+                  value={selectMode ?? ''}
+                  onChange={(e) => setSelectMode(e.target.value)}
                   className='dropdown-select'
                   variant='outlined'
                   label='Select Modes'
@@ -1229,10 +1233,9 @@ const KendoDataTables = ({
                     Select Modes
                   </MenuItem>
 
-                  {/* Render the correct unit options dynamically */}
-                  {permissions?.modes.map((unit) => (
-                    <MenuItem key={unit} value={unit}>
-                      {unit}
+                  {permissions.modes.map((m) => (
+                    <MenuItem key={m.name} value={m.name}>
+                      {m.displayName}
                     </MenuItem>
                   ))}
                 </TextField>

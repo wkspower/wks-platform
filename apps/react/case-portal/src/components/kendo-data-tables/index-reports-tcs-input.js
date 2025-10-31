@@ -548,7 +548,7 @@ const KendoDataTablesReportsTcs = ({
           field={col.field}
           title={col.title || col.headerName}
           editable={col.editable || false}
-          format={col.format || '{0:#.###}'}
+          format={col.format || '{0:0.000}'}
           cells={{
             edit: { text: NoSpinnerNumericEditor },
             data: toolTipRenderer,

@@ -622,11 +622,11 @@ const ProductionNormsCracker = ({ permissions }) => {
           showCalculate: false,
           allAction: true,
           showNote: true,
-          showTitleNameBusiness: true,
-          titleName: 'Other Production',
+          showTitleNameBusiness: false,
+          titleName: '',
           saveBtn: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `${lowerVertName}_Other Production`,
+          ExcelName: `${lowerVertName}_Production`,
         },
         isOldYear,
       ),
@@ -647,35 +647,6 @@ const ProductionNormsCracker = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <KendoDataTables
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        columns={productionColumns}
-        rows={rows}
-        setRows={setRows}
-        title={'Production AOP'}
-        isCellEditable={isCellEditable}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        updateProductNormData={updateProductNormData}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        handleCalculate={handleCalculate}
-        apiRef={apiRef}
-        fetchData={fetchData}
-        handleUnitChange={handleUnitChange}
-        currentRowId={currentRowId}
-        unsavedChangesRef={unsavedChangesRef}
-        permissions={adjustedPermissions}
-        selectedUOM={'UOM'}
-        note={''}
-      />
 
       <KendoDataTables
         modifiedCells={modifiedCellsC2C3R}
@@ -705,6 +676,35 @@ const ProductionNormsCracker = ({ permissions }) => {
         selectedUOM={'UOM'}
         note={''}
         handleRemarkCellClick={handleRemarkCellClick}
+      />
+
+      <KendoDataTables
+        modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
+        columns={productionColumns}
+        rows={rows}
+        setRows={setRows}
+        title={'Production AOP'}
+        isCellEditable={isCellEditable}
+        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+        onDeleteRow={(id) => console.log('Row Deleted:', id)}
+        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+        paginationOptions={[100, 200, 300]}
+        updateProductNormData={updateProductNormData}
+        saveChanges={saveChanges}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        handleCalculate={handleCalculate}
+        apiRef={apiRef}
+        fetchData={fetchData}
+        handleUnitChange={handleUnitChange}
+        currentRowId={currentRowId}
+        unsavedChangesRef={unsavedChangesRef}
+        permissions={adjustedPermissions}
+        selectedUOM={'UOM'}
+        note={''}
       />
     </div>
   )

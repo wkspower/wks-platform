@@ -75,7 +75,7 @@ const OptimizerReport = () => {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.###}' } : {}),
+        ...(isNumberCol ? { format: '{0:0.000}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
@@ -403,7 +403,6 @@ const OptimizerReport = () => {
   const calculateMonthWiseData = async () => {
     try {
       setCalculating(true)
-
 
       if (!PLANT_ID || !AOP_YEAR) {
         throw new Error('Plant ID or year not found in localStorage')

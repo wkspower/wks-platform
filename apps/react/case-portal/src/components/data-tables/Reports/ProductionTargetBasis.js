@@ -16,7 +16,6 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
 
 const ProductionTargetBasis = () => {
   const keycloak = useSession()
@@ -70,7 +69,7 @@ const ProductionTargetBasis = () => {
           filterable: true,
           filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
           align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+          ...(isNumberCol ? { format: '{0:0.00}' } : {}),
           editable: false,
           isRightAlligned: isNumberCol ? 'numeric' : undefined,
         }

@@ -340,7 +340,7 @@ const WorkFlowMerge = () => {
         }),
         ...(isNumeric && {
           type: 'number',
-          format: '{0:#.###}',
+          format: '{0:0.000}',
           // valueFormatter: ({ value }) =>
           //   value === '' || value == null ? '' : Number(value).toFixed(2),
         }),

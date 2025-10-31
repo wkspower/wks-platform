@@ -481,7 +481,7 @@ const SelectivityData = (props) => {
       if (props?.configType === 'grades') {
         await DataService.getRecipeExcel(keycloak)
       } else if (props?.configType === 'ShutdownNorms') {
-        await DataService.getShutdownRateExcel(keycloak)
+        await DataService.getShutdownRateExcel(keycloak, props?.configType)
       } else if (props?.tabIndex != 1) {
         if (
           lowerVertName == 'pe' ||
@@ -549,7 +549,11 @@ const SelectivityData = (props) => {
         response = await DataService.saveRecipeExcel(rawFile, keycloak)
       } else if (props?.configType === 'ShutdownNorms') {
         // Add shutdown rate specific upload
-        response = await DataService.saveShutdownRateExcel(rawFile, keycloak)
+        response = await DataService.saveShutdownRateExcel(
+          rawFile,
+          keycloak,
+          props?.configType,
+        )
       } else if (props?.tabIndex != 1) {
         response = await DataService.saveConfigurationExcel(rawFile, keycloak)
       } else {

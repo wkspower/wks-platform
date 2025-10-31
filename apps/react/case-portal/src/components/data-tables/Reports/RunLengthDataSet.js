@@ -70,7 +70,7 @@ const RunLengthDataSet = () => {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.###}' } : {}),
+        ...(isNumberCol ? { format: '{0:0.000}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
