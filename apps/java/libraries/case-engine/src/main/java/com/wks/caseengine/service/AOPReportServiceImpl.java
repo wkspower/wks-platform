@@ -590,12 +590,12 @@ public class AOPReportServiceImpl implements AOPReportService {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
-					map.put("materialID", row[1]);
-					map.put("utilityName", row[2]);
-					map.put("unit", row[3]);
-					map.put("design", row[4]);
+					map.put("materialID", row[1]!=null ? row[1].toString():"");
+					map.put("utilityName", row[2]!=null ? row[2].toString():"");
+					map.put("unit", row[3]!=null ? row[3].toString():"");
+					map.put("design", row[4]!=null ? row[4].toString():"");
 					map.put("bestAchievedSinceLastFourYears", row[5]);
-					map.put("globalBenchmark", row[6]);
+					map.put("globalBenchmark", row[6]!=null ? row[6].toString():"" );
 					map.put("actualFourYearsAgo", row[7]);
 					map.put("actualThreeYearsAgo", row[8]);
 					map.put("actualTwoYearsAgo", row[9]);
@@ -610,19 +610,20 @@ public class AOPReportServiceImpl implements AOPReportService {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("rowNo", row[0]);
-					map.put("material", row[1]);
-					map.put("uom", row[2]);
+					map.put("material", row[1]!=null ? row[1].toString():"");
+					map.put("uom", row[2]!=null ? row[2].toString():"");
 					map.put("bestAchieved", row[3]);
-					map.put("globalBenchmark", row[4]);
+					map.put("globalBenchmark", row[4]!=null ? row[4].toString():"");
 					map.put("actualFourYearsAgo", row[5]);
 					map.put("actualThreeYearsAgo", row[6]);
 					map.put("actualTwoYearsAgo", row[7]);
 					map.put("budgetCurrent", row[8]);
 					map.put("actualCurrent", row[9]);
-					map.put("ratePerUnit", row[10]);
-					map.put("budgetRsPerMT", row[11]);
-					map.put("actualRsPerMT", row[12]);
-					map.put("proposedRsPerMT", row[13]);
+					map.put("budgetProposed", row[10]);
+					map.put("ratePerUnit", row[11]);
+					map.put("budgetRsPerMT", row[12]);
+					map.put("actualRsPerMT", row[13]);
+					map.put("proposedRsPerMT", row[14]);
 					
 					plantProductionData.add(map);
 				}
@@ -630,10 +631,10 @@ public class AOPReportServiceImpl implements AOPReportService {
 				for (Object[] row : obj) {
 					Map<String, Object> map = new HashMap<>();
 					map.put("sno", row[0]);
-					map.put("materialID", row[1]);
-					map.put("utilityName", row[2]);
-					map.put("unit", row[3]);
-					map.put("design", row[4]);
+					map.put("materialID", row[1]!=null ? row[1].toString():"");
+					map.put("utilityName", row[2]!=null ? row[2].toString():"");
+					map.put("unit", row[3]!=null ? row[3].toString():"");
+					map.put("design", row[4]!=null ? row[4].toString():"");
 					map.put("bestAchievedSinceLastFourYears", row[5]);
 					map.put("globalBenchmark", row[6]);
 					map.put("actualFourYearsAgo", row[7]);
