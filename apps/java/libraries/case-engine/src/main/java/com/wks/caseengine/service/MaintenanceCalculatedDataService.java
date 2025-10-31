@@ -14,6 +14,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 public interface MaintenanceCalculatedDataService {
 	
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId, String year);
+	public AOPMessageVM getMaintenanceReportURLs(String plantId, String year,String type);
 	public AOPMessageVM getMaintenanceDataForCracker( String plantId,  String year);
 	public AOPMessageVM updateMaintenanceDataForCracker( String plantId,  String year, List<DecokePlanningDTO> decokePlanningDTOList);
 	public AOPMessageVM getBudgetMaintenance( String plantId,  String year,String budgetCategory);

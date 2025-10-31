@@ -35,6 +35,11 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataService.getMaintenanceCalculatedData(plantId,year);		
 	}
 	
+	@GetMapping(value="/maintenance-report-urls")
+	public AOPMessageVM getMaintenanceReportURLs(@RequestParam String plantId, @RequestParam String year, @RequestParam String type){
+		return maintenanceCalculatedDataService.getMaintenanceReportURLs(plantId,year,type);		
+	}
+	
 	@GetMapping(value="/maintenance")
 	public AOPMessageVM getMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year){
 		return maintenanceCalculatedDataService.getMaintenanceDataForCracker(plantId,year);		

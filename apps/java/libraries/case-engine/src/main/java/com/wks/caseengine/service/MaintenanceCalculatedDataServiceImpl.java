@@ -39,6 +39,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
+import com.wks.caseengine.dto.MaintenanceReportURLDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BudgetMaintenance;
 import com.wks.caseengine.entity.DecokeMaintenance;
@@ -1331,6 +1332,53 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "    \r\n" + //
 	            "}";
 	}
+
+	@Override
+	public AOPMessageVM getMaintenanceReportURLs(String plantId, String year, String type) {
+		try {
+			List<MaintenanceReportURLDTO> maintenanceReportURLDTOs = new ArrayList<MaintenanceReportURLDTO>();
+			List<Object[]> obj = findByYearAndPlantIdAndType(year, UUID.fromString(plantId),type, "vwMaintenanceReports");
+			for(Object[] row:obj) {
+				MaintenanceReportURLDTO maintenanceReportURLDTO = new MaintenanceReportURLDTO();
+				maintenanceReportURLDTO.setId(row[0]!=null ? row[0].toString():"");
+				maintenanceReportURLDTO.setReportCode(row[1]!=null ? row[1].toString():"");
+				maintenanceReportURLDTO.setPlantId(row[2]!=null ? row[2].toString():"");
+				maintenanceReportURLDTO.setAopYear(row[3]!=null ? row[3].toString():"");
+				maintenanceReportURLDTO.setReportURL(row[4]!=null ? row[4].toString():"");
+				maintenanceReportURLDTOs.add(maintenanceReportURLDTO);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(maintenanceReportURLDTOs);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
+		}catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+		
+	}
+	
+	public List<Object[]> findByYearAndPlantIdAndType(String year, UUID plantId,String type, String viewName) {
+		try {
+			String sql = "SELECT " + "Id, ReportCode, PlantId, AOPYear, ReportURL "
+					 + "FROM " + viewName + " "
+					+ "WHERE (AOPYear = :year AND AOPYear IS NOT NULL) AND PlantId = :plantId AND ReportCode = :type";
+					
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
+			query.setParameter("plantId", plantId);
+			query.setParameter("type", type);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	
 	
 	
