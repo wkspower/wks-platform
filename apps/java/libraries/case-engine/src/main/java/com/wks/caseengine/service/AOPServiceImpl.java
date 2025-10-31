@@ -146,7 +146,8 @@ public class AOPServiceImpl implements AOPService {
 			        aopDTO.setJan(safeParseDouble(row[15]));
 			        aopDTO.setFeb(safeParseDouble(row[16]));
 			        aopDTO.setMarch(safeParseDouble(row[17]));
-			        aopDTO.setAvgTPH(safeParseDouble(row[18]));aopDTO.setRemark(row[19] != null ? row[19].toString() : null);
+			        aopDTO.setAvgTPH(safeParseDouble(row[18]));
+			        aopDTO.setRemark(row[19] != null ? row[19].toString() : null);
 				aopDTO.setDisplayOrder(row[20] != null ? Integer.valueOf(row[20].toString()) : null);
 				aopDTO.setIsEditable(row[21] != null ? Boolean.valueOf(row[21].toString()) : null);
 				aopDTO.setIsVisible(row[22] != null ? Boolean.valueOf(row[22].toString()) : null);

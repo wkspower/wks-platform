@@ -43,7 +43,7 @@ public class ExcelServiceImpl implements ExcelService {
             Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 
             Optional<ExcelConfigurations> optExcelConfiguration = excelConfigurationsRepository
-                    .findByExcelIdAndVerticalFkId("aop_reports", plant.getVerticalFKId());
+                    .findByExcelIdAndVerticalFkIdAndSiteFkId("aop_reports", plant.getVerticalFKId(),plant.getSiteFkId());
 
             if (optExcelConfiguration.isPresent()) {
                 String dataStr = optExcelConfiguration.get().getJsonValue();

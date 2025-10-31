@@ -374,7 +374,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Optional<ExcelConfigurations> optExcelConfiguration = excelConfigurationsRepository
-					.findByExcelIdAndVerticalFkId("spyroInput", plant.getVerticalFKId());
+					.findByExcelIdAndVerticalFkIdAndSiteFkId("spyroInput", plant.getVerticalFKId(),plant.getSiteFkId());
 
 			if (optExcelConfiguration.isPresent()) {
 				String structureJson = optExcelConfiguration.get().getJsonValue();

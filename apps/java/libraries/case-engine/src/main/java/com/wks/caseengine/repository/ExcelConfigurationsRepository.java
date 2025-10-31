@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 public interface ExcelConfigurationsRepository extends JpaRepository<ExcelConfigurations, UUID>{
 	
 	// If you expect one unique record
-    Optional<ExcelConfigurations> findByExcelIdAndVerticalFkId(String tableId, UUID verticalId);
+    Optional<ExcelConfigurations> findByExcelIdAndVerticalFkIdAndSiteFkId(String tableId, UUID verticalId, UUID siteId);
     
 }
 

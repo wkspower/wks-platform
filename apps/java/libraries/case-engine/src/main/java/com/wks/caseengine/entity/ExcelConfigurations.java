@@ -30,6 +30,9 @@ public class ExcelConfigurations {
     @Column(name = "Vertical_FK_Id", nullable = false)
     private UUID verticalFkId;
     
+    @Column(name = "Site_FK_Id")
+    private UUID siteFkId;
+    
     @Column(name = "CreatedOn")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;
