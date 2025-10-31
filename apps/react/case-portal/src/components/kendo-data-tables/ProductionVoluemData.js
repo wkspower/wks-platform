@@ -23,7 +23,7 @@ import {
   getColDefsPercentageSummary,
 } from './Utilities-Kendo/productionTargetColDefs'
 import ProductionTarget from './ProductionTarget'
-
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 const ProductionvolumeData = ({ permissions }) => {
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
@@ -96,7 +96,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const dispatch = useDispatch()
   const [rowsDesignCapacity, setRowsDesignCapacity] = useState([])
   const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
-
+  const valueFormat = ValueFormatterProduction()
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)

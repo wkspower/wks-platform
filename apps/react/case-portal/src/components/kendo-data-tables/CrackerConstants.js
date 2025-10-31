@@ -26,7 +26,7 @@ import KendoDataTables from './index'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import moment from '../../../node_modules/moment/moment'
 import AopDesignBasisNorms from './AopDesignBasisNorms'
-
+import useValueFormatterConsumption from 'utils/ValueFormatterConsumption' 
 const CrakcerConstants = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
@@ -56,6 +56,7 @@ const CrakcerConstants = () => {
   const [availableTabs, setAvailableTabs] = useState([])
   const [summary, setSummary] = useState('')
   const [debouncedSummary, setDebouncedSummary] = useState('')
+  const valueFormat = useValueFormatterConsumption()
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSummary(summary)
@@ -507,7 +508,7 @@ const CrakcerConstants = () => {
       title: 'Value',
       editable: true,
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
       type: 'number',
     },
     {

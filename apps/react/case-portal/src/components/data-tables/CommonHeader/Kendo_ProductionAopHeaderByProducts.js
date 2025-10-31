@@ -1,6 +1,6 @@
 import productionColDefs from '../../../assets/kendo_production_aop_meg_byproducts.json'
 
-const getEnhancedColDefsByProducts = ({ headerMap }) => {
+const getEnhancedColDefsByProducts = ({ headerMap, valueFormat }) => {
   let cols
 
   cols = productionColDefs
@@ -19,6 +19,9 @@ const getEnhancedColDefsByProducts = ({ headerMap }) => {
 
     if (headerMap && headerMap[col.title] !== undefined) {
       updatedCol.title = headerMap[col.title]
+    }
+    if (col.type === 'number' && valueFormat) {
+      updatedCol.format = valueFormat
     }
 
     return updatedCol

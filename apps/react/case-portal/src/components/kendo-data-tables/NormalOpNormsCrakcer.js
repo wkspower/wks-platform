@@ -22,7 +22,7 @@ import CrakcerConstants from './CrackerConstants'
 import KendoDataTables from './index'
 import SelectivityData from './SelectivityData'
 import { DataService } from 'services/DataService'
-
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 // Constants
 const MONTHS = [
   'april',
@@ -127,11 +127,11 @@ const NormalOpNormsScreenCracker = () => {
   const [productionRowsConstants, setProductionRowsConstants] = useState([])
 
   const apiRef = useGridApiRef()
-
+   const valueFormat = ValueFormatterConsumption()
   // column defs
   const colDefs = useMemo(
-    () => getNormalOpNormColDef({ headerMap }),
-    [headerMap],
+    () => getNormalOpNormColDef({ headerMap, valueFormat }),
+    [headerMap, valueFormat],
   )
 
   const colDefsIndividual = useMemo(
@@ -150,7 +150,7 @@ const NormalOpNormsScreenCracker = () => {
         title: 'Value',
         editable: true,
         align: 'right',
-        format: '{0:#.###}',
+        format: valueFormat,
         type: 'number',
       },
       { field: 'remark', title: 'Remarks', widthT: 200, editable: true },
@@ -196,12 +196,12 @@ const NormalOpNormsScreenCracker = () => {
         width: 120,
         align: 'right',
         type: 'number',
-        format: '{0:#.###}',
+        format: valueFormat,
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
       { field: 'remark', title: 'Remark', widthT: 140, editable: true },
     ],
-    [headerMap],
+    [headerMap, valueFormat],
   )
 
   const colDefsFinalNorms1 = useMemo(
@@ -232,12 +232,12 @@ const NormalOpNormsScreenCracker = () => {
         width: 120,
         align: 'right',
         type: 'number',
-        format: '{0:#.###}',
+        format: valueFormat,
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
       { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
     ],
-    [headerMap],
+  [headerMap, valueFormat],
   )
 
   const colDefsExpressionCatChem = useMemo(
@@ -268,12 +268,12 @@ const NormalOpNormsScreenCracker = () => {
         width: 120,
         align: 'right',
         type: 'number',
-        format: '{0:#.###}',
+        format: valueFormat,
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
       { field: 'remark', title: 'Remark', widthT: 140, editable: true },
     ],
-    [headerMap],
+    [headerMap, valueFormat],
   )
 
   const fetchConfigurationData = useCallback(

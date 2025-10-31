@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { SlowdownNormForMegServices } from 'services/SlowdownNormForMegServices'
 import { useSession } from 'SessionStoreContext'
 import KendoDataTables from './index'
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const SlowdownNormForMeg = () => {
   const keycloak = useSession()
@@ -42,7 +43,7 @@ const SlowdownNormForMeg = () => {
   const [columnDefinitions, setColumnDefinitions] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
   const [calculationResults, setCalculationResults] = useState([])
-
+  const valueFormat = ValueFormatterConsumption()
   const showNotification = useCallback((message, severity = 'info') => {
     setNotification({
       open: true,
@@ -235,7 +236,7 @@ const SlowdownNormForMeg = () => {
           hidden: hiddenColumns.includes(column.field),
           ...(column.field !== 'particulars' &&
             column.field.toLowerCase() !== 'uom' && {
-              format: '{0:#.###}',
+              format: valueFormat,
               type: 'number',
             }),
         }))

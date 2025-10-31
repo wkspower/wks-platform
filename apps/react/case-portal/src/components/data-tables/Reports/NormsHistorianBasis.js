@@ -25,6 +25,7 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
@@ -73,9 +74,9 @@ const NormsHistorianBasis = () => {
   const exportRef1 = useRef(null)
   const exportRef2 = useRef(null)
   const exportRef3 = useRef(null)
-
+  const valueFormat = ValueFormatterProduction()
   const generateColumns = (type) =>
-    getKendoNormsHistorianColumns({ headerMap, type })
+    getKendoNormsHistorianColumns({ headerMap, type, valueFormat })
 
   const fetchAllData = async (selectedUnit) => {
     if (!selectedUnit) return

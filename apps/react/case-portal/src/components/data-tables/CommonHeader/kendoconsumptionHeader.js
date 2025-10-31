@@ -1,7 +1,7 @@
 import productionColDefs from '../../../assets/kendo_consumption_aop.json'
 import productionColDefs1 from '../../../assets/kendo_consumption_aop_cracker.json'
 
-const getEnhancedColDefs = ({ headerMap, lowerVertName }) => {
+const getEnhancedColDefs = ({ headerMap, lowerVertName, valueFormat }) => {
   let colDefs = productionColDefs
 
   if (lowerVertName == 'cracker') {
@@ -13,7 +13,7 @@ const getEnhancedColDefs = ({ headerMap, lowerVertName }) => {
         ...col,
         title: headerMap[col.headerName],
         type: 'number',
-        format: '{0:#.###}',
+        format: valueFormat || '{0:#.###}',
         editable: false,
         width: 120,
       }

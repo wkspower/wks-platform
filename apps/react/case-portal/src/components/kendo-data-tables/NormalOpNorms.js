@@ -17,7 +17,7 @@ import { validateFields } from 'utils/validationUtils'
 import { Box, Typography } from '../../../node_modules/@mui/material/index'
 import KendoDataTables from './index'
 import NormalOpNormsScreenCracker from './NormalOpNormsCrakcer'
-
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
@@ -198,9 +198,10 @@ const NormalOpNormsScreen = () => {
   useEffect(() => {
     fetchAllData(gradeId)
   }, [oldYear, yearChanged, keycloak, gradeId, plantID])
-
+  const valueFormat = ValueFormatterConsumption()
   const colDefs = getNormalOpNormColDef({
     headerMap,
+    valueFormat, 
   })
 
   const colDefsIntermediateValues = [
@@ -236,7 +237,7 @@ const NormalOpNormsScreen = () => {
       editable: false,
       width: 120,
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
       type: 'number',
     },
 
@@ -246,7 +247,7 @@ const NormalOpNormsScreen = () => {
       editable: false,
       width: 120,
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
       type: 'number',
     },
     {
@@ -256,7 +257,7 @@ const NormalOpNormsScreen = () => {
       type: 'number',
       width: 120,
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Jul',
@@ -265,7 +266,7 @@ const NormalOpNormsScreen = () => {
       type: 'number',
       width: 120,
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
 
     {
@@ -275,7 +276,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Sep',
@@ -284,7 +285,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Oct',
@@ -293,7 +294,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Nov',
@@ -302,7 +303,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Dec',
@@ -311,7 +312,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Jan',
@@ -320,7 +321,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       align: 'right',
       type: 'number',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Feb',
@@ -329,7 +330,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'Mar',
@@ -338,7 +339,7 @@ const NormalOpNormsScreen = () => {
       width: 120,
       type: 'number',
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat,
     },
     {
       field: 'idFromApi',

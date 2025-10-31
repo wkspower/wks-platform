@@ -18,7 +18,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.VCM]: SlowdownNormsElastomerColumns,
 }
 
-const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
+const getSlowdownNormsColDef = ({ headerMap, slowdownMonths, valueFormat }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
@@ -48,10 +48,11 @@ const getSlowdownNormsColDef = ({ headerMap, slowdownMonths }) => {
         ...(isPEorPP && {
           isBold: safeShutdownMonths.includes(monthNum),
         }),
+        format: valueFormat,
       }
     }
 
-    return col
+    return valueFormat ? { ...col, format: valueFormat } : col
   })
   colDefsCache.set(cacheKey, enhancedColDefs)
   return enhancedColDefs

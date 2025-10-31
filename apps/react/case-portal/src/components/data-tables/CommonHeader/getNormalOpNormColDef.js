@@ -18,7 +18,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.CRACKER]: CrackerColums,
 }
 
-const getNormalOpNormColDef = ({ headerMap }) => {
+const getNormalOpNormColDef = ({ headerMap, valueFormat }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
@@ -32,14 +32,14 @@ const getNormalOpNormColDef = ({ headerMap }) => {
 
   const enhancedColDefs = cols.map((col) => {
     if (!headerMap || headerMap[col.title] === undefined) {
-      return col
+      return valueFormat ? { ...col, format: valueFormat } : col
     }
 
     return {
       ...col,
       title: headerMap[col.title],
       align: 'right',
-      format: '{0:#.###}',
+      format: valueFormat || '{0:#.###}',
     }
   })
 

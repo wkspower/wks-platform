@@ -21,7 +21,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.CRACKER]: ShutdownConsumptionCrackerColumns,
 }
 
-const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
+const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths, valueFormat }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
@@ -51,10 +51,11 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths }) => {
         ...(isPEorPP && {
           isBold: safeShutdownMonths.includes(monthNum),
         }),
+        format: valueFormat,
       }
     }
 
-    return col
+    return valueFormat ? { ...col, format: valueFormat } : col
   })
 
   colDefsCache.set(cacheKey, enhancedColDefs)

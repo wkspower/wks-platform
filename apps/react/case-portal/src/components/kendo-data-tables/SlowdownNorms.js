@@ -2,6 +2,7 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
+// import DataGridTable from '../ASDataGrid'
 // import { GridRowModes } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
@@ -19,6 +20,7 @@ import KendoDataTables from './index'
 import SlowdownNormForMeg from './SlowdownNormForMeg'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const SlowdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -28,7 +30,22 @@ const SlowdownNorms = () => {
   const [grades, setGrades] = useState([])
 
   const [slowdownMonths, setSlowdownMonths] = useState([])
-  const { sitePlantChange, yearChanged, oldYear, plantID } = menu
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+    } = dataGridStore
+  
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const AOP_YEAR = year?.selectedYear
   //const isOldYear = oldYear?.oldYear
   const isOldYear = oldYear?.oldYear
 
@@ -43,13 +60,11 @@ const SlowdownNorms = () => {
     severity: 'info',
   })
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({}) // Track row edit state
 
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
@@ -171,8 +186,8 @@ const SlowdownNorms = () => {
   }
 
   // const months = slowdownMonths
-
-  const colDefs = getSlowdownNormsColDef({ headerMap, slowdownMonths })
+   const valueFormat = ValueFormatterConsumption()
+  const colDefs = getSlowdownNormsColDef({ headerMap, slowdownMonths, valueFormat })
 
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
@@ -218,14 +233,7 @@ const SlowdownNorms = () => {
   const saveSlowdownNormsData = async (newRows) => {
     setLoading(true)
     try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const isTPH = selectedUnit == 'TPD'
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+     
       const businessData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april * 24 : row.april || null,
         may: isTPH && row.may ? row.may * 24 : row.may || null,
@@ -245,8 +253,8 @@ const SlowdownNorms = () => {
         march: isTPH && row.march ? row.march * 24 : row.march || null,
         remark: row.remarks,
         remarks: row.remarks,
-        financialYear: localStorage.getItem('year'),
-        plantId: plantId,
+        financialYear: AOP_YEAR,
+        plantId: PLANT_ID,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
         materialFkId: row.materialFkId || null,
@@ -261,7 +269,7 @@ const SlowdownNorms = () => {
         // console.log(title)
 
         const response = await DataService.saveSlowdownNormsData(
-          plantId,
+          PLANT_ID,
           businessData,
           keycloak,
         )
@@ -416,25 +424,17 @@ const SlowdownNorms = () => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      let plantId = ''
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
       var response = []
       if (lowerVertName == 'pp') {
         response = await DataService.handleCalculateSlowdownNormsPP(
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
       } else {
         response = await DataService.handleCalculateSlowdownNorms(
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
       }

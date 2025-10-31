@@ -25,6 +25,7 @@ import {
 } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
 import moment from '../../../../node_modules/moment/moment'
 import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
@@ -85,24 +86,29 @@ const ProductionVolumeDataBasis = () => {
     setSelectedUnit(unit)
   }
 
+  const valueFormat = ValueFormatterProduction()
   const colsMC = getKendoProductionColumns({
     headerMap,
     type: 'MC',
+    valueFormat,
   })
 
   const colsMCYearwise = getKendoProductionColumns({
     headerMap,
     type: 'MC Yearwise',
+    valueFormat,
   })
 
   const colsCalculatedData = getKendoProductionColumns({
     headerMap,
     type: 'Calculated Data',
+    valueFormat,
   })
 
   const colsRowData = getKendoProductionColumns({
     headerMap,
     type: 'RowData',
+    valueFormat,
   })
 
   useEffect(() => {

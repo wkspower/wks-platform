@@ -4,6 +4,7 @@ export default function getKendoColumns({
   type,
   headers2 = [],
   keys2 = [],
+  valueFormat,
 }) {
   let rawCols
 
@@ -38,8 +39,7 @@ export default function getKendoColumns({
         filterable: true,
         filter: isTextCol ? 'text' : 'numeric',
         isRightAlligned: isTextCol ? 'text' : 'numeric',
-        format: isTextCol ? undefined : '{0:#.##}',
-        ...(isTextCol ? {} : { format: '{0:#.##}' }),
+        format: isTextCol ? undefined : valueFormat || '{0:#.##}',
 
         editable: false,
         align: isTextCol ? 'left' : 'right',
@@ -61,8 +61,7 @@ export default function getKendoColumns({
       filterable: true,
       filter: isTextCol ? 'text' : 'numeric',
       isRightAlligned: isTextCol ? 'text' : 'numeric',
-      format: isTextCol ? undefined : '{0:#.##}',
-      ...(isTextCol ? {} : { format: '{0:#.##}' }),
+      format: isTextCol ? undefined : valueFormat || '{0:#.##}',
       widthT: colDef?.widthT,
       editable: false,
       align: isTextCol ? 'left' : 'right',

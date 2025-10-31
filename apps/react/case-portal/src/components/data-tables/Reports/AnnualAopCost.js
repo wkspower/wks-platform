@@ -19,6 +19,7 @@ import {
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
 import { Button } from '@mui/material'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -115,17 +116,18 @@ const AnnualAopCost = () => {
   }
 
   const headerMap = generateHeaderNames(AOP_YEAR)
-
-  const colsProduction = getKendoColumns({ headerMap, type: 'Production' })
+  const valueFormat = ValueFormatterProduction()
+  const colsProduction = getKendoColumns({ headerMap, type: 'Production', valueFormat })
   const colsPrice = getKendoColumns({
     headerMap,
     type: 'Price',
     headers2,
     keys2,
+    valueFormat,
   })
-  const colsNorm = getKendoColumns({ headerMap, type: 'Norm' })
-  const colsQuantity = getKendoColumns({ headerMap, type: 'Quantity' })
-  const colsNormCost = getKendoColumns({ headerMap, type: 'NormCost' })
+  const colsNorm = getKendoColumns({ headerMap, type: 'Norm', valueFormat })
+  const colsQuantity = getKendoColumns({ headerMap, type: 'Quantity', valueFormat })
+  const colsNormCost = getKendoColumns({ headerMap, type: 'NormCost', valueFormat })
 
   useEffect(() => {
     let isCancelled = false

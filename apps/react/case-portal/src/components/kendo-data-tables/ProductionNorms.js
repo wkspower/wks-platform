@@ -13,7 +13,7 @@ import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
 import ProductionNormsCracker from './ProductionNormsCracker'
-
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 const ProductionNorms = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
@@ -750,12 +750,16 @@ const ProductionNorms = ({ permissions }) => {
     }
   }, [plantID, oldYear, yearChanged, keycloak, selectedUnit])
 
+  const valueFormat = ValueFormatterProduction()
+
   const productionColumns = getEnhancedColDefs({
     headerMap,
-  })
+    valueFormat,
+  }) 
 
   const productionColumnsByProducts = getEnhancedColDefsByProducts({
     headerMap,
+    valueFormat,
   })
 
   const handleUnitChange = (unit) => {

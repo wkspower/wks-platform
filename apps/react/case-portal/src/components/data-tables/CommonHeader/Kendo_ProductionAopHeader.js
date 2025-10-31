@@ -18,7 +18,7 @@ const monthFields = [
   'march',
 ]
 
-const getEnhancedColDefs = ({ headerMap }) => {
+const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -48,6 +48,9 @@ const getEnhancedColDefs = ({ headerMap }) => {
 
     if (headerMap && headerMap[col.title] !== undefined) {
       updatedCol.title = headerMap[col.title]
+    }
+     if (col.type === 'number' && valueFormat) {
+      updatedCol.format = valueFormat
     }
 
     return updatedCol

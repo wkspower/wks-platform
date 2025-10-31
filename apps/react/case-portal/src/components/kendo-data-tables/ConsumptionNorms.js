@@ -8,6 +8,7 @@ import { useSession } from 'SessionStoreContext'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/kendoconsumptionHeader'
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { Box } from '@mui/material'
 
 import KendoDataTables from './index'
@@ -333,10 +334,11 @@ const ConsumptionNorms = () => {
       fetchGradeDropdowns()
     }
   }, [plantID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
-
+  const valueFormat = ValueFormatterConsumption()
   const productionColumns = getEnhancedColDefs({
     headerMap,
     lowerVertName, // pass it here
+    valueFormat,
   })
 
   const handleUnitChange = (unit) => {

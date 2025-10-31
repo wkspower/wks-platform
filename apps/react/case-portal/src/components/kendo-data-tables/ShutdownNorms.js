@@ -11,6 +11,7 @@ import { NormalOperationNormsApiService } from 'services/normal-operation-norms-
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const ShutdownNorms = () => {
   const [gradeId, setGradeId] = useState(null)
@@ -171,8 +172,8 @@ const ShutdownNorms = () => {
   const isCellEditable = (params) => {
     return params.row.isEditable
   }
-
-  const colDefs = getShutdownConsumptionColDef({ headerMap, shutdownMonths })
+  const valueFormat = ValueFormatterConsumption()
+  const colDefs = getShutdownConsumptionColDef({ headerMap, shutdownMonths, valueFormat })
 
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
@@ -347,18 +348,11 @@ const ShutdownNorms = () => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      let plantId = ''
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+      
       const response =
         await ShutdownNormsApiService.handleCalculateShutdownNorms(
-          plantId,
-          year,
+          PLANT_ID,
+          AOP_YEAR,
           keycloak,
         )
 
