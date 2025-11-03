@@ -3360,7 +3360,7 @@ async function getShutdownRateExcel(keycloak, type) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `${props?.configType}_Excel.xlsx`
+    a.download = `${type}_Excel.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

@@ -2,11 +2,6 @@
 
 import { Tooltip } from '../../../../node_modules/@mui/material/index'
 
-//  current FY
-// const currFY = localStorage.getItem('year') || ''
-
-// Compute previous FY (prevFY)
-
 export const MockReportService = {
   async getReport({ category, year }) {
     const currFY = year || ''
@@ -800,7 +795,13 @@ export const MockReportService = {
       case 'OtherVariableCost':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right', widthT: 50 },
+            {
+              field: 'SrNo',
+              headerName: 'SL.No',
+              align: 'right',
+              widthT: 50,
+              format: '{0:#.#}',
+            },
             { field: 'OtherCost', headerName: 'Other cost', flex: 2 },
             { field: 'Unit', headerName: 'Unit' },
             {
@@ -839,7 +840,13 @@ export const MockReportService = {
       case 'ProductionCostCalculations':
         return {
           columns: [
-            { field: 'SrNo', headerName: 'SL.No', align: 'right', widthT: 50 },
+            {
+              field: 'SrNo',
+              headerName: 'SL.No',
+              align: 'right',
+              widthT: 50,
+              format: '{0:#.#}',
+            },
             {
               field: 'ProductionCostCalculations',
               headerName: 'Production cost calculations',

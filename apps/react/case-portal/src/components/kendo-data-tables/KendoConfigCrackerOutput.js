@@ -33,6 +33,7 @@ const CrackerConfig = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id
   const [modifiedCells, setModifiedCells] = useState({})
 
@@ -214,7 +215,14 @@ const CrackerConfig = () => {
     fetchTabsMatrix()
     fetchAvailableTabs()
     setTabIndex(0)
-  }, [keycloak, fetchTabsMatrix, fetchAvailableTabs, fetchModes])
+  }, [
+    keycloak,
+    fetchTabsMatrix,
+    fetchAvailableTabs,
+    fetchModes,
+    PLANT_ID,
+    AOP_YEAR,
+  ])
 
   const getRows = useCallback(
     (tabId) => {

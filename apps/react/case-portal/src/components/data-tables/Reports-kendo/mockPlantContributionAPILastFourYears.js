@@ -22,6 +22,7 @@ export const MockPlantContributionAPILastFourYears = {
               title: 'S.no',
               widthT: 58,
               editable: false,
+              format: '{0:#.#}',
               align: 'right',
             },
             {
@@ -135,7 +136,7 @@ export const MockPlantContributionAPILastFourYears = {
               field: 'rowNo',
               title: 'S.no',
               widthT: 58,
-
+              format: '{0:#.#}',
               editable: false,
               align: 'right',
             },
@@ -325,6 +326,7 @@ export const MockPlantContributionAPILastFourYears = {
               field: 'rowNo',
               title: 'S.no',
               widthT: 58,
+              format: '{0:#.#}',
 
               editable: false,
               align: 'right',
@@ -515,6 +517,7 @@ export const MockPlantContributionAPILastFourYears = {
               field: 'rowNo',
               title: 'S.no',
               widthT: 58,
+              format: '{0:#.#}',
 
               editable: false,
               align: 'right',
@@ -705,6 +708,7 @@ export const MockPlantContributionAPILastFourYears = {
               field: 'rowNo',
               title: 'S.no',
               widthT: 58,
+              format: '{0:#.#}',
 
               editable: false,
               align: 'right',
@@ -897,6 +901,7 @@ export const MockPlantContributionAPILastFourYears = {
               widthT: 58,
               align: 'right',
               editable: false,
+              format: '{0:#.#}',
             },
             {
               field: 'id',
@@ -989,6 +994,7 @@ export const MockPlantContributionAPILastFourYears = {
               field: 'rowNo',
               title: 'S.no',
               widthT: 58,
+              format: '{0:#.#}',
               align: 'right',
               editable: false,
             },

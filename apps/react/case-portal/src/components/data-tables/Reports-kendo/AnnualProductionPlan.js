@@ -1,5 +1,4 @@
 import { Box } from '@mui/material'
-// import DataGridTable from '../ASDataGrid'
 import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
@@ -116,7 +115,7 @@ const AnnualProductionPlan = () => {
       return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
     }
   }
-const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
+  const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
 
   const formatValueToThreeDecimalsZero = (params) => {
     const dateRegex =
@@ -188,8 +187,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
       align: 'right',
       widthT: 150,
       type: 'number',
-      format: '{0:#.##}', 
-
+      format: '{0:#.##}',
     },
     { field: 'uom', headerName: 'UOM', editable: true, widthT: 120 },
   ]
@@ -220,7 +218,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
       align: 'right',
       widthT: 150,
       type: 'number',
-      format: '{0:#.##}', 
+      format: '{0:#.##}',
     },
     {
       field: 'uom',
@@ -289,6 +287,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
       title: 'SL.No',
       editable: false,
       widthT: 80,
+      format: '{0:#.#}',
       align: 'right',
     },
     {
@@ -309,6 +308,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
           flex: 1,
           align: 'right',
           format: '{0:#.##}',
+          type: 'number',
         },
         {
           field: 'Actual1',
@@ -317,6 +317,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
           flex: 1,
           align: 'right',
           format: '{0:#.##}',
+          type: 'number',
         },
       ],
     },
@@ -330,6 +331,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
           flex: 1,
           align: 'right',
           format: '{0:#.##}',
+          type: 'number',
         },
         {
           field: 'Actual2',
@@ -338,6 +340,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
           flex: 1,
           align: 'right',
           format: '{0:#.##}',
+          type: 'number',
         },
       ],
     },
@@ -351,6 +354,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
           flex: 1,
           align: 'right',
           format: '{0:#.##}',
+          type: 'number',
         },
         {
           field: 'Actual3',
@@ -359,6 +363,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
           flex: 1,
           align: 'right',
           format: '{0:#.##}',
+          type: 'number',
         },
       ],
     },
@@ -471,7 +476,7 @@ const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-    
+
       const res = await DataService.calculateAnnualProductionPlanData(
         PLANT_ID,
         AOP_YEAR,

@@ -18,6 +18,7 @@ export const MockReportService = {
               editable: false,
               widthT: 100,
               align: 'right',
+              format: '{0:#.#}',
             },
             {
               field: 'ByProductName',
@@ -98,7 +99,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               widthT: 100,
-
+              format: '{0:#.#}',
               editable: false,
               align: 'right',
             },
@@ -223,7 +224,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               widthT: 100,
-
+              format: '{0:#.#}',
               editable: false,
               align: 'right',
             },
@@ -348,7 +349,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               widthT: 100,
-
+              format: '{0:#.#}',
               editable: false,
               align: 'right',
             },
@@ -473,7 +474,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               widthT: 100,
-
+              format: '{0:#.#}',
               editable: false,
               align: 'right',
             },
@@ -665,7 +666,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               widthT: 100,
-
+              format: '{0:#.#}',
               align: 'right',
               editable: false,
             },

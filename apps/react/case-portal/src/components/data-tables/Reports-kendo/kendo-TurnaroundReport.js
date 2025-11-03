@@ -50,7 +50,13 @@ const TurnaroundReport = () => {
   const isOldYear = oldYear?.oldYear === 1
 
   const columns = [
-    { field: 'sno', title: 'SL.No', widthT: 70, editable: false },
+    {
+      field: 'sno',
+      title: 'SL.No',
+      widthT: 70,
+      format: '{0:#.#}',
+      editable: false,
+    },
 
     {
       field: 'activity',

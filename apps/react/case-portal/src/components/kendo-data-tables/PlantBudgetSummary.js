@@ -62,17 +62,21 @@
 // }
 
 // PlantBudgetSummary.jsx
-import React, { useMemo, useState } from 'react'
+
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CircularProgress, Box, Typography, Button } from '@mui/material'
 import { useSession } from 'SessionStoreContext'
-import { Backdrop } from '../../../node_modules/@mui/material/index'
+import { Backdrop, Toolbar } from '../../../node_modules/@mui/material/index'
+import { renderChildren } from '../../../node_modules/@progress/kendo-react-layout/index'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 
 export default function PlantBudgetSummary() {
   const keycloak = useSession()
   const [openInTab, setOpenInTab] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [base, setBase] = useState('')
 
   const dataGridStore = useSelector((s) => s.dataGridStore)
   const { plantObject, siteObject, verticalObject, year } = dataGridStore
@@ -82,22 +86,32 @@ export default function PlantBudgetSummary() {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  const src = useMemo(() => {
-    const base =
-      'https://sjmnpb174.in.ril.com/ReportServer/Pages/ReportViewer.aspx'
-    const reportPath = '%2fAOP'
-    const params = new URLSearchParams({
-      '': reportPath,
-      'rs:Command': 'Render',
-      'rc:Toolbar': 'true',
-      plantId: PLANT_ID ?? '',
-      siteId: SITE_ID ?? '',
-      verticalId: VERTICAL_ID ?? '',
-      finYear: AOP_YEAR ?? '',
-    })
+  const fetchData = async () => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+    try {
+      var data = await BusinessDemandDataApiService.ssrsBudgetSummary(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
-    return `${base}?${params.toString()}`
-  }, [PLANT_ID, SITE_ID, VERTICAL_ID, AOP_YEAR])
+      setBase(data?.data[0]?.reportURL)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [PLANT_ID, AOP_YEAR, keycloak])
+
+  const src = useMemo(() => {
+    if (!base) return
+    const params = `&plantId=${PLANT_ID}&siteId=${SITE_ID}&verticalId=${VERTICAL_ID}&finYear=${AOP_YEAR}`
+
+    return `${base}${params}`
+  }, [base, PLANT_ID, SITE_ID, VERTICAL_ID, AOP_YEAR])
 
   if (openInTab) {
     window.open(src, '_blank')

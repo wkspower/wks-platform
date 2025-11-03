@@ -703,6 +703,12 @@ const DecokingConfig = () => {
         plantId: plantId,
         id: row?.idFromApi || '',
         demo: row?.demo || '',
+        // Date: row?.date
+        //   ? `${row.date.getFullYear()}/${String(row.date.getMonth() + 1).padStart(2, '0')}/${String(row.date.getDate()).padStart(2, '0')}`
+        //   : null,
+        date: row?.date
+          ? `${row.date.getFullYear()}-${String(row.date.getMonth() + 1).padStart(2, '0')}-${String(row.date.getDate()).padStart(2, '0')}`
+          : null,
       }))
       const response = await DataService.saveCrackerRunLength(
         plantId,

@@ -1,18 +1,22 @@
-import InfoIcon from '@mui/icons-material/Info'
-import { IconButton, Tooltip } from '@mui/material'
-import Notification from 'components/Utilities/Notification'
 import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import { IconButton, Tooltip } from '@mui/material'
+import InfoIcon from '@mui/icons-material/Info'
+import Notification from 'components/Utilities/Notification'
 
+import MuiBreadcrumbs from '@mui/material/Breadcrumbs'
 import { Grid, Typography } from '@mui/material'
-import { useSession } from 'SessionStoreContext'
-import StepperNav from 'components/Utilities/StepperNav'
-import Config from 'consts/index'
-import { useDispatch, useSelector } from 'react-redux'
-import { setScreenTitle } from 'store/reducers/dataGridStore'
-import { Box } from '../../../node_modules/@mui/material/index'
 import MainCard from '../MainCard'
+import { useSession } from 'SessionStoreContext'
+import Config from 'consts/index'
+import { useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
+import { setScreenTitle } from 'store/reducers/dataGridStore'
+import Chip from '@mui/material/Chip'
+import Stack from '@mui/material/Stack'
+import StepperNav from 'components/Utilities/StepperNav'
+import { Box } from '../../../node_modules/@mui/material/index'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -132,7 +136,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         title,
       }),
     )
-  }, [item, VERTICAL_NAME, PLANT_ID, AOP_YEAR])
+  }, [item, VERTICAL_NAME])
 
   // set active item state
   const getCollapse = (menu) => {
@@ -188,8 +192,23 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   // items
   if (item && item.type === 'item') {
     itemTitle = item.title
+    var title1 = itemTitle
+    if (
+      title1 === 'Business Demand' &&
+      VERTICAL_NAME?.toLowerCase() === 'meg'
+    ) {
+      title1 = 'Business Demand (Percentage)'
+    }
+
+    if (title1 === 'Business Demand' && VERTICAL_NAME?.toLowerCase() === 'pe') {
+      title1 = 'Business Demand (Absolute)'
+    }
+
     const normalizedTitle = itemTitle?.toLowerCase().replace(/\s/g, '')
 
+    // console.log('normalizedTitle', normalizedTitle)
+
+    // if (['productionaop', 'consumptionaop'].includes(normalizedTitle)) {
     if (
       [
         'monthwiseproductionplan',
@@ -205,19 +224,20 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           alignItems='center'
         >
           {/* HIDE THE TITLE NAME  */}
-
+          {/* {title1} */}
           <Tooltip title={`Basis for ${itemTitle}`}>
             <IconButton
-              size='small'
+              size='medium'
               sx={{
                 backgroundColor: 'transparent',
                 '&:hover': {
                   backgroundColor: 'rgba(0, 0, 0, 0.1)',
                 },
+                padding: '6px',
               }}
               onClick={() => handleOpenPdfTemp(item?.id)}
             >
-              <InfoIcon fontSize='small' sx={{ color: '#0100cb' }} />
+              <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
             </IconButton>
           </Tooltip>
         </Typography>
@@ -238,16 +258,18 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           {/* {title1} */}
           <Tooltip title={`Report`}>
             <IconButton
-              size='small'
+              size='medium'
               sx={{
+                ml: 1,
                 backgroundColor: 'transparent',
                 '&:hover': {
                   backgroundColor: 'rgba(0, 0, 0, 0.1)',
                 },
+                padding: '6px',
               }}
               onClick={() => handleOpenPdfTempSSRS(item?.id)}
             >
-              <InfoIcon fontSize='small' sx={{ color: '#0100cb' }} />
+              <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
             </IconButton>
           </Tooltip>
         </Typography>
@@ -281,10 +303,43 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
             direction='column'
             justifyContent='flex-start'
             alignItems='flex-start'
+            spacing={1}
+            // sx={{ marginTop: '-18px' }}
           >
+            {/* <Grid item sx={{ ml: 1.5, display: none }}> */}
+            {/* <MuiBreadcrumbs aria-label='breadcrumb'> */}
+            {/* HIDE HOME OPTION FROM Navigators MENU */}
+            {/* <Typography
+                  component={Link}
+                  to='/home'
+                  color='textSecondary'
+                  variant='h6'
+                  sx={{ textDecoration: 'none' }}
+                >
+                  Home
+                </Typography> */}
+
+            {/* {mainContent} */}
+
+            {/* <Typography
+                  component='div'
+                  sx={{
+                    textDecoration: 'none',
+                    fontWeight: 800,
+                    color: 'black',
+                    // fontStyle: 'italic',
+                    fontSize: '1rem',
+                  }}
+                >
+                  {verticalName} / {siteName} / {plantName}
+                </Typography>
+                {itemContent}
+              </MuiBreadcrumbs>
+            </Grid> */}
+
             <Grid
               container
-              sx={{ mt: 0, mb: 1 }}
+              sx={{ mt: 1, mb: 1, ml: 1 }}
               justifyContent='space-between'
               alignItems='center'
             >
@@ -303,10 +358,29 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                   {VERTICAL_NAME} / {SITE_NAME} / {PLANT_NAME}{' '}
                   {/* {getRoleName(verticalId, item?.id)} */}
                   {/* {keycloak?.realmAccess?.roles[0]} */}
-                  {/* {itemContent} */}
+                  {itemContent}
                 </Typography>
               </Grid>
+
+              {/* <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
+                <Grid item>
+                  <Chip
+                    color='primary'
+                    variant='outlined'
+                    // label={getRoleName(verticalId, item?.id)}
+                    className='role-name'
+                    sx={{ border: 'none' }} // Remove the border
+                  />
+                </Grid>
+              </Stack> */}
             </Grid>
+
+            {/* HIDE THE TITLE NAME */}
+            {title && (
+              <Grid item sx={{ mt: 0.5 }}>
+                <Typography variant='h5'>{item.title}</Typography>
+              </Grid>
+            )}
           </Grid>
           {/* Notification Component */}
           <Notification

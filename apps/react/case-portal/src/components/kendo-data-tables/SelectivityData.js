@@ -617,7 +617,7 @@ const SelectivityData = (props) => {
 
       return response
     } catch (error) {
-      console.error('Error saving Configuration data:', error)
+      console.error('Error saving Data:', error)
       setLoading(false)
     } finally {
       // fetchData()

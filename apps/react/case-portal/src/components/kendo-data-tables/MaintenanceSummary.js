@@ -47,17 +47,19 @@
 // }
 
 // MaintenanceSummary.jsx
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CircularProgress, Box, Typography, Button } from '@mui/material'
 import { useSession } from 'SessionStoreContext'
 import { Backdrop } from '../../../node_modules/@mui/material/index'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 
 export default function MaintenanceSummary() {
   const keycloak = useSession()
   const [openInTab, setOpenInTab] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
+  const [base, setBase] = useState('')
 
   const dataGridStore = useSelector((s) => s.dataGridStore)
   const { plantObject, siteObject, verticalObject, year } = dataGridStore
@@ -67,29 +69,33 @@ export default function MaintenanceSummary() {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  // Construct the SSRS URL. Use the ReportServer or ReportManager URL you need.
-  // Example uses ReportViewer.aspx path you had.
-  const src = useMemo(() => {
-    const base =
-      'https://sjmnpb174.in.ril.com/ReportServer/Pages/ReportViewer.aspx'
-    // if your report path is /AOPReport/ConsumptionBudgetSummarySiteWise
-    const reportPath = '%2fAOPReport%2fConsumptionBudgetSummarySiteWise' // encoded '/AOPReport/ConsumptionBudgetSummarySiteWise'
-    const params = new URLSearchParams({
-      // Report path already encoded in URL; append render command and other params
-      '': reportPath, // this makes URL like ...ReportViewer.aspx?%2fAOPReport%2f...  (some servers prefer this form)
-      'rs:Command': 'Render',
-      'rc:Toolbar': 'true', // or false
-      // pass any report parameters here, use your actual parameter names (example:)
-      PlantId: PLANT_ID ?? '',
-      SiteId: SITE_ID ?? '',
-      VerticalId: VERTICAL_ID ?? '',
-      AOPYear: AOP_YEAR ?? '',
-    })
+  const fetchData = async () => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+    try {
+      var data = await BusinessDemandDataApiService.ssrsMaintenanceSummary(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
-    // If the server expects query string without param names for the path, build accordingly:
-    // const url = `${base}?%2fAOPReport%2fConsumptionBudgetSummarySiteWise&rs:Command=Render&PlantId=${encodeURIComponent(PLANT_ID)}...`
-    return `${base}?${params.toString()}`
-  }, [PLANT_ID, SITE_ID, VERTICAL_ID, AOP_YEAR])
+      setBase(data?.data[0]?.reportURL)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [PLANT_ID, AOP_YEAR, keycloak])
+
+  const src = useMemo(() => {
+    if (!base) return
+
+    const params = `&PlantId=${PLANT_ID}&SiteId=${SITE_ID}&VerticalId=${VERTICAL_ID}&AOPYear=${AOP_YEAR}`
+
+    return `${base}${params}`
+  }, [base, PLANT_ID, SITE_ID, VERTICAL_ID, AOP_YEAR])
 
   // Optionally open in new tab
   if (openInTab) {

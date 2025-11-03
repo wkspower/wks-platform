@@ -5,14 +5,47 @@ export const BusinessDemandDataApiService = {
   getBDssData,
   saveBusinessDemandData,
   deleteBusinessDemandData,
-
   businessDemandImport,
   businessDemandExport,
   aopDesignBasisBluePrint,
   savepropanebusiness,
+  ssrsBudgetSummary,
+  ssrsMaintenanceSummary,
 }
 async function getBDData(keycloak, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/business-demand?year=${year}&plantId=${plantId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function ssrsBudgetSummary(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${year}&plantId=${plantId}&type=plant-budget-summary`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function ssrsMaintenanceSummary(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${year}&plantId=${plantId}&type=maintenance-summary`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -134,7 +167,7 @@ async function businessDemandImport(file, keycloak, PLANT_ID, AOP_YEAR) {
 }
 
 async function aopDesignBasisBluePrint() {
-  var url = `${window.location.origin}/files/Blue Print Cracker.docx`
+  var url = `${window.location.origin}/files/BluePrintCracker.pdf`
 
   try {
     const resp = await fetch(url, {
