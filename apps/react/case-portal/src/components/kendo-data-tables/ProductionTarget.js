@@ -19,6 +19,7 @@ import {
   getColDefsNonEditable,
   getColDefsPercentageSummary,
 } from './Utilities-Kendo/productionTargetColDefs'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const ProductionTarget = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -62,6 +63,8 @@ const ProductionTarget = ({ permissions }) => {
     message: '',
     severity: 'info',
   })
+
+  const valueFormat = ValueFormatterProduction()
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [loading, setLoading] = useState(false)
@@ -536,13 +539,19 @@ const ProductionTarget = ({ permissions }) => {
     })
   }
 
-  const colDefs_percentage_summary = getColDefsPercentageSummary(headerMap)
+  const colDefs_percentage_summary = getColDefsPercentageSummary(
+    headerMap,
+    valueFormat,
+  )
   const colDefs_design_capacity = IS_PE_PP
-    ? getColDefsDesignCapacityPEPP(headerMap)
-    : getColDefsDesignCapacity(headerMap)
+    ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
+    : getColDefsDesignCapacity(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(headerMap)
-  const colDefs_non_editable = getColDefsNonEditable(headerMap)
+  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(
+    headerMap,
+    valueFormat,
+  )
+  const colDefs_non_editable = getColDefsNonEditable(headerMap, valueFormat)
 
   useEffect(() => {
     setModifiedCellsDesignCapacity({})

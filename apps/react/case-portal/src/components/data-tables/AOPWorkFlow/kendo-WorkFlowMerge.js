@@ -43,6 +43,7 @@ import MonthWiseRawData from '../Reports/MonthWiseRawData'
 import FurnaceRawData from '../Reports/FurnaceRawData'
 import OptimizerReport from '../Reports/OptimizerReport'
 import TurnaroundReportCracker from '../Reports/TurnaroundReportCracker'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -99,7 +100,6 @@ const WorkFlowMerge = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
   const [businessKey, setBusinessKey] = useState('')
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})
@@ -326,6 +326,8 @@ const WorkFlowMerge = () => {
     )
   }
 
+  const VALUE_FORMATOR = ValueFormatterProduction()
+
   const generateColumns = (data, numericKeys, handleRemarkCellClick) => {
     const cols = data.headers.map((header, i) => {
       const field = data.keys[i]
@@ -340,7 +342,7 @@ const WorkFlowMerge = () => {
         }),
         ...(isNumeric && {
           type: 'number',
-          format: '{0:#.###}',
+          format: VALUE_FORMATOR,
           // valueFormatter: ({ value }) =>
           //   value === '' || value == null ? '' : Number(value).toFixed(2),
         }),

@@ -15,6 +15,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
 
@@ -58,6 +59,8 @@ const UtilitiesNormsBasis = () => {
     }
   }, [])
 
+  const VALUE_FORMATOR = ValueFormatterProduction()
+
   const enrichColumns = useCallback((backendCols = []) => {
     return backendCols
       .filter((col) => col.field !== 'GRID_TYPE')
@@ -70,7 +73,7 @@ const UtilitiesNormsBasis = () => {
           filterable: true,
           filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
           align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+          ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
           editable: false,
           isRightAlligned: isNumberCol ? 'numeric' : undefined,
         }

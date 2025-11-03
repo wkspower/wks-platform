@@ -18,6 +18,7 @@ import {
   ExcelExport,
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const CALL_DELAY_MS = 200
 
@@ -53,6 +54,8 @@ const SteadyStateNormsHistorianBasis = () => {
     return new Date(`${year}-${month}-${day}`)
   }
 
+  const VALUE_FORMATOR = ValueFormatterProduction()
+
   const enrichColumns = useCallback((backendCols = []) => {
     return backendCols.map((col) => {
       const isTextCol = col.type === 'string'
@@ -64,7 +67,7 @@ const SteadyStateNormsHistorianBasis = () => {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+        ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }

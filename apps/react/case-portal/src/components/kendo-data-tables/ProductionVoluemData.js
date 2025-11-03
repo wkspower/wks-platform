@@ -559,13 +559,19 @@ const ProductionvolumeData = ({ permissions }) => {
     })
   }
 
-  const colDefs_percentage_summary = getColDefsPercentageSummary(headerMap, valueFormat)
+  const colDefs_percentage_summary = getColDefsPercentageSummary(
+    headerMap,
+    valueFormat,
+  )
   const colDefs_design_capacity = IS_PE_PP
     ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
     : getColDefsDesignCapacity(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(headerMap, valueFormat)
-  const colDefs_non_editable = getColDefsNonEditable(headerMap)
+  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(
+    headerMap,
+    valueFormat,
+  )
+  const colDefs_non_editable = getColDefsNonEditable(headerMap, valueFormat)
 
   useEffect(() => {
     setModifiedCellsDesignCapacity({})

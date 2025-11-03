@@ -17,6 +17,7 @@ import {
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const CALL_DELAY_MS = 20
 
@@ -49,6 +50,8 @@ const FurnaceRawData = () => {
     return new Date(`${year}-${month}-${day}`)
   }
 
+  const VALUE_FORMATOR = ValueFormatterProduction()
+
   const enrichColumns = useCallback((backendCols = []) => {
     return backendCols.map((col) => {
       const isTextCol = col.type === 'string'
@@ -59,7 +62,7 @@ const FurnaceRawData = () => {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+        ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }

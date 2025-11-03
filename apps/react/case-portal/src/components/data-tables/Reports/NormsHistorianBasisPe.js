@@ -16,6 +16,7 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 // -----------------------------------------------------------------------------
 // ProductionVolumeDataBasisPe
@@ -58,6 +59,8 @@ const ProductionVolumeDataBasisPe = () => {
     return new Date(`${year}-${month}-${day}`)
   }
 
+  const VALUE_FORMATOR = ValueFormatterProduction()
+
   const enrichColumns = useCallback((backendCols = []) => {
     return backendCols
       .filter((col) => col.field !== 'GRID_TYPE')
@@ -70,7 +73,7 @@ const ProductionVolumeDataBasisPe = () => {
           filterable: true,
           filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
           align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+          ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
           editable: false,
           isRightAlligned: isNumberCol ? 'numeric' : undefined,
         }

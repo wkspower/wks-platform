@@ -15,6 +15,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const BestAchievedIndividualNorms = () => {
   const keycloak = useSession()
@@ -56,6 +57,8 @@ const BestAchievedIndividualNorms = () => {
     }
   }, [])
 
+  const VALUE_FORMATOR = ValueFormatterProduction()
+
   const enrichColumns = useCallback((backendCols = []) => {
     const filteredCols = backendCols.filter((col) => col.field !== 'GRID_TYPE')
     const applyFixedWidth = filteredCols.length > 15
@@ -72,7 +75,7 @@ const BestAchievedIndividualNorms = () => {
           filterable: true,
           filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
           align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+          ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
           editable: false,
           isRightAlligned: isNumberCol ? 'numeric' : undefined,
           ...(fixedWidth ? { widthT: fixedWidth } : {}),
