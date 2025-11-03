@@ -1016,7 +1016,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 				while (rowIterator.hasNext()) {
 					Row row = rowIterator.next();
-					Cell tableIdCell = row.getCell(19, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					Cell tableIdCell = row.getCell(18, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                 	if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
                     	continue;
                 	}
@@ -1041,13 +1041,13 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 						dto.setJan(getNumericCellValue(row.getCell(13), dto));
 						dto.setFeb(getNumericCellValue(row.getCell(14), dto));
 						dto.setMar(getNumericCellValue(row.getCell(15), dto));
-						dto.setRemark(getStringCellValue(row.getCell(16), dto));
-						String id=getStringCellValue(row.getCell(17), dto);
+						
+						String id=getStringCellValue(row.getCell(16), dto);
 						if(id!=null) {
 							dto.setId(UUID.fromString(id));
 						}
 						
-						dto.setTableId(getStringCellValue(row.getCell(19), dto));
+						dto.setTableId(getStringCellValue(row.getCell(18), dto));
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -1224,7 +1224,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	String getJson() {
 	    return "{\r\n" + //
 	            "    \"BudgetMaintenance\": {\r\n" + //
-	            "        \"columnCount\":20,\r\n" + //
+	            "        \"columnCount\":19,\r\n" + //
 	            "        \"tables\": [\r\n" + //
 	            "            {\r\n" + //
 	            "                \"startRow\": 0,\r\n" + //
@@ -1246,7 +1246,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"jan\", \r\n" + //
 	            "\t\t\t\t\t\"feb\", \r\n" + //
 	            "\t\t\t\t\t\"mar\", \r\n" + //
-	            "\t\t\t\t\t\"remark\",\r\n" + //
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
@@ -1263,9 +1262,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                    \"Plant\",\r\n" + //
 	            "                    \"Cost\",\r\n" + //
 	            "                    \"% Change (+/-)\",\r\n" + //
-	            "                    \"Remark\",\"Id\",\"Is Editable\"]],\r\n" + //
+	            "                    \"Id\",\"Is Editable\"]],\r\n" + //
 	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[17,18,19],\r\n" + //
+	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
 	            "                \"styles\": {\r\n" + //
 	            "                    \"boldColumns\": [\r\n" + //
 	            "                        0\r\n" + //
@@ -1296,7 +1295,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "\t\t\t\t\t\"jan\",\r\n" + //
 	            "\t\t\t\t\t\"feb\", \r\n" + //
 	            "\t\t\t\t\t\"mar\", \r\n" + //
-	            "\t\t\t\t\t\"remark\",\r\n" + //
 	            "\t\t\t\t\t\"id\",\r\n" + //
 	            "\t\t\t\t\t\"isEditable\"\r\n" + //
 	            "                ],\r\n" + //
@@ -1313,9 +1311,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            "                    \"Plant\",\r\n" + //
 	            "                    \"Cost\",\r\n" + //
 	            "                    \"% Change (+/-)\",\r\n" + //
-	            "                    \"Remark\",\"Id\",\"Is Editable\"]],\r\n" + //
+	            "                    \"Id\",\"Is Editable\"]],\r\n" + //
 	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[17,18,19],\r\n" + //
+	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
 	            "                \"styles\": {\r\n" + //
 	            "                    \"boldColumns\": [\r\n" + //
 	            "                        0\r\n" + //
