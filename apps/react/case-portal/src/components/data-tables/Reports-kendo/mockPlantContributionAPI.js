@@ -601,6 +601,7 @@ export const MockReportService = {
               widthT: 80,
               align: 'right',
               editable: false,
+              format: '{0:#.#}',
             },
             {
               field: 'id',

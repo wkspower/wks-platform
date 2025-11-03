@@ -15,6 +15,8 @@ import {
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import ProductionNorms from 'components/kendo-data-tables/ProductionNorms'
 import NumericInputOnly from 'utils/NumericInputOnly'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const MonthwiseProduction = () => {
   const keycloak = useSession()
@@ -51,6 +53,9 @@ const MonthwiseProduction = () => {
   const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
   const verticalName = vertical?.toLowerCase()
 
+  const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
+  const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
+
   const colsMeg = [
     {
       field: 'RowNo',
@@ -79,6 +84,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
             {
               field: 'EOEProdActual',
@@ -86,6 +92,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
           ],
         },
@@ -98,6 +105,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
             {
               field: 'OpHrsActual',
@@ -105,6 +113,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
           ],
         },
@@ -117,6 +126,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
             {
               field: 'ThroughputActual',
@@ -124,6 +134,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
           ],
         },
@@ -139,6 +150,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
         {
           field: 'MEGThroughput',
@@ -146,6 +158,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
         {
           field: 'EOThroughput',
@@ -153,6 +166,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
         {
           field: 'EOEThroughput',
@@ -160,6 +174,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
         {
           field: 'TotalEOE',
@@ -167,6 +182,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
       ],
     },
@@ -180,7 +196,13 @@ const MonthwiseProduction = () => {
   ]
 
   const colsNonMeg = [
-    { field: 'RowNo', title: 'SL.No', widthT: 80, editable: false },
+    {
+      field: 'RowNo',
+      title: 'SL.No',
+      widthT: 80,
+      editable: false,
+      format: '{0:#.#}',
+    },
 
     {
       field: 'Month',
@@ -201,6 +223,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
             {
               field: 'ProdActual',
@@ -208,6 +231,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
           ],
         },
@@ -220,6 +244,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
             {
               field: 'OpHrsActual',
@@ -227,6 +252,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
           ],
         },
@@ -239,6 +265,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
             {
               field: 'ThroughputActual',
@@ -246,6 +273,7 @@ const MonthwiseProduction = () => {
               width: 120,
               editable: false,
               type: 'number',
+              format: VALUE_FORMATTOR_PRODUCTION,
             },
           ],
         },
@@ -261,6 +289,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
         {
           field: 'Throughput',
@@ -268,6 +297,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
         {
           field: 'Total',
@@ -275,6 +305,7 @@ const MonthwiseProduction = () => {
           width: 150,
           editable: false,
           type: 'number',
+          format: VALUE_FORMATTOR_PRODUCTION,
         },
       ],
     },

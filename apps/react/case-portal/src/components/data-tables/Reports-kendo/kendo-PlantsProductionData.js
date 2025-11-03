@@ -8,6 +8,8 @@ import {
   Backdrop,
   CircularProgress,
 } from '../../../../node_modules/@mui/material/index'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const PlantsProductionSummary = () => {
   const keycloak = useSession()
@@ -25,6 +27,9 @@ const PlantsProductionSummary = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [modifiedCells, setModifiedCells] = React.useState({})
+
+  const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
+  const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
 
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.Remark || '')
@@ -100,14 +105,14 @@ const PlantsProductionSummary = () => {
           title: 'Budget',
           width: 120,
           editable: false,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           type: 'number',
         },
         {
           field: 'ActualPrevYear',
           title: 'Actual',
           width: 120,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           editable: false,
           type: 'number',
         },
@@ -122,7 +127,7 @@ const PlantsProductionSummary = () => {
           title: 'Budget',
           width: 120,
           editable: false,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           type: 'number',
         },
       ],
@@ -136,7 +141,7 @@ const PlantsProductionSummary = () => {
           title: 'MT',
           width: 120,
           editable: false,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           type: 'number',
         },
         {
@@ -144,7 +149,7 @@ const PlantsProductionSummary = () => {
           title: '%',
           width: 100,
           editable: false,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           type: 'number',
         },
       ],
@@ -158,7 +163,7 @@ const PlantsProductionSummary = () => {
           title: 'MT',
           width: 120,
           editable: false,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           type: 'number',
         },
         {
@@ -166,7 +171,7 @@ const PlantsProductionSummary = () => {
           title: '%',
           width: 100,
           editable: false,
-          format: '{0:#.##}',
+          format: VALUE_FORMATTOR_PRODUCTION,
           type: 'number',
         },
       ],
