@@ -907,6 +907,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
                     currentTabDisplayName={currentTabDisplayName}
+                    reportTypes={reportTypes}
                   />
                 )
               case 'report manual entry':
@@ -923,6 +924,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
                     currentTabDisplayName={currentTabDisplayName}
+                    reportTypes={reportTypes}
                   />
                 )
               case 'pio impact':

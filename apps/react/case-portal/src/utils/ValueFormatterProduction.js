@@ -10,5 +10,9 @@ export default function ValueFormatterProduction() {
     return '{0:0.000}'
   }
 
+  if (VERTICAL_NAME === 'elastomer') {
+    return '{0:0.0000}'
+  }
+
   return '{0:0.00}'
 }

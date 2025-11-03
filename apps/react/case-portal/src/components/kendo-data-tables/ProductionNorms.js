@@ -912,6 +912,7 @@ const ProductionNorms = ({ permissions }) => {
         note={
           !permissions?.hideNoteText &&
           lowerVertName !== 'cracker' &&
+          lowerVertName !== 'elastomer' &&
           lowerVertName !== 'aromatics'
             ? '* MT per Annum'
             : ''

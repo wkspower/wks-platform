@@ -3298,13 +3298,13 @@ async function getRecipeExcel(keycloak) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'recipe.xlsx'
+    a.download = 'Production & Norms Basis Recipe.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting recipe data:', e)
+    console.error('Error exporting data:', e)
     return Promise.reject(e)
   }
 }
@@ -3341,6 +3341,10 @@ async function getShutdownRateExcel(keycloak, type) {
   }
   const url = `${Config.CaseEngineUrl}/task/shutdown-rate-export?year=${year}&plantId=${plantId}&type=${type}`
 
+  const EXCEL_NAME = type
+    ? `Production & Norms Basis ${type}.xlsx`
+    : `Production & Norms Basis.xlsx`
+
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -3360,13 +3364,13 @@ async function getShutdownRateExcel(keycloak, type) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `${type}_Excel.xlsx`
+    a.download = EXCEL_NAME
     document.body.appendChild(a)
     a.click()
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting shutdown rate data:', e)
+    console.error('Error Exporting Data:', e)
     return Promise.reject(e)
   }
 }
@@ -3591,6 +3595,9 @@ async function getConfigurationExcelType(
   }
 
   const body = JSON.stringify(reportType)
+  const EXCEL_NAME = reportType
+    ? `Production & Norms Basis ${reportType}.xlsx `
+    : `Production & Norms Basis.xlsx`
 
   try {
     const resp = await fetch(url, {
@@ -3609,7 +3616,7 @@ async function getConfigurationExcelType(
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis.xlsx'
+    a.download = EXCEL_NAME
     document.body.appendChild(a)
     a.click()
     a.remove()
