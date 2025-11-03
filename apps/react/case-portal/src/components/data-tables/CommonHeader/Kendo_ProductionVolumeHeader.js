@@ -2,7 +2,7 @@ import production_coldefs_pe from '../../../assets/kendo_production_coldefs_pe.j
 import production_coldefs_meg from '../../../assets/kendo_production_coldefs_meg.json'
 import { useSelector } from 'react-redux'
 
-const getEnhancedProductionColDefs = ({ headerMap }) => {
+const getEnhancedProductionColDefs = ({ headerMap, valueFormat }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -21,7 +21,7 @@ const getEnhancedProductionColDefs = ({ headerMap }) => {
         ...updatedCol,
         title: headerMap[col.title],
         type: 'number',
-        format: '{0:#.##}',
+        format: valueFormat,
         width: 150,
       }
     }
