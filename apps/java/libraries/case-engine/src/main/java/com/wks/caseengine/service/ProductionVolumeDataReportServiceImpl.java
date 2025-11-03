@@ -669,7 +669,16 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 				}
 				monthWiseProductionPlanRepository.save(optional.get());
 			}
-		}else {
+		}else if ("ELASTOMER".equalsIgnoreCase(verticalName)){
+			for (MonthWiseProductionPlanDTO dto : dataList) {
+				String sql = "UPDATE AnnualMonthWiseProductionPlan SET Remark = :Remark WHERE Id = :Id";              
+	            Query q = entityManager.createNativeQuery(sql);
+	            q.setParameter("Remark", dto.getRemark());
+	            q.setParameter("Id", UUID.fromString(dto.getId()));
+	            q.executeUpdate();
+	        
+			}
+		} else {
 			for (MonthWiseProductionPlanDTO dto : dataList) {
 				String sql = "UPDATE " + tableName + " SET Remark = :Remark WHERE Id = :Id";              
 	            Query q = entityManager.createNativeQuery(sql);
