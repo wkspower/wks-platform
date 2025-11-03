@@ -304,7 +304,9 @@ const RunLengthDataSet = () => {
           <Typography>No grids available.</Typography>
         )}
 
-        {gridNames.map((name) => {
+        {gridNames.map((name, idx) => {
+          if (idx === 0) return null
+
           const d = dataMap[name] || { rows: [], columns: [] }
           return (
             <div key={name}>

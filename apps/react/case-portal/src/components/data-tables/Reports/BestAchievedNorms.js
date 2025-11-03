@@ -154,7 +154,7 @@ function GridPanel({
                 rows={memoized.rows}
                 columns={memoized.columns}
                 permissions={{ isHeight: memoized.rows.length > 15 }}
-                {...(idx === 0 && showColors
+                {...(idx === 1 && showColors
                   ? { allRedCell: allRedCellList, showThreeColors: true }
                   : {})}
               />
@@ -239,7 +239,7 @@ export default function BestAchievedNorms() {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:#.##}' } : {}),
+        ...(isNumberCol ? { format: '{0:0.00}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
         // hide Material FK field (both common casings)
@@ -467,7 +467,7 @@ export default function BestAchievedNorms() {
             const cell = { value: rawVal }
 
             // Apply coloring for first sheet (replicate UI's showThreeColors === true for idx === 0)
-            if (idx === 0 && c.field) {
+            if (idx === 1 && c.field) {
               const monthCandidate = r.month || c.title || c.field || ''
               const matched = findMatchedCell(r, monthCandidate)
               if (matched) {
@@ -578,6 +578,8 @@ export default function BestAchievedNorms() {
         {tabIndex === 0 && (
           <>
             {gridNames.map((name, idx) => {
+              if (idx === 0) return null
+
               const d = dataMap[name] || { rows: [], columns: [] }
               return (
                 <GridPanel

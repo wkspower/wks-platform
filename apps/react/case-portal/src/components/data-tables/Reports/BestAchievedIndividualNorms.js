@@ -57,6 +57,10 @@ const BestAchievedIndividualNorms = () => {
   }, [])
 
   const enrichColumns = useCallback((backendCols = []) => {
+    const filteredCols = backendCols.filter((col) => col.field !== 'GRID_TYPE')
+    const applyFixedWidth = filteredCols.length > 15
+    const fixedWidth = applyFixedWidth ? 150 : undefined
+
     return backendCols
       .filter((col) => col.field !== 'GRID_TYPE')
       .map((col) => {
@@ -71,6 +75,7 @@ const BestAchievedIndividualNorms = () => {
           ...(isNumberCol ? { format: '{0:#.##}' } : {}),
           editable: false,
           isRightAlligned: isNumberCol ? 'numeric' : undefined,
+          ...(fixedWidth ? { widthT: fixedWidth } : {}),
         }
       })
   }, [])
@@ -360,7 +365,8 @@ const BestAchievedIndividualNorms = () => {
       <Box display='flex' flexDirection='column' gap={2}>
         {tabIndex === 0 && (
           <>
-            {gridNames.map((name) => {
+            {gridNames.map((name, idx) => {
+              if (idx === 0) return null
               const d = dataMap[name] || { rows: [], columns: [] }
               return (
                 <div key={name}>

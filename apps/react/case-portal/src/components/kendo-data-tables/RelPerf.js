@@ -199,14 +199,14 @@ export default function RelPerf() {
         'Reliability Improvement Initiative',
       )
 
-      var data5 = await FunctionalApiService.testMacro(
-        keycloak,
-        '20.15',
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      // var data5 = await FunctionalApiService.testMacro(
+      //   keycloak,
+      //   '20.15',
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
 
-      console.log('macro', data5)
+      // console.log('macro', data5)
 
       const processedDatar = data4.data.map((item, index) => ({
         ...item,

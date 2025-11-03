@@ -177,7 +177,7 @@ async function maintenaceExportdata(
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `maintenancebudget_Export'}.xlsx`
+    a.download = `Maintenance Budget_Export.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

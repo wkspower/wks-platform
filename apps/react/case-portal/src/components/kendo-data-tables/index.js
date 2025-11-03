@@ -9,6 +9,7 @@ import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 import Notification from 'components/Utilities/Notification'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
 import { useSelector } from 'react-redux'
 import {
@@ -146,6 +147,7 @@ const KendoDataTables = ({
   onLoad = () => {},
   disableRedHighlight = false,
   showThreeColors = false,
+  resetDataChanges = () => {},
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -157,8 +159,10 @@ const KendoDataTables = ({
   const [selectedUnit, setSelectedUnit] = useState(permissions?.units?.[0])
   const [selectedGrade, setSelectedGrade] = useState()
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
+  const [openResetDataDialogeBox, setOpenResetDataDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
+  const closeResetDataDialogeBox = () => setOpenResetDataDialogeBox(false)
   const [edit, setEdit] = useState({})
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
@@ -474,6 +478,12 @@ const KendoDataTables = ({
     setEdit({})
   }
 
+  const resetConfirmation = async () => {
+    resetDataChanges()
+    setOpenResetDataDialogeBox(false)
+    setEdit({})
+  }
+
   const handleDeleteClick = async (params) => {
     setParamsForDelete(params)
     setOpenDeleteDialogeBox(true)
@@ -522,6 +532,15 @@ const KendoDataTables = ({
       setIsButtonDisabled(false)
     }, 500)
   }
+
+  const resetDataModalOpen = async () => {
+    setIsButtonDisabled(true)
+    setOpenResetDataDialogeBox(true)
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
+  }
+
   const handleCalculateBtn = async () => {
     setSelectedGrade('')
     setIsButtonDisabled(true)
@@ -1144,6 +1163,21 @@ const KendoDataTables = ({
                   {...(loading ? {} : {})}
                 >
                   Save
+                </Button>
+              )}
+
+              {permissions?.showResetButton && (
+                <Button
+                  variant='contained'
+                  className='btn-save'
+                  onClick={resetDataModalOpen}
+                  disabled={
+                    isButtonDisabled ||
+                    (!summaryEdited && Object.keys(modifiedCells).length === 0)
+                  }
+                  startIcon={<RestartAltIcon />}
+                >
+                  Reset
                 </Button>
               )}
 
@@ -2227,6 +2261,27 @@ const KendoDataTables = ({
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={openResetDataDialogeBox}
+        onClose={closeResetDataDialogeBox}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>{'Reset ?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to reset these changes?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeResetDataDialogeBox}>Cancel</Button>
+          <Button onClick={resetConfirmation} autoFocus>
+            Reset
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}

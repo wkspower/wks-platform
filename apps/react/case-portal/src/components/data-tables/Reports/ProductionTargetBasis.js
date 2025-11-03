@@ -362,7 +362,9 @@ const ProductionTargetBasis = () => {
       <Box display='flex' flexDirection='column' gap={2}>
         {tabIndex === 0 && (
           <>
-            {gridNames.map((name) => {
+            {gridNames.map((name, idx) => {
+              if (idx === 0) return null
+
               const d = dataMap[name] || { rows: [], columns: [] }
               return (
                 <div key={name}>

@@ -203,7 +203,7 @@ export default function AopBudget() {
       type,
       format,
     })),
-    { field: 'remark', title: 'Remark', editable: true, widthT: 100 },
+    // { field: 'remark', title: 'Remark', editable: true, widthT: 100 },
   ]
 
   const formatPercentChange = (value) => {
@@ -268,6 +268,12 @@ export default function AopBudget() {
     } finally {
       setLoading(false)
     }
+  }, [keycloak, yearChanged, plantID])
+
+  const resetDataChanges = useCallback(async () => {
+    setModifiedCells({})
+    setModifiedCellsP({})
+    fetchData()
   }, [keycloak, yearChanged, plantID])
 
   const fetchDesignRemarksAndDesignBasis = useCallback(async () => {
@@ -341,7 +347,7 @@ export default function AopBudget() {
 
   const adjustedPermissionsP = getAdjustedPermissionsP(
     {
-      saveBtn: true,
+      saveBtn: false,
       addButton: false,
       allAction: true,
       showTitleNameBusiness: true,
@@ -389,6 +395,7 @@ export default function AopBudget() {
       constarins: ['+', '-'],
       resetButton: false,
       percentChangeLogic: true,
+      showResetButton: true,
     },
     isOldYear,
   )
@@ -431,12 +438,11 @@ export default function AopBudget() {
   const handleSaveAll = async () => {
     setLoading(true)
     try {
-      // Get modified rows for both grids
       const consumptionData = Object.values(modifiedCells)
       const procurementData = Object.values(modifiedCellsP)
 
       if (
-        !designBasisAndDesignRemarksEdited &&
+        !designBasisAndDesignRemarksEdited ||
         !designBasisAndDesignRemarksEdited2
       ) {
         setSnackbarData({
@@ -448,18 +454,22 @@ export default function AopBudget() {
         return
       }
 
-      const requiredFields = ['remark']
-      const validationMessageC = validateFields(consumptionData, requiredFields)
-      const validationMessageP = validateFields(procurementData, requiredFields)
-      if (validationMessageC || validationMessageP) {
-        setSnackbarData({
-          message: validationMessageC || validationMessageP,
-          severity: 'error',
-        })
-        setSnackbarOpen(true)
-        setLoading(false)
-        return
-      }
+      //remarks col hide so , no required to validate the fields
+
+      // const requiredFields = ['remark']
+      // const validationMessageC = validateFields(consumptionData, requiredFields)
+      // const validationMessageP = validateFields(procurementData, requiredFields)
+
+      // if (validationMessageC || validationMessageP) {
+      //   setSnackbarData({
+      //     message: validationMessageC || validationMessageP,
+      //     severity: 'error',
+      //   })
+      //   setSnackbarOpen(true)
+      //   setLoading(false)
+      //   return
+      // }
+
       const fieldsToOmit = ['isEditable', 'IsEditable']
 
       const allRows = [
@@ -622,7 +632,7 @@ export default function AopBudget() {
               container
               alignItems='center'
               justifyContent='space-between'
-              sx={{ marginBottom: 0.5 }}
+              // sx={{ marginBottom: 0.5 }}
             >
               <Grid item>
                 <div
@@ -705,7 +715,7 @@ export default function AopBudget() {
         groupBy='budgetType'
         resetRowData={resetRowData1}
         summaryEdited={designBasisAndDesignRemarksEdited}
-
+        resetDataChanges={resetDataChanges}
         // setEditMode={setEditMode}
       />
 
@@ -732,6 +742,7 @@ export default function AopBudget() {
         resetRowData={resetRowData2}
         summaryEdited={designBasisAndDesignRemarksEdited2}
         // setEditMode={setEditMode}
+        resetDataChanges={resetDataChanges}
       />
       <Notification
         open={snackbarOpen}
