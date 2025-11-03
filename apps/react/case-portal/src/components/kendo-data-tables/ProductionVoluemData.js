@@ -72,6 +72,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
   const [rowsFormattedAndNonEditable, setRowsFormattedAndNonEditable] =
     useState()
+  const valueFormat = ValueFormatterProduction()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -96,7 +97,6 @@ const ProductionvolumeData = ({ permissions }) => {
   const dispatch = useDispatch()
   const [rowsDesignCapacity, setRowsDesignCapacity] = useState([])
   const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
-  const valueFormat = ValueFormatterProduction()
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -559,12 +559,12 @@ const ProductionvolumeData = ({ permissions }) => {
     })
   }
 
-  const colDefs_percentage_summary = getColDefsPercentageSummary(headerMap)
+  const colDefs_percentage_summary = getColDefsPercentageSummary(headerMap, valueFormat)
   const colDefs_design_capacity = IS_PE_PP
-    ? getColDefsDesignCapacityPEPP(headerMap)
-    : getColDefsDesignCapacity(headerMap)
+    ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
+    : getColDefsDesignCapacity(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(headerMap)
+  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(headerMap, valueFormat)
   const colDefs_non_editable = getColDefsNonEditable(headerMap)
 
   useEffect(() => {
@@ -579,6 +579,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
+    valueFormat,
   })
 
   const handleUnitChangeDesignCapacity = (unit) => {

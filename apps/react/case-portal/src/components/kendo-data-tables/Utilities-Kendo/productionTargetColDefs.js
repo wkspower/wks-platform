@@ -1,4 +1,4 @@
-export function getColDefsPercentageSummary(headerMap = {}) {
+export function getColDefsPercentageSummary(headerMap = {}, valueFormat) {
   return [
     { field: 'idFromApi', title: 'ID', hidden: true },
     { field: 'aopCaseId', title: 'Case ID', editable: false, hidden: true },
@@ -15,13 +15,13 @@ export function getColDefsPercentageSummary(headerMap = {}) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, false),
+    ...generateMonthColumns(headerMap, false, valueFormat),
     { field: 'avgTph', title: 'AVG', editable: false, hidden: true },
     { field: 'isEditable', title: 'isEditable', hidden: true },
   ]
 }
 
-export function getColDefsDesignCapacity(headerMap = {}) {
+export function getColDefsDesignCapacity(headerMap = {}, valueFormat) {
   return [
     {
       field: 'materialFKId',
@@ -36,7 +36,7 @@ export function getColDefsDesignCapacity(headerMap = {}) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, true),
+    ...generateMonthColumns(headerMap, true,valueFormat),
     {
       field: 'remarks',
       title: 'Remark',
@@ -48,7 +48,7 @@ export function getColDefsDesignCapacity(headerMap = {}) {
   ]
 }
 
-export function getColDefsDesignCapacityPEPP(headerMap = {}) {
+export function getColDefsDesignCapacityPEPP(headerMap = {}, valueFormat) {
   return [
     {
       field: 'materialFKId',
@@ -63,11 +63,11 @@ export function getColDefsDesignCapacityPEPP(headerMap = {}) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, false),
+    ...generateMonthColumns(headerMap, false, valueFormat),
   ]
 }
 
-export function getColDefsMaxAchievedCapacity(headerMap = {}) {
+export function getColDefsMaxAchievedCapacity(headerMap = {}, valueFormat) {
   return [
     {
       field: 'materialFKId',
@@ -77,11 +77,11 @@ export function getColDefsMaxAchievedCapacity(headerMap = {}) {
       hidden: true,
     },
     { field: 'productName', title: 'Particulars', widthT: 100, editable: true },
-    ...generateMonthColumns(headerMap, true),
+    ...generateMonthColumns(headerMap, true, valueFormat),
   ]
 }
 
-export function getColDefsNonEditable(headerMap = {}) {
+export function getColDefsNonEditable(headerMap = {}, valueFormat) {
   return [
     { field: 'idFromApi', title: 'ID', hidden: true },
     { field: 'aopCaseId', title: 'Case ID', hidden: true },
@@ -98,18 +98,18 @@ export function getColDefsNonEditable(headerMap = {}) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, false),
+    ...generateMonthColumns(headerMap, false, valueFormat),
     { field: 'avgTph', title: 'AVG', editable: false, hidden: true },
     { field: 'isEditable', title: 'isEditable', hidden: true },
   ]
 }
 
-function generateMonthColumns(headerMap = {}, editable = true) {
+function generateMonthColumns(headerMap = {}, editable = true, valueFormat) {
   const monthOrder = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
   return monthOrder.map((month) => ({
     field: getMonthName(month).toLowerCase(),
     title: headerMap[month],
-    format: '{0:#.##}',
+    format: valueFormat,
     editable,
     align: 'left',
     headerAlign: 'left',
