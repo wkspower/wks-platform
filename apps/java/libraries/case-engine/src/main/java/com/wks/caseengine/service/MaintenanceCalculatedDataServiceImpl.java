@@ -733,7 +733,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			           + "PercentChange, Symbol "
 			           + "FROM " + viewName + " "
 			           + "WHERE (AOPYear = :year AND AOPYear IS NOT NULL) "
-			           + "AND PlantId = :plantFkId AND BudgetCategory = :budgetCategory order by Sequence";
+			           + "AND PlantId = :plantFkId AND BudgetCategory = :budgetCategory order by budgetCategory  ASC, budgetType ASC , Sequence ASC ";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("year", year);
