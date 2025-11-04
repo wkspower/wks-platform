@@ -86,7 +86,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			if (vertical.getName().equalsIgnoreCase("MEG")) {
 				objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
-			}else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA")) {
+			}else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("PVC") || vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA")) {
 				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
 				objList = getShutdownNormsMEG(year, plant.getId(), viewName);
 			}else if(vertical.getName().equalsIgnoreCase("CRACKER")) {
