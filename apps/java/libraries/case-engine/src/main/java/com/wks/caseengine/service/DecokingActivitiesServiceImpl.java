@@ -769,15 +769,20 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
 			for (DecokeRunLengthDTO decokeRunLengthDTO : decokeRunLengthDTOList) {
-				if (decokeRunLengthDTO.getSaveStatus() != null
-						&& decokeRunLengthDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
-					failedList.add(decokeRunLengthDTO);
-					continue;
-				}
-						String newyear=nextAcademicYear(year);
-						int deletedRecords=decokeRunLengthRepository.deleteByPlantFkIdAndAopYear(UUID.fromString(plantId),newyear);
-						System.out.println(deletedRecords);
-						DecokeRunLength decokeRunLength = new DecokeRunLength();
+						if (decokeRunLengthDTO.getSaveStatus() != null
+								&& decokeRunLengthDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+							failedList.add(decokeRunLengthDTO);
+							continue;
+						}
+						DecokeRunLength decokeRunLength=null;
+						//String newyear=nextAcademicYear(year);
+						//int deletedRecords=decokeRunLengthRepository.deleteByPlantFkIdAndAopYear(UUID.fromString(plantId),newyear);
+						//System.out.println(deletedRecords);
+						Optional<DecokeRunLength> decokeRunLengthOpt = decokeRunLengthRepository.findById(UUID.fromString(decokeRunLengthDTO.getId()));
+						if(decokeRunLengthOpt.isPresent()) {
+							 decokeRunLength=decokeRunLengthOpt.get();
+						}
+						
 						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
 						decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
 						decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
@@ -794,8 +799,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						   throw new IllegalArgumentException("Invalid date: " + dateString, ex);
 						}
 						decokeRunLength.setDate(parsedDate);
-						decokeRunLength.setPlantFkId(UUID.fromString(plantId));
-						decokeRunLength.setAopYear(newyear);
+						//decokeRunLength.setPlantFkId(UUID.fromString(plantId));
+						//decokeRunLength.setAopYear(newyear);
 						decokeRunLengthRepository.save(decokeRunLength);
 			}
 		} catch (Exception ex) {
