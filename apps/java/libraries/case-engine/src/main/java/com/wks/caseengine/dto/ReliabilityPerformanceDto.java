@@ -32,5 +32,8 @@ public class ReliabilityPerformanceDto {
     private String aopYear;
     private UUID plantId;
     private String reportType;
+    private String saveStatus;
+	private String errDescription;
+	 private String tableId;
 
 }

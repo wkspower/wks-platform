@@ -33,6 +33,9 @@ public class ReliabilityRecordDto {
     private String aopYear;
     private UUID plantId;
     private Integer rowNo;
+    private String saveStatus;
+   	private String errDescription;
+   	private String tableId;
 
 }
 

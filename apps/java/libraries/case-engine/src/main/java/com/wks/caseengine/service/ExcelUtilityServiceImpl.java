@@ -685,6 +685,19 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
 
         return months;
     }
+    
+    public List<String> getFinancialYear(String year) {
+        List<String> months = new ArrayList<>();
+        int startYear = Integer.parseInt(year.substring(2, 4));
+        int nextYear = startYear + 1;
+
+        months.add("FY"+startYear+" AOP");
+        months.add("FY"+startYear+" Actual");
+        months.add("FY"+nextYear+" Plan");
+        
+        return months;
+    }
+
 
     private String formatMonthYear(int month, int year) {
         LocalDate date = LocalDate.of(year, month, 1);
