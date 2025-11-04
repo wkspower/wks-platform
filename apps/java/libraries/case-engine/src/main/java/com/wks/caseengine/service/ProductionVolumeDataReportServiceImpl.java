@@ -658,27 +658,14 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		String tableName=verticalName + "_" + site.getName() + "_MonthWiseProductionPlan";
-		if ("MEG".equalsIgnoreCase(verticalName)) {
-			for (MonthWiseProductionPlanDTO dto : dataList) {
-				Optional<MonthWiseProductionPlan> optional = monthWiseProductionPlanRepository
-						.findById(UUID.fromString(dto.getId()));
-				optional.get().setRemark(dto.getRemark());
-				System.out.println("dto.getOpHrsActual()" + dto.getOpHrsActual());
-				if (dto.getOpHrsActual() != null) {
-					optional.get().setOpHrsActual(dto.getOpHrsActual());
-				}
-				monthWiseProductionPlanRepository.save(optional.get());
-			}
-		}else {
+		
 			for (MonthWiseProductionPlanDTO dto : dataList) {
 				String sql = "UPDATE AnnualMonthWiseProductionPlan SET Remark = :Remark WHERE Id = :Id";              
 	            Query q = entityManager.createNativeQuery(sql);
 	            q.setParameter("Remark", dto.getRemark());
 	            q.setParameter("Id", UUID.fromString(dto.getId()));
 	            q.executeUpdate();
-	        
 			}
-		} 
 		AOPMessageVM response = new AOPMessageVM();
 		response.setCode(200);
 		
