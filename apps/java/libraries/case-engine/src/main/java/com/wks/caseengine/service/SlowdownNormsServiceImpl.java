@@ -121,7 +121,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 						vertical.getId().toString());
 
 				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
-			} else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("PTA") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("VCM")) {
+			} else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("PTA") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("PVC") || vertical.getName().equalsIgnoreCase("VCM")) {
 				String storedProcedure = "vwScrn"+vertical.getName() + "SlowdownNorms";
 
 				objList = getSlowdownNorms(year, plant.getId(), storedProcedure);
