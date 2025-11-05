@@ -407,8 +407,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
                 }
             }
 			
-			sheet.setColumnHidden(6, true);
-			sheet.setColumnHidden(7, true);
+			sheet.setColumnHidden(5, true);
+			//sheet.setColumnHidden(7, true);
 			try {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
