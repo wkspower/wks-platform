@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.Locale;
 import javax.sql.DataSource;
-
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,11 +34,23 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.MCUNormsValueRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 @Service
 public class BasisReportServiceImpl implements BasisReportService {
 
@@ -59,6 +74,9 @@ public class BasisReportServiceImpl implements BasisReportService {
 	
 	@Autowired
 	private ModeWiseNormsService modeWiseNormsService;
+	
+	@Autowired
+	private MCUNormsValueRepository mcuNormsValueRepository;
 	
 	private DataSource dataSource;
 	public BasisReportServiceImpl(DataSource dataSource) {
@@ -513,7 +531,311 @@ public class BasisReportServiceImpl implements BasisReportService {
 	    });
 	}
 
+	public byte[] exportNormhistorian(String plantId, String aopYear, String periodFrom, String periodTo,String type) throws IOException {
+        
+		AOPMessageVM reportData= getNormhistorian(
+			     plantId,  aopYear,  periodFrom,  periodTo, type);
+        if (reportData == null || reportData.getData() == null) {
+            throw new IllegalArgumentException("Report data is empty or null.");
+        }
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> grids;
+        try {
+            grids = (List<Map<String, Object>>) reportData.getData();
+        } catch (ClassCastException e) {
+            throw new IllegalArgumentException("Report data is not in the expected List<Map<String, Object>> format.", e);
+        }
+        if (grids.isEmpty()) {
+            throw new IllegalArgumentException("Report data list is empty.");
+        }
+
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            CellStyle headerStyle = createHeaderStyle(workbook);
+            int sheetIndex = 1;
+            for (Map<String, Object> grid : grids) { 
+                String gridName = (String) grid.getOrDefault("gridName", "Sheet " + sheetIndex);
+                String sheetName = sanitizeSheetName(gridName, sheetIndex);
+                Sheet sheet = workbook.createSheet(sheetName);
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> columns = (List<Map<String, Object>>) grid.get("columns");
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> data = (List<Map<String, Object>>) grid.get("data");
+                if (columns == null || data == null || columns.isEmpty()) {
+                    sheetIndex++;
+                    continue;
+                }
+                List<String> fieldKeys = columns.stream()
+                        .map(c -> (String) c.get("field"))
+                        .toList();
+                
+                List<String> columnLabels = columns.stream()
+                        .map(c -> (String) c.getOrDefault("label", (String) c.get("field")))
+                        .toList();
+                int rowNum = 0; 
+                Row headerRow = sheet.createRow(rowNum++);
+                for (int i = 0; i < columnLabels.size(); i++) {
+                    Cell cell = headerRow.createCell(i);
+                    cell.setCellValue(columnLabels.get(i));
+                    cell.setCellStyle(headerStyle);
+                }
+                for (Map<String, Object> rowMap : data) {
+                    Row row = sheet.createRow(rowNum++);
+                    for (int i = 0; i < fieldKeys.size(); i++) {
+                        String key = fieldKeys.get(i);
+                        Object value = rowMap.get(key);
+                        
+                        Cell cell = row.createCell(i);
+                        setCellValue(cell, value);
+                    }
+                }
+                for (int i = 0; i < fieldKeys.size(); i++) {
+                    sheet.autoSizeColumn(i);
+                }
+                sheetIndex++;
+            }
+            workbook.write(bos);
+            return bos.toByteArray();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IOException("Failed to generate Excel file.", e);
+        }
+    }
+
 	
+	public byte[] exportBestAchieved(String plantId, String aopYear, String reportType) throws IOException {
+
+		AOPMessageVM reportData = getBestAchievedCracker(plantId, aopYear, reportType);
+	    if (reportData == null || reportData.getData() == null) {
+	        throw new IllegalArgumentException("Report data is empty or null.");
+	    }
+	    
+	    List<Map<String, Object>> grids;
+	    try {
+	        @SuppressWarnings("unchecked")
+	        List<Map<String, Object>> castedGrids = (List<Map<String, Object>>) reportData.getData();
+	        grids = castedGrids;
+	    } catch (ClassCastException e) {
+	        throw new IllegalArgumentException("Report data is not in the expected List<Map<String, Object>> format.", e);
+	    }
+	    if (grids.isEmpty()) {
+	        throw new IllegalArgumentException("Report data list is empty.");
+	    }
+	    try (Workbook workbook = new XSSFWorkbook();
+	         ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+	        CellStyle headerStyle = createHeaderStyle(workbook);
+	        CellStyle greenTextStyle = createPropaneStyle(workbook, IndexedColors.GREEN.getIndex());
+	        CellStyle redTextStyle = createPropaneStyle(workbook, IndexedColors.RED.getIndex());
+
+	        int sheetIndex = 1;
+	        for (Map<String, Object> grid : grids) {
+	            String gridName = (String) grid.getOrDefault("gridName", "Sheet " + sheetIndex);
+	            String sheetName = sanitizeSheetName(gridName, sheetIndex);
+	            Sheet sheet = workbook.createSheet(sheetName);
+	            
+	            @SuppressWarnings("unchecked")
+	            List<Map<String, Object>> columns = (List<Map<String, Object>>) grid.get("columns");
+	            @SuppressWarnings("unchecked")
+	            List<Map<String, Object>> data = (List<Map<String, Object>>) grid.get("data");
+
+	            if (columns == null || data == null || columns.isEmpty()) {
+	                sheetIndex++;
+	                continue;
+	            }
+	            List<String> fieldKeys = columns.stream()
+	                    .map(c -> (String) c.get("field"))
+	                    .toList();
+	            
+	            List<String> columnLabels = columns.stream()
+	                    .map(c -> (String) c.getOrDefault("label", (String) c.get("field")))
+	                    .toList();
+	            
+	            int rowNum = 0;
+	            Row headerRow = sheet.createRow(rowNum++);
+	            for (int i = 0; i < columnLabels.size(); i++) {
+	                Cell cell = headerRow.createCell(i);
+	                cell.setCellValue(columnLabels.get(i));
+	                cell.setCellStyle(headerStyle);
+	            }
+	            String mode = null;
+	            String normParameterId = null;
+	            Object[] rowData = null;
+
+	            for (Map<String, Object> rowMap : data) {
+	                Row row = sheet.createRow(rowNum++);
+	                rowData = null; 
+	                
+	                for (int i = 0; i < fieldKeys.size(); i++) {
+	                    String key = fieldKeys.get(i);
+	                    Object value = rowMap.get(key);
+	                    if (key.equalsIgnoreCase("Mode") && value != null) {
+	                        mode = value.toString();
+	                        if(mode.equalsIgnoreCase("5F")) {
+	                        	System.out.println(mode);
+	                        }
+	                        Object normParameter = rowMap.get("Material_FK_Id");
+	                        if (normParameter != null) {
+	                            normParameterId = normParameter.toString();
+	                            rowData = mcuNormsValueRepository.findByNormParameterId(aopYear, plantId, normParameterId, mode);
+	                        }
+	                    }
+
+	                    Cell cell = row.createCell(i);
+	                    if (rowData != null && rowData.length > 0 && isMonth(key)) {
+	                        try {
+	                            // --- Correction Starts Here ---
+	                            // 1. Check if rowData is the 2D array (list inside a list)
+	                            // If rowData is Object[][], this check ensures we get the inner Object[]
+	                            Object[] dataRow = null;
+	                            if (rowData.length > 0 && rowData[0] instanceof Object[]) {
+	                                // Assume the monthly data is in the first (and only) inner array
+	                                dataRow = (Object[]) rowData[0];
+	                            } else {
+	                                // If it's already a 1D array, use it directly (fallback/original intent)
+	                                dataRow = rowData; 
+	                            }
+
+	                            if (dataRow != null && dataRow.length > 0) {
+	                                // 2. Proceed with the original logic using the correct dataRow
+	                                int monthIndex = getMonthNumberByName(key);
+	                                int arrayIndex = (monthIndex > 0) ? monthIndex : 0;
+	                                String dataValue = null;
+
+	                                // Ensure arrayIndex is within bounds of dataRow
+	                                if (arrayIndex < dataRow.length && dataRow[arrayIndex] != null) { 
+	                                    dataValue = dataRow[arrayIndex].toString();
+	                                }
+
+	                                if (dataValue != null) {
+	                                    // ... Styling logic remains the same ...
+	                                    if ("Propane(2Z)".equalsIgnoreCase(dataValue)) {
+	                                        cell.setCellStyle(greenTextStyle);
+	                                    } else if ("Propane(1Z)".equalsIgnoreCase(dataValue)) {
+	                                        cell.setCellStyle(redTextStyle);
+	                                    }
+	                                }
+	                            }
+	                            // --- Correction Ends Here ---
+
+	                        } catch (Exception ignored) {
+	                            // Handle or log the error instead of ignoring it in production code
+	                        }
+	                    }
+	                    setCellValue(cell, value);
+	                }
+	            }
+	            for (int i = 0; i < fieldKeys.size(); i++) {
+	                sheet.autoSizeColumn(i);
+	            }
+	            sheetIndex++;
+	        }
+	        
+	        workbook.write(bos);
+	        return bos.toByteArray();
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        throw new IOException("Failed to generate Excel file.", e);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException("An unexpected error occurred during Excel export.", e);
+	    }
+	}	
+	
+	private CellStyle createPropaneStyle(Workbook workbook, short colorIndex) {
+	    CellStyle style = workbook.createCellStyle();
+	    Font font = workbook.createFont();
+	    font.setColor(colorIndex); 
+	    style.setFont(font);
+	    return style;
+	}
+	
+	public Boolean isMonth(String month) {
+	    switch (month) {
+	        case "January":
+	        case "February":
+	        case "March":
+	        case "April":
+	        case "May":
+	        case "June":
+	        case "July":
+	        case "August":
+	        case "September":
+	        case "October":
+	        case "November":
+	        case "December":
+	            return true;
+	        default:
+	            return false;
+	    }
+	}
+	
+	public int getMonthNumberByName(String monthName) {
+	    try {
+	        Month month = Month.valueOf(monthName.toUpperCase());
+	        return month.getValue();
+	    } catch (IllegalArgumentException e) {
+	        System.err.println("Invalid month name: " + monthName);
+	        return -1; // Or throw new InvalidMonthException(monthName);
+	    }
+	}
+
+    /**
+     * Helper method to create a bold style for column headers.
+     */
+    private CellStyle createHeaderStyle(Workbook workbook) {
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFont(headerFont);
+        return headerStyle;
+    }
+    
+    // The createTitleStyle method is removed as titles are no longer needed
+    
+    /**
+     * Helper method to set the cell value based on the type of the object.
+     */
+    private void setCellValue(Cell cell, Object value) {
+        if (value == null) {
+            cell.setCellValue("");
+        } else if (value instanceof Number num) {
+            // Write numbers directly
+            cell.setCellValue(num.doubleValue());
+        } else if (value instanceof Boolean bool) {
+            cell.setCellValue(bool);
+        } else {
+            // Default to String representation
+            cell.setCellValue(value.toString());
+        }
+    }
+    
+    /**
+     * Sanitizes the sheet name to comply with Excel requirements (max 31 chars, no illegal characters).
+     */
+    private String sanitizeSheetName(String gridName, int index) {
+        // Remove Excel illegal characters: \ / * ? [ ] :
+        String safeName = gridName.replaceAll("[\\\\/*?\\[\\]:]", "_");
+        
+        // Ensure the name is not empty or too long
+        if (safeName.trim().isEmpty() || safeName.length() > 31) {
+            if (safeName.length() > 31) {
+                 safeName = safeName.substring(0, 31);
+            } else {
+                safeName = "Sheet_" + index;
+            }
+        }
+        
+        // Check for common prefix to avoid duplicate name issues (though POI handles duplicates by adding numbers)
+        if (safeName.equalsIgnoreCase("Sheet")) {
+             return "Sheet_" + index;
+        }
+        
+        return safeName;
+    }
+
 		public List<String> getColumnNames(String plantId, String aopYear, String PeriodFrom,
 			String PeriodTo) {
 		return entityManager.unwrap(Session.class).doReturningWork(connection -> {

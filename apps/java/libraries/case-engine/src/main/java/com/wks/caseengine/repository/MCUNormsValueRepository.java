@@ -34,4 +34,24 @@ public interface MCUNormsValueRepository extends JpaRepository<MCUNormsValue,UUI
 						""", nativeQuery = true)
 	List<Object[]> getNormsMonthWiseModeTypeData(@Param("year") String year, @Param("plantFKId") String plantFKId, @Param("mode") String mode);
 	
+	@Query(value = """
+			SELECT 
+  [Material_FK_Id]
+  ,[ModeType_January]
+  ,[ModeType_February]
+  ,[ModeType_March]
+  ,[ModeType_April]
+  ,[ModeType_May]
+  ,[ModeType_June]
+  ,[ModeType_July]
+  ,[ModeType_August]
+  ,[ModeType_September]
+  ,[ModeType_October]
+  ,[ModeType_November]
+  ,[ModeType_December]
+FROM [dbo].[CRACKER_NormsMonthwiseModeType]
+where Plant_FK_Id = :plantFKId and AOPYear = :year and Material_FK_Id = :normParameterId and ModeOfOperation = :mode
+					""", nativeQuery = true)
+Object[] findByNormParameterId(@Param("year") String year, @Param("plantFKId") String plantFKId, @Param("normParameterId") String normParameterId, @Param("mode") String mode);
+	
 	}
