@@ -243,7 +243,7 @@ export default function PlantContributionLastFourYears() {
         const key = 'OtherVariableCost'
         const rpt = reports[key] || {}
         return (
-          <Box key={key} sx={{ mt: 0 }}>
+          <Box key={key} sx={{ mt: 1 }}>
             <KendoDataTablesReports
               modifiedCells={modifiedCells}
               setRows={setOtherVariableRows}

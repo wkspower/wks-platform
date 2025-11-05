@@ -1593,7 +1593,14 @@ const KendoDataTablesCrackerRunLength = ({
             ))}
 
             {/* Calculate Button */}
-            <div style={{ alignSelf: 'flex-end' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignSelf: 'flex-end',
+                gap: '8px', // adds space between buttons
+              }}
+            >
               <button
                 onClick={() => handleCalculateData(hValues)}
                 disabled={
@@ -1603,12 +1610,6 @@ const KendoDataTablesCrackerRunLength = ({
                   )
                 }
                 className='btn-save'
-                style={{
-                  height: '34px',
-                  padding: '0 16px',
-                  fontSize: '14px',
-                  marginRight: '10px',
-                }}
               >
                 Calculate
               </button>
@@ -1629,12 +1630,14 @@ const KendoDataTablesCrackerRunLength = ({
               {renderGridSingleRow()}
             </Tooltip>
           </div>
-          {/* Export button aligned right */}
+
+          {/* Export and Import buttons aligned side by side */}
           <div
             style={{
               display: 'flex',
               justifyContent: 'flex-end',
               marginTop: '8px',
+              gap: '8px', // space between buttons
             }}
           >
             <button
@@ -1644,15 +1647,7 @@ const KendoDataTablesCrackerRunLength = ({
             >
               Export
             </button>
-          </div>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              marginTop: '8px',
-            }}
-          >
             <button
               className='btn-save'
               onClick={onFileChange}
@@ -1673,7 +1668,7 @@ const KendoDataTablesCrackerRunLength = ({
         </DialogContent>
 
         <DialogActions style={{ padding: '4px 8px' }}>
-          <Button onClick={handleCancelClick} size='small'>
+          <Button onClick={handleCancelClick} className='btn-save' size='small'>
             Cancel
           </Button>
         </DialogActions>

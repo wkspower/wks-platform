@@ -66,10 +66,7 @@ export default function PlantContribution() {
             ...item,
             id: index,
             actualId: item?.id,
-            isEditable:
-              key == 'OtherVariableCost' && [1, 2, 3, 0].includes(index)
-                ? true
-                : false,
+            isEditable: key === 'OtherVariableCost' && index >= rows.length - 4,
           }))
           if (key == 'OtherVariableCost') setRows(rows)
         } else {
@@ -213,7 +210,7 @@ export default function PlantContribution() {
         .map(({ key, title }, idx) => {
           const rpt = reports[key] || {}
           return (
-            <Box key={key} sx={{ mt: 0 }}>
+            <Box key={key} sx={{ mt: 1 }}>
               <KendoDataTablesReports
                 columns={rpt.columns || []}
                 rows={rpt.rows || []}

@@ -841,7 +841,8 @@ const ProductionTarget = ({ permissions }) => {
       titleName: percentageTitle,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
-      titleAndInformation: 'Max Achieved Capacity (Ethylene)',
+      titleAndInformation:
+        'Maximum Ethylene Production achieved in the historical data for different furnace mode of operation.',
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
@@ -869,7 +870,8 @@ const ProductionTarget = ({ permissions }) => {
       ExcelName: `${VERTICAL_NAME}_Design Capacity`,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
-      titleAndInformation: 'Design Capacity (Ethylene)',
+      titleAndInformation:
+        'Design plant capacity for different furnace mode of operation as per licensor provided data.',
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
@@ -903,7 +905,7 @@ const ProductionTarget = ({ permissions }) => {
       uploadExcelBtn: permissions?.hideUploadExcel ? false : true,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
-      titleAndInformation: 'Current Operating Capacity (Ethylene)',
+      titleAndInformation: 'Operating capacity derived from Optimizer model.',
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
       titleName:

@@ -407,18 +407,18 @@ const ProductionNorms = ({ permissions }) => {
           normParametersFKId: product.materialFKId,
           originalRemark: product.aopRemarks,
           isEditable: false,
-          april: product?.april.toFixed(2) ?? '0.00',
-          may: product?.may.toFixed(2) ?? '0.00',
-          june: product?.june.toFixed(2) ?? '0.00',
-          july: product?.july.toFixed(2) ?? '0.00',
-          aug: product?.aug.toFixed(2) ?? '0.00',
-          sep: product?.sep.toFixed(2) ?? '0.00',
-          oct: product?.oct.toFixed(2) ?? '0.00',
-          nov: product?.nov.toFixed(2) ?? '0.00',
-          dec: product?.dec.toFixed(2) ?? '0.00',
-          jan: product?.jan.toFixed(2) ?? '0.00',
-          feb: product?.feb.toFixed(2) ?? '0.00',
-          march: product?.march.toFixed(2) ?? '0.00',
+          april: product?.april,
+          may: product?.may,
+          june: product?.june,
+          july: product?.july,
+          aug: product?.aug,
+          sep: product?.sep,
+          oct: product?.oct,
+          nov: product?.nov,
+          dec: product?.dec,
+          jan: product?.jan,
+          feb: product?.feb,
+          march: product?.march,
           Particulars: product.normParameterDisplayName,
           ...(product.materialFKId !== undefined
             ? { materialFKId: undefined }
@@ -491,42 +491,20 @@ const ProductionNorms = ({ permissions }) => {
             normParametersFKId: item?.normParametersFKId?.toLowerCase(),
             id: index,
             ...(TPH && {
-              jan: item.jan
-                ? item.jan / 24 / 31
-                : item.jan.toFixed(2) ?? '0.00',
+              jan: item.jan ? item.jan / 24 / 31 : item.jan,
               feb: item.feb
                 ? item.feb / 24 / (isLeap(nextYear) ? 29 : 28)
-                : item.feb.toFixed(2) ?? '0.00',
-              march: item.march
-                ? item.march / 24 / 31
-                : item.march.toFixed(2) ?? '0.00',
-              april: item.april
-                ? item.april / 24 / 30
-                : item.april.toFixed(2) ?? '0.00',
-              may: item.may
-                ? item.may / 24 / 31
-                : item.may.toFixed(2) ?? '0.00',
-              june: item.june
-                ? item.june / 24 / 30
-                : item.june.toFixed(2) ?? '0.00',
-              july: item.july
-                ? item.july / 24 / 31
-                : item.july.toFixed(2) ?? '0.00',
-              aug: item.aug
-                ? item.aug / 24 / 31
-                : item.aug.toFixed(2) ?? '0.00',
-              sep: item.sep
-                ? item.sep / 24 / 30
-                : item.sep.toFixed(2) ?? '0.00',
-              oct: item.oct
-                ? item.oct / 24 / 31
-                : item.oct.toFixed(2) ?? '0.00',
-              nov: item.nov
-                ? item.nov / 24 / 30
-                : item.nov.toFixed(2) ?? '0.00',
-              dec: item.dec
-                ? item.dec / 24 / 31
-                : item.dec.toFixed(2) ?? '0.00',
+                : item.feb,
+              march: item.march ? item.march / 24 / 31 : item.march,
+              april: item.april ? item.april / 24 / 30 : item.april,
+              may: item.may ? item.may / 24 / 31 : item.may,
+              june: item.june ? item.june / 24 / 30 : item.june,
+              july: item.july ? item.july / 24 / 31 : item.july,
+              aug: item.aug ? item.aug / 24 / 31 : item.aug,
+              sep: item.sep ? item.sep / 24 / 30 : item.sep,
+              oct: item.oct ? item.oct / 24 / 31 : item.oct,
+              nov: item.nov ? item.nov / 24 / 30 : item.nov,
+              dec: item.dec ? item.dec / 24 / 31 : item.dec,
             }),
           }
           const total = [
@@ -777,7 +755,7 @@ const ProductionNorms = ({ permissions }) => {
   const productionColumns = getEnhancedColDefs({
     headerMap,
     valueFormat,
-  }) 
+  })
 
   const productionColumnsByProducts = getEnhancedColDefsByProducts({
     headerMap,

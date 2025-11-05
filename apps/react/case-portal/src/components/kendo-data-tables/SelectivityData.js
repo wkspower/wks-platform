@@ -12,6 +12,7 @@ import { Box } from '../../../node_modules/@mui/material/index'
 import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import KendoDataTables from './index'
 import KendoDataTablesReciepe from './index-reports-receipe'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -404,12 +405,15 @@ const SelectivityData = (props) => {
     props?.configType === 'Report Manual Entry'
   const selectedHeaderMap = !type ? headerMap : headerMapForPrevYear
 
+  const FORMATE_VALUE = ValueFormatterProduction()
+
   const productionColumns = getEnhancedAOPColDefs({
     allGradesReciepes,
     allProducts,
     headerMap: selectedHeaderMap,
     handleRemarkCellClick,
     configType: props?.configType,
+    FORMATE_VALUE,
   })
 
   const getAdjustedPermissions = (permissions, isOldYear) => {

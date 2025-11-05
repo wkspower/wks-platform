@@ -278,6 +278,9 @@ export default function AopBudget() {
 
   const fetchDesignRemarksAndDesignBasis = useCallback(async () => {
     setLoading(true)
+
+    setDesignRemarks('')
+    setDesignBasis('')
     try {
       const resDesignBasis = await AOPMaintenanceApiService.designBasis(
         keycloak,

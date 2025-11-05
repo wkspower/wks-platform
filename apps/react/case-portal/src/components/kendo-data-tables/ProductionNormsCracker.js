@@ -13,6 +13,7 @@ import { setIsBlocked } from 'store/reducers/dataGridStore'
 import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const ProductionNormsCracker = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -23,6 +24,8 @@ const ProductionNormsCracker = ({ permissions }) => {
   const apiRefC2C3R = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const [_plantID, set_PlantID] = useState('')
+
+  const valueFormat = ValueFormatterProduction()
 
   const {
     verticalChange,
@@ -479,18 +482,18 @@ const ProductionNormsCracker = ({ permissions }) => {
           normParametersFKId: product.normParameterFKId,
           originalRemark: product.remarks,
           isEditable: product.isEditable,
-          apr: product?.apr.toFixed(2) ?? '0.00',
-          may: product?.may.toFixed(2) ?? '0.00',
-          jun: product?.jun.toFixed(2) ?? '0.00',
-          jul: product?.jul.toFixed(2) ?? '0.00',
-          aug: product?.aug.toFixed(2) ?? '0.00',
-          sep: product?.sep.toFixed(2) ?? '0.00',
-          oct: product?.oct.toFixed(2) ?? '0.00',
-          nov: product?.nov.toFixed(2) ?? '0.00',
-          dec: product?.dec.toFixed(2) ?? '0.00',
-          jan: product?.jan.toFixed(2) ?? '0.00',
-          feb: product?.feb.toFixed(2) ?? '0.00',
-          mar: product?.mar.toFixed(2) ?? '0.00',
+          apr: product?.apr,
+          may: product?.may,
+          jun: product?.jun,
+          jul: product?.jul,
+          aug: product?.aug,
+          sep: product?.sep,
+          oct: product?.oct,
+          nov: product?.nov,
+          dec: product?.dec,
+          jan: product?.jan,
+          feb: product?.feb,
+          mar: product?.mar,
           Particulars: product.productName,
           idFromApi: product.id,
           id: index,
@@ -536,10 +539,12 @@ const ProductionNormsCracker = ({ permissions }) => {
 
   const productionColumns = getEnhancedColDefs({
     headerMap,
+    valueFormat,
   })
 
   const productionColumnsC2C3R = getEnhancedColDefsC2C3R({
     headerMap,
+    valueFormat,
   })
 
   const handleUnitChange = (unit) => {
