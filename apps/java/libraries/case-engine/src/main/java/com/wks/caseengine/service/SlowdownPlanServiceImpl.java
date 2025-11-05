@@ -806,6 +806,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				                dto.setErrDescription("End date/time cannot be before start date/time.");
 				                Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 				                dto.setMaintEndDateTime(endDate);
+				            }else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) { 
+				                dto.setSaveStatus("Failed");
+				                dto.setErrDescription("Start and end date/time must belong to the same month.");
+				                Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+				                dto.setMaintEndDateTime(endDate);
 				            } else {
 				                Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 				                dto.setMaintEndDateTime(endDate);
