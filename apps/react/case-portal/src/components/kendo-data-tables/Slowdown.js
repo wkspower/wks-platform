@@ -427,8 +427,9 @@ const SlowDown = ({ permissions }) => {
       }
 
       // MEG specific checks
-      if (lowerVertName === 'meg') {
+      if (lowerVertName === 'meg' || lowerVertName === 'elastomer') {
         // Month span check
+        //check timeframe Multiple month spilt into single
         for (const row of rows) {
           const start = new Date(row.maintStartDateTime)
           const end = new Date(row.maintEndDateTime)
@@ -449,7 +450,7 @@ const SlowDown = ({ permissions }) => {
           }
         }
 
-        // Overlap within Slowdown
+        // Overlap within Slowdown  of timeframe ovelaping 
         for (let i = 0; i < rows.length; i++) {
           const a = rows[i]
           const aStart = new Date(a.maintStartDateTime).getTime()
@@ -475,7 +476,7 @@ const SlowDown = ({ permissions }) => {
           }
         }
 
-        // Cross overlap with Shutdown
+        // Cross overlap the timeframe with Shutdown
         for (let i = 0; i < rows.length; i++) {
           const a = rows[i]
           const aStart = new Date(a.maintStartDateTime).getTime()

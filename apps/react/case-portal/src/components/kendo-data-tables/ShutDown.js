@@ -246,12 +246,12 @@ const ShutDown = ({ permissions }) => {
         }
       }
 
-      if (lowerVertName == 'meg') {
+      if (lowerVertName == 'meg' || lowerVertName == 'elastomer') {
         const monthSpanRows = new Set() // Add this line
         for (const row of allRecords) {
           const start = new Date(row.maintStartDateTime)
           const end = new Date(row.maintEndDateTime)
-
+        //shutdown timeframe for Multiple months
           if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
 
           const formatDate = (date) =>
@@ -275,7 +275,7 @@ const ShutDown = ({ permissions }) => {
             return
           }
         }
-
+       //Shutdown timeframe overlapping of same time 
         for (let i = 0; i < allRecords.length; i++) {
           const a = allRecords[i]
           const aStart = new Date(a.maintStartDateTime).getTime()
@@ -303,7 +303,7 @@ const ShutDown = ({ permissions }) => {
             }
           }
         }
-
+        // Slowdown and shutdown timeframe overlapping
         //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
         for (let i = 0; i < rows.length; i++) {
           const a = rows[i]
