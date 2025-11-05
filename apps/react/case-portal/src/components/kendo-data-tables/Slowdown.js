@@ -874,11 +874,20 @@ const SlowDown = ({ permissions }) => {
 
     try {
       let response
-      response = await DataService.slowdownDetailsExport(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
+      
+    if(lowerVertName == 'elastomer'){
+            response = await DataService.slowdownDetailsElastomerExport(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+          } else{
+            response = await DataService.slowdownDetailsExport(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
       )
+          }
     } catch (error) {
       console.error('Error downloading Excel:', error)
       setSnackbarData({

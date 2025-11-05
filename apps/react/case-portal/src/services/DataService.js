@@ -152,7 +152,9 @@ export const DataService = {
   getProductionTargetBasis,
   ImportShutdownDetails,
   shutdownDetailsExport,
+  shutdownDetailsElastomerExport,
   slowdownDetailsExport,
+  slowdownDetailsElastomerExport,
   ImportSlowdownDetails,
 
   getConfigurationExcelType,
@@ -3529,6 +3531,37 @@ export async function shutdownDetailsExport(keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
+
+export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
+  const maintenanceTypeName = 'Shutdown'
+  const url = `${Config.CaseEngineUrl}/task/shutdown-export-non-product?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'shutdown.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Shutdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
 export async function ImportSlowdownDetails(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
@@ -3581,6 +3614,36 @@ export async function slowdownDetailsExport(keycloak, plantId, year) {
   }
 }
 
+export async function slowdownDetailsElastomerExport(keycloak, plantId, year) {
+  const maintenanceTypeName = 'Slowdown'
+  const url = `${Config.CaseEngineUrl}/task/slowdown-export-non-product?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'slowdown.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
 async function getConfigurationExcelType(
   keycloak,
   PLANT_ID,
