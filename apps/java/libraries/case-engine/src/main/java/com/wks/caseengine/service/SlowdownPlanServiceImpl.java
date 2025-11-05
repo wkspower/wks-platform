@@ -741,14 +741,15 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc);
+	                // 1. Description Duplicate Check (Validation)
 	                if (desc != null) {
 	                    boolean exists = dtoList.stream()
-	                        .anyMatch(existing -> "Success".equals(existing.getSaveStatus()) && desc.equals(existing.getDiscription()));
+	                        .anyMatch(existing -> desc.equals(existing.getDiscription()));
 	                    if (exists) {
 	                        dto.setSaveStatus("Failed");
 	                        dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
 	                        alreadyFailed = true;
-	                    }  
+	                    }
 	                }
 
 	                LocalDateTime[] bounds = parseFinancialYearBounds(year);

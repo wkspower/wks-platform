@@ -703,7 +703,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                boolean alreadyFailed = false;
 	                if (desc != null) {
 	                    boolean exists = dtoList.stream()
-	                        .anyMatch(existing -> "Success".equals(existing.getSaveStatus()) && desc.equals(existing.getDiscription()));
+	                        .anyMatch(existing -> desc.equals(existing.getDiscription()));
 	                    if (exists) {
 	                        dto.setSaveStatus("Failed");
 	                        dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
