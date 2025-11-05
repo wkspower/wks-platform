@@ -824,6 +824,169 @@ export default function RelPerf() {
     }
   }, [modifiedReliabilityInitiativeCells])
 
+  const exportReliabilityExcel = async (keycloak, PLANT_ID, AOP_YEAR, excelName) => {
+      setSnackbarOpenReliabilityPerformance(true)
+      setSnackbarDataReliabilityPerformance({
+        message: 'Excel download started!',
+        severity: 'success',
+      })
+  
+      try {
+        const response = await FunctionalApiService.exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, excelName)
+
+        if (response?.code === 200) {
+          setSnackbarOpenReliabilityPerformance(true)
+  
+          setSnackbarDataReliabilityPerformance({
+            message: 'Excel download completed successfully!',
+            severity: 'success',
+          })
+        } else {
+          setSnackbarOpenReliabilityPerformance(true)
+  
+          setSnackbarDataReliabilityPerformance({
+            message: 'Failed to download Excel.',
+            severity: 'error',
+          })
+        }
+      } catch (error) {
+        console.error('Error downloading Excel:', error)
+        setSnackbarOpenReliabilityPerformance(true)
+  
+        setSnackbarDataReliabilityPerformance({
+          message: 'Failed to download Excel.',
+          severity: 'error',
+        })
+      } finally {
+        setSnackbarOpenReliabilityPerformance(false)
+      }
+    }
+    //importReliabilityIncidentExcel
+    const saveReliabilityIncidentExcelFile = async (rawFile) => {
+    setLoading(true)
+    try {
+     
+      let response
+
+      response = await FunctionalApiService.importReliabilityIncidentExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        rawFile,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpenReliabilityPerformance(true)
+        setSnackbarDataReliabilityPerformance({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+
+        fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File - Reliability Performance.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpenReliabilityPerformance(true)
+        setSnackbarDataReliabilityPerformance({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        fetchData()
+      } else {
+        // setSnackbarOpen(true)
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error uploading Reliability Performance Excel:', error)
+    } finally {
+      setLoading(false)
+      fetchData()
+    }
+  }
+  const handleExcelUpload1 = (rawFile) => {
+    saveReliabilityIncidentExcelFile(rawFile)
+  }
+  const saveReliabilityPerformanceExcelFile = async (rawFile) => {
+    setLoading(true)
+    try {
+     
+      let response
+
+      response = await FunctionalApiService.importReliabilityPerformanceExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        rawFile,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpenReliabilityPerformance(true)
+        setSnackbarDataReliabilityPerformance({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+
+        fetchData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
+
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File - Reliability Performance.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpenReliabilityPerformance(true)
+        setSnackbarDataReliabilityPerformance({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        fetchData()
+      } else {
+        // setSnackbarOpen(true)
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error uploading Reliability Performance Excel:', error)
+    } finally {
+      setLoading(false)
+      fetchData()
+    }
+  }
+  const handleExcelUpload = (rawFile) => {
+    saveReliabilityPerformanceExcelFile(rawFile)
+  }
+
   return (
     <>
       <Backdrop
@@ -862,6 +1025,8 @@ export default function RelPerf() {
         }}
         columns={reliabilityPerformanceColumns}
         saveChanges={saveChangesReliabilityPerformance}
+        downloadExcelForConfiguration={() => exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, 'Reliability_Performance')}
+        handleExcelUpload={handleExcelUpload}
       />
 
       {/* Financial Aspect Grid */}
@@ -910,6 +1075,8 @@ export default function RelPerf() {
           ...gridPermissions,
           titleName: `Major Reliability Incidents FY${startYear.slice(-2)} (High & Medium Risks)`,
           ExcelName: 'Major_Reliability_Incidents',
+          downloadExcelBtn: true,
+          uploadExcelBtn: true,
         }}
         columns={majorIncidentsColumns}
         saveChanges={saveChangesIncidents}
@@ -920,6 +1087,8 @@ export default function RelPerf() {
         setOpenIncidents={setOpenIncidents}
         handleRemarkCellClick={handleRemarkCellClickIncidents}
         OpenIncidents={OpenIncidents}
+        downloadExcelForConfiguration={() => exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, 'Major_Reliability_Incidents')}
+        handleExcelUpload={handleExcelUpload1}
       />
 
       {/* Reliability Improvement Initiative Grid */}
