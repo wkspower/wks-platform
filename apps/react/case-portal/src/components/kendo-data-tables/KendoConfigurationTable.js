@@ -837,7 +837,7 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    (lowerVertName == 'meg' || lowerVertName === 'aromatics') &&
+    (lowerVertName == 'meg' || lowerVertName === 'aromatics' || lowerVertName== 'pvc') &&
     lowerVertName !== 'cracker' &&
     lowerVertName !== 'elastomer'
   ) {
