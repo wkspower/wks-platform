@@ -715,7 +715,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                LocalDateTime fyStart = bounds[0];
 	                LocalDateTime fyEnd   = bounds[1];
 	                String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
-	                if (mantStartStr != null && !alreadyFailed) {
+	                if (mantStartStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
@@ -734,7 +734,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                    }
 	                }
 	                String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
-	                if (mantEndStr != null && !alreadyFailed) {
+	                if (mantEndStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
@@ -781,7 +781,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                        alreadyFailed = true;
 	                    }
 	                }
-	                if (ldtStart != null && ldtEnd != null && !alreadyFailed) {
+	                if (ldtStart != null && ldtEnd != null) {
 	                    try {
 	                        Duration duration = Duration.between(ldtStart, ldtEnd);
 	                        long totalMinutes = duration.toMinutes();
