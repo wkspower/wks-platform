@@ -728,7 +728,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 	        if (rowIterator.hasNext())
 	            rowIterator.next(); 
-
+	        List<String> des = new ArrayList<>();
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
@@ -741,18 +741,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc);
-	                // 1. Description Duplicate Check (Validation)
-	                if (desc != null) {
-	                    boolean exists = dtoList.stream()
-	                        .anyMatch(existing -> desc.equals(existing.getDiscription()));
-	                    if (exists) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
-	                        alreadyFailed = true;
-	                    }
+	                if(des!=null && des.contains(dto.getDiscription())) {
+	                	 dto.setSaveStatus("Failed");
+	                     dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
 	                }
-
-	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
+	                if (dto.getDiscription() != null) {
+	                    des.add(dto.getDiscription());
+	                }
+		                LocalDateTime[] bounds = parseFinancialYearBounds(year);
 	                LocalDateTime fyStart = bounds[0];
 	                LocalDateTime fyEnd   = bounds[1];
 	                String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);

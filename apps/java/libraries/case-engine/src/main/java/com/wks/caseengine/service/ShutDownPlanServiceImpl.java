@@ -689,7 +689,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 	        if (rowIterator.hasNext())
 	            rowIterator.next(); 
-
+	        List<String> des = new ArrayList<>();
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
@@ -701,14 +701,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc);
 	                boolean alreadyFailed = false;
-	                if (desc != null) {
-	                    boolean exists = dtoList.stream()
-	                        .anyMatch(existing -> desc.equals(existing.getDiscription()));
-	                    if (exists) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
-	                        alreadyFailed = true;
-	                    }  
+	                if(des!=null && des.contains(dto.getDiscription())) {
+	                	 dto.setSaveStatus("Failed");
+	                     dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
+	                }
+	                if (dto.getDiscription() != null) {
+	                    des.add(dto.getDiscription());
 	                }
 
 	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
