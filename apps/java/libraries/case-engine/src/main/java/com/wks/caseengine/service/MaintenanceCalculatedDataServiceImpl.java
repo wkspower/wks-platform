@@ -757,8 +757,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        Map<String, List<List<Object>>> data = new HashMap<>();
 	        Map<String, Object> structure = mapper.readValue(structureJson, Map.class);
 	        Map<String, List<BudgetMaintenanceDto>> budgetMaintenanceListMap = new HashMap<>();
-
-	        // Fetch and populate data from the database before iterating through tables
 	        if (!isAfterSave) {
 	            // Fetch data for ConsumptionBudget
 	            AOPMessageVM consumptionVm = getBudgetMaintenance(plantId, year, "ConsumptionBudget");
@@ -766,8 +764,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            if (consumptionData != null) {
 	                budgetMaintenanceListMap.put("ConsumptionBudget", consumptionData);
 	            }
-
-	            // Fetch data for ProcurementBudget
 	            AOPMessageVM procurementVm = getBudgetMaintenance(plantId, year, "ProcurementBudget");
 	            List<BudgetMaintenanceDto> procurementData = (List<BudgetMaintenanceDto>) procurementVm.getData();
 	            if (procurementData != null) {
@@ -1016,7 +1012,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 				while (rowIterator.hasNext()) {
 					Row row = rowIterator.next();
-					Cell tableIdCell = row.getCell(18, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					Cell tableIdCell = row.getCell(19, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                 	if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
                     	continue;
                 	}
@@ -1024,6 +1020,10 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
                 	BudgetMaintenanceDto dto = new BudgetMaintenanceDto();
 
 					try {
+						String cost=getStringCellValue(row.getCell(2), dto);
+						if(cost!=null && cost.trim().equalsIgnoreCase("Total Cost")) {
+							continue;
+						}
 						dto.setBudgetType(getStringCellValue(row.getCell(0), dto));
 						dto.setPlantName(getStringCellValue(row.getCell(1), dto));
 						dto.setCostName(getStringCellValue(row.getCell(2), dto));
@@ -1041,13 +1041,13 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 						dto.setJan(getNumericCellValue(row.getCell(13), dto));
 						dto.setFeb(getNumericCellValue(row.getCell(14), dto));
 						dto.setMar(getNumericCellValue(row.getCell(15), dto));
-						
-						String id=getStringCellValue(row.getCell(16), dto);
+						dto.setRemark(getStringCellValue(row.getCell(16), dto));
+						String id=getStringCellValue(row.getCell(17), dto);
 						if(id!=null) {
 							dto.setId(UUID.fromString(id));
 						}
 						
-						dto.setTableId(getStringCellValue(row.getCell(18), dto));
+						dto.setTableId(getStringCellValue(row.getCell(19), dto));
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -1222,115 +1222,140 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	}
 
 	String getJson() {
-	    return "{\r\n" + //
-	            "    \"BudgetMaintenance\": {\r\n" + //
-	            "        \"columnCount\":19,\r\n" + //
-	            "        \"tables\": [\r\n" + //
-	            "            {\r\n" + //
-	            "                \"startRow\": 0,\r\n" + //
-	            "                \"headers\": [\r\n" + //
-	            "\t\t\t\t\t \r\n" + //
-	            "\t\t\t\t\t\"budgetType\", \r\n" + //
-	            "\t\t\t\t\t\"plantName\", \r\n" + //
-	            "\t\t\t\t\t\"costName\", \r\n" + //
-	            "\t\t\t\t\t\"percentChange\", \r\n" + //
-	            "\t\t\t\t\t\"apr\", \r\n" + //
-	            "\t\t\t\t\t\"may\", \r\n" + //
-	            "\t\t\t\t\t\"jun\", \r\n" + //
-	            "\t\t\t\t\t\"jul\", \r\n" + //
-	            "\t\t\t\t\t\"aug\", \r\n" + //
-	            "\t\t\t\t\t\"sep\", \r\n" + //
-	            "\t\t\t\t\t\"oct\", \r\n" + //
-	            "\t\t\t\t\t\"nov\", \r\n" + //
-	            "\t\t\t\t\t\"dec\",\r\n" + //
-	            "\t\t\t\t\t\"jan\", \r\n" + //
-	            "\t\t\t\t\t\"feb\", \r\n" + //
-	            "\t\t\t\t\t\"mar\", \r\n" + //
-	            "\t\t\t\t\t\"id\",\r\n" + //
-	            "\t\t\t\t\t\"isEditable\"\r\n" + //
-	            "                ],\r\n" + //
-	            "                \"startingIndexOfMonths\":4,\r\n" + //
-	            "                \"hideTable\":false,\r\n" + //
-	            "                \"textBeforeTitle\":\"\",\r\n" + //
-				"                \"title\":\"Consumption Budget\",\r\n" + //
-	            "                \"tableId\":\"ConsumptionBudget\",\r\n" + //
-	            "                \"dataInput\":\"Consumption Budget\",\r\n" + //
-	            "                \"isColumnMergeRequired\":false,\r\n" + //
-	            "                \"isRowMergeRequired\":false,\r\n" + //
-	            "                \"headersTitles\":[[\r\n" + //
-	            "                    \"Type\",\r\n" + //
-	            "                    \"Plant\",\r\n" + //
-	            "                    \"Cost\",\r\n" + //
-	            "                    \"% Change (+/-)\",\r\n" + //
-	            "                    \"Id\",\"Is Editable\"]],\r\n" + //
-	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
-	            "                \"styles\": {\r\n" + //
-	            "                    \"boldColumns\": [\r\n" + //
-	            "                        0\r\n" + //
-	            "                    ],\r\n" + //
-	            "                    \"borders\": true\r\n" + //
-	            "                },\r\n" + //
-	            "                \"autoMerge\": {\r\n" + //
-	            "                    \"columns\": [],\r\n" + //
-	            "                    \"rows\": []\r\n" + //
-	            "                }\r\n" + //
-	            "            },\r\n" + //
-	            "            {\r\n" + //
-	            "                \"startRow\": 0,\r\n" + //
-	            "                \"headers\": [\r\n" + //
-	            "\t\t\t\t\t\"budgetType\", \r\n" + //
-	            "\t\t\t\t\t\"plantName\", \r\n" + //
-	            "\t\t\t\t\t\"costName\", \r\n" + //
-	            "\t\t\t\t\t\"percentChange\", \r\n" + //
-	            "\t\t\t\t\t\"apr\", \r\n" + //
-	            "\t\t\t\t\t\"may\", \r\n" + //
-	            "\t\t\t\t\t\"jun\", \r\n" + //
-	            "\t\t\t\t\t\"jul\", \r\n" + //
-	            "\t\t\t\t\t\"aug\", \r\n" + //
-	            "\t\t\t\t\t\"sep\", \r\n" + //
-	            "\t\t\t\t\t\"oct\", \r\n" + //
-	            "\t\t\t\t\t\"nov\", \r\n" + //
-	            "\t\t\t\t\t\"dec\",\r\n" + //
-	            "\t\t\t\t\t\"jan\",\r\n" + //
-	            "\t\t\t\t\t\"feb\", \r\n" + //
-	            "\t\t\t\t\t\"mar\", \r\n" + //
-	            "\t\t\t\t\t\"id\",\r\n" + //
-	            "\t\t\t\t\t\"isEditable\"\r\n" + //
-	            "                ],\r\n" + //
-	            "                \"startingIndexOfMonths\":4,\r\n" + //
-	            "                \"hideTable\":false,\r\n" + //
-	            "                \"textBeforeTitle\":\"\",\r\n" + //
-	            "                \"title\":\"Procurement Budget\",\r\n" + //
-	            "                \"tableId\":\"ProcurmentBudget\",\r\n" + //
-	            "                \"dataInput\":\"Procurement Budget\",\r\n" + //
-	            "                \"isColumnMergeRequired\":false,\r\n" + //
-	            "                \"isRowMergeRequired\":false,\r\n" + //
-	            "                \"headersTitles\":[[\r\n" + //
-	            "                    \"Type\",\r\n" + //
-	            "                    \"Plant\",\r\n" + //
-	            "                    \"Cost\",\r\n" + //
-	            "                    \"% Change (+/-)\",\r\n" + //
-	            "                    \"Id\",\"Is Editable\"]],\r\n" + //
-	            "                \"rows\": [],\r\n" + //
-	            "                \"hiddenColumns\":[16,17,18],\r\n" + //
-	            "                \"styles\": {\r\n" + //
-	            "                    \"boldColumns\": [\r\n" + //
-	            "                        0\r\n" + //
-	            "                    ],\r\n" + //
-	            "                    \"borders\": true\r\n" + //
-	            "                },\r\n" + //
-	            "                \"autoMerge\": {\r\n" + //
-	            "                    \"columns\": [],\r\n" + //
-	            "                    \"rows\": []\r\n" + //
-	            "                }\r\n" + //
-	            "            }\r\n" + //
-	            "        ]\r\n" + //
-	            "    }\r\n" + //
-	            "    \r\n" + //
-	            "}";
+	    return """
+	        {
+	          "BudgetMaintenance": {
+	            "columnCount": 20,
+	            "metadataFields": [
+	              {
+	                "key": "year",
+	                "title": "AOP Year"
+	              },
+	              {
+	                "key": "plant",
+	                "title": "Plant"
+	              },
+	              {
+	                "key": "site",
+	                "title": "Site"
+	              },
+	              {
+	                "key": "site",
+	                "title": "Site"
+	              }
+	            ],
+	            "tables": [
+	              {
+	                "startRow": 0,
+	                "headers": [
+	                  "budgetType",
+	                  "plantName",
+	                  "costName",
+	                  "percentChange",
+	                  "apr",
+	                  "may",
+	                  "jun",
+	                  "jul",
+	                  "aug",
+	                  "sep",
+	                  "oct",
+	                  "nov",
+	                  "dec",
+	                  "jan",
+	                  "feb",
+	                  "mar",
+	                  "remark",
+	                  "id",
+	                  "isEditable"
+	                ],
+	                "startingIndexOfMonths": 4,
+	                "hideTable": false,
+	                "textBeforeTitle": "",
+	                "title": "Consumption Budget",
+	                "tableId": "ConsumptionBudget",
+	                "dataInput": "Consumption Budget",
+	                "isColumnMergeRequired": false,
+	                "isRowMergeRequired": false,
+	                "headersTitles": [
+	                  [
+	                    "Type",
+	                    "Plant",
+	                    "Cost",
+	                    "% Change (+/-)",
+	                    "Remarks",
+	                    "Id",
+	                    "Is Editable"
+	                  ]
+	                ],
+	                "rows": [],
+	                "hiddenColumns": [17, 18, 19],
+	                "styles": {
+	                  "boldColumns": [0],
+	                  "borders": true
+	                },
+	                "autoMerge": {
+	                  "columns": [],
+	                  "rows": []
+	                }
+	              },
+	              {
+	                "startRow": 0,
+	                "headers": [
+	                  "budgetType",
+	                  "plantName",
+	                  "costName",
+	                  "percentChange",
+	                  "apr",
+	                  "may",
+	                  "jun",
+	                  "jul",
+	                  "aug",
+	                  "sep",
+	                  "oct",
+	                  "nov",
+	                  "dec",
+	                  "jan",
+	                  "feb",
+	                  "mar",
+	                  "remark",
+	                  "id",
+	                  "isEditable"
+	                ],
+	                "startingIndexOfMonths": 4,
+	                "hideTable": false,
+	                "textBeforeTitle": "",
+	                "title": "Procurement Budget",
+	                "tableId": "ProcurmentBudget",
+	                "dataInput": "Procurement Budget",
+	                "isColumnMergeRequired": false,
+	                "isRowMergeRequired": false,
+	                "headersTitles": [
+	                  [
+	                    "Type",
+	                    "Plant",
+	                    "Cost",
+	                    "% Change (+/-)",
+	                    "Remarks",
+	                    "Id",
+	                    "Is Editable"
+	                  ]
+	                ],
+	                "rows": [],
+	                "hiddenColumns": [17, 18, 19],
+	                "styles": {
+	                  "boldColumns": [0],
+	                  "borders": true
+	                },
+	                "autoMerge": {
+	                  "columns": [],
+	                  "rows": []
+	                }
+	              }
+	            ]
+	          }
+	        }
+	        """;
 	}
-
 	@Override
 	public AOPMessageVM getMaintenanceReportURLs(String plantId, String year, String type) {
 		try {
