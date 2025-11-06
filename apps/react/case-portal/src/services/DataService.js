@@ -147,12 +147,13 @@ export const DataService = {
   executeConfigurationNorms,
   getProductionTargetBasis,
   ImportShutdownDetails,
+  ImportShutdownElastomerDetails,
   shutdownDetailsExport,
   shutdownDetailsElastomerExport,
   slowdownDetailsExport,
   slowdownDetailsElastomerExport,
   ImportSlowdownDetails,
-
+  ImportSlowdownElastomerDetails,
   getConfigurationExcelType,
 
   getProductionReports,
@@ -3430,6 +3431,27 @@ export async function ImportShutdownDetails(file, keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
+export async function ImportShutdownElastomerDetails(file, keycloak, plantId, year) {
+  const maintenanceTypeName = 'Shutdown'
+  const url = `${Config.CaseEngineUrl}/task/shutdown-import-non-product?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error importing Shutdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
 export async function shutdownDetailsExport(keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
@@ -3494,6 +3516,27 @@ export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
 export async function ImportSlowdownDetails(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error importing Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function ImportSlowdownElastomerDetails(file, keycloak, plantId, year) {
+  const maintenanceTypeName = 'Slowdown'
+  const url = `${Config.CaseEngineUrl}/task/slowdown-import-non-product?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {

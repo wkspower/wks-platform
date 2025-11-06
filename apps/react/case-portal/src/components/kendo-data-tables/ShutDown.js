@@ -649,12 +649,22 @@ const ShutDown = ({ permissions }) => {
     try {
       let response
 
-      response = await DataService.ImportShutdownDetails(
+      
+      if(lowerVertName == 'elastomer'){
+        response = await DataService.ImportShutdownElastomerDetails(
         rawFile,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
+      } else{
+        response = await DataService.ImportShutdownDetails(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -749,7 +759,7 @@ const ShutDown = ({ permissions }) => {
       titleName: `${SCREEN_NAME}`,
 
       uploadExcelBtn:
-        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+        lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'elastomer' ? true : false,
     },
     isOldYear,
   )
