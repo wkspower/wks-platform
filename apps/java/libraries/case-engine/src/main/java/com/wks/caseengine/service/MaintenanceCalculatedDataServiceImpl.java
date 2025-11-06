@@ -1387,11 +1387,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		try {
 			String sql = "SELECT " + "Id, ReportCode, PlantId, AOPYear, ReportURL "
 					 + "FROM " + viewName + " "
-					+ "WHERE (AOPYear = :year AND AOPYear IS NOT NULL) AND PlantId = :plantId AND ReportCode = :type";
+					+ "WHERE ReportCode = :type";
 					
 			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("year", year);
-			query.setParameter("plantId", plantId);
 			query.setParameter("type", type);
 
 			return query.getResultList();
