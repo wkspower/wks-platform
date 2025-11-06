@@ -966,7 +966,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 
 	        PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenanceTransactionOpt.get();
-
+	        String year = plantMaintenanceTransaction.getAuditYear();
 	        List<NormAttributeTransactions> normAttributeTransactionsList =
 	                normAttributeTransactionsRepository.findByMaintenanceId(plantMaintenanceTransactionId);
 
@@ -979,7 +979,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        }
 	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
-	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month);
+	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Slowdown",year);
 	        	if(count==1) {
 	        		List<SlowdownNormsValue> slowdownNormsValues =slowdownNormsRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
 		        	for(SlowdownNormsValue slowdownNormsValue: slowdownNormsValues) {
@@ -1041,7 +1041,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        
 	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
-	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month);
+	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
 	        	if(count==1) {
 	        		List<ShutdownNormsValue> shutdownNormsValues =shutdownNormsRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
 		        	for(ShutdownNormsValue shutdownNormsValue: shutdownNormsValues) {
