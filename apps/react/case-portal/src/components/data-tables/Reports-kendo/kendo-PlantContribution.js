@@ -66,7 +66,7 @@ export default function PlantContribution() {
             ...item,
             id: index,
             actualId: item?.id,
-            isEditable: key === 'OtherVariableCost' && index >= rows.length - 4,
+            isEditable: key === 'OtherVariableCost' && index <= rows.length - 4,
           }))
           if (key == 'OtherVariableCost') setRows(rows)
         } else {

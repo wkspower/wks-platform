@@ -565,6 +565,7 @@ const ProductionTarget = ({ permissions }) => {
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
+    valueFormat,
   })
 
   const handleUnitChangeDesignCapacity = (unit) => {

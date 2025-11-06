@@ -432,6 +432,7 @@ const ProductionVolumeDataBasisPe = () => {
                           rows={d.rows}
                           columns={d.columns?.map((col) => ({
                             ...col,
+                            format: `{0:0.###}`,
                             widthT:
                               d?.columns?.length > 20 ? '150px' : undefined,
                           }))}

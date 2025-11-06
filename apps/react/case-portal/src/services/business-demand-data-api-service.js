@@ -12,8 +12,8 @@ export const BusinessDemandDataApiService = {
   ssrsBudgetSummary,
   ssrsMaintenanceSummary,
 }
-async function getBDData(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/business-demand?year=${year}&plantId=${plantId}`
+async function getBDData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/business-demand?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -27,8 +27,8 @@ async function getBDData(keycloak, plantId, year) {
     return await Promise.reject(e)
   }
 }
-async function ssrsBudgetSummary(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${year}&plantId=${plantId}&type=plant-budget-summary`
+async function ssrsBudgetSummary(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=plant-budget-summary`
 
   const headers = {
     Accept: 'application/json',
@@ -44,8 +44,8 @@ async function ssrsBudgetSummary(keycloak, plantId, year) {
   }
 }
 
-async function ssrsMaintenanceSummary(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${year}&plantId=${plantId}&type=maintenance-summary`
+async function ssrsMaintenanceSummary(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=maintenance-summary`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -103,14 +103,6 @@ async function deleteBusinessDemandData(maintenanceId, keycloak) {
 }
 
 async function businessDemandExport(keycloak, PLANT_ID, AOP_YEAR) {
-  const year = localStorage.getItem('year')
-  let plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-
   const url = `${Config.CaseEngineUrl}/task/business-demand-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
@@ -183,9 +175,8 @@ async function aopDesignBasisBluePrint() {
     return Promise.reject(e)
   }
 }
-async function getBDssData(keycloak, plantId, year) {
-  // changed URL to backend path /business-demand-data
-  const url = `${Config.CaseEngineUrl}/task/business-demand-manual-entry?year=${year}&plantId=${plantId}`
+async function getBDssData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/business-demand-manual-entry?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -199,9 +190,14 @@ async function getBDssData(keycloak, plantId, year) {
     return await Promise.reject(e)
   }
 }
-async function savepropanebusiness(plantId, turnAroundDetails, keycloak) {
-  var year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/business-demand-manual-entry?year=${year}&plantId=${plantId}`
+
+async function savepropanebusiness(
+  PLANT_ID,
+  AOP_YEAR,
+  turnAroundDetails,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/business-demand-manual-entry?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

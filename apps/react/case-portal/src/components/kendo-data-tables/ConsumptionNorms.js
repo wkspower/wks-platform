@@ -111,7 +111,7 @@ const ConsumptionNorms = () => {
         aopStatus: 'Saved',
       }))
       const response = await ConsumptionNormsApiService.saveAOPConsumptionNorm(
-        plantId,
+        PLANT_ID,
         businessData,
         keycloak,
       )
@@ -234,7 +234,11 @@ const ConsumptionNorms = () => {
     try {
       setGrades([])
       const response =
-        await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(keycloak)
+        await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
       if (response?.code == 200) {
         setGrades(response?.data)
@@ -251,7 +255,11 @@ const ConsumptionNorms = () => {
     try {
       setGrades([])
       const response =
-        await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(keycloak)
+        await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
       if (response?.code == 200) {
         setGrades(response?.data)
@@ -286,11 +294,15 @@ const ConsumptionNorms = () => {
         response = await ConsumptionNormsApiService.getConsumptionNormsData(
           keycloak,
           gradeId,
+          PLANT_ID,
+          AOP_YEAR,
         )
       } else {
         response = await ConsumptionNormsApiService.getConsumptionNormsData(
           keycloak,
           null,
+          PLANT_ID,
+          AOP_YEAR,
         )
       }
 

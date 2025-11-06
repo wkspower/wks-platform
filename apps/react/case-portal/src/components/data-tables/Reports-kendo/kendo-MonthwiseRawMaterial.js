@@ -11,18 +11,33 @@ import {
 import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { validateFields } from 'utils/validationUtils'
-import dataGridStore from 'store/reducers/dataGridStore'
 import useValueFormatterConsumption from 'utils/ValueFormatterConsumption'
+import { useSelector } from 'react-redux'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
   const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [normRows, setNormRows] = useState({})
   const [rows, setRows] = useState()
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    screenTitle,
+  } = dataGridStore
 
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+
+  const VERTICAL_NAME = verticalObject?.name
+
+  const lowerVertName = VERTICAL_NAME?.toLowerCase()
 
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -333,7 +348,11 @@ const MonthwiseRawMaterial = () => {
       setLoading(true)
       var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
 
-      if (lowerVertName != 'pe' || lowerVertName != 'pp') {
+      if (
+        lowerVertName != 'pe' &&
+        lowerVertName != 'pp' &&
+        lowerVertName != 'elastomer'
+      ) {
         var res2 = await DataService.getMonthwiseRawData(
           keycloak,
           'Selectivity',
@@ -573,34 +592,36 @@ const MonthwiseRawMaterial = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {lowerVertName !== 'pe' && lowerVertName !== 'pp' && (
-        <KendoDataTablesReports
-          rows={row2}
-          columns={columns}
-          setRows={setRow2}
-          loading={loading}
-          handleCalculate={handleCalculate}
-          title='Monthwise Consumption (T-18)'
-          modifiedCells={modifiedCells}
-          setModifiedCells={setModifiedCells}
-          permissions={{
-            showCalculate: false,
-            allAction: true,
-            showTitle: true,
-            saveBtn: false,
-            textAlignment: 'center',
-            remarksEditable: true,
-          }}
-          remarkDialogOpen={remarkDialogOpen}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
-          currentRowId={currentRowId}
-          setCurrentRowId={setCurrentRowId}
-          saveChanges={saveChanges}
-          handleRemarkCellClick={handleRemarkCellClick}
-        />
-      )}
+      {lowerVertName !== 'pe' &&
+        lowerVertName !== 'pp' &&
+        lowerVertName !== 'elastomer' && (
+          <KendoDataTablesReports
+            rows={row2}
+            columns={columns}
+            setRows={setRow2}
+            loading={loading}
+            handleCalculate={handleCalculate}
+            title='Monthwise Consumption (T-18)'
+            modifiedCells={modifiedCells}
+            setModifiedCells={setModifiedCells}
+            permissions={{
+              showCalculate: false,
+              allAction: true,
+              showTitle: true,
+              saveBtn: false,
+              textAlignment: 'center',
+              remarksEditable: true,
+            }}
+            remarkDialogOpen={remarkDialogOpen}
+            setRemarkDialogOpen={setRemarkDialogOpen}
+            currentRemark={currentRemark}
+            setCurrentRemark={setCurrentRemark}
+            currentRowId={currentRowId}
+            setCurrentRowId={setCurrentRowId}
+            saveChanges={saveChanges}
+            handleRemarkCellClick={handleRemarkCellClick}
+          />
+        )}
 
       {Object.entries(normRows).map(([normName, rows]) => (
         <div key={normName}>

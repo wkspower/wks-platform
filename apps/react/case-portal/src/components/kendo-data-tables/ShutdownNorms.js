@@ -173,7 +173,11 @@ const ShutdownNorms = () => {
     return params.row.isEditable
   }
   const valueFormat = ValueFormatterConsumption()
-  const colDefs = getShutdownConsumptionColDef({ headerMap, shutdownMonths, valueFormat })
+  const colDefs = getShutdownConsumptionColDef({
+    headerMap,
+    shutdownMonths,
+    valueFormat,
+  })
 
   const handleRemarkCellClick = (row) => {
     if (!row?.isEditable) return
@@ -499,7 +503,11 @@ const ShutdownNorms = () => {
       downloadExcelBtnFromUI: true,
 
       showTitleNameBusiness: true,
-      titleName: SCREEN_NAME,
+
+      titleName:
+        lowerVertName === 'elastomer'
+          ? `Shutdown Consumption (Norms/Quantity)`
+          : SCREEN_NAME,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
     },
     isOldYear,

@@ -17,6 +17,7 @@ import {
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 
 const AopSummary = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -26,13 +27,32 @@ const AopSummary = ({ permissions }) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const SCREEN_NAME = screenTitle?.title
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -50,7 +70,11 @@ const AopSummary = ({ permissions }) => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      var data = await DataService.getBDData(keycloak)
+      var data = await BusinessDemandDataApiService.getBDData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       const formattedData = data.map((item, index) => ({
         ...item,

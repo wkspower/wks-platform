@@ -101,13 +101,9 @@ async function designRemarks(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function maintenacegetdata(keycloak, budgetCategory) {
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const parsedPlant = JSON.parse(storedPlant)
-  var year = localStorage.getItem('year')
-
+async function maintenacegetdata(keycloak, budgetCategory, PLANT_ID, AOP_YEAR) {
   // Only encode plantId and year, leave budgetCategory as-is
-  const url = `${Config.CaseEngineUrl}/task/budget-maintenance?plantId=${encodeURIComponent(parsedPlant.id)}&year=${encodeURIComponent(year)}&budgetCategory=${budgetCategory}`
+  const url = `${Config.CaseEngineUrl}/task/budget-maintenance?plantId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}&budgetCategory=${budgetCategory}`
 
   const headers = {
     Accept: 'application/json',
@@ -149,12 +145,7 @@ async function savemaintenacegetdata(
   }
 }
 
-async function maintenaceExportdata(
-  keycloak,
-
-  PLANT_ID,
-  AOP_YEAR,
-) {
+async function maintenaceExportdata(keycloak, PLANT_ID, AOP_YEAR) {
   let url = `${Config.CaseEngineUrl}/task/budget-maintenance-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {

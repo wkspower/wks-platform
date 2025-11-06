@@ -29,7 +29,21 @@ const FurnaceRawData = () => {
   const [loading, setLoading] = useState(false)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
 
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
@@ -75,6 +89,8 @@ const FurnaceRawData = () => {
         const apiResponse = await CrackerReportsApiDataService.furnaceRawData(
           keycloak,
           reportType,
+          PLANT_ID,
+          AOP_YEAR,
         )
 
         if (apiResponse?.code !== 200) {
@@ -151,6 +167,8 @@ const FurnaceRawData = () => {
       const typeListResult = await CrackerReportsApiDataService.furnaceRawData(
         keycloak,
         'gridnames',
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       let types = []

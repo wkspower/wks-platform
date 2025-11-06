@@ -35,7 +35,29 @@ const RawDataSet = () => {
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear } = dataGridStore
+
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const SCREEN_NAME = screenTitle?.title
+
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
   const [exportTarget, setExportTarget] = useState('ALL') // 'ALL' or specific steam grid
@@ -97,6 +119,8 @@ const RawDataSet = () => {
         apiResponse = await CrackerReportsApiDataService.getRawasfindingteam(
           keycloak,
           mode,
+          PLANT_ID,
+          AOP_YEAR,
         )
       } else if (type === 'Raw Steam') {
         apiResponse = await CrackerReportsApiDataService.getRawasteam(
@@ -104,6 +128,8 @@ const RawDataSet = () => {
           periodFrom,
           periodTo,
           mode,
+          PLANT_ID,
+          AOP_YEAR,
         )
       } else {
         return { rows: [], columns: [] }

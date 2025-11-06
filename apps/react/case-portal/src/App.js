@@ -20,6 +20,11 @@ import '@progress/kendo-font-icons/dist/index.css'
 // import { useSelector } from 'react-redux'
 import Layout from 'layout/FooterLayout/index'
 import { MenuProvider } from 'menu/menuProvider'
+import {
+  Box,
+  CircularProgress,
+  Typography,
+} from '../node_modules/@mui/material/index'
 
 const ScrollTop = lazy(() => import('./components/ScrollTop'))
 
@@ -82,7 +87,24 @@ const App = () => {
     authenticated && (
       <ThemeCustomization>
         <Layout>
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense
+            fallback={
+              <Box
+                display='flex'
+                flexDirection='column'
+                alignItems='center'
+                justifyContent='center'
+                height='100vh'
+                gap={2}
+              >
+                <CircularProgress />
+                <Typography variant='h6' color='text.secondary'>
+                  Loading, please wait...
+                </Typography>
+              </Box>
+            }
+          >
+            {' '}
             <ScrollTop>
               <SessionStoreProvider value={{ keycloak }}>
                 <MenuProvider>

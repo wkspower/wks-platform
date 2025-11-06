@@ -198,6 +198,7 @@ const PropaneBusiness = ({ permissions }) => {
       if (businessData.length > 0) {
         const response = await BusinessDemandDataApiService.savepropanebusiness(
           PLANT_ID,
+          AOP_YEAR,
           businessData,
           keycloak,
         )

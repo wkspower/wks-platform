@@ -273,7 +273,12 @@ export default function AopBudget() {
   const resetDataChanges = useCallback(async () => {
     setModifiedCells({})
     setModifiedCellsP({})
+
+    //FETCH DATA WHEN RESET BUTTON CLICKED
     fetchData()
+
+    //FETCH BOTH DESIGN BASIS & DESIGN REMARKS AS WELL
+    fetchDesignRemarksAndDesignBasis()
   }, [keycloak, yearChanged, plantID])
 
   const fetchDesignRemarksAndDesignBasis = useCallback(async () => {
@@ -496,6 +501,8 @@ export default function AopBudget() {
       await AOPMaintenanceApiService.savemaintenacegetdata(
         processedRows,
         keycloak,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       setSnackbarOpen(true)

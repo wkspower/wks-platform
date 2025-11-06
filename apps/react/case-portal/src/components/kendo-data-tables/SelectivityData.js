@@ -13,6 +13,7 @@ import { useGridApiRef } from '../../../node_modules/@mui/x-data-grid/index'
 import KendoDataTables from './index'
 import KendoDataTablesReciepe from './index-reports-receipe'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterProductionProductionNormBasis from 'utils/ValueFormatterProduction_ProductionNormBasis'
 
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
@@ -405,7 +406,12 @@ const SelectivityData = (props) => {
     props?.configType === 'Report Manual Entry'
   const selectedHeaderMap = !type ? headerMap : headerMapForPrevYear
 
-  const FORMATE_VALUE = ValueFormatterProduction()
+  let FORMATE_VALUE = ''
+  if (lowerVertName == 'elastomer') {
+    FORMATE_VALUE = ValueFormatterProductionProductionNormBasis()
+  } else {
+    FORMATE_VALUE = ValueFormatterProduction()
+  }
 
   const productionColumns = getEnhancedAOPColDefs({
     allGradesReciepes,

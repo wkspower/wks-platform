@@ -277,7 +277,7 @@ const AopDesignBasis = () => {
       getAopSummary()
 
       if (response && response.code === 200) {
-        console.log('Carry forward successful, status 200.')
+        // console.log('Carry forward successful, status 200.')
         getConfigurationExecutionDetails()
         setLoading1(false)
       } else {

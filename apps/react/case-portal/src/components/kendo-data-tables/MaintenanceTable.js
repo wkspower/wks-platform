@@ -170,7 +170,7 @@ const MaintenanceTable = () => {
     setRows([])
     setLoading(true)
     try {
-      const resp = await dataConfig.serviceFn(keycloak)
+      const resp = await dataConfig.serviceFn(keycloak, PLANT_ID, AOP_YEAR)
       const raw = dataConfig.isCracker ? resp.data : resp
       const formatted = (raw || []).map((item, idx) => ({
         ...item,

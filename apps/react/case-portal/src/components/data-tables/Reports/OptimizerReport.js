@@ -152,12 +152,16 @@ const OptimizerReport = () => {
             keycloak,
             reportType,
             mode,
+            PLANT_ID,
+            AOP_YEAR,
           )
         } else {
           apiResponse = await CrackerReportsApiDataService.spyroOutputReport(
             keycloak,
             reportType,
             mode,
+            PLANT_ID,
+            AOP_YEAR,
           )
         }
 
@@ -410,7 +414,11 @@ const OptimizerReport = () => {
 
       // Call the calculate API
       const calculateResult =
-        await CrackerReportsApiDataService.calculateMonthWiseRawData(keycloak)
+        await CrackerReportsApiDataService.calculateMonthWiseRawData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
       if (calculateResult?.code === 200) {
         setSnackbarOpen(true)

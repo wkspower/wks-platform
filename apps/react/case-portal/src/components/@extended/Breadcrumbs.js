@@ -16,7 +16,7 @@ import { setScreenTitle } from 'store/reducers/dataGridStore'
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
 import StepperNav from 'components/Utilities/StepperNav'
-import { Box } from '../../../node_modules/@mui/material/index'
+import { Box, Skeleton } from '../../../node_modules/@mui/material/index'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -25,6 +25,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     dataGridStore
 
   const dispatch = useDispatch()
+  const [loading, setLoading] = useState(true)
 
   const PLANT_ID = plantObject?.id
   const VERTICAL_ID = verticalObject?.id
@@ -40,6 +41,14 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     message: '',
     severity: 'info',
   })
+
+  useEffect(() => {
+    if (PLANT_NAME && VERTICAL_NAME && SITE_NAME) {
+      setLoading(false)
+    } else {
+      setLoading(true)
+    }
+  }, [PLANT_NAME, VERTICAL_NAME, SITE_NAME])
 
   async function handleOpenPdf(title) {
     const url = `${Config.StorageUrl}/storage/files/${VERTICAL_NAME}/${SITE_NAME}/${PLANT_NAME}/downloads/${title}.pdf?content-type=application/pdf`
@@ -344,22 +353,32 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
               alignItems='center'
             >
               <Grid item>
-                <Typography
-                  component='div'
-                  sx={{
-                    textDecoration: 'none',
-                    fontWeight: 800,
-                    color: 'black',
-                    fontSize: '0.7rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  {VERTICAL_NAME} / {SITE_NAME} / {PLANT_NAME}{' '}
-                  {/* {getRoleName(verticalId, item?.id)} */}
-                  {/* {keycloak?.realmAccess?.roles[0]} */}
+                {loading ? (
+                  <Skeleton
+                    variant='text'
+                    width={100}
+                    height={30}
+                    animation='wave'
+                    sx={{ mt: 0.5 }}
+                  />
+                ) : (
+                  <Typography
+                    component='div'
+                    sx={{
+                      textDecoration: 'none',
+                      fontWeight: 800,
+                      color: 'black',
+                      fontSize: '0.7rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {VERTICAL_NAME} / {SITE_NAME} / {PLANT_NAME}{' '}
+                    {/* {getRoleName(verticalId, item?.id)} */}
+                    {/* {keycloak?.realmAccess?.roles[0]} */}
                   {itemContent}
-                </Typography>
+                  </Typography>
+                )}
               </Grid>
 
               {/* <Stack spacing={0.5} sx={{ alignItems: 'center' }}>

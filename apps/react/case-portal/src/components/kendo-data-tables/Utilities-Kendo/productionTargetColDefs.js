@@ -15,9 +15,10 @@ export function getColDefsPercentageSummary(headerMap = {}, valueFormat) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, false, valueFormat),
+    ...generateMonthColumnsFixedWidth(headerMap, false, valueFormat),
     { field: 'avgTph', title: 'AVG', editable: false, hidden: true },
     { field: 'isEditable', title: 'isEditable', hidden: true },
+    //add here
   ]
 }
 
@@ -36,14 +37,14 @@ export function getColDefsDesignCapacity(headerMap = {}, valueFormat) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, true,valueFormat),
+    ...generateMonthColumns(headerMap, true, valueFormat),
     {
       field: 'remarks',
       title: 'Remark',
       editable: true,
       align: 'left',
       headerAlign: 'left',
-      widthT: 150,
+      widthT: 90,
     },
   ]
 }
@@ -63,7 +64,7 @@ export function getColDefsDesignCapacityPEPP(headerMap = {}, valueFormat) {
       widthT: 100,
       editable: false,
     },
-    ...generateMonthColumns(headerMap, false, valueFormat),
+    ...generateMonthColumns(headerMap, false, valueFormat, true),
   ]
 }
 
@@ -77,7 +78,7 @@ export function getColDefsMaxAchievedCapacity(headerMap = {}, valueFormat) {
       hidden: true,
     },
     { field: 'productName', title: 'Particulars', widthT: 100, editable: true },
-    ...generateMonthColumns(headerMap, true, valueFormat),
+    ...generateMonthColumnsFixedWidth(headerMap, true, valueFormat),
   ]
 }
 
@@ -104,17 +105,51 @@ export function getColDefsNonEditable(headerMap = {}, valueFormat) {
   ]
 }
 
-function generateMonthColumns(headerMap = {}, editable = true, valueFormat) {
+function generateMonthColumns(
+  headerMap = {},
+  editable = true,
+  valueFormat,
+  isPEPP,
+) {
   const monthOrder = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
-  return monthOrder.map((month) => ({
-    field: getMonthName(month).toLowerCase(),
-    title: headerMap[month],
-    format: valueFormat,
-    editable,
-    align: 'left',
-    headerAlign: 'left',
-    type: 'number',
-  }))
+
+  return monthOrder.map((month) => {
+    const monthName = getMonthName(month)
+
+    return {
+      field: getMonthName(month).toLowerCase(),
+      title: headerMap[month],
+      format: valueFormat,
+      editable,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+      widthT: monthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
+    }
+  })
+}
+
+function generateMonthColumnsFixedWidth(
+  headerMap = {},
+  editable = true,
+  valueFormat,
+) {
+  const monthOrder = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
+
+  return monthOrder.map((month) => {
+    const monthName = getMonthName(month)
+
+    return {
+      field: monthName.toLowerCase(),
+      title: headerMap[month],
+      format: valueFormat,
+      editable,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+      widthT: monthName === 'March' ? 200 : undefined,
+    }
+  })
 }
 
 function getMonthName(num) {

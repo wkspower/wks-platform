@@ -6,7 +6,7 @@ export const ConsumptionNormsApiService = {
   getConsumptionNormsData,
   handleCalculateonsumptionNorms,
 }
-async function saveAOPConsumptionNorm(plantId, shutdownDetails, keycloak) {
+async function saveAOPConsumptionNorm(PLANT_ID, shutdownDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/overall-consumption`
   const headers = {
     Accept: 'application/json',
@@ -25,15 +25,8 @@ async function saveAOPConsumptionNorm(plantId, shutdownDetails, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getConsumptionAOPNormsGrades(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/consumption-aop/grades?year=${year}&plantId=${plantId}`
+async function getConsumptionAOPNormsGrades(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/consumption-aop/grades?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -47,10 +40,9 @@ async function getConsumptionAOPNormsGrades(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function getConsumptionNormsData(keycloak, gradeId) {
-  const year = localStorage.getItem('year') || ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
+async function getConsumptionNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
+  const year = AOP_YEAR
+  const plantId = PLANT_ID
   // Construct URL based on presence of gradeId
   const baseUrl = `${Config.CaseEngineUrl}/task/overall-consumption`
   const queryParams = new URLSearchParams({
@@ -75,9 +67,8 @@ async function getConsumptionNormsData(keycloak, gradeId) {
   }
 }
 
-async function handleCalculateonsumptionNorms(plantId, year, keycloak) {
-  const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/calculate-overall-consumption?year=${year1}&plantId=${plantId}`
+async function handleCalculateonsumptionNorms(PLANT_ID, AOP_YEAR, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-overall-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,

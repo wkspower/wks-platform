@@ -22,7 +22,7 @@ const getEnhancedProductionColDefs = ({ headerMap, valueFormat }) => {
         title: headerMap[col.title],
         type: 'number',
         format: valueFormat,
-        width: 150,
+        widthT: col?.widthT,
       }
     }
 

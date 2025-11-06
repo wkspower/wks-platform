@@ -129,7 +129,7 @@
     "field": "march",
     "title": "3",
     "editable": true,
-    "width": 120,
+    "widthT": 110,
     "align": "left",
     "headerAlign": "left",
     "type": "number"
@@ -146,7 +146,7 @@
     "field": "remarks",
     "title": "Remark",
     "editable": false,
-    "widthT": 160
+    "widthT": 90
   },
   {
     "field": "isEditable",

@@ -391,7 +391,7 @@ const ConfigurationTable = () => {
       )
 
       if (response && response.code === 200) {
-        console.log('Carry forward successful, status 200.')
+        // console.log('Carry forward successful, status 200.')
       } else {
         console.warn(
           `Carry forward request completed but status was not 200: ${response?.status}`,
@@ -1057,7 +1057,7 @@ const ConfigurationTable = () => {
   }
 
   if (lowerVertName === 'elastomer') {
-    const elastomerTabs = ['Constants', 'Report Manual Entry']
+    const elastomerTabs = ['Constants']
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
@@ -1073,14 +1073,18 @@ const ConfigurationTable = () => {
           <CircularProgress color='inherit' />
         </Backdrop>
         {ConfigurationAccordian}
+
         <Box>
-          <AopTabs
-            tabIndex={tabIndex}
-            setTabIndex={setTabIndex}
-            tabs={elastomerTabs.map((tab) =>
-              tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
-            )}
-          />
+          {false && (
+            <AopTabs
+              tabIndex={tabIndex}
+              setTabIndex={setTabIndex}
+              tabs={elastomerTabs.map((tab) =>
+                tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
+              )}
+            />
+          )}
+
           {(() => {
             const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
             const currentTabDisplayName = elastomerTabs[tabIndex]

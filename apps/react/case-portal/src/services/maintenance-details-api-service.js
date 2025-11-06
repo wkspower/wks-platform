@@ -9,15 +9,9 @@ export const MaintenanceDetailsApiService = {
   CrackerMaintenanceImport,
   CrackerMaintenanceExport,
 }
-async function getCrackerMaintenanceData(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${plantId}&year=${year}`
+
+async function getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -55,15 +49,8 @@ async function saveCrackerMaintenance(
     return await Promise.reject(e)
   }
 }
-async function getMaintenanceData(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/maintenance-details?year=${year}&plantId=${plantId}`
+async function getMaintenanceData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-details?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -77,9 +64,8 @@ async function getMaintenanceData(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function handleCalculateMaintenance(plantId, year, keycloak) {
-  const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/handleCalculateMaintenance?year=${year1}&plantId=${plantId}`
+async function handleCalculateMaintenance(PLANT_ID, AOP_YEAR, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/handleCalculateMaintenance?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -142,14 +128,6 @@ async function CrackerMaintenanceImport(file, keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function CrackerMaintenanceExport(keycloak, PLANT_ID, AOP_YEAR) {
-  const year = localStorage.getItem('year')
-  let plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-
   const url = `${Config.CaseEngineUrl}/task/maintenance-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {

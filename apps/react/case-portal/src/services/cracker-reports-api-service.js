@@ -38,31 +38,16 @@ async function runLengthDataSet(keycloak, reportType, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function miisData(keycloak, reportType, periodFrom, periodTo, mode) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/miis-data?plantId=${plantId}&year=${year}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return Promise.reject(e)
-  }
-}
-async function findingModel(keycloak, reportType, periodFrom, periodTo, mode) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/finding-model?plantId=${plantId}&year=${year}`
+async function miisData(
+  keycloak,
+  reportType,
+  periodFrom,
+  periodTo,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/miis-data?plantId=${PLANT_ID}&year=${AOP_YEAR}`
 
   const headers = {
     Accept: 'application/json',
@@ -78,33 +63,16 @@ async function findingModel(keycloak, reportType, periodFrom, periodTo, mode) {
     return Promise.reject(e)
   }
 }
-
-async function furnaceRawData(keycloak, reportType) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/report-furnace?plantId=${plantId}&year=${year}&reportType=${reportType}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return Promise.reject(e)
-  }
-}
-
-async function configurationIntermediateValues(keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/configuration-intermediate-values?plantId=${plantId}&year=${year}`
+async function findingModel(
+  keycloak,
+  reportType,
+  periodFrom,
+  periodTo,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/finding-model?plantId=${PLANT_ID}&year=${AOP_YEAR}`
 
   const headers = {
     Accept: 'application/json',
@@ -121,51 +89,8 @@ async function configurationIntermediateValues(keycloak) {
   }
 }
 
-async function getRawDataSetvalues(keycloak, periodFrom, periodTo) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return Promise.reject(e)
-  }
-}
-async function getRawCatcame(keycloak, periodFrom, periodTo) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-catcam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return Promise.reject(e)
-  }
-}
-async function calculateMonthWiseRawData(keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/calculate-month-wise-raw-data?plantId=${plantId}&year=${year}`
+async function furnaceRawData(keycloak, reportType, PLANT_ID, AOP_YEAR) {
+  let url = `${Config.CaseEngineUrl}/task/report-furnace?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}`
 
   const headers = {
     Accept: 'application/json',
@@ -182,11 +107,8 @@ async function calculateMonthWiseRawData(keycloak) {
   }
 }
 
-async function getRawutilitymonthly(keycloak, periodFrom, periodTo) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-mis-utility-monthly?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+async function configurationIntermediateValues(keycloak, PLANT_ID, AOP_YEAR) {
+  let url = `${Config.CaseEngineUrl}/task/configuration-intermediate-values?plantId=${PLANT_ID}&year=${AOP_YEAR}`
 
   const headers = {
     Accept: 'application/json',
@@ -203,11 +125,102 @@ async function getRawutilitymonthly(keycloak, periodFrom, periodTo) {
   }
 }
 
-async function getRawatcammonthly(keycloak, periodFrom, periodTo) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
+async function getRawDataSetvalues(
+  keycloak,
+  periodFrom,
+  periodTo,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw?plantId=${PLANT_ID}&year=${AOP_YEAR}&periodFrom=${periodFrom}&periodTo=${periodTo}`
 
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-stg-catcam-monthly?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+async function getRawCatcame(
+  keycloak,
+  periodFrom,
+  periodTo,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-catcam?plantId=${PLANT_ID}&year=${AOP_YEAR}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+async function calculateMonthWiseRawData(keycloak, PLANT_ID, AOP_YEAR) {
+  let url = `${Config.CaseEngineUrl}/task/calculate-month-wise-raw-data?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRawutilitymonthly(
+  keycloak,
+  periodFrom,
+  periodTo,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-mis-utility-monthly?plantId=${PLANT_ID}&year=${AOP_YEAR}&periodFrom=${periodFrom}&periodTo=${periodTo}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRawatcammonthly(
+  keycloak,
+  periodFrom,
+  periodTo,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-stg-catcam-monthly?plantId=${PLANT_ID}&year=${AOP_YEAR}&periodFrom=${periodFrom}&periodTo=${periodTo}`
 
   const headers = {
     Accept: 'application/json',
@@ -224,14 +237,18 @@ async function getRawatcammonthly(keycloak, periodFrom, periodTo) {
   }
 }
 ///task/report-best-achieved-raw-steam?
-async function getRawasteam(keycloak, periodFrom, periodTo, mode) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
+async function getRawasteam(
+  keycloak,
+  periodFrom,
+  periodTo,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   // ✅ Encode mode to handle special characters like '+'
   const encodedMode = encodeURIComponent(mode)
 
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw-steam?plantId=${plantId}&year=${year}&periodFrom=${periodFrom}&periodTo=${periodTo}&mode=${encodedMode}`
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-raw-steam?plantId=${PLANT_ID}&year=${AOP_YEAR}&periodFrom=${periodFrom}&periodTo=${periodTo}&mode=${encodedMode}`
 
   const headers = {
     Accept: 'application/json',
@@ -248,13 +265,10 @@ async function getRawasteam(keycloak, periodFrom, periodTo, mode) {
   }
 }
 
-async function getRawasfindingteam(keycloak, mode) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
+async function getRawasfindingteam(keycloak, mode, PLANT_ID, AOP_YEAR) {
   const encodedMode = encodeURIComponent(mode)
 
-  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-finding-steam?plantId=${plantId}&year=${year}&mode=${encodedMode}`
+  let url = `${Config.CaseEngineUrl}/task/report-best-achieved-finding-steam?plantId=${PLANT_ID}&year=${AOP_YEAR}&mode=${encodedMode}`
 
   const headers = {
     Accept: 'application/json',
@@ -288,17 +302,8 @@ async function getConfigurationExecutionDetails(keycloak) {
   }
 }
 
-async function finalNormsReport(
-  keycloak,
-  reportType,
-  periodFrom,
-  periodTo,
-  mode,
-) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/final-norms-report?plantId=${plantId}&year=${year}&reportType=${reportType}`
+async function finalNormsReport(keycloak, reportType, PLANT_ID, AOP_YEAR) {
+  let url = `${Config.CaseEngineUrl}/task/final-norms-report?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}`
 
   const headers = {
     Accept: 'application/json',
@@ -317,14 +322,10 @@ async function finalNormsReport(
 async function finalNormsProductionReport(
   keycloak,
   reportType,
-  periodFrom,
-  periodTo,
-  mode,
+  PLANT_ID,
+  AOP_YEAR,
 ) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/final-norms-production-report?plantId=${plantId}&year=${year}&reportType=${reportType}`
+  let url = `${Config.CaseEngineUrl}/task/final-norms-production-report?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}`
 
   const headers = {
     Accept: 'application/json',
@@ -343,13 +344,11 @@ async function finalNormsProductionReport(
 async function spyroOutputReport(
   keycloak,
   reportType,
-
   mode,
+  PLANT_ID,
+  AOP_YEAR,
 ) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/spyro-output-report?plantId=${plantId}&year=${year}&mode=${mode}`
+  let url = `${Config.CaseEngineUrl}/task/spyro-output-report?plantId=${PLANT_ID}&year=${AOP_YEAR}&mode=${mode}`
 
   const headers = {
     Accept: 'application/json',
@@ -369,13 +368,11 @@ async function spyroOutputReport(
 async function spyroInputReport(
   keycloak,
   reportType,
-
   mode,
+  PLANT_ID,
+  AOP_YEAR,
 ) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
-  let url = `${Config.CaseEngineUrl}/task/spyro-input-report?plantId=${plantId}&year=${year}&mode=${mode}`
+  let url = `${Config.CaseEngineUrl}/task/spyro-input-report?plantId=${PLANT_ID}&year=${AOP_YEAR}&mode=${mode}`
 
   const headers = {
     Accept: 'application/json',
