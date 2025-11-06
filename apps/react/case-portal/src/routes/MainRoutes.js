@@ -62,6 +62,7 @@ import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
 import TcsInput from 'components/kendo-data-tables/TcsInput'
 import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTargetBasis'
 import NormsHistorianBasisAromatics from 'components/data-tables/Reports/NormsHistorianBasisAromatics'
+import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenanceSummary'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -553,6 +554,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='maintenance-summary'>
                 <MaintenanceSummary />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'site-maintenance-summary',
+            element: (
+              <PrivateRoute routeId='site-maintenance-summary'>
+                <SiteMaintenanceSummary />
               </PrivateRoute>
             ),
           },

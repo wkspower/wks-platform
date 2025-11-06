@@ -84,7 +84,8 @@ const defs = {
     maintenanceProcess: 'Process',
     utilitiesNormsBasis: 'Utilities Norms Basis',
     productionTargetBasis: 'Production Target Basis',
-    maintenanceSummary: 'Maintenance Summary',
+    maintenanceSummary: 'Plant Maintenance Summary',
+    siteMaintenanceSummary: 'Site Maintenance Summary',
     plantBudgetSummary: 'Plant Budget Summary',
 
     functionalReports: 'Reports',
@@ -274,7 +275,8 @@ const defs = {
         utilitiesNormsBasis: 'Utilities Norms Basis',
         productionTargetBasis: 'Production Target Basis',
 
-        maintenanceSummary: 'Maintenance Summary',
+        maintenanceSummary: 'Plant Maintenance Summary',
+        siteMaintenanceSummary: 'Site Maintenance Summary',
         plantBudgetSummary: 'Plant Budget Summary',
 
         functionalReports: 'Reports',

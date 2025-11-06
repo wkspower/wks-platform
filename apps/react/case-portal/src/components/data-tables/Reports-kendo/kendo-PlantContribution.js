@@ -44,6 +44,13 @@ export default function PlantContribution() {
   const verticalName = JSON.parse(
     localStorage.getItem('selectedVertical'),
   )?.name?.toLowerCase()
+
+  const FORMAT_VALUES_3_DECIMAL =
+    verticalName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
+  const FORMAT_VALUES_2_DECIMAL =
+    verticalName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
+  const FORMAT_VALUES_COST = verticalName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+
   const loadAll = async () => {
     setLoading(true)
     const out = {}
@@ -54,6 +61,9 @@ export default function PlantContribution() {
           category: key,
           year,
           verticalName,
+          FORMAT_VALUES_3_DECIMAL,
+          FORMAT_VALUES_2_DECIMAL,
+          FORMAT_VALUES_COST,
         })
 
         const apiResp = await DataService.getPlantContributionYearWisePlan(

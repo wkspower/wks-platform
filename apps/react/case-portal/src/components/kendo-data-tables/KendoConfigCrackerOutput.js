@@ -8,6 +8,7 @@ import { DataService } from 'services/DataService'
 import { validateFields } from 'utils/validationUtils'
 import { useSession } from 'SessionStoreContext'
 import { OptimizerDataApiService } from 'services/optimizer-api-service'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const CrackerConfig = () => {
   const keycloak = useSession()
@@ -72,6 +73,8 @@ const CrackerConfig = () => {
   const [compositionRows, setCompositionRows] = useState([])
   const [hydrogenationRows, setHydrogenationRows] = useState([])
 
+  const FORMATE_VALUE = ValueFormatterProduction()
+
   // const allModes = ['5F', '4F', '4F+D']
   const [selectMode, setSelectMode] = useState('')
 
@@ -95,6 +98,7 @@ const CrackerConfig = () => {
       headerMap,
       handleRemarkCellClick,
       configType,
+      FORMATE_VALUE,
     })
   }, [headerMap, currentTabDisplay])
 

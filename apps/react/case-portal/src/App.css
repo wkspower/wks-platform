@@ -368,3 +368,8 @@ main.MuiBox-root.css-vognfw {
 .bold-text {
   font-weight: bold !important;
 }
+
+.textarea-error {
+  border: 1px solid rgb(226, 100, 100) !important;
+  border-radius: 4px;
+}

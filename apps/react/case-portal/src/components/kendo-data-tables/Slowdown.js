@@ -187,7 +187,11 @@ const SlowDown = ({ permissions }) => {
       )
 
       const maintenanceResponse =
-        await MaintenanceDetailsApiService.getMaintenanceData(keycloak)
+        await MaintenanceDetailsApiService.getMaintenanceData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
       setSnackbarOpen(true)
 
@@ -477,26 +481,28 @@ const SlowDown = ({ permissions }) => {
         }
 
         // Cross overlap the timeframe with Shutdown
-        for (let i = 0; i < rows.length; i++) {
-          const a = rows[i]
-          const aStart = new Date(a.maintStartDateTime).getTime()
-          const aEnd = new Date(a.maintEndDateTime).getTime()
-          if (isNaN(aStart) || isNaN(aEnd)) continue
+        if (lowerVertName != 'elastomer') {
+          for (let i = 0; i < rows.length; i++) {
+            const a = rows[i]
+            const aStart = new Date(a.maintStartDateTime).getTime()
+            const aEnd = new Date(a.maintEndDateTime).getTime()
+            if (isNaN(aStart) || isNaN(aEnd)) continue
 
-          for (let j = 0; j < rowsShutdown.length; j++) {
-            const b = rowsShutdown[j]
-            const bStart = new Date(b.maintStartDateTime).getTime()
-            const bEnd = new Date(b.maintEndDateTime).getTime()
-            if (isNaN(bStart) || isNaN(bEnd)) continue
+            for (let j = 0; j < rowsShutdown.length; j++) {
+              const b = rowsShutdown[j]
+              const bStart = new Date(b.maintStartDateTime).getTime()
+              const bEnd = new Date(b.maintEndDateTime).getTime()
+              if (isNaN(bStart) || isNaN(bEnd)) continue
 
-            if (aStart < bEnd && bStart < aEnd) {
-              a.isError = true
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: `The timeframe for "${a.discription} (Slowdown)" overlaps with "${b.discription} (Shutdown)". Please ensure no overlapping of timeframes.`,
-                severity: 'error',
-              })
-              return
+              if (aStart < bEnd && bStart < aEnd) {
+                a.isError = true
+                setSnackbarOpen(true)
+                setSnackbarData({
+                  message: `The timeframe for "${a.discription} (Slowdown)" overlaps with "${b.discription} (Shutdown)". Please ensure no overlapping of timeframes.`,
+                  severity: 'error',
+                })
+                return
+              }
             }
           }
         }
@@ -856,7 +862,11 @@ const SlowDown = ({ permissions }) => {
         })
         fetchData()
         const maintenanceResponse =
-          await MaintenanceDetailsApiService.getMaintenanceData(keycloak)
+          await MaintenanceDetailsApiService.getMaintenanceData(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
       } else {
         setLoading(false)
       }
@@ -874,20 +884,20 @@ const SlowDown = ({ permissions }) => {
 
     try {
       let response
-      
-    if(lowerVertName == 'elastomer'){
-            response = await DataService.slowdownDetailsElastomerExport(
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-          )
-          } else{
-            response = await DataService.slowdownDetailsExport(
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-      )
-          }
+
+      if (lowerVertName == 'elastomer') {
+        response = await DataService.slowdownDetailsElastomerExport(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else {
+        response = await DataService.slowdownDetailsExport(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
     } catch (error) {
       console.error('Error downloading Excel:', error)
       setSnackbarData({

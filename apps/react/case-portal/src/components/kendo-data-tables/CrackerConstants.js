@@ -695,6 +695,10 @@ const CrakcerConstants = () => {
           message: 'Saved Successfully!',
           severity: 'success',
         })
+
+        setLoading(false)
+        setLoading1(false)
+
         setModifiedCellsConstants({})
         fetchData()
       } else if (response?.code === 400 && response?.data) {

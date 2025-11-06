@@ -16,6 +16,7 @@ import { remarkColumn } from 'components/Utilities/remarkColumn'
 import Notification from 'components/Utilities/Notification'
 // import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const ProductionAopView = ({
   handleCalculate,
@@ -35,6 +36,7 @@ const ProductionAopView = ({
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const VALUE_FORMATOR = ValueFormatterProduction()
 
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -47,7 +49,7 @@ const ProductionAopView = ({
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
 
-  function getNumericKeysInAllRows(data) {
+  function getNumericKeysInAllRows1(data = []) {
     if (!Array.isArray(data) || data.length === 0) return []
 
     const keys = Object.keys(data[0])
@@ -55,9 +57,31 @@ const ProductionAopView = ({
     return keys.filter((key) =>
       data.every((row) => {
         const value = row[key]
-        // The column is considered numeric if:
-        // - It's a valid number (including empty values)
         return value === '' || !isNaN(Number(value))
+      }),
+    )
+  }
+
+  function getNumericKeysInAllRows(rows = []) {
+    if (!Array.isArray(rows) || rows.length === 0) return []
+
+    const allKeys = Array.from(
+      rows.reduce((set, row) => {
+        if (row && typeof row === 'object') {
+          Object.keys(row).forEach((k) => set.add(k))
+        }
+        return set
+      }, new Set()),
+    )
+
+    return allKeys.filter((key) =>
+      rows.every((row) => {
+        if (row === null || typeof row !== 'object') return true
+        const v = row[key]
+        if (v === undefined || v === null || String(v).trim() === '')
+          return true
+        const n = Number(String(v).trim())
+        return Number.isFinite(n)
       }),
     )
   }
@@ -78,11 +102,12 @@ const ProductionAopView = ({
   const fetchData = async () => {
     try {
       var data = await DataService.getWorkflowDataProduction(keycloak, plantId)
+
       var formattedRows = data.results.map((row, id) => {
         const newRow = { id }
         Object.entries(row).forEach(([key, val]) => {
           if (!isNaN(val) && val !== '') {
-            newRow[key] = formatValueToNoDecimals(val)
+            newRow[key] = val
           } else {
             newRow[key] = val
           }
@@ -114,6 +139,7 @@ const ProductionAopView = ({
             ...(numericKeys.includes(key) && {
               align: 'right',
               type: 'number',
+              format: VALUE_FORMATOR,
             }),
           }
         })

@@ -837,7 +837,9 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    (lowerVertName == 'meg' || lowerVertName === 'aromatics' || lowerVertName== 'pvc') &&
+    (lowerVertName == 'meg' ||
+      lowerVertName === 'aromatics' ||
+      lowerVertName == 'pvc') &&
     lowerVertName !== 'cracker' &&
     lowerVertName !== 'elastomer'
   ) {
@@ -1057,7 +1059,7 @@ const ConfigurationTable = () => {
   }
 
   if (lowerVertName === 'elastomer') {
-    const elastomerTabs = ['Constants']
+    const elastomerTabs = ['Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
@@ -1075,7 +1077,7 @@ const ConfigurationTable = () => {
         {ConfigurationAccordian}
 
         <Box>
-          {false && (
+          {true && (
             <AopTabs
               tabIndex={tabIndex}
               setTabIndex={setTabIndex}

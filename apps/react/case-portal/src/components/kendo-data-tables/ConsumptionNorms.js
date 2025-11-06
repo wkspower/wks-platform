@@ -319,17 +319,42 @@ const ConsumptionNorms = () => {
         return
       }
       setCalculationObject(response?.data?.aopCalculation)
+
+      const monthFields = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+        'jan',
+        'feb',
+        'march',
+      ]
+
       const formattedData = response?.data?.aopConsumptionNormDTOList?.map(
-        (item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          NormParametersId: item.materialFkId.toLowerCase(),
-          originalRemark: item.aopRemarks?.trim() || null,
-          id: index,
-          isEditable: false,
-          Particulars: item.normParameterTypeDisplayName || 'Type',
-        }),
+        (item, index) => {
+          const total = monthFields.reduce((sum, month) => {
+            const value = parseFloat(item[month]) || 0
+            return sum + value
+          }, 0)
+          const avgOfAllMonths = total / monthFields.length
+          return {
+            ...item,
+            idFromApi: item.id,
+            NormParametersId: item.materialFkId?.toLowerCase(),
+            originalRemark: item.aopRemarks?.trim() || null,
+            id: index,
+            isEditable: false,
+            Particulars: item.normParameterTypeDisplayName || 'Type',
+            avgOfAllMonths,
+          }
+        },
       )
+
       setRows(formattedData)
       setLoading(false)
       setCalculatebtnClicked(false)
@@ -346,10 +371,12 @@ const ConsumptionNorms = () => {
       fetchGradeDropdowns()
     }
   }, [plantID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
+
   const valueFormat = ValueFormatterConsumption()
+
   const productionColumns = getEnhancedColDefs({
     headerMap,
-    lowerVertName, // pass it here
+    lowerVertName,
     valueFormat,
   })
 
@@ -363,7 +390,6 @@ const ConsumptionNorms = () => {
 
   const handleCalculateMeg = async () => {
     try {
-   
       const data =
         await ConsumptionNormsApiService.handleCalculateonsumptionNorms(
           PLANT_ID,

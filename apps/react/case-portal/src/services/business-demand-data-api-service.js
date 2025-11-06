@@ -11,6 +11,7 @@ export const BusinessDemandDataApiService = {
   savepropanebusiness,
   ssrsBudgetSummary,
   ssrsMaintenanceSummary,
+  ssrsSiteMaintenanceSummary,
 }
 async function getBDData(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/business-demand?year=${AOP_YEAR}&plantId=${PLANT_ID}`
@@ -46,6 +47,22 @@ async function ssrsBudgetSummary(keycloak, PLANT_ID, AOP_YEAR) {
 
 async function ssrsMaintenanceSummary(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=maintenance-summary`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function ssrsSiteMaintenanceSummary(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=site-maintenance-summary`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

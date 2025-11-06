@@ -1,5 +1,12 @@
 export const MockReportService = {
-  async getReport({ category, year, verticalName }) {
+  async getReport({
+    category,
+    year,
+    verticalName,
+    FORMAT_VALUES_3_DECIMAL,
+    FORMAT_VALUES_2_DECIMAL,
+    FORMAT_VALUES_COST,
+  }) {
     const currFY = year || ''
 
     let prevFY = ''
@@ -41,7 +48,7 @@ export const MockReportService = {
                   editable: false,
                   align: 'right',
                   width: 120,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_2_DECIMAL,
                   type: 'number',
                 },
               ],
@@ -58,7 +65,7 @@ export const MockReportService = {
                       editable: false,
                       align: 'right',
                       width: 120,
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_2_DECIMAL,
                       type: 'number',
                     },
                     {
@@ -67,7 +74,7 @@ export const MockReportService = {
                       editable: false,
                       align: 'right',
                       width: 120,
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_2_DECIMAL,
                       type: 'number',
                     },
                   ],
@@ -81,7 +88,7 @@ export const MockReportService = {
                       editable: false,
                       align: 'right',
                       width: 120,
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_2_DECIMAL,
                       type: 'number',
                     },
                   ],
@@ -124,7 +131,8 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_3_DECIMAL,
+
                   type: 'number',
                 },
               ],
@@ -141,7 +149,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                     {
@@ -150,7 +159,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -164,7 +174,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -183,7 +194,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                     {
@@ -192,7 +204,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -206,7 +219,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -249,7 +263,8 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_3_DECIMAL,
+
                   type: 'number',
                 },
               ],
@@ -266,7 +281,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                     {
@@ -275,7 +291,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -289,7 +306,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -308,7 +326,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                     {
@@ -317,7 +336,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -331,7 +351,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -374,7 +395,8 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_3_DECIMAL,
+
                   type: 'number',
                 },
               ],
@@ -391,7 +413,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                     {
@@ -414,7 +437,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -433,7 +457,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                     {
@@ -442,7 +467,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -456,7 +482,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -499,7 +526,8 @@ export const MockReportService = {
                   editable: false,
                   width: 120,
                   align: 'right',
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_3_DECIMAL,
+
                   type: 'number',
                 },
               ],
@@ -516,7 +544,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                     {
@@ -525,7 +554,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -539,7 +569,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_3_DECIMAL,
+
                       type: 'number',
                     },
                   ],
@@ -558,7 +589,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                     {
@@ -567,7 +599,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -581,7 +614,8 @@ export const MockReportService = {
                       editable: false,
                       width: 120,
                       align: 'right',
-                      format: '{0:#.##}',
+                      format: FORMAT_VALUES_COST,
+
                       type: 'number',
                     },
                   ],
@@ -628,7 +662,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: true,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_COST,
                   type: 'numberNonGrey',
                 },
                 {
@@ -637,7 +671,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: true,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_COST,
                   type: 'numberNonGrey',
                 },
               ],
@@ -651,7 +685,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: true,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_COST,
                   type: 'numberNonGrey',
                 },
               ],
@@ -686,7 +720,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: false,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_COST,
                   type: 'number',
                 },
                 {
@@ -695,7 +729,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: false,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_COST,
                   type: 'number',
                 },
               ],
@@ -709,7 +743,7 @@ export const MockReportService = {
                   width: 120,
                   align: 'right',
                   editable: false,
-                  format: '{0:#.##}',
+                  format: FORMAT_VALUES_COST,
                   type: 'number',
                 },
               ],

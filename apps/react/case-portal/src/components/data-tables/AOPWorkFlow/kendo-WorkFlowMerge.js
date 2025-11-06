@@ -343,8 +343,6 @@ const WorkFlowMerge = () => {
         ...(isNumeric && {
           type: 'number',
           format: VALUE_FORMATOR,
-          // valueFormatter: ({ value }) =>
-          //   value === '' || value == null ? '' : Number(value).toFixed(2),
         }),
       }
     })
@@ -364,6 +362,7 @@ const WorkFlowMerge = () => {
       const { headers, keys, results } = await DataService.getWorkflowData(
         keycloak,
         PLANT_ID,
+        AOP_YEAR,
       )
       const numericKeys = getNumericKeysInAllRows(results)
       const formatted = results.map((row, idx) => ({
@@ -623,7 +622,7 @@ const WorkFlowMerge = () => {
     'Annual AOP Cost',
     'Plant Production Summary',
     'Month Wise Production Plan',
-    'Month Wise Raw Data',
+    'Month Wise Consumption',
     'Turnaround Report',
     'Annual Production Plan',
     'Plant Contribution',

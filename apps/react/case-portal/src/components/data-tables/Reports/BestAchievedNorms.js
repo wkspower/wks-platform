@@ -8,6 +8,7 @@ import {
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
+import { DataSetaApiService } from 'services/data-set-api-service'
 import { DataService } from 'services/DataService'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
@@ -194,6 +195,7 @@ export default function BestAchievedNorms() {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
 
   const vertName = verticalChange?.selectedVertical
@@ -423,91 +425,100 @@ export default function BestAchievedNorms() {
   // ---------------------------------------------------------------------------
   // Export helpers: build workbookOptions, then mount ExcelExport briefly to call save()
   // ---------------------------------------------------------------------------
-  const exportAllGrids = useCallback(() => {
-    const sheets = gridNames
-      .map((gridName, idx) => {
-        const d = dataMap[gridName] || { rows: [], columns: [] }
-        // filter out hidden columns (including Material_FK_Id / materialFkId)
-        let cols = (d.columns || []).filter(
-          (c) =>
-            !(
-              c &&
-              (c.field === 'Material_FK_Id' || c.field === 'materialFkId')
-            ) && !c.hidden,
-        )
-        const rows = d.rows || []
-        if (!cols.length && !rows.length) return null
 
-        const sheetColumns = cols.map((c) => ({
-          autoWidth: true,
-          title: c.title || c.field || '',
-        }))
+  const exportAllGrids = useCallback(async () => {
+    try {
+      setLoading(true)
 
-        const headerRow = {
-          cells: cols.map((c) => ({ value: c.title || c.field || '' })),
-        }
+      //EXPORT FROM KENDO GRID
+      //START
 
-        // helper to find match for coloring (use lookup map for O(1))
-        const findMatchedCell = (row, monthField) => {
-          const normId =
-            row.materialFKId ||
-            row.NormParameter_FK_Id ||
-            row.Material_FK_Id ||
-            row.NormParameterFKId ||
-            row.normParameterFKId
-          if (!normId) return null
-          const key = `${String(normId).toLowerCase()}|${(monthField || '').toString().toLowerCase()}`
-          const mode = redLookupRef.current?.get(key)
-          return mode ? { mode } : null
-        }
+      // const sheets = gridNames
+      //   .map((gridName, idx) => {
+      //     const d = dataMap[gridName] || { rows: [], columns: [] }
+      //     let cols = (d.columns || []).filter(
+      //       (c) =>
+      //         !(
+      //           c &&
+      //           (c.field === 'Material_FK_Id' || c.field === 'materialFkId')
+      //         ) && !c.hidden,
+      //     )
+      //     const rows = d.rows || []
+      //     if (!cols.length && !rows.length) return null
+      //     const sheetColumns = cols.map((c) => ({
+      //       autoWidth: true,
+      //       title: c.title || c.field || '',
+      //     }))
+      //     const headerRow = {
+      //       cells: cols.map((c) => ({ value: c.title || c.field || '' })),
+      //     }
+      //     const findMatchedCell = (row, monthField) => {
+      //       const normId =
+      //         row.materialFKId ||
+      //         row.NormParameter_FK_Id ||
+      //         row.Material_FK_Id ||
+      //         row.NormParameterFKId ||
+      //         row.normParameterFKId
+      //       if (!normId) return null
+      //       const key = `${String(normId).toLowerCase()}|${(monthField || '').toString().toLowerCase()}`
+      //       const mode = redLookupRef.current?.get(key)
+      //       return mode ? { mode } : null
+      //     }
+      //     const dataRows = rows.map((r) => ({
+      //       cells: cols.map((c) => {
+      //         const rawVal = normalizeCellValue(r?.[c.field])
+      //         const cell = { value: rawVal }
+      //         if (idx === 1 && c.field) {
+      //           const monthCandidate = r.month || c.title || c.field || ''
+      //           const matched = findMatchedCell(r, monthCandidate)
+      //           if (matched) {
+      //             if (matched.mode === 'Propane(1Z)') {
+      //               cell.background = '#FFD6D6' // light red
+      //               cell.color = '#9A0000' // dark red text
+      //               cell.bold = true
+      //             } else if (matched.mode === 'Propane(2Z)') {
+      //               cell.background = '#DFFFD8' // light green
+      //               cell.color = '#006400' // dark green text
+      //               cell.bold = true
+      //             }
+      //           }
+      //         }
+      //         return cell
+      //       }),
+      //     }))
+      //     const sheetRows = [headerRow, ...dataRows]
+      //     return {
+      //       title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
+      //       columns: sheetColumns,
+      //       rows: sheetRows,
+      //     }
+      //   })
+      //   .filter(Boolean)
+      // if (!sheets.length) return
+      // const workbookOptions = { sheets }
+      // workbookRef.current = workbookOptions
+      // setIsExporting(true)
 
-        const dataRows = rows.map((r) => ({
-          cells: cols.map((c) => {
-            const rawVal = normalizeCellValue(r?.[c.field])
-            const cell = { value: rawVal }
+      //END
 
-            // Apply coloring for first sheet (replicate UI's showThreeColors === true for idx === 0)
-            if (idx === 1 && c.field) {
-              const monthCandidate = r.month || c.title || c.field || ''
-              const matched = findMatchedCell(r, monthCandidate)
-              if (matched) {
-                if (matched.mode === 'Propane(1Z)') {
-                  cell.background = '#FFD6D6' // light red
-                  cell.color = '#9A0000' // dark red text
-                  cell.bold = true
-                } else if (matched.mode === 'Propane(2Z)') {
-                  cell.background = '#DFFFD8' // light green
-                  cell.color = '#006400' // dark green text
-                  cell.bold = true
-                }
-              }
-            }
+      const response = await DataSetaApiService.bestAchievedMinCCExport(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        VERTICAL_NAME,
+      )
 
-            return cell
-          }),
-        }))
+      if (response?.data?.code === 200) {
+        setLoading(false)
+      }
+    } catch (error) {
+      console.error('Export failed:', error)
+      setLoading(false)
+    }
+  }, [keycloak, PLANT_ID, AOP_YEAR])
 
-        const sheetRows = [headerRow, ...dataRows]
-
-        return {
-          title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
-          columns: sheetColumns,
-          rows: sheetRows,
-        }
-      })
-      .filter(Boolean)
-
-    if (!sheets.length) return
-
-    const workbookOptions = { sheets }
-    workbookRef.current = workbookOptions
-    setIsExporting(true)
-  }, [gridNames, dataMap])
-
-  // When exporting, once ExcelExport is mounted, call save(workbookOptions)
   useEffect(() => {
     if (!isExporting) return
-    // give React a tick to mount the ExcelExport
     const t = setTimeout(() => {
       try {
         if (excelExportRef.current && workbookRef.current) {
@@ -531,9 +542,7 @@ export default function BestAchievedNorms() {
     .replace(/:/g, '-')
     .split('.')[0]
   const fileName = `Best Achhieved Basis (MIN CC).xlsx`
-
   const renderTitle = (t) => t
-
   const defaultTabs = ['TAB1']
   let activeTabs = defaultTabs
 
@@ -546,25 +555,29 @@ export default function BestAchievedNorms() {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Typography component='div' className='grid-title' sx={{ mb: 1 }}>
-        <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> - Propane
-        (1Z)&nbsp;&nbsp;
-        <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
-        Propane (2Z)
-      </Typography>
+      <Box
+        display='flex'
+        justifyContent='space-between'
+        alignItems='center'
+        mb='0px'
+      >
+        <Typography component='div' className='grid-title' sx={{ mb: 0 }}>
+          <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> -
+          Propane (1Z)&nbsp;&nbsp;
+          <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
+          Propane (2Z)
+        </Typography>
 
-      {/* transient ExcelExport: only mounted during actual export */}
-      {isExporting && (
-        <div style={{ display: 'none' }}>
-          <ExcelExport
-            data={[]}
-            ref={(r) => (excelExportRef.current = r)}
-            fileName={fileName}
-          />
-        </div>
-      )}
+        {isExporting && (
+          <div style={{ display: 'none' }}>
+            <ExcelExport
+              data={[]}
+              ref={(r) => (excelExportRef.current = r)}
+              fileName={fileName}
+            />
+          </div>
+        )}
 
-      <Box display='flex' justifyContent='flex-end' mb='2px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}

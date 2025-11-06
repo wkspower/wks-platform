@@ -236,6 +236,15 @@ const workspace = {
         },
 
         {
+          id: 'site-maintenance-summary',
+          title: i18n.t('menu.siteMaintenanceSummary'),
+          type: 'item',
+          url: '/functional-reports/site-maintenance-summary',
+          icon: icons.IconFile,
+          breadcrumbs: true,
+        },
+
+        {
           id: 'plant-budget-summary',
           title: i18n.t('menu.plantBudgetSummary'),
           type: 'item',

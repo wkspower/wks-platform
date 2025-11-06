@@ -95,7 +95,7 @@ export const validateFields = (data, requiredFields) => {
 
     if (missingFields) {
       const uniqueFields = [...new Set(missingFields.split(', '))].join(', ')
-      return `Please update the following fields: ${uniqueFields}`
+      return `Please update the fields: ${uniqueFields}`
     }
     return ''
   }

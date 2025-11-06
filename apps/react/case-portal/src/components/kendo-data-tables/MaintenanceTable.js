@@ -31,6 +31,7 @@ const MaintenanceTable = () => {
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
   const lowerVertName = vertName?.toLowerCase()
+
   const dataConfig = useMemo(
     () => ({
       isCracker: lowerVertName === 'cracker',
@@ -172,13 +173,37 @@ const MaintenanceTable = () => {
     try {
       const resp = await dataConfig.serviceFn(keycloak, PLANT_ID, AOP_YEAR)
       const raw = dataConfig.isCracker ? resp.data : resp
-      const formatted = (raw || []).map((item, idx) => ({
-        ...item,
-        idFromApi: item.id,
-        id: idx,
-        isEditable: dataConfig.editable,
-        originalRemark: item.remarks,
-      }))
+      const monthFields = [
+        'April',
+        'May',
+        'June',
+        'July',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+        'Jan',
+        'Feb',
+        'Mar',
+      ]
+
+      const formatted = (raw || []).map((item, idx) => {
+        const allMonthsTotal = monthFields.reduce((sum, month) => {
+          const value = parseFloat(item[month]) || 0
+          return sum + value
+        }, 0)
+
+        return {
+          ...item,
+          idFromApi: item.id,
+          id: idx,
+          isEditable: dataConfig.editable,
+          originalRemark: item.remarks,
+          allMonthsTotal,
+        }
+      })
+
       setRows(formatted)
     } catch (err) {
       console.error('Error fetching data:', err)
@@ -267,10 +292,32 @@ const MaintenanceTable = () => {
     isEditableField,
   ]
 
+  const generateColumnsELASTOMER = (nameWidthT) => [
+    {
+      field: 'Name',
+      title: 'Description',
+      align: 'left',
+      headerAlign: 'left',
+      widthT: nameWidthT,
+      editable: false,
+    },
+    ...getMonthlyColumns(),
+    isEditableField,
+    {
+      field: 'allMonthsTotal',
+      title: 'Total',
+      type: 'number',
+      format: '{0:00}',
+      editable: false,
+    },
+  ]
+
   // Column sets
   const productionColumnsMEG = generateColumns(390)
   const productionColumnsPE = generateColumns(150)
   const productionColumnsPP = generateColumns(220)
+  const productionColumnsNonMEG = generateColumns(200)
+  const productionColumnsELASTOMER = generateColumnsELASTOMER(200)
 
   // Column selection
   let basecols
@@ -288,8 +335,11 @@ const MaintenanceTable = () => {
     case 'pp':
       basecols = productionColumnsPP
       break
+    case 'elastomer':
+      basecols = productionColumnsELASTOMER
+      break
     default:
-      basecols = productionColumnsMEG
+      basecols = productionColumnsNonMEG
       break
   }
 
