@@ -789,7 +789,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                        
 	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
 	                        dto.setDurationInHrs(durationInDecimalHours);
-	                        dto.setSaveStatus("Success");
+	                      //  dto.setSaveStatus("Success");
 	                        validTimeRanges.add(new LocalDateTime[]{ldtStart, ldtEnd});
 
 	                    } catch (Exception e) {
