@@ -14,18 +14,29 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 const TurnaroundPlanTable = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
-  //const isOldYear = oldYear?.oldYear
-  const isOldYear = oldYear?.oldYear
+    const {
+      sitePlantChange,
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const vertName = verticalChange?.selectedVertical
   const [rowModesModel, setRowModesModel] = useState({})
-
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
-
   const [loading, setLoading] = useState(false)
 
   // const [TaData, setTaData] = useState([])
@@ -98,13 +109,7 @@ const TurnaroundPlanTable = () => {
 
   const saveTurnAroundData = async (newRow) => {
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+     
       const turnAroundDetails = newRow.map((row) => ({
         productId: row.product,
         discription: row.discription,
@@ -113,12 +118,12 @@ const TurnaroundPlanTable = () => {
         maintEndDateTime: addTimeOffset(row.maintEndDateTime),
         maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         remark: row.remark,
-        audityear: localStorage.getItem('year'),
+        audityear: AOP_YEAR,
         id: row.idFromApi || null,
       }))
 
       const response = await DataService.saveTurnAroundData(
-        plantId,
+        PLANT_ID,
         turnAroundDetails,
         keycloak,
       )
@@ -180,9 +185,10 @@ const TurnaroundPlanTable = () => {
   }, 1000) // Delay of 1 seconds
 
   const fetchData = async () => {
+  if(!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
-      const data = await DataService.getTAPlantData(keycloak)
+      const data = await DataService.getTAPlantData(keycloak, PLANT_ID, AOP_YEAR)
       const formattedData = data.map((item, index) => ({
         ...item,
         idFromApi: item.id,
@@ -444,7 +450,7 @@ const TurnaroundPlanTable = () => {
       }
 
       if (idFromApi) {
-        await DataService.deleteTurnAroundData(idFromApi, keycloak)
+        await DataService.deleteTurnAroundData(idFromApi, keycloak, PLANT_ID)
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
         setSnackbarOpen(true)
         setSnackbarData({

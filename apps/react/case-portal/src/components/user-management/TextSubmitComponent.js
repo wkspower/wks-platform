@@ -83,32 +83,14 @@ const TextSubmitMUI = () => {
   const createCase = async () => {
     try {
       const result = await DataService.createCase(keycloak, caseData)
-      // console.log('Response:', result)
-
-      var year = localStorage.getItem('year')
-      var plantId = ''
-      var siteId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      const storedSite = localStorage.getItem('selectedSite')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
-
-      const verticalId = localStorage.getItem('verticalId')
 
       let workflowData = {
-        year: year,
-        plantFkId: plantId,
+        year: AOP_YEAR,
+        plantFkId: PLANT_ID,
         caseDefId: caseData.caseDefinitionId,
         caseId: result.businessKey,
-        siteFKId: siteId,
-        verticalFKId: verticalId,
+        siteFKId: SITE_ID,
+        verticalFKId: VERTICAL_ID,
       }
 
       const workFlowResult = await DataService.saveworkflow(
