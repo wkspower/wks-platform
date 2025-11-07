@@ -354,7 +354,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     }
                 }
                 int remarkStartCol = 8;
-                int remarkEndCol = remarkStartCol + 6; // 7 columns total (8 to 14)
+                int remarkEndCol = remarkStartCol + 8; // 7 columns total (8 to 14)
                 
                 Cell remarkSummaryCell = basisSummaryRow.createCell(remarkStartCol); 
                 remarkSummaryCell.setCellValue(remarkSummary != null ? remarkSummary : "");
@@ -389,7 +389,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     String textBeforeTitle = (String) table.get(ExcelConstants.TEXT_BEFORE_TITLE);
                     String tableId = (String) table.get(ExcelConstants.TABLEID);
                     rows = data.get(tableId);
-                    System.out.println("rows " + rows);
+                    
                     Boolean isColumnMergeRequired = (Boolean) table.get(ExcelConstants.IS_COLUMN_MERGE_REQUIRED);
                     Boolean isRowMergeRequired = (Boolean) table.get(ExcelConstants.IS_ROW_MERGE_REQUIRED);
                     List<Integer> hiddenColumnsList = (List<Integer>) table.get(ExcelConstants.HIDDEN_COLUMNS);
@@ -439,7 +439,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     int startDataRow = currentRow;
                     if(rows!=null) {
                     	for (List<Object> rowData : rows) {
-                    		System.out.println(rowData.get(rowData.size() - 2));
+                    		
                     		boolean greyOut=false;
                     		if(rowData.get(rowData.size() - 2)!=null) {
                     			greyOut = rowData.size() > 0 && rowData.get(rowData.size() - 2).toString().trim().equalsIgnoreCase("false");
