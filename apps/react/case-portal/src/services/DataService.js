@@ -3108,7 +3108,7 @@ async function calculatePlantContributionSummaryYearly(
   AOP_YEAR,
   keycloak,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/calculate-plant-contribution-summary-yearly?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+  const url = `${Config.CaseEngineUrl}/task/load-plant-contribution?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
