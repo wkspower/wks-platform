@@ -44,7 +44,7 @@ import FurnaceRawData from '../Reports/FurnaceRawData'
 import OptimizerReport from '../Reports/OptimizerReport'
 import TurnaroundReportCracker from '../Reports/TurnaroundReportCracker'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-
+import SpecificConsumptionNorm from '../Reports-kendo/SpecificConsumptionnorm'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
   // const [steps, setSteps] = useState([])
@@ -842,6 +842,11 @@ const WorkFlowMerge = () => {
             {tabIndex === 5 && <AnnualProductionPlan />}
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
+            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
+            <>
+            {tabIndex === 8 && <SpecificConsumptionNorm />}
+           </>
+           )}
 
             <Notification
               open={snackbarOpen}
