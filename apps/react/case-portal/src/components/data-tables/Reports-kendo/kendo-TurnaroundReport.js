@@ -10,6 +10,25 @@ import { validateFields } from 'utils/validationUtils'
 import moment from '../../../../node_modules/moment/moment'
 import { useSelector } from 'react-redux'
 const TurnaroundReport = () => {
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -33,9 +52,6 @@ const TurnaroundReport = () => {
   const [loading, setLoading] = useState(false)
   const keycloak = useSession()
 
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -46,7 +62,6 @@ const TurnaroundReport = () => {
     setCurrentRowId2(row.id)
     setRemarkDialogOpen2(true)
   }
-  const { oldYear } = useSelector((state) => state.dataGridStore)
   const isOldYear = oldYear?.oldYear === 1
 
   const columns = [
@@ -162,6 +177,8 @@ const TurnaroundReport = () => {
       const res = await DataService.getTurnaroundReportData(
         keycloak,
         'currentYear',
+        PLANT_ID, 
+        AOP_YEAR,
       )
       if (res?.code === 200) {
         setRows(mapData(res, 'CY'))
@@ -181,6 +198,8 @@ const TurnaroundReport = () => {
       const res = await DataService.getTurnaroundReportData(
         keycloak,
         'previousYear',
+        PLANT_ID,
+        AOP_YEAR
       )
       if (res?.code === 200) {
         setRows2(mapData(res, 'PY'))
@@ -196,11 +215,11 @@ const TurnaroundReport = () => {
 
   useEffect(() => {
     fetchCurrentYear()
-  }, [keycloak, year, plantId])
+  }, [keycloak, AOP_YEAR, PLANT_ID])
 
   useEffect(() => {
     fetchPreviousYear()
-  }, [keycloak, year, plantId])
+  }, [keycloak, AOP_YEAR, PLANT_ID])
 
   const saveChanges = async () => {
     try {
@@ -222,7 +241,8 @@ const TurnaroundReport = () => {
       const res = await DataService.saveTurnaroundReport(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       // console.log(res)
@@ -299,7 +319,7 @@ const TurnaroundReport = () => {
       const res = await DataService.saveTurnaroundReportWhole(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
       )
 
       // console.log(res)
@@ -333,17 +353,10 @@ const TurnaroundReport = () => {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      var plantId = plantId
+     
       const res = await DataService.calculateTurnAroundPlanReportData(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 

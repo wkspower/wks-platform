@@ -73,6 +73,7 @@ const NormalOpNormsScreen = () => {
   const keycloak = useSession()
 
   const fetchData = async (gradeId) => {
+    if (!PLANT_ID || !AOP_YEAR) return
     const verticalsRequiringGrade = ['pe', 'pp']
     if (verticalsRequiringGrade.includes(lowerVertName) && !gradeId) return
     setLoading(true)
@@ -85,6 +86,8 @@ const NormalOpNormsScreen = () => {
             keycloak,
             gradeId,
             false,
+            PLANT_ID,
+            AOP_YEAR,
           )
       }
 
@@ -115,6 +118,8 @@ const NormalOpNormsScreen = () => {
       const response =
         await NormalOperationNormsApiService.getNormalOperationNormsGrades(
           keycloak,
+          PLANT_ID,
+          AOP_YEAR,
         )
 
       if (response?.code === 200) {
@@ -132,7 +137,7 @@ const NormalOpNormsScreen = () => {
   const fetchDataIntermediateValues = async () => {
     try {
       const res =
-        await NormalOperationNormsApiService.getIntermediateValues(keycloak)
+        await NormalOperationNormsApiService.getIntermediateValues(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         const formattedData = res?.data.map((item, index) => {
           const formattedItem = {
@@ -151,9 +156,10 @@ const NormalOpNormsScreen = () => {
   }
 
   const getNormTransactions = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       const res =
-        await NormalOperationNormsApiService.getNormTransactions(keycloak)
+        await NormalOperationNormsApiService.getNormTransactions(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         const normalized = res?.data.map((obj) => ({
           ...obj,
@@ -429,6 +435,7 @@ const NormalOpNormsScreen = () => {
             keycloak,
             gradeId,
             lowerVertName,
+            AOP_YEAR,
           )
 
         // if (response.status === 200) {
@@ -608,6 +615,8 @@ const NormalOpNormsScreen = () => {
       await NormalOperationNormsApiService.getNormalOpsNormsExcel(
         keycloak,
         gradeId,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       setSnackbarData({
@@ -634,6 +643,8 @@ const NormalOpNormsScreen = () => {
         await NormalOperationNormsApiService.saveNormalOpsNormsExcel(
           rawFile,
           keycloak,
+          PLANT_ID,
+          AOP_YEAR,
         )
       if (response?.code === 200) {
         setSnackbarOpen(true)

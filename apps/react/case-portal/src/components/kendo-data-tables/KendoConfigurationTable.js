@@ -490,9 +490,10 @@ const ConfigurationTable = () => {
     return formatted
   }
   const getAopSummary = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     try {
       setSummary('')
-      var res = await DataService.getAopSummary(keycloak)
+      var res = await DataService.getAopSummary(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         setSummary(res?.data?.summary)
       } else {

@@ -250,7 +250,7 @@ const WorkFlowMerge = () => {
       const payload = postmanData
 
       // Await the API call here to ensure completion
-      const data = await DataService.getExcel(keycloak, payload)
+      const data = await DataService.getExcel(keycloak, payload, PLANT_ID, AOP_YEAR)
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -358,6 +358,7 @@ const WorkFlowMerge = () => {
   }
 
   const fetchData = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       const { headers, keys, results } = await DataService.getWorkflowData(
         keycloak,
@@ -391,8 +392,9 @@ const WorkFlowMerge = () => {
   }
 
   const getCaseId = async () => {
+    if(!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
     try {
-      const cases = await DataService.getCaseId(keycloak)
+      const cases = await DataService.getCaseId(keycloak, PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID)
       setCaseId(cases?.workflowMasterDTO?.casedefId || '')
       setShowCreateCasebutton(cases?.workflowList?.length === 0)
       setTaskId(cases?.taskId || '')

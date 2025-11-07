@@ -16,7 +16,6 @@ import { useSelector } from 'react-redux'
 
 const MonthwiseRawMaterial = () => {
   const keycloak = useSession()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [normRows, setNormRows] = useState({})
   const [rows, setRows] = useState()
 
@@ -31,14 +30,18 @@ const MonthwiseRawMaterial = () => {
     siteObject,
     verticalObject,
     screenTitle,
+    year,
   } = dataGridStore
 
-  const vertName = verticalChange?.selectedVertical
-
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
-
-  const lowerVertName = VERTICAL_NAME?.toLowerCase()
-
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -336,8 +339,6 @@ const MonthwiseRawMaterial = () => {
   const [row, setRow] = useState()
   const [row2, setRow2] = useState()
   const [loading, setLoading] = useState(false)
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
   const [modifiedCells, setModifiedCells] = React.useState({})
 
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -347,7 +348,7 @@ const MonthwiseRawMaterial = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity')
+      var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity', PLANT_ID, AOP_YEAR)
 
       if (
         lowerVertName != 'pe' &&
@@ -357,6 +358,8 @@ const MonthwiseRawMaterial = () => {
         var res2 = await DataService.getMonthwiseRawData(
           keycloak,
           'Selectivity',
+          PLANT_ID,
+          AOP_YEAR,
         )
 
         if (res2?.code == 200) {
@@ -456,7 +459,7 @@ const MonthwiseRawMaterial = () => {
 
   useEffect(() => {
     fetchData()
-  }, [yearChanged, plantID])
+  }, [yearChanged, PLANT_ID])
 
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()
@@ -464,17 +467,9 @@ const MonthwiseRawMaterial = () => {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
       const res = await DataService.handleCalculatePlantConsumptionData(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 
@@ -520,7 +515,7 @@ const MonthwiseRawMaterial = () => {
 
       var data = Object.values(modifiedCells)
       //  console.log('Modified cells before save:', modifiedCells);
-      const year = localStorage.getItem('year') // e.g. "2025-26"
+      const year = AOP_YEAR // e.g. "2025-26"
 
       let prevYear = ''
       if (year && year.includes('-')) {
@@ -559,7 +554,8 @@ const MonthwiseRawMaterial = () => {
       const res = await DataService.postMonthwiseRawData(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (res?.code == 200) {

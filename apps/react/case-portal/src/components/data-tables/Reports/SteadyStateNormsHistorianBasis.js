@@ -30,9 +30,26 @@ const SteadyStateNormsHistorianBasis = () => {
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([]) // ordered list from API
   const [loading, setLoading] = useState(false)
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear } = dataGridStore
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
@@ -77,12 +94,16 @@ const SteadyStateNormsHistorianBasis = () => {
   // Fetch columns + rows for one grid type. Returns { rows, columns }
   const fetchDataForGrid = useCallback(
     async (reportType, StartDate, EndDate) => {
+      if(!PLANT_ID || !AOP_YEAR) return
       try {
         const apiResponse = await DataService.getProductionVolDataBasisPe(
           keycloak,
           reportType,
           StartDate,
           EndDate,
+          null,
+          PLANT_ID,
+          AOP_YEAR,
         )
 
         if (apiResponse?.code !== 200) {
@@ -169,6 +190,7 @@ const SteadyStateNormsHistorianBasis = () => {
 
   // Main: fetch TYPE_LIST then schedule fetching each grid in order
   const fetchAllGrids = useCallback(async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     // clear previous timers
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
@@ -200,6 +222,9 @@ const SteadyStateNormsHistorianBasis = () => {
         'TYPE LIST2',
         StartDate,
         EndDate,
+        null,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       let types = []

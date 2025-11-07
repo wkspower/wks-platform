@@ -29,8 +29,26 @@ const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { yearChanged, oldYear, plantID } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const SCREEN_NAME = screenTitle?.title
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -145,13 +163,14 @@ const DecokingConfig = () => {
 
   const fetchData = useCallback(
     async (screen = null) => {
+      if (!PLANT_ID || !AOP_YEAR) return
       const currentTab = tabs[activeTabIndex]
       setLoading(true)
       try {
         if (currentTab === 'IBR Plan') {
           // Screen 1
           if (!screen || screen === 1) {
-            const data1 = await DataService.getIbr(keycloak)
+            const data1 = await DataService.getIbr(keycloak, PLANT_ID, AOP_YEAR)
             if (data1?.code === 200) {
               const processedData = data1.data
                 .map((item, index) => ({
@@ -171,7 +190,7 @@ const DecokingConfig = () => {
           }
           // Screen 2
           if (!screen || screen === 2) {
-            const data2 = await DataService.getIbrSdTa(keycloak)
+            const data2 = await DataService.getIbrSdTa(keycloak, PLANT_ID, AOP_YEAR)
             const toDateObject = (value) =>
               value ? moment(value, 'MMM D, YYYY').toDate() : null
 
@@ -211,7 +230,7 @@ const DecokingConfig = () => {
 
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
-            const data3 = await DataService.getIbrScreen3(keycloak)
+            const data3 = await DataService.getIbrScreen3(keycloak, PLANT_ID, AOP_YEAR)
             const toDateObject = (value) =>
               value ? moment(value, 'YYYY-MM-DD').toDate() : null
 
@@ -546,12 +565,6 @@ const DecokingConfig = () => {
   const postIbr = async (newRow) => {
     setLoading(true)
     try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
       const formatIfDate = (value) => {
         if (!value) return ''
         const parsed = moment.utc(
@@ -588,7 +601,7 @@ const DecokingConfig = () => {
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
-      const response = await DataService.postIbr(plantId, payload, keycloak)
+      const response = await DataService.postIbr(PLANT_ID, payload, keycloak, AOP_YEAR)
 
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -616,12 +629,6 @@ const DecokingConfig = () => {
   const postIbr2 = async (newRow) => {
     setLoading(true)
     try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
       const formatIfDate = (value) => {
         if (!value) return ''
         const parsed = moment.utc(
@@ -658,7 +665,7 @@ const DecokingConfig = () => {
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
-      const response = await DataService.postIbr(plantId, payload, keycloak)
+      const response = await DataService.postIbr(PLANT_ID, payload, keycloak, AOP_YEAR)
 
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -687,12 +694,6 @@ const DecokingConfig = () => {
   const saveCrackerRunLength = async (newRow) => {
     setLoading(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
       var payload = []
       payload = newRow.map((row) => ({
         tenProposed: row?.tenProposed || null,
@@ -700,7 +701,7 @@ const DecokingConfig = () => {
         twelveProposed: row?.twelveProposed || null,
         thirteenProposed: row?.thirteenProposed || null,
         fourteenProposed: row?.fourteenProposed || null,
-        plantId: plantId,
+        plantId: PLANT_ID,
         id: row?.idFromApi || '',
         demo: row?.demo || '',
         // Date: row?.date
@@ -711,9 +712,10 @@ const DecokingConfig = () => {
           : null,
       }))
       const response = await DataService.saveCrackerRunLength(
-        plantId,
+        PLANT_ID,
         payload,
         keycloak,
+        AOP_YEAR,
       )
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -804,7 +806,7 @@ const DecokingConfig = () => {
       severity: 'success',
     })
     try {
-      await DataService.getRunLengthExcel(keycloak)
+      await DataService.getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR)
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -823,14 +825,8 @@ const DecokingConfig = () => {
   const saveExcelFile = async (rawFile) => {
     setLoading(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
       var response
-      response = await DataService.saveRunLengthExcel(rawFile, keycloak)
+      response = await DataService.saveRunLengthExcel(rawFile, keycloak, PLANT_ID, AOP_YEAR)
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -881,17 +877,10 @@ const DecokingConfig = () => {
   const handleCalculateSdTa = async () => {
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      let plantId = ''
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+  
       const data = await DataService.handleCalculateSdTaActivities(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 
@@ -923,16 +912,10 @@ const DecokingConfig = () => {
   const handleCalculate = async () => {
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
+      
       const data = await DataService.handleCalculateDecokingActivities(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
       if (data?.code == 200) {
@@ -952,7 +935,7 @@ const DecokingConfig = () => {
     }
   }
   function getAopYearLimits() {
-    const yearStr = localStorage.getItem('year') // e.g. "2025-26"
+    const yearStr = AOP_YEAR // e.g. "2025-26"
     let startLimit, endLimit
     if (yearStr) {
       const [startYear, endYear] = yearStr

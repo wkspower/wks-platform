@@ -55,12 +55,27 @@ const NormsHistorianBasis = () => {
   const [rowsHistorianValues, setHistorianValues] = useState([])
   const [rowsMcuAndNormGrid, setMcuAndNormGrid] = useState([])
   const [rowsProductionVolumeData, setProductionVolumeData] = useState([])
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const {
+      sitePlantChange,
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [loading, setLoading] = useState(false)
   function parseDDMMYYYY(dateStr) {
@@ -70,10 +85,11 @@ const NormsHistorianBasis = () => {
   }
 
   const fetchData = async (reportType, setState) => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     try {
       setLoading(true)
       var data = []
-      data = await DataService.getNormsHistorianBasis(keycloak, reportType)
+      data = await DataService.getNormsHistorianBasis(keycloak, reportType, null, PLANT_ID, AOP_YEAR)
 
       if (data?.code === 200) {
         const rowsWithId = data?.data?.normHistoricBasisData?.map(
@@ -96,8 +112,7 @@ const NormsHistorianBasis = () => {
     }
   }
 
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const colsHistorianValues = getKendoNormsHistorianColumns({
     headerMap,

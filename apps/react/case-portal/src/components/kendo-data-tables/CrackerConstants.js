@@ -45,7 +45,11 @@ const CrakcerConstants = () => {
   const isOldYear = oldYear?.oldYear
   const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
-
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
   const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -89,11 +93,6 @@ const CrakcerConstants = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-
-  const PLANT_ID = plantObject?.id
-  const SITE_ID = siteObject?.id
-  const VERTICAL_ID = verticalObject?.id
-  const AOP_YEAR = year?.selectedYear
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -166,9 +165,10 @@ const CrakcerConstants = () => {
     return formatted
   }
   const getAopSummary = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     try {
       setSummary('')
-      var res = await DataService.getAopSummary(keycloak)
+      var res = await DataService.getAopSummary(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         setSummary(res?.data?.summary)
       } else {
@@ -190,7 +190,7 @@ const CrakcerConstants = () => {
   const getConfigurationExecutionDetailsNorms = async () => {
     try {
       const response =
-        await DataService.getConfigurationExecutionDetailsNorms(keycloak)
+        await DataService.getConfigurationExecutionDetailsNorms(keycloak, PLANT_ID, AOP_YEAR)
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(
@@ -548,6 +548,7 @@ const CrakcerConstants = () => {
         PLANT_ID,
         payload,
         keycloak,
+        AOP_YEAR,
       )
       if (response) {
         setSnackbarOpen(true)

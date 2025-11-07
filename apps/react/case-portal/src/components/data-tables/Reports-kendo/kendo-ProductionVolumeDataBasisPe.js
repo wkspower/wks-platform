@@ -61,12 +61,26 @@ const ProductionVolumeDataBasisPe = () => {
   const [rowsConsecutiveDays, setRowsConsecutiveDays] = useState([])
   const [rowsMiisNormsRawData, setRowsMiisNormsRawData] = useState([])
   const [rowsBestAchivedNorms, setRowsBestAchivedNorms] = useState([])
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { sitePlantChange, verticalChange, yearChanged, oldYear } =
-    dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const {
+      sitePlantChange,
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
   const isOldYear = oldYear?.oldYear === 1
   const [loading, setLoading] = useState(false)
 
@@ -77,10 +91,11 @@ const ProductionVolumeDataBasisPe = () => {
   }
 
   const fetchData = async (reportType, setState) => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       var data = []
-      data = await DataService.getProductionVolDataBasisPe(keycloak, reportType)
+      data = await DataService.getProductionVolDataBasisPe(keycloak, reportType,null,null,null, PLANT_ID, AOP_YEAR)
 
       if (data?.code === 200) {
         const rowsWithId = data?.data?.map((item, index) => ({
@@ -103,8 +118,8 @@ const ProductionVolumeDataBasisPe = () => {
     }
   }
 
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
+
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const colsRawMcu = getKendoNormsHistorianBasisPe({
     headerMap,

@@ -374,7 +374,7 @@ const OptimizerReport = () => {
       const payload = []
 
       // Await the API call here to ensure completion
-      const data = await DataService.getExcel(keycloak, payload)
+      const data = await DataService.getExcel(keycloak, payload, PLANT_ID, AOP_YEAR)
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -409,7 +409,7 @@ const OptimizerReport = () => {
       setCalculating(true)
 
       if (!PLANT_ID || !AOP_YEAR) {
-        throw new Error('Plant ID or year not found in localStorage')
+        throw new Error('Plant ID or year not found ')
       }
 
       // Call the calculate API

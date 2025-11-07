@@ -85,8 +85,8 @@ async function handleCalculateMaintenance(PLANT_ID, AOP_YEAR, keycloak) {
     return Promise.reject(e)
   }
 }
-async function handleCalculateMaintenanceCracker(plantId, year, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/calculate-decoke-maintenance?year=${year}&plantId=${plantId}`
+async function handleCalculateMaintenanceCracker(PLANT_ID, AOP_YEAR, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-decoke-maintenance?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,

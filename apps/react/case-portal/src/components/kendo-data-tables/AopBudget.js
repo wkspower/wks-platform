@@ -251,6 +251,7 @@ export default function AopBudget() {
   }
 
   const fetchData = useCallback(async () => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     setLoading(true)
     try {
       // Fetch for Consumption Budget
@@ -325,6 +326,7 @@ export default function AopBudget() {
   }, [keycloak, yearChanged, plantID])
 
   const fetchDesignRemarksAndDesignBasis = useCallback(async () => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     setLoading(true)
     setTextAreaRedDesign(false)
     setTextAreaRedRemark(false)

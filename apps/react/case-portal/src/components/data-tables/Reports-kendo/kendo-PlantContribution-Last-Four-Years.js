@@ -7,7 +7,7 @@ import { DataService } from 'services/DataService'
 import { MockPlantContributionAPILastFourYears } from './mockPlantContributionAPILastFourYears'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import ValueFormatterProductionProductionNormBasis from 'utils/ValueFormatterProduction_ProductionNormBasis'
-
+import { useSelector } from 'react-redux'
 const categories = () => {
   return [
     {
@@ -25,8 +25,26 @@ const categories = () => {
 
 export default function PlantContributionLastFourYears() {
   const keycloak = useSession()
-  const year = localStorage.getItem('year')
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
   const [snackbarData, setSnackbarData] = useState({
@@ -40,15 +58,11 @@ export default function PlantContributionLastFourYears() {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [otherVariableRows, setOtherVariableRows] = useState([])
-  const verticalName = JSON.parse(
-    localStorage.getItem('selectedVertical'),
-  )?.name?.toLowerCase()
-
   const FORMAT_VALUES_3_DECIMAL =
-    verticalName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
+    lowerVertName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
   const FORMAT_VALUES_2_DECIMAL =
-    verticalName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
-  const FORMAT_VALUES_COST = verticalName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+    lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
+  const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
   const FORMAT_VALUES_PRICE = '{0:0}'
 
   const loadAll = async () => {
@@ -60,8 +74,8 @@ export default function PlantContributionLastFourYears() {
         const { columns, columnGrouping } =
           await MockPlantContributionAPILastFourYears.getReport({
             category: key,
-            year,
-            verticalName,
+            AOP_YEAR,
+            lowerVertName,
             FORMAT_VALUES_3_DECIMAL,
             FORMAT_VALUES_2_DECIMAL,
             FORMAT_VALUES_COST,
@@ -71,6 +85,8 @@ export default function PlantContributionLastFourYears() {
         const apiResp = await DataService.plantContributionPlanLastFourYears(
           keycloak,
           key,
+          PLANT_ID,
+          AOP_YEAR,
         )
         let rows = apiResp.data?.plantProductionData || []
         if (apiResp?.code == 200) {
@@ -81,49 +97,49 @@ export default function PlantContributionLastFourYears() {
             if (
               key === 'ProductMixAndProduction' &&
               index >= arr.length - 4 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
             if (
               key === 'ByProducts' &&
               index >= arr.length - 2 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
             if (
               key === 'RawMaterial' &&
               index >= arr.length - 3 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
             if (
               key === 'ProductionCostCalculations' &&
               index >= arr.length - 6 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
             if (
               key === 'CatChem' &&
               index >= arr.length - 2 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
             if (
               key === 'Utilities' &&
               index >= arr.length - 2 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
             if (
               key === 'OtherVariableCost' &&
               index >= arr.length - 2 &&
-              verticalName === 'meg'
+              lowerVertName === 'meg'
             ) {
               isBold = false
             }
@@ -157,7 +173,7 @@ export default function PlantContributionLastFourYears() {
 
   useEffect(() => {
     loadAll()
-  }, [keycloak, year, plantId])
+  }, [keycloak, AOP_YEAR, PLANT_ID])
 
   const handleCalculate = () => {
     handleCalculateMonthwiseAndTurnaround()

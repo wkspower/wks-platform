@@ -452,16 +452,18 @@ const ShutDown = ({ permissions }) => {
   }
 
   const fetchData = async () => {
-    if (!plantID) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       const data = await DataService.getShutDownPlantData(
         keycloak,
-        plantID?.plantId,
+        PLANT_ID,
+        AOP_YEAR
       )
       const dataSlowDown = await DataService.getSlowDownPlantData(
         keycloak,
-        plantID?.plantId,
+        PLANT_ID ,
+        AOP_YEAR
       )
 
       const formattedDataSlowDown = dataSlowDown.map((item, index) => ({
@@ -501,7 +503,7 @@ const ShutDown = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [oldYear, yearChanged, keycloak, _plantID])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID])
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -530,7 +532,7 @@ const ShutDown = ({ permissions }) => {
         } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
-          data = await DataService.getAllProductsAll(keycloak, 'Production')
+          data = await DataService.getAllProductsAll(keycloak, 'Production', PLANT_ID)
         }
         let productList = []
         if (lowerVertName === 'meg') {
@@ -561,12 +563,12 @@ const ShutDown = ({ permissions }) => {
     }
 
     getAllProducts()
-  }, [oldYear, yearChanged, keycloak, _plantID, lowerVertName])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID, lowerVertName])
   useEffect(() => {
     if (allProducts.length > 0) {
       fetchData()
     }
-  }, [allProducts, oldYear, yearChanged, keycloak, _plantID, lowerVertName])
+  }, [allProducts, oldYear, yearChanged, keycloak, PLANT_ID, lowerVertName])
 
   const colDefs = useMemo(() => {
     switch (lowerVertName) {
@@ -597,7 +599,7 @@ const ShutDown = ({ permissions }) => {
       }
 
       if (idFromApi) {
-        await DataService.deleteShutdownData(idFromApi, keycloak)
+        await DataService.deleteShutdownData(idFromApi, keycloak, PLANT_ID)
         setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
         setSnackbarOpen(true)
         setSnackbarData({

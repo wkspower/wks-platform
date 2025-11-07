@@ -79,6 +79,7 @@ const NormsHistorianBasis = () => {
     getKendoNormsHistorianColumns({ headerMap, type, valueFormat })
 
   const fetchAllData = async (selectedUnit) => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     if (!selectedUnit) return
     setLoading(true)
     let isCancelled = false
@@ -94,6 +95,8 @@ const NormsHistorianBasis = () => {
             undefined,
             undefined,
             selectedUnit,
+            PLANT_ID,
+            AOP_YEAR,
           ),
 
           DataService.getProductionVolDataBasisMode(
@@ -102,6 +105,8 @@ const NormsHistorianBasis = () => {
             undefined,
             undefined,
             selectedUnit,
+            PLANT_ID,
+            AOP_YEAR,
           ),
           DataService.getProductionVolDataBasisMode(
             keycloak,
@@ -109,6 +114,8 @@ const NormsHistorianBasis = () => {
             undefined,
             undefined,
             selectedUnit,
+            PLANT_ID,
+            AOP_YEAR,
           ),
         ])
       } else {
@@ -117,16 +124,22 @@ const NormsHistorianBasis = () => {
             keycloak,
             'HistorianValues',
             selectedUnit,
+            PLANT_ID,
+            AOP_YEAR
           ),
           DataService.getNormsHistorianBasis(
             keycloak,
             'McuAndNormGrid',
             selectedUnit,
+            PLANT_ID,
+            AOP_YEAR
           ),
           DataService.getNormsHistorianBasis(
             keycloak,
             'ProductionVolumeData',
             selectedUnit,
+            PLANT_ID,
+            AOP_YEAR
           ),
         ])
       }

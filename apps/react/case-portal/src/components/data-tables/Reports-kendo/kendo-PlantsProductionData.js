@@ -4,6 +4,7 @@ import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
+import { useSelector } from 'react-redux'
 import {
   Backdrop,
   CircularProgress,
@@ -13,13 +14,30 @@ import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const PlantsProductionSummary = () => {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const thisYear = AOP_YEAR
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loading, setLoading] = useState(false)
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
   const [rows, setRows] = useState()
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -27,19 +45,17 @@ const PlantsProductionSummary = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [modifiedCells, setModifiedCells] = React.useState({})
-
   const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
   const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
-
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
   const isOldYear = (() => {
-    if (!year || !year.includes('-')) return false
+    if (!AOP_YEAR || !AOP_YEAR.includes('-')) return false
     const currentYear = new Date().getFullYear()
-    const startYear = parseInt(year.split('-')[0])
+    const startYear = parseInt(AOP_YEAR.split('-')[0])
     return startYear < currentYear
   })()
 
@@ -68,10 +84,10 @@ const PlantsProductionSummary = () => {
     )
   }
 
-  let oldYear = ''
+  let itoldYear = ''
   if (thisYear && thisYear.includes('-')) {
     const [start, end] = thisYear.split('-').map(Number)
-    oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
+    itoldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
 
   const apiCols = [
@@ -98,7 +114,7 @@ const PlantsProductionSummary = () => {
     { field: 'UOM', title: 'Unit', widthT: 80, editable: false },
 
     {
-      title: oldYear || 'Old Year',
+      title: itoldYear || 'Old Year',
       children: [
         {
           field: 'BudgetPrevYear',
@@ -181,9 +197,10 @@ const PlantsProductionSummary = () => {
   ]
 
   const fetchData = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return 
     try {
       setLoading(true)
-      var res = await DataService.getPlantProductionSummary(keycloak)
+      var res = await DataService.getPlantProductionSummary(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         res = res?.data.map((Particulates, index) => ({
           ...Particulates,
@@ -204,7 +221,7 @@ const PlantsProductionSummary = () => {
   }
   useEffect(() => {
     fetchData()
-  }, [year, plantId])
+  }, [AOP_YEAR, PLANT_ID])
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -235,7 +252,8 @@ const PlantsProductionSummary = () => {
       const res = await DataService.savePlantProductionData(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (res?.code == 200) {
@@ -270,17 +288,10 @@ const PlantsProductionSummary = () => {
   const handleCalculatePlantProductionData = async () => {
     try {
       setLoading(true)
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
 
-      var plantId = plantId
       const res = await DataService.handleCalculatePlantProductionData(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 

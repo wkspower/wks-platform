@@ -7,15 +7,13 @@ export const ShutdownNormsApiService = {
   getShutdownNormsData,
   shutdownConsumptionHistoryData,
 }
-async function getShutdownMonths(keycloak, gradeId) {
-  var year = localStorage.getItem('year')
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const parsedPlant = JSON.parse(storedPlant)
+async function getShutdownMonths(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
+
   let url
   if (gradeId) {
-    url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown&year=${year}&gradeId=${gradeId}`
+    url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${PLANT_ID}&maintenanceName=Shutdown&year=${AOP_YEAR}&gradeId=${gradeId}`
   } else {
-    url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${parsedPlant.id}&maintenanceName=Shutdown&year=${year}`
+    url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${PLANT_ID}&maintenanceName=Shutdown&year=${AOP_YEAR}`
   }
   const headers = {
     Accept: 'application/json',
@@ -30,10 +28,8 @@ async function getShutdownMonths(keycloak, gradeId) {
     return await Promise.reject(e)
   }
 }
-async function handleCalculateShutdownNorms(plantId, year, keycloak) {
-  const year1 = localStorage.getItem('year')
-  //  const url = `${Config.CaseEngineUrl}/task/getCalculatedShutdownNorms?year=${year1}&plantId=${plantId}`
-  const url = `${Config.CaseEngineUrl}/task/calculate-shutdown-consumption?year=${year1}&plantId=${plantId}`
+async function handleCalculateShutdownNorms(PLANT_ID, AOP_YEAR, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-shutdown-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -53,22 +49,13 @@ async function handleCalculateShutdownNorms(plantId, year, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getShutdownNormsData(keycloak, gradeId) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  // let siteID =
-  //   JSON.parse(localStorage.getItem('selectedSiteId') || '{}')?.id || ''
-
+async function getShutdownNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
+  
   let url
   if (gradeId) {
-    url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${year}&plantId=${plantId}&gradeId=${gradeId}`
+    url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}&gradeId=${gradeId}`
   } else {
-    url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${year}&plantId=${plantId}`
+    url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   }
 
   const headers = {
@@ -84,16 +71,9 @@ async function getShutdownNormsData(keycloak, gradeId) {
     return await Promise.reject(e)
   }
 }
-async function shutdownConsumptionHistoryData(keycloak, gradeId) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
+async function shutdownConsumptionHistoryData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
 
-  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${year}&plantId=${plantId}`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
     Accept: 'application/json',

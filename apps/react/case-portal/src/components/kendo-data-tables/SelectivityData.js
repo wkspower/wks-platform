@@ -203,6 +203,7 @@ const SelectivityData = (props) => {
           PLANT_ID,
           payload,
           keycloak,
+          AOP_YEAR
         )
       } else {
         payload = newRow.map((row) => ({
@@ -229,6 +230,7 @@ const SelectivityData = (props) => {
           PLANT_ID,
           payload,
           keycloak,
+          AOP_YEAR
         )
       }
 

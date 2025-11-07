@@ -486,7 +486,7 @@ const NormalOpNormsScreenCracker = () => {
   const getNormTransactions = async () => {
     try {
       const res =
-        await NormalOperationNormsApiService.getNormTransactions(keycloak)
+        await NormalOperationNormsApiService.getNormTransactions(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         const normalized = res?.data.map((obj) => ({
           ...obj,
@@ -505,7 +505,7 @@ const NormalOpNormsScreenCracker = () => {
   const fetchFinalNorms = useCallback(async () => {
     try {
       const response =
-        await NormalOperationNormsApiService.getfinalNorms(keycloak)
+        await NormalOperationNormsApiService.getfinalNorms(keycloak, PLANT_ID, AOP_YEAR)
       if (response?.code !== 200) {
         setRowsBestFinalNorms([])
         return
@@ -709,11 +709,15 @@ const NormalOpNormsScreenCracker = () => {
               keycloak,
               gradeId,
               payload,
+              PLANT_ID,
+              AOP_YEAR,
             )
           : await NormalOperationNormsApiService.updateModeWiseNormsData(
               keycloak,
               gradeId,
               payload,
+              PLANT_ID,
+              AOP_YEAR,
             )
 
         if (response?.code === 200) {

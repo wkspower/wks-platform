@@ -31,9 +31,9 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
 
   const dataConfig = useMemo(
     () => ({
-      serviceFn: MaintenanceDetailsApiService.getCrackerMaintenanceData,
+       serviceFn: () => MaintenanceDetailsApiService.getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR),
     }),
-    [plantID],
+    [keycloak, PLANT_ID, AOP_YEAR],
   )
 
   const headerMap = generateHeaderNames(AOP_YEAR)
@@ -203,10 +203,13 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     }
   }
   const fetchData = useCallback(async () => {
-    setRows([])
+    if (!PLANT_ID || !AOP_YEAR) {
+      setRows([])
+      return
+    }
     setLoading(true)
     try {
-      const resp = await dataConfig.serviceFn(keycloak)
+      const resp = await dataConfig.serviceFn()
       const raw = resp.data
       const formatted = (raw || []).map((item, idx, arr) => ({
         ...item,
@@ -230,7 +233,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     } finally {
       setLoading(false)
     }
-  }, [plantID, keycloak])
+  }, [PLANT_ID, keycloak])
 
   const handleCalculate = useCallback(async () => {
     try {
@@ -258,7 +261,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, oldYear, yearChanged, plantID])
+  }, [fetchData, oldYear, yearChanged, PLANT_ID])
 
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)

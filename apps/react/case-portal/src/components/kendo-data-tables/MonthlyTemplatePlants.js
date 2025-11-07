@@ -4,10 +4,28 @@ import { Backdrop, Box, CircularProgress } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useSession } from 'SessionStoreContext'
 import { DataService } from 'services/DataService'
-
+import { useSelector } from 'react-redux'
 export default function MonthlyTemplatePlants() {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+      const {
+        verticalChange,
+        yearChanged,
+        plantID,
+        plantObject,
+        siteObject,
+        verticalObject,
+        year,
+        screenTitle,
+      } = dataGridStore
+      const PLANT_ID = plantObject?.id
+      const SITE_ID = siteObject?.id
+      const VERTICAL_ID = verticalObject?.id
+      const VERTICAL_NAME = verticalObject?.name
+      const AOP_YEAR = year?.selectedYear
+      const vertName = verticalChange?.selectedVertical
+      const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const thisYear = AOP_YEAR
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -22,15 +40,6 @@ export default function MonthlyTemplatePlants() {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const unsavedChangesRef = useRef({ unsavedRows: {}, rowsBeforeChange: {} })
   const isOldYear = false
-  const verticalName = useMemo(() => {
-    const stored = localStorage.getItem('selectedVertical')
-    try {
-      return stored ? JSON.parse(stored).name?.toLowerCase() : ''
-    } catch (e) {
-      return ''
-    }
-  }, [])
-
   const columns = useMemo(
     () => [
       {
@@ -104,23 +113,15 @@ export default function MonthlyTemplatePlants() {
         type: 'number1',
       },
     ],
-    [verticalName],
+    [lowerVertName],
   )
 
-  const plantId = useMemo(() => {
-    const p = localStorage.getItem('selectedPlant')
-    try {
-      return p ? JSON.parse(p).id : null
-    } catch (e) {
-      return null
-    }
-  }, [])
-
-  const year = thisYear
+ 
   const fetchData = useCallback(async () => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     setLoading(true)
     try {
-      var res = await DataService.getMonthWiseSummary(keycloak)
+      var res = await DataService.getMonthWiseSummary(keycloak, PLANT_ID, AOP_YEAR)
       res = {
         code: 200,
         data: {
@@ -620,7 +621,7 @@ export default function MonthlyTemplatePlants() {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, year, plantId])
+  }, [fetchData, AOP_YEAR, PLANT_ID])
 
   const saveChanges = useCallback(async () => {
     try {
@@ -639,7 +640,8 @@ export default function MonthlyTemplatePlants() {
       const res = await DataService.saveMonthwiseProduction(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
+        AOP_YEAR,
       )
       if (res?.code === 200) {
         setSnackbarData({
@@ -660,7 +662,7 @@ export default function MonthlyTemplatePlants() {
       setSnackbarOpen(true)
       setLoading(false)
     }
-  }, [modifiedCells, keycloak, plantId])
+  }, [modifiedCells, keycloak, PLANT_ID])
 
   const handleRemarkCellClick = useCallback((row) => {
     setCurrentRemark(row.Remark || '')

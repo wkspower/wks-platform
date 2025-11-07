@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { truncateRemarks } from 'utils/remarksUtils'
-
+import { useSelector } from 'react-redux'
 import {
   Backdrop,
   CircularProgress,
@@ -20,7 +20,25 @@ import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 
 const MonthwiseProduction = () => {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const thisYear = AOP_YEAR
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -49,9 +67,6 @@ const MonthwiseProduction = () => {
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
   const isOldYear = oldYear?.oldYear === 1
-
-  const vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-  const verticalName = vertical?.toLowerCase()
 
   const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
   const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
@@ -326,13 +341,11 @@ const MonthwiseProduction = () => {
   }
 
   const [loading, setLoading] = useState(false)
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
 
   const fetchData = async () => {
     try {
       setLoading(true)
-      var res = await DataService.getMonthWiseSummary(keycloak)
+      var res = await DataService.getMonthWiseSummary(keycloak, PLANT_ID, AOP_YEAR)
       if (res?.code == 200) {
         res = res?.data?.data.map((item, index) => ({
           ...item,
@@ -354,7 +367,7 @@ const MonthwiseProduction = () => {
 
   useEffect(() => {
     fetchData()
-  }, [year, plantId])
+  }, [AOP_YEAR, PLANT_ID])
 
   const defaultCustomHeight = { mainBox: '34vh', otherBox: '112%' }
 
@@ -413,7 +426,8 @@ const MonthwiseProduction = () => {
       const res = await DataService.saveMonthwiseProduction(
         keycloak,
         rowsToUpdate,
-        plantId,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (res?.code == 200) {
@@ -447,16 +461,10 @@ const MonthwiseProduction = () => {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const year = localStorage.getItem('year')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
+
       const res = await DataService.handleCalculateMonthwiseProduction(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
 
@@ -496,7 +504,7 @@ const MonthwiseProduction = () => {
         title='Monthwise Production (T-16)'
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        columns={verticalName == 'meg' ? colsMeg : colsNonMeg}
+        columns={lowerVertName == 'meg' ? colsMeg : colsNonMeg}
         permissions={{
           customHeight: defaultCustomHeightGrid1,
           textAlignment: 'center',

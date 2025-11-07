@@ -35,7 +35,6 @@ const CrackerConfig = () => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant') || '{}')?.id
   const [modifiedCells, setModifiedCells] = useState({})
 
   const [snackbarData, setSnackbarData] = useState({
@@ -275,6 +274,7 @@ const CrackerConfig = () => {
   const fetchCrackerRows = useCallback(
     async (currentTabDisplay, mode) => {
       if (!currentTabDisplay) return
+      if(!PLANT_ID || !AOP_YEAR) return
       try {
         setLoading(true)
 
@@ -282,6 +282,8 @@ const CrackerConfig = () => {
           keycloak,
           mode,
           currentTabDisplay,
+          PLANT_ID,
+          AOP_YEAR,
         )
         let transformedData = []
         if (spyroVM?.data && Array.isArray(spyroVM.data)) {
@@ -320,6 +322,8 @@ const CrackerConfig = () => {
             keycloak,
             mode,
             currentTabDisplay,
+            PLANT_ID,
+            AOP_YEAR,
           )
         }
         let transformedData1 = (spyroVMYield1.data || []).map(
@@ -379,7 +383,7 @@ const CrackerConfig = () => {
   )
 
   useEffect(() => {
-    if (keycloak && plantId && currentTabDisplay) {
+    if (keycloak && PLANT_ID && currentTabDisplay) {
       if (currentTabDisplay === 'Yield') {
         fetchCrackerRowsYield(currentTabDisplay, selectMode)
       } else {
@@ -388,7 +392,7 @@ const CrackerConfig = () => {
     } else {
       console.warn('Missing data for fetchCrackerRows:', {
         hasKeycloak: !!keycloak,
-        hasPlantId: !!plantId,
+        hasPlantId: !!PLANT_ID,
         currentTabDisplay,
       })
     }
@@ -462,7 +466,8 @@ const CrackerConfig = () => {
       const response = await DataService.saveSpyroOutput(
         SpyroInputData,
         keycloak,
-        plantId,
+        PLANT_ID,
+        AOP_YEAR
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -516,6 +521,8 @@ const CrackerConfig = () => {
       const response = await DataService.saveSpyroOutputYield(
         SpyroOutputYield,
         keycloak,
+        PLANT_ID,
+        AOP_YEAR
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -552,8 +559,6 @@ const CrackerConfig = () => {
     setLoading(true)
 
     try {
-      const storedPlant = localStorage.getItem('selectedPlant')
-      const plantId = storedPlant ? JSON.parse(storedPlant)?.id : ''
       const mode = selectMode || '' // Optional
 
       let response
@@ -563,12 +568,16 @@ const CrackerConfig = () => {
           rawFile,
           keycloak,
           mode,
+          PLANT_ID,
+          AOP_YEAR
         )
       } else {
         response = await DataService.importSpyroOutputExcel(
           rawFile,
           keycloak,
           mode,
+          PLANT_ID,
+          AOP_YEAR
         )
       }
 
@@ -651,9 +660,9 @@ const CrackerConfig = () => {
     try {
       let response
       if (currentTabDisplay === 'Yield') {
-        response = await DataService.exportSpyroOutputExcelYield(keycloak, mode)
+        response = await DataService.exportSpyroOutputExcelYield(keycloak, mode, PLANT_ID, AOP_YEAR)
       } else {
-        response = await DataService.exportSpyroOutputExcel(keycloak, mode)
+        response = await DataService.exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR)
       }
 
       if (response?.code === 200) {

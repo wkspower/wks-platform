@@ -140,6 +140,8 @@ const TurnaroundReportCracker = () => {
       data = await ShutdownNormsApiService.shutdownConsumptionHistoryData(
         keycloak,
         gradeId,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (data?.code != 200) {

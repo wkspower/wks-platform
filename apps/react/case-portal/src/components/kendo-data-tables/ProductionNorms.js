@@ -378,11 +378,14 @@ const ProductionNorms = ({ permissions }) => {
   ]
 
   const fetchData = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       const response = await ProductionNormsApiService.getAOPData(
         keycloak,
         'Production',
+        PLANT_ID,
+        AOP_YEAR,
       )
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {
@@ -648,12 +651,15 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   const fetchDataByProducts = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
 
       const response = await ProductionNormsApiService.getAOPData(
         keycloak,
         'ByProducts',
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (response?.code != 200) {

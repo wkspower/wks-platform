@@ -20,11 +20,26 @@ const NormsHistorianBasisAromatics = () => {
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const [tabIndex, setTabIndex] = useState(0)
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantID, yearChanged, oldYear, verticalChange } = dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const timeoutIdsRef = useRef([])
   const isMountedRef = useRef(true)
@@ -61,6 +76,7 @@ const NormsHistorianBasisAromatics = () => {
   }, [])
 
   const fetchAllGrids = useCallback(async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
 
@@ -93,6 +109,9 @@ const NormsHistorianBasisAromatics = () => {
         REPORT_TYPE_FOR_ALL,
         StartDate,
         EndDate,
+        null,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (apiResponse?.code !== 200) {

@@ -29,7 +29,6 @@ const ShutdownNorms = () => {
     severity: 'info',
   })
   const [_plantID, set_PlantID] = useState('')
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -54,13 +53,14 @@ const ShutdownNorms = () => {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
+  const AOP_YAER = year?.selectedYear
 
   const PLANT_NAME = plantObject?.name
   const SITE_NAME = siteObject?.name
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
-
+  const headerMap = generateHeaderNames(AOP_YEAR)
   useEffect(() => {
     if (plantID?.plantId) {
       set_PlantID(plantID?.plantId)
@@ -131,6 +131,7 @@ const ShutdownNorms = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      if(!PLANT_ID || !AOP_YEAR) return
       try {
         if (['pe', 'pp'].includes(lowerVertName)) {
           if (!gradeId) return
@@ -144,9 +145,11 @@ const ShutdownNorms = () => {
           data = await ShutdownNormsApiService.getShutdownMonths(
             keycloak,
             gradeId,
+            PLANT_ID,
+            AOP_YEAR,
           )
         } else {
-          data = await ShutdownNormsApiService.getShutdownMonths(keycloak, null)
+          data = await ShutdownNormsApiService.getShutdownMonths(keycloak, null, PLANT_ID, AOP_YEAR)
         }
         setShutdownMonths(data)
 
@@ -222,6 +225,7 @@ const ShutdownNorms = () => {
           PLANT_ID,
           payload,
           keycloak,
+          AOP_YEAR,
         )
         // dispatch(setIsBlocked(true))
 
@@ -254,6 +258,7 @@ const ShutdownNorms = () => {
   }
 
   const fetchData = async (gradeId) => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       setRows([])
@@ -269,11 +274,15 @@ const ShutdownNorms = () => {
         data = await ShutdownNormsApiService.getShutdownNormsData(
           keycloak,
           gradeId,
+          PLANT_ID,
+          AOP_YAER,
         )
       } else {
         data = await ShutdownNormsApiService.shutdownConsumptionHistoryData(
           keycloak,
           gradeId,
+          PLANT_ID,
+          AOP_YAER,
         )
       }
 
@@ -428,10 +437,13 @@ const ShutdownNorms = () => {
     } else {
       // non PE/PP flow
       await fetchData(null)
+      if(!PLANT_ID || !AOP_YEAR) return
       try {
         const months = await ShutdownNormsApiService.getShutdownMonths(
           keycloak,
           null,
+          PLANT_ID,
+          AOP_YEAR,
         )
         setShutdownMonths(months)
       } catch (err) {

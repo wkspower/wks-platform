@@ -1,6 +1,11 @@
 import { DateTimePicker } from '@progress/kendo-react-dateinputs'
-
+import { useSelector } from 'react-redux'
 const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const {
+    year,
+  } = dataGridStore
+  const AOP_YEAR = year?.selectedYear
   const currentRaw = dataItem[field]
   const currentDate = currentRaw ? new Date(currentRaw) : null
 
@@ -13,7 +18,7 @@ const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
     })
   }
 
-  const fyString = localStorage.getItem('year')
+  const fyString = AOP_YEAR
   let fyMin = null
   let fyMax = null
 

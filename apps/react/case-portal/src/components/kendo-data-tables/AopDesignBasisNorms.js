@@ -96,13 +96,11 @@ const AopDesignBasisNorms = () => {
     }
     getConfigurationExecutionDetailsNorms()
 
-    let vertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-    let verticalName = vertical?.toLowerCase()
     setTimeout(() => {
       if (
-        verticalName != 'cracker' &&
-        verticalName != 'meg' &&
-        verticalName != 'elastomer'
+        lowerVertName != 'cracker' &&
+        lowerVertName != 'meg' &&
+        lowerVertName != 'elastomer'
       ) {
         getConfigurationTabsMatrix()
         getConfigurationAvailableTabs()
@@ -220,7 +218,7 @@ const AopDesignBasisNorms = () => {
   const getConfigurationExecutionDetailsNorms = async () => {
     try {
       const response =
-        await DataService.getConfigurationExecutionDetailsNorms(keycloak)
+        await DataService.getConfigurationExecutionDetailsNorms(keycloak, PLANT_ID, AOP_YEAR)
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(

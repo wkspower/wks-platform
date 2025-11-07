@@ -286,6 +286,7 @@ const ConsumptionNorms = () => {
   }
 
   const fetchData = async (gradeId) => {
+    if(!PLANT_ID || !AOP_YEAR) return
     if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
     setLoading(true)
     try {

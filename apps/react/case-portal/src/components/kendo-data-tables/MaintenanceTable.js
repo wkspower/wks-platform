@@ -31,17 +31,18 @@ const MaintenanceTable = () => {
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
   const lowerVertName = vertName?.toLowerCase()
-
   const dataConfig = useMemo(
     () => ({
       isCracker: lowerVertName === 'cracker',
       serviceFn:
         lowerVertName === 'cracker'
-          ? MaintenanceDetailsApiService.getCrackerMaintenanceData
-          : MaintenanceDetailsApiService.getMaintenanceData,
+          ? (keycloak, PLANT_ID, AOP_YEAR) =>
+              MaintenanceDetailsApiService.getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR)
+          : (keycloak, PLANT_ID, AOP_YEAR) =>
+              MaintenanceDetailsApiService.getMaintenanceData(keycloak, PLANT_ID, AOP_YEAR),
       editable: lowerVertName === 'cracker',
     }),
-    [plantID],
+    [PLANT_ID, AOP_YEAR, lowerVertName],
   )
 
   const headerMap = generateHeaderNames(AOP_YEAR)
@@ -168,6 +169,7 @@ const MaintenanceTable = () => {
     }
   }
   const fetchData = useCallback(async () => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     setRows([])
     setLoading(true)
     try {
@@ -211,7 +213,7 @@ const MaintenanceTable = () => {
     } finally {
       setLoading(false)
     }
-  }, [plantID, keycloak])
+  }, [PLANT_ID, AOP_YEAR, keycloak, dataConfig])
 
   const handleCalculate = useCallback(async () => {
     const plantId = PLANT_ID

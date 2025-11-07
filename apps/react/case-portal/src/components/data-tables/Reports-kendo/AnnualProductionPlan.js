@@ -391,6 +391,8 @@ const AnnualProductionPlan = () => {
       var res = await DataService.getAnnualProductionPlanReportData(
         keycloak,
         type,
+        PLANT_ID,
+        AOP_YEAR,
       )
       if (res?.code == 200) {
         res = res?.data?.plantProductionData.map((item, index) => ({

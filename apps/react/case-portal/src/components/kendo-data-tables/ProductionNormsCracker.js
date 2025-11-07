@@ -173,6 +173,7 @@ const ProductionNormsCracker = ({ permissions }) => {
         PLANT_ID,
         payload,
         keycloak,
+        AOP_YEAR,
       )
 
       // Adjust response check depending on your API (status, success flag, etc.)
@@ -288,11 +289,14 @@ const ProductionNormsCracker = ({ permissions }) => {
   ]
 
   const fetchData = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       const response = await ProductionNormsApiService.getAOPData(
         keycloak,
         'Production',
+        PLANT_ID,
+        AOP_YEAR,
       )
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {

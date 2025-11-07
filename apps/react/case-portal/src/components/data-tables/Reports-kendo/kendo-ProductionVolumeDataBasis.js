@@ -36,14 +36,32 @@ const ProductionVolumeDataBasis = () => {
   const [rowsCalculatedData, setRowsCalculatedData] = useState([])
   const [rowsRawData, setRowsRowData] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { yearChanged, oldYear, plantID } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+
   const isOldYear = oldYear?.oldYear === 1
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
-  const year = localStorage.getItem('year')
-  const headerMap = generateHeaderNames(year)
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const fetchData = async (reportType, setState, selectedUnit) => {
+    if(!PLANT_ID || !AOP_YEAR) return;
     if (!selectedUnit) return
     try {
       setLoading(true)
@@ -52,6 +70,8 @@ const ProductionVolumeDataBasis = () => {
         keycloak,
         reportType,
         selectedUnit,
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (data?.code === 200) {
@@ -123,12 +143,12 @@ const ProductionVolumeDataBasis = () => {
       setLoading(false)
     }
     fetchAllData()
-  }, [oldYear, yearChanged, keycloak, plantID, selectedUnit])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID, selectedUnit])
 
   useEffect(() => {
     const timers = [
       setTimeout(() => setShowGrids((prev) => ({ ...prev, mc: true })), 100),
-      setTimeout(() => setShowGrids((prev) => ({ ...prev, year: true })), 300),
+      setTimeout(() => setShowGrids((prev) => ({ ...prev, AOP_YEAR: true })), 300),
       setTimeout(
         () => setShowGrids((prev) => ({ ...prev, calculated: true })),
         500,
@@ -240,7 +260,7 @@ const ProductionVolumeDataBasis = () => {
           },
           {
             label: 'MC Yearwise',
-            visible: showGrids.year,
+            visible: showGrids.AOP_YEAR,
             rows: rowsMCYearWise,
             cols: colsMCYearwise,
           },
