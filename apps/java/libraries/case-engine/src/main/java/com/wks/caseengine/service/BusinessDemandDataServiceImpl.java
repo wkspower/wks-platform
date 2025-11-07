@@ -2,9 +2,13 @@ package com.wks.caseengine.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import jakarta.persistence.EntityManager;
@@ -14,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.sql.DataSource;
 
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BusinessDemand;
@@ -87,6 +93,12 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	
 	@Autowired
 	private SiteRepository siteRepository;
+	
+	private DataSource dataSource;
+	
+	public BusinessDemandDataServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
 
 	
@@ -890,6 +902,61 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to save data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM loadPlantContribution(String year, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantContributionReport";
+			// System.out.println(storedProcedure);
+			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			Map<String, Integer> map = new HashMap<>();
+			map.put("count", count);
+			AOPMessageVM response = new AOPMessageVM();
+			response.setData(map);
+			response.setCode(200);
+			response.setMessage("success");
+			return response;
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+
+	}
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String aopYear) {
+		try {
+
+			String callSql = "{call " + procedureName + "(?, ?)}";
+
+			try (Connection connection = dataSource.getConnection();
+					CallableStatement stmt = connection.prepareCall(callSql)) {
+
+				// Set parameters in the correct order
+				stmt.setString(1, plantId);
+				stmt.setString(2, aopYear);
+
+				// Execute the stored procedure
+				int rowsAffected = stmt.executeUpdate();
+
+				// Optional: commit if auto-commit is off
+				if (!connection.getAutoCommit()) {
+					connection.commit();
+				}
+
+				return rowsAffected;
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+				return 0;
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 

@@ -43,6 +43,15 @@ public class BusinessDemandDataController {
 		return businessDemandDataService.getBusinessDemand(year,plantId);
 	}
 	
+	@GetMapping("/load-plant-contribution")
+	public ResponseEntity<AOPMessageVM> loadPlantContribution(
+		@RequestParam String plantId,
+		@RequestParam String year) {
+	AOPMessageVM response =  businessDemandDataService.loadPlantContribution(year,plantId);
+	return ResponseEntity.status(response.getCode()).body(response);
+}
+
+	
 	@PostMapping(value="/business-demand-manual-entry")
 	public AOPMessageVM saveBusinessDemand(@RequestParam String year,@RequestParam String plantId,@RequestBody List<BusinessDemandMonthlyDTO> businessDemandMonthlyDTOs) {
 		return businessDemandDataService.saveBusinessDemand(year,plantId,businessDemandMonthlyDTOs);	
