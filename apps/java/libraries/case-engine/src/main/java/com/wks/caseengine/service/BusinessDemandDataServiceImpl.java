@@ -910,7 +910,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantContributionReport";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadPlantContributionSummaryBusinessDemand";
 			// System.out.println(storedProcedure);
 			int count = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			Map<String, Integer> map = new HashMap<>();
