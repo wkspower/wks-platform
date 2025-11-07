@@ -6,6 +6,7 @@ export const MockPlantContributionAPILastFourYears = {
     FORMAT_VALUES_3_DECIMAL,
     FORMAT_VALUES_2_DECIMAL,
     FORMAT_VALUES_COST,
+    FORMAT_VALUES_PRICE,
   }) {
     const currFY = year || ''
     let prevFY1 = ''
@@ -52,7 +53,7 @@ export const MockPlantContributionAPILastFourYears = {
                   editable: false,
                   align: 'right',
 
-                  format: FORMAT_VALUES_2_DECIMAL,
+                  format: FORMAT_VALUES_PRICE,
                   type: 'number',
                 },
               ],
@@ -167,7 +168,7 @@ export const MockPlantContributionAPILastFourYears = {
                   editable: false,
 
                   align: 'right',
-                  format: FORMAT_VALUES_3_DECIMAL,
+                  format: FORMAT_VALUES_PRICE,
                   type: 'number',
                 },
               ],
@@ -353,7 +354,7 @@ export const MockPlantContributionAPILastFourYears = {
                   editable: false,
 
                   align: 'right',
-                  format: FORMAT_VALUES_3_DECIMAL,
+                  format: FORMAT_VALUES_PRICE,
                   type: 'number',
                 },
               ],
@@ -544,7 +545,7 @@ export const MockPlantContributionAPILastFourYears = {
                   editable: false,
 
                   align: 'right',
-                  format: FORMAT_VALUES_3_DECIMAL,
+                  format: FORMAT_VALUES_PRICE,
                   type: 'number',
                 },
               ],
@@ -735,7 +736,7 @@ export const MockPlantContributionAPILastFourYears = {
                   editable: false,
 
                   align: 'right',
-                  format: FORMAT_VALUES_3_DECIMAL,
+                  format: FORMAT_VALUES_PRICE,
                   type: 'number',
                 },
               ],

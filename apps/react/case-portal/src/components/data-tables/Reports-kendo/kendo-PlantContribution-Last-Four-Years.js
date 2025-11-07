@@ -49,6 +49,7 @@ export default function PlantContributionLastFourYears() {
   const FORMAT_VALUES_2_DECIMAL =
     verticalName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
   const FORMAT_VALUES_COST = verticalName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+  const FORMAT_VALUES_PRICE = '{0:0}'
 
   const loadAll = async () => {
     setLoading(true)
@@ -64,6 +65,7 @@ export default function PlantContributionLastFourYears() {
             FORMAT_VALUES_3_DECIMAL,
             FORMAT_VALUES_2_DECIMAL,
             FORMAT_VALUES_COST,
+            FORMAT_VALUES_PRICE,
           })
 
         const apiResp = await DataService.plantContributionPlanLastFourYears(
