@@ -671,9 +671,7 @@ public class BasisReportServiceImpl implements BasisReportService {
 	                    Object value = rowMap.get(key);
 	                    if (key.equalsIgnoreCase("Mode") && value != null) {
 	                        mode = value.toString();
-	                        if(mode.equalsIgnoreCase("5F")) {
-	                        	System.out.println(mode);
-	                        }
+	                        
 	                        Object normParameter = rowMap.get("Material_FK_Id");
 	                        if (normParameter != null) {
 	                            normParameterId = normParameter.toString();
@@ -684,31 +682,22 @@ public class BasisReportServiceImpl implements BasisReportService {
 	                    Cell cell = row.createCell(i);
 	                    if (rowData != null && rowData.length > 0 && isMonth(key)) {
 	                        try {
-	                            // --- Correction Starts Here ---
-	                            // 1. Check if rowData is the 2D array (list inside a list)
-	                            // If rowData is Object[][], this check ensures we get the inner Object[]
 	                            Object[] dataRow = null;
 	                            if (rowData.length > 0 && rowData[0] instanceof Object[]) {
-	                                // Assume the monthly data is in the first (and only) inner array
 	                                dataRow = (Object[]) rowData[0];
 	                            } else {
-	                                // If it's already a 1D array, use it directly (fallback/original intent)
 	                                dataRow = rowData; 
 	                            }
 
 	                            if (dataRow != null && dataRow.length > 0) {
-	                                // 2. Proceed with the original logic using the correct dataRow
 	                                int monthIndex = getMonthNumberByName(key);
 	                                int arrayIndex = (monthIndex > 0) ? monthIndex : 0;
 	                                String dataValue = null;
-
-	                                // Ensure arrayIndex is within bounds of dataRow
 	                                if (arrayIndex < dataRow.length && dataRow[arrayIndex] != null) { 
 	                                    dataValue = dataRow[arrayIndex].toString();
 	                                }
 
 	                                if (dataValue != null) {
-	                                    // ... Styling logic remains the same ...
 	                                    if ("Propane(2Z)".equalsIgnoreCase(dataValue)) {
 	                                        cell.setCellStyle(greenTextStyle);
 	                                    } else if ("Propane(1Z)".equalsIgnoreCase(dataValue)) {
@@ -716,10 +705,7 @@ public class BasisReportServiceImpl implements BasisReportService {
 	                                    }
 	                                }
 	                            }
-	                            // --- Correction Ends Here ---
-
 	                        } catch (Exception ignored) {
-	                            // Handle or log the error instead of ignoring it in production code
 	                        }
 	                    }
 	                    setCellValue(cell, value);

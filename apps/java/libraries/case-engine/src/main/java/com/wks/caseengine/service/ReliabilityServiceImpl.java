@@ -253,7 +253,7 @@ public class ReliabilityServiceImpl implements ReliabilityService{
 		            data.put(tableId, dataList);
 		        }
 
-		        return excelUtilityService.generateFlexibleExcelForBudgetMaintenance(structure, data);
+		        return excelUtilityService.generateFlexibleExcelForReliability(structure, data);
 
 		    } catch (Exception e) {
 		        e.printStackTrace();
@@ -345,7 +345,7 @@ public class ReliabilityServiceImpl implements ReliabilityService{
 		            data.put(tableId, dataList);
 		        }
 
-		        return excelUtilityService.generateFlexibleExcelForBudgetMaintenance(structure, data);
+		        return excelUtilityService.generateFlexibleExcelForReliability(structure, data);
 
 		    } catch (Exception e) {
 		        e.printStackTrace();

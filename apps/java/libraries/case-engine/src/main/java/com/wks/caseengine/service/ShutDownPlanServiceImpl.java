@@ -706,7 +706,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                     dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
 	                }
 	                if (dto.getDiscription() != null) {
-	                    des.add(dto.getDiscription());
+	                    des.add(dto.getDiscription().trim());
 	                }
 
 	                LocalDateTime[] bounds = parseFinancialYearBounds(year);

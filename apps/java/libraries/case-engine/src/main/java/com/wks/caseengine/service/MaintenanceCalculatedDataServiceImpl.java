@@ -36,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wks.caseengine.dto.AOPMaintenanceDesignRemarksDTO;
 import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
@@ -93,6 +94,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	
 	@Autowired
 	private ExcelUtilityService excelUtilityService;
+	
+	@Autowired
+	private AOPMaintenanceDesignBasisService aopMaintenanceDesignBasisService;
+	
+	@Autowired
+	private AOPMaintenanceDesignRemarksService aopMaintenanceDesignRemarksService;
 
 	@Override
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(String plantId, String year) {
@@ -752,6 +759,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	public byte[] createExcel(String year, String plantId, boolean isAfterSave,
 	        Map<String, List<BudgetMaintenanceDto>> mapForExcel) {
 	    try {
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 	        String structureJson = getJson();
 	        ObjectMapper mapper = new ObjectMapper();
 	        Map<String, List<List<Object>>> data = new HashMap<>();
@@ -772,6 +781,30 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        }
 	        
 	        Map<String, Object> sheetData = (Map<String, Object>) structure.get("BudgetMaintenance");
+	        List<Map<String, String>> fields = (List<Map<String, String>>) sheetData.get("metadataFields"); 
+	        
+	        Map<String, Object> metadataValues = new HashMap<>();
+	        for (Map<String, String> field : fields) {
+	            String key = field.get("key");
+	            switch (key) {
+	                case "year":{
+	                	metadataValues.put(key, year);
+	                    break;
+	                }  
+	                case "plant":{
+	                	metadataValues.put(key, plant.getDisplayName());
+	                    break;
+	                }
+	                 case "site":{
+	                	 metadataValues.put(key, site.getDisplayName());
+		                 break;
+	                 }	
+	                 case "date":{
+	                	 metadataValues.put(key, new Date());
+		                 break;
+	                 }	
+	            }
+	        }
 	        List<Map<String, Object>> tables = (List<Map<String, Object>>) sheetData.get("tables");
 
 	        for (Map<String, Object> table : tables) {
@@ -781,7 +814,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            Integer startingIndexofMonths = (Integer) table.get("startingIndexOfMonths");
 	            List<List<String>> headersOuterTitles = (List<List<String>>) table.get("headersTitles");
 
-	            // Add months to the header titles
 	            headersOuterTitles.get(0).addAll(startingIndexofMonths, excelUtilityService.getAcademicYearMonths(year));
 
 	            List<List<Object>> dataList = new ArrayList<>();
@@ -808,6 +840,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	            // Populate the data rows using reflection
 	            for (BudgetMaintenanceDto dto : sourceData) {
+	            	if(dto.getCostName().equalsIgnoreCase("Total Cost")) {
+	            		continue;
+	            	}
 	                List<Object> row = new ArrayList<>();
 	                for (String fieldName : headers) {
 	                    try {
@@ -826,14 +861,28 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            
 	            data.put(tableId, dataList);
 	        }
-
-	        return excelUtilityService.generateFlexibleExcelForBudgetMaintenance(structure, data);
+	        
+	        return excelUtilityService.generateFlexibleExcelForBudgetMaintenance(structure, data, metadataValues,getBasisSummary(plantId,year),getRemarksSummary(plantId,year));
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        // You might want to log the exception more professionally here
 	        return null;
 	    }
+	}
+	
+	public String getBasisSummary(String plantId, String year) {
+		AOPMessageVM designBasis= aopMaintenanceDesignBasisService.getMaintenanceDesignBasis(plantId,year);
+        List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs =(List<AOPMaintenanceDesignRemarksDTO>) designBasis.getData();
+        AOPMaintenanceDesignRemarksDTO aopMaintenanceDesignRemarksDTO = aopMaintenanceDesignRemarksDTOs.get(0);
+        return aopMaintenanceDesignRemarksDTO.getSummary();
+	}
+	
+	public String getRemarksSummary(String plantId, String year) {
+		AOPMessageVM designBasis= aopMaintenanceDesignRemarksService.getMaintenanceDesignRemarks(plantId,year);
+        List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs =(List<AOPMaintenanceDesignRemarksDTO>) designBasis.getData();
+        AOPMaintenanceDesignRemarksDTO aopMaintenanceDesignRemarksDTO = aopMaintenanceDesignRemarksDTOs.get(0);
+        return aopMaintenanceDesignRemarksDTO.getSummary();
 	}
 
 	
@@ -954,7 +1003,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 		try {
 			
-			Map<String, List<BudgetMaintenanceDto>> map = readBudgetMaintenanceExcel(file.getInputStream(), year);
+			Map<String, List<BudgetMaintenanceDto>> map = readBudgetMaintenanceExcel(file.getInputStream(), year,plantFKId);
 			
 			Map<String, List<BudgetMaintenanceDto>> mapForExcel = new HashMap<>();
 			List<BudgetMaintenanceDto> failedRecords = new ArrayList<>();
@@ -999,16 +1048,49 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		}
 	}
 	
-	public Map<String, List<BudgetMaintenanceDto>> readBudgetMaintenanceExcel(InputStream inputStream, String year) {
+	public Map<String, List<BudgetMaintenanceDto>> readBudgetMaintenanceExcel(InputStream inputStream, String year,String plantId) {
 
 		Map<String, List<BudgetMaintenanceDto>> map = new HashMap<>();
+		String basisSummary = null;
+	    String remarkSummary = null;
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 
 				Sheet sheet = workbook.getSheetAt(0);
 				Iterator<Row> rowIterator = sheet.iterator();
+				int summaryRowStart = -1;
+		        while (rowIterator.hasNext()) {
+		            Row row = rowIterator.next();
+		            Cell basisLabelCell = row.getCell(0, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+
+		            if (basisLabelCell != null && basisLabelCell.getCellType() == CellType.STRING) {
+		                String cellValue = basisLabelCell.getStringCellValue().trim();
+		                if ("Justification:".equalsIgnoreCase(cellValue)) {
+		                    summaryRowStart = row.getRowNum();
+		                    break; 
+		                }
+		            }
+		        }
+		        if (summaryRowStart != -1) {
+		            int contentRow = summaryRowStart + 1;
+		            Row contentDataRow = sheet.getRow(contentRow); 
+
+		            if (contentDataRow != null) {
+		                Cell basisCell = contentDataRow.getCell(0, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+		                if (basisCell != null) {
+		                    basisSummary = getCellStringValue(basisCell); 
+		                }
+		                Cell remarkCell = contentDataRow.getCell(8, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+		                if (remarkCell != null) {
+		                    remarkSummary = getCellStringValue(remarkCell); 
+		                }
+		            }
+		        }
+		        aopMaintenanceDesignRemarksService.updateMaintenanceDesignRemarks(plantId,year,remarkSummary);
+		        aopMaintenanceDesignBasisService.updateMaintenanceDesignBasis(plantId,year,basisSummary);
+		        		
 				List<BudgetMaintenanceDto> budgetMaintenanceDto = new ArrayList<BudgetMaintenanceDto>();
 				if (rowIterator.hasNext())
-					rowIterator.next(); // Skip header
+					rowIterator.next();
 
 				while (rowIterator.hasNext()) {
 					Row row = rowIterator.next();
@@ -1065,6 +1147,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 		return map;
 	}
+	
 	
 	private static String getStringCellValue(Cell cell, DecokePlanningDTO dto) {
 		try {
@@ -1139,6 +1222,20 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		} catch (Exception e) {
 			dto.setSaveStatus("Failed");
 			dto.setErrDescription("Please enter correct values");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	
+	private static String getCellStringValue(Cell cell) {
+		try {
+			if (cell == null)
+				return null;
+			cell.setCellType(CellType.STRING);
+			return cell.getStringCellValue().trim();
+		} catch (Exception e) {
+			
 			e.printStackTrace();
 		}
 		return null;
@@ -1240,8 +1337,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                "title": "Site"
 	              },
 	              {
-	                "key": "site",
-	                "title": "Site"
+	                "key": "date",
+	                "title": "Date"
 	              }
 	            ],
 	            "tables": [
