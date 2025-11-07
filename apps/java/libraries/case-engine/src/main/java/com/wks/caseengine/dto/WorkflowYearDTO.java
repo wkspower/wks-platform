@@ -24,9 +24,9 @@ public class WorkflowYearDTO {
 
 	private String particulates;
 	private String uom;
-	private Double fyAop;
-	private Double fyActual;
-	private Double syAop;
+	private String fyAop;
+	private String fyActual;
+	private String syAop;
 	private String remark;
 	private String aopType;
 	private String aopYear;

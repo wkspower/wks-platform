@@ -288,7 +288,7 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 					String value = row[i] != null ? row[i].toString() : null;
 
 					String mode = null;
-					if ("Propane(2Z)".equalsIgnoreCase(value) || "Propane(1Z)".equalsIgnoreCase(value)) {
+					if ("Propane(2Z)".equalsIgnoreCase(value) || "Propane(1Z)".equalsIgnoreCase(value)  || "Copied".equalsIgnoreCase(value)) {
 						mode = value;
 						System.out.println("value2 " + value);
 						Map<String, Object> map = new LinkedHashMap<>();

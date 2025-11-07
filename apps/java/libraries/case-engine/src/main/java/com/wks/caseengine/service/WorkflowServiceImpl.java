@@ -251,9 +251,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowYearDTO dto = new WorkflowYearDTO();
 				dto.setParticulates(row[0] != null ? row[0].toString() : null);
 				dto.setUom(row[1] != null ? row[1].toString() : null);
-				dto.setFyAop(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
-				dto.setFyActual(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
-				dto.setSyAop(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+				dto.setFyAop(row[2] != null ? row[2].toString() : null);
+				dto.setFyActual(row[3] != null ? row[3].toString() : null);
+				dto.setSyAop(row[4] != null ? row[4].toString() : null);
 				dto.setRemark(row[5] != null ? row[5].toString() : "");
 				dto.setAopYear(year);
 				workflowList.add(dto);
@@ -286,9 +286,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 				WorkflowYearDTO dto = new WorkflowYearDTO();
 				dto.setParticulates(row[0] != null ? row[0].toString() : null);
 				dto.setUom(row[1] != null ? row[1].toString() : null);
-				dto.setFyAop(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
-				dto.setFyActual(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
-				dto.setSyAop(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+				dto.setFyAop(row[2] != null ? row[2].toString() : null);
+				dto.setFyActual(row[3] != null ? row[3].toString() : null);
+				dto.setSyAop(row[4] != null ? row[4].toString() : null);
 				dto.setRemark(row[5] != null ? row[5].toString() : "");
 				dto.setAopYear(year);
 				workflowList.add(dto);
