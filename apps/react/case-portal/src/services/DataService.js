@@ -138,6 +138,7 @@ export const DataService = {
 
   plantContributionPlanLastFourYears,
   calculatePlantContributionSummaryYearly,
+  calculateLoadPlantContribution,
   getRecipeExcel,
   saveRecipeExcel,
   getShutdownRateExcel,
@@ -3128,7 +3129,31 @@ async function calculatePlantContributionSummaryYearly(
     return Promise.reject(e)
   }
 }
-
+async function calculateLoadPlantContribution(
+  PLANT_ID,
+  AOP_YEAR,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/load-plant-contribution?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const data = await resp.json() // Parse JSON response
+    return data
+  } catch (e) {
+    console.error('Error fetching calculation data:', e)
+    return Promise.reject(e)
+  }
+}
 async function getConfigurationExecutionDetailsNorms(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/configuration-execution-norms?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {

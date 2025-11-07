@@ -189,6 +189,12 @@ const WorkFlowMerge = () => {
             keycloak,
           ),
 
+          DataService.calculateLoadPlantContribution(
+            PLANT_ID,
+            AOP_YEAR,
+            keycloak,
+          ),
+
           lowerVertName === 'meg' || lowerVertName === 'pe'
             ? DataService.calculatePlantContributionReportData(
                 PLANT_ID,
