@@ -697,22 +697,22 @@ public class AOPReportServiceImpl implements AOPReportService {
 		}
 	}
 	
-	public List<Object[]> getSpecificConsumptionNormsData(String plantId, String aopYear, String category) {
+	public List<Object[]> getSpecificConsumptionNormsData(String plantId, String aopYear, String reportType) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = verticalName + "_" + site.getName() + "_SpecificConsumptionNormsReport";
+			String storedProcedure = verticalName + "_" + site.getName() + "_PlantContributionFiveYearSummaryBusinessDemandBasisReport";
 			
 			String sql = "EXEC " + storedProcedure
-					+ " @plantId = :plantId, @aopYear = :aopYear, @category = :category";
+					+ " @plantId = :plantId, @aopYear = :aopYear, @reportType = :reportType";
 
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
-			query.setParameter("category", category);
+			query.setParameter("reportType", reportType);
 
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
