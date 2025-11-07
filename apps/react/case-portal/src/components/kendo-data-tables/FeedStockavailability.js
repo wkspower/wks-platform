@@ -7,18 +7,22 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 // import NumericInputOnly from 'utils/NumericInputOnly'
 import getEnhancedColDefs from './CommonHeader/feedstockHeaders'
-
+import { useSelector } from 'react-redux'
 const FeedStockAvailability = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
-
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const {
+    year,
+  } = dataGridStore
+  const AOP_YEAR = year?.selectedYear
   // const [productOptions, setProductOptions] = useState([])
   // const [productionData, setProductionData] = useState([])
   // const dataGridStore = useSelector((state) => state.dataGridStore)
   // const { sitePlantChange } = dataGridStore
   const [open1, setOpen1] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({})
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()

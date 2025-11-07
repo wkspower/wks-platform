@@ -159,22 +159,7 @@ const AopSummary = ({ permissions }) => {
 
   const saveBusinessDemandData = async (newRows) => {
     try {
-      let plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
-      let siteId = ''
-      const storedSite = localStorage.getItem('selectedSiteId')
-      if (storedSite) {
-        const parsedSite = JSON.parse(storedSite)
-        siteId = parsedSite.id
-      }
-
-      let verticalId = localStorage.getItem('verticalId')
-
+      
       const businessData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
@@ -190,10 +175,10 @@ const AopSummary = ({ permissions }) => {
         march: row.march || null,
         remark: row.remark || null,
         avgTph: row.avgTph || null,
-        year: localStorage.getItem('year'),
-        plantId: plantId,
-        siteFKId: siteId,
-        verticalFKId: verticalId,
+        year: AOP_YEAR,
+        plantId: PLANT_ID,
+        siteFKId: SITE_ID,
+        verticalFKId: VERTICAL_ID,
         normParameterId: row.normParameterId,
         id: row.idFromApi || null,
         inEdit: row.inEdit || false,

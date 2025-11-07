@@ -146,16 +146,32 @@ const KendoDataTablesReciepe = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
 
   const shouldShowExportImportButtons = () => {
-    const verticalObject = JSON.parse(localStorage.getItem('selectedVertical'))
-    const siteObject = JSON.parse(localStorage.getItem('selectedSite'))
-    const plantObject = JSON.parse(localStorage.getItem('selectedPlant'))
-
-    const verticalName = verticalObject?.name?.toLowerCase()
+    const dataGridStore = useSelector((state) => state.dataGridStore)
+      const {
+        verticalChange,
+        yearChanged,
+        oldYear,
+        plantID,
+        plantObject,
+        siteObject,
+        verticalObject,
+        year,
+        screenTitle,
+      } = dataGridStore
+      const PLANT_ID = plantObject?.id
+      const SITE_ID = siteObject?.id
+      const VERTICAL_ID = verticalObject?.id
+      const VERTICAL_NAME = verticalObject?.name
+      const AOP_YEAR = year?.selectedYear
+      const isOldYear = oldYear?.oldYear
+      const vertName = verticalChange?.selectedVertical
+      const lowerVertName = vertName?.toLowerCase() || 'meg'
+      const SCREEN_NAME = screenTitle?.title
     const siteName = siteObject?.name?.toLowerCase()
     const plantName = plantObject?.name?.toLowerCase()
 
     // Check if conditions are met for showing export/import buttons
-    return verticalName === 'pe' || verticalName === 'pp'
+    return lowerVertName === 'pe' || lowerVertName === 'pp'
   }
   const initialGroup = groupBy
     ? [

@@ -54,15 +54,12 @@ export default function PlantContribution() {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [rows, setRows] = useState()
-  const verticalName = JSON.parse(
-    localStorage.getItem('selectedVertical'),
-  )?.name?.toLowerCase()
 
   const FORMAT_VALUES_3_DECIMAL =
-    verticalName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
+    lowerVertName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
   const FORMAT_VALUES_2_DECIMAL =
-    verticalName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
-  const FORMAT_VALUES_COST = verticalName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+    lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
+  const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
   const FORMAT_VALUES_PRICE = '{0:0}'
 
   const loadAll = async () => {

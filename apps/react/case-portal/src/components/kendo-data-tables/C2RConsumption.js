@@ -16,13 +16,29 @@ const C2RConsumption = ({ permissions }) => {
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
   const apiRef = useGridApiRef()
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
   const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const SCREEN_NAME = screenTitle?.title
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const [_plantID, set_PlantID] = useState('')
-  const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
-  const isOldYear = oldYear?.oldYear
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -96,23 +112,16 @@ const C2RConsumption = ({ permissions }) => {
     setLoading(true)
 
     try {
-      let plantId = ''
-      const isKiloTon = selectedUnit != ('MT' || 'MT/Month')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-
+      
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
         aopStatus: row.aopStatus || null,
-        aopYear: localStorage.getItem('year'),
-        plantFKId: plantId,
+        aopYear: AOP_YEAR,
+        plantFKId: PLANT_ID,
         materialFKId: row.normParametersFKId,
-        siteFKId: JSON.parse(localStorage.getItem('selectedSiteId')).id,
-        verticalFKId: localStorage.getItem('verticalId'),
+        siteFKId: SITE_ID,
+        verticalFKId: VERTICAL_ID,
         april:
           row.april === 0
             ? 0
@@ -245,16 +254,9 @@ const C2RConsumption = ({ permissions }) => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      const year = localStorage.getItem('year')
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
-      var plantId = plantId
       const data = await ProductionNormsApiService.handleCalculate(
-        plantId,
-        year,
+        PLANT_ID,
+        AOP_YEAR,
         keycloak,
       )
       if (data?.code == 200) {
@@ -340,6 +342,8 @@ const C2RConsumption = ({ permissions }) => {
       const response = await ProductionNormsApiService.getAOPData(
         keycloak,
         'Production',
+        PLANT_ID,
+        AOP_YEAR,
       )
       setCalculationObject(response?.data?.aopCalculation)
       if (response?.code != 200) {
@@ -426,7 +430,7 @@ const C2RConsumption = ({ permissions }) => {
         })
       }
 
-      const fiscalYear = localStorage.getItem('year')
+      const fiscalYear = AOP_YEAR
       const startYear = parseInt(fiscalYear.split('-')[0], 10)
       const nextYear = startYear + 1
 
@@ -554,12 +558,15 @@ const C2RConsumption = ({ permissions }) => {
   }
 
   const fetchDataByProducts = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
 
       const response = await ProductionNormsApiService.getAOPData(
         keycloak,
         'ByProducts',
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (response?.code != 200) {

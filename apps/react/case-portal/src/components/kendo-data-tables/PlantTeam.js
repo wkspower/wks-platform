@@ -10,8 +10,12 @@ import { useSelector } from 'react-redux'
 
 export default function PlantTeam() {
   const keycloak = useSession()
-  const thisYear = localStorage.getItem('year')
-
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+    const {
+      year,
+    } = dataGridStore
+    const AOP_YEAR = year?.selectedYear
+  const thisYear =AOP_YEAR
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
 
@@ -20,14 +24,12 @@ export default function PlantTeam() {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
-
-  const dataGridStore = useSelector((state) => state.dataGridStore)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
-  const headerMap = generateHeaderNames(localStorage.getItem('year'))
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   // second grid states
   const [rowsP, setRowsP] = useState([])
@@ -56,15 +58,6 @@ export default function PlantTeam() {
     const [start, end] = thisYear.split('-').map(Number)
     return `${start - 1}-${(end - 1).toString().slice(-2)}`
   }, [thisYear])
-
-  const verticalName = useMemo(() => {
-    const stored = localStorage.getItem('selectedVertical')
-    try {
-      return stored ? JSON.parse(stored).name?.toLowerCase() : ''
-    } catch (e) {
-      return ''
-    }
-  }, [])
 
   const columns = useMemo(
     () => [
@@ -110,7 +103,6 @@ export default function PlantTeam() {
     [plantID, yearChanged],
   )
 
-  const year = thisYear
   const peopleInitiativeColumns = [
     {
       field: 'serialNumber',
