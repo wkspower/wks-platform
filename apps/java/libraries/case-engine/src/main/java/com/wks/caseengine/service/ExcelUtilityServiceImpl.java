@@ -280,7 +280,6 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
             CellStyle unlockedStyle = workbook.createCellStyle();
             unlockedStyle.setLocked(false);
             
-
             for (String sheetName : structure.keySet()) {
                 Map<String, Object> sheetData = (Map<String, Object>) structure.get(sheetName);
                 
@@ -294,39 +293,47 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                 List<Map<String, String>> metadataFields = (List<Map<String, String>>) sheetData.get("metadataFields");
 
                 if (metadataFields != null && metadataFields.size() > 0) {
-                    CellStyle metadataTitleStyle = createBoldStyle(workbook); 
-                    Row mainTitleRow = sheet.createRow(currentRow++);
-                    Cell mainTitleCell = mainTitleRow.createCell(0);
-                    mainTitleCell.setCellValue(sheetName); 
-                    mainTitleCell.setCellStyle(createBoldStyle(workbook));
-                    currentRow++; 
-                    for (Map<String, String> field : metadataFields) {
-                        String key = field.get("key");
-                        String title = field.get("title");
-                        Object value = metadataValues.get(key); 
-                        Row metadataRow = sheet.createRow(currentRow++);
-                        Cell titleCell = metadataRow.createCell(0);
-                        titleCell.setCellValue(title + ":");
-                        titleCell.setCellStyle(metadataTitleStyle); // Apply bold style
-                        Cell valueCell = metadataRow.createCell(1);
-                        
-                        if (value != null) {
-                            if (value instanceof Date) {
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-                                valueCell.setCellValue(dateFormat.format((Date) value));
-                            } else {
-                                valueCell.setCellValue(value.toString());
-                            }
-                        } else {
-                            valueCell.setCellValue("N/A"); 
-                        }
-                    }
+                	SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy");
+                	Object dateValue = metadataValues.get("date");
+                	String formattedDate = "";
+                	if (dateValue instanceof Date) {
+                	    formattedDate = dateFormatter.format((Date) dateValue);
+                	}
+                    String formattedSheetName = sheetName.replace("BudgetMaintenance", "Budget Maintenance");
+                    String date = metadataValues.containsKey("date") ? "Date: " + formattedDate : "";
+                    String year = metadataValues.containsKey("year") ? "AOP Year: " + metadataValues.get("year") : "";
+                    String site = metadataValues.containsKey("site") ? "Site: " + metadataValues.get("site") : "";
+                    String plant = metadataValues.containsKey("plant") ? "Plant: " + metadataValues.get("plant") : "";
+                    String combinedTitle = formattedSheetName + "\n" +
+                                           date + " | " + year + "\n" +
+                                           site + " | " + plant;
                     
-                    currentRow++; 
-                    currentRow++; 
-                }
+                    
+                    final int titleStartRow = currentRow; 
+                    Row mainTitleRow = sheet.createRow(currentRow); 
+                    Cell mainTitleCell = mainTitleRow.createCell(0);
+                    mainTitleCell.setCellValue(combinedTitle); 
+                    
+                    CellStyle boldCenteredWrappedStyle = createBoldStyle(workbook);
+                    boldCenteredWrappedStyle.setAlignment(HorizontalAlignment.CENTER);
+                    boldCenteredWrappedStyle.setVerticalAlignment(VerticalAlignment.CENTER); 
+                    boldCenteredWrappedStyle.setWrapText(true); 
+                    mainTitleCell.setCellStyle(boldCenteredWrappedStyle);
+                    
+                   
+                    sheet.addMergedRegion(new CellRangeAddress(
+                        titleStartRow, 
+                        titleStartRow + 3, 
+                        0, 
+                        16 
+                    ));
+                    
+                    currentRow += 4;
+                    currentRow++;   
+                } 
+                
                 CellStyle summaryStyle = workbook.createCellStyle();
-                summaryStyle.setWrapText(true); // Enable wrap text for multi-line summaries
+                summaryStyle.setWrapText(true); 
                 summaryStyle.setBorderTop(BorderStyle.THIN);
                 summaryStyle.setBorderBottom(BorderStyle.THIN);
                 summaryStyle.setBorderLeft(BorderStyle.THIN);
@@ -334,14 +341,14 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                 Row summaryLabelRow = sheet.createRow(currentRow++);
                 Cell basisSummaryLabelCell = summaryLabelRow.createCell(0);
                 basisSummaryLabelCell.setCellValue("Justification:");
-                basisSummaryLabelCell.setCellStyle(createBoldStyle(workbook)); // Assuming createBoldStyle exists
+                basisSummaryLabelCell.setCellStyle(createBoldStyle(workbook)); 
                 Cell remarkSummaryLabelCell = summaryLabelRow.createCell(8); 
                 remarkSummaryLabelCell.setCellValue("Remarks:");
-                remarkSummaryLabelCell.setCellStyle(createBoldStyle(workbook)); // Assuming createBoldStyle exists
+                remarkSummaryLabelCell.setCellStyle(createBoldStyle(workbook)); 
                 int basisStartCol = 0;
-                int basisEndCol = basisStartCol + 6; // 7 columns total (0 to 6)
+                int basisEndCol = basisStartCol + 6; 
                 
-                Row basisSummaryRow = sheet.createRow(currentRow); // Start row for content
+                Row basisSummaryRow = sheet.createRow(currentRow); 
                 Cell basisSummaryCell = basisSummaryRow.createCell(basisStartCol);
                 basisSummaryCell.setCellValue(basisSummary != null ? basisSummary : "");
                 basisSummaryCell.setCellStyle(summaryStyle); 
@@ -354,7 +361,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     }
                 }
                 int remarkStartCol = 8;
-                int remarkEndCol = remarkStartCol + 8; // 7 columns total (8 to 14)
+                int remarkEndCol = remarkStartCol + 8; 
                 
                 Cell remarkSummaryCell = basisSummaryRow.createCell(remarkStartCol); 
                 remarkSummaryCell.setCellValue(remarkSummary != null ? remarkSummary : "");
@@ -564,7 +571,20 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
         return null;
     }
 
-
+ // Helper function to handle cell value setting (Date/String/N/A)
+    private void setFormattedCellValue(Cell valueCell, Object value, CellStyle style) {
+        if (value != null) {
+            if (value instanceof Date) {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+                valueCell.setCellValue(dateFormat.format((Date) value));
+            } else {
+                valueCell.setCellValue(value.toString());
+            }
+        } else {
+            valueCell.setCellValue("N/A");
+        }
+        valueCell.setCellStyle(style); // Apply the specific alignment style
+    }
     public byte[] generateFlexibleExcelForReliability(Map<String, Object> structure, Map<String, List<List<Object>>> data) {
         try {
             Workbook workbook = new XSSFWorkbook();

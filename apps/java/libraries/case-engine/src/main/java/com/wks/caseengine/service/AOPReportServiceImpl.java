@@ -368,7 +368,7 @@ public class AOPReportServiceImpl implements AOPReportService {
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadAnnualAOPCost_MIISContribution";
-			System.out.println(storedProcedure);
+			
 			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year);
 			
 			aopMessageVM.setCode(200);

@@ -1096,8 +1096,6 @@ public class BasisReportServiceImpl implements BasisReportService {
 	                }
 	                gridDataMap.add(rowMap);
 	            }
-
-	            
 	            Map<String, Object> part = new LinkedHashMap<>();
 	            part.put("gridName", gridName);
 	            part.put("data", gridDataMap);
@@ -1123,6 +1121,8 @@ public class BasisReportServiceImpl implements BasisReportService {
 	@Transactional(readOnly = true)
 	public List<List<Map<String, Object>>> getBestAchievedAllColumnMeta(
 	    String plantId, String aopYear,String reportType, String storedProcedure) {
+		
+		System.out.println("storedProcedure= "+storedProcedure);
 
 	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?) }";
 
@@ -1167,13 +1167,18 @@ public class BasisReportServiceImpl implements BasisReportService {
 	            return allMetadataGrids;
 
 	        } catch (java.sql.SQLException e) {
+	        	e.printStackTrace();
+	            throw new RuntimeException("Error executing stored procedure for metadata: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
+	        }
+	        catch (Exception e) {
+	        	e.printStackTrace();
 	            throw new RuntimeException("Error executing stored procedure for metadata: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
 	        }
 	    });
 	}
 	@Transactional(readOnly = true) 
 	public List<List<Object[]>> getBestAchievedReportData(String plantId, String aopYear,String reportType,String storedProcedure) {
-   
+		System.out.println("storedProcedure= "+storedProcedure);
 	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?) }";
 	   
 	    Session session = entityManager.unwrap(Session.class);
@@ -1216,7 +1221,11 @@ public class BasisReportServiceImpl implements BasisReportService {
 	            return allGrids;
 
 	        } catch (java.sql.SQLException e) {
-	            // Include the dynamic SP name in the error message for better debugging
+	        	e.printStackTrace();
+	            throw new RuntimeException("Error executing stored procedure: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
+	        }
+	        catch (Exception e) {
+	        	e.printStackTrace();
 	            throw new RuntimeException("Error executing stored procedure: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
 	        }
 	    });

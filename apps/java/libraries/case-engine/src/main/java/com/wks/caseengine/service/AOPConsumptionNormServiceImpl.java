@@ -241,7 +241,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateConsumptionAOPValues";
-			System.out.println(storedProcedure);
+			
 			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, site.getId().toString(),
 					vertical.getId().toString(), year);
 			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"consumption-aop");
@@ -312,7 +312,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 
 			List<CalculatedConsumptionNormsDTO> listDTO = new ArrayList<>();
 			String storedProcedure = vertical.getName() + "_"+site.getName()+"_CalculateConsumptionAOPValues";
-			System.out.println("Executing SP: " + storedProcedure);
+			
 
 			List<Object[]> results = getCalculatedConsumptionNormsSP(storedProcedure, year, plant.getId().toString(),
 					site.getId().toString(), vertical.getId().toString());

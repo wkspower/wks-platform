@@ -29,7 +29,6 @@ public class NormAttributeTransactionsController {
 	@GetMapping(value="/getCatalystSelectivityData")
 	public	String getCatalystSelectivityData(@RequestParam String year,@RequestParam UUID plantId,@RequestParam UUID siteId){
 		try {
-			System.out.println("result for configuration"+configurationService.getConfigurationData(year,plantId));
 			return normAttributeTransactionsService.getCatalystSelectivityData(year,plantId);
 		}catch(Exception e) {
 			e.printStackTrace();

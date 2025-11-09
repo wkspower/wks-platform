@@ -276,9 +276,6 @@ public class ModeWiseNormsServiceImpl implements ModeWiseNormsService {
 			// Get the data
 			List<Object[]> rows = mcuNormsValueRepository.getNormsMonthWiseModeTypeData(year, plantId, modeVal);
 
-			// Get column names
-
-			// Prepare the list of maps
 			List<Map<String, Object>> resultList = new ArrayList<>();
 
 			for (Object[] row : rows) {

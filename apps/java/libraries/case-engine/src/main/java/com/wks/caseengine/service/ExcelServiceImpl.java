@@ -80,14 +80,8 @@ public class ExcelServiceImpl implements ExcelService {
                         .replaceAll("previous4YearJson", previous4Year)
                         .replaceAll("nextYearJson", nextYear);
                 dataStr = dataStr.replace("\"monthsJson\"", quotedMonths);
-
-                System.out.println(dataStr);
-
                 ObjectMapper mapper = new ObjectMapper();
-
-                System.out.println(dataStr);
                 Map<String, Object> data = mapper.readValue(dataStr, Map.class);
-                System.out.println("postman data" + data);
                 LocalDate today = LocalDate.now();
                 String formattedDate = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
@@ -95,8 +89,6 @@ public class ExcelServiceImpl implements ExcelService {
                     Map<String, Object> sheetData = (Map<String, Object>) data.get(sheetName);
                     List<Map<String, Object>> tables = (List<Map<String, Object>>) sheetData.get("tables");
                     String SheetDisplayName = (String) sheetData.get("sheetDisplayName");
-                    System.out.println("sheetName " + sheetName);
-                    System.out.println("SheetDisplayName " + SheetDisplayName);
                     Sheet sheet = workbook.createSheet(SheetDisplayName);
 
                     int currentRow = 0;
@@ -111,9 +103,6 @@ public class ExcelServiceImpl implements ExcelService {
                         String title = (String) table.get("title");
                         String tableId = (String) table.get("tableId");
                         String dataInput = (String) table.get("dataInput");
-                        System.out.println("title " + title);
-                        System.out.println("tableId " + tableId);
-                        System.out.println("tableId " + tableId);
                         tableCount++;
                         Integer startRow = (table.get("startRow") == null) ? currentRow : (int) table.get("startRow");
                         List<List<String>> headersTitles = (List<List<String>>) table.get("headersTitles");
@@ -239,18 +228,7 @@ public class ExcelServiceImpl implements ExcelService {
 
                         currentRow = Math.max(currentRow, startRow);
                         currentRow += 1;
-
-                        // Write headers
-                        // for (List<String> headerRow : headers) {
-                        // Row row = sheet.createRow(currentRow++);
-                        // for (int col = 0; col < headerRow.size(); col++) {
-                        // Cell cell = row.createCell(col);
-                        // cell.setCellValue(headerRow.get(col));
-                        // if (boldCols.contains(col)) cell.setCellStyle(boldStyle);
-                        // if (borders) cell.setCellStyle(borderStyle);
-                        // }
-                        // }
-
+ 
                         Row titleRow = sheet.createRow(currentRow++);
                         Cell titleCell = titleRow.createCell(0);
                         titleCell.setCellValue(title);

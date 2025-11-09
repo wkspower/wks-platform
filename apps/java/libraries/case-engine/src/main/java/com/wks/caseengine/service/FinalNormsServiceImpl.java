@@ -91,7 +91,6 @@ public class FinalNormsServiceImpl implements FinalNormsService {
 				finalNormsDTO.setMaterialDisplayName(row[6] != null ? row[6].toString() : null);
 				finalNormsDTO.setUom(row[7] != null ? row[7].toString() : null);
 
-				// Monthly values now shift by +1:
 				finalNormsDTO.setApril(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
 				finalNormsDTO.setMay(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
 				finalNormsDTO.setJune(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
@@ -108,6 +107,7 @@ public class FinalNormsServiceImpl implements FinalNormsService {
 				finalNormsDTO.setRemark(row[21] != null ? row[21].toString() : "");
 				finalNormsDTO.setIsEditable(row[24] != null ? Boolean.valueOf(row[24].toString()) : null);
 				finalNormsDTO.setMethod(row[25] != null ? row[25].toString() : "");
+				finalNormsDTO.setMaterialName(row[26] != null ? row[26].toString() : "");
 				finalNormsDTOList.add(finalNormsDTO);
 			}			
 			Map<String, Object> map = new HashMap<>();

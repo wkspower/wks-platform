@@ -15,10 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.MCUNormsValueDTO;
-
+import com.wks.caseengine.dto.ModeWiseNormsDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.MCUNormsValue;
 import com.wks.caseengine.entity.MCUNormsValueGrade;
+import com.wks.caseengine.entity.NormParameterType;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.NormsTransactions;
 import com.wks.caseengine.entity.Plants;
@@ -29,6 +30,8 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueGradeRepository;
+import com.wks.caseengine.repository.MCUNormsValueRepository;
+import com.wks.caseengine.repository.NormParameterTypeRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.NormalOperationNormsRepository;
 import com.wks.caseengine.repository.NormsTransactionRepository;
@@ -79,6 +82,16 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private FinalNormsService finalNormsService;
+	
+	@Autowired
+	private NormParameterTypeRepository normParameterTypeRepository;
+	
+	@Autowired
+	private MCUNormsValueRepository mcuNormsValueRepository;
+
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public NormalOperationNormsServiceImpl(DataSource dataSource) {
@@ -580,9 +593,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			List<Map<String, Object>> normsTransactions = transactions.stream()
 					.map(tx -> {
 						Map<String, Object> cell = new HashMap<>();
-						cell.put("month", tx[0]); // AOPMonth
-						cell.put("normParameterFKId", tx[1].toString()); // NormParameter_FK_Id
-						cell.put("value", tx[2]); // AttributeValue
+						cell.put("month", tx[0]); 
+						cell.put("normParameterFKId", tx[1].toString()); 
+						cell.put("value", tx[2]); 
 						return cell;
 					})
 					.collect(Collectors.toList());
@@ -1038,6 +1051,91 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+	
+	
+
+
+
+	@Override
+	public AOPMessageVM getNormsTransactionFinalNormsModeWise(String plantId, String aopYear) {
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		AOPMessageVM aopMessageVM = getNormsTransaction( plantId,  aopYear);
+		List<Map<String, Object>> normsTransactions = (List<Map<String, Object>>) aopMessageVM.getData();
+		AOPMessageVM finalNorms=finalNormsService.getFinalNorms(aopYear,plantId,null,null);
+		Map<String, Object> dataMap=(Map<String, Object>) finalNorms.getData();
+		List<ModeWiseNormsDTO> finalNormsDTOList =(List<ModeWiseNormsDTO>) dataMap.get("mcuNormsValueDTOList");
+		List<String> materialNames = new ArrayList<>();
+		for (ModeWiseNormsDTO dto : finalNormsDTOList) {
+			    materialNames.add(dto.getMaterialName());
+		}
+
+		for (Map<String, Object> map : normsTransactions) {
+			Object normParameterFKId=map.get("normParameterFKId");
+			if(normParameterFKId!=null) {
+				UUID normParameterId= UUID.fromString(normParameterFKId.toString());
+				Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterId);
+				if(normParametersOpt.isPresent()) {
+					NormParameters normParameters=normParametersOpt.get();
+					if(!normParameters.getType().equalsIgnoreCase("Monthly")) {
+						if(materialNames.contains(normParameters.getName())) {
+							result.add(map);
+						}
+					}
+				}
+			} 
+		}
+		AOPMessageVM finalResult=new AOPMessageVM();
+		finalResult.setCode(200);
+		finalResult.setData(result);
+		finalResult.setMessage("Data fetched successfully");
+		return finalResult;
+	}
+	@Override
+	public AOPMessageVM getNormsTransactionFinalNorms(String plantId, String aopYear) {
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		AOPMessageVM aopMessageVM = getNormsTransaction( plantId,  aopYear);
+		List<Map<String, Object>> normsTransactions = (List<Map<String, Object>>) aopMessageVM.getData();
+		AOPMessageVM finalNorms=finalNormsService.getFinalNorms(aopYear,plantId,null,null);
+		Map<String, Object> dataMap=(Map<String, Object>) finalNorms.getData();
+		List<ModeWiseNormsDTO> finalNormsDTOList =(List<ModeWiseNormsDTO>) dataMap.get("mcuNormsValueDTOList");
+		List<String> materialNames = new ArrayList<>();
+		for (ModeWiseNormsDTO dto : finalNormsDTOList) {
+			    materialNames.add(dto.getMaterialName());
+		}
+
+		for (Map<String, Object> map : normsTransactions) {
+			Object normParameterFKId=map.get("normParameterFKId");
+			if(normParameterFKId!=null) {
+				UUID normParameterId= UUID.fromString(normParameterFKId.toString());
+				Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterId);
+				if(normParametersOpt.isPresent()) {
+					NormParameters normParameters=normParametersOpt.get();
+					if(normParameters.getType().equalsIgnoreCase("Monthly")) {
+						UUID normParameterTypeFkId=normParameters.getNormParameterTypeFkId();
+						Optional<NormParameterType> normParameterTypeOpt = normParameterTypeRepository.findById(normParameterTypeFkId);
+						if(normParameterTypeOpt.isPresent()) {
+							NormParameterType normParameterType = normParameterTypeOpt.get();
+							if(normParameterType.getName().equalsIgnoreCase("RawMaterial") || normParameterType.getName().equalsIgnoreCase("ByProducts")){
+								result.add(map);
+							}else {
+								List<MCUNormsValue> MCUNormsValues= mcuNormsValueRepository.findCheckedNormsByMaterialFkIdNative(normParameterId);
+								if(MCUNormsValues.size()>0) {
+									result.add(map);
+								}
+							}
+						} 
+					}
+				}
+			} 
+		}
+		AOPMessageVM finalResult=new AOPMessageVM();
+		finalResult.setCode(200);
+		finalResult.setData(result);
+		finalResult.setMessage("Data fetched successfully");
+		return finalResult;
 	}
 
 }

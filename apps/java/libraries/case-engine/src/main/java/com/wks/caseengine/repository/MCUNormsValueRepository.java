@@ -54,4 +54,11 @@ where Plant_FK_Id = :plantFKId and AOPYear = :year and Material_FK_Id = :normPar
 					""", nativeQuery = true)
 Object[] findByNormParameterId(@Param("year") String year, @Param("plantFKId") String plantFKId, @Param("normParameterId") String normParameterId, @Param("mode") String mode);
 	
+	@Query(
+	        value = "SELECT * FROM MCUNormsValue WHERE Material_FK_Id = :materialFkId AND isChecked = true",
+	        nativeQuery = true
+	    )
+	    List<MCUNormsValue> findCheckedNormsByMaterialFkIdNative(
+	        @Param("materialFkId") UUID materialFkId
+	    );
 	}

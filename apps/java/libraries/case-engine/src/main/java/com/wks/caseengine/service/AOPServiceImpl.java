@@ -362,18 +362,10 @@ public class AOPServiceImpl implements AOPService {
 						vertical.getId().toString(),
 						year);
 
-				System.out.println("list" + list);
-				System.out.println("listTo String" + list.toString());
-
-				List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
-				System.out.println("objList" + objList);
-				System.out.println("objList String" + objList.toString());
-
+								List<AOP> objList = aopRepository.findAllByAopYearAndPlantFkId(year, UUID.fromString(plantId));
+				
 				for (Object[] obj : list) {
-					System.out.println("obj" + obj.toString());
-					System.out.println("obj[0].toString()" + obj[0].toString());
-					System.out.println("obj[0]" + obj[0]);
-
+					
 					AOPDTO aopDto = new AOPDTO();
 					aopDto.setAopCaseId("");
 					aopDto.setAopRemarks("");

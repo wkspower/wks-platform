@@ -34,7 +34,6 @@ public class BusinessDemandDataController {
 	
 	@GetMapping(value="/business-demand")
 	public	List<BusinessDemandDataDTO> getBusinessDemandData(@RequestParam String year,@RequestParam String plantId){
-		System.out.println(plantId);
 		return businessDemandDataService.getBusinessDemandData(year,plantId);	
 	}
 	

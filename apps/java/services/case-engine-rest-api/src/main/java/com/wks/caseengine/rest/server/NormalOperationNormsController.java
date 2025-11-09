@@ -50,6 +50,16 @@ public class NormalOperationNormsController {
 	public AOPMessageVM getNormsTransaction(@RequestParam String plantId, @RequestParam String year) {
 		return normalOperationNormsService.getNormsTransaction(plantId, year);
 	}
+	
+	@GetMapping(value = "/norms-transactions-final-norms-mode-wise")
+	public AOPMessageVM getNormsTransactionFinalNormsModeWise(@RequestParam String plantId, @RequestParam String year) {
+		return normalOperationNormsService.getNormsTransactionFinalNormsModeWise(plantId, year);
+	}
+	
+	@GetMapping(value = "/norms-transactions-final-norms")
+	public AOPMessageVM getNormsTransactionFinalNorms(@RequestParam String plantId, @RequestParam String year) {
+		return normalOperationNormsService.getNormsTransactionFinalNorms(plantId, year);
+	}
 
 	@PostMapping(value = "/steady-state-norms")
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(
