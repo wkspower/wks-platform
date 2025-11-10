@@ -497,15 +497,8 @@ async function deleteTurnAroundData(maintenanceId, keycloak, PLANT_ID) {
   }
 }
 
-async function updatePeConfigData(keycloak, payload) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/updatePeConfigData?year=${year}&plantId=${plantId}`
+async function updatePeConfigData(keycloak, payload, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/updatePeConfigData?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -697,16 +690,16 @@ async function getWorkflowData(keycloak, PLANT_ID, AOP_YEAR) {
 }
 async function getAnnualCostAopReport(
   keycloak,
+  PLANT_ID,
+  AOP_YEAR,
   reportType = 'production',
   aopYearFilter1 = 'null',
 ) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
   var url = ''
   if (reportType == 'aopYearFilter') {
-    url = `${Config.CaseEngineUrl}/task/report/annual-aop?plantId=${plantId}&year=${year}&reportType=${reportType}&aopYearFilter=null`
+    url = `${Config.CaseEngineUrl}/task/report/annual-aop?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}&aopYearFilter=null`
   } else {
-    url = `${Config.CaseEngineUrl}/task/report/annual-aop?plantId=${plantId}&year=${year}&reportType=${reportType}&aopYearFilter=${aopYearFilter1}`
+    url = `${Config.CaseEngineUrl}/task/report/annual-aop?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}&aopYearFilter=${aopYearFilter1}`
   }
   const headers = {
     Accept: 'application/json',
@@ -1986,13 +1979,7 @@ async function getShutDownPlantData(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function getSlowDownConfigurationData(keycloak, PLANT_ID, AOP_YEAR) {
-  const maintenanceTypeName = 'Slowdown' // Assuming the maintenance type is 'Slowdown'
-  var year = localStorage.getItem('year')
-  // const storedPlant = localStorage.getItem('selectedPlant')
-  // if (storedPlant) {
-  //   const parsedPlant = JSON.parse(storedPlant)
-  //   plantId= (parsedPlant.id)
-  // }
+  const maintenanceTypeName = 'Slowdown' 
   const url = `${Config.CaseEngineUrl}/task/slowdown-configuration?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
@@ -2184,10 +2171,8 @@ async function getTurnaroundReportData(keycloak, type, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function saveConfigurationExcel(file, keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${plantId}&year=${year}`
+async function saveConfigurationExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -2457,15 +2442,8 @@ async function getConfigurationExcel(keycloak, reportType) {
   }
 }
 
-async function getConfigurationExcelConstants(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${year}&plantFKId=${plantId}`
+async function getConfigurationExcelConstants(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -2559,10 +2537,8 @@ async function getConfigurationExecutionDetails(keycloak) {
     return await Promise.reject(e)
   }
 }
-async function saveConfigurationExcelConstants(file, keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/configuration-constants-import-excel?plantFKId=${plantId}&year=${year}`
+async function saveConfigurationExcelConstants(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-constants-import-excel?plantFKId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -2960,15 +2936,8 @@ async function getCrackerNextYearData(keycloak, qParams) {
     return Promise.reject(e)
   }
 }
-async function getRecipeExcel(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/recipe-export?year=${year}&plantId=${plantId}`
+async function getRecipeExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/recipe-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -3000,10 +2969,8 @@ async function getRecipeExcel(keycloak) {
   }
 }
 
-async function saveRecipeExcel(file, keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/recipe-import?plantId=${plantId}&year=${year}`
+async function saveRecipeExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/recipe-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -3022,15 +2989,9 @@ async function saveRecipeExcel(file, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getShutdownRateExcel(keycloak, type) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-export?year=${year}&plantId=${plantId}&type=${type}`
+async function getShutdownRateExcel(keycloak, type, PLANT_ID, AOP_YEAR) {
+
+  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-export?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${type}`
 
   const EXCEL_NAME = type
     ? `Production & Norms Basis ${type}.xlsx`
@@ -3066,10 +3027,8 @@ async function getShutdownRateExcel(keycloak, type) {
   }
 }
 
-async function saveShutdownRateExcel(file, keycloak, type) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-import?plantId=${plantId}&year=${year}&type=${type}`
+async function saveShutdownRateExcel(file, keycloak, type, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-rate-import?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -3109,7 +3068,7 @@ async function calculatePlantContributionSummaryYearly(
   AOP_YEAR,
   keycloak,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/load-plant-contribution?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/calculate-plant-contribution-summary-yearly?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,

@@ -83,11 +83,13 @@ const AnnualAopCost = () => {
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const fetchData = async (reportType, setState) => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       const data = await DataService.getAnnualCostAopReport(
         keycloak,
-        reportType,
+        PLANT_ID,
         AOP_YEAR,
+        reportType,
       )
       if (data?.code === 200) {
         if (reportType === 'price') {
