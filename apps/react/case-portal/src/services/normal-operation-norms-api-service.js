@@ -15,7 +15,6 @@ export const NormalOperationNormsApiService = {
   handleCalculateNormalOperationNormsPe,
   handleCalculateNormalOperationNorms,
   getNormalOpsNormsExcel,
-  getFinalNormsData,
   updateFinalNormsData,
   getfinalNorms,
   calculateFinalNorms,
@@ -505,26 +504,6 @@ async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.error('Error Editing data:', e)
     return Promise.reject(e)
-  }
-}
-async function getFinalNormsData(keycloak, gradeId, method) {
-  const year = localStorage.getItem('year') || ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
-
-  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms?year=${year}&plantId=${plantId}&mode=${gradeId}&method=${method}`
-
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
   }
 }
 async function updateFinalNormsData(keycloak, gradeId, payload, PLANT_ID, AOP_YEAR) {
