@@ -57,9 +57,6 @@ const CustomAccordion = styled((props) => (
   },
 }))
 
-const year = localStorage.getItem('year')
-const startYear = parseInt(year?.split('-')[0], 10)
-
 const CustomAccordionSummary = styled((props) => (
   <MuiAccordionSummary expandIcon={<ExpandMoreIcon />} {...props} />
 ))(() => ({
@@ -104,7 +101,26 @@ const KendoDataTablesCrackerRunLength = ({
 }) => {
   const fileInputRef = useRef(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { yearChanged } = dataGridStore
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const SCREEN_NAME = screenTitle?.title
 
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -159,7 +175,7 @@ const KendoDataTablesCrackerRunLength = ({
   }, [yearChanged])
 
   useEffect(() => {
-    const year = localStorage.getItem('year')
+    const year = AOP_YEAR
     const startYear = parseInt(year?.split('-')[0], 10)
     const lowerLimit = new Date(startYear, 3, 1)
     const upperLimit = new Date(startYear + 1, 2, 31)
@@ -1027,12 +1043,6 @@ const KendoDataTablesCrackerRunLength = ({
   const saveCrackerRunLength = async (singleRow) => {
     setLoading1(true)
     try {
-      var plantId = ''
-      const storedPlant = localStorage.getItem('selectedPlant')
-      if (storedPlant) {
-        const parsedPlant = JSON.parse(storedPlant)
-        plantId = parsedPlant.id
-      }
       const payload = [
         {
           tenProposed: singleRow[0]?.tenProposed || null,
@@ -1040,7 +1050,7 @@ const KendoDataTablesCrackerRunLength = ({
           twelveProposed: singleRow[0]?.twelveProposed || null,
           thirteenProposed: singleRow[0]?.thirteenProposed || null,
           fourteenProposed: singleRow[0]?.fourteenProposed || null,
-          plantId: plantId,
+          plantId: PLANT_ID,
           id: null,
           demo: singleRow[0]?.demo || null,
           date: moment(singleRow[0]?.date).format('YYYY-MM-DD'),
@@ -1083,6 +1093,8 @@ const KendoDataTablesCrackerRunLength = ({
         const res = await DataService.getCrackerNextYearParameters(
           keycloak,
           moment(date).format('YYYY-MM-DD'),
+          PLANT_ID,
+          AOP_YEAR,
         )
 
         if (
@@ -1118,6 +1130,7 @@ const KendoDataTablesCrackerRunLength = ({
 
   const fetchDataNextYearCalculate = useCallback(
     async (hValuesParam, startDateParam) => {
+      if(!PLANT_ID || !AOP_YEAR) return
       setLoading1(true)
       try {
         const queryParams = {
@@ -1132,6 +1145,8 @@ const KendoDataTablesCrackerRunLength = ({
         const res = await DataService.getCrackerNextYearData(
           keycloak,
           queryParams,
+          PLANT_ID,
+          AOP_YEAR,
         )
 
         if (
@@ -1232,7 +1247,7 @@ const KendoDataTablesCrackerRunLength = ({
     setStartDate(e.value)
 
     const selectedDate = e.value
-    const year = localStorage.getItem('year')
+    const year = AOP_YEAR
 
     if (
       lowerLimitDate &&
@@ -1531,7 +1546,7 @@ const KendoDataTablesCrackerRunLength = ({
       >
         <DialogTitle style={{ padding: '8px 16px', fontSize: '16px' }}>
           Configuration for Next Year (
-          {`${parseInt(localStorage.getItem('year')?.split('-')[0], 10) + 1}-${(parseInt(localStorage.getItem('year')?.split('-')[0], 10) + 2).toString().slice(-2)}`}
+          {`${parseInt(AOP_YEAR?.split('-')[0], 10) + 1}-${(parseInt(AOP_YEAR?.split('-')[0], 10) + 2).toString().slice(-2)}`}
           )
         </DialogTitle>
 

@@ -767,10 +767,11 @@ const SlowDown = ({ permissions }) => {
   useEffect(() => {
     setSelectedTab(0)
     const getAllProducts = async () => {
+      if (!PLANT_ID) return
       try {
         var data = []
         if (lowerVertName == 'meg')
-          data = await DataService.getAllProducts(keycloak, null)
+          data = await DataService.getAllProducts(keycloak, PLANT_ID, null)
         else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {

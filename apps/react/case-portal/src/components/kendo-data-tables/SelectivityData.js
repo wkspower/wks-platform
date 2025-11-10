@@ -328,7 +328,7 @@ const SelectivityData = (props) => {
   useEffect(() => {
     const getAllGrades = async () => {
       try {
-        const data = await DataService.getAllGrades(keycloak)
+        const data = await DataService.getAllGrades(keycloak, PLANT_ID) 
         setAllGradesReciepes(data)
       } catch (error) {
         console.error('Error fetching Grades/Reciepes:', error)
@@ -337,9 +337,10 @@ const SelectivityData = (props) => {
       }
     }
     const getConfigurationExecutionDetails = async () => {
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         const data =
-          await DataService.getConfigurationExecutionDetails(keycloak)
+          await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
 
         var data1 = data?.data
 
@@ -382,9 +383,10 @@ const SelectivityData = (props) => {
   ])
 
   const fetchConfigData = async () => {
+    if( !PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     try {
-      var data = await DataService.getPeConfigData(keycloak)
+      var data = await DataService.getPeConfigData(keycloak, PLANT_ID, AOP_YEAR)
 
       data = data.map((item, index) => ({
         ...item,
@@ -530,7 +532,7 @@ const SelectivityData = (props) => {
             report_t = reportTypes.filter((type) => type == 'Shutdown')
           }
 
-          await DataService.getConfigurationExcel(keycloak, report_t)
+          await DataService.getConfigurationExcel(keycloak, report_t, PLANT_ID, AOP_YEAR)
         }
       } else {
         await DataService.getConfigurationExcelConstants(keycloak, PLANT_ID, AOP_YEAR)

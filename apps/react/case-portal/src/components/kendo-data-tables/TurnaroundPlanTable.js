@@ -205,9 +205,11 @@ const TurnaroundPlanTable = () => {
   }
   useEffect(() => {
     const getAllProducts = async () => {
+      if (!PLANT_ID) return
       try {
         const data = await DataService.getAllProducts(
           keycloak,
+          PLANT_ID,
           lowerVertName === 'meg' ? 'Production' : 'Grade',
         )
         const productList = data.map((product) => ({

@@ -70,10 +70,13 @@ const RawDataSet = () => {
 
   useEffect(() => {
     async function fetchPeriod() {
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         const resp =
           await CrackerReportsApiDataService.getConfigurationExecutionDetails(
             keycloak,
+            PLANT_ID,
+            AOP_YEAR,
           )
         if (Array.isArray(resp?.data)) {
           const start = resp.data.find((d) => d.Name === 'StartDate')

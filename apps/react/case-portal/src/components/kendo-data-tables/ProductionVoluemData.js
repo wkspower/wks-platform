@@ -490,6 +490,7 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const fetchConfiguration = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       const configData = await DataService.getConfigurationExecutionDetails(

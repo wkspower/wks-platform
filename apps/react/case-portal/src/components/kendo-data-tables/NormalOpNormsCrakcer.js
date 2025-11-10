@@ -278,12 +278,15 @@ const NormalOpNormsScreenCracker = () => {
 
   const fetchConfigurationData = useCallback(
     async (gradeId = null) => {
+      if(!PLANT_ID || !AOP_YEAR) return
       setProductionRows([])
       setLoading(true)
 
       try {
         const data = await DataService.getCatalystSelectivityData(
           keycloak,
+          PLANT_ID,
+          AOP_YEAR,
           gradeId,
         )
         const filteredData = data?.filter(
@@ -308,10 +311,11 @@ const NormalOpNormsScreenCracker = () => {
   )
 
   const fetchConstantsData = useCallback(async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     setProductionRowsConstants([])
     try {
       const constantsRes =
-        await DataService.getCatalystSelectivityDataConstants(keycloak)
+        await DataService.getCatalystSelectivityDataConstants(keycloak, PLANT_ID, AOP_YEAR)
       if (constantsRes?.code !== 200) {
         setProductionRowsConstants([])
         return

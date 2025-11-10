@@ -240,9 +240,10 @@ const AopDesignBasis = () => {
   }
 
   const getConfigurationExecutionDetails = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       const response =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(

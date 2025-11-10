@@ -154,8 +154,9 @@ const CrackerConfig = () => {
   }, [headerMap, currentTabDisplay])
 
   const fetchTabsMatrix = useCallback(async () => {
+    if(!PLANT_ID || !SITE_ID || !VERTICAL_ID) return
     try {
-      const resp = await DataService.getConfigurationTabsMatrix(keycloak)
+      const resp = await DataService.getConfigurationTabsMatrix(keycloak, PLANT_ID, SITE_ID, VERTICAL_ID)
       let tabsFromApi = []
       if (typeof resp.data === 'string') {
         try {

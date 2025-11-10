@@ -84,7 +84,7 @@ const NormsHistorianBasisAromatics = () => {
       setLoading(true)
 
       const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
       if (configData?.code !== 200) {
         setGridNames([])
         setDataMap({})

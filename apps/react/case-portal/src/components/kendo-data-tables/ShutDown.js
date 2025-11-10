@@ -525,10 +525,11 @@ const ShutDown = ({ permissions }) => {
   }
   useEffect(() => {
     const getAllProducts = async () => {
+      if (!PLANT_ID) return
       try {
         let data = []
         if (lowerVertName === 'meg') {
-          data = await DataService.getAllProducts(keycloak, null)
+          data = await DataService.getAllProducts(keycloak, PLANT_ID, null)
         } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {

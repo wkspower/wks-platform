@@ -153,7 +153,7 @@ const SteadyStateNormsHistorianBasis = () => {
         try {
           // get config before fetching grid (so we have StartDate/EndDate)
           const configData =
-            await DataService.getConfigurationExecutionDetails(keycloak)
+            await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
           if (configData?.code !== 200) return
 
           const StartDate = configData.data.find(
@@ -198,7 +198,7 @@ const SteadyStateNormsHistorianBasis = () => {
     try {
       setLoading(true)
       const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
       if (configData?.code !== 200) {
         setLoading(false)
         return

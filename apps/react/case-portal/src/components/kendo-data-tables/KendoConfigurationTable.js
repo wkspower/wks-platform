@@ -118,6 +118,7 @@ const ConfigurationTable = () => {
   }
 
   const fetchData = async (gradeId = null) => {
+    if(!PLANT_ID || !AOP_YEAR) return
     setProductionRows([])
     setProductionRowsConstants([])
     setProductionRowsConstantsMannualEntry([])
@@ -129,7 +130,7 @@ const ConfigurationTable = () => {
       setLoading(true)
       var data = []
 
-      data = await DataService.getCatalystSelectivityData(keycloak, gradeId)
+      data = await DataService.getCatalystSelectivityData(keycloak, PLANT_ID, AOP_YEAR, gradeId)
 
       const distinctReportTypes = [
         ...new Set(data.map((item) => item.normType).filter(Boolean)),
@@ -240,10 +241,11 @@ const ConfigurationTable = () => {
   }
 
   const fetchDataConstants = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     setProductionRowsConstants([])
     try {
       var constantsRes =
-        await DataService.getCatalystSelectivityDataConstants(keycloak)
+        await DataService.getCatalystSelectivityDataConstants(keycloak, PLANT_ID, AOP_YEAR)
       if (constantsRes?.code != 200) {
         setProductionRowsConstants([])
         return
@@ -272,11 +274,12 @@ const ConfigurationTable = () => {
   const [reportTypes, setReportTypes] = useState([])
 
   const fetchDataConstantsMnnualEntry = async () => {
+    if (!PLANT_ID || !AOP_YEAR) return
     setProductionRowsConstantsMannualEntry([])
     setPioImpactRows([])
     setShutdownDataRows([])
     try {
-      var constantsRes = await DataService.getCatalystSelectivityData(keycloak)
+      var constantsRes = await DataService.getCatalystSelectivityData(keycloak, PLANT_ID, AOP_YEAR)
 
       const formattedData = constantsRes.map((item, index) => ({
         ...item,
@@ -307,9 +310,10 @@ const ConfigurationTable = () => {
     }
   }
   const fetchGradeData = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     try {
-      var data = await DataService.getPeConfigData(keycloak)
+      var data = await DataService.getPeConfigData(keycloak, PLANT_ID, AOP_YEAR)
 
       const formattedData = data?.map((item, index) => {
         const converted = {}
@@ -347,9 +351,10 @@ const ConfigurationTable = () => {
   }
 
   const getConfigurationTabsMatrix = async () => {
+    if(!PLANT_ID || !SITE_ID || !VERTICAL_ID) return
     setLoading(true)
     try {
-      var response = await DataService.getConfigurationTabsMatrix(keycloak)
+      var response = await DataService.getConfigurationTabsMatrix(keycloak, PLANT_ID, SITE_ID, VERTICAL_ID)
       if (response?.code == 200) {
         const parsedData = JSON.parse(response?.data)
         setTabs(parsedData)
@@ -553,9 +558,10 @@ const ConfigurationTable = () => {
   }, [PLANT_ID])
 
   const getConfigurationExecutionDetails = async () => {
+    if(!PLANT_ID || !AOP_YEAR) return
     try {
       const response =
-        await DataService.getConfigurationExecutionDetails(keycloak)
+        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(

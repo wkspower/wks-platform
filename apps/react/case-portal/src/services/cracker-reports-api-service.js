@@ -284,10 +284,8 @@ async function getRawasfindingteam(keycloak, mode, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-async function getConfigurationExecutionDetails(keycloak) {
-  const plantId = JSON.parse(localStorage.getItem('selectedPlant'))?.id
-  const year = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/configuration-execution?plantId=${plantId}&year=${year}`
+async function getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-execution?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
