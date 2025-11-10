@@ -549,16 +549,22 @@ const NormalOpNormsScreenCracker = () => {
                 keycloak,
                 gradeIdParam,
                 'Best Achieved',
+                PLANT_ID,
+                AOP_YEAR,
               ),
               NormalOperationNormsApiService.getModeWiseNormsData(
                 keycloak,
                 gradeIdParam,
                 'Expression',
+                PLANT_ID,
+                AOP_YEAR,
               ),
               NormalOperationNormsApiService.getModeWiseNormsData(
                 keycloak,
                 gradeIdParam,
                 'Yearly Norms',
+                PLANT_ID,
+                AOP_YEAR,
               ),
               NormalOperationNormsApiService.BestAchivedColorCodes(
                 keycloak,

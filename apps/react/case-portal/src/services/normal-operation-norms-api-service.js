@@ -179,13 +179,9 @@ async function getfinalNorms(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function getModeWiseNormsData(keycloak, gradeId, method) {
-  const year = localStorage.getItem('year') || ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
+async function getModeWiseNormsData(keycloak, gradeId, method, PLANT_ID, AOP_YEAR) {
 
-  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms?year=${year}&plantId=${plantId}&mode=${gradeId}&method=${method}`
-
+  const url = `${Config.CaseEngineUrl}/task/mode-wise/norms?year=${AOP_YEAR}&plantId=${PLANT_ID}&mode=${gradeId}&method=${method}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -199,12 +195,8 @@ async function getModeWiseNormsData(keycloak, gradeId, method) {
     return await Promise.reject(e)
   }
 }
-async function getModeWiseNormsDataworkflow(keycloak, gradeId, method) {
-  const year = localStorage.getItem('year') || ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  const plantId = storedPlant ? JSON.parse(storedPlant)?.id || '' : ''
-
-  const url = `${Config.CaseEngineUrl}/task/month-wise-raw-data-by-method?year=${year}&plantId=${plantId}&mode=${gradeId}&method=${method}`
+async function getModeWiseNormsDataworkflow(keycloak, gradeId, method, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/month-wise-raw-data-by-method?year=${AOP_YEAR}&plantId=${PLANT_ID}&mode=${gradeId}&method=${method}`
   ///month-wise-raw-data-by-method
   const headers = {
     Accept: 'application/json',
@@ -297,15 +289,9 @@ async function getNormalOperationNormsGrades(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function getGradesForShutdownNorms(keycloak) {
-  var year = localStorage.getItem('year')
-  var plantId = ''
-  const storedPlant = localStorage.getItem('selectedPlant')
-  if (storedPlant) {
-    const parsedPlant = JSON.parse(storedPlant)
-    plantId = parsedPlant.id
-  }
-  const url = `${Config.CaseEngineUrl}/task/unique/grades?year=${year}&plantId=${plantId}`
+async function getGradesForShutdownNorms(keycloak, PLANT_ID, AOP_YEAR) {
+
+  const url = `${Config.CaseEngineUrl}/task/unique/grades?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -466,9 +452,8 @@ async function handleCalculateNormalOperationNorms(plantId, AOP_YEAR, keycloak) 
     return Promise.reject(e)
   }
 }
-async function calculateFinalNorms(plantId, year, keycloak) {
-  const year1 = localStorage.getItem('year')
-  const url = `${Config.CaseEngineUrl}/task/calculate-final-norms?year=${year1}&plantId=${plantId}`
+async function calculateFinalNorms(PLANT_ID, AOP_YEAR, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-final-norms?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,

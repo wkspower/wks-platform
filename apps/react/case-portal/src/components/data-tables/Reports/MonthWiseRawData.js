@@ -146,6 +146,8 @@ export default function MonthWiseRawData() {
               keycloak,
               grade,
               mode,
+              PLANT_ID,
+              AOP_YEAR,
             )
           if (resp?.code !== 200) continue
 

@@ -109,6 +109,8 @@ const ShutdownNorms = () => {
           const response =
             await NormalOperationNormsApiService.getGradesForShutdownNorms(
               keycloak,
+              PLANT_ID,
+              AOP_YEAR,
             )
 
           if (response?.code === 200) {
@@ -400,6 +402,8 @@ const ShutdownNorms = () => {
         const response =
           await NormalOperationNormsApiService.getGradesForShutdownNorms(
             keycloak,
+            PLANT_ID,
+            AOP_YEAR,
           )
 
         if (response?.code === 200) {
