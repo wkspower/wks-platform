@@ -318,6 +318,27 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     boldCenteredWrappedStyle.setAlignment(HorizontalAlignment.CENTER);
                     boldCenteredWrappedStyle.setVerticalAlignment(VerticalAlignment.CENTER); 
                     boldCenteredWrappedStyle.setWrapText(true); 
+                    boldCenteredWrappedStyle.setBorderTop(BorderStyle.THIN);
+                    boldCenteredWrappedStyle.setBorderBottom(BorderStyle.THIN);
+                    boldCenteredWrappedStyle.setBorderLeft(BorderStyle.THIN);
+                    boldCenteredWrappedStyle.setBorderRight(BorderStyle.THIN);
+                    int endRow = titleStartRow + 3;
+                    int endCol = 16;
+                    
+                    for (int r = titleStartRow; r <= endRow; r++) {
+                        Row row = sheet.getRow(r);
+                        if (row == null) {
+                            row = sheet.createRow(r);
+                        }
+                        for (int c = 0; c <= endCol; c++) {
+                            Cell cell = row.getCell(c);
+                            if (cell == null) {
+                                cell = row.createCell(c);
+                            }
+                            cell.setCellStyle(boldCenteredWrappedStyle);
+                        }
+                    }
+                    
                     mainTitleCell.setCellStyle(boldCenteredWrappedStyle);
                     
                    
