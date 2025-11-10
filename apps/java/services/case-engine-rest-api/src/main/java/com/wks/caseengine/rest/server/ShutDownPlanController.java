@@ -135,5 +135,10 @@ public class ShutDownPlanController {
 			  return shutDownPlanService.getMonthlyShutdownHours(auditYear,UUID.fromString(plantId));
 		  }
 		  
+		  @GetMapping("/description-drpdwn")
+		  public AOPMessageVM getDescriptionDropdown(@RequestParam String year,@RequestParam String plantId){
+			  return shutDownPlanService.getDescriptionDropdown(year,plantId);
+		  }
+		  
 		  
 }

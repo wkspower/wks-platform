@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import com.wks.caseengine.repository.SlowdownNormsRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
+
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -36,9 +38,11 @@ import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.ShutdownNormsValue;
 import com.wks.caseengine.entity.SlowdownNormsValue;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
@@ -46,10 +50,16 @@ import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
 import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
 import com.wks.caseengine.repository.ShutdownNormsRepository;
 import com.wks.caseengine.utility.Utility;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.poi.ss.usermodel.*;
@@ -71,7 +81,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Autowired
 	private SlowdownNormsRepository slowdownNormsRepository;
 
-
+	@Autowired
+	private PlantsRepository plantsRepository;
+	
+	@Autowired
+	private VerticalsRepository verticalRepository;
+	
+	@PersistenceContext
+	private EntityManager entityManager;
+	
 	@Lazy // Add this annotation here
 	@Autowired
 	private SlowdownPlanService slowdownPlanService;
@@ -1435,7 +1453,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear, UUID plantId) {
 		try {
@@ -1455,7 +1473,50 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	@Override
+	public AOPMessageVM getDescriptionDropdown(String auditYear, String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			List<Map<String,Object>> mapList = new ArrayList<Map<String,Object>>();
+			String viewName= "vwScrnShutdown"+vertical.getName();
+			List<Object[]> results = getDescriptionDropdownData(auditYear, plantId,viewName);
+			for (Object[] obj : results) {
+				Map<String,Object> map = new HashMap<String,Object>();
+				map.put("DisplayName",obj[2]);
+				map.put("Name",obj[1]);
+				mapList.add(map);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(mapList);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid data format", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	public List<Object[]> getDescriptionDropdownData(String year, String plantFkId, String viewName) {
+		try {
+			String sql = "SELECT * from " + viewName+ " where Plant_FK_Id = :plantFkId AND AOPyear = :year order by DisplayOrder";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
+			query.setParameter("plantFkId", plantFkId);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 		
 	
 
