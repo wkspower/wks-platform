@@ -283,7 +283,7 @@ const NormalOpNormsScreenCracker = () => {
 
   const [reportTypes, setReportTypes] = useState([])
 
-  const fetchConfigurationData = useCallback(
+  const fetchData = useCallback(
     async (gradeId = null) => {
       setProductionRows([])
       setLoading(true)
@@ -688,7 +688,7 @@ const NormalOpNormsScreenCracker = () => {
 
         // Load data based on selected tab
         if (selectedTab === 0) {
-          promises.push(fetchConfigurationData(gId))
+          promises.push(fetchData(gId))
         } else if (selectedTab === 1) {
           promises.push(fetchConstantsData())
         } else if (selectedTab === 3) {
@@ -707,7 +707,7 @@ const NormalOpNormsScreenCracker = () => {
     [
       fetchModeData,
       fetchFinalNorms,
-      fetchConfigurationData,
+      fetchData,
       fetchConstantsData,
       selectedTab,
     ],
@@ -1142,7 +1142,7 @@ const NormalOpNormsScreenCracker = () => {
         <SelectivityData
           rows={productionRows}
           loading={loading}
-          fetchData={fetchConfigurationData}
+          fetchData={fetchData}
           setRows={setProductionRows}
           configType='cracker_configuration'
           groupBy='Particulars'

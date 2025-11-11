@@ -622,7 +622,16 @@ const SelectivityData = (props) => {
         })
         setModifiedCells({})
         setLoading(false)
-
+        if (props?.configType === 'cracker_configuration') {
+         console.log('Fetching cracker data after upload...')
+         props?.fetchData(null)
+        }
+        if (props?.configType === 'cracker_constants') {
+          console.log('Fetching cracker constants data after upload...')
+          if (typeof props.fetchData === 'function') {
+            props.fetchData()
+          }
+        }
         if (props?.configType === 'grades') {
           fetchConfigData() // This was missing!
         } else if (
