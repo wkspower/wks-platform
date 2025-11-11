@@ -57,6 +57,8 @@ const BestAchievedReport = () => {
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
 
+  const isCracker = lowerVertName === 'cracker'
+
   useEffect(() => {
     return () => {
       isMountedRef.current = false
@@ -203,7 +205,7 @@ const BestAchievedReport = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({

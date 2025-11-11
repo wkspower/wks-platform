@@ -30,26 +30,27 @@ const SteadyStateNormsHistorianBasis = () => {
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([]) // ordered list from API
   const [loading, setLoading] = useState(false)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
@@ -94,7 +95,7 @@ const SteadyStateNormsHistorianBasis = () => {
   // Fetch columns + rows for one grid type. Returns { rows, columns }
   const fetchDataForGrid = useCallback(
     async (reportType, StartDate, EndDate) => {
-      if(!PLANT_ID || !AOP_YEAR) return
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         const apiResponse = await DataService.getProductionVolDataBasisPe(
           keycloak,
@@ -152,8 +153,11 @@ const SteadyStateNormsHistorianBasis = () => {
 
         try {
           // get config before fetching grid (so we have StartDate/EndDate)
-          const configData =
-            await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
+          const configData = await DataService.getConfigurationExecutionDetails(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
           if (configData?.code !== 200) return
 
           const StartDate = configData.data.find(
@@ -190,15 +194,18 @@ const SteadyStateNormsHistorianBasis = () => {
 
   // Main: fetch TYPE_LIST then schedule fetching each grid in order
   const fetchAllGrids = useCallback(async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     // clear previous timers
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
 
     try {
       setLoading(true)
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
+      const configData = await DataService.getConfigurationExecutionDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (configData?.code !== 200) {
         setLoading(false)
         return
@@ -255,7 +262,7 @@ const SteadyStateNormsHistorianBasis = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   // Export: gather sheets from each ExcelExport instance and combine into one workbook
   const exportAllGrids = useCallback(() => {

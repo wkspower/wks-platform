@@ -220,7 +220,6 @@ export default function AopBudget() {
       type,
       format,
     })),
-    { field: 'remark', title: 'Remark', editable: true, widthT: 100 },
     {
       field: 'allMonthsTotal',
       title: 'Total',
@@ -229,6 +228,7 @@ export default function AopBudget() {
       type: 'number',
       format: FORMATE_DECIMAL,
     },
+    { field: 'remark', title: 'Remark', editable: true, widthT: 100 },
   ]
 
   const formatPercentChange = (value) => {
@@ -251,7 +251,7 @@ export default function AopBudget() {
   }
 
   const fetchData = useCallback(async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     try {
       // Fetch for Consumption Budget
@@ -312,7 +312,7 @@ export default function AopBudget() {
     } finally {
       setLoading(false)
     }
-  }, [keycloak, yearChanged, plantID])
+  }, [keycloak, yearChanged, PLANT_ID])
 
   const resetDataChanges = useCallback(async () => {
     setModifiedCells({})
@@ -323,10 +323,10 @@ export default function AopBudget() {
 
     //FETCH BOTH DESIGN BASIS & DESIGN REMARKS AS WELL
     fetchDesignRemarksAndDesignBasis()
-  }, [keycloak, yearChanged, plantID])
+  }, [keycloak, yearChanged, PLANT_ID])
 
   const fetchDesignRemarksAndDesignBasis = useCallback(async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     setTextAreaRedDesign(false)
     setTextAreaRedRemark(false)
@@ -356,7 +356,7 @@ export default function AopBudget() {
     } finally {
       setLoading(false)
     }
-  }, [keycloak, yearChanged, plantID])
+  }, [keycloak, yearChanged, PLANT_ID])
 
   useEffect(() => {
     fetchData()
@@ -497,29 +497,31 @@ export default function AopBudget() {
       const consumptionData = Object.values(modifiedCells)
       const procurementData = Object.values(modifiedCellsP)
 
-      if (
-        !designBasisAndDesignRemarksEdited ||
-        !designBasisAndDesignRemarksEdited2
-      ) {
-        setSnackbarData({
-          message: 'Please update Justification & Remarks',
-          severity: 'error',
-        })
-        setSnackbarOpen(true)
-        setLoading(false)
+      //VALIDATION REMOVED
 
-        if (!designBasisAndDesignRemarksEdited) {
-          setTextAreaRedDesign(true)
-        } else {
-          setTextAreaRedDesign(false)
-        }
-        if (!designBasisAndDesignRemarksEdited2) {
-          setTextAreaRedRemark(true)
-        } else {
-          setTextAreaRedRemark(false)
-        }
-        return
-      }
+      // if (
+      //   !designBasisAndDesignRemarksEdited ||
+      //   !designBasisAndDesignRemarksEdited2
+      // ) {
+      //   setSnackbarData({
+      //     message: 'Please update Justification & Remarks',
+      //     severity: 'error',
+      //   })
+      //   setSnackbarOpen(true)
+      //   setLoading(false)
+
+      //   if (!designBasisAndDesignRemarksEdited) {
+      //     setTextAreaRedDesign(true)
+      //   } else {
+      //     setTextAreaRedDesign(false)
+      //   }
+      //   if (!designBasisAndDesignRemarksEdited2) {
+      //     setTextAreaRedRemark(true)
+      //   } else {
+      //     setTextAreaRedRemark(false)
+      //   }
+      //   return
+      // }
 
       setTextAreaRedDesign(false)
       setTextAreaRedRemark(false)

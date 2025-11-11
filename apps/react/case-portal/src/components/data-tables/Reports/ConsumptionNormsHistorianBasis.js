@@ -170,8 +170,11 @@ const ConsumptionNormsHistorianBasis = () => {
     try {
       setLoading(true)
 
-      const configData =
-        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
+      const configData = await DataService.getConfigurationExecutionDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (configData?.code !== 200) {
         setLoading(false)
         return
@@ -255,7 +258,7 @@ const ConsumptionNormsHistorianBasis = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)

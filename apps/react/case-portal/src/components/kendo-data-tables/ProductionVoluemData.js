@@ -107,11 +107,6 @@ const ProductionvolumeData = ({ permissions }) => {
     setCurrentRowIdDesignCapacity(row.id)
     setRemarkDialogOpenDesignCapacity(true)
   }
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
 
   const findAvg = (value, row) => {
     const months = [
@@ -490,7 +485,6 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const fetchConfiguration = async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       const configData = await DataService.getConfigurationExecutionDetails(
@@ -582,7 +576,7 @@ const ProductionvolumeData = ({ permissions }) => {
     fetchData()
 
     fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
@@ -777,16 +771,16 @@ const ProductionvolumeData = ({ permissions }) => {
 
   useEffect(() => {
     fetchDesignCapacityData(unitDesignCapacity)
-  }, [unitDesignCapacity, plantID, yearChanged, keycloak])
+  }, [unitDesignCapacity, PLANT_ID, yearChanged, keycloak])
 
   useEffect(() => {
     fetchMaxCapacityData(unitMaxCapacity)
-  }, [unitMaxCapacity, plantID, yearChanged, keycloak])
+  }, [unitMaxCapacity, PLANT_ID, yearChanged, keycloak])
 
   useEffect(() => {
     fetchData()
     fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   const handleCalculateMeg = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return

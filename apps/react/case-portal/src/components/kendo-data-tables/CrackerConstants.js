@@ -26,7 +26,7 @@ import KendoDataTables from './index'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import moment from '../../../node_modules/moment/moment'
 import AopDesignBasisNorms from './AopDesignBasisNorms'
-import useValueFormatterConsumption from 'utils/ValueFormatterConsumption' 
+import useValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 const CrakcerConstants = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
@@ -124,19 +124,19 @@ const CrakcerConstants = () => {
   }
 
   useEffect(() => {
-    if (!plantID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     setTabIndex(0)
     getConfigurationExecutionDetailsNorms()
     fetchData()
-  }, [plantID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
-    if (!plantID || !AOP_YEAR) {
+    if (!PLANT_ID || !AOP_YEAR) {
       return
     }
     getConfigurationExecutionDetailsNorms()
     getAopSummary()
-  }, [oldYear, yearChanged, keycloak, plantID])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID])
 
   function formatDate(date) {
     if (!date) return ''
@@ -165,7 +165,7 @@ const CrakcerConstants = () => {
     return formatted
   }
   const getAopSummary = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setSummary('')
       var res = await DataService.getAopSummary(keycloak, PLANT_ID, AOP_YEAR)
@@ -180,17 +180,20 @@ const CrakcerConstants = () => {
   }
 
   useEffect(() => {
-    if (!plantID || !AOP_YEAR) {
+    if (!PLANT_ID || !AOP_YEAR) {
       return
     }
     hasExecutedRef.current = false
     getConfigurationExecutionDetailsNorms()
-  }, [plantID])
+  }, [PLANT_ID])
 
   const getConfigurationExecutionDetailsNorms = async () => {
     try {
-      const response =
-        await DataService.getConfigurationExecutionDetailsNorms(keycloak, PLANT_ID, AOP_YEAR)
+      const response = await DataService.getConfigurationExecutionDetailsNorms(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(
@@ -747,6 +750,7 @@ const CrakcerConstants = () => {
     } catch (error) {
       console.error('Error uploading xcel:', error)
       setSnackbarOpen(true)
+
       setSnackbarData({
         message: 'Unexpected error occurred!',
         severity: 'error',
@@ -837,7 +841,7 @@ const CrakcerConstants = () => {
           handleRemarkCellClick={handleRemarkCellClickConstants}
           permissions={adjustedPermissionsConstants}
           groupBy='Particulars'
-          plantID={plantID}
+          plantID={PLANT_ID}
           summaryEdited={summaryEdited}
           handleExcelUpload={handleExcelUpload}
           downloadExcelForConfiguration={downloadExcelForConfiguration}

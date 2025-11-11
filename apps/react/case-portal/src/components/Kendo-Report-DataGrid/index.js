@@ -146,16 +146,11 @@ const KendoDataGrid = ({
       field,
     )
 
-    // console.log('dataItem', dataItem)
-
     const month = field
     const normId =
       dataItem.materialFKId ||
       dataItem.NormParameter_FK_Id ||
       dataItem.Material_FK_Id
-
-    // console.log('normId', normId)
-    // console.log('allRedCell', allRedCell)
 
     const matchedCell = allRedCell?.find(
       (cell) =>
@@ -164,12 +159,16 @@ const KendoDataGrid = ({
     )
 
     let highlightColor
+    let highlightColorFullCell = false
     if (isEdited) {
       highlightColor = 'orange'
     } else if (matchedCell?.mode === 'Propane(1Z)') {
       highlightColor = 'red'
     } else if (matchedCell?.mode === 'Propane(2Z)') {
       highlightColor = 'green'
+    } else if (matchedCell?.mode === 'Copied') {
+      highlightColor = 'purple'
+      highlightColorFullCell = true
     }
 
     return (
@@ -179,6 +178,7 @@ const KendoDataGrid = ({
         style={{
           color: highlightColor,
           fontWeight: highlightColor ? 'bold' : undefined,
+          // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
         }}
       >
         {children}

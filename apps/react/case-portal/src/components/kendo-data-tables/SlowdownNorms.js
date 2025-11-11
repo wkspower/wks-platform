@@ -81,13 +81,6 @@ const SlowdownNorms = () => {
     rowsBeforeChange: {},
   })
 
-  const [_plantID, set_PlantID] = useState('')
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
-
   // const getProductDisplayName = (id) => {
   //   if (!id) return
   //   const product = allProducts.find((p) => p.id === id)
@@ -129,7 +122,7 @@ const SlowdownNorms = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if(!PLANT_ID || !AOP_YEAR) return
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         if (['pe', 'pp'].includes(lowerVertName)) {
           if (!gradeId) return
@@ -140,9 +133,19 @@ const SlowdownNorms = () => {
         let data
         if (['pe', 'pp'].includes(lowerVertName)) {
           if (!gradeId) return
-          data = await DataService.getSlowdownMonths(keycloak, gradeId, PLANT_ID, AOP_YEAR)
+          data = await DataService.getSlowdownMonths(
+            keycloak,
+            gradeId,
+            PLANT_ID,
+            AOP_YEAR,
+          )
         } else {
-          data = await DataService.getSlowdownMonths(keycloak, null, PLANT_ID, AOP_YEAR)
+          data = await DataService.getSlowdownMonths(
+            keycloak,
+            null,
+            PLANT_ID,
+            AOP_YEAR,
+          )
         }
         setSlowdownMonths(data)
       } catch (error) {
@@ -163,9 +166,14 @@ const SlowdownNorms = () => {
 
   useEffect(() => {
     const getSlowdownMonths = async () => {
-      if(!PLANT_ID || !AOP_YEAR) return
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
-        const data = await DataService.getSlowdownMonths(keycloak, null, PLANT_ID, AOP_YEAR)
+        const data = await DataService.getSlowdownMonths(
+          keycloak,
+          null,
+          PLANT_ID,
+          AOP_YEAR,
+        )
         if (data) setSlowdownMonths(data)
       } catch (error) {
         console.error('Error fetching months:', error)
@@ -177,7 +185,7 @@ const SlowdownNorms = () => {
       fetchData(gradeId)
       getSlowdownMonths()
     }
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   // const formatValueToFiveDecimals = (params) =>
   //   params ? parseFloat(params).toFixed(5) : ''
@@ -238,7 +246,6 @@ const SlowdownNorms = () => {
   const saveSlowdownNormsData = async (newRows) => {
     setLoading(true)
     try {
-     
       const businessData = newRows.map((row) => ({
         april: isTPH && row.april ? row.april * 24 : row.april || null,
         may: isTPH && row.may ? row.may * 24 : row.may || null,
@@ -316,7 +323,7 @@ const SlowdownNorms = () => {
   }
 
   const fetchData = async (gradeId) => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       setRows([])
@@ -330,7 +337,12 @@ const SlowdownNorms = () => {
       }
 
       // Fetch data from API
-      const data = await DataService.getSlowdownNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR)
+      const data = await DataService.getSlowdownNormsData(
+        keycloak,
+        gradeId,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       setCalculationObject(data?.data?.aopCalculation)
 
@@ -376,7 +388,7 @@ const SlowdownNorms = () => {
   }
 
   const loadGradesAfterCalculation = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     if (['pe', 'pp'].includes(lowerVertName)) {
       try {
         const response =
@@ -416,7 +428,12 @@ const SlowdownNorms = () => {
       // non PE/PP flow
       await fetchData(null)
       try {
-        const months = await DataService.getSlowdownMonths(keycloak, null, PLANT_ID, AOP_YEAR)
+        const months = await DataService.getSlowdownMonths(
+          keycloak,
+          null,
+          PLANT_ID,
+          AOP_YEAR,
+        )
         setSlowdownMonths(months)
       } catch (err) {
         console.error('Error fetching shutdown months:', err)
@@ -558,7 +575,7 @@ const SlowdownNorms = () => {
       }
     }
     loadGrades()
-  }, [plantID, yearChanged, keycloak])
+  }, [PLANT_ID, yearChanged, keycloak])
 
   const handleGradeChange = (gradeId) => {
     setGradeId(gradeId)

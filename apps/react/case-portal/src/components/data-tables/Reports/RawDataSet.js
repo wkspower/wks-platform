@@ -70,7 +70,6 @@ const RawDataSet = () => {
 
   useEffect(() => {
     async function fetchPeriod() {
-      if (!PLANT_ID || !AOP_YEAR) return
       try {
         const resp =
           await CrackerReportsApiDataService.getConfigurationExecutionDetails(
@@ -231,7 +230,7 @@ const RawDataSet = () => {
 
   useEffect(() => {
     if (periodFrom && periodTo) loadGrids()
-  }, [loadGrids, plantID, oldYear, yearChanged, periodFrom, periodTo])
+  }, [loadGrids, PLANT_ID, oldYear, yearChanged, periodFrom, periodTo])
 
   // Export helpers (only for steam grids)
   const currentDateTime = new Date()

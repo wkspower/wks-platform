@@ -26,6 +26,7 @@ import {
 import moment from '../../../../node_modules/moment/moment'
 import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ProductionVolumeDataBasisPe from './kendo-ProductionVolumeDataBasisPe'
 
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
@@ -61,7 +62,7 @@ const ProductionVolumeDataBasis = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
 
   const fetchData = async (reportType, setState, selectedUnit) => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     if (!selectedUnit) return
     try {
       setLoading(true)
@@ -148,7 +149,10 @@ const ProductionVolumeDataBasis = () => {
   useEffect(() => {
     const timers = [
       setTimeout(() => setShowGrids((prev) => ({ ...prev, mc: true })), 100),
-      setTimeout(() => setShowGrids((prev) => ({ ...prev, AOP_YEAR: true })), 300),
+      setTimeout(
+        () => setShowGrids((prev) => ({ ...prev, AOP_YEAR: true })),
+        300,
+      ),
       setTimeout(
         () => setShowGrids((prev) => ({ ...prev, calculated: true })),
         500,
@@ -184,130 +188,134 @@ const ProductionVolumeDataBasis = () => {
   }
 
   const fileName = `Production Volume Data ${new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').split('.')[0]}.xlsx`
-  return (
-    <div>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
 
-      {/* Export hidden ExcelExport instances */}
-      <div style={{ display: 'none' }}>
-        {[rowsMC, rowsMCYearWise, rowsCalculatedData, rowsRawData].map(
-          (data, i) => (
-            <ExcelExport
-              key={i}
-              data={data}
-              ref={[exportRef1, exportRef2, exportRef3, exportRef4][i]}
-              fileName={fileName}
-            >
-              {[colsMC, colsMCYearwise, colsCalculatedData, colsRowData][i].map(
-                (col) => (
+  if (lowerVertName != 'meg') {
+    return <ProductionVolumeDataBasisPe />
+  } else
+    return (
+      <div>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={!!loading}
+        >
+          <CircularProgress color='inherit' />
+        </Backdrop>
+
+        {/* Export hidden ExcelExport instances */}
+        <div style={{ display: 'none' }}>
+          {[rowsMC, rowsMCYearWise, rowsCalculatedData, rowsRawData].map(
+            (data, i) => (
+              <ExcelExport
+                key={i}
+                data={data}
+                ref={[exportRef1, exportRef2, exportRef3, exportRef4][i]}
+                fileName={fileName}
+              >
+                {[colsMC, colsMCYearwise, colsCalculatedData, colsRowData][
+                  i
+                ].map((col) => (
                   <ExcelExportColumn
                     key={col.field}
                     field={col.field}
                     title={col.title}
                   />
-                ),
-              )}
-            </ExcelExport>
-          ),
-        )}
-      </div>
-
-      <Box display='flex' justifyContent='flex-end' gap={1}>
-        {!isOldYear && (
-          <Button
-            variant='contained'
-            onClick={exportAllGrids}
-            className='btn-save'
-          >
-            Export
-          </Button>
-        )}
-        <TextField
-          select
-          value={selectedUnit || 'TPH'}
-          onChange={(e) => {
-            setSelectedUnit(e.target.value)
-            handleUnitChange(e.target.value)
-          }}
-          className='dropdown-select'
-          variant='outlined'
-          label='Select UOM'
-        >
-          <MenuItem value='' disabled>
-            Select UOM
-          </MenuItem>
-
-          {units.map((unit) => (
-            <MenuItem key={unit} value={unit}>
-              {unit}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Box>
-
-      <Box display='flex' flexDirection='column' gap={2}>
-        {[
-          {
-            label: 'MC',
-            visible: showGrids.mc,
-            rows: rowsMC,
-            cols: colsMC,
-          },
-          {
-            label: 'MC Yearwise',
-            visible: showGrids.AOP_YEAR,
-            rows: rowsMCYearWise,
-            cols: colsMCYearwise,
-          },
-          {
-            label: 'Calculated Data',
-            visible: showGrids.calculated,
-            rows: rowsCalculatedData,
-            cols: colsCalculatedData,
-          },
-          {
-            label: 'Raw Data',
-            visible: showGrids.raw,
-            rows: rowsRawData,
-            cols: colsRowData,
-          },
-        ].map(
-          (section, index) =>
-            section.visible && (
-              <div key={index}>
-                <CustomAccordion defaultExpanded disableGutters>
-                  <CustomAccordionSummary
-                    aria-controls='meg-grid-content'
-                    id='meg-grid-header'
-                  >
-                    <Typography component='span' className='grid-title'>
-                      {section.label}
-                    </Typography>
-                  </CustomAccordionSummary>
-                  <CustomAccordionDetails>
-                    <Box sx={{ width: '100%', margin: 0 }}>
-                      <KendoDataGrid
-                        rows={section.rows}
-                        columns={section.cols}
-                        permissions={{
-                          allAction: false,
-                          isHeight: section?.rows?.length > 15,
-                        }}
-                      />
-                    </Box>
-                  </CustomAccordionDetails>
-                </CustomAccordion>
-              </div>
+                ))}
+              </ExcelExport>
             ),
-        )}
-      </Box>
-    </div>
-  )
+          )}
+        </div>
+
+        <Box display='flex' justifyContent='flex-end' gap={1}>
+          {!isOldYear && (
+            <Button
+              variant='contained'
+              onClick={exportAllGrids}
+              className='btn-save'
+            >
+              Export
+            </Button>
+          )}
+          <TextField
+            select
+            value={selectedUnit || 'TPH'}
+            onChange={(e) => {
+              setSelectedUnit(e.target.value)
+              handleUnitChange(e.target.value)
+            }}
+            className='dropdown-select'
+            variant='outlined'
+            label='Select UOM'
+          >
+            <MenuItem value='' disabled>
+              Select UOM
+            </MenuItem>
+
+            {units.map((unit) => (
+              <MenuItem key={unit} value={unit}>
+                {unit}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Box>
+
+        <Box display='flex' flexDirection='column' gap={2}>
+          {[
+            {
+              label: 'MC',
+              visible: showGrids.mc,
+              rows: rowsMC,
+              cols: colsMC,
+            },
+            {
+              label: 'MC Yearwise',
+              visible: showGrids.AOP_YEAR,
+              rows: rowsMCYearWise,
+              cols: colsMCYearwise,
+            },
+            {
+              label: 'Calculated Data',
+              visible: showGrids.calculated,
+              rows: rowsCalculatedData,
+              cols: colsCalculatedData,
+            },
+            {
+              label: 'Raw Data',
+              visible: showGrids.raw,
+              rows: rowsRawData,
+              cols: colsRowData,
+            },
+          ].map(
+            (section, index) =>
+              section.visible && (
+                <div key={index}>
+                  <CustomAccordion defaultExpanded disableGutters>
+                    <CustomAccordionSummary
+                      aria-controls='meg-grid-content'
+                      id='meg-grid-header'
+                    >
+                      <Typography component='span' className='grid-title'>
+                        {section.label}
+                      </Typography>
+                    </CustomAccordionSummary>
+                    <CustomAccordionDetails>
+                      <Box sx={{ width: '100%', margin: 0 }}>
+                        <KendoDataGrid
+                          rows={section.rows}
+                          columns={section.cols}
+                          permissions={{
+                            allAction: false,
+                            isHeight: section?.rows?.length > 15,
+                          }}
+                        />
+                      </Box>
+                    </CustomAccordionDetails>
+                  </CustomAccordion>
+                </div>
+              ),
+          )}
+        </Box>
+      </div>
+    )
 }
 
 export default ProductionVolumeDataBasis

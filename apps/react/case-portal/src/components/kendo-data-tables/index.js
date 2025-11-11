@@ -139,6 +139,7 @@ const KendoDataTables = ({
   gridName,
   onGlobalCheckboxChange,
   allProducts = [],
+  allDescriptionDrpdwn = [],
   allMonths = [],
   selectMode,
   setSelectMode = () => {},
@@ -783,12 +784,17 @@ const KendoDataTables = ({
     })
 
     let highlightColor
+    let highlightColorFullCell = false
+
     if (isEdited || isRedFromAllRedCell) {
       highlightColor = 'orange'
     } else if (matchedCell?.mode === 'Propane(1Z)') {
       highlightColor = 'red'
     } else if (matchedCell?.mode === 'Propane(2Z)') {
       highlightColor = 'green'
+    } else if (matchedCell?.mode === 'Copied') {
+      highlightColor = 'purple'
+      highlightColorFullCell = true
     }
 
     return (
@@ -798,6 +804,7 @@ const KendoDataTables = ({
         style={{
           color: highlightColor,
           fontWeight: highlightColor ? 'bold' : undefined,
+          // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
         }}
       >
         {children}
@@ -854,6 +861,7 @@ const KendoDataTables = ({
       </th>
     )
   }
+
   const BlankHeader = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
 
@@ -872,6 +880,7 @@ const KendoDataTables = ({
       fileInputRef.current.click()
     }
   }
+
   const onFileChange = (event) => {
     const file = event.target.files[0]
     if (!file) return
@@ -1507,6 +1516,29 @@ const KendoDataTables = ({
                     />
                   )
                 }
+
+                if (col?.field === 'discriptionDrpdwn') {
+                  return (
+                    <GridColumn
+                      key='discriptionDrpdwn'
+                      field='discriptionDrpdwn'
+                      title={col.title || col.headerName || 'Particulars'}
+                      editable={col.editable || true}
+                      hidden={col.hidden}
+                      cells={{
+                        data: (cellProps) => (
+                          <ProductCell
+                            {...cellProps}
+                            allProducts={allDescriptionDrpdwn}
+                          />
+                        ),
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
+
                 if (col?.field === 'productName1') {
                   return (
                     <GridColumn
@@ -1529,6 +1561,7 @@ const KendoDataTables = ({
                     />
                   )
                 }
+
                 if (col?.field === 'month') {
                   return (
                     <GridColumn
@@ -2101,7 +2134,7 @@ const KendoDataTables = ({
                       key={col.field}
                       field={col.field}
                       title={col.title || col.headerName}
-                      // width={col.width}
+                      width={col.widthT}
                       hidden={col.hidden}
                       editable={!!col?.editable}
                       headerClassName={isActive ? 'active-column' : ''}
@@ -2242,6 +2275,7 @@ const KendoDataTables = ({
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={openSaveDialogeBox}
         onClose={closeSaveDialogeBox}

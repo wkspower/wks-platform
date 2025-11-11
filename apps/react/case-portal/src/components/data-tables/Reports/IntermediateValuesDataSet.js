@@ -128,7 +128,7 @@ export default function IntermediateValuesDataSet() {
         return { rows: [], columns: [] }
       }
     },
-    [keycloak, enrichColumns, plantID, oldYear],
+    [keycloak, enrichColumns, PLANT_ID, oldYear],
   )
 
   // -----------------------------------------------------------------------
@@ -155,7 +155,7 @@ export default function IntermediateValuesDataSet() {
 
   useEffect(() => {
     loadGrid()
-  }, [loadGrid, plantID, oldYear, yearChanged])
+  }, [loadGrid, PLANT_ID, oldYear, yearChanged])
 
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})

@@ -1,4 +1,3 @@
-
 export const ShutDownAllColumns = [
   {
     field: 'discription',
@@ -90,6 +89,42 @@ export const ShutDownPpColumns = [
     editable: true,
     widthT: 130,
   },
+  {
+    field: 'maintenanceId',
+    title: 'Maintenance ID',
+    editable: false,
+    hidden: true,
+  },
+  {
+    field: 'maintStartDateTime',
+    title: 'SD - From',
+    editable: true,
+  },
+  {
+    field: 'maintEndDateTime',
+    title: 'SD - To',
+    editable: true,
+  },
+  {
+    field: 'durationInHrs',
+    title: 'Duration (hrs)',
+    editable: true,
+  },
+  {
+    field: 'remark',
+    title: 'Shutdown Basis',
+    editable: true,
+  },
+]
+
+export const ShutDownPTAColumns = [
+  {
+    field: 'discriptionDrpdwn',
+    title: 'Shutdown Desc',
+    editable: true,
+    type: 'discriptionDrpdwn',
+  },
+
   {
     field: 'maintenanceId',
     title: 'Maintenance ID',

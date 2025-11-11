@@ -65,14 +65,6 @@ const ProductionNorms = ({ permissions }) => {
   })
   const dispatch = useDispatch()
 
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-    // setSelectedUnit('')
-  }, [plantID])
-  // const isBlocked = useSelector((state) => state.isBlocked) // Get block flag from Redux
-
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
       try {
@@ -378,7 +370,7 @@ const ProductionNorms = ({ permissions }) => {
   ]
 
   const fetchData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       const response = await ProductionNormsApiService.getAOPData(
@@ -400,7 +392,7 @@ const ProductionNorms = ({ permissions }) => {
       }
 
       let dataSet = response?.data?.aopDTOList
-      // if (lowerVertName === 'cracker') {
+      // if (lowerVertName === 'elastomer') {
       //   dataSet = rowDataForCracker
       // }
 
@@ -651,7 +643,7 @@ const ProductionNorms = ({ permissions }) => {
   }
 
   const fetchDataByProducts = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
 
@@ -758,7 +750,7 @@ const ProductionNorms = ({ permissions }) => {
     if (lowerVertName === 'meg') {
       fetchDataByProducts()
     }
-  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit])
+  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
 
   const valueFormat = ValueFormatterProduction()
 

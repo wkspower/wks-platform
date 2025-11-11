@@ -125,7 +125,7 @@ const WorkFlowMerge = () => {
   useEffect(() => {
     setTabIndex(0)
     fetchData()
-  }, [plantID, yearChanged])
+  }, [PLANT_ID, AOP_YEAR])
 
   const handleExport = () => {
     handleExportAll()
@@ -139,8 +139,7 @@ const WorkFlowMerge = () => {
         throw new Error('PLANT_ID or AOP_YEAR not found ')
       }
 
-      // Wait for all API calls to complete
-      const [data, res1, res2, res3, res4, res5, res6, res7] =
+      const [data, res1, res2, res3, res4, res5, res6, res7, res8] =
         await Promise.all([
           DataService.handleCalculateAnnualAopCostMiisContribution(
             PLANT_ID,
@@ -189,25 +188,16 @@ const WorkFlowMerge = () => {
             keycloak,
           ),
 
-          DataService.calculateLoadPlantContribution(
+          DataService.calculatePlantContributionBusinessDemand(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
 
-          lowerVertName === 'meg' || lowerVertName === 'pe'
-            ? DataService.calculatePlantContributionReportData(
-                PLANT_ID,
-                AOP_YEAR,
-                keycloak,
-              )
-            : Promise.resolve(null),
+          Promise.resolve(null),
         ])
 
-      const responses =
-        lowerVertName === 'meg' || lowerVertName === 'pe'
-          ? [data, res1, res2, res3, res4, res5, res6, res7]
-          : [data, res1, res2, res3, res4, res5, res6]
+      const responses = [data, res1, res2, res3, res4, res5, res6, res7, res8]
 
       const allSuccess = responses.every(
         (res) => res !== null && res !== undefined,
@@ -256,7 +246,12 @@ const WorkFlowMerge = () => {
       const payload = postmanData
 
       // Await the API call here to ensure completion
-      const data = await DataService.getExcel(keycloak, payload, PLANT_ID, AOP_YEAR)
+      const data = await DataService.getExcel(
+        keycloak,
+        payload,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -400,7 +395,13 @@ const WorkFlowMerge = () => {
   const getCaseId = async () => {
     if(!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
     try {
-      const cases = await DataService.getCaseId(keycloak, PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID)
+      const cases = await DataService.getCaseId(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
       setCaseId(cases?.workflowMasterDTO?.casedefId || '')
       setShowCreateCasebutton(cases?.workflowList?.length === 0)
       setTaskId(cases?.taskId || '')
@@ -582,6 +583,7 @@ const WorkFlowMerge = () => {
     'Annual Production Plan(T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
+    'Specific Consumption Norms',
   ]
 
   const customPPTabs = [
@@ -593,6 +595,7 @@ const WorkFlowMerge = () => {
     'Annual Production Plan(T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
+    'Specific Consumption Norms',
   ]
   const PETabs = [
     'Annual AOP Cost',
@@ -849,10 +852,8 @@ const WorkFlowMerge = () => {
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
             {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
-            <>
-            {tabIndex === 8 && <SpecificConsumptionNorm />}
-           </>
-           )}
+              <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
+            )}
 
             <Notification
               open={snackbarOpen}

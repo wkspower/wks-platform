@@ -58,12 +58,6 @@ const TurnaroundReportCracker = () => {
 
   const headerMap = generateHeaderNames(AOP_YEAR)
 
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
-
   const keycloak = useSession()
 
   useEffect(() => {

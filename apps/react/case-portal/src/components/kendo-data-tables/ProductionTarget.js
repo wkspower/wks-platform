@@ -92,11 +92,6 @@ const ProductionTarget = ({ permissions }) => {
     setCurrentRowIdDesignCapacity(row.id)
     setRemarkDialogOpenDesignCapacity(true)
   }
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
 
   const findAvg = (value, row) => {
     const months = [
@@ -561,7 +556,7 @@ const ProductionTarget = ({ permissions }) => {
     fetchData()
 
     fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   const colDefs_editable = getEnhancedProductionColDefs({
     headerMap,
@@ -756,16 +751,16 @@ const ProductionTarget = ({ permissions }) => {
 
   useEffect(() => {
     fetchDesignCapacityData(selectedUnit)
-  }, [selectedUnit, plantID, yearChanged, keycloak])
+  }, [selectedUnit, PLANT_ID, yearChanged, keycloak])
 
   useEffect(() => {
     fetchMaxCapacityData(selectedUnit)
-  }, [selectedUnit, plantID, yearChanged, keycloak])
+  }, [selectedUnit, PLANT_ID, yearChanged, keycloak])
 
   useEffect(() => {
     fetchData()
     fetchConfiguration()
-  }, [oldYear, yearChanged, keycloak, selectedUnit, plantID])
+  }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
   const handleCalculateMeg = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return

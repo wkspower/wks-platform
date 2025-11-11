@@ -1,5 +1,4 @@
 import { Box } from '@mui/material'
-import ReportDataGrid from 'components/data-tables-views/ReportDataGrid'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'

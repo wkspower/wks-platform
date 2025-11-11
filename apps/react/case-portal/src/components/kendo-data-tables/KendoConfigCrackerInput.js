@@ -154,9 +154,14 @@ const CrackerConfig = () => {
   }, [headerMap, currentTabDisplay])
 
   const fetchTabsMatrix = useCallback(async () => {
-    if(!PLANT_ID || !SITE_ID || !VERTICAL_ID) return
     try {
-      const resp = await DataService.getConfigurationTabsMatrix(keycloak, PLANT_ID, SITE_ID, VERTICAL_ID)
+      const resp = await DataService.getConfigurationTabsMatrix(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
       let tabsFromApi = []
       if (typeof resp.data === 'string') {
         try {
@@ -433,8 +438,6 @@ const CrackerConfig = () => {
   }, [modifiedCells])
 
   const saveSpyroData = async (newRows) => {
-    console.log('newRows', newRows)
-
     setLoading(true)
     try {
       const SpyroInputData = newRows.map((row) => ({
@@ -459,7 +462,7 @@ const CrackerConfig = () => {
         SpyroInputData,
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -559,7 +562,12 @@ const CrackerConfig = () => {
     const mode = selectMode
 
     try {
-      const response = await DataService.exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR)
+      const response = await DataService.exportSpyroInputExcel(
+        keycloak,
+        mode,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)

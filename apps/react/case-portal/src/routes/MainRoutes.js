@@ -1,7 +1,7 @@
 import { CaseStatus } from 'common/caseStatus'
 import WorkFlowMerge from 'components/data-tables/AOPWorkFlow/kendo-WorkFlowMerge'
 import AssessmentForm from 'components/data-tables/AssesmentForm/AssessmentContext'
-import FeedStockAvailability from 'components/data-tables/FeedStockavailability'
+
 import MonthwiseProduction from 'components/data-tables/Reports-kendo/kendo-MonthwiseProduction'
 import MonthwiseRawMaterial from 'components/data-tables/Reports-kendo/kendo-MonthwiseRawMaterial'
 import PlantsProductionSummary from 'components/data-tables/Reports-kendo/kendo-PlantsProductionData'
@@ -9,7 +9,6 @@ import ProductionVolumeDataBasis from 'components/data-tables/Reports-kendo/kend
 import AnnualAopCost from 'components/data-tables/Reports/AnnualAopCost'
 import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBasis'
 import BestAchievedNorms from 'components/data-tables/Reports/BestAchievedNorms'
-import TurnaroundPlanTable from 'components/data-tables/TurnaroundPlanTable'
 import BusinessDemand from 'components/kendo-data-tables/BusinessDemand'
 import ConsumptionNorms from 'components/kendo-data-tables/ConsumptionNorms'
 import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
@@ -37,15 +36,12 @@ import { ProcessDefList } from 'views/management/processDef/processDefList'
 import { QueueList } from 'views/management/queue/queueList'
 import { RecordTypeList } from 'views/management/recordType/recordTypeList'
 import { TaskList } from 'views/taskList/taskList'
-// import ProductionVolumeDataBasisPe from 'components/data-tables/Reports-kendo/kendo-ProductionVolumeDataBasisPe'
-import ProductionVolumeDataBasisPe from 'components/data-tables/Reports-kendo/ProductionVolumeDataBasisPe'
-import NormsHistorianBasisPe from 'components/data-tables/Reports/NormsHistorianBasisPe'
+
 import ConfigurationTable from 'components/kendo-data-tables/KendoConfigurationTable'
 import { Navigate } from '../../node_modules/react-router-dom/dist/index'
 import PrivateRoute from './PrivateRoutes'
 import AopBudget from 'components/kendo-data-tables/AopBudget'
-import MonthlyTemplatePlants from 'components/kendo-data-tables/MonthlyTemplatePlants'
-import AopSummary from 'components/kendo-data-tables/AopSummary'
+
 import PlantTeam from 'components/kendo-data-tables/PlantTeam'
 import RelPerf from 'components/kendo-data-tables/RelPerf'
 import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafetyPerformanceTarget'
@@ -61,8 +57,10 @@ import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
 import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
 import TcsInput from 'components/kendo-data-tables/TcsInput'
 import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTargetBasis'
-import NormsHistorianBasisAromatics from 'components/data-tables/Reports/NormsHistorianBasisAromatics'
+
 import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenanceSummary'
+import FeedStockAvailability from 'components/kendo-data-tables/FeedStockavailability'
+import TurnaroundPlanTable from 'components/kendo-data-tables/TurnaroundPlanTable'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -73,26 +71,6 @@ export const MainRoutes = (
   // recordsTypes,
   casesDefinitions,
 ) => {
-  const verticalName = JSON.parse(
-    localStorage.getItem('selectedVertical'),
-  )?.name
-
-  const ProductionVolumeDataBasisElement =
-    verticalName != 'MEG' ? (
-      <ProductionVolumeDataBasisPe />
-    ) : (
-      <ProductionVolumeDataBasis />
-    )
-
-  const NormsHistorianBasisElement =
-    (verticalName || '').toLowerCase() === 'meg' ? (
-      <NormsHistorianBasis />
-    ) : (verticalName || '').toLowerCase() === 'aromatics' ? (
-      <NormsHistorianBasisAromatics />
-    ) : (
-      <NormsHistorianBasisPe />
-    )
-
   let routes = {
     path: '/',
     element: <MainLayout keycloak={keycloak} authenticated={authenticated} />,
@@ -408,7 +386,7 @@ export const MainRoutes = (
             path: 'production-volume-basis',
             element: (
               <PrivateRoute routeId='production-volume-basis'>
-                {ProductionVolumeDataBasisElement}
+                <ProductionVolumeDataBasis />
               </PrivateRoute>
             ),
           },
@@ -416,7 +394,7 @@ export const MainRoutes = (
             path: 'norms-historian-basis',
             element: (
               <PrivateRoute routeId='norms-historian-basis'>
-                {NormsHistorianBasisElement}
+                <NormsHistorianBasis />
               </PrivateRoute>
             ),
           },

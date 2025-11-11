@@ -43,7 +43,7 @@ const Notification = ({
       autoHideDuration={duration}
       onClose={onClose}
       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      sx={{ top: '65px !important' }}
+      sx={{ top: '55px !important' }}
     >
       <StyledAlert onClose={onClose} severity={severity} sx={{ width: '100%' }}>
         {message}

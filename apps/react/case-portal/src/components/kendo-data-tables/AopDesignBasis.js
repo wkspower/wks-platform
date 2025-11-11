@@ -184,7 +184,7 @@ const AopDesignBasis = () => {
   }
 
   const getAopSummary = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setSummary('')
       var res = await DataService.getAopSummary(keycloak, PLANT_ID, AOP_YEAR)
@@ -240,10 +240,12 @@ const AopDesignBasis = () => {
   }
 
   const getConfigurationExecutionDetails = async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
     try {
-      const response =
-        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
+      const response = await DataService.getConfigurationExecutionDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(

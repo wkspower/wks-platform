@@ -454,7 +454,7 @@ const SlowDown = ({ permissions }) => {
           }
         }
 
-        // Overlap within Slowdown  of timeframe ovelaping 
+        // Overlap within Slowdown  of timeframe ovelaping
         for (let i = 0; i < rows.length; i++) {
           const a = rows[i]
           const aStart = new Date(a.maintStartDateTime).getTime()
@@ -626,18 +626,18 @@ const SlowDown = ({ permissions }) => {
   }
 
   const fetchData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     try {
       const data = await DataService.getSlowDownPlantData(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
       const dataShutDown = await DataService.getShutDownPlantData(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
       const formattedDataShutDown = dataShutDown?.map((item, index) => ({
         ...item,
@@ -672,11 +672,15 @@ const SlowDown = ({ permissions }) => {
   const [allRedCell, setAllRedCell] = useState([])
 
   const fetchConfigurationData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     setRows2([])
     setLoading(true)
     try {
-      var response = await DataService.getSlowDownConfigurationData(keycloak, PLANT_ID, AOP_YEAR)
+      var response = await DataService.getSlowDownConfigurationData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       var data = response?.data?.data
       var redCells = response?.data?.changedData
 
@@ -719,12 +723,16 @@ const SlowDown = ({ permissions }) => {
     }
   }
   const fetchData2 = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
 
     setLoading(true)
     setColDefs2([])
     try {
-      var data1 = await DataService.getSlowDownPlantDataTab(keycloak, PLANT_ID, AOP_YEAR)
+      var data1 = await DataService.getSlowDownPlantDataTab(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       const removedCols = [
         'srNo',
@@ -767,15 +775,18 @@ const SlowDown = ({ permissions }) => {
   useEffect(() => {
     setSelectedTab(0)
     const getAllProducts = async () => {
-      if (!PLANT_ID) return
       try {
         var data = []
         if (lowerVertName == 'meg')
-          data = await DataService.getAllProducts(keycloak, PLANT_ID, null)
+          data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
         else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
-          data = await DataService.getAllProductsAll(keycloak, 'Production', PLANT_ID)
+          data = await DataService.getAllProductsAll(
+            keycloak,
+            'Production',
+            PLANT_ID,
+          )
         }
         var productList = []
         if (lowerVertName === 'meg') {
@@ -817,7 +828,7 @@ const SlowDown = ({ permissions }) => {
       setRows2([])
       fetchData2()
     }
-  }, [oldYear, yearChanged, keycloak, plantID])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID])
 
   const focusFirstField = async () => {
     const newRowId = rows.length
@@ -869,7 +880,11 @@ const SlowDown = ({ permissions }) => {
         })
         fetchData()
         const maintenanceResponse =
-          await MaintenanceDetailsApiService.getMaintenanceData(keycloak, PLANT_ID, AOP_YEAR)
+          await MaintenanceDetailsApiService.getMaintenanceData(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
       } else {
         setLoading(false)
       }
@@ -917,22 +932,21 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-    
-    if(lowerVertName == 'elastomer'){
-            response = await DataService.ImportSlowdownElastomerDetails(
-            rawFile,
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-      )
-          } else{
-            response = await DataService.ImportSlowdownDetails(
-            rawFile,
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-      )
-          }
+      if (lowerVertName == 'elastomer') {
+        response = await DataService.ImportSlowdownElastomerDetails(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else {
+        response = await DataService.ImportSlowdownDetails(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -1025,7 +1039,11 @@ const SlowDown = ({ permissions }) => {
       titleName: SCREEN_NAME,
 
       uploadExcelBtn:
-        lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName == 'elastomer' ? true : false,
+        lowerVertName === 'pe' ||
+        lowerVertName === 'pp' ||
+        lowerVertName == 'elastomer'
+          ? true
+          : false,
     },
     isOldYear,
   )

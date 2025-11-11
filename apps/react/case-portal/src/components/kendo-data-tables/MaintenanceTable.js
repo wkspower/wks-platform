@@ -37,9 +37,17 @@ const MaintenanceTable = () => {
       serviceFn:
         lowerVertName === 'cracker'
           ? (keycloak, PLANT_ID, AOP_YEAR) =>
-              MaintenanceDetailsApiService.getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR)
+              MaintenanceDetailsApiService.getCrackerMaintenanceData(
+                keycloak,
+                PLANT_ID,
+                AOP_YEAR,
+              )
           : (keycloak, PLANT_ID, AOP_YEAR) =>
-              MaintenanceDetailsApiService.getMaintenanceData(keycloak, PLANT_ID, AOP_YEAR),
+              MaintenanceDetailsApiService.getMaintenanceData(
+                keycloak,
+                PLANT_ID,
+                AOP_YEAR,
+              ),
       editable: lowerVertName === 'cracker',
     }),
     [PLANT_ID, AOP_YEAR, lowerVertName],
@@ -169,7 +177,7 @@ const MaintenanceTable = () => {
     }
   }
   const fetchData = useCallback(async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     setRows([])
     setLoading(true)
     try {
@@ -243,7 +251,7 @@ const MaintenanceTable = () => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, oldYear, yearChanged, plantID])
+  }, [fetchData, oldYear, yearChanged, PLANT_ID])
 
   // Helper to generate monthly fields
   const getMonthlyColumns = () => {

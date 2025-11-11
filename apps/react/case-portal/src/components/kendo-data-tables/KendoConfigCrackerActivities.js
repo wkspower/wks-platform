@@ -29,26 +29,26 @@ const DecokingConfig = () => {
   const keycloak = useSession()
   const tabs = ['IBR Plan']
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
-    const SCREEN_NAME = screenTitle?.title
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const SCREEN_NAME = screenTitle?.title
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -190,7 +190,11 @@ const DecokingConfig = () => {
           }
           // Screen 2
           if (!screen || screen === 2) {
-            const data2 = await DataService.getIbrSdTa(keycloak, PLANT_ID, AOP_YEAR)
+            const data2 = await DataService.getIbrSdTa(
+              keycloak,
+              PLANT_ID,
+              AOP_YEAR,
+            )
             const toDateObject = (value) =>
               value ? moment(value, 'MMM D, YYYY').toDate() : null
 
@@ -230,7 +234,11 @@ const DecokingConfig = () => {
 
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
-            const data3 = await DataService.getIbrScreen3(keycloak, PLANT_ID, AOP_YEAR)
+            const data3 = await DataService.getIbrScreen3(
+              keycloak,
+              PLANT_ID,
+              AOP_YEAR,
+            )
             const toDateObject = (value) =>
               value ? moment(value, 'YYYY-MM-DD').toDate() : null
 
@@ -269,7 +277,7 @@ const DecokingConfig = () => {
   )
   useEffect(() => {
     fetchData()
-  }, [plantID, oldYear, yearChanged, keycloak, fetchData])
+  }, [PLANT_ID, oldYear, yearChanged, keycloak, fetchData])
 
   function validateAllDateOverlaps(rows) {
     const pairs = [['ibrStartDate', 'ibrEndDate', 'IBR']]
@@ -601,7 +609,12 @@ const DecokingConfig = () => {
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
-      const response = await DataService.postIbr(PLANT_ID, payload, keycloak, AOP_YEAR)
+      const response = await DataService.postIbr(
+        PLANT_ID,
+        payload,
+        keycloak,
+        AOP_YEAR,
+      )
 
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -665,7 +678,12 @@ const DecokingConfig = () => {
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
-      const response = await DataService.postIbr(PLANT_ID, payload, keycloak, AOP_YEAR)
+      const response = await DataService.postIbr(
+        PLANT_ID,
+        payload,
+        keycloak,
+        AOP_YEAR,
+      )
 
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -826,7 +844,12 @@ const DecokingConfig = () => {
     setLoading(true)
     try {
       var response
-      response = await DataService.saveRunLengthExcel(rawFile, keycloak, PLANT_ID, AOP_YEAR)
+      response = await DataService.saveRunLengthExcel(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -877,7 +900,6 @@ const DecokingConfig = () => {
   const handleCalculateSdTa = async () => {
     setLoading(true)
     try {
-  
       const data = await DataService.handleCalculateSdTaActivities(
         PLANT_ID,
         AOP_YEAR,
@@ -912,7 +934,6 @@ const DecokingConfig = () => {
   const handleCalculate = async () => {
     setLoading(true)
     try {
-      
       const data = await DataService.handleCalculateDecokingActivities(
         PLANT_ID,
         AOP_YEAR,

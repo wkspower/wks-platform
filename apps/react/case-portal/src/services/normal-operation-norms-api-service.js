@@ -25,6 +25,8 @@ export const NormalOperationNormsApiService = {
   load1,
   load2,
   load3,
+  getNormTransactionsForFinalNorms,
+  getNormTransactionsForFinalNormsModeWise,
 }
 
 async function BestAchivedColorCodes(keycloak, plantId, year, mode) {
@@ -162,7 +164,6 @@ async function load3(keycloak, PLANT_ID, AOP_YEAR, endDate, startDate) {
 }
 
 async function getfinalNorms(keycloak, PLANT_ID, AOP_YEAR) {
-
   const url = `${Config.CaseEngineUrl}/task/final-norms?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
@@ -178,9 +179,15 @@ async function getfinalNorms(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function getModeWiseNormsData(keycloak, gradeId, method, PLANT_ID, AOP_YEAR) {
-
+async function getModeWiseNormsData(
+  keycloak,
+  gradeId,
+  method,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   const url = `${Config.CaseEngineUrl}/task/mode-wise/norms?year=${AOP_YEAR}&plantId=${PLANT_ID}&mode=${gradeId}&method=${method}`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -194,7 +201,13 @@ async function getModeWiseNormsData(keycloak, gradeId, method, PLANT_ID, AOP_YEA
     return await Promise.reject(e)
   }
 }
-async function getModeWiseNormsDataworkflow(keycloak, gradeId, method, PLANT_ID, AOP_YEAR) {
+async function getModeWiseNormsDataworkflow(
+  keycloak,
+  gradeId,
+  method,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   const url = `${Config.CaseEngineUrl}/task/month-wise-raw-data-by-method?year=${AOP_YEAR}&plantId=${PLANT_ID}&mode=${gradeId}&method=${method}`
   ///month-wise-raw-data-by-method
   const headers = {
@@ -210,7 +223,13 @@ async function getModeWiseNormsDataworkflow(keycloak, gradeId, method, PLANT_ID,
     return await Promise.reject(e)
   }
 }
-async function updateModeWiseNormsData(keycloak, gradeId, payload, PLANT_ID, AOP_YEAR) {
+async function updateModeWiseNormsData(
+  keycloak,
+  gradeId,
+  payload,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   const baseUrl = `${Config.CaseEngineUrl}/task/mode-wise/norms`
   const year = AOP_YEAR
   const plantId = PLANT_ID
@@ -273,7 +292,6 @@ async function getNormalOperationNormsData(
   }
 }
 async function getNormalOperationNormsGrades(keycloak, PLANT_ID, AOP_YEAR) {
-
   const url = `${Config.CaseEngineUrl}/task/normal-operation/norms/grades?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
@@ -289,7 +307,6 @@ async function getNormalOperationNormsGrades(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function getGradesForShutdownNorms(keycloak, PLANT_ID, AOP_YEAR) {
-
   const url = `${Config.CaseEngineUrl}/task/unique/grades?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
@@ -305,7 +322,6 @@ async function getGradesForShutdownNorms(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function getGradesForSlowdownNorms(keycloak, PLANT_ID, AOP_YEAR) {
-  
   const url = `${Config.CaseEngineUrl}/task/slowdown-norms-grades?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
@@ -321,8 +337,6 @@ async function getGradesForSlowdownNorms(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function getIntermediateValues(keycloak, PLANT_ID, AOP_YEAR) {
-  
-
   const url = `${Config.CaseEngineUrl}/task/intermediate-values?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
@@ -430,7 +444,11 @@ async function handleCalculateNormalOperationNormsPe(
     return Promise.reject(e)
   }
 }
-async function handleCalculateNormalOperationNorms(plantId, AOP_YEAR, keycloak) {
+async function handleCalculateNormalOperationNorms(
+  plantId,
+  AOP_YEAR,
+  keycloak,
+) {
   const url = `${Config.CaseEngineUrl}/task/calculate-steady-state-norms?year=${AOP_YEAR}&plantId=${plantId}`
   const headers = {
     Accept: 'application/json',
@@ -473,7 +491,6 @@ async function calculateFinalNorms(PLANT_ID, AOP_YEAR, keycloak) {
   }
 }
 async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
-
   var url = `${Config.CaseEngineUrl}/task/steady-state-norms-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   if (gradeId) {
@@ -506,7 +523,14 @@ async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-async function updateFinalNormsData(keycloak, gradeId, payload, PLANT_ID, AOP_YEAR) {
+
+async function updateFinalNormsData(
+  keycloak,
+  gradeId,
+  payload,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   const baseUrl = `${Config.CaseEngineUrl}/task/final-norms`
   const year = AOP_YEAR
   const plantId = PLANT_ID
@@ -527,6 +551,42 @@ async function updateFinalNormsData(keycloak, gradeId, payload, PLANT_ID, AOP_YE
       headers,
       body: JSON.stringify(payload),
     })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getNormTransactionsForFinalNormsModeWise(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const url = `${Config.CaseEngineUrl}/task/norms-transactions-final-norms-mode-wise?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getNormTransactionsForFinalNorms(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/norms-transactions-final-norms?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

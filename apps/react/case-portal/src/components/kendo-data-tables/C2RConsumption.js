@@ -17,26 +17,26 @@ const C2RConsumption = ({ permissions }) => {
   const keycloak = useSession()
   const apiRef = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
-    const SCREEN_NAME = screenTitle?.title
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const SCREEN_NAME = screenTitle?.title
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [_plantID, set_PlantID] = useState('')
   const [loading, setLoading] = useState(false)
@@ -57,12 +57,6 @@ const C2RConsumption = ({ permissions }) => {
     rowsBeforeChange: {},
   })
   const dispatch = useDispatch()
-
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
 
   const saveChanges = React.useCallback(async () => {
     setTimeout(() => {
@@ -112,7 +106,8 @@ const C2RConsumption = ({ permissions }) => {
     setLoading(true)
 
     try {
-      
+      const isKiloTon = selectedUnit != ('MT' || 'MT/Month')
+
       const productNormData = newRow.map((row) => ({
         aopType: row.aopType || 'production',
         aopCaseId: row.aopCaseId || null,
@@ -558,7 +553,7 @@ const C2RConsumption = ({ permissions }) => {
   }
 
   const fetchDataByProducts = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
 
@@ -667,7 +662,7 @@ const C2RConsumption = ({ permissions }) => {
     if (lowerVertName === 'meg') {
       fetchDataByProducts()
     }
-  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit])
+  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,

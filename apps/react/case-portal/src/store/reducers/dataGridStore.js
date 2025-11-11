@@ -1,9 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const getSelectedPlantStorage = localStorage.getItem('selectedPlant')
-  ? JSON.parse(localStorage.getItem('selectedPlant'))
-  : null
-
 const getStorageYear = () => {
   const year = localStorage.getItem('year')
   return year ? year : ''
@@ -18,9 +14,7 @@ const initialState = {
   currentYear: null,
   oldYear: null,
   siteID: null,
-  plantID: getSelectedPlantStorage,
-
-  // New objects (each with shape { id, name } or null)
+  plantID: null,
   plantObject: null,
   siteObject: null,
   verticalObject: null,

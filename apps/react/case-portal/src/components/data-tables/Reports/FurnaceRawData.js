@@ -198,7 +198,7 @@ const FurnaceRawData = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   const exportAllGrids = useCallback(() => {
     const keys = Object.keys(exportRefs.current || {})

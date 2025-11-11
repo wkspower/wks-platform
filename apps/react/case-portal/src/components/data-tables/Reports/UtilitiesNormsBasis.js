@@ -165,6 +165,8 @@ const UtilitiesNormsBasis = () => {
       const apiResponse = await DataService.getBestAchievedNorms(
         keycloak,
         'TYPE LIST3',
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (apiResponse?.code !== 200) {
@@ -222,7 +224,7 @@ const UtilitiesNormsBasis = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)

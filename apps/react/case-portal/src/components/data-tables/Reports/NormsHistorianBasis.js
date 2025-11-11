@@ -26,6 +26,8 @@ import {
 } from 'utils/CustomAccrodian'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import NormsHistorianBasisAromatics from './NormsHistorianBasisAromatics'
+import ProductionVolumeDataBasisPe from './NormsHistorianBasisPe'
 
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
@@ -79,7 +81,7 @@ const NormsHistorianBasis = () => {
     getKendoNormsHistorianColumns({ headerMap, type, valueFormat })
 
   const fetchAllData = async (selectedUnit) => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     if (!selectedUnit) return
     setLoading(true)
     let isCancelled = false
@@ -125,21 +127,21 @@ const NormsHistorianBasis = () => {
             'HistorianValues',
             selectedUnit,
             PLANT_ID,
-            AOP_YEAR
+            AOP_YEAR,
           ),
           DataService.getNormsHistorianBasis(
             keycloak,
             'McuAndNormGrid',
             selectedUnit,
             PLANT_ID,
-            AOP_YEAR
+            AOP_YEAR,
           ),
           DataService.getNormsHistorianBasis(
             keycloak,
             'ProductionVolumeData',
             selectedUnit,
             PLANT_ID,
-            AOP_YEAR
+            AOP_YEAR,
           ),
         ])
       }
@@ -294,102 +296,113 @@ const NormsHistorianBasis = () => {
           },
         ]
 
-  return (
-    <div>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
+  if (lowerVertName != 'meg') {
+    return <ProductionVolumeDataBasisPe />
+  } else if (lowerVertName == 'aromatics') {
+    return <NormsHistorianBasisAromatics />
+  } else
+    return (
+      <div>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color='inherit' />
+        </Backdrop>
 
-      <div style={{ display: 'none' }}>
-        {(lowerVertName === 'cracker'
-          ? [rowsBestAchieved, rowsExpressionBased, rowsCurrentYear]
-          : [rowsProductionVolumeData, rowsMcuAndNormGrid, rowsHistorianValues]
-        ).map((data, i) => (
-          <ExcelExport
-            key={i}
-            data={data}
-            ref={[exportRef1, exportRef2, exportRef3][i]}
-            fileName={fileName}
-          >
-            {(lowerVertName === 'cracker'
-              ? [colsBestAchieved, colsExpressionBased, colsCurrentYear]
-              : [
-                  colsProductionVolumeData,
-                  colsMcuAndNormGrid,
-                  colsHistorianValues,
-                ])[i].map((col) => (
-              <ExcelExportColumn
-                key={col.field}
-                field={col.field}
-                title={col.title}
-              />
-            ))}
-          </ExcelExport>
-        ))}
-      </div>
+        <div style={{ display: 'none' }}>
+          {(lowerVertName === 'cracker'
+            ? [rowsBestAchieved, rowsExpressionBased, rowsCurrentYear]
+            : [
+                rowsProductionVolumeData,
+                rowsMcuAndNormGrid,
+                rowsHistorianValues,
+              ]
+          ).map((data, i) => (
+            <ExcelExport
+              key={i}
+              data={data}
+              ref={[exportRef1, exportRef2, exportRef3][i]}
+              fileName={fileName}
+            >
+              {(lowerVertName === 'cracker'
+                ? [colsBestAchieved, colsExpressionBased, colsCurrentYear]
+                : [
+                    colsProductionVolumeData,
+                    colsMcuAndNormGrid,
+                    colsHistorianValues,
+                  ])[i].map((col) => (
+                <ExcelExportColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title}
+                />
+              ))}
+            </ExcelExport>
+          ))}
+        </div>
 
-      <Box display='flex' justifyContent='flex-end' gap={2}>
-        {!isOldYear && (
-          <Button
-            variant='contained'
-            onClick={exportAllGrids}
-            className='btn-save'
-          >
-            Export
-          </Button>
-        )}
+        <Box display='flex' justifyContent='flex-end' gap={2}>
+          {!isOldYear && (
+            <Button
+              variant='contained'
+              onClick={exportAllGrids}
+              className='btn-save'
+            >
+              Export
+            </Button>
+          )}
 
-        {lowerVertName !== 'cracker' && (
-          <TextField
-            select
-            value={selectedUnit}
-            onChange={(e) => handleUnitChange(e.target.value)}
-            className='dropdown-select'
-            variant='outlined'
-            label={lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
-          >
-            <MenuItem value='' disabled>
-              {lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
-            </MenuItem>
-
-            {units.map((unit) => (
-              <MenuItem key={unit} value={unit}>
-                {unit}
+          {lowerVertName !== 'cracker' && (
+            <TextField
+              select
+              value={selectedUnit}
+              onChange={(e) => handleUnitChange(e.target.value)}
+              className='dropdown-select'
+              variant='outlined'
+              label={
+                lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'
+              }
+            >
+              <MenuItem value='' disabled>
+                {lowerVertName === 'cracker' ? 'Select Mode.' : 'Select UOM.'}
               </MenuItem>
-            ))}
-          </TextField>
-        )}
-      </Box>
 
-      <Box display='flex' flexDirection='column' gap={2}>
-        {gridData.map(
-          (section, index) =>
-            (section.visible ?? true) && (
-              <CustomAccordion key={index} defaultExpanded disableGutters>
-                <CustomAccordionSummary>
-                  <Typography className='grid-title'>
-                    {section.label}
-                  </Typography>
-                </CustomAccordionSummary>
-                <CustomAccordionDetails>
-                  <Box sx={{ width: '100%' }}>
-                    <KendoDataGrid
-                      rows={section.rows}
-                      loading={loading}
-                      columns={section.cols}
-                      permissions={{ isHeight: section?.rows?.length > 15 }}
-                    />
-                  </Box>
-                </CustomAccordionDetails>
-              </CustomAccordion>
-            ),
-        )}
-      </Box>
-    </div>
-  )
+              {units.map((unit) => (
+                <MenuItem key={unit} value={unit}>
+                  {unit}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
+        </Box>
+
+        <Box display='flex' flexDirection='column' gap={2}>
+          {gridData.map(
+            (section, index) =>
+              (section.visible ?? true) && (
+                <CustomAccordion key={index} defaultExpanded disableGutters>
+                  <CustomAccordionSummary>
+                    <Typography className='grid-title'>
+                      {section.label}
+                    </Typography>
+                  </CustomAccordionSummary>
+                  <CustomAccordionDetails>
+                    <Box sx={{ width: '100%' }}>
+                      <KendoDataGrid
+                        rows={section.rows}
+                        loading={loading}
+                        columns={section.cols}
+                        permissions={{ isHeight: section?.rows?.length > 15 }}
+                      />
+                    </Box>
+                  </CustomAccordionDetails>
+                </CustomAccordion>
+              ),
+          )}
+        </Box>
+      </div>
+    )
 }
 
 export default NormsHistorianBasis

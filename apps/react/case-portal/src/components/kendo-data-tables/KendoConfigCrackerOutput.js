@@ -138,11 +138,11 @@ const CrackerConfig = () => {
   )
 
   const fetchTabsMatrix = useCallback(async () => {
-    if(!PLANT_ID || !SITE_ID || !VERTICAL_ID) return
     try {
       const resp = await DataService.getConfigurationTabsMatrix(
         keycloak,
         PLANT_ID,
+        AOP_YEAR,
         SITE_ID,
         VERTICAL_ID,
         'output',
@@ -278,7 +278,7 @@ const CrackerConfig = () => {
   const fetchCrackerRows = useCallback(
     async (currentTabDisplay, mode) => {
       if (!currentTabDisplay) return
-      if(!PLANT_ID || !AOP_YEAR) return
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         setLoading(true)
 
@@ -471,7 +471,7 @@ const CrackerConfig = () => {
         SpyroInputData,
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -526,7 +526,7 @@ const CrackerConfig = () => {
         SpyroOutputYield,
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -573,7 +573,7 @@ const CrackerConfig = () => {
           keycloak,
           mode,
           PLANT_ID,
-          AOP_YEAR
+          AOP_YEAR,
         )
       } else {
         response = await DataService.importSpyroOutputExcel(
@@ -581,7 +581,7 @@ const CrackerConfig = () => {
           keycloak,
           mode,
           PLANT_ID,
-          AOP_YEAR
+          AOP_YEAR,
         )
       }
 
@@ -664,9 +664,19 @@ const CrackerConfig = () => {
     try {
       let response
       if (currentTabDisplay === 'Yield') {
-        response = await DataService.exportSpyroOutputExcelYield(keycloak, mode, PLANT_ID, AOP_YEAR)
+        response = await DataService.exportSpyroOutputExcelYield(
+          keycloak,
+          mode,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       } else {
-        response = await DataService.exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR)
+        response = await DataService.exportSpyroOutputExcel(
+          keycloak,
+          mode,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       }
 
       if (response?.code === 200) {

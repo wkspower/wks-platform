@@ -168,6 +168,8 @@ const BestAchievedIndividualNorms = () => {
       const apiResponse = await DataService.getBestAchievedNorms(
         keycloak,
         'TYPE LIST2',
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       if (apiResponse?.code !== 200) {
@@ -228,7 +230,7 @@ const BestAchievedIndividualNorms = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)
@@ -311,7 +313,7 @@ const BestAchievedIndividualNorms = () => {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Overall Consumption Basis.xlsx`
+  const fileName = `Best Achieved Individual Norms.xlsx`
 
   const renderTitle = (t) => t
 

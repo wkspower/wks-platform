@@ -48,7 +48,6 @@ const AopSummary = ({ permissions }) => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
 
@@ -97,7 +96,7 @@ const AopSummary = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [plantID, oldYear, yearChanged, keycloak])
+  }, [PLANT_ID, oldYear, yearChanged, keycloak])
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
@@ -159,7 +158,6 @@ const AopSummary = ({ permissions }) => {
 
   const saveBusinessDemandData = async (newRows) => {
     try {
-      
       const businessData = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,

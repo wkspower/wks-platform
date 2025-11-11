@@ -10,20 +10,20 @@
     "field": "UOM",
     "title": "UOM",
     "editable": false,
-    "widthT": 100
+    "widthT": 80
   },
   {
     "field": "ConstantValue",
     "title": "Value",
     "editable": true,
-    "type": "number"
+    "type": "number",
+    "widthT": 120
   },
 
   {
     "field": "remarks",
     "title": "Remark",
     "editable": false,
-    "widthT": 220,
     "type": "string"
   },
   {

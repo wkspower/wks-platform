@@ -16,7 +16,6 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 
-
 const ProductionTargetBasis = () => {
   const keycloak = useSession()
 
@@ -150,6 +149,7 @@ const ProductionTargetBasis = () => {
   // Fetch all grids in one call and build dataMap + gridNames
   // The backend is expected to return: apiResponse.data = [ { gridName, data: [...] }, ... ]
   // ---------------------------------------------------------------------------
+
   const fetchAllGrids = useCallback(async () => {
     // clear previous timers if any
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
@@ -222,7 +222,7 @@ const ProductionTargetBasis = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)

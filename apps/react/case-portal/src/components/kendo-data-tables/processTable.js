@@ -209,7 +209,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     }
     setLoading(true)
     try {
-      const resp = await dataConfig.serviceFn()
+      const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data
       const formatted = (raw || []).map((item, idx, arr) => ({
         ...item,

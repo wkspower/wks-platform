@@ -4,10 +4,12 @@ import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { MockSpecificConsumptionNormsAPI } from './MockSpecificConsumptionNormsAPI'
 //F:\MNT\workspace\wks-platform\apps\react\case-portal\src\components\data-tables\Reports-kendo\MockSpecificConsumptionNormsAPI.js
-import { DataService } from 'services/DataService' // or your actual API service path
+// import { DataService } from 'services/DataService' // or your actual API service path
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
+import { DataService } from 'services/DataService'
+import { Typography } from '../../../../node_modules/@mui/material/index'
 
 const specificConsumptionCategories = () => [
   {
@@ -16,7 +18,7 @@ const specificConsumptionCategories = () => [
   },
   {
     key: 'ByProduct',
-    title: 'ByProduct',
+    title: 'By Product',
   },
   {
     key: 'CatChem',
@@ -41,7 +43,7 @@ const specificConsumptionCategories = () => [
 ]
 
 export default function SpecificConsumptionNorm() {
-const dataGridStore = useSelector((state) => state.dataGridStore)
+  const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
     yearChanged,
@@ -69,42 +71,45 @@ const dataGridStore = useSelector((state) => state.dataGridStore)
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
-    const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-    const [currentRemark, setCurrentRemark] = useState('')
-    const [currentRowId, setCurrentRowId] = useState(null)
-    const [modifiedCells, setModifiedCells] = React.useState({})
-    const [otherVariableRows, setOtherVariableRows] = useState([])
-    const valueFormat = ValueFormatterConsumption()
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const [modifiedCells, setModifiedCells] = React.useState({})
+  const [otherVariableRows, setOtherVariableRows] = useState([])
+  const valueFormat = ValueFormatterConsumption()
 
   // ...existing code...
-const loadAll = async () => {
-  setLoading(true)
-  const out = {}
-  await Promise.all(
-    specificConsumptionCategories().map(async ({ key }) => {
-      const { columns } = await MockSpecificConsumptionNormsAPI.getReport({
-        category: key,
-        AOP_YEAR,
-        valueFormat,
-      })
-      const apiResp = await DataService.getspecificconsumption(
-        keycloak,
-        key,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-      let rows = []
-      if (key === 'PackingConsumables' && apiResp?.data?.packingConsumablesData) {
-        rows = apiResp.data.packingConsumablesData // Use as is for Packing Consumables
-      } else if (apiResp?.data?.plantProductionData) {
-        rows = apiResp.data.plantProductionData // Use as is for all other categories
-      }  
-      out[key] = { columns, rows }
-    }),
-  )
-  setReports(out)
-  setLoading(false)
-}
+  const loadAll = async () => {
+    setLoading(true)
+    const out = {}
+    await Promise.all(
+      specificConsumptionCategories().map(async ({ key }) => {
+        const { columns } = await MockSpecificConsumptionNormsAPI.getReport({
+          category: key,
+          AOP_YEAR,
+          valueFormat,
+        })
+        const apiResp = await DataService.getSpecificConsumption(
+          keycloak,
+          key,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        let rows = []
+        if (
+          key === 'PackingConsumables' &&
+          apiResp?.data?.packingConsumablesData
+        ) {
+          rows = apiResp.data.packingConsumablesData // Use as is for Packing Consumables
+        } else if (apiResp?.data?.plantProductionData) {
+          rows = apiResp.data.plantProductionData // Use as is for all other categories
+        }
+        out[key] = { columns, rows }
+      }),
+    )
+    setReports(out)
+    setLoading(false)
+  }
 
   useEffect(() => {
     loadAll()
@@ -116,10 +121,15 @@ const loadAll = async () => {
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
       />
+
+      <Typography component='div' className='grid-title' sx={{ mb: 0 }}>
+        {'Specific Consumption Norms'}
+      </Typography>
+
       {specificConsumptionCategories().map(({ key, title }) => {
         const rpt = reports[key] || {}
         return (
-          <Box key={key} sx={{ mt: 2 }}>
+          <Box key={key} sx={{ mt: 1 }}>
             <KendoDataTablesReports
               columns={rpt.columns || []}
               rows={rpt.rows || []}

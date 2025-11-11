@@ -65,12 +65,6 @@ const ConsumptionNorms = () => {
   const [gradeId, setGradeId] = useState(null)
   const [grades, setGrades] = useState([])
 
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
-
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -286,7 +280,7 @@ const ConsumptionNorms = () => {
   }
 
   const fetchData = async (gradeId) => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
     setLoading(true)
     try {
@@ -371,7 +365,7 @@ const ConsumptionNorms = () => {
     if (lowerVertName === 'pe' || lowerVertName === 'pp') {
       fetchGradeDropdowns()
     }
-  }, [plantID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
+  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
 
   const valueFormat = ValueFormatterConsumption()
 

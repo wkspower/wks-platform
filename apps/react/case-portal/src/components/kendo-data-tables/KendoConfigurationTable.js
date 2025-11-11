@@ -52,8 +52,7 @@ const ConfigurationTable = () => {
   const isOldYearFlag = oldYear?.oldYear === 1
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
-  const vcmVertical = JSON.parse(localStorage.getItem('selectedVertical'))?.name
-  const vcmVerticalName = vcmVertical?.toLowerCase().trim()
+
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
@@ -118,7 +117,6 @@ const ConfigurationTable = () => {
   }
 
   const fetchData = async (gradeId = null) => {
-    if(!PLANT_ID || !AOP_YEAR) return
     setProductionRows([])
     setProductionRowsConstants([])
     setProductionRowsConstantsMannualEntry([])
@@ -130,7 +128,12 @@ const ConfigurationTable = () => {
       setLoading(true)
       var data = []
 
-      data = await DataService.getCatalystSelectivityData(keycloak, PLANT_ID, AOP_YEAR, gradeId)
+      data = await DataService.getCatalystSelectivityData(
+        keycloak,
+        gradeId,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       const distinctReportTypes = [
         ...new Set(data.map((item) => item.normType).filter(Boolean)),
@@ -241,11 +244,13 @@ const ConfigurationTable = () => {
   }
 
   const fetchDataConstants = async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
     setProductionRowsConstants([])
     try {
-      var constantsRes =
-        await DataService.getCatalystSelectivityDataConstants(keycloak, PLANT_ID, AOP_YEAR)
+      var constantsRes = await DataService.getCatalystSelectivityDataConstants(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (constantsRes?.code != 200) {
         setProductionRowsConstants([])
         return
@@ -274,12 +279,16 @@ const ConfigurationTable = () => {
   const [reportTypes, setReportTypes] = useState([])
 
   const fetchDataConstantsMnnualEntry = async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
     setProductionRowsConstantsMannualEntry([])
     setPioImpactRows([])
     setShutdownDataRows([])
     try {
-      var constantsRes = await DataService.getCatalystSelectivityData(keycloak, PLANT_ID, AOP_YEAR)
+      var constantsRes = await DataService.getCatalystSelectivityData(
+        keycloak,
+        null,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       const formattedData = constantsRes.map((item, index) => ({
         ...item,
@@ -310,7 +319,6 @@ const ConfigurationTable = () => {
     }
   }
   const fetchGradeData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     try {
       var data = await DataService.getPeConfigData(keycloak, PLANT_ID, AOP_YEAR)
@@ -351,10 +359,15 @@ const ConfigurationTable = () => {
   }
 
   const getConfigurationTabsMatrix = async () => {
-    if(!PLANT_ID || !SITE_ID || !VERTICAL_ID) return
     setLoading(true)
     try {
-      var response = await DataService.getConfigurationTabsMatrix(keycloak, PLANT_ID, SITE_ID, VERTICAL_ID)
+      var response = await DataService.getConfigurationTabsMatrix(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
       if (response?.code == 200) {
         const parsedData = JSON.parse(response?.data)
         setTabs(parsedData)
@@ -410,14 +423,14 @@ const ConfigurationTable = () => {
   }
 
   useEffect(() => {
-    if (!plantID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     setTabIndex(0)
     carryForwardRecords()
     getConfigurationExecutionDetails()
-  }, [plantID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
-    if (!plantID || !AOP_YEAR) {
+    if (!PLANT_ID || !AOP_YEAR) {
       return
     }
     getConfigurationExecutionDetails()
@@ -434,7 +447,7 @@ const ConfigurationTable = () => {
         fetchGradeData()
       }
     }, 500)
-  }, [oldYear, yearChanged, keycloak, plantID])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID])
 
   const computeAndSetDates = useCallback(() => {
     setStartDate('')
@@ -460,7 +473,7 @@ const ConfigurationTable = () => {
       setStartDate(fallbackStartDate)
       setEndDate(fallbackEndDate)
     }
-  }, [configurationExecutionDetails, plantID])
+  }, [configurationExecutionDetails, PLANT_ID])
   useEffect(() => {
     computeAndSetDates()
   }, [computeAndSetDates])
@@ -495,7 +508,7 @@ const ConfigurationTable = () => {
     return formatted
   }
   const getAopSummary = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setSummary('')
       var res = await DataService.getAopSummary(keycloak, PLANT_ID, AOP_YEAR)
@@ -558,10 +571,12 @@ const ConfigurationTable = () => {
   }, [PLANT_ID])
 
   const getConfigurationExecutionDetails = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
     try {
-      const response =
-        await DataService.getConfigurationExecutionDetails(keycloak, PLANT_ID, AOP_YEAR)
+      const response = await DataService.getConfigurationExecutionDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       const details = response?.data || []
       if (details.length === 0) {
         console.warn(
@@ -1146,7 +1161,7 @@ const ConfigurationTable = () => {
     )
   }
 
-  if (vcmVerticalName === 'vcm') {
+  if (lowerVertName === 'vcm') {
     const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''

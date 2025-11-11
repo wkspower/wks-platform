@@ -49,12 +49,17 @@ const mapApiRowToGrid = (list = [], prefix = '') =>
     Particulars: item.normType || item.normParameterTypeDisplayName,
   }))
 
-const mapGridRowToPayload = (rows = []) =>
+const mapGridRowToPayload = (rows = [], savingMonthlyBestAchieved = false) =>
   (rows || []).map((row) => {
     const payload = {}
     MONTHS.forEach((m) => {
-      payload[m] = row[m] || 0
+      if (savingMonthlyBestAchieved) {
+        payload[m] = row.april || 0
+      } else {
+        payload[m] = row[m] || 0
+      }
     })
+
     payload.remark = row.remark || row.remarks || ''
     payload.isChecked = !!row.isChecked
     payload.id = row.idFromApi || null
@@ -68,6 +73,8 @@ const NormalOpNormsScreenCracker = () => {
   const [modifiedCellsFinalNorms, setModifiedCellsFinalNorms] = useState({})
   const [allRedCell, setAllRedCell] = useState([])
   const [allRedCell2, setAllRedCell2] = useState([])
+
+  const [allRedCellFinalNorms, setAllRedCellFinalNorms] = useState([])
 
   const dataGridStore = useSelector((s) => s.dataGridStore) || {}
   const { verticalChange, yearChanged, oldYear, plantObject, year } =
@@ -127,7 +134,7 @@ const NormalOpNormsScreenCracker = () => {
   const [productionRowsConstants, setProductionRowsConstants] = useState([])
 
   const apiRef = useGridApiRef()
-   const valueFormat = ValueFormatterConsumption()
+  const valueFormat = ValueFormatterConsumption()
   // column defs
   const colDefs = useMemo(
     () => getNormalOpNormColDef({ headerMap, valueFormat }),
@@ -193,13 +200,11 @@ const NormalOpNormsScreenCracker = () => {
         field: m,
         title: headerMap[monthIndexMap[m]] || m,
         editable: true,
-        width: 120,
-        align: 'right',
         type: 'number',
         format: valueFormat,
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
-      { field: 'remark', title: 'Remark', widthT: 140, editable: true },
+      // { field: 'remark', title: 'Remark', widthT: 140, editable: true },
     ],
     [headerMap, valueFormat],
   )
@@ -237,7 +242,7 @@ const NormalOpNormsScreenCracker = () => {
       { field: 'isEditable', title: 'isEditable', hidden: true },
       { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
     ],
-  [headerMap, valueFormat],
+    [headerMap, valueFormat],
   )
 
   const colDefsExpressionCatChem = useMemo(
@@ -276,19 +281,27 @@ const NormalOpNormsScreenCracker = () => {
     [headerMap, valueFormat],
   )
 
+  const [reportTypes, setReportTypes] = useState([])
+
   const fetchConfigurationData = useCallback(
     async (gradeId = null) => {
-      if(!PLANT_ID || !AOP_YEAR) return
       setProductionRows([])
       setLoading(true)
 
       try {
         const data = await DataService.getCatalystSelectivityData(
           keycloak,
+          gradeId,
           PLANT_ID,
           AOP_YEAR,
-          gradeId,
         )
+
+        const distinctReportTypes = [
+          ...new Set(data.map((item) => item.normType).filter(Boolean)),
+        ]
+
+        setReportTypes(distinctReportTypes)
+
         const filteredData = data?.filter(
           (item) => item.normType !== 'Report Manual Entry',
         )
@@ -311,11 +324,14 @@ const NormalOpNormsScreenCracker = () => {
   )
 
   const fetchConstantsData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
     setProductionRowsConstants([])
     try {
       const constantsRes =
-        await DataService.getCatalystSelectivityDataConstants(keycloak, PLANT_ID, AOP_YEAR)
+        await DataService.getCatalystSelectivityDataConstants(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       if (constantsRes?.code !== 200) {
         setProductionRowsConstants([])
         return
@@ -489,8 +505,11 @@ const NormalOpNormsScreenCracker = () => {
 
   const getNormTransactions = async () => {
     try {
-      const res =
-        await NormalOperationNormsApiService.getNormTransactions(keycloak, PLANT_ID, AOP_YEAR)
+      const res = await NormalOperationNormsApiService.getNormTransactions(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (res?.code == 200) {
         const normalized = res?.data.map((obj) => ({
           ...obj,
@@ -505,11 +524,59 @@ const NormalOpNormsScreenCracker = () => {
     }
   }
 
+  const getCombinedNormTransactions = async () => {
+    try {
+      const [res1, res2] = await Promise.all([
+        NormalOperationNormsApiService.getNormTransactionsForFinalNorms(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        ),
+        NormalOperationNormsApiService.getNormTransactionsForFinalNormsModeWise(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        ),
+      ])
+
+      if (res1?.code === 200 && res2?.code === 200) {
+        const normalized1 = res1.data.map((obj) => ({
+          ...obj,
+          normParameterFKId: obj.normParameterFKId.toUpperCase(),
+        }))
+
+        const normalized2 = res2.data.map((obj) => ({
+          ...obj,
+          normParameterFKId: obj.normParameterFKId.toUpperCase(),
+        }))
+
+        const combinedData = [...normalized1, ...normalized2]
+
+        const uniqueCombinedData = combinedData.filter(
+          (v, i, a) =>
+            a.findIndex(
+              (t) =>
+                t.month === v.month &&
+                t.normParameterFKId === v.normParameterFKId,
+            ) === i,
+        )
+
+        setAllRedCellFinalNorms(uniqueCombinedData)
+      }
+    } catch (error) {
+      console.error('Error fetching combined data:', error)
+    }
+  }
+
   // --- Data fetchers ---
   const fetchFinalNorms = useCallback(async () => {
     try {
-      const response =
-        await NormalOperationNormsApiService.getfinalNorms(keycloak, PLANT_ID, AOP_YEAR)
+      getCombinedNormTransactions()
+      const response = await NormalOperationNormsApiService.getfinalNorms(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (response?.code !== 200) {
         setRowsBestFinalNorms([])
         return
@@ -704,7 +771,7 @@ const NormalOpNormsScreenCracker = () => {
 
   // save/calc logic
   const saveRows = useCallback(
-    async (rowsToSave, isFinal = false) => {
+    async (rowsToSave, isFinal = false, savingAllMonthValues = false) => {
       if (!rowsToSave || rowsToSave.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
@@ -713,7 +780,7 @@ const NormalOpNormsScreenCracker = () => {
 
       setLoading(true)
       try {
-        const payload = mapGridRowToPayload(rowsToSave)
+        const payload = mapGridRowToPayload(rowsToSave, savingAllMonthValues)
         const response = isFinal
           ? await NormalOperationNormsApiService.updateFinalNormsData(
               keycloak,
@@ -737,6 +804,7 @@ const NormalOpNormsScreenCracker = () => {
             message: 'Saved Successfully!',
             severity: 'success',
           })
+
           if (isFinal) setModifiedCellsFinalNorms({})
           else setModifiedCells({})
           await fetchModeData(gradeId)
@@ -764,44 +832,46 @@ const NormalOpNormsScreenCracker = () => {
     return saveRows(data, true)
   }, [modifiedCellsFinalNorms, saveRows])
 
-  const saveChangesUnified = useCallback(async () => {
-    if (selectedTab === 4) return saveChangesCrackerFinalNorms()
+  const saveChangesUnified = useCallback(
+    async (extraParam) => {
+      if (selectedTab === 4) return saveChangesCrackerFinalNorms()
 
-    // Prepare modified rows for save
-    let allModified = Object.values(modifiedCells)
+      // Prepare modified rows for save
+      let allModified = Object.values(modifiedCells)
 
-    if (!allModified || allModified.length === 0) {
-      setSnackbarOpen(true)
-      setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-      return
-    }
+      if (!allModified || allModified.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+        return
+      }
 
-    // Enforce single checked per materialName across the 2 grids
-    const materialGroups = {} // key = materialName, value = array of rows
-    allModified.forEach((row) => {
-      if (!materialGroups[row.materialName])
-        materialGroups[row.materialName] = []
-      materialGroups[row.materialName].push(row)
-    })
-
-    const updatedRows = []
-    Object.values(materialGroups).forEach((rows) => {
-      // Find the row that is checked
-      const checkedRow = rows.find((r) => r.isChecked)
-      rows.forEach((r) => {
-        if (r !== checkedRow) r.isChecked = false
-        updatedRows.push(r)
+      // Enforce single checked per materialName across the 2 grids
+      const materialGroups = {} // key = materialName, value = array of rows
+      allModified.forEach((row) => {
+        if (!materialGroups[row.materialName])
+          materialGroups[row.materialName] = []
+        materialGroups[row.materialName].push(row)
       })
-    })
 
-    return saveRows(updatedRows, false)
-  }, [
-    selectedTab,
-    gradeDisplayName,
-    modifiedCells,
-    saveRows,
-    saveChangesCrackerFinalNorms,
-  ])
+      const updatedRows = []
+      Object.values(materialGroups).forEach((rows) => {
+        const checkedRow = rows.find((r) => r.isChecked)
+        rows.forEach((r) => {
+          if (r !== checkedRow) r.isChecked = false
+          updatedRows.push(r)
+        })
+      })
+
+      return saveRows(updatedRows, false, extraParam)
+    },
+    [
+      selectedTab,
+      gradeDisplayName,
+      modifiedCells,
+      saveRows,
+      saveChangesCrackerFinalNorms,
+    ],
+  )
 
   const handleCalculate = useCallback(async () => {
     setLoading(true)
@@ -851,7 +921,9 @@ const NormalOpNormsScreenCracker = () => {
         severity: success ? 'success' : 'error',
       })
       if (success) await fetchModeData(gradeId)
+
       if (success) await fetchFinalNorms()
+
       return res
     } catch (err) {
       setSnackbarOpen(true)
@@ -1076,6 +1148,7 @@ const NormalOpNormsScreenCracker = () => {
           groupBy='Particulars'
           tabIndex='0'
           setGradeId={handleGradeChange}
+          reportTypes={reportTypes}
         />
       )}
       {selectedTab === 1 && (
@@ -1124,7 +1197,11 @@ const NormalOpNormsScreenCracker = () => {
               <span style={{ color: 'green', fontWeight: 'bold' }}>
                 Green
               </span>{' '}
-              - Propane (2Z)
+              - Propane (2Z)&nbsp;&nbsp;
+              <span style={{ color: 'purple', fontWeight: 'bold' }}>
+                Purple
+              </span>{' '}
+              - Copied From Other Season
             </Typography>
           </Box>
 
@@ -1141,7 +1218,7 @@ const NormalOpNormsScreenCracker = () => {
                 rows={rowsBestAchivedIndividual}
                 grades={grades}
                 paginationOptions={[100, 200, 300]}
-                saveChanges={saveChangesUnified}
+                saveChanges={() => saveChangesUnified(true)}
                 isCellEditable={isCellEditable}
                 snackbarData={snackbarData}
                 handleCalculate={handleCalculateUnified}
@@ -1163,6 +1240,8 @@ const NormalOpNormsScreenCracker = () => {
                 plantID={PLANT_ID}
                 gridName='best'
                 showCatChemUtilityCheckbox2={true}
+                showThreeColors={true}
+                allRedCell2={allRedCell2}
               />
 
               {/* expression below */}
@@ -1285,7 +1364,7 @@ const NormalOpNormsScreenCracker = () => {
         <>
           {/* Add color-coded legend for Final norms */}
           <Box
-            sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2, mb: 2 }}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, mb: 0 }}
           >
             <Typography component='div' className='grid-title'>
               <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> -
@@ -1295,7 +1374,11 @@ const NormalOpNormsScreenCracker = () => {
               </span>{' '}
               - Best Achieved (MinCC)&nbsp;&nbsp;
               <span style={{ color: 'blue', fontWeight: 'bold' }}>Blue</span> -
-              Best Achieved (Indv)
+              Best Achieved (Indv)&nbsp;&nbsp;
+              <span style={{ color: 'orange', fontWeight: 'bold' }}>
+                Orange
+              </span>{' '}
+              - Overridden&nbsp;&nbsp;
             </Typography>
           </Box>
           <KendoDataTables
@@ -1322,6 +1405,8 @@ const NormalOpNormsScreenCracker = () => {
             permissions={finalPermissions}
             groupBy='Particulars'
             plantID={PLANT_ID}
+            allRedCell2={allRedCellFinalNorms}
+            showThreeColors={true}
           />
         </>
       )}

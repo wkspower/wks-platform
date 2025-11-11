@@ -8,7 +8,7 @@ import {
 import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react'
 import { useSelector } from 'react-redux'
-import { DataSetaApiService } from 'services/data-set-api-service'
+
 import { DataService } from 'services/DataService'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
@@ -195,7 +195,7 @@ export default function BestAchievedNorms() {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
+
   const AOP_YEAR = year?.selectedYear
 
   const vertName = verticalChange?.selectedVertical
@@ -298,6 +298,8 @@ export default function BestAchievedNorms() {
       const apiResponse = await DataService.getBestAchievedNorms(
         keycloak,
         'TYPE LIST',
+        PLANT_ID,
+        AOP_YEAR,
       )
 
       const code1 = NormalOperationNormsApiService.BestAchivedColorCodes(
@@ -425,104 +427,127 @@ export default function BestAchievedNorms() {
   // ---------------------------------------------------------------------------
   // Export helpers: build workbookOptions, then mount ExcelExport briefly to call save()
   // ---------------------------------------------------------------------------
+  const exportAllGrids = useCallback(() => {
+    const sheets = gridNames
+      .map((gridName, idx) => {
+        const d = dataMap[gridName] || { rows: [], columns: [] }
+        // filter out hidden columns (including Material_FK_Id / materialFkId)
+        let cols = (d.columns || []).filter(
+          (c) =>
+            !(
+              c &&
+              (c.field === 'Material_FK_Id' || c.field === 'materialFkId')
+            ) && !c.hidden,
+        )
+        const rows = d.rows || []
+        if (!cols.length && !rows.length) return null
 
-  const exportAllGrids = useCallback(async () => {
-    try {
-      setLoading(true)
+        const sheetColumns = cols.map((c) => ({
+          autoWidth: true,
+          title: c.title || c.field || '',
+        }))
 
-      //EXPORT FROM KENDO GRID
-      //START
+        const headerRow = {
+          cells: cols.map((c) => ({ value: c.title || c.field || '' })),
+        }
 
-      // const sheets = gridNames
-      //   .map((gridName, idx) => {
-      //     const d = dataMap[gridName] || { rows: [], columns: [] }
-      //     let cols = (d.columns || []).filter(
-      //       (c) =>
-      //         !(
-      //           c &&
-      //           (c.field === 'Material_FK_Id' || c.field === 'materialFkId')
-      //         ) && !c.hidden,
-      //     )
-      //     const rows = d.rows || []
-      //     if (!cols.length && !rows.length) return null
-      //     const sheetColumns = cols.map((c) => ({
-      //       autoWidth: true,
-      //       title: c.title || c.field || '',
-      //     }))
-      //     const headerRow = {
-      //       cells: cols.map((c) => ({ value: c.title || c.field || '' })),
-      //     }
-      //     const findMatchedCell = (row, monthField) => {
-      //       const normId =
-      //         row.materialFKId ||
-      //         row.NormParameter_FK_Id ||
-      //         row.Material_FK_Id ||
-      //         row.NormParameterFKId ||
-      //         row.normParameterFKId
-      //       if (!normId) return null
-      //       const key = `${String(normId).toLowerCase()}|${(monthField || '').toString().toLowerCase()}`
-      //       const mode = redLookupRef.current?.get(key)
-      //       return mode ? { mode } : null
-      //     }
-      //     const dataRows = rows.map((r) => ({
-      //       cells: cols.map((c) => {
-      //         const rawVal = normalizeCellValue(r?.[c.field])
-      //         const cell = { value: rawVal }
-      //         if (idx === 1 && c.field) {
-      //           const monthCandidate = r.month || c.title || c.field || ''
-      //           const matched = findMatchedCell(r, monthCandidate)
-      //           if (matched) {
-      //             if (matched.mode === 'Propane(1Z)') {
-      //               cell.background = '#FFD6D6' // light red
-      //               cell.color = '#9A0000' // dark red text
-      //               cell.bold = true
-      //             } else if (matched.mode === 'Propane(2Z)') {
-      //               cell.background = '#DFFFD8' // light green
-      //               cell.color = '#006400' // dark green text
-      //               cell.bold = true
-      //             }
-      //           }
-      //         }
-      //         return cell
-      //       }),
-      //     }))
-      //     const sheetRows = [headerRow, ...dataRows]
-      //     return {
-      //       title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
-      //       columns: sheetColumns,
-      //       rows: sheetRows,
-      //     }
-      //   })
-      //   .filter(Boolean)
-      // if (!sheets.length) return
-      // const workbookOptions = { sheets }
-      // workbookRef.current = workbookOptions
-      // setIsExporting(true)
+        // helper to find match for coloring (use lookup map for O(1))
+        const findMatchedCell = (row, monthField) => {
+          const normId =
+            row.materialFKId ||
+            row.NormParameter_FK_Id ||
+            row.Material_FK_Id ||
+            row.NormParameterFKId ||
+            row.normParameterFKId
+          if (!normId) return null
+          const key = `${String(normId).toLowerCase()}|${(monthField || '').toString().toLowerCase()}`
+          const mode = redLookupRef.current?.get(key)
+          return mode ? { mode } : null
+        }
 
-      //END
+        const dataRows = rows.map((r) => ({
+          cells: cols.map((c) => {
+            const rawVal = normalizeCellValue(r?.[c.field])
+            const cell = { value: rawVal }
 
-      const response = await DataSetaApiService.bestAchievedMinCCExport(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        VERTICAL_NAME,
-      )
+            // Apply coloring for first sheet (replicate UI's showThreeColors === true for idx === 0)
+            if (idx === 1 && c.field) {
+              const monthCandidate = r.month || c.title || c.field || ''
+              const matched = findMatchedCell(r, monthCandidate)
+              if (matched) {
+                if (matched.mode === 'Propane(1Z)') {
+                  cell.background = '#FFD6D6' // light red
+                  cell.color = '#9A0000' // dark red text
+                  cell.bold = true
+                } else if (matched.mode === 'Propane(2Z)') {
+                  cell.background = '#DFFFD8' // light green
+                  cell.color = '#006400' // dark green text
+                  cell.bold = true
+                } else if (matched.mode === 'Copied') {
+                  cell.background = '#7e99beff' // light green
+                  cell.color = '#2f0064ff' // dark green text
+                  cell.bold = true
+                }
+              }
+            }
 
-      if (response?.data?.code === 200) {
-        setLoading(false)
-      }
-    } catch (error) {
-      console.error('Export failed:', error)
-      setLoading(false)
-    }
-  }, [keycloak, PLANT_ID, AOP_YEAR])
+            return cell
+          }),
+        }))
+
+        const sheetRows = [headerRow, ...dataRows]
+
+        return {
+          title: sanitizeSheetName(gridName, `Sheet${idx + 1}`),
+          columns: sheetColumns,
+          rows: sheetRows,
+        }
+      })
+      .filter(Boolean)
+
+    if (!sheets.length) return
+
+    const workbookOptions = { sheets }
+    workbookRef.current = workbookOptions
+    setIsExporting(true)
+  }, [gridNames, dataMap])
 
   useEffect(() => {
     if (!isExporting) return
-    const t = setTimeout(() => {
+
+    let cancelled = false
+
+    ;(async () => {
       try {
         if (excelExportRef.current && workbookRef.current) {
-          excelExportRef.current.save(workbookRef.current)
+          // Prefer toDataURL (returns a Promise<string>) so we know when the file was generated.
+          if (typeof excelExportRef.current.toDataURL === 'function') {
+            const dataUrl = await excelExportRef.current.toDataURL(workbookRef.current)
+            if (cancelled) return
+
+            // Convert data URL to blob then trigger download programmatically.
+            const base64 = dataUrl.split(',')[1]
+            const byteString = atob(base64)
+            const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0]
+            const ab = new ArrayBuffer(byteString.length)
+            const ia = new Uint8Array(ab)
+            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i)
+            const blob = new Blob([ab], { type: mimeString })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            // fileName is defined below; safe to reference here because it's constant for component render
+            a.download = `Best Achieved Basis (MIN CC).xlsx`
+            document.body.appendChild(a)
+            a.click()
+            a.remove()
+            URL.revokeObjectURL(url)
+          } else if (typeof excelExportRef.current.save === 'function') {
+            // Fallback to save() if toDataURL is not available in this kendo version
+            excelExportRef.current.save(workbookRef.current)
+          } else {
+            console.error('ExcelExport ref method missing: toDataURL or save not found')
+          }
         } else {
           console.error('ExcelExport ref or workbookOptions missing')
         }
@@ -530,10 +555,13 @@ export default function BestAchievedNorms() {
         console.error('Export save failed:', err)
       } finally {
         workbookRef.current = null
-        setIsExporting(false)
+        if (!cancelled) setIsExporting(false)
       }
-    }, 0)
-    return () => clearTimeout(t)
+    })()
+
+    return () => {
+      cancelled = true
+    }
   }, [isExporting])
 
   const currentDateTime = new Date()
@@ -541,7 +569,7 @@ export default function BestAchievedNorms() {
     .replace(/T/, ' ')
     .replace(/:/g, '-')
     .split('.')[0]
-  const fileName = `Best Achhieved Basis (MIN CC).xlsx`
+  const fileName = `Best Achieved Basis (MIN CC).xlsx`
   const renderTitle = (t) => t
   const defaultTabs = ['TAB1']
   let activeTabs = defaultTabs
@@ -550,34 +578,33 @@ export default function BestAchievedNorms() {
     <div>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
+        // show backdrop during data loading OR while exporting the workbook
+        open={!!loading || !!isExporting}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <Box
-        display='flex'
-        justifyContent='space-between'
-        alignItems='center'
-        mb='0px'
-      >
-        <Typography component='div' className='grid-title' sx={{ mb: 0 }}>
-          <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> -
-          Propane (1Z)&nbsp;&nbsp;
-          <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
-          Propane (2Z)
-        </Typography>
+      <Typography component='div' className='grid-title' sx={{ mb: 0 }}>
+        <span style={{ color: 'red', fontWeight: 'bold' }}>Red</span> - Propane
+        (1Z)&nbsp;&nbsp;
+        <span style={{ color: 'green', fontWeight: 'bold' }}>Green</span> -
+        Propane (2Z)&nbsp;&nbsp;
+        <span style={{ color: 'purple', fontWeight: 'bold' }}>Purple</span> -
+        Copied From Other Season&nbsp;&nbsp;
+      </Typography>
 
-        {isExporting && (
-          <div style={{ display: 'none' }}>
-            <ExcelExport
-              data={[]}
-              ref={(r) => (excelExportRef.current = r)}
-              fileName={fileName}
-            />
-          </div>
-        )}
+      {/* transient ExcelExport: only mounted during actual export */}
+      {isExporting && (
+        <div style={{ display: 'none' }}>
+          <ExcelExport
+            data={[]}
+            ref={(r) => (excelExportRef.current = r)}
+            fileName={fileName}
+          />
+        </div>
+      )}
 
+      <Box display='flex' justifyContent='flex-end' mb='1px'>
         <Button
           variant='contained'
           onClick={exportAllGrids}

@@ -227,7 +227,7 @@ export default function RelPerf() {
 
   useEffect(() => {
     fetchData()
-  }, [plantID, oldYear, yearChanged, keycloak])
+  }, [PLANT_ID, oldYear, yearChanged, keycloak])
 
   const reliabilityPerformanceColumns = [
     {
@@ -824,48 +824,57 @@ export default function RelPerf() {
     }
   }, [modifiedReliabilityInitiativeCells])
 
-  const exportReliabilityExcel = async (keycloak, PLANT_ID, AOP_YEAR, excelName) => {
-      setSnackbarOpenReliabilityPerformance(true)
-      setSnackbarDataReliabilityPerformance({
-        message: 'Excel download started!',
-        severity: 'success',
-      })
-  
-      try {
-        const response = await FunctionalApiService.exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, excelName)
+  const exportReliabilityExcel = async (
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    excelName,
+  ) => {
+    setSnackbarOpenReliabilityPerformance(true)
+    setSnackbarDataReliabilityPerformance({
+      message: 'Excel download started!',
+      severity: 'success',
+    })
 
-        if (response?.code === 200) {
-          setSnackbarOpenReliabilityPerformance(true)
-  
-          setSnackbarDataReliabilityPerformance({
-            message: 'Excel download completed successfully!',
-            severity: 'success',
-          })
-        } else {
-          setSnackbarOpenReliabilityPerformance(true)
-  
-          setSnackbarDataReliabilityPerformance({
-            message: 'Failed to download Excel.',
-            severity: 'error',
-          })
-        }
-      } catch (error) {
-        console.error('Error downloading Excel:', error)
+    try {
+      const response = await FunctionalApiService.exportReliabilityExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        excelName,
+      )
+
+      if (response?.code === 200) {
         setSnackbarOpenReliabilityPerformance(true)
-  
+
+        setSnackbarDataReliabilityPerformance({
+          message: 'Excel download completed successfully!',
+          severity: 'success',
+        })
+      } else {
+        setSnackbarOpenReliabilityPerformance(true)
+
         setSnackbarDataReliabilityPerformance({
           message: 'Failed to download Excel.',
           severity: 'error',
         })
-      } finally {
-        setSnackbarOpenReliabilityPerformance(false)
       }
+    } catch (error) {
+      console.error('Error downloading Excel:', error)
+      setSnackbarOpenReliabilityPerformance(true)
+
+      setSnackbarDataReliabilityPerformance({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      })
+    } finally {
+      setSnackbarOpenReliabilityPerformance(false)
     }
-    //importReliabilityIncidentExcel
-    const saveReliabilityIncidentExcelFile = async (rawFile) => {
+  }
+  //importReliabilityIncidentExcel
+  const saveReliabilityIncidentExcelFile = async (rawFile) => {
     setLoading(true)
     try {
-     
       let response
 
       response = await FunctionalApiService.importReliabilityIncidentExcel(
@@ -897,7 +906,10 @@ export default function RelPerf() {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Reliability Performance.xlsx')
+        link.setAttribute(
+          'download',
+          'Error File - Reliability Performance.xlsx',
+        )
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -927,7 +939,6 @@ export default function RelPerf() {
   const saveReliabilityPerformanceExcelFile = async (rawFile) => {
     setLoading(true)
     try {
-     
       let response
 
       response = await FunctionalApiService.importReliabilityPerformanceExcel(
@@ -959,7 +970,10 @@ export default function RelPerf() {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Reliability Performance.xlsx')
+        link.setAttribute(
+          'download',
+          'Error File - Reliability Performance.xlsx',
+        )
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -1025,7 +1039,14 @@ export default function RelPerf() {
         }}
         columns={reliabilityPerformanceColumns}
         saveChanges={saveChangesReliabilityPerformance}
-        downloadExcelForConfiguration={() => exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, 'Reliability_Performance')}
+        downloadExcelForConfiguration={() =>
+          exportReliabilityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            'Reliability_Performance',
+          )
+        }
         handleExcelUpload={handleExcelUpload}
       />
 
@@ -1087,7 +1108,14 @@ export default function RelPerf() {
         setOpenIncidents={setOpenIncidents}
         handleRemarkCellClick={handleRemarkCellClickIncidents}
         OpenIncidents={OpenIncidents}
-        downloadExcelForConfiguration={() => exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, 'Major_Reliability_Incidents')}
+        downloadExcelForConfiguration={() =>
+          exportReliabilityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            'Major_Reliability_Incidents',
+          )
+        }
         handleExcelUpload={handleExcelUpload1}
       />
 

@@ -61,11 +61,6 @@ const ShutdownNorms = () => {
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
   const headerMap = generateHeaderNames(AOP_YEAR)
-  useEffect(() => {
-    if (plantID?.plantId) {
-      set_PlantID(plantID?.plantId)
-    }
-  }, [plantID])
 
   const keycloak = useSession()
 
@@ -127,13 +122,13 @@ const ShutdownNorms = () => {
       }
     }
     loadGrades()
-  }, [plantID, yearChanged, keycloak])
+  }, [PLANT_ID, yearChanged, keycloak])
 
   // 2) Fetch main data when gradeId or other deps change
 
   useEffect(() => {
     const loadData = async () => {
-      if(!PLANT_ID || !AOP_YEAR) return
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         if (['pe', 'pp'].includes(lowerVertName)) {
           if (!gradeId) return
@@ -151,7 +146,12 @@ const ShutdownNorms = () => {
             AOP_YEAR,
           )
         } else {
-          data = await ShutdownNormsApiService.getShutdownMonths(keycloak, null, PLANT_ID, AOP_YEAR)
+          data = await ShutdownNormsApiService.getShutdownMonths(
+            keycloak,
+            null,
+            PLANT_ID,
+            AOP_YEAR,
+          )
         }
         setShutdownMonths(data)
 
@@ -260,7 +260,7 @@ const ShutdownNorms = () => {
   }
 
   const fetchData = async (gradeId) => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       setRows([])
@@ -363,7 +363,6 @@ const ShutdownNorms = () => {
     setCalculatebtnClicked(true)
     setLoading(true)
     try {
-      
       const response =
         await ShutdownNormsApiService.handleCalculateShutdownNorms(
           PLANT_ID,
@@ -441,7 +440,7 @@ const ShutdownNorms = () => {
     } else {
       // non PE/PP flow
       await fetchData(null)
-      if(!PLANT_ID || !AOP_YEAR) return
+      if (!PLANT_ID || !AOP_YEAR) return
       try {
         const months = await ShutdownNormsApiService.getShutdownMonths(
           keycloak,
