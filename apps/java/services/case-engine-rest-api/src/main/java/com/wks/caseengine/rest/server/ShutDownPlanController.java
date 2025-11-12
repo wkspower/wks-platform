@@ -136,8 +136,8 @@ public class ShutDownPlanController {
 		  }
 		  
 		  @GetMapping("/description-drpdwn")
-		  public AOPMessageVM getDescriptionDropdown(@RequestParam String year,@RequestParam String plantId){
-			  return shutDownPlanService.getDescriptionDropdown(year,plantId);
+		  public AOPMessageVM getDescriptionDropdown(@RequestParam String plantId){
+			  return shutDownPlanService.getDescriptionDropdown(plantId);
 		  }
 		  
 		  

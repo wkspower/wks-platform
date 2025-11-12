@@ -1475,7 +1475,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	}
 	
 	@Override
-	public AOPMessageVM getDescriptionDropdown(String auditYear, String plantId) {
+	public AOPMessageVM getDescriptionDropdown(String plantId) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
 					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -1484,7 +1484,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 			List<Map<String,Object>> mapList = new ArrayList<Map<String,Object>>();
 			String viewName= "vwScrnShutdown"+vertical.getName();
-			List<Object[]> results = getDescriptionDropdownData(auditYear, plantId,viewName);
+			List<Object[]> results = getDescriptionDropdownData(vertical.getId(), viewName);
 			for (Object[] obj : results) {
 				Map<String,Object> map = new HashMap<String,Object>();
 				map.put("DisplayName",obj[2]);
@@ -1502,14 +1502,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	public List<Object[]> getDescriptionDropdownData(String year, String plantFkId, String viewName) {
+	public List<Object[]> getDescriptionDropdownData(UUID verticalId,String viewName) {
 		try {
-			String sql = "SELECT * from " + viewName+ " where Plant_FK_Id = :plantFkId AND AOPyear = :year order by DisplayOrder";
-
+			String sql = "SELECT * from " + viewName+ " where Vertical_FK_Id = :verticalId order by DisplayOrder";
 			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("year", year);
-			query.setParameter("plantFkId", plantFkId);
-
+			query.setParameter("verticalId", verticalId);
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
