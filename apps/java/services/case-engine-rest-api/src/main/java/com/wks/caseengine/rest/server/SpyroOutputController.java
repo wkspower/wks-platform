@@ -69,7 +69,6 @@ public class SpyroOutputController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-
 	
 	@PostMapping(value="/spyro-output/yield")
 	public AOPMessageVM updateSpyroOutputYieldData(

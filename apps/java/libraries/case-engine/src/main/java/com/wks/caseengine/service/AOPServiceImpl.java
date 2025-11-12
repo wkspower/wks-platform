@@ -6,12 +6,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.transaction.annotation.Transactional;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AOPDTO;
 import com.wks.caseengine.entity.AOP;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
@@ -20,6 +29,7 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -33,6 +43,8 @@ import java.util.UUID;
 
 
 import javax.sql.DataSource;
+
+import java.io.ByteArrayOutputStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -63,6 +75,9 @@ public class AOPServiceImpl implements AOPService {
 
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private NormParametersRepository normParametersRepository;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public AOPServiceImpl(DataSource dataSource) {
@@ -492,5 +507,154 @@ public class AOPServiceImpl implements AOPService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public byte[] exportAOPData(String plantId, String year,String type,boolean isAfterSave,List<AOPDTO> dtoList) {
+	    try {
+	    	AOPMessageVM aopMessageVM = getAOPData(plantId, year, type);
+
+	    	if (!isAfterSave) {
+	    	    
+	    	    Map<String, Object> map = (Map<String, Object>) aopMessageVM.getData();
+	    	     dtoList = (List<AOPDTO>) map.get("aopDTOList");
+	    	}
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+
+	        CellStyle normalStyle = workbook.createCellStyle();
+	        CellStyle totalRowStyle = workbook.createCellStyle();
+	        totalRowStyle.cloneStyleFrom(normalStyle);
+	        totalRowStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+	        totalRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+	        int currentRow = 0;
+
+	        // (Ensure your header writing is here)
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Products");
+	        innerHeaders.add("UOM");
+	        innerHeaders.add(getMonth(year,4));
+	        innerHeaders.add(getMonth(year,5));
+	        innerHeaders.add(getMonth(year,6));
+	        innerHeaders.add(getMonth(year,7));
+	        innerHeaders.add(getMonth(year,8));
+	        innerHeaders.add(getMonth(year,9));
+	        innerHeaders.add(getMonth(year,10));
+	        innerHeaders.add(getMonth(year,11));
+	        innerHeaders.add(getMonth(year,12));
+	        innerHeaders.add(getMonth(year,1));
+	        innerHeaders.add(getMonth(year,2));
+	        innerHeaders.add(getMonth(year,3));
+	        innerHeaders.add("Total");
+	       
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(normalStyle);
+	        }
+
+	        int dataRowCount = dtoList.size();
+	        for (int i = 0; i < dataRowCount; i++) {
+	        	AOPDTO dto = dtoList.get(i);
+	            Row row = sheet.createRow(currentRow++);
+	            List<Object> rowData = new ArrayList<>();
+	            rowData.add(dto.getDisplayName());
+	            UUID materialId = UUID.fromString(dto.getMaterialFKId());
+	            Optional<NormParameters> opt = normParametersRepository.findById(materialId);
+
+	            String uom = opt
+	                .map(NormParameters::getUom)     // if present, get the UOM
+	                .orElse("DEFAULT_UOM");         // fallback if not present or UOM is null
+
+	            rowData.add(uom);
+
+	            rowData.add(dto.getApril());
+	            rowData.add(dto.getMay());
+	            rowData.add(dto.getJune());
+	            rowData.add(dto.getJuly());
+	            rowData.add(dto.getAug());
+	            rowData.add(dto.getSep());
+	            rowData.add(dto.getOct());
+	            rowData.add(dto.getNov());
+	            rowData.add(dto.getDec());
+	            rowData.add(dto.getJan());
+	            rowData.add(dto.getFeb());
+	            rowData.add(dto.getMarch());
+	            rowData.add(dto.getApril()+dto.getMay()+dto.getJune()+dto.getJuly()+dto.getAug()+dto.getSep()+dto.getOct()+dto.getNov()
+	           +dto.getDec()+ dto.getJan()+dto.getFeb()+dto.getMarch());
+	            
+	            if (isAfterSave) {
+	                rowData.add(dto.getSaveStatus());
+	                rowData.add(dto.getErrDescription());
+	            }
+
+	            boolean isLastRow = (i == dataRowCount - 1);
+	            CellStyle styleToUse = isLastRow ? totalRowStyle : normalStyle;
+
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	                cell.setCellStyle(styleToUse);
+	            }
+	        }
+
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	public String getMonth(String year, int month) {
+	    
+	    if (year == null || !year.matches("\\d{4}-\\d{2}")) {
+	        throw new IllegalArgumentException("Year must be in format YYYY-YY");
+	    }
+	    String[] parts = year.split("-");
+	    int startYear = Integer.parseInt(parts[0]);   
+	    int endYearSuffix = Integer.parseInt(parts[1]); 
+	    int endYear = (startYear / 100) * 100 + endYearSuffix;  
+
+	    
+	    String[] monthNames = {
+	        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+	        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+	    };
+	    if (month < 1 || month > 12) {
+	        throw new IllegalArgumentException("Month must be 1 to 12");
+	    }
+
+	    String mname = monthNames[month - 1];
+	    int displayYear;
+	    
+	    if (month >= 4 && month <= 12) {
+	        displayYear = startYear;
+	    } else {  
+	        displayYear = endYear;
+	    }
+
+	    
+	    int yy = displayYear % 100;  
+	    String yyStr = String.format("%02d", yy);
+
+	    return mname + "-" + yyStr;
+	}
+
 
 }

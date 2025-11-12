@@ -47,4 +47,7 @@ public class AOPDTO {
     private String remark;
     private Boolean isEditable;
     private Boolean isVisible;
+    private String saveStatus;
+	private String errDescription;
+	private Double total;
 }
