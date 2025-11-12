@@ -87,10 +87,5 @@
     "field": "isEditable",
     "title": "isEditable",
     "hidden": true
-  },
-
-  {
-    "field": "avgOfAllMonths",
-    "title": "Avg.Norms"
   }
 ]
