@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -552,11 +553,17 @@ public class AOPServiceImpl implements AOPService {
 	            innerHeaders.add("Error Description");
 	        }
 	        Row headerRow = sheet.createRow(currentRow++);
+	        Font boldFont = workbook.createFont();
+	        boldFont.setBold(true);
+
+	        CellStyle boldStyle = workbook.createCellStyle();
+	        boldStyle.setFont(boldFont);
 	        for (int col = 0; col < innerHeaders.size(); col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
-	            cell.setCellStyle(normalStyle);
+	            cell.setCellStyle(boldStyle);
 	        }
+
 
 	        int dataRowCount = dtoList.size();
 	        for (int i = 0; i < dataRowCount; i++) {
