@@ -592,10 +592,7 @@ public class AOPServiceImpl implements AOPService {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
 	            }
-
-	            boolean isLastRow = (i == dataRowCount - 1);
-	            CellStyle styleToUse = isLastRow ? totalRowStyle : normalStyle;
-
+     
 	            for (int col = 0; col < rowData.size(); col++) {
 	                Cell cell = row.createCell(col);
 	                Object value = rowData.get(col);
@@ -608,7 +605,7 @@ public class AOPServiceImpl implements AOPService {
 	                } else {
 	                    cell.setCellValue("");
 	                }
-	                cell.setCellStyle(styleToUse);
+	                cell.setCellStyle(normalStyle);
 	            }
 	        }
 
