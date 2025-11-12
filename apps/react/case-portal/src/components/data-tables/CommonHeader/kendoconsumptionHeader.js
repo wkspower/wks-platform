@@ -1,7 +1,7 @@
 import productionColDefs from '../../../assets/kendo_consumption_aop.json'
 import productionColDefsElastomer from '../../../assets/kendo_consumption_aop_elastomer.json'
 import productionColDefs1 from '../../../assets/kendo_consumption_aop_cracker.json'
-
+import productionColDefsVcm from '../../../assets/kendo_consumption_aop_vcm.json'
 const getEnhancedColDefs = ({ headerMap, lowerVertName, valueFormat }) => {
   let colDefs = productionColDefs
 
@@ -13,6 +13,9 @@ const getEnhancedColDefs = ({ headerMap, lowerVertName, valueFormat }) => {
 
   if (lowerVertName == 'elastomer') {
     colDefs = productionColDefsElastomer
+  }
+  if(lowerVertName == 'vcm'){
+    colDefs = productionColDefsVcm // Using VCM columns for VCM as well
   }
 
   const enhancedColDefs = colDefs.map((col) => {

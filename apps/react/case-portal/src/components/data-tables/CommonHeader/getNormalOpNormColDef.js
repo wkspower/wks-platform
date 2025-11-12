@@ -1,5 +1,6 @@
 import { NormalOpNormElastomerColumns } from 'components/colums/ElastomerColums'
 import { NormalOpNormMegColumns } from 'components/colums/MegColums'
+import { NormalOpNormVcmColumns } from 'components/colums/VcmColumns'
 import { CrackerColums } from 'components/colums/CrackerColums'
 import { NormalOpNormPeColumns } from 'components/colums/PeColums'
 import { NormalOpNormPpColumns } from 'components/colums/PpColums'
@@ -16,6 +17,7 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.ELASTOMER]: NormalOpNormElastomerColumns,
   [verticalEnums.MEG]: NormalOpNormMegColumns,
   [verticalEnums.CRACKER]: CrackerColums,
+  [verticalEnums.VCM]: NormalOpNormVcmColumns,
 }
 
 const getNormalOpNormColDef = ({ headerMap, valueFormat }) => {
