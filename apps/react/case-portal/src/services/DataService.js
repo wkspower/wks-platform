@@ -3197,7 +3197,7 @@ async function getConfigurationExcelType(
 
   const body = JSON.stringify(reportType)
   const EXCEL_NAME = reportType
-    ? `Production & Norms Basis ${reportType}.xlsx `
+    ? `Production & Norms Basis ${reportType}.xlsx`
     : `Production & Norms Basis.xlsx`
 
   try {

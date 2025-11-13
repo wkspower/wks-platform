@@ -431,7 +431,10 @@ const SlowDown = ({ permissions }) => {
       }
 
       // MEG specific checks
-      if (lowerVertName === 'meg' || lowerVertName === 'elastomer') {
+      if (lowerVertName === 'meg' || 
+        lowerVertName === 'elastomer' ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'pvc') {
         // Month span check
         //check timeframe Multiple month spilt into single
         for (const row of rows) {
@@ -481,7 +484,7 @@ const SlowDown = ({ permissions }) => {
         }
 
         // Cross overlap the timeframe with Shutdown
-        if (lowerVertName != 'elastomer') {
+        if (lowerVertName != 'elastomer' || lowerVertName != 'vcm' || lowerVertName != 'pvc') {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
             const aStart = new Date(a.maintStartDateTime).getTime()
@@ -854,6 +857,10 @@ const SlowDown = ({ permissions }) => {
         return SlowDownMegColumns
       case verticalEnums.AROMATICS:
         return SlowDownAromaticsColumns
+      case verticalEnums.PVC:
+        return SlowDownElastomerColumns 
+      case verticalEnums.VCM:
+        return SlowDownElastomerColumns 
       default:
         return SlowDownMegColumns
     }
@@ -903,7 +910,7 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (lowerVertName == 'elastomer') {
+      if (lowerVertName == 'elastomer' || lowerVertName== 'pvc' || lowerVertName== 'vcm') {
         response = await DataService.slowdownDetailsElastomerExport(
           keycloak,
           PLANT_ID,
@@ -932,21 +939,22 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (lowerVertName == 'elastomer') {
-        response = await DataService.ImportSlowdownElastomerDetails(
-          rawFile,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      } else {
-        response = await DataService.ImportSlowdownDetails(
-          rawFile,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      }
+
+    if(lowerVertName == 'elastomer' || lowerVertName == 'pvc' || lowerVertName == 'vcm'){
+            response = await DataService.ImportSlowdownElastomerDetails(
+            rawFile,
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+      )
+          } else{
+            response = await DataService.ImportSlowdownDetails(
+            rawFile,
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+      )
+          }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -1039,11 +1047,9 @@ const SlowDown = ({ permissions }) => {
       titleName: SCREEN_NAME,
 
       uploadExcelBtn:
-        lowerVertName === 'pe' ||
-        lowerVertName === 'pp' ||
-        lowerVertName == 'elastomer'
-          ? true
-          : false,
+        lowerVertName === 'pe' || 
+        lowerVertName === 'pp' || lowerVertName == 'elastomer' || 
+        lowerVertName == 'pvc' || lowerVertName == 'vcm' ? true : false,
     },
     isOldYear,
   )
