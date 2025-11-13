@@ -442,7 +442,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		}
 		return null;
 	}
-	
+
 	@Override
 	public AOPMessageVM importShutdownExcel(String year,UUID plantId, String maintenanceTypeName,MultipartFile file) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -474,7 +474,18 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	public AOPMessageVM importNonProductShutdown(String year,UUID plantId, String maintenanceTypeName,MultipartFile file) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<ShutDownPlanDTO> data = readNonProductShutdown(file.getInputStream(), plantId, year);
+			Plants plant = plantsRepository.findById(plantId)
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			List<ShutDownPlanDTO> data = null;
+			if(vertical.getName().equalsIgnoreCase("PTA") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("PET")) {
+				data = readNonValidationShutdown(file.getInputStream(), plantId, year);
+			}else {
+				data = readNonProductShutdown(file.getInputStream(), plantId, year);
+			}
+			data = readNonProductShutdown(file.getInputStream(), plantId, year);
 			List<ShutDownPlanDTO> failedList = saveShutdownPlantData(plantId, data);
 			if (failedList != null && failedList.size() > 0) {
 				byte[] fileByteArray = shutdownNonProductExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
@@ -860,6 +871,165 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	    }
+
+	    return dtoList;
+	}
+	public List<ShutDownPlanDTO> readNonValidationShutdown(InputStream inputStream, UUID plantFKId, String year) {
+	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+	   
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+
+	       
+	        if (rowIterator.hasNext())
+	            rowIterator.next();
+	            
+	        List<String> descriptions = new ArrayList<>(); 
+	        
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
+	            LocalDateTime ldtStart = null;
+	            LocalDateTime ldtEnd = null;
+	            boolean alreadyFailed = false; 
+
+	            try {
+	                dto.setAudityear(year);
+	                
+	                String desc = getStringCellValue(row.getCell(0), dto);
+	                dto.setDiscription(desc);
+
+	                if (dto.getDiscription() == null || dto.getDiscription().trim().isEmpty()) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Description is required.");
+	                    alreadyFailed = true;
+	                } else if (descriptions.contains(dto.getDiscription().trim())) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
+	                    alreadyFailed = true;
+	                }
+	                
+	                if (!alreadyFailed) {
+	                    descriptions.add(dto.getDiscription().trim());
+	                }
+
+	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
+	                LocalDateTime fyStart = bounds[0];
+	                LocalDateTime fyEnd = bounds[1];
+	                
+	                String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
+	                
+	                String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
+
+	                if (!alreadyFailed && (mantStartStr == null || mantEndStr == null || mantStartStr.trim().isEmpty() || mantEndStr.trim().isEmpty())) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Start and/or End Date/Time is missing.");
+	                    alreadyFailed = true;
+	                }
+
+	                if (!alreadyFailed && mantStartStr != null) {
+	                    try {
+	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
+	                        
+	                        if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Start date/time is outside the financial year " + year);
+	                            alreadyFailed = true;
+	                        }
+	                        
+	                        Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
+	                        dto.setMaintStartDateTime(startDate);
+	                        
+	                    } catch (Exception ex) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Invalid date/time format in cell 1 (Start Date).");
+	                        alreadyFailed = true;
+	                    }
+	                }
+
+	                if (!alreadyFailed && mantEndStr != null) {
+	                    try {
+	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
+	                        Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+	                        dto.setMaintEndDateTime(endDate);
+	                        if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("End date/time is outside the financial year " + year);
+	                            alreadyFailed = true;
+	                        } 
+	                        
+	                        else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("End date/time cannot be before start date/time.");
+	                            alreadyFailed = true;
+	                        }
+	                        	                        
+	                    } catch (Exception ex) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Invalid date/time format in cell 2 (End Date).");
+	                        alreadyFailed = true;
+	                    }
+	                }
+	                
+	                if (!alreadyFailed && ldtStart != null && ldtEnd != null) {
+	                    try {
+	                        Duration duration = Duration.between(ldtStart, ldtEnd);
+	                        long totalMinutes = duration.toMinutes();
+	                        
+	                        if (totalMinutes < 0) {
+	                            throw new IllegalStateException("Calculated negative duration.");
+	                        }
+	                        
+	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
+	                        dto.setDurationInHrs(durationInDecimalHours);
+	                        
+	                    } catch (Exception e) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
+	                        alreadyFailed = true;
+	                    }
+	                }
+	                
+	                dto.setRemark(getStringCellValue(row.getCell(4), dto));
+	                if (!alreadyFailed && (dto.getRemark() == null || dto.getRemark().trim().isEmpty())) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please enter remark");
+	                    alreadyFailed = true;
+	                }
+	                
+	                String idString = getStringCellValue(row.getCell(5), dto);
+	                dto.setId(idString);
+	                
+	                if (!alreadyFailed && dto.getId() == null) {
+	                    List<Object[]> obj = shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown", plantFKId.toString(), year, dto.getDiscription());
+
+	                    if (obj.size() > 0) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("The Description '" + dto.getDiscription() + "' already exists in the database. Please enter a unique description to avoid duplication.");
+	                        alreadyFailed = true;
+	                    }
+	                }
+
+	                if (!alreadyFailed) {
+	                    dto.setSaveStatus("Success");
+	                }
+
+	            } catch (Exception e) {
+	                if (dto.getSaveStatus() == null || !dto.getSaveStatus().equals("Failed")) {
+	                    dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
+	                    dto.setSaveStatus("Failed");
+	                }
+	            }
+	            
+	            dtoList.add(dto);
+	        }
+
+	    } catch (Exception e) {
 	    }
 
 	    return dtoList;
