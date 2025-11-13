@@ -910,7 +910,10 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (lowerVertName == 'elastomer' || lowerVertName== 'pvc' || lowerVertName== 'vcm') {
+      if (lowerVertName == 'elastomer' || lowerVertName== 'pvc' || lowerVertName== 'vcm' ||
+        lowerVertName === 'aromatics' ||
+        lowerVertName === 'pta' 
+      ) {
         response = await DataService.slowdownDetailsElastomerExport(
           keycloak,
           PLANT_ID,

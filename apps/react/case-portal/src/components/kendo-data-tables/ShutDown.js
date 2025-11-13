@@ -713,7 +713,12 @@ const ShutDown = ({ permissions }) => {
 
     try {
       let response
-      if (lowerVertName === 'elastomer' || lowerVertName === 'pvc' || lowerVertName === 'vcm') {
+      if (lowerVertName === 'elastomer' || 
+        lowerVertName === 'pvc' || 
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'aromatic' ||
+        lowerVertName === 'pta' ||
+        lowerVertName === 'pet' ) {
         response = await DataService.shutdownDetailsElastomerExport(
           keycloak,
           PLANT_ID,
