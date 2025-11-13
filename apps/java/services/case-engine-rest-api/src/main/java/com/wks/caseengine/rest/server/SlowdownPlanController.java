@@ -73,6 +73,27 @@ public class SlowdownPlanController {
 	    }
 	}
 	
+	@GetMapping(value = "/slowdown-rate-export")
+	public ResponseEntity<byte[]> slowdownRateExport(
+	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
+	    try {
+			
+	        byte[] excelBytes = slowdownPlanService.slowdownRateExport(year, plantId,maintenanceTypeName, false, null);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("slowdown.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+	
 	@GetMapping(value = "/slowdown-export-non-product")
 	public ResponseEntity<byte[]> nonProductSlowdownExport(
 	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
@@ -102,6 +123,15 @@ public class SlowdownPlanController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			return	slowdownPlanService.importSlowdownExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
+	}
+	
+	@PostMapping(value = "/slowdown-rate-import", consumes = "multipart/form-data")
+	public AOPMessageVM importSlowdownRateExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam String maintenanceTypeName,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	slowdownPlanService.importSlowdownRateExcel(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
 	}
 	
 	@PostMapping(value = "/slowdown-import-non-product", consumes = "multipart/form-data")
