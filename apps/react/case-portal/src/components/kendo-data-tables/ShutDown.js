@@ -625,7 +625,7 @@ const ShutDown = ({ permissions }) => {
       }
     }
 
-    getAllDescriptionDrpdwn()
+    if (lowerVertName == 'pta') getAllDescriptionDrpdwn()
   }, [oldYear, AOP_YEAR, keycloak, PLANT_ID, lowerVertName])
 
   useEffect(() => {

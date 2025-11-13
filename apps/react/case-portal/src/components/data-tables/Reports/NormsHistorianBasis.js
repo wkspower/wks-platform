@@ -296,7 +296,7 @@ const NormsHistorianBasis = () => {
           },
         ]
 
-  if (lowerVertName != 'meg') {
+  if (lowerVertName != 'meg' && lowerVertName != 'aromatics') {
     return <ProductionVolumeDataBasisPe />
   } else if (lowerVertName == 'aromatics') {
     return <NormsHistorianBasisAromatics />
