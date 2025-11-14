@@ -485,7 +485,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			}else {
 				data = readNonProductShutdown(file.getInputStream(), plantId, year);
 			}
-			data = readNonProductShutdown(file.getInputStream(), plantId, year);
 			List<ShutDownPlanDTO> failedList = saveShutdownPlantData(plantId, data);
 			if (failedList != null && failedList.size() > 0) {
 				byte[] fileByteArray = shutdownNonProductExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
@@ -877,12 +876,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	}
 	public List<ShutDownPlanDTO> readNonValidationShutdown(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-	   
+	    String verticalName = plantsService.findVerticalNameByPlantId(plantFKId);
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
 	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-
 	       
 	        if (rowIterator.hasNext())
 	            rowIterator.next();
@@ -906,7 +904,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                    dto.setSaveStatus("Failed");
 	                    dto.setErrDescription("Description is required.");
 	                    alreadyFailed = true;
-	                } else if (descriptions.contains(dto.getDiscription().trim())) {
+	                } else if (!verticalName.equalsIgnoreCase("PTA") && descriptions.contains(dto.getDiscription().trim())) {
 	                    dto.setSaveStatus("Failed");
 	                    dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
 	                    alreadyFailed = true;
