@@ -247,22 +247,18 @@ const SlowdownNorms = () => {
     setLoading(true)
     try {
       const businessData = newRows.map((row) => ({
-        april: isTPH && row.april ? row.april * 24 : row.april || null,
-        may: isTPH && row.may ? row.may * 24 : row.may || null,
-        june: isTPH && row.june ? row.june * 24 : row.june || null,
-        july: isTPH && row.july ? row.july * 24 : row.july || null,
-        august: isTPH && row.august ? row.august * 24 : row.august || null,
-        september:
-          isTPH && row.september ? row.september * 24 : row.september || null,
-        october: isTPH && row.october ? row.october * 24 : row.october || null,
-        november:
-          isTPH && row.november ? row.november * 24 : row.november || null,
-        december:
-          isTPH && row.december ? row.december * 24 : row.december || null,
-        january: isTPH && row.january ? row.january * 24 : row.january || null,
-        february:
-          isTPH && row.february ? row.february * 24 : row.february || null,
-        march: isTPH && row.march ? row.march * 24 : row.march || null,
+        april: row.april || null,
+        may: row.may || null,
+        june: row.june || null,
+        july: row.july || null,
+        august: row.august || null,
+        september: row.september || null,
+        october: row.october || null,
+        november: row.november || null,
+        december: row.december || null,
+        january: row.january || null,
+        february: row.february || null,
+        march: row.march || null,
         remark: row.remarks,
         remarks: row.remarks,
         financialYear: AOP_YEAR,

@@ -846,8 +846,6 @@ const ProductionNorms = ({ permissions }) => {
           units:
           lowerVertName === 'cracker'
             ? ['MT/Month', 'TPH']
-            : lowerVertName === 'vcm' || lowerVertName === 'pta'
-            ? ['MT', 'KT']
             : ['MT', 'KT'],
           customHeight: permissions?.customHeight,
           downloadExcelBtnFromUI: lowerVertName === 'vcm' || lowerVertName === 'pta' || lowerVertName === 'cracker'
