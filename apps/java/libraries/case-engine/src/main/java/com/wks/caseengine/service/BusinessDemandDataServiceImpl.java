@@ -437,7 +437,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	
 	public List<BusinessDemandDataDTO> readBusinessDemand(InputStream inputStream, UUID plantFKId, String year) {
 		List<BusinessDemandDataDTO> configList = new ArrayList<>();
-
+		String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 			Sheet sheet = workbook.getSheetAt(0);
 			Iterator<Row> rowIterator = sheet.iterator();
@@ -463,6 +463,44 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					dto.setJan(getNumericCellValue(row.getCell(11), dto));
 					dto.setFeb(getNumericCellValue(row.getCell(12), dto));
 					dto.setMarch(getNumericCellValue(row.getCell(13), dto));
+					
+					
+					if (verticalName != null
+					    && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP"))) {
+					    Double jan   = dto.getJan();
+					    Double feb   = dto.getFeb();
+					    Double march = dto.getMarch();
+					    Double april = dto.getApril();
+					    Double may   = dto.getMay();
+					    Double june  = dto.getJune();
+					    Double july  = dto.getJuly();
+					    Double aug   = dto.getAug();
+					    Double sep   = dto.getSep();
+					    Double oct   = dto.getOct();
+					    Double nov   = dto.getNov();
+					    Double dec   = dto.getDec();
+
+					    double sum = 0.0;
+					    sum += (jan   != null ? jan   : 0.0);
+					    sum += (feb   != null ? feb   : 0.0);
+					    sum += (march != null ? march : 0.0);
+					    sum += (april != null ? april : 0.0);
+					    sum += (may   != null ? may   : 0.0);
+					    sum += (june  != null ? june  : 0.0);
+					    sum += (july  != null ? july  : 0.0);
+					    sum += (aug   != null ? aug   : 0.0);
+					    sum += (sep   != null ? sep   : 0.0);
+					    sum += (oct   != null ? oct   : 0.0);
+					    sum += (nov   != null ? nov   : 0.0);
+					    sum += (dec   != null ? dec   : 0.0);
+
+					    final double EPSILON = 0.0001d;  
+					    if (Math.abs(sum - 100.0d) > EPSILON) {  
+					    	dto.setSaveStatus("Failed");
+					    	dto.setErrDescription("Sum should be 100 for this row");
+					    } 
+					}
+
 					dto.setRemark(getStringCellValue(row.getCell(14), dto));
 					dto.setId(getStringCellValue(row.getCell(15), dto));
 					dto.setNormParameterId(getStringCellValue(row.getCell(16), dto));
@@ -611,10 +649,11 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 					if (businessDemandDataDTO.getVerticalFKId() != null) {
 						businessDemand.setVerticalFKId(UUID.fromString(businessDemandDataDTO.getVerticalFKId()));
 					}
+					
 					businessDemandDataRepository.save(businessDemand);
 
 				}
-			} // TODO Auto-generated method stub
+			} 
 			
 			Plants plant = plantsRepository.findById((plantId))
 					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
