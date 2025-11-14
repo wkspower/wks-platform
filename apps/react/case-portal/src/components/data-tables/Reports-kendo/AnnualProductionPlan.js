@@ -536,12 +536,10 @@ const AnnualProductionPlan = () => {
         rateValue: row.rateValue,
       }))
       const res = await DataService.saveAnnualProduction(
-        {
-          PLANT_ID,
-          AOP_YEAR,
-          reportType: 'assumptions',
-          dataList,
-        },
+        PLANT_ID,
+        AOP_YEAR,
+        'assumptions',
+        dataList,
         keycloak,
       )
 
@@ -594,12 +592,10 @@ const AnnualProductionPlan = () => {
         maxHourlyRateValue: row.maxHourlyRateValue,
       }))
       const res = await DataService.saveAnnualProduction(
-        {
-          PLANT_ID,
-          AOP_YEAR,
-          reportType: 'maxRate',
-          dataList,
-        },
+        PLANT_ID,
+        AOP_YEAR,
+        'maxRate',
+        dataList,
         keycloak,
       )
 
@@ -651,12 +647,10 @@ const AnnualProductionPlan = () => {
         rateValue: row.rateValue,
       }))
       const res = await DataService.saveAnnualProduction(
-        {
-          PLANT_ID,
-          AOP_YEAR,
-          reportType: 'OperatingHrs',
-          dataList,
-        },
+        PLANT_ID,
+        AOP_YEAR,
+        'OperatingHrs',
+        dataList,
         keycloak,
       )
 
@@ -722,12 +716,10 @@ const AnnualProductionPlan = () => {
           : null,
       }))
       const res = await DataService.saveAnnualProduction(
-        {
-          PLANT_ID,
-          AOP_YEAR,
-          reportType: 'AverageHourlyrate',
-          dataList,
-        },
+        PLANT_ID,
+        AOP_YEAR,
+        'AverageHourlyrate',
+        dataList,
         keycloak,
       )
 

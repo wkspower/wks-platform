@@ -11,7 +11,7 @@ import moment from '../../../../node_modules/moment/moment'
 import { useSelector } from 'react-redux'
 const TurnaroundReport = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
+  const {
       verticalChange,
       yearChanged,
       oldYear,
@@ -199,7 +199,7 @@ const TurnaroundReport = () => {
         keycloak,
         'previousYear',
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
       if (res?.code === 200) {
         setRows2(mapData(res, 'PY'))
@@ -320,6 +320,7 @@ const TurnaroundReport = () => {
         keycloak,
         rowsToUpdate,
         PLANT_ID,
+        AOP_YEAR,
       )
 
       // console.log(res)

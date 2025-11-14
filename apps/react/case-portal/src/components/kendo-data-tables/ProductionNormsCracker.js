@@ -606,7 +606,8 @@ const ProductionNormsCracker = ({ permissions }) => {
           showNote: true,
           showTitleNameBusiness: true,
           titleName: 'Month wise Production plan',
-          showCalculateVisibility: false,
+          showCalculateVisibility:
+            calculationObject && Object.keys(calculationObject).length > 0,
           saveBtn: false,
           units: ['MT/Month', 'TPH'],
           customHeight: permissions?.customHeight,

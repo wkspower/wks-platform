@@ -1259,7 +1259,7 @@ async function saveTurnaroundReportWhole(
   PLANT_ID,
   AOP_YEAR,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${'previousYear'}`
+  const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=previousYear`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2443,9 +2443,14 @@ async function getIbr(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function saveAnnualProduction(payload, keycloak) {
-  const { plantId, year, reportType, dataList } = payload
-  let queryParams = `?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+async function saveAnnualProduction(
+  PLANT_ID,
+  AOP_YEAR,
+  reportType,
+  dataList,
+  keycloak,
+) {
+  let queryParams = `?plantId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
   if (reportType) {
     queryParams += `&reportType=${encodeURIComponent(reportType)}`
   }

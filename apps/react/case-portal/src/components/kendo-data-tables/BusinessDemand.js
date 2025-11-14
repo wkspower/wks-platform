@@ -122,7 +122,6 @@ const BusinessDemand = ({ permissions }) => {
 
       var rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
-      // var data = Object.values(unsavedChangesRef.current.unsavedRows)
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -136,10 +135,10 @@ const BusinessDemand = ({ permissions }) => {
       //
 
       if (isPPorPE_NMD) {
-        // Use all rows, not just edited ones
         const productionRows = (rows || []).filter(
           (row) => row.Particulars?.toLowerCase() === 'production',
         )
+
         if (productionRows.length > 0) {
           const months = [
             'april',
@@ -155,23 +154,61 @@ const BusinessDemand = ({ permissions }) => {
             'feb',
             'march',
           ]
+
+          const SCALE = 100000
+
+          const toPreciseInt = (num) => {
+            if (num === null || num === undefined || num === '') return 0
+            const n = Number(num)
+            if (isNaN(n)) return 0
+            return Math.round(n * SCALE)
+          }
+
+          const formatFromIntRobust = (intVal) => {
+            const sign = intVal < 0 ? '-' : ''
+            const abs = Math.abs(intVal)
+            const integerPart = Math.floor(abs / SCALE)
+            const remainder = abs % SCALE
+            if (remainder === 0) return sign + String(integerPart)
+            const scaleDigits = String(SCALE).length - 1
+            let fracStr = String(remainder).padStart(scaleDigits, '0')
+            fracStr = fracStr.replace(/0+$/, '')
+            return sign + `${integerPart}.${fracStr}`
+          }
+
+          const expected = 100 * SCALE
+          const failures = []
+
           for (const month of months) {
-            const sumMonth = productionRows.reduce(
-              (acc, row) => acc + (parseFloat(row[month]) || 0),
+            const sumInt = productionRows.reduce(
+              (acc, row) => acc + toPreciseInt(row[month]),
               0,
             )
-            if (Math.abs(sumMonth - 100) > 0.01) {
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: `Sum of '${month.charAt(0).toUpperCase() + month.slice(1)}' for Production must be exactly 100.00 (Current: ${sumMonth.toFixed(2)})`,
-                severity: 'error',
-              })
-              setLoading(false)
-              return
+
+            if (sumInt !== expected) {
+              failures.push({ month, sumInt })
             }
+          }
+
+          if (failures.length > 0) {
+            const parts = failures.map((f) => {
+              const prettyMonth =
+                f.month.charAt(0).toUpperCase() + f.month.slice(1)
+              const prettySum = formatFromIntRobust(f.sumInt)
+              return `${prettyMonth} - ${prettySum}`
+            })
+
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `The production Sum should be exactly same - Current values (${parts.join(', ')})`,
+              severity: 'error',
+            })
+            setLoading(false)
+            return
           }
         }
       }
+
       const requiredFields = ['normParameterId', 'remark']
 
       const validationMessage = validateFields(data, requiredFields)

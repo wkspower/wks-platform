@@ -97,7 +97,6 @@ const BestAchievedReport = () => {
           await CrackerReportsApiDataService.finalNormsProductionReport(
             keycloak,
             reportTypeForCall,
-            mode,
             PLANT_ID,
             AOP_YEAR,
           )
