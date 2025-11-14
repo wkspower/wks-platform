@@ -32,8 +32,8 @@ public class ConfigurationController {
 	private ConfigurationService configurationService;
 	
 	@GetMapping(value="/production-norms")
-	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId) {
-		return configurationService.getConfigurationData(year,plantFKId);
+	public List<ConfigurationDTO> getConfigurationData(@RequestParam String year,@RequestParam UUID plantFKId,@RequestParam(required=false) String version) {
+		return configurationService.getConfigurationData(year,plantFKId,version);
 	}
 	
 	@GetMapping(value="/monthly-production-manual-entry")
@@ -62,8 +62,8 @@ public class ConfigurationController {
 	}
 	
 	@PostMapping(value="/production-norms")
-	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year,@RequestParam String plantFKId, @RequestBody List<ConfigurationDTO> configurationDTOList) {
-		configurationService.saveConfigurationData(year,plantFKId,configurationDTOList);
+	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year,@RequestParam String plantFKId,@RequestParam(required=false) String version, @RequestBody List<ConfigurationDTO> configurationDTOList) {
+		configurationService.saveConfigurationData(year,plantFKId,version,configurationDTOList);
 		return configurationDTOList;
 	}
 	
@@ -171,11 +171,12 @@ public class ConfigurationController {
 	@PostMapping(value = "/configuration-export-excel")
 	public ResponseEntity<byte[]> exportConfigurationReport(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,@RequestBody(required=false) List<String> reportTypes
+            @RequestParam("year") String year,@RequestBody(required=false) List<String> reportTypes,
+            @RequestParam(required=false) String version
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId),reportTypes, false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = configurationService.createExcel(year,UUID.fromString(plantId),reportTypes,version, false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
@@ -218,10 +219,10 @@ public class ConfigurationController {
 	@PostMapping(value = "/configuration-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,@RequestParam(required=false) List<String> reportTypes,
+            @RequestParam("year") String year,@RequestParam(required=false) List<String> reportTypes,@RequestParam(required=false) String version,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			return	configurationService.importExcel(year,UUID.fromString(plantId),reportTypes, file); 
+			return	configurationService.importExcel(year,UUID.fromString(plantId),reportTypes,version, file); 
 	}
 	
 	@PostMapping(value = "/shutdown-rate-import", consumes = "multipart/form-data")
@@ -229,19 +230,21 @@ public class ConfigurationController {
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
             @RequestParam("type") String type,
+            @RequestParam(required=false) String version,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId),type, file); 
+			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId),type,version, file); 
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importConfigurationConstantsExcel(
 	         @RequestParam("plantFKId") String plantFKId,
             @RequestParam("year") String year,
+            @RequestParam(required=false) String version,
 			@RequestParam("file") MultipartFile file
 	        ) {
 		
-	        return configurationService.importConfigurationConstantsExcel(year,UUID.fromString(plantFKId), file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        return configurationService.importConfigurationConstantsExcel(year,UUID.fromString(plantFKId),version, file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 	}
 	
 	@GetMapping(value="/configuration-execution")
@@ -262,6 +265,11 @@ public class ConfigurationController {
 	@PostMapping(value="/configuration-execution-norms")
 	public AOPMessageVM saveConfigurationExecutionNorms(@RequestBody List<ExecutionDetailDto> executionDetailDtoList) {
 		return configurationService.saveConfigurationExecutionNorms(executionDetailDtoList);
+	}
+	
+	@GetMapping(value="/configuration-version")
+	public AOPMessageVM getConfigurationVersion(@RequestParam String year,@RequestParam String plantId) {
+		return configurationService.getConfigurationVersion(year,plantId);
 	}
 
 }
