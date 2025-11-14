@@ -146,13 +146,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 				List<Object> list = new ArrayList<>();
 
-				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
+				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM") || verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
 					list.add(dto.getConfigTypeDisplayName());
 					list.add(dto.getTypeDisplayName());
 				}
 				if ((verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
-						|| (verticalName.equalsIgnoreCase("CRACKER")) 
-						|| (verticalName.equalsIgnoreCase("PTA")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
+						|| (verticalName.equalsIgnoreCase("CRACKER"))) {
 					list.add(dto.getNormType());
 				}
 
@@ -183,7 +182,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			}
 
 			List<String> innerHeaders = new ArrayList<>();
-			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
+			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM") || verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
 				innerHeaders.add("Category");
 
 			}
@@ -243,7 +242,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 			}
 
-			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM")) {
+			if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM") || verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
 				sheet.setColumnHidden(17, true);
 			} else {
 				sheet.setColumnHidden(16, true);
@@ -2163,7 +2162,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				ConfigurationDTO dto = new ConfigurationDTO();
 
 				try {
-					if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+					if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("VCM") || verticalName.equalsIgnoreCase("PTA") || verticalName.equalsIgnoreCase("AROMATICS")) {
 						dto.setConfigTypeDisplayName(getStringCellValue(row.getCell(0), dto));
 						dto.setTypeDisplayName(getStringCellValue(row.getCell(1), dto));
 						dto.setProductName(getStringCellValue(row.getCell(2), dto));
@@ -2553,10 +2552,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.add("UOM");
 			innerHeaders.add("Value");
 			innerHeaders.add("Remark");
-
-			
 			innerHeaders.add("NormParameter_FK_Id");
-			
 			innerHeaders.add("Status");
 			innerHeaders.add("Error Description");
 
@@ -2930,7 +2926,5 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-
-
 
 }
