@@ -12,6 +12,7 @@ export const BusinessDemandDataApiService = {
   ssrsBudgetSummary,
   ssrsMaintenanceSummary,
   ssrsSiteMaintenanceSummary,
+  SSRS_NormComparisonReport,
 }
 async function getBDData(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/business-demand?year=${AOP_YEAR}&plantId=${PLANT_ID}`
@@ -226,6 +227,23 @@ async function savepropanebusiness(
       headers,
       body: JSON.stringify(turnAroundDetails),
     })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function SSRS_NormComparisonReport(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=norm-comparison-report`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
     return json(keycloak, resp)
   } catch (e) {
     console.log(e)

@@ -7,12 +7,13 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
+import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 
 const REPORT_TYPE_FOR_ALL = 'NormsHistorian'
 
 const NormsHistorianBasisAromatics2 = () => {
   const keycloak = useSession()
-  const [dataMap, setDataMap] = useState({}) // values will be processed rows + columns (light processing only)
+  const [dataMap, setDataMap] = useState({}) // processed rows + columns
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const [tabIndex, setTabIndex] = useState(0)
@@ -30,18 +31,13 @@ const NormsHistorianBasisAromatics2 = () => {
     screenTitle,
   } = dataGridStore
   const PLANT_ID = plantObject?.id
-  const SITE_ID = siteObject?.id
-  const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
-  const SCREEN_NAME = screenTitle?.title
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
   const timeoutIdsRef = useRef([])
   const isMountedRef = useRef(true)
-  const exportRefs = useRef({}) // refs for hidden ExcelExport instances
+  const exportRefs = useRef({})
 
   useEffect(
     () => () => {
@@ -54,6 +50,7 @@ const NormsHistorianBasisAromatics2 = () => {
 
   // Helper: light preprocess — keep stable refs and a width property; do NOT change data values
   const preprocessGrid = useCallback((g) => {
+    // g should be an object with { data: [...], columns: [...] }
     const rawRows = Array.isArray(g.data) ? g.data : []
     const backendCols = Array.isArray(g.columns) ? g.columns : []
 
@@ -73,6 +70,7 @@ const NormsHistorianBasisAromatics2 = () => {
     return { rows: rawRows, columns: processedCols }
   }, [])
 
+  // Fetch all grids — iterate API array in order, and for each grid take gridName, columns then data
   const fetchAllGrids = useCallback(async () => {
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
@@ -120,6 +118,7 @@ const NormsHistorianBasisAromatics2 = () => {
         return
       }
 
+      // Normalize to the array that actually contains grid objects
       const gridsArray = Array.isArray(apiResponse.data)
         ? apiResponse.data
         : Array.isArray(apiResponse.data?.data)
@@ -134,25 +133,41 @@ const NormsHistorianBasisAromatics2 = () => {
       }
 
       const newMap = {}
-      const normalizedNames = []
+      const orderedNames = []
 
+      // IMPORTANT: iterate in API order, and for each grid use:
+      //   const name = g.gridName      // -> grid name
+      //   const cols = g.columns       // -> grid columns
+      //   const rows = g.data          // -> grid rows/data
       for (const g of gridsArray) {
-        const name = g.gridName
+        // defensive checks
+        if (!g) continue
+        const name = g.gridName || g.gridname || g.name || null
         if (!name) continue
-        normalizedNames.push(name)
-        newMap[name] = preprocessGrid(g) // preprocessed: stable refs, but values unchanged
+
+        // push in the same order received from API
+        orderedNames.push(name)
+
+        // build a local object for preprocess (explicitly pass columns then data)
+        const gridObjectForPreprocess = {
+          columns: Array.isArray(g.columns) ? g.columns : [],
+          data: Array.isArray(g.data) ? g.data : [],
+        }
+
+        // preprocess keeps stable refs and adds widthT + __processed
+        newMap[name] = preprocessGrid(gridObjectForPreprocess)
       }
 
       if (isMountedRef.current) {
-        setGridNames(normalizedNames)
+        setGridNames(orderedNames) // API order preserved
         setDataMap(newMap)
       }
     } catch (err) {
-      console.error('Error fetching all grids (new shape):', err)
+      console.error('Error fetching all grids (ordered processing):', err)
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, preprocessGrid])
+  }, [keycloak, preprocessGrid, PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
     setTabIndex(0)
@@ -177,13 +192,36 @@ const NormsHistorianBasisAromatics2 = () => {
     })
   }, [gridNames, dataMap])
 
-  // -----------------------
-  // Excel export helpers
-  // -----------------------
-  // sanitize sheet name (avoid invalid chars / length)
+  // renderGrids: build JSX using an imperative for-loop (no .map)
+  const renderGrids = useCallback(() => {
+    const out = []
+    // use gridNames order (already set from API)
+    for (let i = 0; i < gridNames.length; i++) {
+      const name = gridNames[i]
+      if (!name) continue
+      const d = dataMap[name] || { rows: [], columns: [] }
+      out.push(
+        <div key={name}>
+          <Typography component='span' className='grid-title'>
+            {renderTitle(name)}
+          </Typography>
+
+          <Box sx={{ width: '100%', margin: 0 }}>
+            <KendoDataGrid
+              rows={d.rows}
+              columns={d.columns}
+              permissions={{ isHeight: d.rows?.length > 15 }}
+            />
+          </Box>
+        </div>,
+      )
+    }
+    return out
+  }, [gridNames, dataMap, renderTitle])
+
+  // Excel export helpers (kept unchanged)
   // eslint-disable-next-line
   const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
-
   const fileName = `Norms Historian Basis.xlsx`
 
   return (
@@ -227,24 +265,7 @@ const NormsHistorianBasisAromatics2 = () => {
       )}
 
       <Box display='flex' flexDirection='column' gap={2}>
-        {tabIndex === 0 &&
-          gridList.map(({ name, rows, columns }) => (
-            <div key={name}>
-              <Typography component='span' className='grid-title'>
-                {renderTitle(name)}
-              </Typography>
-
-              <Box sx={{ width: '100%', margin: 0 }}>
-                <KendoDataGrid2
-                  rows={rows}
-                  columns={columns}
-                  permissions={{ isHeight: rows?.length > 15 }}
-                />
-              </Box>
-            </div>
-          ))}
-
-        {tabIndex === 1 && <ConsumptionNormsHistorianBasis />}
+        {tabIndex === 0 && renderGrids()}
       </Box>
     </div>
   )

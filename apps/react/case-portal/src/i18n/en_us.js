@@ -91,6 +91,9 @@ const defs = {
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
     tcsinput: 'TCS Input',
+
+    //SSRS
+    normComparisonReport: 'Norm Comparison Report',
   },
   pages: {
     dashboard: {
@@ -282,6 +285,7 @@ const defs = {
         functionalReports: 'Reports',
         aopDesignBasis: 'AOP Basis',
         tcsinput: 'TCS Input',
+        normComparisonReport: 'Norm Comparison Report',
       },
     },
   },

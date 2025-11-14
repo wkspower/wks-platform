@@ -162,7 +162,7 @@ const NormsHistorianBasisAromatics = () => {
 
   useEffect(() => {
     setTabIndex(0)
-    fetchAllGrids()
+    // fetchAllGrids()
     return () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []

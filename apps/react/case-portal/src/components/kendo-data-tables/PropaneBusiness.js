@@ -135,7 +135,7 @@ const PropaneBusiness = ({ permissions }) => {
         inEdit: false,
         originalRemark: item.remarks || '', // Store original
         remarks: item.remarks || '', // Editable field
-        Particulars: 'Type',
+        Particulars: 'Zone Selection',
       }))
       setRows(formattedData)
     } catch (error) {

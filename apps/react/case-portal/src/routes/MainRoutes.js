@@ -61,6 +61,7 @@ import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTarg
 import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenanceSummary'
 import FeedStockAvailability from 'components/kendo-data-tables/FeedStockavailability'
 import TurnaroundPlanTable from 'components/kendo-data-tables/TurnaroundPlanTable'
+import NormComparisonReport from 'components/kendo-data-tables/NormComparisonReport'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -550,6 +551,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='plant-budget-summary'>
                 <PlantBudgetSummary />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'norm-comparison-report',
+            element: (
+              <PrivateRoute routeId='norm-comparison-report'>
+                <NormComparisonReport />
               </PrivateRoute>
             ),
           },
