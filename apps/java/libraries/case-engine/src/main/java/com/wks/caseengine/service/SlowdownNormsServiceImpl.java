@@ -680,6 +680,20 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 					slowdownConsumption.setPlantFkId(UUID.fromString(plantId));
 					slowdownConsumptionList.add(slowdownConsumptionRepository.save(slowdownConsumption));
 				}
+
+				Map<String, Object> map = new HashMap<>();
+
+				List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("slowdown-norms");
+				for (ScreenMapping screenMapping : screenMappingList) {
+					AopCalculation aopCalculation = new AopCalculation();
+					aopCalculation.setAopYear(year);
+					aopCalculation.setIsChanged(true);
+					aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+					aopCalculation.setPlantId(UUID.fromString(plantId));
+					aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+					aopCalculationRepository.save(aopCalculation);
+				}
+
 			}
 		}catch (Exception ex) {
 			ex.printStackTrace();
