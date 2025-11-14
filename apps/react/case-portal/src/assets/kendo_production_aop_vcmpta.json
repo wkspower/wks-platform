@@ -1,0 +1,179 @@
+[
+  { "field": "idFromApi", "title": "ID", "hidden": true },
+  {
+    "field": "aopCaseId",
+    "title": "Case ID",
+    "hidden": true,
+    "editable": false
+  },
+  { "field": "aopType", "title": "Type", "width": 80, "hidden": true },
+  { "field": "aopYear", "title": "Year", "width": 80, "hidden": true },
+  { "field": "plantFkId", "title": "Plant ID", "width": 80, "hidden": true },
+  {
+    "field": "Particulars",
+    "title": "Type",
+    "width": 100,
+    "groupable": true,
+    "headerClass": "bold-header",
+    "filterable": "false",
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "normParameterId",
+    "title": "Particulars",
+    "editable": false,
+    "width": 150,
+    "hidden": true
+  },
+  {
+    "field": "materialFKId",
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "normParameterDisplayName",
+    "editable": false,
+    "hidden": true
+  },
+  {
+    "field": "displayName",
+    "title": "Products",
+    "editable": false,
+    "width": 125
+  },
+  {
+    "field": "uom",
+    "title": "UOM",
+    "editable": false,
+    "width": 125
+  },
+  {
+    "field": "april",
+    "title": "4",
+    "align": "left",
+    "editable": false,
+    "type": "number",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "may",
+    "title": "5",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "june",
+    "title": "6",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "july",
+    "title": "7",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "aug",
+    "title": "8",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "sep",
+    "title": "9",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "oct",
+    "title": "10",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "nov",
+    "title": "11",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "dec",
+    "title": "12",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "jan",
+    "title": "1",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "feb",
+    "title": "2",
+
+    "editable": false,
+
+    "align": "left",
+    "type": "number",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "march",
+    "title": "3",
+    "type": "number",
+    "editable": false,
+
+    "align": "left",
+    "format": "{0:#.##}"
+  },
+  {
+    "field": "averageTPH",
+    "title": "Total",
+    "type": "number",
+    "editable": false,
+    "format": "{0:#.##}"
+  },
+
+  {
+    "field": "isEditable",
+    "title": "isEditable",
+    "hidden": true
+  },
+
+  {
+    "field": "aopStatus",
+    "title": "aopStatus",
+    "editable": false,
+    "hidden": true
+  }
+]

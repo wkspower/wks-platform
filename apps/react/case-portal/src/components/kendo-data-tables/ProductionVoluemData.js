@@ -917,7 +917,7 @@ const ProductionvolumeData = ({ permissions }) => {
         Object.keys(calculationObject || {}).length > 0
           ? true
           : false,
-      downloadExcelBtn: VERTICAL_NAME === 'vcm' ? false : (permissions?.hideDownloadExcel ? false : true),
+      downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       uploadExcelBtn: VERTICAL_NAME === 'vcm' ? false : (permissions?.hideUploadExcel ? false : true),
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,

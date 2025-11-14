@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux'
 import productionColDefs from '../../../assets/kendo_production_aop_meg.json'
 import productionColDefsPE from '../../../assets/kendo_production_aop_pe.json'
 import productionColDefsCracker from '../../../assets/kendo_production_aop_cracker.json'
-
+import productionColDefsvcmpta from '../../../assets/kendo_production_aop_vcmpta.json'
 const monthFields = [
   'april',
   'may',
@@ -30,7 +30,9 @@ const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
     cols = productionColDefsPE
   } else if (lowerVertName === 'cracker') {
     cols = productionColDefsCracker
-  } else {
+  } else if(lowerVertName === 'pta' || lowerVertName === 'vcm'){
+    cols= productionColDefsvcmpta
+  }else {
     cols = productionColDefs
   }
 
