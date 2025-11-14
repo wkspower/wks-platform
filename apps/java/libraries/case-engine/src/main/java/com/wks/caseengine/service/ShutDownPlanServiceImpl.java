@@ -1430,6 +1430,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
 		String year=null;
+		String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 		List<ShutDownPlanDTO> failedList = new ArrayList<ShutDownPlanDTO>();
 		try {
 			UUID plantMaintenanceId = findIdByPlantIdAndMaintenanceTypeName(plantId, "Shutdown");
@@ -1493,8 +1494,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 					// Save new record
 					plantMaintenanceTransactionRepository.save(plantMaintenanceTransaction);
-
-					String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 					
 					String description = shutDownPlanDTO.getDiscription();
 					if (verticalName.equalsIgnoreCase("MEG")) {
@@ -1552,7 +1551,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							} else {
 								plantMaintenanceTransaction.setDurationInMins(0);
 							}
-							// plantMaintenanceTransaction.setDurationInMins(shutDownPlanDTO.getDurationInMins());
+							if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName))) {
+								if(plantMaintenanceTransaction.getMaintForMonth()!=(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1)) {
+									int month=plantMaintenanceTransaction.getMaintForMonth();
+						        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
+						        	if(count==1) {
+						        		List<ShutdownNormsValue> shutdownNormsValues =shutdownNormsRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
+							        	for(ShutdownNormsValue shutdownNormsValue: shutdownNormsValues) {
+							        		setMonthShutdown(month,shutdownNormsValue);
+							        	}
+						        	}	
+								}
+							}
+							
 							plantMaintenanceTransaction
 									.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
 							Date entityEndDate = plantMaintenanceTransaction.getMaintEndDateTime();
