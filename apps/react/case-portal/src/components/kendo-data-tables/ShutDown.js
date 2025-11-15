@@ -61,8 +61,8 @@ const ShutDown = ({ permissions }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const READ_ONLY = getRoleName(keycloak) 
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak) 
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remark || '')

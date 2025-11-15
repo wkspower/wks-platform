@@ -42,7 +42,6 @@ const SlowDown = ({ permissions }) => {
   const SCREEN_NAME = screenTitle?.title
 
   const FORMATE_DECIMAL = ValueFormatterProduction()
-  const READ_ONLY = getRoleName(keycloak)
   const vertName = verticalChange?.selectedVertical
   const plantName = plantObject?.name
   const isOldYear = oldYear?.oldYear
@@ -66,7 +65,7 @@ const SlowDown = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
-
+  const READ_ONLY = getRoleName(keycloak)
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
