@@ -44,6 +44,7 @@ import { Skeleton } from '../../../node_modules/@progress/kendo-react-indicators
 import moment from '../../../node_modules/moment/moment'
 import { ExcelExport } from '../../../node_modules/@progress/kendo-react-excel-export/index'
 import { useSelector } from 'react-redux'
+import { getRoleName } from 'services/role-service'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -148,6 +149,9 @@ const KendoDataTablesCrackerRunLength = ({
   const [modifiedCellsDayWise, setModifiedCellsDayWise] = useState([])
 
   const keycloak = useSession()
+
+  const READ_ONLY = getRoleName(keycloak)
+
   const [loading1, setLoading1] = useState(false)
   const [open, setOpen] = useState(false)
   const [startDate, setStartDate] = useState(null)
@@ -1311,7 +1315,7 @@ const KendoDataTablesCrackerRunLength = ({
                   variant='contained'
                   className='btn-save'
                   onClick={downloadExcelForConfiguration}
-                  disabled={isButtonDisabled}
+                  disabled={isButtonDisabled || READ_ONLY}
                 >
                   Export
                 </Button>
@@ -1324,7 +1328,7 @@ const KendoDataTablesCrackerRunLength = ({
                       variant='contained'
                       className='btn-save'
                       onClick={triggerFileUpload}
-                      disabled={isButtonDisabled}
+                      disabled={isButtonDisabled || READ_ONLY}
                     >
                       Import
                     </Button>
@@ -1345,7 +1349,9 @@ const KendoDataTablesCrackerRunLength = ({
                   className='btn-save'
                   onClick={saveModalOpen}
                   disabled={
-                    isButtonDisabled || Object.keys(modifiedCells).length === 0
+                    isButtonDisabled ||
+                    Object.keys(modifiedCells).length === 0 ||
+                    READ_ONLY
                   }
                   {...(loading ? {} : {})}
                 >
@@ -1357,10 +1363,11 @@ const KendoDataTablesCrackerRunLength = ({
                   variant='contained'
                   onClick={handleCalculateBtn}
                   disabled={
-                    rows?.length === 0
+                    READ_ONLY ||
+                    (rows?.length === 0
                       ? false
                       : isButtonDisabled ||
-                        !permissions?.showCalculateVisibility
+                        !permissions?.showCalculateVisibility)
                   }
                   className='btn-save'
                 >
@@ -1372,6 +1379,7 @@ const KendoDataTablesCrackerRunLength = ({
                   variant='contained'
                   onClick={handleOpen}
                   className='btn-save'
+                  disabled={READ_ONLY}
                 >
                   Calculate For Next Year
                 </Button>
@@ -1420,7 +1428,7 @@ const KendoDataTablesCrackerRunLength = ({
             variant='contained'
             className='btn-save'
             onClick={handleDeleteSelected}
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || READ_ONLY}
             loading={loading}
             loadingposition='start'
           >
@@ -1572,6 +1580,7 @@ const KendoDataTablesCrackerRunLength = ({
                 min={lowerLimitDate}
                 max={upperLimitDate}
                 size='small'
+                disabled={READ_ONLY}
                 popupSettings={{
                   appendTo: document.body,
                   style: { zIndex: 1302 },
@@ -1617,6 +1626,7 @@ const KendoDataTablesCrackerRunLength = ({
               <button
                 onClick={() => handleCalculateData(hValues)}
                 disabled={
+                  READ_ONLY ||
                   !startDate ||
                   Object.values(hValues).some(
                     (value) => value === null || value === '',

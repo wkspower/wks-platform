@@ -30,10 +30,13 @@ import InfoIcon from '@mui/icons-material/Info'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
 import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
+import { getRoleName } from 'services/role-service'
 
 const AopDesignBasis = () => {
   const hasExecutedRef = useRef(false)
+
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -513,6 +516,7 @@ const AopDesignBasis = () => {
                         onChange={(e) => setStartDate(e.value)}
                         style={{ height: '80px' }}
                         size={'medium'}
+                        disabled={READ_ONLY}
                       />
                     </Box>
                     <Box
@@ -531,6 +535,7 @@ const AopDesignBasis = () => {
                         onChange={(e) => setEndDate(e.value)}
                         style={{ height: '80px' }}
                         size={'medium'}
+                        disabled={READ_ONLY}
                       />{' '}
                     </Box>
 
@@ -540,6 +545,7 @@ const AopDesignBasis = () => {
                         variant='contained'
                         onClick={handleOpenDialog}
                         className='btn-save'
+                        disabled={READ_ONLY}
                         sx={{ alignSelf: 'flex-end' }}
                       >
                         Load
@@ -591,6 +597,7 @@ const AopDesignBasis = () => {
               </Typography>
 
               <TextArea
+                disabled={READ_ONLY}
                 value={summary}
                 rows={6}
                 onChange={(e) => {

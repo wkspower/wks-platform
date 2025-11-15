@@ -141,7 +141,7 @@ public class ProductionVolumeDataReportController {
 			return ResponseEntity.status(response.getCode()).body(response);
 		}
 		
-		@GetMapping("/handle/calculate/turnarounf-plan-data")
+	@GetMapping("/handle/calculate/turnaround-plan-data")
 	public ResponseEntity<AOPMessageVM> calculateTurnAroundPlanReportData(
 			@RequestParam String plantId,
 			@RequestParam String year) {

@@ -41,6 +41,8 @@ import {
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
+import { useSession } from 'SessionStoreContext'
+import { getRoleName } from 'services/role-service'
 
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -148,6 +150,10 @@ const KendoDataTablesCracker = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
+
+  const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const initialGroup = groupBy
     ? [
         {
@@ -161,6 +167,11 @@ const KendoDataTablesCracker = ({
     setEdit(e.edit)
   }, [])
   const handleRowClick = (e) => {
+    if (READ_ONLY) {
+      setEdit({})
+      return
+    }
+
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return

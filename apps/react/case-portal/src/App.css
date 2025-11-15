@@ -373,3 +373,41 @@ main.MuiBox-root.css-vognfw {
   border: 1px solid rgb(226, 100, 100) !important;
   border-radius: 4px;
 }
+
+.k-popup .k-columnmenu-actions .k-button.k-primary {
+  background-color: #3a1d1d !important; /* your blue */
+  border-color: #10754b !important;
+  color: white !important;
+}
+
+/* Reduce popup max height */
+.k-columnmenu-popup,
+.k-popup.k-columnmenu-popup {
+  max-height: 150px !important; /* DEFAULT is very tall (700px+) */
+  padding: 1px 1px !important;
+}
+
+/* Make the scroll area shorter */
+.k-columnmenu-item-wrapper,
+.k-checkbox-list {
+  max-height: 300px !important; /* adjust as needed */
+  overflow-y: auto !important;
+}
+
+/* Reduce spacing inside menu */
+.k-columnmenu-item,
+.k-treeview-item,
+.k-columnmenu-content {
+  padding: 1px 1px !important;
+}
+
+/* Make each checkbox row smaller */
+.k-checkbox-label {
+  padding: 2px 4px !important;
+  font-size: 12px !important;
+}
+
+/* Compact the footer buttons area */
+.k-columnmenu-actions {
+  padding: 1px 1px !important;
+}

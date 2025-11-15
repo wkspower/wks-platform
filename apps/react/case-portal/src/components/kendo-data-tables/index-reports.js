@@ -43,6 +43,8 @@ import {
 } from './Utilities-Kendo/durationHelpers'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
+import { getRoleName } from 'services/role-service'
+import { useSession } from 'SessionStoreContext'
 
 export const particulars = [
   'normParameterId',
@@ -131,6 +133,9 @@ const KendoDataTablesReports = ({
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+
+  const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
 
   const initialGroup = groupBy
     ? [
@@ -389,6 +394,8 @@ const KendoDataTablesReports = ({
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
+      // console.log('col', col)
+
       const headerColorClass = undefined
 
       const budgetDividerClass =
@@ -624,7 +631,7 @@ const KendoDataTablesReports = ({
                 variant='contained'
                 className='btn-save'
                 onClick={handleAddRow}
-                disabled={false}
+                disabled={READ_ONLY}
               >
                 Add Item
               </Button>
@@ -634,7 +641,7 @@ const KendoDataTablesReports = ({
                 variant='contained'
                 className='btn-save'
                 onClick={saveModalOpen}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 // loading={loading}
                 // loadingposition='start'
                 {...(loading ? {} : {})}
@@ -647,7 +654,7 @@ const KendoDataTablesReports = ({
               <Button
                 variant='contained'
                 onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
               >
                 Calculate
@@ -657,7 +664,7 @@ const KendoDataTablesReports = ({
               <Button
                 variant='contained'
                 onClick={handleExport}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
               >
                 Export
@@ -668,7 +675,7 @@ const KendoDataTablesReports = ({
               <Button
                 variant='contained'
                 onClick={handleExport}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
               >
                 Export
@@ -679,7 +686,7 @@ const KendoDataTablesReports = ({
               <Button
                 variant='contained'
                 onClick={handleExport}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
               >
                 Import
@@ -690,7 +697,7 @@ const KendoDataTablesReports = ({
               <Button
                 variant='contained'
                 // onClick={handleExport}
-                // disabled={isButtonDisabled}
+                // disabled={isButtonDisabled|| READ_ONLY}
                 className='btn-save'
               >
                 Submit
@@ -703,12 +710,14 @@ const KendoDataTablesReports = ({
                         <Button
                           variant='contained'
                           onClick={handleRejectClick}
-                          disabled={isButtonDisabled}
+                          disabled={isButtonDisabled|| READ_ONLY}
                         >
                           Accept
                         </Button>
                       )}
-                      <Button variant='outlined' onClick={handleAuditOpen}>
+                      <Button variant='outlined'                           
+                      disabled={isButtonDisabled|| READ_ONLY}
+                      onClick={handleAuditOpen}>
                         Audit Trail
                       </Button>
                     </Stack>

@@ -23,10 +23,13 @@ import {
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
+import { getRoleName } from 'services/role-service'
 
 const AopDesignBasisNorms = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     sitePlantChange,
@@ -455,6 +458,7 @@ const AopDesignBasisNorms = () => {
                         onChange={(e) => setStartDate(e.value)}
                         style={{ height: '80px' }}
                         size={'medium'}
+                        disabled={READ_ONLY}
                       />{' '}
                     </Box>
                     {/* End Date */}
@@ -474,6 +478,7 @@ const AopDesignBasisNorms = () => {
                         onChange={(e) => setEndDate(e.value)}
                         style={{ height: '80px' }}
                         size={'medium'}
+                        disabled={READ_ONLY}
                       />{' '}
                     </Box>
                     {/* Load Button */}
@@ -483,7 +488,7 @@ const AopDesignBasisNorms = () => {
                         // onClick={onLoad}
                         onClick={handleOpenDialog}
                         className='btn-save'
-                        // disabled={!isLoadEnabled}
+                        disabled={READ_ONLY}
                         sx={{ alignSelf: 'flex-end' }}
                       >
                         Load

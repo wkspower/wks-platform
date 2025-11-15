@@ -27,9 +27,12 @@ import { NormalOperationNormsApiService } from 'services/normal-operation-norms-
 import moment from '../../../node_modules/moment/moment'
 import AopDesignBasisNorms from './AopDesignBasisNorms'
 import useValueFormatterConsumption from 'utils/ValueFormatterConsumption'
+import { getRoleName } from 'services/role-service'
 const CrakcerConstants = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     sitePlantChange,
@@ -407,6 +410,7 @@ const CrakcerConstants = () => {
                     onChange={(e) => setStartDate(e.value)}
                     style={{ height: '80px' }}
                     size={'medium'}
+                    disabled={READ_ONLY}
                   />
                   <Box
                     sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}
@@ -424,6 +428,7 @@ const CrakcerConstants = () => {
                       onChange={(e) => setEndDate(e.value)}
                       style={{ height: '80px' }}
                       size={'medium'}
+                      disabled={READ_ONLY}
                     />
                   </Box>
                   {!isOldYearFlag && (
@@ -432,6 +437,7 @@ const CrakcerConstants = () => {
                       onClick={handleOpenDialog}
                       className='btn-load'
                       sx={{ alignSelf: 'flex-end' }}
+                      disabled={READ_ONLY}
                     >
                       Load
                     </Button>

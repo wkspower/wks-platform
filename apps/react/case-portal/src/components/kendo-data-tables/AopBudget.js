@@ -19,8 +19,11 @@ import { Grid, TextField } from '../../../node_modules/@mui/material/index'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
 import { AOPMaintenanceApiService } from 'services/aop-maintenance-api-service'
+import { getRoleName } from 'services/role-service'
 export default function AopBudget() {
   const keycloak = useSession()
+
+  const READ_ONLY = getRoleName(keycloak)
 
   const [row, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -752,6 +755,7 @@ export default function AopBudget() {
             </Grid>
 
             <TextArea
+              disabled={READ_ONLY}
               className={textAreaRedRemark ? 'textarea-error' : ''}
               value={designRemarks}
               rows={3}

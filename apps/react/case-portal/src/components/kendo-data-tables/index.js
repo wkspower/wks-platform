@@ -57,6 +57,9 @@ import ProductCell from './Utilities-Kendo/ProductCell'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { TextCellEditor } from './Utilities-Kendo/TextCellEditor'
 import { NoSpinnerNumericEditorWithUOMValidation } from './Utilities-Kendo/numbericColumnsWithUOMValidation'
+import { useSession } from 'SessionStoreContext'
+import { getRoleName } from 'services/role-service'
+import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -170,8 +173,12 @@ const KendoDataTables = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
+  const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
   const [customModifiedCells, setCustomModifiedCells] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
+
+  const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
 
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
@@ -199,6 +206,11 @@ const KendoDataTables = ({
   }
 
   const handleRowClick = (e) => {
+    if (READ_ONLY) {
+      setEdit({})
+      return
+    }
+
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
       return
@@ -629,7 +641,7 @@ const KendoDataTables = ({
   }
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
     const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
+      READ_ONLY || (!dataItem.isEditable && dataItem?.isEditable !== undefined)
     const hasError = dataItem?.isError
     const isTotal = dataItem?.isTotal
     const rowClassName = hasError
@@ -1122,7 +1134,7 @@ const KendoDataTables = ({
                   variant='contained'
                   className='btn-save'
                   onClick={handleAddRow}
-                  disabled={isButtonDisabled}
+                  disabled={isButtonDisabled || READ_ONLY}
                 >
                   Add Item
                 </Button>
@@ -1133,7 +1145,7 @@ const KendoDataTables = ({
                   variant='contained'
                   className='btn-save'
                   onClick={downloadExcelForConfiguration}
-                  disabled={isButtonDisabled}
+                  disabled={isButtonDisabled || READ_ONLY}
                 >
                   Export
                 </Button>
@@ -1144,7 +1156,7 @@ const KendoDataTables = ({
                   <Button
                     variant='contained'
                     onClick={triggerFileUpload}
-                    disabled={isButtonDisabled}
+                    disabled={isButtonDisabled || READ_ONLY}
                     className='btn-save'
                   >
                     Import
@@ -1167,6 +1179,7 @@ const KendoDataTables = ({
                   onClick={saveModalOpen}
                   disabled={
                     isButtonDisabled ||
+                    READ_ONLY ||
                     (!summaryEdited && Object.keys(modifiedCells).length === 0)
                   }
                   {...(loading ? {} : {})}
@@ -1182,6 +1195,7 @@ const KendoDataTables = ({
                   onClick={resetDataModalOpen}
                   disabled={
                     isButtonDisabled ||
+                    READ_ONLY ||
                     (!summaryEdited && Object.keys(modifiedCells).length === 0)
                   }
                   startIcon={<RestartAltIcon />}
@@ -1195,10 +1209,11 @@ const KendoDataTables = ({
                   variant='contained'
                   onClick={handleCalculateBtn}
                   disabled={
-                    rows?.length === 0
+                    READ_ONLY ||
+                    (rows?.length === 0
                       ? false
                       : isButtonDisabled ||
-                        !permissions?.showCalculateVisibility
+                        !permissions?.showCalculateVisibility)
                   }
                   className='btn-save'
                 >
@@ -1210,7 +1225,7 @@ const KendoDataTables = ({
                 <Button
                   variant='contained'
                   onClick={handleCalculateBtn}
-                  disabled={isButtonDisabled}
+                  disabled={isButtonDisabled || READ_ONLY}
                   className='btn-save'
                 >
                   Refresh
@@ -1222,6 +1237,7 @@ const KendoDataTables = ({
                   variant='contained'
                   onClick={handleRefresh}
                   className='btn-save'
+                  disabled={isButtonDisabled || READ_ONLY}
                 >
                   Refresh
                 </Button>
@@ -1232,7 +1248,7 @@ const KendoDataTables = ({
                   variant='contained'
                   className='btn-save'
                   onClick={excelExport}
-                  disabled={rows?.length === 0}
+                  disabled={READ_ONLY || rows?.length === 0}
                 >
                   Export
                 </Button>
@@ -1421,7 +1437,9 @@ const KendoDataTables = ({
                       }
                       editor='date'
                       hidden={col.hidden}
-                      columnMenu={DateColumnMenu}
+                      // columnMenu={DateColumnMenu}
+                      filter='date'
+                      columnMenu={ColumnMenuCheckboxFilterDate}
                       width={col?.widthT}
                       headerClassName={
                         isDateFilterActive.includes(col.field)
@@ -2199,7 +2217,7 @@ const KendoDataTables = ({
             <Button
               variant='contained'
               onClick={createCase}
-              disabled={isCreatingCase || !showCreateCasebutton}
+              disabled={READ_ONLY ||isCreatingCase || !showCreateCasebutton}
               className='btn-save'
             >
               {isCreatingCase ? 'Submitting…' : 'Submit'}
@@ -2211,7 +2229,7 @@ const KendoDataTables = ({
             variant='contained'
             className='btn-save'
             onClick={saveModalOpen}
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || READ_ONLY}
             // loading={loading}
             // loadingposition='start'
             {...(loading ? {} : {})}
@@ -2229,7 +2247,7 @@ const KendoDataTables = ({
               // navigate('/user-form')
               handleAddPlantSite()
             }}
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || READ_ONLY}
             loading={loading} // Use the loading prop to trigger loading state
             loadingposition='start' // Use loadingPosition to control where the spinner appears
           >
@@ -2241,7 +2259,7 @@ const KendoDataTables = ({
             variant='contained'
             className='btn-save'
             onClick={handleDeleteSelected}
-            disabled={isButtonDisabled}
+            disabled={isButtonDisabled || READ_ONLY}
             loading={loading} // Use the loading prop to trigger loading state
             loadingposition='start' // Use loadingPosition to control where the spinner appears
           >

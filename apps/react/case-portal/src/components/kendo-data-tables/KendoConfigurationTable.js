@@ -28,10 +28,13 @@ import {
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import SelectivityData from './SelectivityData'
 import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
+import { getRoleName } from 'services/role-service'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
@@ -751,6 +754,7 @@ const ConfigurationTable = () => {
                         onChange={(e) => setStartDate(e.value)}
                         style={{ height: '80px' }}
                         size='medium'
+                        disabled={READ_ONLY}
                       />
                     </Box>
 
@@ -771,6 +775,7 @@ const ConfigurationTable = () => {
                         onChange={(e) => setEndDate(e.value)}
                         style={{ height: '80px' }}
                         size='medium'
+                        disabled={READ_ONLY}
                       />
                     </Box>
 
@@ -781,6 +786,7 @@ const ConfigurationTable = () => {
                         onClick={handleOpenDialog}
                         className='btn-load'
                         sx={{ alignSelf: 'flex-end' }}
+                        disabled={READ_ONLY}
                       >
                         Load
                       </Button>
@@ -805,7 +811,7 @@ const ConfigurationTable = () => {
             <Box
               sx={{
                 display: 'flex',
-                flexDirection: 'column', // ?? stack vertically
+                flexDirection: 'column',
                 alignItems: 'flex-start',
                 gap: 0,
                 mt: 1,
@@ -819,6 +825,7 @@ const ConfigurationTable = () => {
               </Typography>
 
               <TextArea
+                disabled={READ_ONLY}
                 value={summary}
                 rows={3}
                 onChange={(e) => {
