@@ -51,6 +51,8 @@ const CustomAccordionDetails = styled(MuiAccordionDetails)(() => ({
 
 const AnnualAopCost = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const [rowsProduction, setRowsProduction] = useState([])
   const [rowsPrice, setRowsPrice] = useState([])
   const [rowsNorm, setRowsNorm] = useState([])
@@ -81,9 +83,8 @@ const AnnualAopCost = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const READ_ONLY = getRoleName(keycloak)
   const fetchData = async (reportType, setState) => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       const data = await DataService.getAnnualCostAopReport(
         keycloak,
@@ -119,7 +120,11 @@ const AnnualAopCost = () => {
 
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
-  const colsProduction = getKendoColumns({ headerMap, type: 'Production', valueFormat })
+  const colsProduction = getKendoColumns({
+    headerMap,
+    type: 'Production',
+    valueFormat,
+  })
   const colsPrice = getKendoColumns({
     headerMap,
     type: 'Price',
@@ -128,8 +133,16 @@ const AnnualAopCost = () => {
     valueFormat,
   })
   const colsNorm = getKendoColumns({ headerMap, type: 'Norm', valueFormat })
-  const colsQuantity = getKendoColumns({ headerMap, type: 'Quantity', valueFormat })
-  const colsNormCost = getKendoColumns({ headerMap, type: 'NormCost', valueFormat })
+  const colsQuantity = getKendoColumns({
+    headerMap,
+    type: 'Quantity',
+    valueFormat,
+  })
+  const colsNormCost = getKendoColumns({
+    headerMap,
+    type: 'NormCost',
+    valueFormat,
+  })
 
   useEffect(() => {
     let isCancelled = false

@@ -27,10 +27,11 @@ import {
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import NormsHistorianBasisAromatics from './NormsHistorianBasisAromatics'
-import ProductionVolumeDataBasisPe from './NormsHistorianBasisPe'
+import NormsHistorianBasisPe from './NormsHistorianBasisPe'
 import { getRoleName } from 'services/role-service'
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
 
   const [rowsHistorianValues, setHistorianValues] = useState([])
   const [rowsMcuAndNormGrid, setMcuAndNormGrid] = useState([])
@@ -64,7 +65,6 @@ const NormsHistorianBasis = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const READ_ONLY = getRoleName(keycloak)
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
 
@@ -82,6 +82,7 @@ const NormsHistorianBasis = () => {
 
   const fetchAllData = async (selectedUnit) => {
     if (!PLANT_ID || !AOP_YEAR) return
+    if (lowerVertName === 'aromatics') return
     if (!selectedUnit) return
     setLoading(true)
     let isCancelled = false
@@ -297,7 +298,7 @@ const NormsHistorianBasis = () => {
         ]
 
   if (lowerVertName != 'meg' && lowerVertName != 'aromatics') {
-    return <ProductionVolumeDataBasisPe />
+    return <NormsHistorianBasisPe />
   } else if (lowerVertName == 'aromatics') {
     return <NormsHistorianBasisAromatics />
   } else

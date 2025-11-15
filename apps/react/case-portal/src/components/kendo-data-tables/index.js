@@ -1497,7 +1497,9 @@ const KendoDataTables = ({
                       }
                       editor='date'
                       hidden={col.hidden}
-                      columnMenu={DateColumnMenu}
+                      filter='date'
+                      // columnMenu={DateColumnMenu}
+                      columnMenu={ColumnMenuCheckboxFilterDate}
                     />
                   )
                 }

@@ -139,8 +139,8 @@ const NormalOpNormsScreenCracker = () => {
   const valueFormat = ValueFormatterConsumption()
   // column defs
   const colDefs = useMemo(
-    () => getNormalOpNormColDef({ headerMap, valueFormat }),
-    [headerMap, valueFormat],
+    () => getNormalOpNormColDef({ headerMap, valueFormat, lowerVertName }),
+    [headerMap, valueFormat, lowerVertName],
   )
 
   const colDefsIndividual = useMemo(
@@ -544,12 +544,12 @@ const NormalOpNormsScreenCracker = () => {
       if (res1?.code === 200 && res2?.code === 200) {
         const normalized1 = res1.data.map((obj) => ({
           ...obj,
-          normParameterFKId: obj.normParameterFKId.toUpperCase(),
+          normParameterFKId: obj.normParameterId.toUpperCase(),
         }))
 
         const normalized2 = res2.data.map((obj) => ({
           ...obj,
-          normParameterFKId: obj.normParameterFKId.toUpperCase(),
+          normParameterFKId: obj.normParameterId.toUpperCase(),
         }))
 
         const combinedData = [...normalized1, ...normalized2]
@@ -601,7 +601,7 @@ const NormalOpNormsScreenCracker = () => {
     } catch (err) {
       console.error('fetchFinalNorms', err)
     }
-  }, [keycloak])
+  }, [keycloak, PLANT_ID, AOP_YEAR])
 
   const fetchModeData = useCallback(
     async (gradeIdParam) => {
@@ -712,6 +712,8 @@ const NormalOpNormsScreenCracker = () => {
       fetchData,
       fetchConstantsData,
       selectedTab,
+      PLANT_ID,
+      AOP_YEAR,
     ],
   )
 
@@ -725,6 +727,8 @@ const NormalOpNormsScreenCracker = () => {
     gradeId,
     plantObject?.id,
     selectedTab,
+    PLANT_ID,
+    AOP_YEAR,
   ])
 
   // remark handlers

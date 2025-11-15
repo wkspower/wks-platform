@@ -38,6 +38,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
 
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
 
   const [calculationObject, setCalculationObject] = useState([])
 
@@ -98,7 +99,6 @@ const ProductionvolumeData = ({ permissions }) => {
   const dispatch = useDispatch()
   const [rowsDesignCapacity, setRowsDesignCapacity] = useState([])
   const [rowsMaxCapacity, setRowsMaxCapacity] = useState([])
-  const READ_ONLY = getRoleName(keycloak)
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remarks || '')
@@ -922,7 +922,12 @@ const ProductionvolumeData = ({ permissions }) => {
           ? true
           : false,
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      uploadExcelBtn: VERTICAL_NAME === 'vcm' ? false : (permissions?.hideUploadExcel ? false : true),
+      uploadExcelBtn:
+        VERTICAL_NAME === 'vcm'
+          ? false
+          : permissions?.hideUploadExcel
+            ? false
+            : true,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:

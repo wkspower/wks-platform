@@ -30,6 +30,8 @@ import ProductionVolumeDataBasisPe from './kendo-ProductionVolumeDataBasisPe'
 import { getRoleName } from 'services/role-service'
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const units = ['TPH', 'TPD']
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [rowsMC, setRowsMC] = useState([])
@@ -60,7 +62,6 @@ const ProductionVolumeDataBasis = () => {
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const READ_ONLY = getRoleName(keycloak)
   const fetchData = async (reportType, setState, selectedUnit) => {
     if (!PLANT_ID || !AOP_YEAR) return
     if (!selectedUnit) return

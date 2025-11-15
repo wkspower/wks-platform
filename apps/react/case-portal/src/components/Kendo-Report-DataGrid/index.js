@@ -12,6 +12,7 @@ import { DateColumnMenu } from 'components/Utilities/DateColumnMenu'
 import { useState } from 'react'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import '../../kendo-data-grid.css'
+import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
 
 const KendoDataGrid = ({
   rows,
@@ -22,6 +23,8 @@ const KendoDataGrid = ({
   allRedCell = [],
   showThreeColors = false,
 }) => {
+  const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
+
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
@@ -253,6 +256,7 @@ const KendoDataGrid = ({
                     headerCell: SimpleHeaderWithTooltip,
                   }}
                   editor='date'
+                  filter='date'
                   format='{0:dd-MM-yyyy}'
                   hidden={hidden}
                   className={
@@ -263,7 +267,8 @@ const KendoDataGrid = ({
                   headerClassName={
                     isColumnActive(field, filter, sort) ? 'active-column' : ''
                   }
-                  columnMenu={DateColumnMenu}
+                  // columnMenu={DateColumnMenu}
+                  columnMenu={ColumnMenuCheckboxFilterDate}
                 />
               )
             }
@@ -286,6 +291,7 @@ const KendoDataGrid = ({
                   editor='date'
                   format='{0:dd-MM-yyyy}'
                   hidden={hidden}
+                  filter='date'
                   className={
                     isRightAlligned === 'numeric'
                       ? 'k-number-right-disabled'
@@ -294,7 +300,8 @@ const KendoDataGrid = ({
                   headerClassName={
                     isColumnActive(field, filter, sort) ? 'active-column' : ''
                   }
-                  columnMenu={DateColumnMenu}
+                  // columnMenu={DateColumnMenu}
+                  columnMenu={ColumnMenuCheckboxFilterDate}
                 />
               )
             }

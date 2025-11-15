@@ -11,28 +11,29 @@ import { getRoleName } from 'services/role-service'
 
 export default function PlantContribution() {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
-    const READ_ONLY = getRoleName(keycloak)
-    const categories = () => [
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const categories = () => [
     {
       key: 'ProductMixAndProduction',
       title:
@@ -91,7 +92,10 @@ export default function PlantContribution() {
             ...item,
             id: index,
             actualId: item?.id,
-            isEditable: !READ_ONLY && key === 'OtherVariableCost' && index <= rows.length - 4,
+            isEditable:
+              !READ_ONLY &&
+              key === 'OtherVariableCost' &&
+              index <= rows.length - 4,
           }))
           if (key == 'OtherVariableCost') setRows(rows)
         } else {

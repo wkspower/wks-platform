@@ -41,12 +41,13 @@ const SelectivityData = (props) => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const [loading, setLoading] = useState(false)
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [allGradesReciepes, setAllGradesReciepes] = useState(null)
-  const READ_ONLY = getRoleName(keycloak) 
   const reportTypes = props?.reportTypes
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState(null)
@@ -623,6 +624,7 @@ const SelectivityData = (props) => {
         })
         setModifiedCells({})
         setLoading(false)
+
         if (props?.configType === 'cracker_configuration') {
           props?.fetchData(null)
         }
@@ -631,6 +633,7 @@ const SelectivityData = (props) => {
             props.fetchData()
           }
         }
+
         if (props?.configType === 'grades') {
           fetchConfigData() // This was missing!
         } else if (

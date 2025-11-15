@@ -15,7 +15,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-import  { getRoleName } from 'services/role-service.js'
+import { getRoleName } from 'services/role-service.js'
 const CALL_DELAY_MS = 20
 const MONTH_GRID_NAME = 'Month wise Quantity, Tonnes / Month'
 
@@ -464,7 +464,7 @@ const OptimizerReport = () => {
           <Button
             variant='contained'
             onClick={calculateMonthWiseData}
-            disabled={calculating || loading || READ_ONLY}
+            disabled={READ_ONLY || calculating || loading}
             className='btn-save'
             color='primary'
           >

@@ -22,6 +22,8 @@ import { getRoleName } from 'services/role-service'
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -45,7 +47,6 @@ const BusinessDemand = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const SCREEN_NAME = screenTitle?.title
-  const READ_ONLY = getRoleName(keycloak) 
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const headerMap = generateHeaderNames(AOP_YEAR)
@@ -98,7 +99,7 @@ const BusinessDemand = ({ permissions }) => {
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemark(dataItem.remark || '')
     setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)

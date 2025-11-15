@@ -149,6 +149,8 @@ const KendoDataTablesCracker = ({
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
+  const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
+
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
 
   const keycloak = useSession()
@@ -418,7 +420,9 @@ const KendoDataTablesCracker = ({
               }
               editor='date'
               hidden={col.hidden}
-              columnMenu={DateColumnMenu}
+              filter='date'
+              // columnMenu={DateColumnMenu}
+              columnMenu={ColumnMenuCheckboxFilterDate}
             />
           )
         }

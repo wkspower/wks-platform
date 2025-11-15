@@ -20,10 +20,9 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.VCM]: NormalOpNormVcmColumns,
 }
 
-const getNormalOpNormColDef = ({ headerMap, valueFormat }) => {
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const vertName = dataGridStore.verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
+const getNormalOpNormColDef = ({ headerMap, valueFormat, lowerVertName }) => {
+  // const dataGridStore = useSelector((state) => state.dataGridStore)
+  // const vertName = dataGridStore.verticalChange?.selectedVertical
 
   const cacheKey = `${lowerVertName}_${headerMap ? JSON.stringify(headerMap) : 'no_map'}`
 

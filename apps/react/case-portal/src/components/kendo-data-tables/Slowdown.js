@@ -66,6 +66,7 @@ const SlowDown = ({ permissions }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
+
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -431,10 +432,12 @@ const SlowDown = ({ permissions }) => {
       }
 
       // MEG specific checks
-      if (lowerVertName === 'meg' || 
+      if (
+        lowerVertName === 'meg' ||
         lowerVertName === 'elastomer' ||
         lowerVertName === 'vcm' ||
-        lowerVertName === 'pvc') {
+        lowerVertName === 'pvc'
+      ) {
         // Month span check
         //check timeframe Multiple month spilt into single
         for (const row of rows) {
@@ -484,7 +487,11 @@ const SlowDown = ({ permissions }) => {
         }
 
         // Cross overlap the timeframe with Shutdown
-        if (lowerVertName != 'elastomer' || lowerVertName != 'vcm' || lowerVertName != 'pvc') {
+        if (
+          lowerVertName != 'elastomer' ||
+          lowerVertName != 'vcm' ||
+          lowerVertName != 'pvc'
+        ) {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
             const aStart = new Date(a.maintStartDateTime).getTime()
@@ -858,9 +865,9 @@ const SlowDown = ({ permissions }) => {
       case verticalEnums.AROMATICS:
         return SlowDownAromaticsColumns
       case verticalEnums.PVC:
-        return SlowDownElastomerColumns 
+        return SlowDownElastomerColumns
       case verticalEnums.VCM:
-        return SlowDownElastomerColumns 
+        return SlowDownElastomerColumns
       default:
         return SlowDownMegColumns
     }
@@ -910,16 +917,19 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (lowerVertName == 'elastomer' || lowerVertName== 'pvc' || lowerVertName== 'vcm' ||
+      if (
+        lowerVertName == 'elastomer' ||
+        lowerVertName == 'pvc' ||
+        lowerVertName == 'vcm' ||
         lowerVertName === 'aromatics' ||
-        lowerVertName === 'pta' 
+        lowerVertName === 'pta'
       ) {
         response = await DataService.slowdownDetailsElastomerExport(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
         )
-      } else if(lowerVertName === 'chemical' || lowerVertName === 'meg'){
+      } else if (lowerVertName === 'chemical' || lowerVertName === 'meg') {
         response = await DataService.ExportSlowdownDetailsEOE(
           keycloak,
           PLANT_ID,
@@ -948,29 +958,33 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-
-    if(lowerVertName == 'elastomer' || lowerVertName == 'pvc' || lowerVertName == 'vcm' || lowerVertName == 'pta'){
-            response = await DataService.ImportSlowdownElastomerDetails(
-            rawFile,
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-      )
-          } else if(lowerVertName=== 'chemical' || lowerVertName === 'meg'){
-            response = await DataService.ImportSlowdownDetailsEOE(
-            rawFile,
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-          )
-          } else{
-            response = await DataService.ImportSlowdownDetails(
-            rawFile,
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-      )
-          }
+      if (
+        lowerVertName == 'elastomer' ||
+        lowerVertName == 'pvc' ||
+        lowerVertName == 'vcm' ||
+        lowerVertName == 'pta'
+      ) {
+        response = await DataService.ImportSlowdownElastomerDetails(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (lowerVertName === 'chemical' || lowerVertName === 'meg') {
+        response = await DataService.ImportSlowdownDetailsEOE(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else {
+        response = await DataService.ImportSlowdownDetails(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -1063,11 +1077,16 @@ const SlowDown = ({ permissions }) => {
       titleName: SCREEN_NAME,
 
       uploadExcelBtn:
-        lowerVertName === 'pe' || 
-        lowerVertName === 'pp' || 
-        lowerVertName == 'elastomer' || 
-        lowerVertName == 'pvc' || 
-        lowerVertName == 'vcm' || lowerVertName == 'pta' || lowerVertName == 'chemical' || lowerVertName == 'meg' ? true : false,
+        lowerVertName === 'pe' ||
+        lowerVertName === 'pp' ||
+        lowerVertName == 'elastomer' ||
+        lowerVertName == 'pvc' ||
+        lowerVertName == 'vcm' ||
+        lowerVertName == 'pta' ||
+        lowerVertName == 'chemical' ||
+        lowerVertName == 'meg'
+          ? true
+          : false,
     },
     isOldYear,
   )

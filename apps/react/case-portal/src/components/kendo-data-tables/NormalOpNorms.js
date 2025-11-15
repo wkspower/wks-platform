@@ -214,6 +214,7 @@ const NormalOpNormsScreen = () => {
   const colDefs = getNormalOpNormColDef({
     headerMap,
     valueFormat,
+    lowerVertName,
   })
 
   const colDefsIntermediateValues = [
