@@ -20,7 +20,7 @@ import {
 } from '@progress/kendo-react-excel-export'
 import { Button } from '@mui/material'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-
+import { getRoleName } from 'services/role-service'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -81,7 +81,7 @@ const AnnualAopCost = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const READ_ONLY = getRoleName(keycloak)
   const fetchData = async (reportType, setState) => {
     if(!PLANT_ID || !AOP_YEAR) return
     try {
@@ -264,6 +264,7 @@ const AnnualAopCost = () => {
             variant='contained'
             onClick={exportAllGrids}
             className='btn-save'
+            disabled={READ_ONLY}
           >
             Export
           </Button>

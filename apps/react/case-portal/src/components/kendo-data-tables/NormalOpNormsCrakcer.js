@@ -23,6 +23,7 @@ import KendoDataTables from './index'
 import SelectivityData from './SelectivityData'
 import { DataService } from 'services/DataService'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
+import { getRoleName } from 'services/role-service.js'
 // Constants
 const MONTHS = [
   'april',
@@ -88,6 +89,7 @@ const NormalOpNormsScreenCracker = () => {
 
   const dispatch = useDispatch()
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const headerMap = generateHeaderNames(AOP_YEAR)
 
   const [loading, setLoading] = useState(false)
@@ -727,39 +729,39 @@ const NormalOpNormsScreenCracker = () => {
 
   // remark handlers
   const handleRemarkCellClick = useCallback((row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }, [])
 
   const handleRemarkCellClick1 = useCallback((row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     setCurrentRemark1(row.remark || '')
     setCurrentRowId1(row.id)
     setRemarkDialogOpen1(true)
   }, [])
   const handleRemarkCellClick2 = useCallback((row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     setCurrentRemark2(row.remark || '')
     setCurrentRowId2(row.id)
     setRemarkDialogOpen2(true)
   }, [])
   const handleRemarkCellClick3 = useCallback((row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     setCurrentRemark3(row.remark || '')
     setCurrentRowId3(row.id)
     setRemarkDialogOpen3(true)
   }, [])
   const handleRemarkCellClick4 = useCallback((row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     setCurrentRemark4(row.remark || '')
     setCurrentRowId4(row.id)
     setRemarkDialogOpen4(true)
   }, [])
 
   const handleRemarkCellClickFinalNorms = useCallback((row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     // console.log('row', row)
 
     setCurrentRemarkFinalNorms(row.remark || '')

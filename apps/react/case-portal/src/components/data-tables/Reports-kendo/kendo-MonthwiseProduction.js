@@ -17,9 +17,10 @@ import ProductionNorms from 'components/kendo-data-tables/ProductionNorms'
 import NumericInputOnly from 'utils/NumericInputOnly'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
-
+import { getRoleName } from 'services/role-service'
 const MonthwiseProduction = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
     const {
       verticalChange,
@@ -57,6 +58,7 @@ const MonthwiseProduction = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
+    if(READ_ONLY) return
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)

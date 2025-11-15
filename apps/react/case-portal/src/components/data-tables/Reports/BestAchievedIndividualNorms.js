@@ -16,9 +16,10 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-
+import { getRoleName } from 'services/role-service.js'
 const BestAchievedIndividualNorms = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
 
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
@@ -362,6 +363,7 @@ const BestAchievedIndividualNorms = () => {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
+          disabled={READ_ONLY}
         >
           Export
         </Button>

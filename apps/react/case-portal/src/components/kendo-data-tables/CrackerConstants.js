@@ -681,6 +681,7 @@ const CrakcerConstants = () => {
   }, [modifiedCellsConstants, summary])
 
   const handleRemarkCellClickConstants = (row) => {
+    if (READ_ONLY) return
     setCurrentRemarkConstants(row.remarks || '')
     setCurrentRowIdConstants(row.id)
     setRemarkDialogOpenConstants(true)

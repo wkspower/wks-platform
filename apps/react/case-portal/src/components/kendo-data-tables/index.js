@@ -498,6 +498,7 @@ const KendoDataTables = ({
   }
 
   const handleDeleteClick = async (params) => {
+    if (READ_ONLY) return
     setParamsForDelete(params)
     setOpenDeleteDialogeBox(true)
   }
@@ -539,6 +540,7 @@ const KendoDataTables = ({
     )
   }
   const saveModalOpen = async () => {
+    if (READ_ONLY) return
     setIsButtonDisabled(true)
     setOpenSaveDialogeBox(true)
     setTimeout(() => {
@@ -547,6 +549,7 @@ const KendoDataTables = ({
   }
 
   const resetDataModalOpen = async () => {
+    if (READ_ONLY) return
     setIsButtonDisabled(true)
     setOpenResetDataDialogeBox(true)
     setTimeout(() => {
@@ -1526,7 +1529,8 @@ const KendoDataTables = ({
                       title={col.title}
                       editable={col.editable || true}
                       cells={{
-                        data: (cellProps) => <LimitCellEditor {...cellProps} />,
+                        data: (cellProps) => <LimitCellEditor {...cellProps} 
+                        READ_ONLY={READ_ONLY}/>,
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
@@ -2288,7 +2292,7 @@ const KendoDataTables = ({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDeleteDialogeBox(false)}>Cancel</Button>
-          <Button onClick={deleteTheRecord} autoFocus>
+          <Button onClick={deleteTheRecord} autoFocus disabled={READ_ONLY}>
             Delete
           </Button>
         </DialogActions>
@@ -2354,12 +2358,13 @@ const KendoDataTables = ({
             onChange={(e) => setCurrentRemark(e.target.value)}
             multiline
             rows={8}
+            disabled={READ_ONLY}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
           {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
-          <Button onClick={handleRemarkSave} disabled={!currentRemark?.trim()}>
+          <Button onClick={handleRemarkSave} disabled={READ_ONLY || !currentRemark?.trim()}>
             Add
           </Button>
         </DialogActions>

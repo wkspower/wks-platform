@@ -9,7 +9,7 @@ import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 import KendoDataTables from './index'
-
+import { getRoleName } from 'services/role-service'
 const MaintenanceProcessTable = ({ viewOnly }) => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -52,8 +52,9 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
+ const READ_ONLY = getRoleName(keycloak)
   const handleRemarkCellClick = (row) => {
+    if (READ_ONLY) return
     // if (!row?.isEditable) return
 
     setCurrentRemark(row.remarks || '')

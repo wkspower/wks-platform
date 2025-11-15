@@ -17,7 +17,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-
+import { getRoleName } from 'services/role-service.js'
 const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
 
 // ---------------------------------------------------------------------------
@@ -174,7 +174,7 @@ function GridPanel({
 // ---------------------------------------------------------------------------
 export default function BestAchievedNorms() {
   const keycloak = useSession()
-
+  const READ_ONLY = getRoleName(keycloak)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -609,6 +609,7 @@ export default function BestAchievedNorms() {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
+          disabled={READ_ONLY}
         >
           Export
         </Button>

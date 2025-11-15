@@ -11,9 +11,10 @@ import {
 } from '../../../../node_modules/@mui/material/index'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
-
+import { getRoleName } from 'services/role-service'
 const PlantsProductionSummary = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
     const {
       verticalChange,
@@ -48,6 +49,7 @@ const PlantsProductionSummary = () => {
   const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
   const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
   const handleRemarkCellClick = (row) => {
+    if(READ_ONLY) return
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)

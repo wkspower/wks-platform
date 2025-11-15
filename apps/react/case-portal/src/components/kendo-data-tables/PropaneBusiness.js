@@ -7,6 +7,7 @@ import { validateFields } from 'utils/validationUtils'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { DataService } from 'services/DataService'
 import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
+import { getRoleName } from 'services/role-service'
 const getMonthYearTitles = (selectedYear) => {
   const yearShort = String(selectedYear).slice(-2)
   const nextYearShort = String(Number(selectedYear) + 1).slice(-2)
@@ -70,6 +71,7 @@ const PropaneBusiness = ({ permissions }) => {
   const SCREEN_NAME = screenTitle?.title
 
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const [rows, setRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
@@ -231,6 +233,7 @@ const PropaneBusiness = ({ permissions }) => {
   }
   // Remark dialog logic
   const handleRemarkCellClick = (dataItem) => {
+    if (READ_ONLY) return
     setCurrentRemark(dataItem.remarks || '')
     setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)

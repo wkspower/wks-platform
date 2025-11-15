@@ -699,6 +699,7 @@ const KendoDataTablesReports = ({
                 // onClick={handleExport}
                 // disabled={isButtonDisabled|| READ_ONLY}
                 className='btn-save'
+                disabled={READ_ONLY}
               >
                 Submit
               </Button>
@@ -852,12 +853,13 @@ const KendoDataTablesReports = ({
             onChange={(e) => setCurrentRemark(e.target.value)}
             multiline
             rows={8}
+            disabled={READ_ONLY}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
           {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
-          <Button onClick={handleRemarkSave}>Add</Button>
+          <Button onClick={handleRemarkSave} disabled={READ_ONLY}>Add</Button>
         </DialogActions>
       </Dialog>
     </div>

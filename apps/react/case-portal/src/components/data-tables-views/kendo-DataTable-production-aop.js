@@ -7,6 +7,7 @@ import Notification from 'components/Utilities/Notification'
 import { remarkColumn } from 'components/Utilities/remarkColumn'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { Box } from '../../../node_modules/@mui/material/index'
+import { getRoleName } from 'services/role-service'
 
 const ProductionAopView = ({
   handleCalculate,
@@ -14,6 +15,7 @@ const ProductionAopView = ({
   handleExport,
 }) => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
@@ -91,6 +93,7 @@ const ProductionAopView = ({
   }
 
   const handleRemarkCellClick = (row) => {
+    if(READ_ONLY) return
     // do not delete commented code
     // try {
     //   const cases = await DataService.getCaseId(keycloak)

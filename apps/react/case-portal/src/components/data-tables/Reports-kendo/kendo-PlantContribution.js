@@ -7,7 +7,7 @@ import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import { DataService } from 'services/DataService'
 import { MockReportService } from './mockPlantContributionAPI'
 import { useSelector } from 'react-redux'
-
+import { getRoleName } from 'services/role-service'
 
 export default function PlantContribution() {
   const keycloak = useSession()
@@ -31,6 +31,7 @@ export default function PlantContribution() {
     const isOldYear = oldYear?.oldYear
     const vertName = verticalChange?.selectedVertical
     const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const READ_ONLY = getRoleName(keycloak)
     const categories = () => [
     {
       key: 'ProductMixAndProduction',
@@ -90,7 +91,7 @@ export default function PlantContribution() {
             ...item,
             id: index,
             actualId: item?.id,
-            isEditable: key === 'OtherVariableCost' && index <= rows.length - 4,
+            isEditable: !READ_ONLY && key === 'OtherVariableCost' && index <= rows.length - 4,
           }))
           if (key == 'OtherVariableCost') setRows(rows)
         } else {

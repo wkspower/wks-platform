@@ -18,6 +18,7 @@ import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import ProductionvolumeData from './ProductionVoluemData'
 import PropaneBusiness from 'components/kendo-data-tables/PropaneBusiness'
+import { getRoleName } from 'services/role-service'
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const keycloak = useSession()
@@ -44,7 +45,7 @@ const BusinessDemand = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const SCREEN_NAME = screenTitle?.title
-
+  const READ_ONLY = getRoleName(keycloak) 
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const headerMap = generateHeaderNames(AOP_YEAR)
@@ -97,6 +98,7 @@ const BusinessDemand = ({ permissions }) => {
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
+    if(READ_ONLY) return
     setCurrentRemark(dataItem.remark || '')
     setCurrentRowId(dataItem.id)
     setRemarkDialogOpen(true)

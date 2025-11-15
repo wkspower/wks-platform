@@ -20,7 +20,7 @@ import { GridRowModes } from '../../../node_modules/@mui/x-data-grid/models/grid
 import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-
+import { getRoleName } from 'services/role-service'
 const SlowDown = ({ permissions }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -42,7 +42,7 @@ const SlowDown = ({ permissions }) => {
   const SCREEN_NAME = screenTitle?.title
 
   const FORMATE_DECIMAL = ValueFormatterProduction()
-
+  const READ_ONLY = getRoleName(keycloak)
   const vertName = verticalChange?.selectedVertical
   const plantName = plantObject?.name
   const isOldYear = oldYear?.oldYear
@@ -102,6 +102,7 @@ const SlowDown = ({ permissions }) => {
   }
 
   const handleRemarkCellClick = (row) => {
+    if (READ_ONLY) return
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -919,6 +920,12 @@ const SlowDown = ({ permissions }) => {
           PLANT_ID,
           AOP_YEAR,
         )
+      } else if(lowerVertName === 'chemical' || lowerVertName === 'meg'){
+        response = await DataService.ExportSlowdownDetailsEOE(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
       } else {
         response = await DataService.slowdownDetailsExport(
           keycloak,
@@ -950,6 +957,13 @@ const SlowDown = ({ permissions }) => {
             PLANT_ID,
             AOP_YEAR,
       )
+          } else if(lowerVertName=== 'chemical' || lowerVertName === 'meg'){
+            response = await DataService.ImportSlowdownDetailsEOE(
+            rawFile,
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
           } else{
             response = await DataService.ImportSlowdownDetails(
             rawFile,
@@ -1054,7 +1068,7 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'pp' || 
         lowerVertName == 'elastomer' || 
         lowerVertName == 'pvc' || 
-        lowerVertName == 'vcm' || lowerVertName == 'pta' ? true : false,
+        lowerVertName == 'vcm' || lowerVertName == 'pta' || lowerVertName == 'chemical' || lowerVertName == 'meg' ? true : false,
     },
     isOldYear,
   )

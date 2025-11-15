@@ -2,7 +2,7 @@ import { DropDownList } from '@progress/kendo-react-dropdowns'
 import { useMemo } from 'react'
 
 const LimitCellEditor = (props) => {
-  const { dataItem, field, onChange, ...tdProps } = props
+  const { READ_ONLY, dataItem, field, onChange, ...tdProps } = props
 
   // Hardcoded dropdown options
   const allOptions = useMemo(
@@ -36,7 +36,7 @@ const LimitCellEditor = (props) => {
         value={currentValueObj}
         onChange={handleChange}
         style={{ width: '100%' }}
-        disabled={dataItem?.uom != '%'}
+        disabled={dataItem?.uom != '%' || READ_ONLY}
       />
     )
   }

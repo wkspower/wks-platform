@@ -8,6 +8,7 @@ import { MockPlantContributionAPILastFourYears } from './mockPlantContributionAP
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import ValueFormatterProductionProductionNormBasis from 'utils/ValueFormatterProduction_ProductionNormBasis'
 import { useSelector } from 'react-redux'
+import { getRoleName } from 'services/role-service'
 const categories = () => {
   return [
     {
@@ -25,6 +26,7 @@ const categories = () => {
 
 export default function PlantContributionLastFourYears() {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
     const {
       verticalChange,
@@ -148,7 +150,7 @@ export default function PlantContributionLastFourYears() {
               id: index,
               actualId: item?.id,
               isEditable:
-                key === 'OtherVariableCost' && index >= arr.length - 2
+               key === 'OtherVariableCost' && index >= arr.length - 2
                   ? false
                   : true,
               isdisable:

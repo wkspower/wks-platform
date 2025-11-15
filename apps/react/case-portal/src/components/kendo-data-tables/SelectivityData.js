@@ -14,7 +14,7 @@ import KendoDataTables from './index'
 import KendoDataTablesReciepe from './index-reports-receipe'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import ValueFormatterProductionProductionNormBasis from 'utils/ValueFormatterProduction_ProductionNormBasis'
-
+import { getRoleName } from 'services/role-service'
 const SelectivityData = (props) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -46,7 +46,7 @@ const SelectivityData = (props) => {
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const [allGradesReciepes, setAllGradesReciepes] = useState(null)
-
+  const READ_ONLY = getRoleName(keycloak) 
   const reportTypes = props?.reportTypes
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState(null)
@@ -99,6 +99,7 @@ const SelectivityData = (props) => {
   }
 
   const handleRemarkCellClick = (row) => {
+    if (READ_ONLY) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)

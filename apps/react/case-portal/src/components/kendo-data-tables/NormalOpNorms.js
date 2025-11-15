@@ -18,6 +18,7 @@ import { Box, Typography } from '../../../node_modules/@mui/material/index'
 import KendoDataTables from './index'
 import NormalOpNormsScreenCracker from './NormalOpNormsCrakcer'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
+import { getRoleName } from 'services/role-service'
 const NormalOpNormsScreen = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
 
@@ -64,14 +65,13 @@ const NormalOpNormsScreen = () => {
   const lowerVertName = vertName?.toLowerCase()
   const dispatch = useDispatch()
   const headerMap = generateHeaderNames(AOP_YEAR)
-
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
 
   const keycloak = useSession()
-
+  const READ_ONLY = getRoleName(keycloak)
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
     const verticalsRequiringGrade = ['pe', 'pp']
@@ -366,7 +366,7 @@ const NormalOpNormsScreen = () => {
   ]
 
   const handleRemarkCellClick = (row) => {
-    if (!row?.isEditable) return
+    if (!row?.isEditable || READ_ONLY) return
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)

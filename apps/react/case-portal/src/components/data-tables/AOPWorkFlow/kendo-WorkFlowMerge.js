@@ -45,8 +45,10 @@ import OptimizerReport from '../Reports/OptimizerReport'
 import TurnaroundReportCracker from '../Reports/TurnaroundReportCracker'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import SpecificConsumptionNorm from '../Reports-kendo/SpecificConsumptionnorm'
+import { getRoleName } from 'services/role-service'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   // const [steps, setSteps] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   // const [openRejectDialog, setOpenRejectDialog] = useState(false)
@@ -273,6 +275,7 @@ const WorkFlowMerge = () => {
   }
 
   const handleRemarkCellClick = async (row) => {
+    if(READ_ONLY) return
     // do not delete commented code
     // try {
     //   const cases = await DataService.getCaseId(keycloak)

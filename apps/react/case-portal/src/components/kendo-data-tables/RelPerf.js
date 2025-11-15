@@ -12,10 +12,11 @@ import {
   CircularProgress,
 } from '../../../node_modules/@mui/material/index'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-
+import { getRoleName } from 'services/role-service'
 export default function RelPerf() {
   // Reliability Performance Grid (already present)
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const [loading, setLoading] = useState(false)
   const FORMATE_DECIMAL = ValueFormatterProduction()
 
@@ -487,21 +488,25 @@ export default function RelPerf() {
   }
 
   const handleRemarkCellClickIncidents = (dataItem) => {
+    if(READ_ONLY) return
     setCurrentRemarkMajorIncidents(dataItem.remarks || '')
     setCurrentRowIdMajorIncidents(dataItem.id)
     setRemarkDialogOpenMajorIncidents(true)
   }
   const handleRemarkCellClickImprovement = (dataItem) => {
+    if(READ_ONLY) return
     setCurrentRemarkReliabilityInitiative(dataItem.remarks || '')
     setCurrentRowIdReliabilityInitiative(dataItem.id)
     setRemarkDialogOpenReliabilityInitiative(true)
   }
   const handleRemarkCellClickFinancial = (dataItem) => {
+    if(READ_ONLY) return
     setCurrentRemarkFinancial(dataItem.remarks || '')
     setCurrentRowIdFinancial(dataItem.id)
     setRemarkDialogOpenFinancial(true)
   }
   const handleRemarkCellClickReliabilityPerformance = (dataItem) => {
+    if(READ_ONLY) return
     setCurrentRemarkReliability(dataItem.remarks || '')
     setCurrentRowIdReliability(dataItem.id)
     setRemarkDialogOpenReliability(true)

@@ -15,12 +15,13 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-
+import  { getRoleName } from 'services/role-service.js'
 const CALL_DELAY_MS = 20
 const MONTH_GRID_NAME = 'Month wise Quantity, Tonnes / Month'
 
 const OptimizerReport = () => {
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -466,6 +467,7 @@ const OptimizerReport = () => {
             disabled={calculating || loading}
             className='btn-save'
             color='primary'
+            disabled={READ_ONLY}
           >
             {calculating ? 'Calculating...' : 'Calculate'}
           </Button>
@@ -474,6 +476,7 @@ const OptimizerReport = () => {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
+          disabled={READ_ONLY}
         >
           Export
         </Button>

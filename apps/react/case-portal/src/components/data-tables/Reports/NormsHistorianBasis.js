@@ -28,7 +28,7 @@ import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeade
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import NormsHistorianBasisAromatics from './NormsHistorianBasisAromatics'
 import ProductionVolumeDataBasisPe from './NormsHistorianBasisPe'
-
+import { getRoleName } from 'services/role-service'
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
 
@@ -64,7 +64,7 @@ const NormsHistorianBasis = () => {
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
+  const READ_ONLY = getRoleName(keycloak)
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
 
@@ -348,6 +348,7 @@ const NormsHistorianBasis = () => {
               variant='contained'
               onClick={exportAllGrids}
               className='btn-save'
+              disabled={READ_ONLY}
             >
               Export
             </Button>

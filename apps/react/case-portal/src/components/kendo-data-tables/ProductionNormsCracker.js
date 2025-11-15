@@ -14,12 +14,13 @@ import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/Kendo_ProductionAopHeader'
 import KendoDataTables from './index'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-
+import { getRoleName } from 'services/role-service'
 const ProductionNormsCracker = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCellsC2C3R, setModifiedCellsC2C3R] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const apiRef = useGridApiRef()
   const apiRefC2C3R = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -645,6 +646,7 @@ const ProductionNormsCracker = ({ permissions }) => {
   )
 
   const handleRemarkCellClick = (dataItem) => {
+    if(READ_ONLY) return
     setCurrentRemarkC2C3R(dataItem.remarks || '')
     setCurrentRowIdC2C3R(dataItem.id)
     setRemarkDialogOpenC2C3R(true)

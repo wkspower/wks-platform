@@ -375,13 +375,14 @@ export default function AopBudget() {
   const handleCalculateP = () => {}
 
   const handleRemarkCellClick = useCallback((row) => {
-    if (!row?.IsEditable) return
+    if (!row?.IsEditable || READ_ONLY) return
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }, [])
 
   const handleRemarkCellClickP = useCallback((row) => {
+    if(READ_ONLY) return
     setCurrentRemarkP(row.remark || '')
     setCurrentRowIdP(row.id)
     setRemarkDialogOpenP(true)
@@ -723,6 +724,7 @@ export default function AopBudget() {
             </Grid>
 
             <TextArea
+              disabled={READ_ONLY}
               className={textAreaRedDesign ? 'textarea-error' : ''}
               value={designBasis}
               rows={3}

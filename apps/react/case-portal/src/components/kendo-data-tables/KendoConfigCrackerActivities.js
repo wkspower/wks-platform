@@ -99,11 +99,13 @@ const DecokingConfig = () => {
   }, [globalTaStartDate, globalTaEndDate])
 
   const handleRemarkCellClick2 = (dataItem) => {
+    if (READ_ONLY) return
     setCurrentRemarkSdTa(dataItem.remarks || '')
     setCurrentRowId2(dataItem.id)
     setRemarkDialogOpenSdTa(true)
   }
   const handleRemarkCellClickRunLength = (dataItem) => {
+    if (READ_ONLY) return
     setCurrentRemarkRunLength(dataItem.remarks || '')
     setCurrentRowId3(dataItem.id)
     setRemarkDialogOpenRunLength(true)
