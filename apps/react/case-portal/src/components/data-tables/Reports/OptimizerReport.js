@@ -464,10 +464,9 @@ const OptimizerReport = () => {
           <Button
             variant='contained'
             onClick={calculateMonthWiseData}
-            disabled={calculating || loading}
+            disabled={calculating || loading || READ_ONLY}
             className='btn-save'
             color='primary'
-            disabled={READ_ONLY}
           >
             {calculating ? 'Calculating...' : 'Calculate'}
           </Button>
