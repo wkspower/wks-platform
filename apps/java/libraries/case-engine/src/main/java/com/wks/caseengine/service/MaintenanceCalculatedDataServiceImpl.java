@@ -262,10 +262,15 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 			// Finally add this summary map to your data (or return separately)
 			data.add(sumMap);
-
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(
+							UUID.fromString(plantId), year, "maintenance-details");
+			Map<String,Object> map = new HashMap<String,Object>();
+			map.put("aata", data);
+			map.put("aopCalculation", aopCalculation);
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(data);
+			aopMessageVM.setData(map);
 			return aopMessageVM;
 
 		} catch (IllegalArgumentException e) {
