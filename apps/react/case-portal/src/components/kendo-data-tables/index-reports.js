@@ -315,12 +315,15 @@ const KendoDataTablesReports = ({
     const { dataItem, field, onRemarkClick, ...tdProps } = props
     const rawValue = dataItem[field]
     const displayText = String(rawValue ?? '')
+    const isDisabled = READ_ONLY
+
     return (
       <td
         {...tdProps}
         style={{
           cursor: 'pointer',
           color: rawValue ? 'inherit' : 'gray',
+          background: isDisabled ? '#e7e7e7' : undefined, // match column disabled bg
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -332,8 +335,10 @@ const KendoDataTablesReports = ({
         onDoubleClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
+        if (!isDisabled) {
           onRemarkClick(dataItem)
           setEdit?.({})
+        }
         }}
       >
         {displayText || 'Add remark'}
