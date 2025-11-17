@@ -876,6 +876,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	}
 	public List<ShutDownPlanDTO> readNonValidationShutdown(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
 	    String verticalName = plantsService.findVerticalNameByPlantId(plantFKId);
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
@@ -928,7 +929,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                    alreadyFailed = true;
 	                }
 
-	                if (!alreadyFailed && mantStartStr != null) {
+	                if (mantStartStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
@@ -949,7 +950,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                    }
 	                }
 
-	                if (!alreadyFailed && mantEndStr != null) {
+	                if (mantEndStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
@@ -965,6 +966,22 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                            dto.setSaveStatus("Failed");
 	                            dto.setErrDescription("End date/time cannot be before start date/time.");
 	                            alreadyFailed = true;
+	                        }else if (verticalName.equalsIgnoreCase("PTA") && ldtStart != null) {
+	                            boolean overlaps = false;
+	                            for (LocalDateTime[] prevPeriod : validTimeRanges) {
+	                                LocalDateTime prevLdtStart = prevPeriod[0];
+	                                LocalDateTime prevLdtEnd = prevPeriod[1];
+	                                if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
+	                                    overlaps = true;
+	                                    break;
+	                                }
+	                            }
+
+	                            if (overlaps) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
+	                                alreadyFailed = true;
+	                            }
 	                        }
 	                        	                        
 	                    } catch (Exception ex) {
@@ -974,7 +991,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                    }
 	                }
 	                
-	                if (!alreadyFailed && ldtStart != null && ldtEnd != null) {
+	                if (ldtStart != null && ldtEnd != null) {
 	                    try {
 	                        Duration duration = Duration.between(ldtStart, ldtEnd);
 	                        long totalMinutes = duration.toMinutes();
