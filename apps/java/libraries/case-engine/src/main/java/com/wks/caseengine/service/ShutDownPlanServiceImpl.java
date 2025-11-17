@@ -584,7 +584,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					        // You may decide to skip adding this dto further
 					    } 
 					} 
-
+					dto.setPlantId(plantFKId);
 					dto.setProductName(getStringCellValue(row.getCell(1), dto));
 					
 					if(dto.getProductName()!=null) {
@@ -725,6 +725,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	            LocalDateTime ldtEnd = null;  
 
 	            try {
+	            	dto.setPlantId(plantFKId);
 	                dto.setAudityear(year);
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc);
@@ -897,7 +898,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	            try {
 	                dto.setAudityear(year);
-	                
+	                dto.setPlantId(plantFKId);
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc);
 
@@ -1464,11 +1465,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					continue;
 				}
 				year=shutDownPlanDTO.getAudityear();
+				
 				if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 					// Creating a new record
 					PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 					plantMaintenanceTransaction.setId(UUID.randomUUID());
-
+					plantMaintenanceTransaction.setPlantId(plantId);
 					// Set mandatory fields with default values if missing
 					plantMaintenanceTransaction
 							.setDiscription(shutDownPlanDTO.getDiscription() != null ? shutDownPlanDTO.getDiscription()
@@ -1538,10 +1540,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						Boolean changed=false;
 						Optional<PlantMaintenanceTransaction> plantMaintenance = shutDownPlanRepository
 								.findById(UUID.fromString(shutDownPlanDTO.getId()));
-
+						
 						if (plantMaintenance.isPresent()) {
 							PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
-							
+							plantMaintenanceTransaction.setPlantId(plantId);
 							if(!plantMaintenanceTransaction.getDiscription().equalsIgnoreCase(shutDownPlanDTO.getDiscription())) {
 								changed=true;
 							}
