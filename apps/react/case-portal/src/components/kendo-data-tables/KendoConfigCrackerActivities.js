@@ -73,6 +73,7 @@ const DecokingConfig = () => {
   const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
   const [globalTaStartDate, setGlobalTaStartDate] = useState(null)
   const [globalTaEndDate, setGlobalTaEndDate] = useState(null)
+
   useEffect(() => {
     if (!globalTaStartDate || !globalTaEndDate || ibrScreen2Rows.length === 0)
       return
@@ -278,11 +279,12 @@ const DecokingConfig = () => {
         setLoading(false)
       }
     },
-    [activeTabIndex, keycloak, setRowsForTab],
+    [activeTabIndex, keycloak, setRowsForTab, AOP_YEAR, PLANT_ID],
   )
+
   useEffect(() => {
     fetchData()
-  }, [PLANT_ID, oldYear, yearChanged, keycloak, fetchData])
+  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak, fetchData])
 
   function validateAllDateOverlaps(rows) {
     const pairs = [['ibrStartDate', 'ibrEndDate', 'IBR']]

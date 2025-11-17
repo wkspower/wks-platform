@@ -17,12 +17,11 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-import { getRoleName } from 'services/role-service'
+
 const CALL_DELAY_MS = 200
 
 const RunLengthDataSet = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName?.(keycloak)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -59,33 +58,36 @@ const RunLengthDataSet = () => {
     return new Date(`${year}-${month}-${day}`)
   }
 
-  const enrichColumns = useCallback((backendCols = []) => {
-    const DEFAULT_MIN_WIDTH = 160
+  const enrichColumns = useCallback(
+    (backendCols = []) => {
+      const DEFAULT_MIN_WIDTH = 160
 
-    const cols = backendCols.map((col) => {
-      const isTextCol = col.type === 'string'
-      const isNumberCol = col.type === 'number'
-      return {
-        ...col,
-        title: col.title || col.field,
-        filterable: true,
-        filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-        align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:0.000}' } : {}),
-        editable: false,
-        isRightAlligned: isNumberCol ? 'numeric' : undefined,
+      const cols = backendCols.map((col) => {
+        const isTextCol = col.type === 'string'
+        const isNumberCol = col.type === 'number'
+        return {
+          ...col,
+          title: col.title || col.field,
+          filterable: true,
+          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+          ...(isNumberCol ? { format: '{0:0.000}' } : {}),
+          editable: false,
+          isRightAlligned: isNumberCol ? 'numeric' : undefined,
+        }
+      })
+
+      if (cols.length > 17) {
+        return cols.map((c) => ({
+          widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
+          ...c,
+        }))
       }
-    })
 
-    if (cols.length > 17) {
-      return cols.map((c) => ({
-        widthT: c.minWidth ?? DEFAULT_MIN_WIDTH,
-        ...c,
-      }))
-    }
-
-    return cols
-  }, [])
+      return cols
+    },
+    [AOP_YEAR, PLANT_ID, keycloak],
+  )
 
   const fetchDataForGrid = useCallback(
     async (reportType) => {
@@ -131,7 +133,7 @@ const RunLengthDataSet = () => {
         return { rows: [], columns: [] }
       }
     },
-    [keycloak, enrichColumns],
+    [AOP_YEAR, PLANT_ID, keycloak, enrichColumns],
   )
 
   const scheduleAndRunFetch = useCallback(
@@ -197,7 +199,7 @@ const RunLengthDataSet = () => {
       console.error('Error fetching TYPE_LIST or config:', err)
       setLoading(false)
     }
-  }, [keycloak, scheduleAndRunFetch])
+  }, [AOP_YEAR, PLANT_ID, keycloak, scheduleAndRunFetch])
 
   useEffect(() => {
     fetchAllGrids()
@@ -206,7 +208,7 @@ const RunLengthDataSet = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
+  }, [fetchAllGrids, AOP_YEAR, PLANT_ID, keycloak, oldYear, yearChanged])
 
   // Export: gather sheets from each ExcelExport instance and combine into one workbook
   const exportAllGrids = useCallback(() => {
@@ -295,7 +297,6 @@ const RunLengthDataSet = () => {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
-          disabled={READ_ONLY} 
         >
           Export
         </Button>

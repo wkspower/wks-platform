@@ -60,29 +60,34 @@ const BestAchievedIndividualNorms = () => {
 
   const VALUE_FORMATOR = ValueFormatterProduction()
 
-  const enrichColumns = useCallback((backendCols = []) => {
-    const filteredCols = backendCols.filter((col) => col.field !== 'GRID_TYPE')
-    const applyFixedWidth = filteredCols.length > 15
-    const fixedWidth = applyFixedWidth ? 150 : undefined
+  const enrichColumns = useCallback(
+    (backendCols = []) => {
+      const filteredCols = backendCols.filter(
+        (col) => col.field !== 'GRID_TYPE',
+      )
+      const applyFixedWidth = filteredCols.length > 15
+      const fixedWidth = applyFixedWidth ? 150 : undefined
 
-    return backendCols
-      .filter((col) => col.field !== 'GRID_TYPE')
-      .map((col) => {
-        const isTextCol = col.type === 'string'
-        const isNumberCol = col.type === 'number'
-        return {
-          ...col,
-          title: col.title || col.field,
-          filterable: true,
-          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
-          editable: false,
-          isRightAlligned: isNumberCol ? 'numeric' : undefined,
-          ...(fixedWidth ? { widthT: fixedWidth } : {}),
-        }
-      })
-  }, [])
+      return backendCols
+        .filter((col) => col.field !== 'GRID_TYPE')
+        .map((col) => {
+          const isTextCol = col.type === 'string'
+          const isNumberCol = col.type === 'number'
+          return {
+            ...col,
+            title: col.title || col.field,
+            filterable: true,
+            filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+            align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+            ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
+            editable: false,
+            isRightAlligned: isNumberCol ? 'numeric' : undefined,
+            ...(fixedWidth ? { widthT: fixedWidth } : {}),
+          }
+        })
+    },
+    [PLANT_ID, AOP_YEAR, keycloak],
+  )
 
   // ---------------------------------------------------------------------------
   // Infer columns from row objects (returns [{ field, title, type }])
@@ -222,7 +227,7 @@ const BestAchievedIndividualNorms = () => {
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [keycloak, PLANT_ID, AOP_YEAR, enrichColumns])
 
   useEffect(() => {
     setTabIndex(0)
@@ -231,7 +236,7 @@ const BestAchievedIndividualNorms = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
+  }, [fetchAllGrids, keycloak, PLANT_ID, AOP_YEAR, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)

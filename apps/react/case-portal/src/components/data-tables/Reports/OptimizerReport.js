@@ -203,7 +203,7 @@ const OptimizerReport = () => {
         return { rows: [], columns: [] }
       }
     },
-    [keycloak, enrichColumns],
+    [keycloak, enrichColumns, PLANT_ID, AOP_YEAR],
   )
 
   // scheduleAndRunFetch — supports month grids suffixed with reportType
@@ -235,7 +235,7 @@ const OptimizerReport = () => {
 
       timeoutIdsRef.current.push(id)
     },
-    [fetchDataForGrid],
+    [fetchDataForGrid, AOP_YEAR, PLANT_ID],
   )
 
   // Main: fetch TYPE_LIST then schedule fetching each grid in order
@@ -346,7 +346,7 @@ const OptimizerReport = () => {
       console.error('Error fetching TYPE_LIST or config:', err)
       setLoading(false)
     }
-  }, [scheduleAndRunFetch])
+  }, [scheduleAndRunFetch, PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
     fetchAllGrids()
@@ -354,7 +354,7 @@ const OptimizerReport = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, AOP_YEAR, oldYear, yearChanged])
 
   // Export: gather sheets from each ExcelExport instance and combine into one workbook
 

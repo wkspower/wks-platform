@@ -11,6 +11,7 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
+import KendoDataGridAromatics2 from 'components/Kendo-Report-DataGrid/index-aromatics2'
 
 const REPORT_TYPE_FOR_ALL = 'NormsHistorian'
 
@@ -168,7 +169,7 @@ const ReportAccordionPanel = React.memo(function ReportAccordionPanel({
           {!loaded && <Typography sx={{ p: 1 }}>Loading...</Typography>}
 
           {loaded && (
-            <KendoDataGrid
+            <KendoDataGridAromatics2
               setRows={setRows}
               columns={colDefs}
               rows={rows || []}

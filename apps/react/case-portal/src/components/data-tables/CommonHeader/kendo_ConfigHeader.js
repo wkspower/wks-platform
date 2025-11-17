@@ -30,6 +30,12 @@ const getConfigByType = (configType) => {
       return productionColumnsPE1
     case 'Otherlosses':
       return productionColumnsPE2
+
+    //NEW BUILD 17 NOV
+
+    case 'Constant':
+      return colDefsShutdownRate
+
     case 'ShutdownNorms':
       return colDefsShutdownRate
     case 'Constants':
@@ -69,6 +75,8 @@ const getEnhancedAOPColDefs = ({
 }) => {
   var config = []
 
+  // console.log('configType', configType)
+
   if (configType == 'grades') {
     config = [
       {
@@ -103,7 +111,8 @@ const getEnhancedAOPColDefs = ({
   if (
     configType == 'ShutdownNorms' ||
     configType == 'cracker_constants' ||
-    configType == 'megConstants'
+    configType == 'megConstants' ||
+    configType == 'Constant'
   ) {
     enhancedColDefs = config.map((col) => {
       if (col?.title == 'Value') {

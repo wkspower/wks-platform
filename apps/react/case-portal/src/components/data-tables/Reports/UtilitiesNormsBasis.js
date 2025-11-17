@@ -62,24 +62,27 @@ const UtilitiesNormsBasis = () => {
 
   const VALUE_FORMATOR = ValueFormatterProduction()
 
-  const enrichColumns = useCallback((backendCols = []) => {
-    return backendCols
-      .filter((col) => col.field !== 'GRID_TYPE')
-      .map((col) => {
-        const isTextCol = col.type === 'string'
-        const isNumberCol = col.type === 'number'
-        return {
-          ...col,
-          title: col.title || col.field,
-          filterable: true,
-          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
-          editable: false,
-          isRightAlligned: isNumberCol ? 'numeric' : undefined,
-        }
-      })
-  }, [])
+  const enrichColumns = useCallback(
+    (backendCols = []) => {
+      return backendCols
+        .filter((col) => col.field !== 'GRID_TYPE')
+        .map((col) => {
+          const isTextCol = col.type === 'string'
+          const isNumberCol = col.type === 'number'
+          return {
+            ...col,
+            title: col.title || col.field,
+            filterable: true,
+            filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+            align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+            ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
+            editable: false,
+            isRightAlligned: isNumberCol ? 'numeric' : undefined,
+          }
+        })
+    },
+    [AOP_YEAR, PLANT_ID, keycloak],
+  )
 
   // ---------------------------------------------------------------------------
   // Infer columns from row objects (returns [{ field, title, type }])
@@ -216,7 +219,7 @@ const UtilitiesNormsBasis = () => {
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [AOP_YEAR, PLANT_ID, keycloak, enrichColumns])
 
   useEffect(() => {
     setTabIndex(0)
@@ -225,7 +228,7 @@ const UtilitiesNormsBasis = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
+  }, [fetchAllGrids, AOP_YEAR, PLANT_ID, keycloak, oldYear, yearChanged])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)

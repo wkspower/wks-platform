@@ -506,7 +506,13 @@ const SelectivityData = (props) => {
     try {
       if (props?.configType === 'grades') {
         await DataService.getRecipeExcel(keycloak, PLANT_ID, AOP_YEAR)
-      } else if (props?.configType === 'ShutdownNorms') {
+
+        //NEW BUILD 17 NOV
+      } else if (
+        props?.configType === 'ShutdownNorms' ||
+        props?.configType === 'Constant'
+      ) {
+        //NEW BUILD 17 NOV
         await DataService.getShutdownRateExcel(
           keycloak,
           props?.configType,
@@ -592,7 +598,11 @@ const SelectivityData = (props) => {
           PLANT_ID,
           AOP_YEAR,
         )
-      } else if (props?.configType === 'ShutdownNorms') {
+      } else if (
+        //NEW BUILD 17 NOV
+        props?.configType === 'ShutdownNorms' ||
+        props?.configType === 'Constant'
+      ) {
         // Add shutdown rate specific upload
         response = await DataService.saveShutdownRateExcel(
           rawFile,

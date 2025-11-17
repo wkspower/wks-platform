@@ -180,7 +180,8 @@
 }
 
 .custom-data-grid .MuiDataGrid-columnHeaderTitle {
-  font-weight: bold;
+  font-weight: 550 !important; /* lighter than bold (700) */
+  font-size: 0.8rem !important; /* smaller font */
 }
 
 .custom-data-grid .disabled-cell {

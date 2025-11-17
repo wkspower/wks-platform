@@ -1374,7 +1374,7 @@ const ConfigurationTable = () => {
                     loading={loading}
                     setRows={setConstantsRows}
                     fetchData={fetchData}
-                    configType='ShutdownNorms'
+                    configType='Constant'
                     groupBy='TypeDisplayName'
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
