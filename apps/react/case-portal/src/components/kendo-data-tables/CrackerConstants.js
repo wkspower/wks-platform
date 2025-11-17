@@ -446,7 +446,9 @@ const CrakcerConstants = () => {
 
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
-                    className='summary-title'
+                    className={
+                      READ_ONLY ? 'summary-title-disabled' : 'summary-title'
+                    }
                     sx={{ whiteSpace: 'normal' }} // <-- added alignSelf
                   >
                     {`(Last refreshed data on: ${formatDateForText(configurationExecutionDetails[0]?.ModifiedOn, true)} for the period from ${formatDateForText(startDateFromConfig)} to ${formatDateForText(endDateDateFromConfig)})`}

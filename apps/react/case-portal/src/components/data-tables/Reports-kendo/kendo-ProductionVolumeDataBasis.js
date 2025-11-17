@@ -26,7 +26,9 @@ import {
 import moment from '../../../../node_modules/moment/moment'
 import getKendoProductionColumns from '../CommonHeader/KendoProdVolBHeader'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import ProductionVolumeDataBasisPe from './kendo-ProductionVolumeDataBasisPe'
+// import ProductionVolumeDataBasisPe from './kendo-ProductionVolumeDataBasisPe'
+import ProductionVolumeDataBasisPe from './ProductionVolumeDataBasisPe'
+
 import { getRoleName } from 'services/role-service'
 const ProductionVolumeDataBasis = () => {
   const keycloak = useSession()
@@ -144,7 +146,9 @@ const ProductionVolumeDataBasis = () => {
       ])
       setLoading(false)
     }
-    fetchAllData()
+    if (lowerVertName == 'meg') {
+      fetchAllData()
+    }
   }, [oldYear, yearChanged, keycloak, PLANT_ID, selectedUnit])
 
   useEffect(() => {

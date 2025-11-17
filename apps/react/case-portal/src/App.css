@@ -243,6 +243,14 @@ main.MuiBox-root.css-vognfw {
   color: green;
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
 }
+
+.summary-title-disabled {
+  font-family: 'Roboto', sans-serif !important;
+  margin-left: 5px;
+  /* color: green; */
+  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+}
+
 .k-animation-container,
 .k-popup {
   z-index: 5500 !important;
@@ -410,4 +418,18 @@ main.MuiBox-root.css-vognfw {
 /* Compact the footer buttons area */
 .k-columnmenu-actions {
   padding: 1px 1px !important;
+}
+
+.k-textarea.k-input.k-disabled {
+  color: #4a4a4a !important;
+  -webkit-text-fill-color: #4a4a4a !important;
+  opacity: 1 !important;
+}
+/* Kendo TextArea disabled text color fix */
+.k-textarea.k-disabled,
+.k-input.k-disabled {
+  color: #4a4a4a !important;
+  -webkit-text-fill-color: #4a4a4a !important;
+  opacity: 1 !important; /* Remove faded look */
+  background-color: #f0f0f0 !important; /* Light grey background */
 }

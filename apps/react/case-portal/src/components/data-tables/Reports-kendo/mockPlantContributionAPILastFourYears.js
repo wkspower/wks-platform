@@ -1,14 +1,14 @@
 export const MockPlantContributionAPILastFourYears = {
   async getReport({
     category,
-    year,
+    AOP_YEAR,
     verticalName,
     FORMAT_VALUES_3_DECIMAL,
     FORMAT_VALUES_2_DECIMAL,
     FORMAT_VALUES_COST,
     FORMAT_VALUES_PRICE,
   }) {
-    const currFY = year || ''
+    const currFY = AOP_YEAR || ''
     let prevFY1 = ''
     let prevFY2 = ''
     let prevFY3 = ''

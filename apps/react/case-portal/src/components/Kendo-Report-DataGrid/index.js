@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { Tooltip } from '../../../node_modules/@progress/kendo-react-tooltip/index'
 import '../../kendo-data-grid.css'
 import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
+import { GridColumn } from '../../../node_modules/@progress/kendo-react-grid/index'
 
 const KendoDataGrid = ({
   rows,
@@ -24,6 +25,7 @@ const KendoDataGrid = ({
   showThreeColors = false,
 }) => {
   const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
+
 
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [sort, setSort] = useState([])
@@ -85,49 +87,6 @@ const KendoDataGrid = ({
           {props.children}
         </Tooltip>
       </th>
-    )
-  }
-
-  const RedHighlightCell = (props) => {
-    const {
-      dataItem,
-      field,
-      tdProps,
-      children,
-      customModifiedCells,
-      allRedCell,
-    } = props
-
-    const rowId = dataItem.id
-    const value = dataItem[field]
-
-    const isEdited = Object.prototype.hasOwnProperty.call(
-      customModifiedCells?.[rowId] || {},
-      field,
-    )
-
-    const month = field
-    const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
-
-    const isRedFromAllRedCell = allRedCell?.some(
-      (cell) =>
-        cell.month === month &&
-        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
-    )
-
-    const shouldHighlight = isEdited || isRedFromAllRedCell
-
-    return (
-      <td
-        {...tdProps}
-        title={value}
-        style={{
-          color: shouldHighlight ? 'orange' : undefined,
-          fontWeight: shouldHighlight ? 'bold' : undefined,
-        }}
-      >
-        {children}
-      </td>
     )
   }
 
@@ -236,6 +195,8 @@ const KendoDataGrid = ({
               type,
             } = col
 
+            const isActive = isColumnActive(col?.field, filter, sort)
+
             if (['endDate', 'startDate', 'dateTime'].includes(field)) {
               return (
                 <Column
@@ -243,7 +204,7 @@ const KendoDataGrid = ({
                   field={field}
                   title={title}
                   cell={cell}
-                  width={widthT}
+                  width={permissions?.widthT}
                   cells={{
                     edit: {
                       date: ['dateTime', 'dateTime', 'mcuDate'].includes(
@@ -280,7 +241,7 @@ const KendoDataGrid = ({
                   field={field}
                   title={title}
                   cell={cell}
-                  width={widthT}
+                  width={permissions?.widthT}
                   cells={{
                     edit: {
                       DateOnlyPicker,
@@ -302,6 +263,26 @@ const KendoDataGrid = ({
                   }
                   // columnMenu={DateColumnMenu}
                   columnMenu={ColumnMenuCheckboxFilterDate}
+                />
+              )
+            }
+
+            if (col.type === 'number') {
+              return (
+                <GridColumn
+                  key={col.field}
+                  field={col.field}
+                  title={col.title || col.headerName}
+                  width={col.widthT || permissions?.widthT}
+                  hidden={col.hidden}
+                  className='k-number-right-disabled'
+                  headerClassName={isActive ? 'active-column' : ''}
+                  cells={{
+                    headerCell: SimpleHeaderWithTooltip,
+                  }}
+                  columnMenu={ColumnMenuCheckboxFilter}
+                  filter='numeric'
+                  format={col.format || '{0:0.000}'}
                 />
               )
             }
@@ -332,7 +313,7 @@ const KendoDataGrid = ({
                 headerClassName={
                   isColumnActive(field, filter, sort) ? 'active-column' : ''
                 }
-                width={widthT}
+                width={permissions?.widthT}
               />
             )
           })}

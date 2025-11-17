@@ -784,7 +784,7 @@ const ConfigurationTable = () => {
                       <Button
                         variant='contained'
                         onClick={handleOpenDialog}
-                        className='btn-load'
+                        className='btn-save'
                         sx={{ alignSelf: 'flex-end' }}
                         disabled={READ_ONLY}
                       >
@@ -796,7 +796,9 @@ const ConfigurationTable = () => {
 
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
-                    className='summary-title'
+                    className={
+                      READ_ONLY ? 'summary-title-disabled' : 'summary-title'
+                    }
                     sx={{
                       whiteSpace: 'normal',
                       alignSelf: 'flex-end', // ?? ensures it's bottom-aligned with the button

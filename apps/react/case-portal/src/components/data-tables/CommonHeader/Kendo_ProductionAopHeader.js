@@ -1,64 +1,53 @@
+import { NormalOpNormElastomerColumns } from 'components/colums/ElastomerColums'
+import { NormalOpNormMegColumns } from 'components/colums/MegColums'
+import { NormalOpNormVcmColumns } from 'components/colums/VcmColumns'
+import { CrackerColums } from 'components/colums/CrackerColums'
+import { NormalOpNormPeColumns } from 'components/colums/PeColums'
+import { NormalOpNormPpColumns } from 'components/colums/PpColums'
+import { NormalOpNormPtaColumns } from 'components/colums/PtaColums'
+import { verticalEnums } from 'enums/verticalEnums'
 import { useSelector } from 'react-redux'
-import productionColDefs from '../../../assets/kendo_production_aop_meg.json'
-import productionColDefsPE from '../../../assets/kendo_production_aop_pe.json'
-import productionColDefsCracker from '../../../assets/kendo_production_aop_cracker.json'
-import productionColDefsvcmpta from '../../../assets/kendo_production_aop_vcmpta.json'
-const monthFields = [
-  'april',
-  'may',
-  'june',
-  'july',
-  'aug',
-  'sep',
-  'oct',
-  'nov',
-  'dec',
-  'jan',
-  'feb',
-  'march',
-]
 
-const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
-  const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { verticalChange } = dataGridStore
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+const colDefsCache = new Map()
 
-  let cols
+const VERTICAL_COLDEFS_MAP = {
+  [verticalEnums.PE]: NormalOpNormPeColumns,
+  [verticalEnums.PP]: NormalOpNormPpColumns,
+  [verticalEnums.PTA]: NormalOpNormPtaColumns,
+  [verticalEnums.ELASTOMER]: NormalOpNormElastomerColumns,
+  [verticalEnums.MEG]: NormalOpNormMegColumns,
+  [verticalEnums.CRACKER]: CrackerColums,
+  [verticalEnums.VCM]: NormalOpNormVcmColumns,
+}
 
-  if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-    cols = productionColDefsPE
-  } else if (lowerVertName === 'cracker') {
-    cols = productionColDefsCracker
-  } else if(lowerVertName === 'pta' || lowerVertName === 'vcm'){
-    cols= productionColDefsvcmpta
-  }else {
-    cols = productionColDefs
+const getNormalOpNormColDef = ({ headerMap, valueFormat, lowerVertName }) => {
+  // const dataGridStore = useSelector((state) => state.dataGridStore)
+  // const vertName = dataGridStore.verticalChange?.selectedVertical
+
+  const cacheKey = `${lowerVertName}_${headerMap ? JSON.stringify(headerMap) : 'no_map'}`
+
+  if (colDefsCache.has(cacheKey)) {
+    return colDefsCache.get(cacheKey)
   }
-
-  const hasTotal = cols.some((col) => col.field === 'averageTPH')
-
-  if (!hasTotal) {
-    cols.push({
-      field: 'averageTPH',
-      title: 'Total',
-    })
-  }
+  const cols = VERTICAL_COLDEFS_MAP[lowerVertName] || NormalOpNormMegColumns
 
   const enhancedColDefs = cols.map((col) => {
-    let updatedCol = { ...col }
-
-    if (headerMap && headerMap[col.title] !== undefined) {
-      updatedCol.title = headerMap[col.title]
-    }
-     if (col.type === 'number' && valueFormat) {
-      updatedCol.format = valueFormat
+    if (!headerMap || headerMap[col.title] === undefined) {
+      return valueFormat ? { ...col, format: valueFormat } : col
     }
 
-    return updatedCol
+    return {
+      ...col,
+      title: headerMap[col.title],
+      align: 'right',
+      format: valueFormat || '{0:#.###}',
+    }
   })
 
+  colDefsCache.set(cacheKey, enhancedColDefs)
   return enhancedColDefs
 }
 
-export default getEnhancedColDefs
+export const clearColDefsCache = () => colDefsCache.clear()
+
+export default getNormalOpNormColDef

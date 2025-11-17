@@ -558,7 +558,7 @@ const AopDesignBasis = () => {
                         // onClick={onLoad}
                         onClick={saveSummary}
                         className='btn-save'
-                        disabled={!summaryEdited}
+                        disabled={READ_ONLY || !summaryEdited}
                         sx={{ alignSelf: 'flex-end' }}
                       >
                         Save
@@ -568,7 +568,9 @@ const AopDesignBasis = () => {
                 )}
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
-                    className='summary-title'
+                    className={
+                      READ_ONLY ? 'summary-title-disabled' : 'summary-title'
+                    }
                     sx={{
                       whiteSpace: 'normal',
                       alignSelf: 'flex-end', // ?? ensures it's bottom-aligned with the button
@@ -604,7 +606,6 @@ const AopDesignBasis = () => {
                   setSummary(e.target.value)
                   setSummaryEdited(true)
                 }}
-                // className='aop-design-basis'
               />
             </Box>
           </CustomAccordionDetails>

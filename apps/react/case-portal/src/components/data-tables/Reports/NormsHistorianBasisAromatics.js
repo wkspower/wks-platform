@@ -27,13 +27,18 @@ const NormsHistorianBasisAromatics = () => {
     plantObject,
 
     year,
+    verticalChange,
     screenTitle,
   } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
+  const vertName = verticalChange?.selectedVertical
+
+  const lowerVertName = vertName?.toLowerCase()
 
   const fetchAllGrids = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
+    if (lowerVertName === 'aromatics') return
 
     try {
       setLoading(true)

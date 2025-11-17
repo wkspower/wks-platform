@@ -325,7 +325,7 @@ const AopDesignBasisNorms = () => {
         return response
       }
 
-      // Execution started — show user and refresh details
+      // Execution started ? show user and refresh details
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Execution Started Successfully!',
@@ -358,7 +358,7 @@ const AopDesignBasisNorms = () => {
         ),
       ])
 
-      // all finished — check statuses
+      // all finished ? check statuses
       const ok1 = r1?.code === 200
       const ok2 = r2?.code === 200
       const ok3 = r3?.code === 200
@@ -499,7 +499,9 @@ const AopDesignBasisNorms = () => {
 
                 {configurationExecutionDetails[0]?.ModifiedOn && (
                   <Typography
-                    className='summary-title'
+                    className={
+                      READ_ONLY ? 'summary-title-disabled' : 'summary-title'
+                    }
                     sx={{
                       whiteSpace: 'normal',
                       alignSelf: 'flex-end', // ?? ensures it's bottom-aligned with the button
