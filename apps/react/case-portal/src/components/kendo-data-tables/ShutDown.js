@@ -184,7 +184,7 @@ const ShutDown = ({ permissions }) => {
         (d, i) => d && allDescriptions.indexOf(d) !== i,
       )
 
-      if (duplicate) {
+      if (duplicate && lowerVertName !== 'pta') {
         rows.forEach((row) => {
           if ((row.discription || '').trim().toLowerCase() === duplicate) {
             row.isError = true
@@ -245,7 +245,8 @@ const ShutDown = ({ permissions }) => {
         lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||
         lowerVertName == 'vcm' ||
-        lowerVertName == 'pvc'
+        lowerVertName == 'pvc' ||
+        lowerVertName == 'pta'
       ) {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
@@ -297,7 +298,7 @@ const ShutDown = ({ permissions }) => {
               b.isError = true
               setSnackbarOpen(true)
               setSnackbarData({
-                message: `The shutdown timeframe for "${a.discription}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+                message: `The shutdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
                 severity: 'error',
               })
               return

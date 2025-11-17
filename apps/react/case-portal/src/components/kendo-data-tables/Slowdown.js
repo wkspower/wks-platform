@@ -436,7 +436,8 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'meg' ||
         lowerVertName === 'elastomer' ||
         lowerVertName === 'vcm' ||
-        lowerVertName === 'pvc'
+        lowerVertName === 'pvc' ||
+        lowerVertName === 'pta'
       ) {
         // Month span check
         //check timeframe Multiple month spilt into single
@@ -478,7 +479,7 @@ const SlowDown = ({ permissions }) => {
               b.isError = true
               setSnackbarOpen(true)
               setSnackbarData({
-                message: `The slowdown timeframe for "${a.discription}" overlaps with "${b.discription}". Please ensure no overlapping of timeframes.`,
+                message: `The slowdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping of timeframes.`,
                 severity: 'error',
               })
               return
