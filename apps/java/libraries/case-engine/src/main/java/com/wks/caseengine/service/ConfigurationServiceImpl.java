@@ -519,9 +519,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
-			} else if(verticalName.equalsIgnoreCase("AROMATICS")){
-				obj = findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,version);
-			}else {
+			} /*
+				 * else if(verticalName.equalsIgnoreCase("AROMATICS")){ obj =
+				 * findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,version); }
+				 */else {
 				obj = findByYearAndPlantFkId(year, plantFKId, viewName);
 			}
 			
@@ -583,9 +584,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					configurationDTO.setProductName(row[21] != null ? row[21].toString() : "");
 
 				}
-				if(verticalName.equalsIgnoreCase("AROMATICS")) {
-					configurationDTO.setVersion(row[22] != null ? row[22].toString() : "");
-				}
+				/*
+				 * if(verticalName.equalsIgnoreCase("AROMATICS")) {
+				 * configurationDTO.setVersion(row[22] != null ? row[22].toString() : ""); }
+				 */
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
 						|| verticalName.equalsIgnoreCase("CRACKER")) {
@@ -693,9 +695,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				}
 				
-				if(verticalName.equalsIgnoreCase("AROMATICS")) {
-					configurationDTO.setVersion(row[22] != null ? row[22].toString() : "");
-				}
+				/*
+				 * if(verticalName.equalsIgnoreCase("AROMATICS")) {
+				 * configurationDTO.setVersion(row[22] != null ? row[22].toString() : ""); }
+				 */
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
 						|| verticalName.equalsIgnoreCase("CRACKER")  
@@ -1576,9 +1579,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			
 			normAttributeTransactions.setCreatedOn(new Date());
 			normAttributeTransactions.setAttributeValueVersion("V1");
-			if(configurationDTO.getVertical().equalsIgnoreCase("AROMATICS")) {
-				normAttributeTransactions.setAttributeValueVersion(configurationDTO.getVersion());
-			}
+			/*
+			 * if(configurationDTO.getVertical().equalsIgnoreCase("AROMATICS")) {
+			 * normAttributeTransactions.setAttributeValueVersion(configurationDTO.
+			 * getVersion()); }
+			 */
 			normAttributeTransactions.setUserName(Utility.getUserName());
 			normAttributeTransactions.setNormParameterFKId(normParameter.getId());
 			normAttributeTransactions.setAopMonth(i);
