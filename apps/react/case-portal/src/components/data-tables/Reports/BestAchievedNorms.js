@@ -222,38 +222,44 @@ export default function BestAchievedNorms() {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [])
+  }, [keycloak, PLANT_ID, AOP_YEAR])
 
   // ---------------------------------------------------------------------------
   // Column enrichment (kept same except optimized hidden logic)
   // ---------------------------------------------------------------------------
-  const enrichColumns = useCallback((backendCols = []) => {
-    const filteredCols = backendCols.filter((col) => col.field !== 'GRID_TYPE')
-    const applyFixedWidth = filteredCols.length > 15
-    const fixedWidth = applyFixedWidth ? 150 : undefined
+  const enrichColumns = useCallback(
+    (backendCols = []) => {
+      const filteredCols = backendCols.filter(
+        (col) => col.field !== 'GRID_TYPE',
+      )
+      const applyFixedWidth = filteredCols.length > 15
+      const fixedWidth = applyFixedWidth ? 150 : undefined
 
-    return filteredCols.map((col) => {
-      const isTextCol = col.type === 'string'
-      const isNumberCol = col.type === 'number'
-      return {
-        ...col,
-        title: col.title || col.field,
-        filterable: true,
-        filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-        align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:0.00}' } : {}),
-        editable: false,
-        isRightAlligned: isNumberCol ? 'numeric' : undefined,
-        // hide Material FK field (both common casings)
-        hidden:
-          (col.field &&
-            (col.field === 'Material_FK_Id' || col.field === 'materialFkId')) ||
-          col.hidden,
-        // set fixed width when total cols > 15
-        ...(fixedWidth ? { widthT: fixedWidth } : {}),
-      }
-    })
-  }, [])
+      return filteredCols.map((col) => {
+        const isTextCol = col.type === 'string'
+        const isNumberCol = col.type === 'number'
+        return {
+          ...col,
+          title: col.title || col.field,
+          filterable: true,
+          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
+          ...(isNumberCol ? { format: '{0:0.00}' } : {}),
+          editable: false,
+          isRightAlligned: isNumberCol ? 'numeric' : undefined,
+          // hide Material FK field (both common casings)
+          hidden:
+            (col.field &&
+              (col.field === 'Material_FK_Id' ||
+                col.field === 'materialFkId')) ||
+            col.hidden,
+          // set fixed width when total cols > 15
+          ...(fixedWidth ? { widthT: fixedWidth } : {}),
+        }
+      })
+    },
+    [keycloak, PLANT_ID, AOP_YEAR],
+  )
 
   // ---------------------------------------------------------------------------
   // Normalize row values according to detected column types
@@ -422,7 +428,16 @@ export default function BestAchievedNorms() {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [
+    fetchAllGrids,
+    plantID,
+    oldYear,
+    keycloak,
+    enrichColumns,
+    PLANT_ID,
+    AOP_YEAR,
+    yearChanged,
+  ])
 
   // ---------------------------------------------------------------------------
   // Export helpers: build workbookOptions, then mount ExcelExport briefly to call save()
@@ -522,7 +537,9 @@ export default function BestAchievedNorms() {
         if (excelExportRef.current && workbookRef.current) {
           // Prefer toDataURL (returns a Promise<string>) so we know when the file was generated.
           if (typeof excelExportRef.current.toDataURL === 'function') {
-            const dataUrl = await excelExportRef.current.toDataURL(workbookRef.current)
+            const dataUrl = await excelExportRef.current.toDataURL(
+              workbookRef.current,
+            )
             if (cancelled) return
 
             // Convert data URL to blob then trigger download programmatically.
@@ -531,7 +548,8 @@ export default function BestAchievedNorms() {
             const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0]
             const ab = new ArrayBuffer(byteString.length)
             const ia = new Uint8Array(ab)
-            for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i)
+            for (let i = 0; i < byteString.length; i++)
+              ia[i] = byteString.charCodeAt(i)
             const blob = new Blob([ab], { type: mimeString })
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
@@ -546,7 +564,9 @@ export default function BestAchievedNorms() {
             // Fallback to save() if toDataURL is not available in this kendo version
             excelExportRef.current.save(workbookRef.current)
           } else {
-            console.error('ExcelExport ref method missing: toDataURL or save not found')
+            console.error(
+              'ExcelExport ref method missing: toDataURL or save not found',
+            )
           }
         } else {
           console.error('ExcelExport ref or workbookOptions missing')

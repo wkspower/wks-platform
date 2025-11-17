@@ -82,7 +82,8 @@ const NormsHistorianBasis = () => {
 
   const fetchAllData = async (selectedUnit) => {
     if (!PLANT_ID || !AOP_YEAR) return
-    if (lowerVertName === 'aromatics') return
+    if (lowerVertName != 'meg') return
+
     if (!selectedUnit) return
     setLoading(true)
     let isCancelled = false

@@ -238,7 +238,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     } finally {
       setLoading(false)
     }
-  }, [PLANT_ID, keycloak])
+  }, [PLANT_ID, keycloak, AOP_YEAR])
 
   const handleCalculate = useCallback(async () => {
     try {
@@ -266,7 +266,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
 
   useEffect(() => {
     fetchData()
-  }, [fetchData, oldYear, yearChanged, PLANT_ID])
+  }, [fetchData, oldYear, yearChanged, PLANT_ID, AOP_YEAR])
 
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)

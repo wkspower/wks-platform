@@ -6,7 +6,6 @@ import {
   ExcelExport,
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
-import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -17,6 +16,7 @@ import {
 } from 'utils/CustomAccrodian'
 import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import { DataGrid } from '@mui/x-data-grid'
 
 // -----------------------------------------------------------------------------
 // NormsHistorianBasisPe
@@ -27,13 +27,14 @@ import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const REPORT_TYPE_FOR_ALL = 'NormsHistorian' // <-- change to your backend's value if needed
 
-const NormsHistorianBasisPe = () => {
+const ProductionVolumeDataBasisPe = () => {
   const keycloak = useSession()
 
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
   const [tabIndex, setTabIndex] = useState(0)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
@@ -77,27 +78,62 @@ const NormsHistorianBasisPe = () => {
   const VALUE_FORMATOR = ValueFormatterProduction()
 
   const enrichColumns = useCallback((backendCols = []) => {
+    function countDecimals(value) {
+      if (value == null) return 0
+      const s = String(value).replace(/,/g, '').trim()
+      if (s.includes('.')) return s.split('.')[1].length
+      return 0
+    }
+
     return backendCols
       .filter((col) => col.field !== 'GRID_TYPE')
       .map((col) => {
         const isTextCol = col.type === 'string'
         const isNumberCol = col.type === 'number'
-        return {
+
+        const base = {
           ...col,
           title: col.title || col.field,
           filterable: true,
+          flex: 1,
           filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-          align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-          ...(isNumberCol ? { format: VALUE_FORMATOR } : {}),
           editable: false,
-          isRightAlligned: isNumberCol ? 'numeric' : undefined,
+          headerAlign: 'left',
+          align: isNumberCol ? 'right' : 'left',
+        }
+
+        if (!isNumberCol) return base
+
+        return {
+          ...base,
+
+          renderCell: (params) => {
+            const original = params?.row?.[col.field] ?? params?.value
+            const decimals = countDecimals(original) || 2
+            const text =
+              params?.value == null || params?.value === ''
+                ? ''
+                : new Intl.NumberFormat('en-IN', {
+                    maximumFractionDigits: Math.min(decimals, 3),
+                  }).format(Number(params?.value))
+            return (
+              <div
+                title={String(params.value)}
+                style={{
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {text}
+              </div>
+            )
+          },
         }
       })
   }, [])
 
-  // ---------------------------------------------------------------------------
-  // Infer columns from row objects (returns [{ field, title, type }])
-  // ---------------------------------------------------------------------------
   function isValidDateString(str) {
     if (typeof str !== 'string') return false
 
@@ -109,12 +145,10 @@ const NormsHistorianBasisPe = () => {
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/, // ISO format
     ]
 
-    // Check if string matches common date patterns
     const matchesPattern = datePatterns.some((pattern) =>
       pattern.test(str.trim()),
     )
 
-    // Additional check: if it contains only letters and numbers without date separators, it's likely not a date
     if (!matchesPattern && !/[-/,\s:]/.test(str)) {
       return false
     }
@@ -141,15 +175,12 @@ const NormsHistorianBasisPe = () => {
           detectedType = 'number'
           break
         }
-        // detect date-like strings
-        // Shivanand
 
         const d = new Date(v)
         if (!isNaN(d.getTime()) && isValidDateString(v)) {
           detectedType = 'date'
           break
         }
-        // numeric string (allow commas)
         const numericCandidate = String(v).replace(/[,]/g, '')
         if (!isNaN(Number(numericCandidate))) {
           detectedType = 'number'
@@ -162,9 +193,6 @@ const NormsHistorianBasisPe = () => {
     return cols
   }
 
-  // ---------------------------------------------------------------------------
-  // Normalize row values according to detected column types
-  // ---------------------------------------------------------------------------
   function normalizeRowValues(row = {}, columns = []) {
     const parsed = { ...row }
     columns.forEach((c) => {
@@ -191,10 +219,6 @@ const NormsHistorianBasisPe = () => {
     return parsed
   }
 
-  // ---------------------------------------------------------------------------
-  // Fetch all grids in one call and build dataMap + gridNames
-  // The backend is expected to return: apiResponse.data = [ { gridName, data: [...] }, ... ]
-  // ---------------------------------------------------------------------------
   const fetchAllGrids = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     // clear previous timers if any
@@ -294,13 +318,16 @@ const NormsHistorianBasisPe = () => {
   }, [keycloak, enrichColumns])
 
   useEffect(() => {
-    setTabIndex(0)
-    fetchAllGrids()
-    return () => {
-      timeoutIdsRef.current.forEach((t) => clearTimeout(t))
-      timeoutIdsRef.current = []
+    // setTabIndex(0)
+
+    if (tabIndex == 0) {
+      fetchAllGrids()
+      return () => {
+        timeoutIdsRef.current.forEach((t) => clearTimeout(t))
+        timeoutIdsRef.current = []
+      }
     }
-  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged])
+  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged, tabIndex])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)
@@ -487,16 +514,33 @@ const NormsHistorianBasisPe = () => {
                       </Typography>
                     </CustomAccordionSummary>
                     <CustomAccordionDetails>
-                      <Box sx={{ width: '100%', margin: 0 }}>
-                        <KendoDataGrid
+                      <Box
+                        sx={{
+                          width: '100%',
+                          margin: 0,
+                          height: d?.rows?.length > 50 ? 500 : 'auto',
+                        }}
+                      >
+                        <DataGrid
                           rows={d.rows}
-                          columns={d.columns?.map((col) => ({
-                            ...col,
-                            format: `{0:0.###}`,
-                            widthT:
-                              d?.columns?.length > 20 ? '150px' : undefined,
-                          }))}
-                          permissions={{ isHeight: d?.rows?.length > 15 }}
+                          className='custom-data-grid'
+                          columns={d.columns}
+                          disableSelectionOnClick
+                          disableColumnSelector
+                          disableDensitySelector
+                          density='standard'
+                          rowHeight={30}
+                          // show default footer + pagination
+                          // allow only 100 rows per page
+
+                          pagination={d?.rows?.length > 99} // enable pagination only if > 99
+                          hideFooterPagination={d?.rows?.length <= 99} // hide pagination UI if <= 99
+                          hideFooter={d?.rows?.length === 0} // optional: hide whole footer when no rows
+                          pageSize={100}
+                          rowsPerPageOptions={[100]}
+                          // remove footer hiding flags you had before:
+                          hideFooterSelectedRowCount={false}
+                          experimentalFeatures={{ newEditingApi: true }}
                         />
                       </Box>
                     </CustomAccordionDetails>
@@ -513,4 +557,4 @@ const NormsHistorianBasisPe = () => {
   )
 }
 
-export default NormsHistorianBasisPe
+export default ProductionVolumeDataBasisPe

@@ -380,7 +380,7 @@ const CrackerConfig = () => {
         setLoading(false)
       }
     },
-    [keycloak, setRowsForTab, currentTabDisplay],
+    [keycloak, setRowsForTab, currentTabDisplay, AOP_YEAR, PLANT_ID],
   )
 
   useEffect(() => {

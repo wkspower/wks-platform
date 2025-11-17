@@ -111,10 +111,10 @@
 
 .custom-data-grid .MuiDataGrid-columnHeaders {
   background-color: #fafafc;
-  color: black;
-  font-size: 0.8rem;
+  color: rgb(29, 27, 27);
+  font-size: 0.7rem;
   font-weight: bold;
-  border-bottom: 2px solid #dae0ef;
+  border-bottom: 1px solid #dae0ef;
   /* border-top-left-radius: 0; */
   /* border-top-right-radius: 0; */
   padding-left: auto;
@@ -136,7 +136,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   cursor: pointer;
   padding-left: 3px !important;
   padding-right: 4px !important;
@@ -146,7 +146,7 @@
 }
 
 .custom-data-grid .MuiDataGrid-row {
-  border-bottom: 3px solid #bbbbbb;
+  border-bottom: 1px solid #bbbbbb;
 }
 
 .custom-data-grid .even-row {
@@ -197,7 +197,8 @@
 }
 
 .custom-data-grid .MuiDataGrid-columnHeaderTitle {
-  font-weight: bold;
+  font-weight: 550 !important; /* lighter than bold (700) */
+  font-size: 0.8rem !important; /* smaller font */
 }
 
 .custom-data-grid .disabled-cell {
@@ -247,7 +248,6 @@
   text-overflow: ellipsis;
   padding: 0 !important; /* Remove all padding */
   line-height: 1.2; /* Optional: tighten line spacing */
-  font-weight: bold; /* Keep bold styling */
 }
 
 .custom-data-grid .MuiDataGrid-row.Mui-selected {

@@ -433,3 +433,14 @@ main.MuiBox-root.css-vognfw {
   opacity: 1 !important; /* Remove faded look */
   background-color: #f0f0f0 !important; /* Light grey background */
 }
+
+/* MUI DATA GRID */
+.custom-data-grid .MuiDataGrid-row {
+  background-color: #e7e7e7 !important; /* light grey */
+  color: #777 !important; /* grey text */
+}
+
+/* Optional: give cells a softer border */
+.custom-data-grid .MuiDataGrid-cell {
+  border-color: #d3d3d3 !important;
+}
