@@ -15,10 +15,10 @@ import {
   CustomAccordionDetails,
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
-
+import { getRoleName } from 'services/role-service'
 const ProductionTargetBasis = () => {
   const keycloak = useSession()
-
+  const READ_ONLY = getRoleName?.(keycloak)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -354,6 +354,7 @@ const ProductionTargetBasis = () => {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
+          disabled={READ_ONLY}
         >
           Export
         </Button>

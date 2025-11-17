@@ -43,7 +43,7 @@ import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
-
+import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -748,7 +748,7 @@ const KendoDataTablesCracker = ({
                   className='btn-save'
                   onClick={saveModalOpen}
                   disabled={
-                    isButtonDisabled ||
+                    isButtonDisabled || READ_ONLY ||
                     (!summaryEdited && Object.keys(modifiedCells).length === 0)
                   }
                   {...(loading ? {} : {})}
