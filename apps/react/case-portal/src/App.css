@@ -444,3 +444,47 @@ main.MuiBox-root.css-vognfw {
 .custom-data-grid .MuiDataGrid-cell {
   border-color: #d3d3d3 !important;
 }
+/* Reduce footer height */
+.MuiDataGrid-footerContainer {
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  padding: 0 !important;
+}
+
+/* Reduce internal pagination toolbar height */
+.MuiTablePagination-root {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+}
+
+/* Reduce the displayed rows text */
+.MuiTablePagination-displayedRows {
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 28px !important;
+  font-size: 12px;
+}
+.custom-data-grid .MuiDataGrid-footerContainer {
+  min-height: 32px !important; /* reduce height */
+  height: 32px !important;
+  max-height: 32px !important;
+}
+
+.custom-data-grid .MuiTablePagination-toolbar {
+  min-height: 32px !important;
+  height: 32px !important;
+}
+
+.custom-data-grid .MuiTablePagination-selectLabel,
+.custom-data-grid .MuiTablePagination-displayedRows {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  line-height: 32px !important;
+}
+
+.custom-data-grid .MuiTablePagination-select {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}

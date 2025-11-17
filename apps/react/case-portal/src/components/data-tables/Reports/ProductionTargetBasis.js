@@ -157,7 +157,7 @@ const ProductionTargetBasis = () => {
     // clear previous timers if any
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
     timeoutIdsRef.current = []
-
+    setDataMap({})
     try {
       setLoading(true)
 

@@ -80,7 +80,7 @@
   top: 50%;
   transform: translateY(-50%);
   height: 60%;
-  border-right: 1px solid #d0d0d0;
+  border-right: 1px solid #a5a5a5;
 }
 
 .custom-data-grid .MuiDataGrid-row.no-border-row .MuiDataGrid-cell:after {
@@ -95,7 +95,7 @@
   top: 50%;
   transform: translateY(-50%);
   height: 60%;
-  border-right: 1px solid #d0d0d0;
+  border-right: 1px solid #a5a5a5;
 }
 
 .custom-data-grid .MuiDataGrid-columnHeaderTitleContainer:after {

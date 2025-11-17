@@ -1,11 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
+import { DataGrid } from '@mui/x-data-grid'
 import {
   ExcelExport,
   ExcelExportColumn,
 } from '@progress/kendo-react-excel-export'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
@@ -15,19 +16,9 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 import ConsumptionNormsHistorianBasis from './ConsumptionNormsHistorianBasis'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import { DataGrid } from '@mui/x-data-grid'
+const REPORT_TYPE_FOR_ALL = 'NormsHistorian'
 
-// -----------------------------------------------------------------------------
-// NormsHistorianBasisPe
-// Updated to handle new API payload shape: apiResponse.data = [ { gridName, data: [...] }, ... ]
-// If your backend expects a special reportType to return the combined payload, change
-// the REPORT_TYPE_FOR_ALL constant below.
-// -----------------------------------------------------------------------------
-
-const REPORT_TYPE_FOR_ALL = 'NormsHistorian' // <-- change to your backend's value if needed
-
-const ProductionVolumeDataBasisPe = () => {
+const NormsHistorianBasisPe = () => {
   const keycloak = useSession()
 
   const [dataMap, setDataMap] = useState({})
@@ -68,15 +59,6 @@ const ProductionVolumeDataBasisPe = () => {
     }
   }, [keycloak, PLANT_ID, AOP_YEAR])
 
-  // Small helper used previously
-  function parseDDMMYYYY(dateStr) {
-    if (!dateStr) return null
-    const [day, month, year] = dateStr.split('-')
-    return new Date(`${year}-${month}-${day}`)
-  }
-
-  const VALUE_FORMATOR = ValueFormatterProduction()
-
   const enrichColumns = useCallback(
     (backendCols = []) => {
       function countDecimals(value) {
@@ -85,6 +67,8 @@ const ProductionVolumeDataBasisPe = () => {
         if (s.includes('.')) return s.split('.')[1].length
         return 0
       }
+
+      const isManyColumns = backendCols.length > 15
 
       return backendCols
         .filter((col) => col.field !== 'GRID_TYPE')
@@ -96,7 +80,9 @@ const ProductionVolumeDataBasisPe = () => {
             ...col,
             title: col.title || col.field,
             filterable: true,
-            flex: 1,
+
+            flex: isManyColumns ? undefined : 1,
+            width: isManyColumns ? 150 : undefined,
             filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
             editable: false,
             headerAlign: 'left',
@@ -125,6 +111,7 @@ const ProductionVolumeDataBasisPe = () => {
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
+                    textAlign: 'right',
                   }}
                 >
                   {text}
@@ -217,12 +204,13 @@ const ProductionVolumeDataBasisPe = () => {
         parsed[c.field] = !isNaN(d.getTime()) ? d : null
         return
       }
-      // strings and objects left as-is (objects will be stringified during export)
     })
     return parsed
   }
 
   const fetchAllGrids = useCallback(async () => {
+    setGridNames([])
+    setDataMap({})
     if (!PLANT_ID || !AOP_YEAR) return
     // clear previous timers if any
     timeoutIdsRef.current.forEach((t) => clearTimeout(t))
@@ -321,8 +309,6 @@ const ProductionVolumeDataBasisPe = () => {
   }, [keycloak, PLANT_ID, AOP_YEAR, enrichColumns])
 
   useEffect(() => {
-    // setTabIndex(0)
-
     if (tabIndex == 0) {
       fetchAllGrids()
       return () => {
@@ -339,10 +325,6 @@ const ProductionVolumeDataBasisPe = () => {
     yearChanged,
     tabIndex,
   ])
-
-  // ---------------------------------------------------------------------------
-  // Excel export helpers (keeps your existing implementation compatible)
-  // ---------------------------------------------------------------------------
 
   // eslint-disable-next-line
   const INVALID_SHEET_CHARS_RE = /[\\\/\?\*\[\]\:]/g
@@ -416,11 +398,6 @@ const ProductionVolumeDataBasisPe = () => {
     }
   }, [gridNames, dataMap])
 
-  const currentDateTime = new Date()
-    .toISOString()
-    .replace(/T/, ' ')
-    .replace(/:/g, '-')
-    .split('.')[0]
   const fileName = `Norms Historian Basis.xlsx`
 
   const renderTitle = (t) => t
@@ -458,6 +435,11 @@ const ProductionVolumeDataBasisPe = () => {
                   key={col.field}
                   field={col.field}
                   title={col.title || col.field}
+                  headerCellOptions={{
+                    background: '#d9e1f2', // light blue header
+                    color: '#000',
+                    bold: true,
+                  }}
                 />
               ))}
             </ExcelExport>
@@ -541,15 +523,11 @@ const ProductionVolumeDataBasisPe = () => {
                           disableDensitySelector
                           density='standard'
                           rowHeight={30}
-                          // show default footer + pagination
-                          // allow only 100 rows per page
-
-                          pagination={d?.rows?.length > 99} // enable pagination only if > 99
-                          hideFooterPagination={d?.rows?.length <= 99} // hide pagination UI if <= 99
-                          hideFooter={d?.rows?.length === 0} // optional: hide whole footer when no rows
+                          pagination={d?.rows?.length > 99}
+                          hideFooterPagination={d?.rows?.length <= 99}
+                          hideFooter={d?.rows?.length < 30}
                           pageSize={100}
                           rowsPerPageOptions={[100]}
-                          // remove footer hiding flags you had before:
                           hideFooterSelectedRowCount={false}
                           experimentalFeatures={{ newEditingApi: true }}
                         />
@@ -568,4 +546,4 @@ const ProductionVolumeDataBasisPe = () => {
   )
 }
 
-export default ProductionVolumeDataBasisPe
+export default NormsHistorianBasisPe
