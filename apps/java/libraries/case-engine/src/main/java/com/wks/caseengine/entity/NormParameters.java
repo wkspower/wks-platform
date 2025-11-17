@@ -55,6 +55,9 @@ public class NormParameters {
     
     @Column(name="isVisible")
     private Boolean isVisible;
+    
+    @Column(name = "SAPMaterialCode")
+    private String sapMaterialCode;
 
 }
 

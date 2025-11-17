@@ -1055,46 +1055,51 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	
 	@Override
 	public AOPMessageVM getNormsTransactionFinalNormsModeWise(String plantId, String aopYear) {
+		try {
+			List<Map<String, Object>> result = new ArrayList<>();
+		    AOPMessageVM aopMessageVM = getNormsTransaction(plantId, aopYear);
+		    List<Map<String, Object>> normsTransactions = (List<Map<String, Object>>) aopMessageVM.getData();
 
-	    List<Map<String, Object>> result = new ArrayList<>();
-	    AOPMessageVM aopMessageVM = getNormsTransaction(plantId, aopYear);
-	    List<Map<String, Object>> normsTransactions = (List<Map<String, Object>>) aopMessageVM.getData();
+		    AOPMessageVM finalNorms = finalNormsService.getFinalNorms(aopYear, plantId, null, null);
+		    Map<String, Object> dataMap = (Map<String, Object>) finalNorms.getData();
+		    List<ModeWiseNormsDTO> finalNormsDTOList = (List<ModeWiseNormsDTO>) dataMap.get("mcuNormsValueDTOList");
+		    Map<String, String> sapMaterialCodeToIdMap = finalNormsDTOList.stream()
+		    	    .collect(Collectors.toMap(
+		    	        ModeWiseNormsDTO::getSapMaterialCode,
+		    	        ModeWiseNormsDTO::getMaterialFKId,
+		    	        (existing, replacement) -> existing   
+		    	    ));
 
-	    AOPMessageVM finalNorms = finalNormsService.getFinalNorms(aopYear, plantId, null, null);
-	    Map<String, Object> dataMap = (Map<String, Object>) finalNorms.getData();
-	    List<ModeWiseNormsDTO> finalNormsDTOList = (List<ModeWiseNormsDTO>) dataMap.get("mcuNormsValueDTOList");
-	    Map<String, String> materialNameToIdMap = finalNormsDTOList.stream()
-	    	    .collect(Collectors.toMap(
-	    	        ModeWiseNormsDTO::getMaterialName,
-	    	        ModeWiseNormsDTO::getMaterialFKId,
-	    	        (existing, replacement) -> existing   
-	    	    ));
+		    for (Map<String, Object> map : normsTransactions) {
+		        Object normParameterFKId = map.get("normParameterFKId");
+		        if (normParameterFKId != null) {
+		            UUID normParameterId = UUID.fromString(normParameterFKId.toString());
+		            Optional<NormParameters> normParametersOpt = normParametersRepository.findById(normParameterId);
+		            if (normParametersOpt.isPresent()) {
+		                NormParameters normParameters = normParametersOpt.get();
+		                if (!normParameters.getType().equalsIgnoreCase("Monthly")) {
+		                    String sapMaterialCode = normParameters.getSapMaterialCode();
+		                    if (sapMaterialCodeToIdMap.containsKey(sapMaterialCode)) {
+		                        Map<String, Object> finalMap = new HashMap<>();
+		                        finalMap.put("month", map.get("month"));
+		                        finalMap.put("normParameterId", sapMaterialCodeToIdMap.get(sapMaterialCode)); 
+		                        result.add(finalMap);
+		                    }
+		                }
+		            }
+		        }
+		    }
 
-	    for (Map<String, Object> map : normsTransactions) {
-	        Object normParameterFKId = map.get("normParameterFKId");
-	        if (normParameterFKId != null) {
-	            UUID normParameterId = UUID.fromString(normParameterFKId.toString());
-	            Optional<NormParameters> normParametersOpt = normParametersRepository.findById(normParameterId);
-	            if (normParametersOpt.isPresent()) {
-	                NormParameters normParameters = normParametersOpt.get();
-	                if (!normParameters.getType().equalsIgnoreCase("Monthly")) {
-	                    String materialName = normParameters.getName();
-	                    if (materialNameToIdMap.containsKey(materialName)) {
-	                        Map<String, Object> finalMap = new HashMap<>();
-	                        finalMap.put("month", map.get("month"));
-	                        finalMap.put("normParameterId", materialNameToIdMap.get(materialName)); 
-	                        result.add(finalMap);
-	                    }
-	                }
-	            }
-	        }
-	    }
+		    AOPMessageVM finalResult = new AOPMessageVM();
+		    finalResult.setCode(200);
+		    finalResult.setData(result);
+		    finalResult.setMessage("Data fetched successfully");
+		    return finalResult;
 
-	    AOPMessageVM finalResult = new AOPMessageVM();
-	    finalResult.setCode(200);
-	    finalResult.setData(result);
-	    finalResult.setMessage("Data fetched successfully");
-	    return finalResult;
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@Override
@@ -1114,7 +1119,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	  
 	    Map<String, String> materialNameToFKId = finalNormsDTOList.stream()
 	        .collect(Collectors.toMap(
-	            ModeWiseNormsDTO::getMaterialName,
+	            ModeWiseNormsDTO::getSapMaterialCode,
 	            ModeWiseNormsDTO::getMaterialFKId,
 	            (existing, replacement) -> existing 
 	        ));
@@ -1135,7 +1140,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	                        if (typeName.equalsIgnoreCase("RawMaterial") 
 	                            || typeName.equalsIgnoreCase("ByProducts")) {
 	                            
-	                            String materialName = normParameters.getName();
+	                            String materialName = normParameters.getSapMaterialCode();
 	                            if (materialNameToFKId.containsKey(materialName)) {
 	                                Map<String, Object> finalMap = new HashMap<>();
 	                                finalMap.put("month", map.get("month"));
@@ -1148,7 +1153,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	                            List<MCUNormsValue> mcuNormsValues = mcuNormsValueRepository
 	                                      .findCheckedNormsByMaterialFkIdNative(normParameterId);
 	                            if (!mcuNormsValues.isEmpty()) {
-	                                String materialName = normParameters.getName();
+	                                String materialName = normParameters.getSapMaterialCode();
 	                                if (materialNameToFKId.containsKey(materialName)) {
 	                                    Map<String, Object> finalMap = new HashMap<>();
 	                                    finalMap.put("month", map.get("month"));
