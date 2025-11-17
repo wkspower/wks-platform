@@ -1020,7 +1020,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                String idString = getStringCellValue(row.getCell(5), dto);
 	                dto.setId(idString);
 	                
-	                if (!alreadyFailed && dto.getId() == null) {
+	                if (!verticalName.equalsIgnoreCase("PTA") && !alreadyFailed && dto.getId() == null) {
 	                    List<Object[]> obj = shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown", plantFKId.toString(), year, dto.getDiscription());
 
 	                    if (obj.size() > 0) {
