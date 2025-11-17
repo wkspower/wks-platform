@@ -74,7 +74,7 @@ const NormsHistorianBasisAromatics2 = () => {
 
   useEffect(() => {
     fetchAllGrids()
-  }, [fetchAllGrids, plantID, oldYear, yearChanged])
+  }, [fetchAllGrids, keycloak, PLANT_ID, AOP_YEAR, oldYear, yearChanged])
 
   const getGridTitleFromEntry = (entry = {}, fallbackIndex = 0) => {
     const rows = Array.isArray(entry.data) ? entry.data : []

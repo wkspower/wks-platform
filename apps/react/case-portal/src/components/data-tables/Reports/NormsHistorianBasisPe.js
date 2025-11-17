@@ -66,7 +66,7 @@ const ProductionVolumeDataBasisPe = () => {
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [])
+  }, [keycloak, PLANT_ID, AOP_YEAR])
 
   // Small helper used previously
   function parseDDMMYYYY(dateStr) {
@@ -77,62 +77,65 @@ const ProductionVolumeDataBasisPe = () => {
 
   const VALUE_FORMATOR = ValueFormatterProduction()
 
-  const enrichColumns = useCallback((backendCols = []) => {
-    function countDecimals(value) {
-      if (value == null) return 0
-      const s = String(value).replace(/,/g, '').trim()
-      if (s.includes('.')) return s.split('.')[1].length
-      return 0
-    }
+  const enrichColumns = useCallback(
+    (backendCols = []) => {
+      function countDecimals(value) {
+        if (value == null) return 0
+        const s = String(value).replace(/,/g, '').trim()
+        if (s.includes('.')) return s.split('.')[1].length
+        return 0
+      }
 
-    return backendCols
-      .filter((col) => col.field !== 'GRID_TYPE')
-      .map((col) => {
-        const isTextCol = col.type === 'string'
-        const isNumberCol = col.type === 'number'
+      return backendCols
+        .filter((col) => col.field !== 'GRID_TYPE')
+        .map((col) => {
+          const isTextCol = col.type === 'string'
+          const isNumberCol = col.type === 'number'
 
-        const base = {
-          ...col,
-          title: col.title || col.field,
-          filterable: true,
-          flex: 1,
-          filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
-          editable: false,
-          headerAlign: 'left',
-          align: isNumberCol ? 'right' : 'left',
-        }
+          const base = {
+            ...col,
+            title: col.title || col.field,
+            filterable: true,
+            flex: 1,
+            filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
+            editable: false,
+            headerAlign: 'left',
+            align: isNumberCol ? 'right' : 'left',
+          }
 
-        if (!isNumberCol) return base
+          if (!isNumberCol) return base
 
-        return {
-          ...base,
+          return {
+            ...base,
 
-          renderCell: (params) => {
-            const original = params?.row?.[col.field] ?? params?.value
-            const decimals = countDecimals(original) || 2
-            const text =
-              params?.value == null || params?.value === ''
-                ? ''
-                : new Intl.NumberFormat('en-IN', {
-                    maximumFractionDigits: Math.min(decimals, 3),
-                  }).format(Number(params?.value))
-            return (
-              <div
-                title={String(params.value)}
-                style={{
-                  width: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {text}
-              </div>
-            )
-          },
-        }
-      })
-  }, [])
+            renderCell: (params) => {
+              const original = params?.row?.[col.field] ?? params?.value
+              const decimals = countDecimals(original) || 2
+              const text =
+                params?.value == null || params?.value === ''
+                  ? ''
+                  : new Intl.NumberFormat('en-IN', {
+                      maximumFractionDigits: Math.min(decimals, 3),
+                    }).format(Number(params?.value))
+              return (
+                <div
+                  title={String(params.value)}
+                  style={{
+                    width: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {text}
+                </div>
+              )
+            },
+          }
+        })
+    },
+    [keycloak, PLANT_ID, AOP_YEAR],
+  )
 
   function isValidDateString(str) {
     if (typeof str !== 'string') return false
@@ -315,7 +318,7 @@ const ProductionVolumeDataBasisPe = () => {
     } finally {
       if (isMountedRef.current) setLoading(false)
     }
-  }, [keycloak, enrichColumns])
+  }, [keycloak, PLANT_ID, AOP_YEAR, enrichColumns])
 
   useEffect(() => {
     // setTabIndex(0)
@@ -327,7 +330,15 @@ const ProductionVolumeDataBasisPe = () => {
         timeoutIdsRef.current = []
       }
     }
-  }, [fetchAllGrids, PLANT_ID, oldYear, yearChanged, tabIndex])
+  }, [
+    fetchAllGrids,
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    oldYear,
+    yearChanged,
+    tabIndex,
+  ])
 
   // ---------------------------------------------------------------------------
   // Excel export helpers (keeps your existing implementation compatible)

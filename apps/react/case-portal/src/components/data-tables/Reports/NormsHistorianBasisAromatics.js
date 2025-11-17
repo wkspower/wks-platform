@@ -89,12 +89,12 @@ const NormsHistorianBasisAromatics = () => {
     } finally {
       setLoading(false)
     }
-  }, [keycloak])
+  }, [keycloak, PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
     setTabIndex(0)
     fetchAllGrids()
-  }, [fetchAllGrids, PLANT_ID, AOP_YEAR, yearChanged])
+  }, [fetchAllGrids, keycloak, PLANT_ID, AOP_YEAR, yearChanged])
 
   const defaultTabs = ['Tabs1']
   const activeTabs = defaultTabs
