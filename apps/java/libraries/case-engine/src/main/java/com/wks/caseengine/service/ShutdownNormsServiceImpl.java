@@ -497,15 +497,14 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
 			// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
-			List<String> grades=fetchUniqueGradeFkIds(viewName,UUID.fromString(plantId),year);
-			List<Map<String, String>> listOfMaps = new ArrayList<>();
-
-			for (String grade : grades) {
-			    String productName = normParametersRepository.findNormParameterIdByGrade(UUID.fromString(grade));
-			    Map<String, String> singleEntryMap = new HashMap<>();
-			    singleEntryMap.put("gradeId", grade);
-			    singleEntryMap.put("displayName", productName);
+			String viewName="vwScrn"+vertical.getName()+"ShutdownGrade";
+			List<Object[]> grades=fetchUniqueGradeFkIds(viewName,UUID.fromString(plantId),year);
+			List<Map<String, Object>> listOfMaps = new ArrayList<>();
+			
+			for (Object[] grade : grades) {
+			    Map<String, Object> singleEntryMap = new HashMap<>();
+			    singleEntryMap.put("gradeId", grade[5] != null ? grade[5].toString() : null);
+			    singleEntryMap.put("displayName", grade[4] != null ? grade[4].toString() : null);
 			    listOfMaps.add(singleEntryMap);
 			}
 			
@@ -520,17 +519,17 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		return aopMessageVM;
 	}
 	
-	 public List<String> fetchUniqueGradeFkIds(String viewName, UUID plantFkId, String financialYear) {
+	 public List<Object[]> fetchUniqueGradeFkIds(String viewName, UUID plantId, String year) {
 	        // Build SQL with safe view injection (ensure viewName is validated)
-	        String sql = "SELECT DISTINCT Grade_Fk_Id FROM " + viewName +
-	                     " WHERE Plant_Fk_Id = :plantFkId AND FinancialYear = :financialYear";
+	        String sql = "SELECT * FROM " + viewName +
+	                     " WHERE plantId = :plantId AND year = :year";
 
 	        Query query = entityManager.createNativeQuery(sql);
-	        query.setParameter("plantFkId", plantFkId);
-	        query.setParameter("financialYear", financialYear);
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("year", year);
 
 	        @SuppressWarnings("unchecked")
-	        List<String> results = query.getResultList();
+	        List<Object[]> results = query.getResultList();
 	        return results;
 	    }
 
