@@ -1284,7 +1284,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    List<ShutDownPlanDTO> failedList = new ArrayList<ShutDownPlanDTO>();
 	    String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 	    DateTimeFormatter COMPARISON_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"); 
-
+	    Boolean monthChange=false;
+	    int changedMonth=0;
 	    try {
 	        UUID plantMaintenanceId = shutDownPlanService.findIdByPlantIdAndMaintenanceTypeName(plantId, "Slowdown");
 	        if (plantMaintenanceId == null) {
@@ -1324,6 +1325,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    continue;
 	                }
 	                isUpdate = true;
+	                
+	                if(plantMaintenanceTransaction.getMaintForMonth()!=(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1)) {
+	                	changedMonth=plantMaintenanceTransaction.getMaintForMonth();
+	                	monthChange=true;
+	                }
 	            }
 	            String originalDesc = plantMaintenanceTransaction.getDiscription();
 	            String originalStart = plantMaintenanceTransaction.getMaintStartDateTime() != null ? 
@@ -1388,13 +1394,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    continue; // Skip saving this record
 	                }
 	                if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
-						if(plantMaintenanceTransaction.getMaintForMonth()!=(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1)) {
-							int month=plantMaintenanceTransaction.getMaintForMonth();
-				        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Slowdown",year);
+						if(monthChange) {	
+				        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,changedMonth,"Slowdown",year);
 				        	if(count==1) {
 				        		List<SlowdownNormsValue> shutdownNormsValues =slowdownNormsRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
 					        	for(SlowdownNormsValue shutdownNormsValue: shutdownNormsValues) {
-					        		setMonth(month,shutdownNormsValue);
+					        		setMonth(changedMonth,shutdownNormsValue);
 					        	}
 				        	}	
 						}
