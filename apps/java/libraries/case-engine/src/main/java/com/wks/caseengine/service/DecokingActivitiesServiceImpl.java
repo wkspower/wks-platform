@@ -801,6 +801,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
 						decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
 						decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
+						decokeRunLength.setAopYear(year);
+						decokeRunLength.setPlantFkId(UUID.fromString(plantId));
 						String dateString = decokeRunLengthDTO.getDate();
 						DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 						LocalDate parsedDate;
