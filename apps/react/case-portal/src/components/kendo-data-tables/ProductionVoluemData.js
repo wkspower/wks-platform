@@ -931,7 +931,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
-        'Maximum Ethylene Production achieved in the last 01 year historical data for 05 consecutive days in different furnace mode of operation.',
+        'Average Ethylene Production achieved in the last 01 year historical data in different furnace mode of operation.',
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
       titleName:
