@@ -775,12 +775,24 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 							continue;
 						}
 						DecokeRunLength decokeRunLength=null;
+						Optional<DecokeRunLength> decokeRunLengthOpt=null;
 						//String newyear=nextAcademicYear(year);
 						//int deletedRecords=decokeRunLengthRepository.deleteByPlantFkIdAndAopYear(UUID.fromString(plantId),newyear);
 						//System.out.println(deletedRecords);
-						Optional<DecokeRunLength> decokeRunLengthOpt = decokeRunLengthRepository.findById(UUID.fromString(decokeRunLengthDTO.getId()));
+						if(decokeRunLengthDTO.getId()!=null) {
+							decokeRunLengthOpt = decokeRunLengthRepository.findById(UUID.fromString(decokeRunLengthDTO.getId()));
+						}else {
+							decokeRunLengthOpt=	decokeRunLengthRepository.findUniqueByPlantAOPYearAndDate(UUID.fromString(plantId),year,LocalDate.parse(decokeRunLengthDTO.getDate()));					}
+						
 						if(decokeRunLengthOpt.isPresent()) {
 							 decokeRunLength=decokeRunLengthOpt.get();
+						}else {
+							 decokeRunLength = new DecokeRunLength();
+							 decokeRunLength.setH10Actual(decokeRunLengthDTO.getHTenActual() != null ? decokeRunLengthDTO.getHTenActual() : "0.0");
+							 decokeRunLength.setH11Actual(decokeRunLengthDTO.getHElevenActual() != null ? decokeRunLengthDTO.getHElevenActual() : "0.0");
+							 decokeRunLength.setH12Actual(decokeRunLengthDTO.getHTwelveActual() != null ? decokeRunLengthDTO.getHTwelveActual() : "0.0");
+							 decokeRunLength.setH13Actual(decokeRunLengthDTO.getHThirteenActual() != null ? decokeRunLengthDTO.getHThirteenActual() : "0.0");
+							 decokeRunLength.setH14Actual(decokeRunLengthDTO.getHFourteenActual() != null ? decokeRunLengthDTO.getHFourteenActual() : "0.0");
 						}
 						
 						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());

@@ -1,5 +1,7 @@
 package com.wks.caseengine.repository;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,5 +25,18 @@ public interface DecokeRunLengthRepository extends JpaRepository<DecokeRunLength
       @Param("plantFkId") UUID plantFkId,
       @Param("aopYear") String aopYear
     );
+	
+	@Query(
+	        value = "SELECT * FROM DecokeRunLength " +
+	                "WHERE Plant_FK_Id = :plantId " +
+	                "AND AOPYear = :aopYear " +
+	                "AND [Date] = :date",
+	        nativeQuery = true
+	    )
+	    Optional<DecokeRunLength> findUniqueByPlantAOPYearAndDate(
+	        @Param("plantId") UUID plantId,
+	        @Param("aopYear") String aopYear, // Assuming AOPYear is a String/Varchar like '2025-26'
+	        @Param("date") LocalDate date    // Assuming Date is stored as a date type
+	    );
 
 }
