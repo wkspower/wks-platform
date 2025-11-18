@@ -49,5 +49,6 @@ public class ShutdownNormsValueDTO {
     private String productName;
     private String gradeFkId;
     private String sapCode;
+    private Integer materialDisplayOrder;
 }
 
