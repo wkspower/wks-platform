@@ -26,7 +26,7 @@ import {
 } from 'utils/CustomAccrodian'
 import getKendoNormsHistorianColumns from '../CommonHeader/KendoNormHistoryHeader'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import NormsHistorianBasisAromatics from './NormsHistorianBasisAromatics'
+// import NormsHistorianBasisAromatics from './NormsHistorianBasisAromatics'
 import NormsHistorianBasisPe from './NormsHistorianBasisPe'
 import { getRoleName } from 'services/role-service'
 const NormsHistorianBasis = () => {
@@ -64,7 +64,7 @@ const NormsHistorianBasis = () => {
 
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)
   const [showGrids, setShowGrids] = useState({})
 
@@ -298,10 +298,8 @@ const NormsHistorianBasis = () => {
           },
         ]
 
-  if (lowerVertName != 'meg' && lowerVertName != 'aromatics') {
+  if (lowerVertName != 'meg') {
     return <NormsHistorianBasisPe />
-  } else if (lowerVertName == 'aromatics') {
-    return <NormsHistorianBasisAromatics />
   } else
     return (
       <div>

@@ -183,6 +183,7 @@ const KendoDataTables = ({
   const { verticalChange } = dataGridStore
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const isPEPP = ['pe', 'pp'].includes(lowerVertName)
 
   const initialGroup = groupBy
     ? [
@@ -2309,7 +2310,9 @@ const KendoDataTables = ({
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
           <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to save these changes?
+            {permissions?.showNoteWhileSaving
+              ? `Are you sure you want to save these changes? ${note}`
+              : 'Are you sure you want to save these changes?'}{' '}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

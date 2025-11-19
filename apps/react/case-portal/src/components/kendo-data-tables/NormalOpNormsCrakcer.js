@@ -890,7 +890,7 @@ const NormalOpNormsScreenCracker = () => {
       const res =
         await NormalOperationNormsApiService.handleCalculateNormalOperationNorms(
           PLANT_ID,
-          year,
+          AOP_YEAR,
           keycloak,
         )
       const success = res == 0 || !!res

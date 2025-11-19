@@ -57,7 +57,8 @@ public class PlantServiceImpl implements PlantService {
      public List getShutdownMonths(UUID plantId,String maintenanceName,String year,String gradeId){
 		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
 		if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {	
-			return	plantsRepository.getShutdownMonthsWithGrades(plantId,maintenanceName,year,UUID.fromString(gradeId));
+			// return	plantsRepository.getShutdownMonthsWithGrades(plantId,maintenanceName,year,UUID.fromString(gradeId));
+			return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
 		}else {
 			return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
 		}

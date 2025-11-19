@@ -21,7 +21,11 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.CRACKER]: ShutdownConsumptionCrackerColumns,
 }
 
-const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths, valueFormat }) => {
+const getShutdownConsumptionColDef = ({
+  headerMap,
+  shutdownMonths,
+  valueFormat,
+}) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const vertName = dataGridStore.verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || verticalEnums.MEG
@@ -35,22 +39,19 @@ const getShutdownConsumptionColDef = ({ headerMap, shutdownMonths, valueFormat }
   }
 
   const cols = VERTICAL_COLDEFS_MAP[lowerVertName] || []
+  // const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
 
   const enhancedColDefs = cols.map((col) => {
     if (col.monthNumber) {
       const monthNum = col.monthNumber
-      const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
+      const isPEorPP = false
 
       return {
         ...col,
         headerName: headerMap?.[monthNum] || col.field,
-        editable: isPEorPP ? false : safeShutdownMonths.includes(monthNum),
-        ...(!isPEorPP && {
-          isDisabled: !safeShutdownMonths.includes(monthNum),
-        }),
-        ...(isPEorPP && {
-          isBold: safeShutdownMonths.includes(monthNum),
-        }),
+        editable: safeShutdownMonths.includes(monthNum),
+        // isDisabled: !safeShutdownMonths.includes(monthNum),
+        isDisabled: !safeShutdownMonths.includes(monthNum),
         format: valueFormat,
       }
     }

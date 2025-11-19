@@ -40,7 +40,7 @@ const ShutDown = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
 
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const plantName = plantObject?.name
 
   const isOldYear = oldYear?.oldYear
@@ -139,11 +139,7 @@ const ShutDown = ({ permissions }) => {
       }
       let requiredFields
       if (lowerVertName === 'pe') {
-        if (plantName?.toLowerCase() === 'ldpe') {
-          requiredFields = ['discription', 'remark', 'productName1']
-        } else {
-          requiredFields = ['discription', 'remark', 'productName1']
-        }
+        requiredFields = ['discription', 'remark']
       } else if (lowerVertName === 'pta') {
         requiredFields = ['discriptionDrpdwn', 'remark']
       } else if (lowerVertName === 'pp') {

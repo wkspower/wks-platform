@@ -51,13 +51,13 @@ const ConsumptionNormsHistorianBasis = () => {
   const exportRefs = useRef({})
 
   useEffect(() => {
+    isMountedRef.current = true
     return () => {
       isMountedRef.current = false
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR])
-
+  }, [])
   const enrichColumns = useCallback(
     (backendCols = []) => {
       function countDecimals(value) {

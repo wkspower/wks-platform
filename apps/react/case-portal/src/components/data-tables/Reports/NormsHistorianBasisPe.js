@@ -45,19 +45,21 @@ const NormsHistorianBasisPe = () => {
   const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
 
   const timeoutIdsRef = useRef([])
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
 
   useEffect(() => {
+    isMountedRef.current = true
+
     return () => {
       isMountedRef.current = false
       timeoutIdsRef.current.forEach((t) => clearTimeout(t))
       timeoutIdsRef.current = []
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR])
+  }, [])
 
   const enrichColumns = useCallback(
     (backendCols = []) => {
