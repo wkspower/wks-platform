@@ -878,9 +878,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	}
 	public List<ShutDownPlanDTO> readNonValidationShutdown(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-	   
-	    Map<String, Integer> validatedDescriptions = new HashMap<>(); 
 	    
+	    Map<String, Integer> validatedDescriptions = new HashMap<>();
 	    List<TimeRangeWithIndex> validTimeRangesWithIndex = new ArrayList<>();
 	    
 	    String verticalName = plantsService.findVerticalNameByPlantId(plantFKId);
@@ -891,23 +890,23 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
 	        if (rowIterator.hasNext())
-	            rowIterator.next(); 
+	            rowIterator.next();
 
-	        int currentRowIndex = 0; 
+	        int currentRowIndex = 0;
 
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
-	            LocalDateTime ldtStart = null;
-	            LocalDateTime ldtEnd = null;
+	            LocalDateTime ldtStart = null; 
+	            LocalDateTime ldtEnd = null;   
 	            boolean alreadyFailed = false;
 
 	            try {
 	                dto.setAudityear(year);
 	                dto.setPlantId(plantFKId);
+	                
 	                String desc = getStringCellValue(row.getCell(0), dto);
-	                dto.setDiscription(desc);
-
+	                dto.setDiscription(desc); // Set DTO field regardless of validity
 	                if (dto.getDiscription() == null || dto.getDiscription().trim().isEmpty()) {
 	                    dto.setSaveStatus("Failed");
 	                    dto.setErrDescription("Description is required.");
@@ -919,19 +918,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	                    int conflictingDtoIndex = validatedDescriptions.get(dto.getDiscription().trim());
 	                    ShutDownPlanDTO conflictingDto = dtoList.get(conflictingDtoIndex);
-	                    
 	                    if (conflictingDto.getSaveStatus() == null || !conflictingDto.getSaveStatus().equals("Failed")) {
-	                         conflictingDto.setSaveStatus("Failed");
-	                         conflictingDto.setErrDescription("Description is a duplicate of a description in row " + (currentRowIndex + 2) + ".");
+	                        conflictingDto.setSaveStatus("Failed");
+	                        conflictingDto.setErrDescription("Description is a duplicate of a description in row " + (currentRowIndex + 2) + ".");
 	                    }
-	                    
 	                    validatedDescriptions.remove(dto.getDiscription().trim());
 	                }
 	                
-	                if (!alreadyFailed) {
-	                    if (!verticalName.equalsIgnoreCase("PTA")) {
-	                        validatedDescriptions.put(dto.getDiscription().trim(), currentRowIndex);
-	                    }
+	                if (!alreadyFailed && !verticalName.equalsIgnoreCase("PTA")) {
+	                    validatedDescriptions.put(dto.getDiscription().trim(), currentRowIndex);
 	                }
 	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
 	                LocalDateTime fyStart = bounds[0];
@@ -940,56 +935,55 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
 	                String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
 
-	                if (!alreadyFailed && (mantStartStr == null || mantEndStr == null || mantStartStr.trim().isEmpty() || mantEndStr.trim().isEmpty())) {
-	                    dto.setSaveStatus("Failed");
-	                    dto.setErrDescription("Start and/or End Date/Time is missing.");
-	                    alreadyFailed = true;
-	                }
-
-	                if (mantStartStr != null && !alreadyFailed) {
+	                if (mantStartStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
-	                                
+	                        
+	                        Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
+	                        dto.setMaintStartDateTime(startDate); // Set DTO field
+
 	                        if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
+	                             if (!alreadyFailed) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("Start date/time is outside the financial year " + year);
+	                                alreadyFailed = true;
+	                            }
+	                        }
+	                    } catch (Exception ex) {
+	                        if (!alreadyFailed) {
 	                            dto.setSaveStatus("Failed");
-	                            dto.setErrDescription("Start date/time is outside the financial year " + year);
+	                            dto.setErrDescription("Invalid date/time format in cell 1 (Start Date).");
 	                            alreadyFailed = true;
 	                        }
-	                                
-	                        Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
-	                        dto.setMaintStartDateTime(startDate);
-	                    } catch (Exception ex) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("Invalid date/time format in cell 1 (Start Date).");
-	                        alreadyFailed = true;
 	                    }
 	                }
-
-	                if (mantEndStr != null && !alreadyFailed) {
+	                
+	                if (mantEndStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
 	                        Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
-	                        dto.setMaintEndDateTime(endDate);
-	                        
+	                        dto.setMaintEndDateTime(endDate); // Set DTO field
 	                        if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
-	                            dto.setSaveStatus("Failed");
-	                            dto.setErrDescription("End date/time is outside the financial year " + year);
-	                            alreadyFailed = true;
+	                            if (!alreadyFailed) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("End date/time is outside the financial year " + year);
+	                                alreadyFailed = true;
+	                            }
 	                        } else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
-	                            dto.setSaveStatus("Failed");
-	                            dto.setErrDescription("End date/time cannot be before start date/time.");
-	                            alreadyFailed = true;
+	                             if (!alreadyFailed) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("End date/time cannot be before start date/time.");
+	                                alreadyFailed = true;
+	                            }
 	                        }
 	                        
 	                        else if (verticalName.equalsIgnoreCase("PTA") && ldtStart != null) {
 	                            int conflictingIndex = -1;
-	                            
 	                            for (TimeRangeWithIndex prevPeriod : validTimeRangesWithIndex) {
 	                                LocalDateTime prevLdtStart = prevPeriod.getStart();
 	                                LocalDateTime prevLdtEnd = prevPeriod.getEnd();
-	                                
 	                                if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
 	                                    conflictingIndex = prevPeriod.getIndex();
 	                                    break;
@@ -997,27 +991,40 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                            }
 
 	                            if (conflictingIndex != -1) {
-	                                dto.setSaveStatus("Failed");
-	                                dto.setErrDescription("The maintenance period overlaps with a period in row " + (conflictingIndex + 2) + ".");
-	                                alreadyFailed = true;
+	                                if (!alreadyFailed) {
+	                                    dto.setSaveStatus("Failed");
+	                                    dto.setErrDescription("The maintenance period overlaps with a period in row " + (conflictingIndex + 2) + ".");
+	                                    alreadyFailed = true;
+	                                }
+	                                
+	                               
 	                                ShutDownPlanDTO conflictingDto = dtoList.get(conflictingIndex);
 	                                if (conflictingDto.getSaveStatus() == null || !conflictingDto.getSaveStatus().equals("Failed")) {
-	                                     conflictingDto.setSaveStatus("Failed");
-	                                     conflictingDto.setErrDescription("The maintenance period overlaps with a period in row " + (currentRowIndex + 2) + ".");
+	                                    conflictingDto.setSaveStatus("Failed");
+	                                    conflictingDto.setErrDescription("The maintenance period overlaps with a period in row " + (currentRowIndex + 2) + ".");
 	                                }
 	                                final int finalConflictingIndex = conflictingIndex;
-	                                validTimeRangesWithIndex.removeIf(p -> p.getIndex()== finalConflictingIndex);
+	                                validTimeRangesWithIndex.removeIf(p -> p.getIndex() == finalConflictingIndex);
 	                            }
 	                        }
-	                                
 	                    } catch (Exception ex) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("Invalid date/time format in cell 2 (End Date).");
-	                        alreadyFailed = true;
+	                         if (!alreadyFailed) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Invalid date/time format in cell 2 (End Date).");
+	                            alreadyFailed = true;
+	                        }
 	                    }
 	                }
-
-	                if (ldtStart != null && ldtEnd != null && !alreadyFailed) {
+	                
+	                
+	                 if (!alreadyFailed && (mantStartStr == null || mantEndStr == null || mantStartStr.trim().isEmpty() || mantEndStr.trim().isEmpty())) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Start and/or End Date/Time is missing.");
+	                    alreadyFailed = true;
+	                }
+	                
+	               
+	                if (ldtStart != null && ldtEnd != null) { 
 	                    try {
 	                        Duration duration = Duration.between(ldtStart, ldtEnd);
 	                        long totalMinutes = duration.toMinutes();
@@ -1027,16 +1034,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                        }
 
 	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
-	                        dto.setDurationInHrs(durationInDecimalHours);
+	                        dto.setDurationInHrs(durationInDecimalHours); 
 
 	                    } catch (Exception e) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
-	                        alreadyFailed = true;
+	                        if (!alreadyFailed) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
+	                            alreadyFailed = true;
+	                        }
 	                    }
 	                }
-
-	                dto.setRemark(getStringCellValue(row.getCell(4), dto));
+	                
+	                dto.setRemark(getStringCellValue(row.getCell(4), dto)); // Set DTO field
+	                
 	                if (!alreadyFailed && (dto.getRemark() == null || dto.getRemark().trim().isEmpty())) {
 	                    dto.setSaveStatus("Failed");
 	                    dto.setErrDescription("Please enter remark");
@@ -1044,7 +1054,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                }
 
 	                String idString = getStringCellValue(row.getCell(5), dto);
-	                dto.setId(idString);
+	                dto.setId(idString); 
+	                
 	                if (!verticalName.equalsIgnoreCase("PTA") && !alreadyFailed && dto.getId() == null) {
 	                    List<Object[]> obj = shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown", plantFKId.toString(), year, dto.getDiscription());
 
@@ -1067,16 +1078,15 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	            }
 	            
 	            dtoList.add(dto);
-	            currentRowIndex++; 
+	            currentRowIndex++;
 	        }
 
 	    } catch (Exception e) {
-	    	e.printStackTrace();
+	        e.printStackTrace();
 	    }
 
 	    return dtoList;
 	}
-
 	private static String getStringCellValue(Cell cell, ShutDownPlanDTO dto) {
 		try {
 			if (cell == null)
