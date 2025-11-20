@@ -44,6 +44,7 @@ import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
+import { PostCrDaysEditor } from './Utilities-Kendo/numbericColumns_dmd'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -168,6 +169,17 @@ const KendoDataTablesCracker = ({
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
   }, [])
+  const originalIsCrRef = useRef({});
+  
+  useEffect(() => {
+    rows.forEach(row => {
+      // Only set if not already set (preserve original state)
+      if (!(row.id in originalIsCrRef.current)) {
+        originalIsCrRef.current[row.id] = row.isCr === true;
+      }
+    });
+  }, [rows]);
+
   const handleRowClick = (e) => {
     if (READ_ONLY) {
       setEdit({})
@@ -181,6 +193,7 @@ const KendoDataTablesCracker = ({
     setRows(
       rows.map((r) => ({
         ...r,
+        originalIsCr: originalIsCrRef.current[r.id],
         inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
       })),
     )
@@ -207,6 +220,9 @@ const KendoDataTablesCracker = ({
         prev.map((r) => {
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
+            if (field === 'postCrDays' || field === 'isCr') {
+          updated.originalIsCr = originalIsCrRef.current[itemId];
+        }
           // Auto-calculate preCrDays
           if (field === 'actualRunLength' || field === 'reduction') {
             updated.preCrDays = calcPreCoilReplacementRunLength(
@@ -258,6 +274,9 @@ const KendoDataTablesCracker = ({
   }
   const saveConfirmation = async () => {
     saveChanges()
+    rows.forEach(row => {
+      originalIsCrRef.current[row.id] = row.isCr === true;
+    });
     setOpenSaveDialogeBox(false)
     setEdit({})
   }
@@ -446,6 +465,25 @@ const KendoDataTablesCracker = ({
             />
           )
         }
+         if (col.field === 'postCrDays') {
+            return (
+              <GridColumn
+                key={col.field}
+                field={col.field}
+                title={col.title || col.headerName}
+                hidden={col.hidden}
+                className='k-number-right'
+                cells={{
+                  edit: { text: PostCrDaysEditor },
+                  data: toolTipRenderer,
+                  headerCell: SimpleHeaderWithTooltip,
+                }}
+                filter='numeric'
+                format={col.format}
+                sortable={false}
+              />
+            );
+          }
         if (col?.field === 'productName1') {
           return (
             <GridColumn

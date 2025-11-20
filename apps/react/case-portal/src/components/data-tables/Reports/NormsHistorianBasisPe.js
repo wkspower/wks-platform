@@ -102,9 +102,7 @@ const NormsHistorianBasisPe = () => {
               const text =
                 params?.value == null || params?.value === ''
                   ? ''
-                  : new Intl.NumberFormat('en-IN', {
-                      maximumFractionDigits: Math.min(decimals, 3),
-                    }).format(Number(params?.value))
+                  : Number(params?.value).toFixed(Math.min(decimals, 3))
               return (
                 <div
                   title={String(params.value)}

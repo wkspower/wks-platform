@@ -620,12 +620,20 @@ const NormalOpNormsScreen = () => {
     })
 
     try {
-      await NormalOperationNormsApiService.getNormalOpsNormsExcel(
+      if(lowerVertName === 'pe' || lowerVertName === 'pp'){
+        await NormalOperationNormsApiService.getNormalOpsNormsExcelpe(
         keycloak,
-        gradeId,
         PLANT_ID,
         AOP_YEAR,
       )
+      }else {
+        await NormalOperationNormsApiService.getNormalOpsNormsExcel(
+          keycloak,
+          gradeId,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
 
       setSnackbarData({
         message: 'Excel download completed successfully!',

@@ -1,0 +1,184 @@
+[
+  {
+    "field": "id",
+    "title": "Id",
+    "editable": true,
+    "hidden": true
+  },
+  {
+    "field": "monthName",
+    "title": "Month",
+    "editable": false,
+    "widthT": 100
+  },
+
+  {
+    "field": "fiveF",
+    "title": "5F",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "fourF",
+    "title": "4F",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "fourFD",
+    "title": "5F With D/S SD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "coilReplacement",
+    "title": "IBR/Coil Replacement",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 125
+  },
+
+  {
+    "field": "shutdown",
+    "title": "Shutdown(TA)",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "slowdown",
+    "title": "Slowdown",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "sad",
+    "title": "SAD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "bbu",
+    "title": "BBU",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "bbd",
+    "title": "BBD",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "mnt",
+    "title": "MNT",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "total",
+    "title": "Total",
+    "editable": false,
+
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "numberOfDays",
+    "title": "No of Days",
+    "editable": false,
+
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+  {
+    "field": "totalSAD",
+    "title": "No of SADs",
+    "editable": false,
+
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": false,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 100
+  },
+
+  {
+    "field": "fourFHours",
+    "title": "4F Hours",
+    "editable": true,
+    "type": "number",
+    "format": "{0:#.##}",
+    "hidden": true,
+    "hideFilter": true,
+    "hideSort": true,
+    "widthT": 120
+  },
+
+  {
+    "field": "remarks",
+    "title": "Remarks",
+    "widthT": 120
+  }
+]

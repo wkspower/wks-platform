@@ -10,6 +10,7 @@ import { validateFields } from 'utils/validationUtils'
 import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
 import { ShutDownPeColumns } from 'components/colums/ShutdownColumn'
+import { ShutDownPeColumnsldpe12 } from 'components/colums/ShutdownColumn'
 import { ShutDownPpColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownPTAColumns } from 'components/colums/ShutdownColumn'
@@ -42,7 +43,7 @@ const ShutDown = ({ permissions }) => {
 
   const lowerVertName = vertName?.toLowerCase()
   const plantName = plantObject?.name
-
+  const siteName = siteObject?.name
   const isOldYear = oldYear?.oldYear
 
   const [open1, setOpen1] = useState(false)
@@ -139,7 +140,17 @@ const ShutDown = ({ permissions }) => {
       }
       let requiredFields
       if (lowerVertName === 'pe') {
-        requiredFields = ['discription', 'remark']
+        if (
+          siteName?.toLowerCase() === 'nmd' &&
+          (
+            plantName?.toLowerCase() === 'lldpe1' ||
+            plantName?.toLowerCase() === 'lldpe2'
+          )
+        ) {
+          requiredFields = ['discription', 'remark', 'productName1']
+        } else {
+          requiredFields = ['discription', 'remark']
+        }
       } else if (lowerVertName === 'pta') {
         requiredFields = ['discriptionDrpdwn', 'remark']
       } else if (lowerVertName === 'pp') {
@@ -658,11 +669,16 @@ const ShutDown = ({ permissions }) => {
   const colDefs = useMemo(() => {
     switch (lowerVertName) {
       case verticalEnums.PE:
-        // if (plantName?.toLowerCase() != 'ldpe') {
-        //   return ShutDownAllColumns
-        // }
-
-        return ShutDownPeColumns
+        if (
+    siteName?.toLowerCase() === 'nmd' &&
+    (
+      plantName?.toLowerCase() === 'lldpe1' ||
+      plantName?.toLowerCase() === 'lldpe2'
+    )
+  ) {
+    return ShutDownPeColumnsldpe12
+  }
+  return ShutDownPeColumns
 
       case verticalEnums.PP:
         return ShutDownPpColumns

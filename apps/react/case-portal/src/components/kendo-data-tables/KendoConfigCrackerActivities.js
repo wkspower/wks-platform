@@ -52,6 +52,7 @@ const DecokingConfig = () => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const SCREEN_NAME = screenTitle?.title
+  const siteName = siteObject?.name?.toLowerCase() 
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -991,6 +992,10 @@ const DecokingConfig = () => {
     return `${d}/${m}/${y}`
   }
   const rowClass = (row) => (row.isError ? 'row-error' : '')
+  const filteredIbrGridThree =
+  siteName === 'dmd'
+    ? ibrGridThree.filter((col) => col.field !== 'demo')
+    : ibrGridThree;
   return (
     <Box>
       <Backdrop
@@ -1071,7 +1076,7 @@ const DecokingConfig = () => {
       />
 
       <FurnaceRunLengthGrid
-        columns={ibrGridThree}
+        columns={filteredIbrGridThree}
         rows={getRows('IBR Plan')[3]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
         fetchData={fetchData}

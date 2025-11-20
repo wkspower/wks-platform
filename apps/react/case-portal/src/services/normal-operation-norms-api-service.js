@@ -15,6 +15,7 @@ export const NormalOperationNormsApiService = {
   handleCalculateNormalOperationNormsPe,
   handleCalculateNormalOperationNorms,
   getNormalOpsNormsExcel,
+  getNormalOpsNormsExcelpe,
   updateFinalNormsData,
   getfinalNorms,
   calculateFinalNorms,
@@ -524,6 +525,36 @@ async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
   }
 }
 
+async function getNormalOpsNormsExcelpe(keycloak, PLANT_ID, AOP_YEAR) {
+  var url = `${Config.CaseEngineUrl}/task/steady-state-norms-all-grades-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'Steady State Norms.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error Editing data:', e)
+    return Promise.reject(e)
+  }
+}
 async function updateFinalNormsData(
   keycloak,
   gradeId,

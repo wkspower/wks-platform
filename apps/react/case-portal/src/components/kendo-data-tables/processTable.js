@@ -8,6 +8,7 @@ import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-s
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
 import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
+import crackercolumnsDMD from '../../assets/CrackerMaintenanceColumn_DMD.json'
 import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
 const MaintenanceProcessTable = ({ viewOnly }) => {
@@ -30,7 +31,9 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
-
+  const plantName = plantObject?.name?.toLowerCase()
+  const siteName = siteObject?.name?.toLowerCase() 
+  const lowerVertName = verticalObject?.name?.toLowerCase()
   const dataConfig = useMemo(
     () => ({
       serviceFn: () =>
@@ -59,6 +62,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [calculationObject, setCalculationObject] = useState([]) 
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     // if (!row?.isEditable) return
@@ -216,7 +220,8 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     setLoading(true)
     try {
       const resp = await dataConfig.serviceFn(keycloak)
-      const raw = resp.data
+      const raw = resp.data?.data
+      setCalculationObject(resp?.data?.aopCalculation)
       const formatted = (raw || []).map((item, idx, arr) => ({
         ...item,
         idFromApi: item.id,
@@ -399,7 +404,15 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     hidden: true,
   }
 
-  let basecols = crackercolumns
+  let basecols 
+  if (siteName === 'dmd') {
+    basecols = crackercolumnsDMD
+  } else if (siteName === 'nmd') {
+    basecols = crackercolumns
+  } else {
+    basecols = crackercolumns
+  }
+  
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -416,6 +429,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       allAction: false,
       uploadExcelBtn: false,
       downloadExcelBtn: false,
+
     }
   }
 
