@@ -103,7 +103,27 @@ public class NormalOperationNormsController {
 	    }
 	}
 
+	@GetMapping(value = "/steady-state-norms-all-grades-export")
+	public ResponseEntity<byte[]> exportSteadyStateNorms(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam(required = false) String mode) {
+	    try {
+			
+	        byte[] excelBytes = normalOperationNormsService.exportSteadyStateNorms(year,UUID.fromString(plantId),false,null,mode); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("plant_production_plan.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
 
 	@PostMapping(value = "/steady-state-norms-import", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(

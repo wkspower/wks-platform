@@ -17,7 +17,8 @@ public interface NormalOperationNormsService {
 	AOPMessageVM getNormsTransaction(String plantId, String aopYear);
 	AOPMessageVM getNormsTransactionFinalNormsModeWise(String plantId, String aopYear);
 	AOPMessageVM getNormsTransactionFinalNorms(String plantId, String aopYear);
-	 public byte[] createExcel(String year, UUID plantFKId,boolean isAfterSave,List<MCUNormsValueDTO> dtoList,String mode,String gradeId);
+	public byte[] createExcel(String year, UUID plantFKId,boolean isAfterSave,List<MCUNormsValueDTO> dtoList,String mode,String gradeId);
+	public byte[] exportSteadyStateNorms(String year, UUID plantFKId,boolean isAfterSave,List<MCUNormsValueDTO> dtoList,String mode);
     public AOPMessageVM importExcel(String year, UUID fromString,String gradeId, MultipartFile file,String mode);
     public AOPMessageVM getNormalOperationNormsGrades(String year,String plantId);
 	// public int getCalculatedNormalOpsNorms( String year, String plantId);
