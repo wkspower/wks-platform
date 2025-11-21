@@ -900,6 +900,7 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					annualProductionPlanReport.setAopYear(year);
 					annualProductionPlanReport.setPlantFkId(UUID.fromString(plantId));
 					annualProductionPlanReport.setRowNo((annualProductionPlanReportRepository.findLatestRowNo()+1));
+					annualProductionPlanReport.setReportType("assumptions");
 					annualProductionPlanReportRepository.save(annualProductionPlanReport);
 				}
 			}
