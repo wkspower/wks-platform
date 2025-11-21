@@ -217,7 +217,6 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 					list.add(dto.getJan());
 					list.add(dto.getFeb());
 					list.add(dto.getMarch());
-					list.add(dto.getAopRemarks());
 					list.add(dto.getId()); 
 					isEditable.add(dto.getIsEditable());
 					
@@ -235,7 +234,6 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 				innerHeaders.add("UOM");
 				List<String> monthsList = Utility.getAcademicYearMonths(year);
 				innerHeaders.addAll(monthsList);
-				innerHeaders.add("Remarks");
 				innerHeaders.add("Id");
 				if (isAfterSave) {
 					innerHeaders.add("Status");
@@ -283,7 +281,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 						}
 					}
 				}
-				sheet.setColumnHidden(16, true);
+				sheet.setColumnHidden(15, true);
 				
 			} 
 			
