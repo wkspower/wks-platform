@@ -858,52 +858,60 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 	@Override
 	public AOPMessageVM updateReportForPlantProductionPlanData(String plantId, String year,
 			List<AnnualProductionPlanReportDto> dataList, String reportType) {
-		for (AnnualProductionPlanReportDto dto : dataList) {
-			if (dto.getId() != null) {
-				Optional<AnnualProductionPlanReport> optional = annualProductionPlanReportRepository
-						.findById(dto.getId());
-				if (optional.isPresent()) {
-					AnnualProductionPlanReport annualProductionPlanReport = optional.get();
-					if (reportType.equalsIgnoreCase("assumptions")) {
-						annualProductionPlanReport.setActivity(dto.getActivity());
-						annualProductionPlanReport.setRemark(dto.getRemark());
-						annualProductionPlanReportRepository.save(annualProductionPlanReport);
+		try {
+			for (AnnualProductionPlanReportDto dto : dataList) {
+				if (dto.getId() != null) {
+					Optional<AnnualProductionPlanReport> optional = annualProductionPlanReportRepository
+							.findById(dto.getId());
+					if (optional.isPresent()) {
+						AnnualProductionPlanReport annualProductionPlanReport = optional.get();
+						if (reportType.equalsIgnoreCase("assumptions")) {
+							annualProductionPlanReport.setActivity(dto.getActivity());
+							annualProductionPlanReport.setRemark(dto.getRemark());
+							annualProductionPlanReportRepository.save(annualProductionPlanReport);
+						}
+						if (reportType.equalsIgnoreCase("maxRate")) {
+							annualProductionPlanReport.setActivity(dto.getActivity());
+							annualProductionPlanReport.setMaxHourlyRateValue(dto.getMaxHourlyRateValue());
+							annualProductionPlanReport.setUom(dto.getUom());
+							annualProductionPlanReport.setRemark(dto.getRemark());
+							annualProductionPlanReportRepository.save(annualProductionPlanReport);
+						}
+						if (reportType.equalsIgnoreCase("OperatingHrs")) {
+							annualProductionPlanReport.setActivity(dto.getActivity());
+							annualProductionPlanReport.setRateValue(dto.getRateValue());
+							annualProductionPlanReport.setUom(dto.getUom());
+							annualProductionPlanReport.setRemark(dto.getRemark());
+							annualProductionPlanReportRepository.save(annualProductionPlanReport);
+						}
+						if (reportType.equalsIgnoreCase("AverageHourlyRate")) {
+							annualProductionPlanReport.setActivity(dto.getActivity());
+							annualProductionPlanReport.setDurationHours(dto.getDurationHours());
+							annualProductionPlanReport.setRateValue(dto.getRateValue());
+							annualProductionPlanReport.setPeriodTo(dto.getPeriodTo());
+							annualProductionPlanReport.setPeriodFrom(dto.getPeriodFrom());
+							annualProductionPlanReport.setRemark(dto.getRemark());
+							annualProductionPlanReportRepository.save(annualProductionPlanReport);
+						}
 					}
-					if (reportType.equalsIgnoreCase("maxRate")) {
-						annualProductionPlanReport.setActivity(dto.getActivity());
-						annualProductionPlanReport.setMaxHourlyRateValue(dto.getMaxHourlyRateValue());
-						annualProductionPlanReport.setUom(dto.getUom());
-						annualProductionPlanReport.setRemark(dto.getRemark());
-						annualProductionPlanReportRepository.save(annualProductionPlanReport);
-					}
-					if (reportType.equalsIgnoreCase("OperatingHrs")) {
-						annualProductionPlanReport.setActivity(dto.getActivity());
-						annualProductionPlanReport.setRateValue(dto.getRateValue());
-						annualProductionPlanReport.setUom(dto.getUom());
-						annualProductionPlanReport.setRemark(dto.getRemark());
-						annualProductionPlanReportRepository.save(annualProductionPlanReport);
-					}
-					if (reportType.equalsIgnoreCase("AverageHourlyRate")) {
-						annualProductionPlanReport.setActivity(dto.getActivity());
-						annualProductionPlanReport.setDurationHours(dto.getDurationHours());
-						annualProductionPlanReport.setRateValue(dto.getRateValue());
-						annualProductionPlanReport.setPeriodTo(dto.getPeriodTo());
-						annualProductionPlanReport.setPeriodFrom(dto.getPeriodFrom());
-						annualProductionPlanReport.setRemark(dto.getRemark());
-						annualProductionPlanReportRepository.save(annualProductionPlanReport);
-					}
+				} else {
+					AnnualProductionPlanReport annualProductionPlanReport = new AnnualProductionPlanReport();
+					annualProductionPlanReport.setActivity(dto.getActivity());
+					annualProductionPlanReport.setAopYear(year);
+					annualProductionPlanReport.setPlantFkId(UUID.fromString(plantId));
+					annualProductionPlanReport.setRowNo((annualProductionPlanReportRepository.findLatestRowNo()+1));
+					annualProductionPlanReportRepository.save(annualProductionPlanReport);
 				}
-			} else {
-				AnnualProductionPlanReport annualProductionPlanReport = new AnnualProductionPlanReport();
-				annualProductionPlanReport.setActivity(dto.getActivity());
-				annualProductionPlanReportRepository.save(annualProductionPlanReport);
 			}
+			AOPMessageVM response = new AOPMessageVM();
+			response.setCode(200);
+			response.setMessage("Data updated successfully.");
+			return response;
+			// TODO Auto-generated method stub
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
 		}
-		AOPMessageVM response = new AOPMessageVM();
-		response.setCode(200);
-		response.setMessage("Remarks updated successfully.");
-		return response;
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
