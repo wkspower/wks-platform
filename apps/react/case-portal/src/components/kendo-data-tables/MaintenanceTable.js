@@ -185,7 +185,7 @@ const MaintenanceTable = () => {
     setLoading(true)
     try {
       const resp = await dataConfig.serviceFn(keycloak, PLANT_ID, AOP_YEAR)
-      const raw = dataConfig.isCracker ? resp.data : resp
+      const raw = dataConfig.isCracker ? resp.data?.data : resp
       const monthFields = [
         'April',
         'May',
