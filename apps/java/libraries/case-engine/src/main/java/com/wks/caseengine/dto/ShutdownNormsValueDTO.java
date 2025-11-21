@@ -50,5 +50,7 @@ public class ShutdownNormsValueDTO {
     private String gradeFkId;
     private String sapCode;
     private Integer materialDisplayOrder;
+    private String saveStatus;
+	private String errDescription;
 }
 

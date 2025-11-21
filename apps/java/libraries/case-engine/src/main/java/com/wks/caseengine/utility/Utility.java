@@ -1,7 +1,11 @@
 package com.wks.caseengine.utility;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,6 +38,30 @@ public class Utility {
                 ));
     }
 
+	public static List<String> getAcademicYearMonths(String year) {
+		List<String> months = new ArrayList<>();
+		int startYear = Integer.parseInt(year.substring(0, 4));
+		int nextYear = startYear + 1;
 
+		// Apr to Dec of startYear
+		for (int month = 4; month <= 12; month++) {
+			String label = formatMonthYear(month, startYear);
+			months.add(label);
+		}
+
+		// Jan to Mar of nextYear
+		for (int month = 1; month <= 3; month++) {
+			String label = formatMonthYear(month, nextYear);
+			months.add(label);
+		}
+
+		return months;
+	}
+	
+	private static String formatMonthYear(int month, int year) {
+		LocalDate date = LocalDate.of(year, month, 1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+		return date.format(formatter);
+	}
     
 }

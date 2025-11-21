@@ -7,16 +7,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import javax.sql.DataSource;
+
+import java.io.ByteArrayOutputStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
 import jakarta.persistence.Query;
 import javax.sql.DataSource;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.dto.ShutdownConsumptionDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -159,6 +174,209 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public byte[] exportShutdownNorms(String year, UUID plantFKId, boolean isAfterSave, List<ShutdownNormsValueDTO> dtoList) {
+		try {
+			AOPMessageVM gradesVM = getUniqueGrades(year, plantFKId.toString());
+			List<Map<String, String>> gradeInfoList = extractGradeInfo(gradesVM);
+			Workbook workbook = new XSSFWorkbook();
+			CellStyle lockedStyle = createLockedStyle(workbook);
+			CellStyle unlockedStyle = createUnlockedStyle(workbook);
+
+			for (Map<String, String> gradeInfo : gradeInfoList) {
+				
+				String currentGradeId = gradeInfo.get("gradeId");
+				String sheetName = sanitizeSheetName(gradeInfo.get("displayName"));
+				
+				AOPMessageVM aopMessageVM =null;
+				List<ShutdownNormsValueDTO> currentDtoList = new ArrayList<>();
+				List<Boolean> isEditable = new ArrayList<>();
+				if(!isAfterSave){
+					 aopMessageVM = getShutdownNormsData(year, plantFKId.toString(), currentGradeId);
+				}
+				if (aopMessageVM!=null && aopMessageVM.getData() != null) {
+					
+					Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+					currentDtoList = (List<ShutdownNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+				} else if (isAfterSave) {
+					currentDtoList = dtoList.stream()
+				            .filter(dto -> currentGradeId.equals(dto.getGradeFkId()))
+				            .collect(Collectors.toList()); 
+				} else {
+                    continue; 
+                }
+                
+				Sheet sheet = workbook.createSheet(sheetName);
+				int currentRow = 0;
+
+				List<List<Object>> rows = new ArrayList<>();
+				for (ShutdownNormsValueDTO dto : currentDtoList) {
+					List<Object> list = new ArrayList<>();
+					list.add(dto.getNormParameterTypeDisplayName());
+					list.add(dto.getProductName());
+					list.add(dto.getUOM());
+					list.add(dto.getApril());
+					list.add(dto.getMay());
+					list.add(dto.getJune());
+					list.add(dto.getJuly());
+					list.add(dto.getAugust());
+					list.add(dto.getSeptember());
+					list.add(dto.getOctober());
+					list.add(dto.getNovember());
+					list.add(dto.getDecember());
+					list.add(dto.getJanuary());
+					list.add(dto.getFebruary());
+					list.add(dto.getMarch());
+					list.add(dto.getRemarks());
+					list.add(dto.getId()); 
+					isEditable.add(dto.getIsEditable());
+					
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				}
+
+				
+				List<String> innerHeaders = new ArrayList<>();
+				innerHeaders.add("Type");
+				innerHeaders.add("Particulars");
+				innerHeaders.add("UOM");
+				List<String> monthsList = Utility.getAcademicYearMonths(year);
+				innerHeaders.addAll(monthsList);
+				innerHeaders.add("Remarks");
+				innerHeaders.add("Id");
+				if (isAfterSave) {
+					innerHeaders.add("Status");
+					innerHeaders.add("Error Description");
+				}
+				List<List<String>> headers = new ArrayList<>();
+				headers.add(innerHeaders);
+
+				for (List<String> headerRowData : headers) {
+					Row headerRow = sheet.createRow(currentRow++);
+					for (int col = 0; col < headerRowData.size(); col++) {
+						Cell cell = headerRow.createCell(col);
+						cell.setCellValue(headerRowData.get(col));
+						cell.setCellStyle(createBoldBorderedStyle(workbook));
+					}
+				}
+				
+				for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+					List<Object> rowData = rows.get(rowIndex);
+					boolean isRowEditable = true;
+					
+					if (rowIndex < isEditable.size() && isEditable.get(rowIndex) != null) {
+						isRowEditable = isEditable.get(rowIndex);
+					}
+					
+					Row row = sheet.createRow(currentRow++);
+					for (int col = 0; col < rowData.size(); col++) {
+						Cell cell = row.createCell(col);
+						Object value = rowData.get(col);
+
+						if (value instanceof Number) {
+							cell.setCellValue(((Number) value).doubleValue());
+						} else if (value instanceof Boolean) {
+							cell.setCellValue((Boolean) value);
+						} else if (value != null) {
+							cell.setCellValue(value.toString());
+						} else {
+							cell.setCellValue("");
+						}
+						
+						if (isRowEditable) {
+							cell.setCellStyle(unlockedStyle);
+						} else {
+							cell.setCellStyle(lockedStyle);
+						}
+					}
+				}
+				sheet.setColumnHidden(16, true);
+				
+			} 
+			
+			try {
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private CellStyle createBoldBorderedStyle(Workbook workbook) {
+		CellStyle style = createBorderedStyle(workbook);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
+	}
+	
+	private CellStyle createBorderedStyle(Workbook wb) {
+		CellStyle style = wb.createCellStyle();
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	public List<Map<String, String>> extractGradeInfo(AOPMessageVM grades) {
+	    List<Map<String, String>> gradeInfoList = new ArrayList<>();
+
+	    Object data = grades.getData();
+
+	    if (data instanceof List) {
+	        try {
+	            @SuppressWarnings("unchecked")
+	            List<Map<String, Object>> gradeList = (List<Map<String, Object>>) data;
+	            
+	            for (Map<String, Object> gradeMap : gradeList) {
+	                Object gradeIdObj = gradeMap.get("gradeId");
+	                Object displayNameObj = gradeMap.get("displayName");
+	                
+	                if (gradeIdObj != null && displayNameObj != null) {
+	                    Map<String, String> infoMap = new HashMap<>();
+	                    infoMap.put("gradeId", gradeIdObj.toString());
+	                    infoMap.put("displayName", displayNameObj.toString());
+	                    gradeInfoList.add(infoMap);
+	                }
+	            }
+	        } catch (ClassCastException e) {
+	            System.err.println("Error casting data to List<Map<String, Object>>: " + e.getMessage());
+	        }
+	    }
+
+	    return gradeInfoList;
+	}
+
+	private String sanitizeSheetName(String name) {
+        if (name == null || name.trim().isEmpty()) return "Sheet";
+        String sanitized = name.replaceAll("[\\\\/\\?\\*:\\[\\]]", "_");
+        return sanitized.substring(0, Math.min(sanitized.length(), 31));
+    }
+	
+	private CellStyle createLockedStyle(Workbook workbook) {
+        CellStyle lockedStyle = workbook.createCellStyle();
+        lockedStyle.setLocked(true);
+        lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return lockedStyle;
+    }
+	
+	private CellStyle createUnlockedStyle(Workbook workbook) {
+        CellStyle unlockedStyle = workbook.createCellStyle();
+        unlockedStyle.setLocked(false);
+        return unlockedStyle;
+    }
 	
 	@Override
 	public AOPMessageVM saveShutDownNorms(String plantId,List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
