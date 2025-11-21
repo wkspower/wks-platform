@@ -124,8 +124,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<Boolean> isEditable = new ArrayList<>();
 
 			Workbook workbook = new XSSFWorkbook();
-			CellStyle borderStyle = createBorderedStyle(workbook);
-			CellStyle boldStyle = createBoldStyle(workbook);
+			CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+			CellStyle boldStyle = Utility.createBoldStyle(workbook);
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			
@@ -210,7 +210,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -276,8 +276,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<Boolean> isEditable = new ArrayList<>();
 
 			Workbook workbook = new XSSFWorkbook();
-			CellStyle borderStyle = createBorderedStyle(workbook);
-			CellStyle boldStyle = createBoldStyle(workbook);
+			CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+			CellStyle boldStyle = Utility.createBoldStyle(workbook);
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			
@@ -333,7 +333,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -411,30 +411,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return months;
 	}
 
-	private CellStyle createBorderedStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		return style;
-	}
-
-	private CellStyle createBoldStyle(Workbook wb) {
-		Font font = wb.createFont();
-		font.setBold(true);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		return style;
-	}
-
-	private CellStyle createBoldBorderedStyle(Workbook workbook) {
-		CellStyle style = createBorderedStyle(workbook);
-		Font font = workbook.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
-	}
+	
 	
 	public List<ConfigurationDTO> getMonthlyProductionData(String year, UUID plantFKId) {
 		try {
@@ -1167,7 +1144,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -2480,7 +2457,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -2570,7 +2547,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -2778,7 +2755,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	        for (int col = 0; col < innerHeaders.size(); col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
-	            cell.setCellStyle(createBoldBorderedStyle(workbook));
+	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 	        }
 
 	        

@@ -266,7 +266,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -402,7 +402,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -1150,34 +1150,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 				return null;
 		}
 	}
-
-
-
-	private CellStyle createBorderedStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		return style;
-	}
-
-	private CellStyle createBoldStyle(Workbook wb) {
-		Font font = wb.createFont();
-		font.setBold(true);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		return style;
-	}
-
-	private CellStyle createBoldBorderedStyle(Workbook workbook) {
-		CellStyle style = createBorderedStyle(workbook);
-		Font font = workbook.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
-	}
-
 
 	@Override
 	public UUID findPlantMaintenanceId(String productName) {

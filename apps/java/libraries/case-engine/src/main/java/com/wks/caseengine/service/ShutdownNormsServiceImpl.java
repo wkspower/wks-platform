@@ -180,13 +180,13 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			AOPMessageVM gradesVM = getUniqueGrades(year, plantFKId.toString());
 			List<Map<String, String>> gradeInfoList = extractGradeInfo(gradesVM);
 			Workbook workbook = new XSSFWorkbook();
-			CellStyle lockedStyle = createLockedStyle(workbook);
-			CellStyle unlockedStyle = createUnlockedStyle(workbook);
+			CellStyle lockedStyle = Utility.createLockedStyle(workbook);
+			CellStyle unlockedStyle = Utility.createUnlockedStyle(workbook);
 
 			for (Map<String, String> gradeInfo : gradeInfoList) {
 				
 				String currentGradeId = gradeInfo.get("gradeId");
-				String sheetName = sanitizeSheetName(gradeInfo.get("displayName"));
+				String sheetName = Utility.sanitizeSheetName(gradeInfo.get("displayName"));
 				
 				AOPMessageVM aopMessageVM =null;
 				List<ShutdownNormsValueDTO> currentDtoList = new ArrayList<>();
@@ -259,7 +259,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					for (int col = 0; col < headerRowData.size(); col++) {
 						Cell cell = headerRow.createCell(col);
 						cell.setCellValue(headerRowData.get(col));
-						cell.setCellStyle(createBoldBorderedStyle(workbook));
+						cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 					}
 				}
 				
@@ -312,23 +312,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		return null;
 	}
 	
-	private CellStyle createBoldBorderedStyle(Workbook workbook) {
-		CellStyle style = createBorderedStyle(workbook);
-		Font font = workbook.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
-	}
 	
-	private CellStyle createBorderedStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		return style;
-	}
-
 	public List<Map<String, String>> extractGradeInfo(AOPMessageVM grades) {
 	    List<Map<String, String>> gradeInfoList = new ArrayList<>();
 
@@ -357,26 +341,6 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	    return gradeInfoList;
 	}
-
-	private String sanitizeSheetName(String name) {
-        if (name == null || name.trim().isEmpty()) return "Sheet";
-        String sanitized = name.replaceAll("[\\\\/\\?\\*:\\[\\]]", "_");
-        return sanitized.substring(0, Math.min(sanitized.length(), 31));
-    }
-	
-	private CellStyle createLockedStyle(Workbook workbook) {
-        CellStyle lockedStyle = workbook.createCellStyle();
-        lockedStyle.setLocked(true);
-        lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        return lockedStyle;
-    }
-	
-	private CellStyle createUnlockedStyle(Workbook workbook) {
-        CellStyle unlockedStyle = workbook.createCellStyle();
-        unlockedStyle.setLocked(false);
-        return unlockedStyle;
-    }
 	
 	@Override
 	public AOPMessageVM saveShutDownNorms(String plantId,List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {

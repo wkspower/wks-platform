@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.utility.ExcelConstants;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class ExcelUtilityServiceImpl implements ExcelUtilityService {
@@ -41,8 +42,8 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
     public byte[] generateFlexibleExcel(Map<String, Object> structure, Map<String, List<List<Object>>> data) {
         try {
             Workbook workbook = new XSSFWorkbook();
-            CellStyle borderStyle = createBorderedStyle(workbook);
-            CellStyle boldStyle = createBoldStyle(workbook);
+            CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+            CellStyle boldStyle = Utility.createBoldStyle(workbook);
             CellStyle lockedStyle = workbook.createCellStyle();
             lockedStyle.setLocked(true);
             lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -125,7 +126,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                         for (int col = 0; col < headerRowData.size(); col++) {
                             Cell cell = headerRow.createCell(col);
                             cell.setCellValue(headerRowData.get(col));
-                            cell.setCellStyle(createBoldBorderedStyle(workbook));
+                            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
                         }
                     }
                     mergeHeaderCells(sheet, headers, headerStartRow);
@@ -270,8 +271,8 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
     public byte[] generateFlexibleExcelForBudgetMaintenance(Map<String, Object> structure, Map<String, List<List<Object>>> data,Map<String, Object> metadataValues,String basisSummary,String remarkSummary) {
         try {
             Workbook workbook = new XSSFWorkbook();
-            CellStyle borderStyle = createBorderedStyle(workbook);
-            CellStyle boldStyle = createBoldStyle(workbook);
+            CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+            CellStyle boldStyle = Utility.createBoldStyle(workbook);
             CellStyle lockedStyle = workbook.createCellStyle();
             lockedStyle.setLocked(true);
             lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -314,7 +315,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     Cell mainTitleCell = mainTitleRow.createCell(0);
                     mainTitleCell.setCellValue(combinedTitle); 
                     
-                    CellStyle boldCenteredWrappedStyle = createBoldStyle(workbook);
+                    CellStyle boldCenteredWrappedStyle = Utility.createBoldStyle(workbook);
                     boldCenteredWrappedStyle.setAlignment(HorizontalAlignment.CENTER);
                     boldCenteredWrappedStyle.setVerticalAlignment(VerticalAlignment.CENTER); 
                     boldCenteredWrappedStyle.setWrapText(true); 
@@ -362,10 +363,10 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                 Row summaryLabelRow = sheet.createRow(currentRow++);
                 Cell basisSummaryLabelCell = summaryLabelRow.createCell(0);
                 basisSummaryLabelCell.setCellValue("Justification:");
-                basisSummaryLabelCell.setCellStyle(createBoldStyle(workbook)); 
+                basisSummaryLabelCell.setCellStyle(Utility.createBoldStyle(workbook)); 
                 Cell remarkSummaryLabelCell = summaryLabelRow.createCell(8); 
                 remarkSummaryLabelCell.setCellValue("Remarks:");
-                remarkSummaryLabelCell.setCellStyle(createBoldStyle(workbook)); 
+                remarkSummaryLabelCell.setCellStyle(Utility.createBoldStyle(workbook)); 
                 int basisStartCol = 0;
                 int basisEndCol = basisStartCol + 6; 
                 
@@ -459,7 +460,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                         for (int col = 0; col < headerRowData.size(); col++) {
                             Cell cell = headerRow.createCell(col);
                             cell.setCellValue(headerRowData.get(col));
-                            cell.setCellStyle(createBoldBorderedStyle(workbook));
+                            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
                         }
                     }
                     mergeHeaderCells(sheet, headers, headerStartRow);
@@ -609,8 +610,8 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
     public byte[] generateFlexibleExcelForReliability(Map<String, Object> structure, Map<String, List<List<Object>>> data) {
         try {
             Workbook workbook = new XSSFWorkbook();
-            CellStyle borderStyle = createBorderedStyle(workbook);
-            CellStyle boldStyle = createBoldStyle(workbook);
+            CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+            CellStyle boldStyle = Utility.createBoldStyle(workbook);
             CellStyle lockedStyle = workbook.createCellStyle();
             lockedStyle.setLocked(true);
             lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -692,7 +693,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                         for (int col = 0; col < headerRowData.size(); col++) {
                             Cell cell = headerRow.createCell(col);
                             cell.setCellValue(headerRowData.get(col));
-                            cell.setCellStyle(createBoldBorderedStyle(workbook));
+                            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
                         }
                     }
                     mergeHeaderCells(sheet, headers, headerStartRow);
@@ -836,33 +837,6 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
             e.printStackTrace();
         }
         return null;
-    }
-
-
-    private CellStyle createBorderedStyle(Workbook wb) {
-        CellStyle style = wb.createCellStyle();
-        style.setBorderBottom(BorderStyle.THIN);
-        style.setBorderTop(BorderStyle.THIN);
-        style.setBorderLeft(BorderStyle.THIN);
-        style.setBorderRight(BorderStyle.THIN);
-        return style;
-    }
-
-    private CellStyle createBoldStyle(Workbook wb) {
-        Font font = wb.createFont();
-        font.setBold(true);
-        CellStyle style = wb.createCellStyle();
-        style.setFont(font);
-        return style;
-    }
-
-    private CellStyle createBoldBorderedStyle(Workbook workbook) {
-
-        CellStyle style = createBorderedStyle(workbook);
-        Font font = workbook.createFont();
-        font.setBold(true);
-        style.setFont(font);
-        return style;
     }
 
     private void mergeHeaderCells(Sheet sheet, List<List<String>> headers, int startRow) {

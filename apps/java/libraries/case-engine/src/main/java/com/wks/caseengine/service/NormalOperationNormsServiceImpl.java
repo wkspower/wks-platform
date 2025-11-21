@@ -881,7 +881,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	    Map<String, String> nameIdMap = new HashMap<>();
 	    for (Map<String, String> info : gradeInfoList) {
-	        String sanitizedName = sanitizeSheetName(info.get("displayName"));
+	        String sanitizedName = Utility.sanitizeSheetName(info.get("displayName"));
 	        nameIdMap.put(sanitizedName, info.get("gradeId"));
 	    }
 	    return nameIdMap;
@@ -897,7 +897,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	                continue;
 	            }
 	            String sheetName = sheet.getSheetName();
-	            String gradeId = gradeMap.get(sanitizeSheetName(sheetName));
+	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
 	           
 	            
 	            Iterator<Row> rowIterator = sheet.iterator();
@@ -1097,13 +1097,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			AOPMessageVM gradesVM = getNormalOperationNormsGrades(year, plantFKId.toString());
 			List<Map<String, String>> gradeInfoList = extractGradeInfo(gradesVM);
 			Workbook workbook = new XSSFWorkbook();
-			CellStyle lockedStyle = createLockedStyle(workbook);
-			CellStyle unlockedStyle = createUnlockedStyle(workbook);
+			CellStyle lockedStyle = Utility.createLockedStyle(workbook);
+			CellStyle unlockedStyle = Utility.createUnlockedStyle(workbook);
 
 			for (Map<String, String> gradeInfo : gradeInfoList) {
 				
 				String currentGradeId = gradeInfo.get("gradeId");
-				String sheetName = sanitizeSheetName(gradeInfo.get("displayName"));
+				String sheetName = Utility.sanitizeSheetName(gradeInfo.get("displayName"));
 				
 				AOPMessageVM aopMessageVM =null;
 				List<MCUNormsValueDTO> currentDtoList = new ArrayList<>();
@@ -1176,7 +1176,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					for (int col = 0; col < headerRowData.size(); col++) {
 						Cell cell = headerRow.createCell(col);
 						cell.setCellValue(headerRowData.get(col));
-						cell.setCellStyle(createBoldBorderedStyle(workbook));
+						cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 					}
 				}
 				
@@ -1229,25 +1229,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		return null;
 	}
 	
-	private String sanitizeSheetName(String name) {
-        if (name == null || name.trim().isEmpty()) return "Sheet";
-        String sanitized = name.replaceAll("[\\\\/\\?\\*:\\[\\]]", "_");
-        return sanitized.substring(0, Math.min(sanitized.length(), 31));
-    }
 	
-	private CellStyle createLockedStyle(Workbook workbook) {
-        CellStyle lockedStyle = workbook.createCellStyle();
-        lockedStyle.setLocked(true);
-        lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        return lockedStyle;
-    }
-	
-	private CellStyle createUnlockedStyle(Workbook workbook) {
-        CellStyle unlockedStyle = workbook.createCellStyle();
-        unlockedStyle.setLocked(false);
-        return unlockedStyle;
-    }
 	
 	public byte[] createExcel(String year, UUID plantFKId, boolean isAfterSave, List<MCUNormsValueDTO> dtoList,String mode,String gradeId) {
 		try {
@@ -1329,7 +1311,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -1403,31 +1385,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 
 		return months;
-	}
-
-	private CellStyle createBorderedStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		return style;
-	}
-
-	private CellStyle createBoldStyle(Workbook wb) {
-		Font font = wb.createFont();
-		font.setBold(true);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		return style;
-	}
-
-	private CellStyle createBoldBorderedStyle(Workbook workbook) {
-		CellStyle style = createBorderedStyle(workbook);
-		Font font = workbook.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import com.wks.caseengine.repository.ExcelConfigurationsRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.file.Paths;
@@ -48,8 +49,8 @@ public class ExcelServiceImpl implements ExcelService {
             if (optExcelConfiguration.isPresent()) {
                 String dataStr = optExcelConfiguration.get().getJsonValue();
                 Workbook workbook = new XSSFWorkbook();
-                CellStyle borderStyle = createBorderedStyle(workbook);
-                CellStyle boldStyle = createBoldStyle(workbook);
+                CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+                CellStyle boldStyle = Utility.createBoldStyle(workbook);
 
                 String previousYear = getPreviousYear(year);
                 String previous2Year = getPrevious2Year(year);
@@ -241,7 +242,7 @@ public class ExcelServiceImpl implements ExcelService {
                             for (int col = 0; col < headerRowData.size(); col++) {
                                 Cell cell = headerRow.createCell(col);
                                 cell.setCellValue(headerRowData.get(col));
-                                cell.setCellStyle(createBoldBorderedStyle(workbook));
+                                cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
                             }
                         }
                         mergeHeaderCells(sheet, headersTitles, headerStartRow);
@@ -365,31 +366,6 @@ public class ExcelServiceImpl implements ExcelService {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private CellStyle createBorderedStyle(Workbook wb) {
-        CellStyle style = wb.createCellStyle();
-        style.setBorderBottom(BorderStyle.THIN);
-        style.setBorderTop(BorderStyle.THIN);
-        style.setBorderLeft(BorderStyle.THIN);
-        style.setBorderRight(BorderStyle.THIN);
-        return style;
-    }
-
-    private CellStyle createBoldStyle(Workbook wb) {
-        Font font = wb.createFont();
-        font.setBold(true);
-        CellStyle style = wb.createCellStyle();
-        style.setFont(font);
-        return style;
-    }
-
-    private CellStyle createBoldBorderedStyle(Workbook workbook) {
-        CellStyle style = createBorderedStyle(workbook);
-        Font font = workbook.createFont();
-        font.setBold(true);
-        style.setFont(font);
-        return style;
     }
 
     private void mergeHeaderCells(Sheet sheet, List<List<String>> headers, int startRow) {

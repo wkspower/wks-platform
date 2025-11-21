@@ -471,8 +471,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			}
 
 			Workbook workbook = new XSSFWorkbook();
-			CellStyle borderStyle = createBorderedStyle(workbook);
-			CellStyle boldStyle = createBoldStyle(workbook);
+			CellStyle borderStyle = Utility.createBorderedStyle(workbook);
+			CellStyle boldStyle = Utility.createBoldStyle(workbook);
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			// List<List<Object>> rows = new ArrayList<>();
@@ -539,7 +539,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 				for (int col = 0; col < headerRowData.size(); col++) {
 					Cell cell = headerRow.createCell(col);
 					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(createBoldBorderedStyle(workbook));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 				}
 			}
 			for (List<Object> rowData : rows) {
@@ -609,31 +609,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		return months;
 	}
 
-	private CellStyle createBorderedStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		return style;
-	}
-
-	private CellStyle createBoldStyle(Workbook wb) {
-		Font font = wb.createFont();
-		font.setBold(true);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		return style;
-	}
-
-	private CellStyle createBoldBorderedStyle(Workbook workbook) {
-		CellStyle style = createBorderedStyle(workbook);
-		Font font = workbook.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
-	}
-
+	
 	@Override
 	public AOPMessageVM importExcel(String year, UUID plantFKId, String reportType, MultipartFile file) {
 		// TODO Auto-generated method stub

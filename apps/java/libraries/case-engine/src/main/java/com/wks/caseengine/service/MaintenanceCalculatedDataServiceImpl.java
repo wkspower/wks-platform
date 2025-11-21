@@ -336,7 +336,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        }
 
 	        // Header style
-	        CellStyle headerStyle = createBoldBorderedStyle(workbook);
+	        CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
 
 	        // Gray style for the total row
 	        CellStyle grayStyle = workbook.createCellStyle();
@@ -895,33 +895,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		return str.substring(0, 1).toUpperCase() + str.substring(1);
 	}
 	
-	private CellStyle createBorderedStyle(Workbook wb) {
-		CellStyle style = wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.THIN);
-		style.setBorderTop(BorderStyle.THIN);
-		style.setBorderLeft(BorderStyle.THIN);
-		style.setBorderRight(BorderStyle.THIN);
-		return style;
-	}
-
-	private CellStyle createBoldStyle(Workbook wb) {
-		Font font = wb.createFont();
-		font.setBold(true);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		return style;
-	}
-
-	private CellStyle createBoldBorderedStyle(Workbook workbook) {
-		CellStyle style = createBorderedStyle(workbook);
-		Font font = workbook.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		return style;
-	}
-
-
-
 	@Override
 	public AOPMessageVM updateBudgetMaintenance(List<BudgetMaintenanceDto> budgetMaintenanceDtos) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
