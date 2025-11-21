@@ -2,6 +2,8 @@ package com.wks.caseengine.service;
 
 import java.util.List;
 
+
+
 import com.wks.caseengine.dto.AnnualProductionPlanReportDto;
 import com.wks.caseengine.dto.MonthWiseConsumptionSummaryDTO;
 import com.wks.caseengine.dto.MonthWiseProductionPlanDTO;
@@ -21,7 +23,7 @@ public interface ProductionVolumeDataReportService {
     public AOPMessageVM getReportForPlantProductionPlanData(String plantId, String year, String reportType);
     
     public AOPMessageVM updateReportForPlantProductionPlanData(String plantId,String year,List<AnnualProductionPlanReportDto> dataList,String reportType);
-			
+    public AOPMessageVM deletePlantProductionPlanData( String id);		
     public AOPMessageVM getReportForPlantContributionYearWise(String plantId, String year, String reportType);
     public AOPMessageVM updateReportForPlantContributionYearWise( String plantId,
 			 String year, List<YearWiseContributionDataDTO> dataList); 

@@ -60,6 +60,10 @@ public class AOPReportController {
 	public AOPMessageVM updatePlantContributionFiveYearSummaryReport(@RequestBody List<PlantContributionSummaryDTO> plantContributionSummaryDTOs) {
 		return aopReportService.updatePlantContributionFiveYearSummaryReport(plantContributionSummaryDTOs);
 	}
-
+	
+	@GetMapping(value="/grade-wise-consumption-norms")
+	public AOPMessageVM getGradewiseConsumptionNorms(@RequestParam String plantId,@RequestParam String year) {
+		return aopReportService.getGradewiseConsumptionNorms(plantId,year);
+	}
 
 }
