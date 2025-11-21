@@ -5,14 +5,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.CalculatedConsumptionNormsDTO;
+import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
 import com.wks.caseengine.entity.AOPConsumptionNorm;
 import com.wks.caseengine.entity.AopCalculation;
@@ -28,7 +38,11 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.Utility;
+
 import javax.sql.DataSource;
+
+import java.io.ByteArrayOutputStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -149,6 +163,172 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	public byte[] exportOverallConsumption(String year, UUID plantFKId, boolean isAfterSave, List<AOPConsumptionNormDTO> dtoList) {
+		try {
+			AOPMessageVM gradesVM = getConsumptionAOPGrades(year, plantFKId.toString());
+			List<Map<String, String>> gradeInfoList = extractGradeInfo(gradesVM);
+			Workbook workbook = new XSSFWorkbook();
+			CellStyle lockedStyle = Utility.createLockedStyle(workbook);
+			CellStyle unlockedStyle = Utility.createUnlockedStyle(workbook);
+
+			for (Map<String, String> gradeInfo : gradeInfoList) {
+				
+				String currentGradeId = gradeInfo.get("gradeId");
+				String sheetName = Utility.sanitizeSheetName(gradeInfo.get("displayName"));
+				
+				AOPMessageVM aopMessageVM =null;
+				List<AOPConsumptionNormDTO> currentDtoList = new ArrayList<>();
+				List<Boolean> isEditable = new ArrayList<>();
+				if(!isAfterSave){
+					 aopMessageVM = getAOPConsumptionNorm( plantFKId.toString(),year, currentGradeId);
+				}
+				if (aopMessageVM!=null && aopMessageVM.getData() != null) {
+					
+					Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+					currentDtoList = (List<AOPConsumptionNormDTO>) responseMap.get("aopConsumptionNormDTOList");
+				} else if (isAfterSave) {
+					currentDtoList = dtoList.stream()
+				            .filter(dto -> currentGradeId.equals(dto.getGradeId()))
+				            .collect(Collectors.toList()); 
+				} else {
+                    continue; 
+                }
+                
+				Sheet sheet = workbook.createSheet(sheetName);
+				int currentRow = 0;
+
+				List<List<Object>> rows = new ArrayList<>();
+				for (AOPConsumptionNormDTO dto : currentDtoList) {
+					List<Object> list = new ArrayList<>();
+					list.add(dto.getNormParameterTypeDisplayName());
+					list.add(dto.getProductName());
+					list.add(dto.getUOM());
+					list.add(dto.getApril());
+					list.add(dto.getMay());
+					list.add(dto.getJune());
+					list.add(dto.getJuly());
+					list.add(dto.getAug());
+					list.add(dto.getSep());
+					list.add(dto.getOct());
+					list.add(dto.getNov());
+					list.add(dto.getDec());
+					list.add(dto.getJan());
+					list.add(dto.getFeb());
+					list.add(dto.getMarch());
+					list.add(dto.getAopRemarks());
+					list.add(dto.getId()); 
+					isEditable.add(dto.getIsEditable());
+					
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				}
+
+				
+				List<String> innerHeaders = new ArrayList<>();
+				innerHeaders.add("Type");
+				innerHeaders.add("Particulars");
+				innerHeaders.add("UOM");
+				List<String> monthsList = Utility.getAcademicYearMonths(year);
+				innerHeaders.addAll(monthsList);
+				innerHeaders.add("Remarks");
+				innerHeaders.add("Id");
+				if (isAfterSave) {
+					innerHeaders.add("Status");
+					innerHeaders.add("Error Description");
+				}
+				List<List<String>> headers = new ArrayList<>();
+				headers.add(innerHeaders);
+
+				for (List<String> headerRowData : headers) {
+					Row headerRow = sheet.createRow(currentRow++);
+					for (int col = 0; col < headerRowData.size(); col++) {
+						Cell cell = headerRow.createCell(col);
+						cell.setCellValue(headerRowData.get(col));
+						cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+					}
+				}
+				
+				for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+					List<Object> rowData = rows.get(rowIndex);
+					boolean isRowEditable = true;
+					
+					if (rowIndex < isEditable.size() && isEditable.get(rowIndex) != null) {
+						isRowEditable = isEditable.get(rowIndex);
+					}
+					
+					Row row = sheet.createRow(currentRow++);
+					for (int col = 0; col < rowData.size(); col++) {
+						Cell cell = row.createCell(col);
+						Object value = rowData.get(col);
+
+						if (value instanceof Number) {
+							cell.setCellValue(((Number) value).doubleValue());
+						} else if (value instanceof Boolean) {
+							cell.setCellValue((Boolean) value);
+						} else if (value != null) {
+							cell.setCellValue(value.toString());
+						} else {
+							cell.setCellValue("");
+						}
+						
+						if (isRowEditable) {
+							cell.setCellStyle(unlockedStyle);
+						} else {
+							cell.setCellStyle(lockedStyle);
+						}
+					}
+				}
+				sheet.setColumnHidden(16, true);
+				
+			} 
+			
+			try {
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public List<Map<String, String>> extractGradeInfo(AOPMessageVM grades) {
+	    List<Map<String, String>> gradeInfoList = new ArrayList<>();
+
+	    Object data = grades.getData();
+
+	    if (data instanceof List) {
+	        try {
+	            @SuppressWarnings("unchecked")
+	            List<Map<String, Object>> gradeList = (List<Map<String, Object>>) data;
+	            
+	            for (Map<String, Object> gradeMap : gradeList) {
+	                Object gradeIdObj = gradeMap.get("gradeId");
+	                Object displayNameObj = gradeMap.get("displayName");
+	                
+	                if (gradeIdObj != null && displayNameObj != null) {
+	                    Map<String, String> infoMap = new HashMap<>();
+	                    infoMap.put("gradeId", gradeIdObj.toString());
+	                    infoMap.put("displayName", displayNameObj.toString());
+	                    gradeInfoList.add(infoMap);
+	                }
+	            }
+	        } catch (ClassCastException e) {
+	            System.err.println("Error casting data to List<Map<String, Object>>: " + e.getMessage());
+	        }
+	    }
+
+	    return gradeInfoList;
 	}
 
 	@Override
