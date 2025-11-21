@@ -10,7 +10,7 @@ import com.wks.caseengine.entity.AnnualProductionPlanReport;
 @Repository
 public interface AnnualProductionPlanReportRepository  extends JpaRepository<AnnualProductionPlanReport,UUID>{
 	
-	@Query(value = "SELECT TOP (1) RowNo FROM AnnualProductionPlanReport ORDER BY RowNo DESC", nativeQuery = true)
+	@Query(value = "SELECT TOP (1) RowNo FROM AnnualProductionPlanReport where ReportType = 'assumptions' ORDER BY RowNo DESC", nativeQuery = true)
 	Integer findLatestRowNo();
 
 

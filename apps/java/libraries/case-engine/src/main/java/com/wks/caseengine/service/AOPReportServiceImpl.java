@@ -604,8 +604,8 @@ public class AOPReportServiceImpl implements AOPReportService {
 					map.put("actualTwoYearsAgo", row[9]);
 					map.put("actualLastYear", row[10]);
 					map.put("budgetLastYear", row[11]);
-					map.put("budgetCurrentYearCross", row[12]);
-					map.put("budgetProposed", row[13]);
+					map.put("budgetProposed", row[12]);
+					map.put("budgetCurrentYearCross", row[13]);
 					
 					plantProductionData.add(map);
 					
