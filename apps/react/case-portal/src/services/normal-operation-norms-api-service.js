@@ -399,8 +399,20 @@ async function saveNormalOperationNormsData(
     return await Promise.reject(e)
   }
 }
-async function saveNormalOpsNormsExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/steady-state-norms-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+async function saveNormalOpsNormsExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  GRADE_ID,
+) {
+  let url = ''
+  url = `${Config.CaseEngineUrl}/task/steady-state-norms-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  if (GRADE_ID) {
+    url += `&gradeId=${GRADE_ID}`
+  }
+
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -498,6 +510,7 @@ async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
   if (gradeId) {
     url += `&gradeId=${gradeId}`
   }
+
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

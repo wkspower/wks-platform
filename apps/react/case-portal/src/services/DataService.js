@@ -455,7 +455,7 @@ async function deleteAnnualProduction(id, keycloak) {
         `Failed to delete data: ${resp.status} ${resp.statusText}`,
       )
     }
-    return await resp.text() // Handle text response from the backend
+    return await resp.json()
   } catch (e) {
     console.error('Error deleting slowdown data:', e)
     return Promise.reject(e)

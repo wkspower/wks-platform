@@ -70,12 +70,13 @@ const NormalOpNormsScreen = () => {
     rowsBeforeChange: {},
   })
 
+  const isPEPP = lowerVertName === 'pe' || lowerVertName === 'pp'
+
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
-    const verticalsRequiringGrade = ['pe', 'pp']
-    if (verticalsRequiringGrade.includes(lowerVertName) && !gradeId) return
+    if (isPEPP && !gradeId) return
     setLoading(true)
     let response
 
@@ -194,7 +195,7 @@ const NormalOpNormsScreen = () => {
       if (lowerVertName === 'meg') {
         promises.push(fetchDataIntermediateValues())
       }
-      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+      if (isPEPP) {
         promises.push(fetchGradeDropdowns())
       }
 
@@ -407,7 +408,7 @@ const NormalOpNormsScreen = () => {
   const saveNormalOperationNormsData = async (newRows) => {
     setLoading(true)
     try {
-      const businessData = newRows.map((row) => ({
+      const payload = newRows.map((row) => ({
         april: row.april || null,
         may: row.may || null,
         june: row.june || null,
@@ -433,13 +434,14 @@ const NormalOpNormsScreen = () => {
         verticalFkId: row.verticalFkId || null,
         unit: row.unit || null,
         normParameterTypeId: row.normParameterTypeId || null,
+        gradeId: row.gradeId || gradeId || null,
       }))
 
-      if (businessData.length > 0) {
+      if (payload.length > 0) {
         const response =
           await NormalOperationNormsApiService.saveNormalOperationNormsData(
             PLANT_ID,
-            businessData,
+            payload,
             keycloak,
             gradeId,
             lowerVertName,
@@ -571,14 +573,10 @@ const NormalOpNormsScreen = () => {
       showCalculate: true,
       downloadExcelBtnFromUI: false,
       showCheckbox: false,
-      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
-      marginBottom:
-        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      showG: isPEPP ? true : false,
+      marginBottom: isPEPP ? true : false,
 
-      dropdownLabel:
-        lowerVertName === 'pe' || lowerVertName === 'pp'
-          ? 'Select Grade'
-          : 'Select Mode',
+      dropdownLabel: isPEPP ? 'Select Grade' : 'Select Mode',
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
 
@@ -612,6 +610,7 @@ const NormalOpNormsScreen = () => {
   const handleExcelUpload = (rawFile) => {
     saveExcelFile(rawFile)
   }
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -620,13 +619,13 @@ const NormalOpNormsScreen = () => {
     })
 
     try {
-      if(lowerVertName === 'pe' || lowerVertName === 'pp'){
+      if (isPEPP) {
         await NormalOperationNormsApiService.getNormalOpsNormsExcelpe(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-      }else {
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else {
         await NormalOperationNormsApiService.getNormalOpsNormsExcel(
           keycloak,
           gradeId,
@@ -660,7 +659,9 @@ const NormalOpNormsScreen = () => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          isPEPP ? gradeId : NULL,
         )
+
       if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -710,9 +711,11 @@ const NormalOpNormsScreen = () => {
       setLoading(false)
     }
   }
+
   const handleGradeChange = (gradeId, gradeDisplayName) => {
     setGradeId(gradeId)
   }
+
   return (
     <div>
       <Backdrop

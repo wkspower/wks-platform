@@ -170,6 +170,7 @@ const ShutdownNorms = () => {
     plantID,
     gradeId,
     lowerVertName,
+    AOP_YEAR,
   ])
 
   const isCellEditable = (params) => {
@@ -259,6 +260,7 @@ const ShutdownNorms = () => {
 
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
+
     try {
       setLoading(true)
       setRows([])

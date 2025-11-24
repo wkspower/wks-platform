@@ -13,8 +13,7 @@ import KendoDataTables from 'components/kendo-data-tables/index'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import moment from '../../../../node_modules/moment/moment'
 import { useSelector } from 'react-redux'
-//import { format } from '../../../../node_modules/@progress/kendo-intl/dist/npm/format'
-import { format } from '@progress/kendo-intl'
+
 const AnnualProductionPlan = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -40,6 +39,7 @@ const AnnualProductionPlan = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
 
   let oldYear1 = ''
   if (thisYear && thisYear.includes('-')) {
@@ -77,63 +77,7 @@ const AnnualProductionPlan = () => {
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [rows, setRows] = useState()
   const isOldYear = oldYear?.oldYear === 1
-  const formatValueToThreeDecimals = (params) => {
-    const dateRegex =
-      /^(\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{1,2} [a-zA-Z]+ \d{4}|\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
 
-    if (params === 0) return 0
-
-    if (typeof params === 'string' && dateRegex.test(params.trim())) {
-      return params
-    }
-
-    const num = parseFloat(params)
-    return isNaN(num) ? '' : num.toFixed(1)
-  }
-  const formatValueToThreeDecimalsTwo = (params) => {
-    const dateRegex =
-      /^(\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{1,2} [a-zA-Z]+ \d{4}|\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
-
-    if (params === 0) return 0
-
-    if (typeof params === 'string' && dateRegex.test(params.trim())) {
-      return params
-    }
-
-    const num = parseFloat(params)
-    return isNaN(num) ? '' : num.toFixed(2)
-  }
-
-  const formatValueToThreeDecimalsTwoProductionPerformance = (params, row) => {
-    const rowsWithPercentage =
-      row?.Item?.includes('Operating') || row?.Item?.includes('EOE')
-
-    if (rowsWithPercentage) {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(0) : ''
-    } else {
-      return params === 0 ? 0 : params ? parseFloat(params).toFixed(2) : ''
-    }
-  }
-  const dateRegex = /^(\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
-
-  const formatValueToThreeDecimalsZero = (params) => {
-    const dateRegex =
-      /^(\d{1,2}[-/ ]\d{1,2}[-/ ]\d{2,4}|\d{1,2} [a-zA-Z]+ \d{4}|\d{1,2}-[a-zA-Z]{3}-\d{2,4})$/
-
-    if (params === 0) return 0
-
-    if (typeof params === 'string' && dateRegex.test(params.trim())) {
-      return params
-    }
-
-    const num = parseFloat(params)
-    return isNaN(num) ? '' : num.toFixed(0)
-  }
-  // {
-  //               "activity": "1 MT EOE \u003d 1 MT EO",
-  //               "sno": 1,
-  //               "id": "E0383316-53DE-4A28-B1D5-AC57294ECE8E"
-  //           },
   const columnsAssumptions = [
     {
       field: 'sno',
@@ -153,13 +97,7 @@ const AnnualProductionPlan = () => {
       hidden: true,
     },
   ]
-  //  {
-  //               "maxHourlyRateValue": "480.8190",
-  //               "uom": "TPD",
-  //               "activity": "Recorded max daily production",
-  //               "sno": 1,
-  //               "id": "2813A86A-5AA0-408B-A8FB-F2E49BC844C3"
-  //           },
+
   const columnsMaxRate = [
     {
       field: 'sno',
@@ -487,7 +425,7 @@ const AnnualProductionPlan = () => {
       if (res?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Refreshed Successfully!',
+          message: 'Refreshed Successfully!',
           severity: 'success',
         })
         fetchData('assumptions')
@@ -546,7 +484,7 @@ const AnnualProductionPlan = () => {
       if (res?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
         setModifiedCells({})
@@ -602,7 +540,7 @@ const AnnualProductionPlan = () => {
       if (res?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
         setModifiedCells2({})
@@ -657,7 +595,7 @@ const AnnualProductionPlan = () => {
       if (res?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
         setModifiedCells3({})
@@ -726,7 +664,7 @@ const AnnualProductionPlan = () => {
       if (res?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: 'Data Saved Successfully!',
+          message: 'Saved Successfully!',
           severity: 'success',
         })
         setModifiedCells4({})
@@ -751,30 +689,39 @@ const AnnualProductionPlan = () => {
     }
   }
 
-const handleDeleteAssumptionRow = async (row) => {
-  // If row is not saved to API, just remove from local state
-  if (!row.idFromApi) {
-    setRowsassumptions((prev) => prev.filter((r) => r.id !== row.id))
-    return
+  const handleDeleteAssumptionRow = async (row) => {
+    // If row is not saved to API, just remove from local state
+
+    if (!row.idFromApi) {
+      setRowsassumptions((prev) => prev.filter((r) => r.id !== row.id))
+      return
+    }
+
+    setLoading(true)
+    // If row is saved to API, call delete API
+    try {
+      const response = await DataService.deleteAnnualProduction(
+        row.idFromApi,
+        keycloak,
+      )
+      // handle response.code
+      if (response && response?.code === 200) {
+        setRowsassumptions((prev) => prev.filter((r) => r.id !== row.id))
+        setSnackbarData({
+          message: 'Deleted Successfully!',
+          severity: 'success',
+        })
+        setSnackbarOpen(true)
+        fetchData('assumptions')
+      } else {
+        throw new Error('Unexpected response from server')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      setSnackbarData({ message: 'Error deleting record!', severity: 'error' })
+      setSnackbarOpen(true)
+    }
   }
-  // If row is saved to API, call delete API
-  try {
-    await DataService.deleteAnnualProduction(row.idFromApi, keycloak)
-    setRowsassumptions((prev) => prev.filter((r) => r.id !== row.id))
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Record Deleted successfully!',
-      severity: 'success',
-    })
-    fetchData('assumptions')
-  } catch (error) {
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error deleting record!',
-      severity: 'error',
-    })
-  }
-}
 
   return (
     <Box sx={{ height: 'auto', width: '100%' }}>
@@ -810,8 +757,8 @@ const handleDeleteAssumptionRow = async (row) => {
           saveBtn: !isOldYear,
           allAction: true,
           showReportTitle: true,
-          addButton: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
-          deleteButton: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+          addButton: IS_PE_PP_VERTICAL ? true : false,
+          deleteButton: IS_PE_PP_VERTICAL ? true : false,
         }}
       />
 
