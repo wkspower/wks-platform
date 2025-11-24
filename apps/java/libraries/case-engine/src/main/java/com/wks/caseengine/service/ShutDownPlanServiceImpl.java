@@ -35,6 +35,7 @@ import com.wks.caseengine.dto.MonthWiseDataDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.dto.TimeRangeWithIndex;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.GradeShutdownNormsValue;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.PlantMaintenance;
@@ -47,6 +48,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.GradeShutdownNormsValueRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantMaintenanceRepository;
@@ -118,6 +120,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	
 	@Autowired
 	private ShutdownNormsRepository shutdownNormsRepository;
+	
+	@Autowired
+	private GradeShutdownNormsValueRepository gradeShutdownNormsValueRepository;
 
 	
 	
@@ -1252,12 +1257,23 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	        String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 	        
-	        if(("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName)) || ("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
+	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
 	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
 	        	if(count==1) {
 	        		List<ShutdownNormsValue> shutdownNormsValues =shutdownNormsRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
 		        	for(ShutdownNormsValue shutdownNormsValue: shutdownNormsValues) {
+		        		setMonthShutdown(month,shutdownNormsValue);
+		        	}
+	        	}		
+	        }
+	        
+	        if(("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName))) {
+	        	int month=plantMaintenanceTransaction.getMaintForMonth();
+	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
+	        	if(count==1) {
+	        		List<GradeShutdownNormsValue> shutdownNormsValues =gradeShutdownNormsValueRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
+		        	for(GradeShutdownNormsValue shutdownNormsValue: shutdownNormsValues) {
 		        		setMonthShutdown(month,shutdownNormsValue);
 		        	}
 	        	}		
@@ -1451,6 +1467,64 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		
 	}
 
+	public void setMonthShutdown(int month,GradeShutdownNormsValue shutdownNormsValue) {
+		switch (month) {
+	    case 1:
+	    	shutdownNormsValue.setJanuary(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 2:
+	    	shutdownNormsValue.setFebruary(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 3:
+	    	shutdownNormsValue.setMarch(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 4:
+	    	shutdownNormsValue.setApril(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 5:
+	    	shutdownNormsValue.setMay(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 6:
+	    	shutdownNormsValue.setJune(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 7:
+	    	shutdownNormsValue.setJuly(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 8:
+	    	shutdownNormsValue.setAugust(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 9:
+	    	shutdownNormsValue.setSeptember(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 10:
+	    	shutdownNormsValue.setOctober(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 11:
+	    	shutdownNormsValue.setNovember(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    case 12:
+	    	shutdownNormsValue.setDecember(0.0);
+	    	gradeShutdownNormsValueRepository.save(shutdownNormsValue);
+	        break;
+	    default:
+	        // optionally handle invalid month values
+	        throw new IllegalArgumentException("Invalid month: " + month);
+	    }
+		
+	}
+	
+	
 
 	@Override
 	public List<ShutDownPlanDTO> saveShutdownPlantData(UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList) {
@@ -1577,7 +1651,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							} else {
 								plantMaintenanceTransaction.setDurationInMins(0);
 							}
-							if(("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName)) || ("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
+							if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
 								if(plantMaintenanceTransaction.getMaintForMonth()!=(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1)) {
 									int month=plantMaintenanceTransaction.getMaintForMonth();
 						        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
@@ -1589,7 +1663,16 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						        	}	
 								}
 							}
-							
+							if(("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName))) {
+					        	int month=plantMaintenanceTransaction.getMaintForMonth();
+					        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
+					        	if(count==1) {
+					        		List<GradeShutdownNormsValue> shutdownNormsValues =gradeShutdownNormsValueRepository.findByPlantFkIdAndFinancialYear(plantId,plantMaintenanceTransaction.getAuditYear());
+						        	for(GradeShutdownNormsValue shutdownNormsValue: shutdownNormsValues) {
+						        		setMonthShutdown(month,shutdownNormsValue);
+						        	}
+					        	}		
+					        }
 							plantMaintenanceTransaction
 									.setMaintForMonth(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1);
 							Date entityEndDate = plantMaintenanceTransaction.getMaintEndDateTime();

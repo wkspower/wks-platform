@@ -27,6 +27,12 @@ public interface GradeShutdownNormsValueRepository extends JpaRepository<GradeSh
                   @Param("verticalId") UUID verticalId,
                   @Param("materialId") UUID materialId,
                   @Param("financialYear") String financialYear,@Param("gradeId") UUID gradeId);
+	
+	@Query(
+		      value = "SELECT * FROM dbo.GradeShutdownNormsValue WHERE Plant_FK_Id = :plantId and FinancialYear = :FinancialYear", 
+		      nativeQuery = true
+		    )
+		    List<GradeShutdownNormsValue> findByPlantFkIdAndFinancialYear(@Param("plantId") UUID plantId,@Param("FinancialYear") String FinancialYear);
 
 	
 }
