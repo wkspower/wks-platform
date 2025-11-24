@@ -398,7 +398,7 @@ const NormsHistorianBasisPe = () => {
     }
   }, [gridNames, dataMap])
 
-  const fileName = `Norms Historian Basis.xlsx`
+  const fileName = `${VERTICAL_NAME}-Norms Historian Basis.xlsx`
 
   const renderTitle = (t) => t
 

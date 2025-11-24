@@ -145,6 +145,7 @@ const KendoDataTablesReciepe = ({
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+  const FORMATE_DECIMAL = ValueFormatterProduction()
 
   const shouldShowExportImportButtons = () => {
     const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -407,7 +408,6 @@ const KendoDataTablesReciepe = ({
 
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
-      const FORMATE_DECIMAL = ValueFormatterProduction()
 
       if (col.field === 'UOM') {
         return (
