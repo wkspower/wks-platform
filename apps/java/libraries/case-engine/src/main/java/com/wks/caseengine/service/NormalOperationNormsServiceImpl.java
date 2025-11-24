@@ -457,13 +457,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 								mCUNormsValueGrade.setFinancialYear(mCUNormsValueDTO.getFinancialYear());
 							}
 							
-							
-
-							
 							mCUNormsValueGrade.setMcuVersion("V1");
 							mCUNormsValueGrade.setUpdatedBy(Utility.getUserName());
 							mCUNormsValueGrade.setModifiedOn(new Date());
-							mCUNormsValueGrade.setGradeFkId(UUID.fromString(gradeId));
+							mCUNormsValueGrade.setGradeFkId(UUID.fromString(mCUNormsValueDTO.getGradeId()));
 							System.out.println("Data Saved Succussfully" + mCUNormsValue);
 							if(changed && mCUNormsValueGrade.getRemarks().equals(mCUNormsValueDTO.getRemarks())) {
 								mCUNormsValueDTO.setErrDescription("Please add/update remark");
