@@ -1018,7 +1018,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	public List<ShutDownPlanDTO> readNonProductSlowdown(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>(); 
-
+	    Plants plant = plantsRepository.findById(plantFKId).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
@@ -1143,7 +1144,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                        alreadyFailed = true;
 	                    }
 	                }
-	                
+	                if(vertical.getName().equalsIgnoreCase("ELASTOMER")) {
+	                	 dto.setDurationInHrs(getNumericCellValue(row.getCell(3), dto));
+	                }               
 	                dto.setRate(getNumericCellValue(row.getCell(4), dto));
 	                dto.setRemark(getStringCellValue(row.getCell(5), dto));
 	                if((dto.getRemark() == null || dto.getRemark().trim().isEmpty()) && !alreadyFailed) {
