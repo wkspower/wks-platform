@@ -322,7 +322,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
 			Workbook workbook = new XSSFWorkbook();
             CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm");
-
+            CellStyle durationStyle = createDateTimeStyle(workbook, "[h]:mm");
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			List<List<Object>> rows = new ArrayList<>();
@@ -333,30 +333,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					
 					Double durationObject = dto.getDurationInHrs();
 					double durationDouble = (durationObject != null) ? durationObject.doubleValue() : 0.0;
+					Double excelTimeValue = durationDouble / 24.0;
 					int hours = (int) durationDouble;
 					int minutes = (int) Math.round((durationDouble - hours) * 100);
 					String formattedDuration = String.format("%02d:%02d", hours, minutes);
 					
 					list.add(dto.getDiscription());
-					//String productString = dto.getProduct();
-					/*
-					 * if (productString != null) { try { UUID product =
-					 * UUID.fromString(productString); Optional<NormParameters> normParameter =
-					 * normParametersRepository.findById(product); if (normParameter.isPresent()) {
-					 * list.add(normParameter.get().getDisplayName()); } else {
-					 * list.add(productString); } } catch (IllegalArgumentException e) {
-					 * 
-					 * list.add("Invalid Product ID"); throw new Exception("Invalid Product UUID: "
-					 * + productString, e); } } else { list.add(null); }
-					 */
-					
 					
 					Date startDate = dto.getMaintStartDateTime();
 					Date endDate = dto.getMaintEndDateTime();
 					
 					list.add(startDate != null ? formatter.format(startDate) : null);
 					list.add(endDate != null ? formatter.format(endDate) : null);
-					list.add(formattedDuration);
+					list.add(excelTimeValue); 
 					list.add(dto.getRemark());
 					list.add(dto.getId());
 					//list.add(productString);
