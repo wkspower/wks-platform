@@ -24,6 +24,7 @@ import javax.sql.DataSource;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BusinessDemand;
 import com.wks.caseengine.entity.NormAttributeTransactions;
+import com.wks.caseengine.entity.NormParameterType;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
@@ -55,6 +56,7 @@ import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
+import com.wks.caseengine.repository.NormParameterTypeRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -68,7 +70,8 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	@Autowired
 	private BusinessDemandDataRepository businessDemandDataRepository;
 
-	
+	@Autowired
+	private NormParameterTypeRepository normParameterTypeRepository;
 
 	@Autowired
 	private PlantsRepository plantsRepository;
@@ -411,102 +414,133 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	}
 	
 	public List<BusinessDemandDataDTO> readBusinessDemand(InputStream inputStream, UUID plantFKId, String year) {
-		List<BusinessDemandDataDTO> configList = new ArrayList<>();
-		String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
-		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rowIterator = sheet.iterator();
+	    List<BusinessDemandDataDTO> configList = new ArrayList<>();
+	    String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 
-			if (rowIterator.hasNext())
-				rowIterator.next(); // Skip header
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
 
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-				BusinessDemandDataDTO dto = new BusinessDemandDataDTO();
-				try {
-					dto.setDisplayName(getStringCellValue(row.getCell(0), dto));
-					dto.setUOM(getStringCellValue(row.getCell(1), dto));
-					dto.setApril(getNumericCellValue(row.getCell(2), dto));
-					dto.setMay(getNumericCellValue(row.getCell(3), dto));
-					dto.setJune(getNumericCellValue(row.getCell(4), dto));
-					dto.setJuly(getNumericCellValue(row.getCell(5), dto));
-					dto.setAug(getNumericCellValue(row.getCell(6), dto));
-					dto.setSep(getNumericCellValue(row.getCell(7), dto));
-					dto.setOct(getNumericCellValue(row.getCell(8), dto));
-					dto.setNov(getNumericCellValue(row.getCell(9), dto));
-					dto.setDec(getNumericCellValue(row.getCell(10), dto));
-					dto.setJan(getNumericCellValue(row.getCell(11), dto));
-					dto.setFeb(getNumericCellValue(row.getCell(12), dto));
-					dto.setMarch(getNumericCellValue(row.getCell(13), dto));
-					
-					
-					if (verticalName != null
-					    && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP"))) {
-					    Double jan   = dto.getJan();
-					    Double feb   = dto.getFeb();
-					    Double march = dto.getMarch();
-					    Double april = dto.getApril();
-					    Double may   = dto.getMay();
-					    Double june  = dto.getJune();
-					    Double july  = dto.getJuly();
-					    Double aug   = dto.getAug();
-					    Double sep   = dto.getSep();
-					    Double oct   = dto.getOct();
-					    Double nov   = dto.getNov();
-					    Double dec   = dto.getDec();
+	        if (rowIterator.hasNext())
+	            rowIterator.next(); 
+	        List<BusinessDemandDataDTO> productionDtos = new ArrayList<>();
 
-					    double sum = 0.0;
-					    sum += (jan   != null ? jan   : 0.0);
-					    sum += (feb   != null ? feb   : 0.0);
-					    sum += (march != null ? march : 0.0);
-					    sum += (april != null ? april : 0.0);
-					    sum += (may   != null ? may   : 0.0);
-					    sum += (june  != null ? june  : 0.0);
-					    sum += (july  != null ? july  : 0.0);
-					    sum += (aug   != null ? aug   : 0.0);
-					    sum += (sep   != null ? sep   : 0.0);
-					    sum += (oct   != null ? oct   : 0.0);
-					    sum += (nov   != null ? nov   : 0.0);
-					    sum += (dec   != null ? dec   : 0.0);
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            BusinessDemandDataDTO dto = new BusinessDemandDataDTO();
+	            try {
+	                dto.setDisplayName(getStringCellValue(row.getCell(0), dto));
+	                dto.setUOM(getStringCellValue(row.getCell(1), dto));
+	                dto.setApril(getNumericCellValue(row.getCell(2), dto));
+	                dto.setMay(getNumericCellValue(row.getCell(3), dto));
+	                dto.setJune(getNumericCellValue(row.getCell(4), dto));
+	                dto.setJuly(getNumericCellValue(row.getCell(5), dto));
+	                dto.setAug(getNumericCellValue(row.getCell(6), dto));
+	                dto.setSep(getNumericCellValue(row.getCell(7), dto));
+	                dto.setOct(getNumericCellValue(row.getCell(8), dto));
+	                dto.setNov(getNumericCellValue(row.getCell(9), dto));
+	                dto.setDec(getNumericCellValue(row.getCell(10), dto));
+	                dto.setJan(getNumericCellValue(row.getCell(11), dto));
+	                dto.setFeb(getNumericCellValue(row.getCell(12), dto));
+	                dto.setMarch(getNumericCellValue(row.getCell(13), dto));
+	                
+	                String normParameterId = getStringCellValue(row.getCell(16), dto);
+	                dto.setNormParameterId(normParameterId); 
+	                boolean isProduction = false;
+	                if (verticalName != null
+	                        && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) 
+	                        && normParameterId != null) {
+	                    
+	                    isProduction = isProductionType(normParameterId, normParametersRepository, normParameterTypeRepository);
+	                }
+	                
+	                if (isProduction) {
+	                    productionDtos.add(dto); 
+	                }
+	                dto.setRemark(getStringCellValue(row.getCell(14), dto));
+	                dto.setId(getStringCellValue(row.getCell(15), dto));
+	                dto.setPlantId(plantFKId!=null ? plantFKId.toString():"");
+	                
+	                Plants plant = plantsRepository.findById(plantFKId)
+	                        .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 
-					    final double EPSILON = 0.0001d;  
-					    if (Math.abs(sum - 100.0d) > EPSILON) {  
-					    	dto.setSaveStatus("Failed");
-					    	dto.setErrDescription("Sum should be 100 for this row");
-					    } 
-					}
+	                Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	                        .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	                Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	                dto.setVerticalFKId(vertical.getId().toString());
+	                dto.setSiteFKId(site.getId().toString());
+	                dto.setYear(year);
+	                
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                dto.setErrDescription(e.getMessage());
+	                dto.setSaveStatus("Failed");
+	            }
+	            configList.add(dto);
+	        }
+	        
+	        if (!productionDtos.isEmpty() && (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP"))) {
+	            
+	            Map<String, Double> monthlyProductionSums = new HashMap<>();
+	            String[] months = {"April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "March"};
+	            
+	            for (BusinessDemandDataDTO dto : productionDtos) {
+	                monthlyProductionSums.merge("April", dto.getApril() != null ? dto.getApril() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("May", dto.getMay() != null ? dto.getMay() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("June", dto.getJune() != null ? dto.getJune() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("July", dto.getJuly() != null ? dto.getJuly() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Aug", dto.getAug() != null ? dto.getAug() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Sep", dto.getSep() != null ? dto.getSep() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Oct", dto.getOct() != null ? dto.getOct() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Nov", dto.getNov() != null ? dto.getNov() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Dec", dto.getDec() != null ? dto.getDec() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Jan", dto.getJan() != null ? dto.getJan() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("Feb", dto.getFeb() != null ? dto.getFeb() : 0.0, Double::sum);
+	                monthlyProductionSums.merge("March", dto.getMarch() != null ? dto.getMarch() : 0.0, Double::sum);
+	            }
 
-					dto.setRemark(getStringCellValue(row.getCell(14), dto));
-					dto.setId(getStringCellValue(row.getCell(15), dto));
-					dto.setNormParameterId(getStringCellValue(row.getCell(16), dto));
-					dto.setPlantId(plantFKId!=null ? plantFKId.toString():"");
-					Plants plant = plantsRepository.findById(plantFKId)
-							.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	            for (String month : months) {
+	                Double sum = monthlyProductionSums.getOrDefault(month, 0.0);
+	                if (Math.abs(sum - 100.0) > 0.001) { 
+	                    for (BusinessDemandDataDTO dto : productionDtos) {
+	                        if (!"Failed".equalsIgnoreCase(dto.getSaveStatus())) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription(month + " Production sum is " + String.format("%.2f", sum) + ", but must be 100.");
+	                        } else {
+	                            String existingError = dto.getErrDescription() != null ? dto.getErrDescription() : "";
+	                            dto.setErrDescription(existingError + "; " + month + " Production sum is " + String.format("%.2f", sum) + ", but must be 100.");
+	                        }
+	                    }
+	                }
+	            }
+	        }
 
-					Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-							.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-					Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-					dto.setVerticalFKId(vertical.getId().toString());
-					dto.setSiteFKId(site.getId().toString());
-					dto.setYear(year);
-					// dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
-					// dto.setIsEditable(getBooleanCellValue(row.getCell(18), dto));
-				} catch (Exception e) {
-					e.printStackTrace();
-					dto.setErrDescription(e.getMessage());
-					dto.setSaveStatus("Failed");
-				}
-				configList.add(dto);
-			}
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return configList;
+	    return configList;
 	}
-	
-	
+
+	private boolean isProductionType(String normParameterId, NormParametersRepository normParametersRepository, NormParameterTypeRepository normParameterTypeRepository) {
+	    try {
+	        UUID normId = UUID.fromString(normParameterId);
+	        Optional<NormParameters> normParametersOpt = normParametersRepository.findById(normId);
+	        
+	        if (normParametersOpt.isPresent()) {
+	            NormParameters normParameters = normParametersOpt.get();
+	            Optional<NormParameterType> normParameterTypeOpt = normParameterTypeRepository.findById(normParameters.getNormParameterTypeFkId());
+	            
+	            if (normParameterTypeOpt.isPresent()) {
+	                NormParameterType normParameterType = normParameterTypeOpt.get();
+	                return normParameterType.getName().equalsIgnoreCase("Production");
+	            }
+	        }
+	    } catch (IllegalArgumentException e) {
+	        return false;
+	    }
+	    return false;
+	}	
 	
 	private static Double getNumericCellValue(Cell cell, BusinessDemandDataDTO dto) {
 		if (cell == null)

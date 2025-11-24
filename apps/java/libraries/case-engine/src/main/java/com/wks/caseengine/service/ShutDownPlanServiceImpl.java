@@ -1190,7 +1190,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                }
 	            }
 	        }
-	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
+	        if(("PP".equalsIgnoreCase(verticalName)) || ("PE".equalsIgnoreCase(verticalName)) || ("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
 	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Slowdown",year);
 	        	if(count==1) {
@@ -1252,7 +1252,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 	        String verticalName = plantsService.findVerticalNameByPlantId(plantId);
 	        
-	        if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
+	        if(("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName)) || ("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
 	        	int month=plantMaintenanceTransaction.getMaintForMonth();
 	        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
 	        	if(count==1) {
@@ -1577,7 +1577,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							} else {
 								plantMaintenanceTransaction.setDurationInMins(0);
 							}
-							if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
+							if(("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName)) || ("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
 								if(plantMaintenanceTransaction.getMaintForMonth()!=(shutDownPlanDTO.getMaintStartDateTime().getMonth() + 1)) {
 									int month=plantMaintenanceTransaction.getMaintForMonth();
 						        	Long count=plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId,month,"Shutdown",year);
