@@ -487,7 +487,35 @@ const SlowdownNorms = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
-
+  const downloadExcelForConfiguration = async () => {
+           setSnackbarOpen(true)
+           setSnackbarData({
+             message: 'Excel download started!',
+             severity: 'success',
+           })
+       
+           try {
+             let response
+             if (
+               lowerVertName === 'pp' ||
+               lowerVertName === 'pe'
+             ) {
+               response = await DataService.slowdownconsumptionExport(
+                 keycloak,
+                 PLANT_ID,
+                 AOP_YEAR,
+               )
+             }
+           } catch (error) {
+             console.error('Error downloading Excel:', error)
+             setSnackbarData({
+               message: 'Failed to download Excel.',
+               severity: 'error',
+             })
+           } finally {
+             setSnackbarOpen(true)
+           }
+         }
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -530,7 +558,8 @@ const SlowdownNorms = () => {
         lowerVertName === 'pe' || lowerVertName === 'pp'
           ? 'Select Grade'
           : 'Select Grade',
-      downloadExcelBtnFromUI: true,
+      downloadExcelBtnFromUI: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+      downloadExcelBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       marginBottom:
         lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
@@ -641,6 +670,7 @@ const SlowdownNorms = () => {
           grades={grades}
           calculatebtnClicked={calculatebtnClicked}
           handleGradeChange={handleGradeChange}
+          downloadExcelForConfiguration={downloadExcelForConfiguration}
         />
       )}
     </div>

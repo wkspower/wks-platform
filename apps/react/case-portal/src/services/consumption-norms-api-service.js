@@ -5,6 +5,7 @@ export const ConsumptionNormsApiService = {
   getConsumptionAOPNormsGrades,
   getConsumptionNormsData,
   handleCalculateonsumptionNorms,
+  OverallconsumptionppExport,
 }
 async function saveAOPConsumptionNorm(PLANT_ID, shutdownDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/overall-consumption`
@@ -85,6 +86,35 @@ async function handleCalculateonsumptionNorms(PLANT_ID, AOP_YEAR, keycloak) {
     return data
   } catch (e) {
     console.error('Error fetching calculation data:', e)
+    return Promise.reject(e)
+  }
+}
+export async function OverallconsumptionppExport(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/overall-consumption-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'Overall_consumption.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Shutdown Excel:', e)
     return Promise.reject(e)
   }
 }

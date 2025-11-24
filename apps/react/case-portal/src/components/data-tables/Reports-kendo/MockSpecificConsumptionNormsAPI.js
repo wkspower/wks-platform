@@ -108,8 +108,15 @@ export const MockSpecificConsumptionNormsAPI = {
               title: currFY,
               children: [
                 {
+                  field: 'budgetCurrentYearCross',
+                  title: 'Budget Last Year Actual Grade Mix',
+                  editable: false,
+                  format: valueFormat,
+                  type: 'number',
+                },
+                {
                   field: 'budgetProposed',
-                  title: 'Proposed Norm',
+                  title: 'Budget proposed Grade Mix',
                   editable: false,
                   format: valueFormat,
                   type: 'number',
@@ -209,8 +216,15 @@ export const MockSpecificConsumptionNormsAPI = {
               title: currFY,
               children: [
                 {
+                  field: 'budgetCurrentYearCross',
+                  title: 'Budget Last Year Actual Grade Mix',
+                  editable: false,
+                  format: valueFormat,
+                  type: 'number',
+                },
+                {
                   field: 'budgetProposed',
-                  title: 'Proposed Norm',
+                  title: 'Budget proposed Grade Mix',
                   editable: false,
                   format: valueFormat,
                   type: 'number',
@@ -310,8 +324,15 @@ export const MockSpecificConsumptionNormsAPI = {
               title: currFY,
               children: [
                 {
+                  field: 'budgetCurrentYearCross',
+                  title: 'Budget Last Year Actual Grade Mix',
+                  editable: false,
+                  format: valueFormat,
+                  type: 'number',
+                },
+                {
                   field: 'budgetProposed',
-                  title: 'Proposed Norm',
+                  title: 'Budget proposed Grade Mix',
                   editable: false,
                   format: valueFormat,
                   type: 'number',
@@ -412,8 +433,15 @@ export const MockSpecificConsumptionNormsAPI = {
               title: currFY,
               children: [
                 {
+                  field: 'budgetCurrentYearCross',
+                  title: 'Budget Last Year Actual Grade Mix',
+                  editable: false,
+                  format: valueFormat,
+                  type: 'number',
+                },
+                {
                   field: 'budgetProposed',
-                  title: 'Proposed Norm',
+                  title: 'Budget proposed Grade Mix',
                   editable: false,
                   format: valueFormat,
                   type: 'number',
@@ -514,9 +542,15 @@ export const MockSpecificConsumptionNormsAPI = {
               title: currFY,
               children: [
                 {
-                  field: 'proposedNorm',
-                  title: 'Proposed Norm',
+                  field: 'budgetProposed',
+                  title: 'Budget Last Year Actual Grade Mix',
                   editable: false,
+                  format: valueFormat,
+                  type: 'number',
+                },
+                {
+                  field: 'proposedNorm',
+                  title: 'Budget proposed Grade Mix',
                   format: valueFormat,
                   type: 'number',
                 },
@@ -554,6 +588,7 @@ export const MockSpecificConsumptionNormsAPI = {
             {
               title: prevFY4,
               children: [
+                
                 {
                   field: 'actualFourYearsAgo',
                   title: 'Actual',
@@ -615,8 +650,15 @@ export const MockSpecificConsumptionNormsAPI = {
               title: currFY,
               children: [
                 {
+                  field: 'budgetCurrentYearCross',
+                  title: 'Budget Last Year Actual Grade Mix',
+                  editable: false,
+                  format: valueFormat,
+                  type: 'number',
+                },
+                {
                   field: 'budgetProposed',
-                  title: 'Proposed Norm',
+                  title: 'Budget proposed Grade Mix',
                   editable: false,
                   format: valueFormat,
                   type: 'number',

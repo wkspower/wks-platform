@@ -33,7 +33,7 @@ const AnnualProductionPlan = () => {
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
-
+  const lowerVertName = verticalObject?.name?.toLowerCase()
   const thisYear = AOP_YEAR
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -751,6 +751,31 @@ const AnnualProductionPlan = () => {
     }
   }
 
+const handleDeleteAssumptionRow = async (row) => {
+  // If row is not saved to API, just remove from local state
+  if (!row.idFromApi) {
+    setRowsassumptions((prev) => prev.filter((r) => r.id !== row.id))
+    return
+  }
+  // If row is saved to API, call delete API
+  try {
+    await DataService.deleteAnnualProduction(row.idFromApi, keycloak)
+    setRowsassumptions((prev) => prev.filter((r) => r.id !== row.id))
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Record Deleted successfully!',
+      severity: 'success',
+    })
+    fetchData('assumptions')
+  } catch (error) {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Error deleting record!',
+      severity: 'error',
+    })
+  }
+}
+
   return (
     <Box sx={{ height: 'auto', width: '100%' }}>
       <Backdrop
@@ -777,6 +802,7 @@ const AnnualProductionPlan = () => {
         saveChanges={saveChanges}
         loading={loading}
         fetchData={() => fetchData('assumptions')}
+        deleteRowData={handleDeleteAssumptionRow}
         permissions={{
           showWorkFlowBtns: true,
           showCalculate: false,
@@ -784,6 +810,8 @@ const AnnualProductionPlan = () => {
           saveBtn: !isOldYear,
           allAction: true,
           showReportTitle: true,
+          addButton: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+          deleteButton: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
         }}
       />
 

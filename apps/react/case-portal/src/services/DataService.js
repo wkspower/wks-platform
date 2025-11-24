@@ -45,6 +45,7 @@ export const DataService = {
   getSpyroInputData,
   deleteSlowdownData,
   deleteShutdownData,
+  deleteAnnualProduction,
   deleteTurnAroundData,
   handleRefresh,
 
@@ -153,6 +154,7 @@ export const DataService = {
   getSpecificConsumption,
   calculatePlantContributionBusinessDemand,
   dropdownValues,
+  slowdownconsumptionExport,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -416,6 +418,29 @@ async function calculatePlantContributionReportData(
 
 async function deleteSlowdownData(maintenanceId, keycloak, PLANT_ID) {
   const url = `${Config.CaseEngineUrl}/task/slowdown/${maintenanceId}/${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function deleteAnnualProduction(id, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan?id=${encodeURIComponent(id)}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -3399,5 +3424,34 @@ async function dropdownValues(keycloak, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+export async function slowdownconsumptionExport(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/slowdown-consumption-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'Slowdown_consumption.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Shutdown Excel:', e)
+    return Promise.reject(e)
   }
 }

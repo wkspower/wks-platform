@@ -456,7 +456,35 @@ const ShutdownNorms = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
-
+  const downloadExcelForConfiguration = async () => {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel download started!',
+        severity: 'success',
+      })
+  
+      try {
+        let response
+        if (
+          lowerVertName === 'pe' ||
+          lowerVertName === 'pp'
+        ) {
+          response = await NormalOperationNormsApiService.shutdownnormsppExport(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        }
+      } catch (error) {
+        console.error('Error downloading Excel:', error)
+        setSnackbarData({
+          message: 'Failed to download Excel.',
+          severity: 'error',
+        })
+      } finally {
+        setSnackbarOpen(true)
+      }
+    }
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -510,8 +538,8 @@ const ShutdownNorms = () => {
           ? 'Select Grade'
           : 'Select Mode',
       allAction: true,
-      downloadExcelBtnFromUI: true,
-
+      downloadExcelBtnFromUI: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+      downloadExcelBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       showTitleNameBusiness: true,
 
       titleName:
@@ -568,6 +596,7 @@ const ShutdownNorms = () => {
         groupBy='Particulars'
         permissions={adjustedPermissions}
         handleGradeChange={handleGradeChange}
+        downloadExcelForConfiguration={downloadExcelForConfiguration}
         calculatebtnClicked={calculatebtnClicked}
         plantID={plantID}
         grades={grades}

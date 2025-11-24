@@ -425,7 +425,35 @@ const ConsumptionNorms = () => {
       console.error('Error!', error)
     }
   }
-
+   const downloadExcelForConfiguration = async () => {
+         setSnackbarOpen(true)
+         setSnackbarData({
+           message: 'Excel download started!',
+           severity: 'success',
+         })
+     
+         try {
+           let response
+           if (
+             lowerVertName === 'pe' ||
+             lowerVertName === 'pp'
+           ) {
+             response = await ConsumptionNormsApiService.OverallconsumptionppExport(
+               keycloak,
+               PLANT_ID,
+               AOP_YEAR,
+             )
+           }
+         } catch (error) {
+           console.error('Error downloading Excel:', error)
+           setSnackbarData({
+             message: 'Failed to download Excel.',
+             severity: 'error',
+           })
+         } finally {
+           setSnackbarOpen(true)
+         }
+       }
   const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -465,7 +493,8 @@ const ConsumptionNorms = () => {
       marginBottom:
         lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       dropdownLabel: 'Select Grade',
-      downloadExcelBtnFromUI: true,
+      downloadExcelBtnFromUI: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+      downloadExcelBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
       ExcelName: `${lowerVertName}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
       showTitleNameBusiness: true,
@@ -531,6 +560,7 @@ const ConsumptionNorms = () => {
               grades={grades}
               handleGradeChange={handleGradeChange}
               calculatebtnClicked={calculatebtnClicked}
+              downloadExcelForConfiguration={downloadExcelForConfiguration}
             />
           </Box>
         }

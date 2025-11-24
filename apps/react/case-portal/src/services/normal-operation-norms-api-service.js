@@ -28,6 +28,7 @@ export const NormalOperationNormsApiService = {
   load3,
   getNormTransactionsForFinalNorms,
   getNormTransactionsForFinalNormsModeWise,
+  shutdownnormsppExport,
 }
 
 async function BestAchivedColorCodes(keycloak, plantId, year, mode) {
@@ -622,5 +623,34 @@ async function getNormTransactionsForFinalNorms(keycloak, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+export async function shutdownnormsppExport(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-consumption-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = 'shutdown_consumption.xlsx'
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Shutdown Excel:', e)
+    return Promise.reject(e)
   }
 }
