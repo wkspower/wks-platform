@@ -351,84 +351,96 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 							// January
 							double newJan = Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getJanuary(), newJan)) {
+							double oldJan = Optional.ofNullable(mCUNormsValueGrade.getJanuary()).orElse(0.0); 
+							if (isDifferent(oldJan, newJan)) {
 							    mCUNormsValueGrade.setJanuary(newJan);
 							    changed = true;
 							}
 
 							// February
 							double newFeb = Optional.ofNullable(mCUNormsValueDTO.getFebruary()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getFebruary(), newFeb)) {
+							double oldFeb = Optional.ofNullable(mCUNormsValueGrade.getFebruary()).orElse(0.0); 
+							if (isDifferent(oldFeb, newFeb)) {
 							    mCUNormsValueGrade.setFebruary(newFeb);
 							    changed = true;
 							}
 
 							// March
 							double newMar = Optional.ofNullable(mCUNormsValueDTO.getMarch()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getMarch(), newMar)) {
+							double oldMar = Optional.ofNullable(mCUNormsValueGrade.getMarch()).orElse(0.0); 
+							if (isDifferent(oldMar, newMar)) {
 							    mCUNormsValueGrade.setMarch(newMar);
 							    changed = true;
 							}
 
 							// April
 							double newApr = Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getApril(), newApr)) {
+							double oldApr = Optional.ofNullable(mCUNormsValueGrade.getApril()).orElse(0.0);
+							if (isDifferent(oldApr, newApr)) {
 							    mCUNormsValueGrade.setApril(newApr);
 							    changed = true;
 							}
 
 							// May
 							double newMay = Optional.ofNullable(mCUNormsValueDTO.getMay()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getMay(), newMay)) {
+							double oldMay = Optional.ofNullable(mCUNormsValueGrade.getMay()).orElse(0.0);
+							if (isDifferent(oldMay, newMay)) {
 							    mCUNormsValueGrade.setMay(newMay);
 							    changed = true;
 							}
 
 							// June
 							double newJun = Optional.ofNullable(mCUNormsValueDTO.getJune()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getJune(), newJun)) {
+							double oldJun = Optional.ofNullable(mCUNormsValueGrade.getJune()).orElse(0.0);
+							if (isDifferent(oldJun, newJun)) {
 							    mCUNormsValueGrade.setJune(newJun);
 							    changed = true;
 							}
 
 							// July
 							double newJul = Optional.ofNullable(mCUNormsValueDTO.getJuly()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getJuly(), newJul)) {
+							 double oldJul = Optional.ofNullable(mCUNormsValueGrade.getJuly()).orElse(0.0);
+							if (isDifferent(oldJul, newJul)) {
 							    mCUNormsValueGrade.setJuly(newJul);
 							    changed = true;
 							}
 
 							// August
 							double newAug = Optional.ofNullable(mCUNormsValueDTO.getAugust()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getAugust(), newAug)) {
+							double oldAug = Optional.ofNullable(mCUNormsValueGrade.getAugust()).orElse(0.0);
+							if (isDifferent(oldAug, newAug)) {
 							    mCUNormsValueGrade.setAugust(newAug);
 							    changed = true;
 							}
 
 							// September
 							double newSep = Optional.ofNullable(mCUNormsValueDTO.getSeptember()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getSeptember(), newSep)) {
+							double oldSep = Optional.ofNullable(mCUNormsValueGrade.getSeptember()).orElse(0.0);
+							if (isDifferent(oldSep, newSep)) {
 							    mCUNormsValueGrade.setSeptember(newSep);
 							    changed = true;
 							}
 
 							// October
 							double newOct = Optional.ofNullable(mCUNormsValueDTO.getOctober()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getOctober(), newOct)) {
+							double oldOct = Optional.ofNullable(mCUNormsValueGrade.getOctober()).orElse(0.0);
+							if (isDifferent(oldOct, newOct)) {
 							    mCUNormsValueGrade.setOctober(newOct);
 							    changed = true;
 							}
 
 							// November
 							double newNov = Optional.ofNullable(mCUNormsValueDTO.getNovember()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getNovember(), newNov)) {
+							double oldNov = Optional.ofNullable(mCUNormsValueGrade.getNovember()).orElse(0.0);
+							if (isDifferent(oldNov, newNov)) {
 							    mCUNormsValueGrade.setNovember(newNov);
 							    changed = true;
 							}
 
 							// December
 							double newDec = Optional.ofNullable(mCUNormsValueDTO.getDecember()).orElse(0.0);
-							if (isDifferent(mCUNormsValueGrade.getDecember(), newDec)) {
+							double oldDec = Optional.ofNullable(mCUNormsValueGrade.getDecember()).orElse(0.0);
+							if (isDifferent(oldDec, newDec)) {
 							    mCUNormsValueGrade.setDecember(newDec);
 							    changed = true;
 							}
@@ -500,84 +512,96 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 							// January
 							double newJan = Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getJanuary(), newJan)) {
+							double oldJan = Optional.ofNullable(mCUNormsValue.getJanuary()).orElse(0.0);
+							if (isDifferent(oldJan, newJan)) {
 							    mCUNormsValue.setJanuary(newJan);
 							    changed = true;
 							}
 
 							// February
 							double newFeb = Optional.ofNullable(mCUNormsValueDTO.getFebruary()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getFebruary(), newFeb)) {
+							double oldFeb = Optional.ofNullable(mCUNormsValue.getFebruary()).orElse(0.0);
+							if (isDifferent(oldFeb, newFeb)) {
 							    mCUNormsValue.setFebruary(newFeb);
 							    changed = true;
 							}
 
 							// March
 							double newMar = Optional.ofNullable(mCUNormsValueDTO.getMarch()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getMarch(), newMar)) {
+							double oldMar = Optional.ofNullable(mCUNormsValue.getMarch()).orElse(0.0);
+							if (isDifferent(oldMar, newMar)) {
 							    mCUNormsValue.setMarch(newMar);
 							    changed = true;
 							}
 
 							// April
 							double newApr = Optional.ofNullable(mCUNormsValueDTO.getApril()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getApril(), newApr)) {
+							double oldApr = Optional.ofNullable(mCUNormsValue.getApril()).orElse(0.0);
+							if (isDifferent(oldApr, newApr)) {
 							    mCUNormsValue.setApril(newApr);
 							    changed = true;
 							}
 
 							// May
 							double newMay = Optional.ofNullable(mCUNormsValueDTO.getMay()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getMay(), newMay)) {
+							double oldMay = Optional.ofNullable(mCUNormsValue.getMay()).orElse(0.0);
+							if (isDifferent(oldMay, newMay)) {
 							    mCUNormsValue.setMay(newMay);
 							    changed = true;
 							}
 
 							// June
 							double newJun = Optional.ofNullable(mCUNormsValueDTO.getJune()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getJune(), newJun)) {
+							double oldJun = Optional.ofNullable(mCUNormsValue.getJune()).orElse(0.0);
+							if (isDifferent(oldJun, newJun)) {
 							    mCUNormsValue.setJune(newJun);
 							    changed = true;
 							}
 
 							// July
 							double newJul = Optional.ofNullable(mCUNormsValueDTO.getJuly()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getJuly(), newJul)) {
+							double oldJul = Optional.ofNullable(mCUNormsValue.getJuly()).orElse(0.0);
+							if (isDifferent(oldJul, newJul)) {
 							    mCUNormsValue.setJuly(newJul);
 							    changed = true;
 							}
 
 							// August
 							double newAug = Optional.ofNullable(mCUNormsValueDTO.getAugust()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getAugust(), newAug)) {
+							 double oldAug = Optional.ofNullable(mCUNormsValue.getAugust()).orElse(0.0);
+							if (isDifferent(oldAug, newAug)) {
 							    mCUNormsValue.setAugust(newAug);
 							    changed = true;
 							}
 
 							// September
 							double newSep = Optional.ofNullable(mCUNormsValueDTO.getSeptember()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getSeptember(), newSep)) {
+							double oldSep = Optional.ofNullable(mCUNormsValue.getSeptember()).orElse(0.0);
+							if (isDifferent(oldSep, newSep)) {
 							    mCUNormsValue.setSeptember(newSep);
 							    changed = true;
 							}
 
 							// October
 							double newOct = Optional.ofNullable(mCUNormsValueDTO.getOctober()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getOctober(), newOct)) {
+							 double oldOct = Optional.ofNullable(mCUNormsValue.getOctober()).orElse(0.0);
+							if (isDifferent(oldOct, newOct)) {
 							    mCUNormsValue.setOctober(newOct);
 							    changed = true;
 							}
 
 							// November
 							double newNov = Optional.ofNullable(mCUNormsValueDTO.getNovember()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getNovember(), newNov)) {
+							double oldNov = Optional.ofNullable(mCUNormsValue.getNovember()).orElse(0.0);
+							if (isDifferent(oldNov, newNov)) {
 							    mCUNormsValue.setNovember(newNov);
 							    changed = true;
 							}
 
 							// December
 							double newDec = Optional.ofNullable(mCUNormsValueDTO.getDecember()).orElse(0.0);
-							if (isDifferent(mCUNormsValue.getDecember(), newDec)) {
+							double oldDec = Optional.ofNullable(mCUNormsValue.getDecember()).orElse(0.0);
+							if (isDifferent(oldDec, newDec)) {
 							    mCUNormsValue.setDecember(newDec);
 							    changed = true;
 							}
