@@ -1037,19 +1037,31 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	private static Double getNumericCellValue(Cell cell, MCUNormsValueDTO dto) {
-		if (cell == null)
-			return null;
-		if (cell.getCellType() == CellType.NUMERIC) {
-			return cell.getNumericCellValue();
-		} else if (cell.getCellType() == CellType.STRING) {
-			try {
-				return Double.parseDouble(cell.getStringCellValue().trim());
-			} catch (NumberFormatException e) {
-				dto.setSaveStatus("Failed");
-				dto.setErrDescription("Please enter numeric values");
-			}
-		}
-		return null;
+	    if (cell == null) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } else if (cell.getCellType() == CellType.STRING) {
+	        
+	        String cellValue = cell.getStringCellValue().trim();
+
+	        if (cellValue.isEmpty()) {
+	            return null; 
+	        }
+
+	        try {
+	            return Double.parseDouble(cellValue);
+	        } catch (NumberFormatException e) {
+	            
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    } else if (cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+	    return null;
 	}
 
 	public static Boolean getBooleanCellValue(Cell cell, MCUNormsValueDTO dto) {
