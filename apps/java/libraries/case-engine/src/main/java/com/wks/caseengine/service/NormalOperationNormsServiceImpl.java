@@ -241,7 +241,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					for (int month = 1; month <= 12; month++) {
 						Double oldVal = getMonthlyValue(value, month);
 						Double newVal = getMonthlyValue(dto, month);
-
+						System.out.println("oldVal="+oldVal);
+						System.out.println("newVal="+newVal);
+						System.out.println("value.getRemarks()="+value.getRemarks());
+						System.out.println("dto.getRemarks()="+dto.getRemarks());;
 						if(newVal != null && !Objects.equals(oldVal, newVal) && value.getRemarks().equals(dto.getRemarks())) {
 							dto.setErrDescription("Please add/update remark");
 							dto.setSaveStatus("Failed");
