@@ -66,8 +66,8 @@ const SlowdownNorms = () => {
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
-  const plantName= plantObject?.name.toLowerCase()
-  const siteName= siteObject?.name.toLowerCase()
+  const plantName = plantObject?.name.toLowerCase()
+  const siteName = siteObject?.name.toLowerCase()
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -89,6 +89,9 @@ const SlowdownNorms = () => {
 
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
+
+  const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
+
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -488,34 +491,31 @@ const SlowdownNorms = () => {
     setRowModesModel(newRowModesModel)
   }
   const downloadExcelForConfiguration = async () => {
-           setSnackbarOpen(true)
-           setSnackbarData({
-             message: 'Excel download started!',
-             severity: 'success',
-           })
-       
-           try {
-             let response
-             if (
-               lowerVertName === 'pp' ||
-               lowerVertName === 'pe'
-             ) {
-               response = await DataService.slowdownconsumptionExport(
-                 keycloak,
-                 PLANT_ID,
-                 AOP_YEAR,
-               )
-             }
-           } catch (error) {
-             console.error('Error downloading Excel:', error)
-             setSnackbarData({
-               message: 'Failed to download Excel.',
-               severity: 'error',
-             })
-           } finally {
-             setSnackbarOpen(true)
-           }
-         }
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'success',
+    })
+
+    try {
+      let response
+      if (lowerVertName === 'pp' || lowerVertName === 'pe') {
+        response = await DataService.slowdownconsumptionExport(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
+    } catch (error) {
+      console.error('Error downloading Excel:', error)
+      setSnackbarData({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -544,27 +544,24 @@ const SlowdownNorms = () => {
       showUnit: false,
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
-      saveBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+      saveBtn: IS_PE_PP ? false : true,
       showCalculate:
         lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||
         lowerVertName == 'aromatics' ||
-        lowerVertName == 'pta'
+        lowerVertName == 'pta' ||
+        IS_PE_PP
           ? false
           : true,
 
       allAction: true,
-      dropdownLabel:
-        lowerVertName === 'pe' || lowerVertName === 'pp'
-          ? 'Select Grade'
-          : 'Select Grade',
-      downloadExcelBtnFromUI: lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
-      downloadExcelBtn: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
-      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
-      marginBottom:
-        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      dropdownLabel: 'Select Grade',
+      downloadExcelBtnFromUI: IS_PE_PP ? false : true,
+      downloadExcelBtn: IS_PE_PP ? true : false,
+      showG: IS_PE_PP ? true : false,
+      marginBottom: IS_PE_PP ? true : false,
 
-      ExcelName: `${lowerVertName}_Slowdown Consumption (Norms/Quantity)`,
+      ExcelName: `${lowerVertName}-Slowdown Consumption (Norms/Quantity)`,
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
 
@@ -577,7 +574,7 @@ const SlowdownNorms = () => {
   // 1) Load grades list if vertical requires it
   useEffect(() => {
     const loadGrades = async () => {
-      if (['pe', 'pp'].includes(lowerVertName)) {
+      if (IS_PE_PP) {
         try {
           const response =
             await NormalOperationNormsApiService.getGradesForSlowdownNorms(
@@ -600,7 +597,7 @@ const SlowdownNorms = () => {
       }
     }
     loadGrades()
-  }, [PLANT_ID, yearChanged, keycloak])
+  }, [PLANT_ID, yearChanged, keycloak, AOP_YEAR])
 
   const handleGradeChange = (gradeId) => {
     setGradeId(gradeId)
@@ -613,11 +610,7 @@ const SlowdownNorms = () => {
     return <td>{displayName}</td>
   }
 
-  if (
-    lowerVertName === 'pp' &&
-    siteName === 'nmd' &&
-    plantName === 'pp'
-  ) {
+  if (lowerVertName === 'pp' && siteName === 'nmd' && plantName === 'pp') {
     return null // Or: return <div>Screen hidden for this configuration.</div>
   }
   return (

@@ -152,6 +152,8 @@ const KendoDataTables = ({
   disableRedHighlight = false,
   showThreeColors = false,
   resetDataChanges = () => {},
+  noteOnSaveDialogeBox = '',
+  deleteNoteOnDeleteDialogeBox = '',
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -1532,8 +1534,12 @@ const KendoDataTables = ({
                       title={col.title}
                       editable={col.editable || true}
                       cells={{
-                        data: (cellProps) => <LimitCellEditor {...cellProps} 
-                        READ_ONLY={READ_ONLY}/>,
+                        data: (cellProps) => (
+                          <LimitCellEditor
+                            {...cellProps}
+                            READ_ONLY={READ_ONLY}
+                          />
+                        ),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
@@ -2290,7 +2296,9 @@ const KendoDataTables = ({
         <DialogTitle id='alert-dialog-title'>{'Delete ?'}</DialogTitle>
         <DialogContent>
           <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to delete this row?
+            {permissions?.showNoteWhileDeleting
+              ? `Are you sure you want to delete this row?   ${deleteNoteOnDeleteDialogeBox}`
+              : 'Are you sure you want to delete this row?'}{' '}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -2311,7 +2319,7 @@ const KendoDataTables = ({
         <DialogContent>
           <DialogContentText id='alert-dialog-description'>
             {permissions?.showNoteWhileSaving
-              ? `Are you sure you want to save these changes? ${note}`
+              ? `Are you sure you want to save these changes?   ${noteOnSaveDialogeBox}`
               : 'Are you sure you want to save these changes?'}{' '}
           </DialogContentText>
         </DialogContent>
@@ -2369,7 +2377,10 @@ const KendoDataTables = ({
         <DialogActions>
           <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
           {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
-          <Button onClick={handleRemarkSave} disabled={READ_ONLY || !currentRemark?.trim()}>
+          <Button
+            onClick={handleRemarkSave}
+            disabled={READ_ONLY || !currentRemark?.trim()}
+          >
             Add
           </Button>
         </DialogActions>

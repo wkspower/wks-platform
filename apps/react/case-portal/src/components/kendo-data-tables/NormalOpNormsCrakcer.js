@@ -24,6 +24,7 @@ import SelectivityData from './SelectivityData'
 import { DataService } from 'services/DataService'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service.js'
+import { OptimizerDataApiService } from 'services/optimizer-api-service'
 // Constants
 const MONTHS = [
   'april',
@@ -126,9 +127,8 @@ const NormalOpNormsScreenCracker = () => {
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [currentRowIdFinalNorms, setCurrentRowIdFinalNorms] = useState(null)
 
-  // default gradeId same as earlier (you used '4F' default)
-  const [gradeId, setGradeId] = useState('4F')
-  const [gradeDisplayName, setGradeDisplayName] = useState('4F')
+  const [gradeId, setGradeId] = useState('')
+  const [gradeDisplayName, setGradeDisplayName] = useState('')
 
   const [calculationObject, setCalculationObject] = useState({})
   const [selectedTab, setSelectedTab] = useState(0)
@@ -676,16 +676,45 @@ const NormalOpNormsScreenCracker = () => {
     [AOP_YEAR, PLANT_ID, keycloak, lowerVertName],
   )
 
+  const fetchGrades = useCallback(
+    async (type) => {
+      try {
+        const resp = await OptimizerDataApiService.fetchModes(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          type,
+        )
+
+        if (resp?.code === 200 && Array.isArray(resp.data)) {
+          const mapped = resp.data.map((item) => ({
+            name: item.name,
+            displayName: item.displayName,
+            gradeId: item.name,
+          }))
+
+          setGrades(mapped)
+        } else {
+          setGrades([])
+        }
+      } catch (err) {
+        console.error('Error fetching grades:', err)
+        setGrades([])
+      }
+    },
+    [keycloak, PLANT_ID, AOP_YEAR],
+  )
+
   const fetchAllData = useCallback(
     async (gId) => {
       setLoading(true)
       try {
-        setGrades([
-          { name: '4F', displayName: '4F', gradeId: '4F' },
-          { name: '5F', displayName: '5F', gradeId: '5F' },
-          { name: '4F+D', displayName: '4F+D', gradeId: '4F+D' },
-          { name: 'Monthly', displayName: 'Monthly', gradeId: 'Monthly' },
-        ])
+        // setGrades([
+        //   { name: '4F', displayName: '4F', gradeId: '4F' },
+        //   { name: '5F', displayName: '5F', gradeId: '5F' },
+        //   { name: '4F+D', displayName: '4F+D', gradeId: '4F+D' },
+        //   { name: 'Monthly', displayName: 'Monthly', gradeId: 'Monthly' },
+        // ])
 
         const promises = []
 
@@ -735,6 +764,16 @@ const NormalOpNormsScreenCracker = () => {
   useEffect(() => {
     setSelectedTab(0)
   }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
+
+  useEffect(() => {
+    fetchGrades('2')
+  }, [selectedTab, keycloak, PLANT_ID, AOP_YEAR])
+
+  useEffect(() => {
+    if (!gradeId && grades.length > 0) {
+      setGradeId(grades[0].gradeId)
+    }
+  }, [grades, gradeId])
 
   // remark handlers
   const handleRemarkCellClick = useCallback((row) => {

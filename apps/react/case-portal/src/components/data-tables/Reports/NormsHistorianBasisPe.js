@@ -66,8 +66,11 @@ const NormsHistorianBasisPe = () => {
       function countDecimals(value) {
         if (value == null) return 0
         const s = String(value).replace(/,/g, '').trim()
-        if (s.includes('.')) return s.split('.')[1].length
-        return 0
+        if (!s.includes('.')) return 0
+        const frac = s.split('.')[1] || ''
+        // remove trailing zeros from the fractional part (so 2024.0 -> 0 decimals)
+        const fracNoTrailing = frac.replace(/0+$/, '')
+        return fracNoTrailing.length
       }
 
       const isManyColumns = backendCols.length > 15
@@ -95,14 +98,18 @@ const NormsHistorianBasisPe = () => {
 
           return {
             ...base,
-
             renderCell: (params) => {
               const original = params?.row?.[col.field] ?? params?.value
-              const decimals = countDecimals(original) || 2
+              const decimals = countDecimals(original)
+              const decimalsToShow = Math.min(Math.max(decimals, 0), 3)
+
               const text =
                 params?.value == null || params?.value === ''
                   ? ''
-                  : Number(params?.value).toFixed(Math.min(decimals, 3))
+                  : decimalsToShow === 0
+                    ? String(Number(params.value))
+                    : Number(params.value).toFixed(decimalsToShow)
+
               return (
                 <div
                   title={String(params.value)}

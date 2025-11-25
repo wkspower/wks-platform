@@ -612,6 +612,7 @@ const NormalOpNormsScreen = () => {
   }
 
   const downloadExcelForConfiguration = async () => {
+    setLoading(true)
     setSnackbarOpen(true)
     setSnackbarData({
       message: 'Excel download started!',
@@ -647,6 +648,7 @@ const NormalOpNormsScreen = () => {
       })
     } finally {
       // optional cleanup or logging
+      setLoading(false)
     }
   }
 

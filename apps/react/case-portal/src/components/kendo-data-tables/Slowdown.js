@@ -1209,7 +1209,7 @@ const SlowDown = ({ permissions }) => {
             allAction: true,
             onlyCellUpdate: true,
             downloadExcelBtnFromUI: true,
-            ExcelName: `${lowerVertName}_Slowdown Activities Configuration`,
+            ExcelName: `${lowerVertName}-Slowdown Activities Configuration`,
             showTitleNameBusiness: true,
             titleName: 'Configuration',
           }}

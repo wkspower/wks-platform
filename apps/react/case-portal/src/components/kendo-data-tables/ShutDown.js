@@ -46,6 +46,9 @@ const ShutDown = ({ permissions }) => {
   const siteName = siteObject?.name
   const isOldYear = oldYear?.oldYear
 
+  const DELETE_NOTE =
+    'Warning: Please verify the shutdown consumption quantity before deleting the shutdown activity.'
+
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -65,6 +68,8 @@ const ShutDown = ({ permissions }) => {
   const keycloak = useSession()
 
   const READ_ONLY = getRoleName(keycloak)
+
+  const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remark || '')
@@ -142,10 +147,8 @@ const ShutDown = ({ permissions }) => {
       if (lowerVertName === 'pe') {
         if (
           siteName?.toLowerCase() === 'nmd' &&
-          (
-            plantName?.toLowerCase() === 'lldpe1' ||
-            plantName?.toLowerCase() === 'lldpe2'
-          )
+          (plantName?.toLowerCase() === 'lldpe1' ||
+            plantName?.toLowerCase() === 'lldpe2')
         ) {
           requiredFields = ['discription', 'remark', 'productName1']
         } else {
@@ -533,7 +536,7 @@ const ShutDown = ({ permissions }) => {
 
   useEffect(() => {
     fetchData()
-  }, [oldYear, yearChanged, keycloak, PLANT_ID])
+  }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -670,15 +673,13 @@ const ShutDown = ({ permissions }) => {
     switch (lowerVertName) {
       case verticalEnums.PE:
         if (
-    siteName?.toLowerCase() === 'nmd' &&
-    (
-      plantName?.toLowerCase() === 'lldpe1' ||
-      plantName?.toLowerCase() === 'lldpe2'
-    )
-  ) {
-    return ShutDownPeColumnsldpe12
-  }
-  return ShutDownPeColumns
+          siteName?.toLowerCase() === 'nmd' &&
+          (plantName?.toLowerCase() === 'lldpe1' ||
+            plantName?.toLowerCase() === 'lldpe2')
+        ) {
+          return ShutDownPeColumnsldpe12
+        }
+        return ShutDownPeColumns
 
       case verticalEnums.PP:
         return ShutDownPpColumns
@@ -739,7 +740,7 @@ const ShutDown = ({ permissions }) => {
         lowerVertName === 'elastomer' ||
         lowerVertName === 'pvc' ||
         lowerVertName === 'vcm' ||
-        lowerVertName === 'aromatic' ||
+        lowerVertName === 'aromatics' ||
         lowerVertName === 'pta' ||
         lowerVertName === 'pet'
       ) {
@@ -880,6 +881,7 @@ const ShutDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
+      showNoteWhileDeleting: IS_PE_PP_VERTICAL ? true : false,
 
       showTitleNameBusiness: true,
       titleName: `${SCREEN_NAME}`,
@@ -938,6 +940,7 @@ const ShutDown = ({ permissions }) => {
         allDescriptionDrpdwn={allDescriptionDrpdwn}
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
+        deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
       />
     </div>
   )
