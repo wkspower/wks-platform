@@ -954,7 +954,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 	                    dto.setId(getStringCellValue(row.getCell(16), dto)); 
 	                    dto.setGradeId(gradeId);
-	                    dto.setSaveStatus("Success"); 
 
 	                } catch (Exception e) {
 	                    e.printStackTrace();
