@@ -152,6 +152,7 @@ export const DataService = {
   gradeDetails,
   carryForwardRecords,
   getSpecificConsumption,
+  getConsumptionNorms,
   calculatePlantContributionBusinessDemand,
   dropdownValues,
   slowdownconsumptionExport,
@@ -3382,6 +3383,26 @@ export async function getSpecificConsumption(
   }
 }
 
+export async function getConsumptionNorms(
+  keycloak,
+  reportType,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const url = `${Config.CaseEngineUrl}/task/grade-wise-consumption-norms?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error(e)
+    return Promise.reject(e)
+  }
+}
 async function calculatePlantContributionBusinessDemand(
   PLANT_ID,
   AOP_YEAR,

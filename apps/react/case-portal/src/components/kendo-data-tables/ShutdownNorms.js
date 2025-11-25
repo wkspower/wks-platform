@@ -503,7 +503,17 @@ const ShutdownNorms = () => {
       allAction: true,
     }
   }
-
+  const shouldHideCalculate = () => {
+  const isPE_NMD_LDPE =
+    lowerVertName === 'pe' &&
+    siteObject?.name?.toLowerCase() === 'nmd' &&
+    plantObject?.name?.toLowerCase() === 'ldpe'
+  const isPP_NMD_PP =
+    lowerVertName === 'pp' &&
+    siteObject?.name?.toLowerCase() === 'nmd' &&
+    plantObject?.name?.toLowerCase() === 'pp'
+  return isPE_NMD_LDPE || isPP_NMD_PP
+}
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -519,7 +529,9 @@ const ShutdownNorms = () => {
 
       saveBtn: true,
       showCalculate:
-        lowerVertName == 'meg' ||
+      shouldHideCalculate()
+        ? false
+        : lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||
         lowerVertName == 'aromatics' ||
         lowerVertName == 'pta'
