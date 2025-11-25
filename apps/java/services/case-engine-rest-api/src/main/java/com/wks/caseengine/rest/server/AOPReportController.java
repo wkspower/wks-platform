@@ -62,8 +62,8 @@ public class AOPReportController {
 	}
 	
 	@GetMapping(value="/grade-wise-consumption-norms")
-	public AOPMessageVM getGradewiseConsumptionNorms(@RequestParam String plantId,@RequestParam String year) {
-		return aopReportService.getGradewiseConsumptionNorms(plantId,year);
+	public AOPMessageVM getGradewiseConsumptionNorms(@RequestParam String plantId,@RequestParam String year,@RequestParam(required=false) String reportType) {
+		return aopReportService.getGradewiseConsumptionNorms(plantId,year,reportType);
 	}
 
 }

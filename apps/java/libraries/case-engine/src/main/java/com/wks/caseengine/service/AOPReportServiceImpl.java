@@ -756,39 +756,59 @@ public class AOPReportServiceImpl implements AOPReportService {
 	}
 
 	@Override
-	public AOPMessageVM getGradewiseConsumptionNorms(String plantId,String year) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		try {
-			List<Object[]> results = getGradewiseConsumptionNormsData(plantId, year);
-			List<String> columnNames = getGradewiseConsumptionNormsDataColumns(plantId, year);
+	public AOPMessageVM getGradewiseConsumptionNorms(String plantId,String year,String reportType) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        List<Object[]> results = getGradewiseConsumptionNormsData(plantId, year);
+	        List<String> columnNames = getGradewiseConsumptionNormsDataColumns(plantId, year);
 
-			List<Map<String, Object>> resultList = new ArrayList<>();
+	   	        int normParameterTypeNameIndex = -1;
+	        for (int i = 0; i < columnNames.size(); i++) {
+	            if ("NormParameterTypeName".equalsIgnoreCase(columnNames.get(i))) {
+	                normParameterTypeNameIndex = i;
+	                break;
+	            }
+	        }
 
-			for (Object[] row : results) {
-				Map<String, Object> rowMap = new LinkedHashMap<>();
-				for (int i = 0; i < columnNames.size(); i++) {
-					rowMap.put(columnNames.get(i), row[i]);
-				}
-				resultList.add(rowMap);
-			}
+	        List<Object[]> filteredResults = new ArrayList<>();
+	        if (normParameterTypeNameIndex != -1) {
+	            for (Object[] row : results) {
+	                Object normValue = row[normParameterTypeNameIndex]; 
+	                
+	                if (reportType != null && normValue != null) {
+	                    if (reportType.equalsIgnoreCase(normValue.toString())) {
+	                        filteredResults.add(row);
+	                    }
+	                }
+	            }
+	        } else {
+	             filteredResults = results;
+	        }
+	        List<Map<String, Object>> resultList = new ArrayList<>();
+	        for (Object[] row : filteredResults) { 
+	            Map<String, Object> rowMap = new LinkedHashMap<>();
+	            for (int i = 0; i < columnNames.size(); i++) {
+	                rowMap.put(columnNames.get(i), row[i]);
+	            }
+	            resultList.add(rowMap);
+	        }
 
-			Map<String, Object> data = new HashMap<>();
-			data.put("data", resultList);
-			data.put("columns", getGradewiseConsumptionNormsColumnMetadata(plantId, year));
+	        Map<String, Object> data = new HashMap<>();
+	        data.put("data", resultList);
+	        data.put("columns", getGradewiseConsumptionNormsColumnMetadata(plantId, year));
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("SP Executed successfully");
-			aopMessageVM.setData(data);
-			return aopMessageVM;
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(data);
+	        return aopMessageVM;
 
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
-
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
 	}
-
+	
 	public List<Object[]> getGradewiseConsumptionNormsData(String plantId,String year) {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
