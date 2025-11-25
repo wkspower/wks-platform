@@ -193,7 +193,7 @@ const ProductionVolumeDataBasis = () => {
     exportRef1.current.save(options1)
   }
 
-  const fileName = `Production Volume Data ${new Date().toISOString().replace(/T/, ' ').replace(/:/g, '-').split('.')[0]}.xlsx`
+  const fileName = `${VERTICAL_NAME}-Production Volume Data.xlsx`
 
   if (lowerVertName != 'meg') {
     return <ProductionVolumeDataBasisPe />

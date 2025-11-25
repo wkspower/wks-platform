@@ -67,6 +67,18 @@ const SlowDown = ({ permissions }) => {
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
 
+  const SHOW_EXCEL_UPLOAD_BUTTON =
+    lowerVertName === 'pe' ||
+    lowerVertName === 'pp' ||
+    lowerVertName == 'elastomer' ||
+    lowerVertName == 'pvc' ||
+    lowerVertName == 'vcm' ||
+    lowerVertName == 'pta' ||
+    lowerVertName == 'chemical' ||
+    lowerVertName == 'meg'
+
+  const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
+
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -332,7 +344,12 @@ const SlowDown = ({ permissions }) => {
       // Select required fields based on vertical
       const requiredFields = ['discription', 'remark']
       const requiredFieldsForElastomer = ['discription', 'remark', 'rate']
-      const requiredFieldsForPe = ['discription', 'remark', 'rate', 'productName1']
+      const requiredFieldsForPe = [
+        'discription',
+        'remark',
+        'rate',
+        'productName1',
+      ]
       const requiredFieldsForMeg = [
         'discription',
         'remark',
@@ -345,7 +362,7 @@ const SlowDown = ({ permissions }) => {
           ? requiredFieldsForElastomer
           : lowerVertName === 'meg'
             ? requiredFieldsForMeg
-            : lowerVertName === 'pe' || lowerVertName === 'pp'
+            : IS_PE_PP
               ? requiredFieldsForPe
               : requiredFields
 
@@ -790,7 +807,7 @@ const SlowDown = ({ permissions }) => {
         var data = []
         if (lowerVertName == 'meg')
           data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
-        else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        else if (IS_PE_PP) {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(
@@ -808,7 +825,7 @@ const SlowDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        } else if (IS_PE_PP) {
           productList = data?.data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
@@ -1073,21 +1090,9 @@ const SlowDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
-
       showTitleNameBusiness: true,
       titleName: SCREEN_NAME,
-
-      uploadExcelBtn:
-        lowerVertName === 'pe' ||
-        lowerVertName === 'pp' ||
-        lowerVertName == 'elastomer' ||
-        lowerVertName == 'pvc' ||
-        lowerVertName == 'vcm' ||
-        lowerVertName == 'pta' ||
-        lowerVertName == 'chemical' ||
-        lowerVertName == 'meg'
-          ? true
-          : false,
+      uploadExcelBtn: SHOW_EXCEL_UPLOAD_BUTTON,
     },
     isOldYear,
   )

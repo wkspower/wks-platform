@@ -659,7 +659,7 @@ const NormalOpNormsScreen = () => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
-          isPEPP ? gradeId : NULL,
+          gradeId,
         )
 
       if (response?.code === 200) {

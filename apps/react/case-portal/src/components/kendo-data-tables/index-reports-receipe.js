@@ -47,6 +47,8 @@ import {
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import { useSession } from 'SessionStoreContext'
+import { getRoleName } from 'services/role-service'
 
 export const particulars = [
   'normParameterId',
@@ -131,6 +133,7 @@ const KendoDataTablesReciepe = ({
   handleExport = () => {},
   handleExcelUpload,
   downloadExcelForConfiguration,
+  summaryEdited,
 }) => {
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
@@ -147,28 +150,31 @@ const KendoDataTablesReciepe = ({
   const [issRowEdited, setIsRowEdited] = useState(false)
   const FORMATE_DECIMAL = ValueFormatterProduction()
 
+  const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
+
   const shouldShowExportImportButtons = () => {
     const dataGridStore = useSelector((state) => state.dataGridStore)
-      const {
-        verticalChange,
-        yearChanged,
-        oldYear,
-        plantID,
-        plantObject,
-        siteObject,
-        verticalObject,
-        year,
-        screenTitle,
-      } = dataGridStore
-      const PLANT_ID = plantObject?.id
-      const SITE_ID = siteObject?.id
-      const VERTICAL_ID = verticalObject?.id
-      const VERTICAL_NAME = verticalObject?.name
-      const AOP_YEAR = year?.selectedYear
-      const isOldYear = oldYear?.oldYear
-      const vertName = verticalChange?.selectedVertical
-      const lowerVertName = vertName?.toLowerCase() || 'meg'
-      const SCREEN_NAME = screenTitle?.title
+    const {
+      verticalChange,
+      yearChanged,
+      oldYear,
+      plantID,
+      plantObject,
+      siteObject,
+      verticalObject,
+      year,
+      screenTitle,
+    } = dataGridStore
+    const PLANT_ID = plantObject?.id
+    const SITE_ID = siteObject?.id
+    const VERTICAL_ID = verticalObject?.id
+    const VERTICAL_NAME = verticalObject?.name
+    const AOP_YEAR = year?.selectedYear
+    const isOldYear = oldYear?.oldYear
+    const vertName = verticalChange?.selectedVertical
+    const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const SCREEN_NAME = screenTitle?.title
     const siteName = siteObject?.name?.toLowerCase()
     const plantName = plantObject?.name?.toLowerCase()
 
@@ -611,7 +617,9 @@ const KendoDataTablesReciepe = ({
                 className='btn-save'
                 onClick={saveModalOpen}
                 disabled={
-                  isButtonDisabled || Object.keys(modifiedCells).length === 0
+                  isButtonDisabled ||
+                  READ_ONLY ||
+                  (!summaryEdited && Object.keys(modifiedCells).length === 0)
                 }
                 // loading={loading}
                 // loadingposition='start'
