@@ -817,7 +817,7 @@ public class AOPReportServiceImpl implements AOPReportService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GradewiseConsumptionNorms";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetGradewiseConsumptionNorms";
 
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = :plantId, @year = :year";
@@ -846,7 +846,7 @@ public class AOPReportServiceImpl implements AOPReportService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GradewiseConsumptionNorms";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetGradewiseConsumptionNorms";
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = ?, @year = ?";
 
@@ -876,7 +876,7 @@ public class AOPReportServiceImpl implements AOPReportService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 
-			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GradewiseConsumptionNorms";
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetGradewiseConsumptionNorms";
 			String sql = "EXEC " + storedProcedure
 					+ " @plantId = ?, @year = ?";
 			try (PreparedStatement ps = connection.prepareStatement(sql)) {
