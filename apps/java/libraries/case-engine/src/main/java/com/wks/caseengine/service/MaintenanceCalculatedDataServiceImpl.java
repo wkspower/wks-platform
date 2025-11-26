@@ -686,7 +686,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		List<BudgetMaintenance> budgetMaintenanceList=null;
 		
-		List<Object[]> obj=findByYearAndPlantFkId( year, UUID.fromString(plantId),"vwBudgetMaintenance",budgetCategory);
+		//List<Object[]> obj=findByYearAndPlantFkId( year, UUID.fromString(plantId),"vwBudgetMaintenance",budgetCategory);
+		List<Object[]> obj=findBudgetMaintenance(year, UUID.fromString(plantId),"GetBudgetMaintenance");
 		List<BudgetMaintenanceDto> budgetMaintenanceDtoList = new ArrayList<BudgetMaintenanceDto>();
 		try {
 			
@@ -700,6 +701,9 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			    dto.setCostName((String) row[i++]);
 			    dto.setBudgetType((String) row[i++]);
 			    dto.setBudgetCategory((String) row[i++]);
+			    if(!(dto.getBudgetCategory().equalsIgnoreCase(budgetCategory))) {
+			    	continue;
+			    }
 			    dto.setApr(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
 			    dto.setMay(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
 			    dto.setJun(row[i++] != null ? ((Number) row[i - 1]).doubleValue() : 0.0);
@@ -757,6 +761,25 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public List<Object[]> findBudgetMaintenance(String aopYear, UUID plantId, String procedureName) {
+		try {
+
+			String sql = "EXEC " + procedureName
+					+ " @PlantId = :plantId, @AOPYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 	
 	public byte[] createExcel(String year, String plantId, boolean isAfterSave,

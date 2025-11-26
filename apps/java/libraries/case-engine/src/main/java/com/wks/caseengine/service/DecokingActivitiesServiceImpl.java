@@ -963,13 +963,15 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 						aopYear, "Furnace-run-length");
 				List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("Furnace-run-length");
 				for (ScreenMapping screenMapping : screenMappingList) {
-					AopCalculation aopCalculation = new AopCalculation();
-					aopCalculation.setAopYear(aopYear);
-					aopCalculation.setIsChanged(true);
-					aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-					aopCalculation.setPlantId(UUID.fromString(plantId));
-					aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-					aopCalculationRepository.save(aopCalculation);
+					if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
+						AopCalculation aopCalculation = new AopCalculation();
+						aopCalculation.setAopYear(aopYear);
+						aopCalculation.setIsChanged(true);
+						aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+						aopCalculation.setPlantId(UUID.fromString(plantId));
+						aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+						aopCalculationRepository.save(aopCalculation);
+					}
 				}
 
 				aopMessageVM.setCode(200);
