@@ -49,8 +49,8 @@ const specificConsumptionCategories = () => [
 const categoriesWithNorms = {
   RawMaterial: 'Raw Material',
   CatChem: 'Cat Chem',
-  ByProduct: 'By Product',
-  Utilities: 'Utilities',
+  UtilityConsumption: 'Utilities',
+  ByProducts: 'By Products',
 }
 
 export default function SpecificConsumptionNorm() {
@@ -131,9 +131,12 @@ export default function SpecificConsumptionNorm() {
         } else if (apiResp?.data?.plantProductionData) {
           rows = apiResp.data.plantProductionData
         }
-        out[key] = { columns, rows }
+      out[key] = { columns, rows }
+    }),
+  )
 
-        if (categoriesWithNorms[key]) {
+  await Promise.all(
+    Object.keys(categoriesWithNorms).map(async (key) => {
           try {
             const normsResp = await DataService.getConsumptionNorms(
               keycloak,
@@ -161,7 +164,6 @@ export default function SpecificConsumptionNorm() {
             console.error(`Error loading norms for ${key}:`, error)
             normsOut[key] = []
           }
-        }
       }),
     )
     setReports(out)
