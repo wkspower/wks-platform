@@ -9,7 +9,10 @@ import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { DataService } from 'services/DataService'
-import { Typography } from '../../../../node_modules/@mui/material/index'
+import {
+  CircularProgress,
+  Typography,
+} from '../../../../node_modules/@mui/material/index'
 
 const specificConsumptionCategories = () => [
   {
@@ -44,10 +47,10 @@ const specificConsumptionCategories = () => [
 
 // Categories that should have norms grid with their custom titles
 const categoriesWithNorms = {
-  RawMaterial: 'Grade Raw Material',
-  CatChem: 'Grade Catchem',
-  ByProduct: 'Grade By Product',
-  Utilities: 'Grade Utilities',
+  RawMaterial: 'Raw Material',
+  CatChem: 'Cat Chem',
+  ByProduct: 'By Product',
+  Utilities: 'Utilities',
 }
 
 export default function SpecificConsumptionNorm() {
@@ -70,7 +73,7 @@ export default function SpecificConsumptionNorm() {
   const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
   const [normsData, setNormsData] = useState({})
@@ -93,7 +96,7 @@ export default function SpecificConsumptionNorm() {
     if (!columnsFromBackend || columnsFromBackend.length === 0) {
       // Default columns if backend doesn't provide them
       return [
-        { field: 'NormName', title: 'Norms Name', editable: false, flex: 1 },
+        { field: 'NormName', title: 'Particular', editable: false, flex: 1 },
         { field: 'UOM', title: 'UOM', editable: false, width: 100 },
       ]
     }
@@ -105,7 +108,7 @@ export default function SpecificConsumptionNorm() {
     const out = {}
     const normsOut = {}
     let dynamicColumns = []
-    
+
     await Promise.all(
       specificConsumptionCategories().map(async ({ key }) => {
         const { columns } = await MockSpecificConsumptionNormsAPI.getReport({
@@ -124,13 +127,12 @@ export default function SpecificConsumptionNorm() {
           key === 'PackingConsumables' &&
           apiResp?.data?.packingConsumablesData
         ) {
-          rows = apiResp.data.packingConsumablesData // Use as is for Packing Consumables
+          rows = apiResp.data.packingConsumablesData
         } else if (apiResp?.data?.plantProductionData) {
-          rows = apiResp.data.plantProductionData // Use as is for all other categories
+          rows = apiResp.data.plantProductionData
         }
         out[key] = { columns, rows }
 
-        // Load norms data for applicable categories
         if (categoriesWithNorms[key]) {
           try {
             const normsResp = await DataService.getConsumptionNorms(
@@ -140,16 +142,21 @@ export default function SpecificConsumptionNorm() {
               AOP_YEAR,
             )
             const normsRows = normsResp?.data?.data || []
-            const normsColumns = normsResp?.data?.columns || []
+            const allNormsColumns = normsResp?.data?.columns || []
             normsOut[key] = normsRows
-            
-            // Set columns from first category that has data
+
+            const columnToSkip = 'NormParameterTypeName'
+
+            const normsColumns = allNormsColumns.filter(
+              (col) => col.field !== columnToSkip,
+            )
+
             if (normsColumns.length > 0 && dynamicColumns.length === 0) {
-              dynamicColumns = normsColumns
+              dynamicColumns = normsColumns.map((col) => ({
+                ...col,
+                format: valueFormat,
+              }))
             }
-            
-            console.log(`Norms data for ${key}:`, normsRows)
-            console.log(`Norms columns for ${key}:`, normsColumns)
           } catch (error) {
             console.error(`Error loading norms for ${key}:`, error)
             normsOut[key] = []
@@ -160,8 +167,6 @@ export default function SpecificConsumptionNorm() {
     setReports(out)
     setNormsData(normsOut)
     setNormColumns(generateNormColumns(dynamicColumns))
-    console.log('All norms data loaded:', normsOut)
-    console.log('Dynamic columns:', dynamicColumns)
     setLoading(false)
   }
 
@@ -174,7 +179,9 @@ export default function SpecificConsumptionNorm() {
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={!!loading}
-      />
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
 
       <Typography component='div' className='grid-title' sx={{ mb: 0 }}>
         {'Specific Consumption Norms'}
@@ -183,7 +190,7 @@ export default function SpecificConsumptionNorm() {
       {specificConsumptionCategories().map(({ key, title }) => {
         const rpt = reports[key] || {}
         return (
-          <Box key={key} sx={{ mt: 1 }}>
+          <Box key={key} sx={{ mt: 0 }}>
             <KendoDataTablesReports
               columns={rpt.columns || []}
               rows={rpt.rows || []}
@@ -201,7 +208,7 @@ export default function SpecificConsumptionNorm() {
       })}
 
       {/* Section title for norms grids */}
-      <Typography component='div' className='grid-title' sx={{ mt: 3, mb: 0 }}>
+      <Typography component='div' className='grid-title' sx={{ mt: 0, mb: 0 }}>
         {'Grade Wise Specific Consumption Norms'}
       </Typography>
 
@@ -211,7 +218,7 @@ export default function SpecificConsumptionNorm() {
         const normsTitle = categoriesWithNorms[key]
 
         return (
-          <Box key={`norms-${key}`} sx={{ mt: 2 }}>
+          <Box key={`norms-${key}`} sx={{ mt: 0 }}>
             <KendoDataTablesReports
               columns={normColumns}
               rows={norms}

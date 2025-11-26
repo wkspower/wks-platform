@@ -441,6 +441,21 @@ const BusinessDemand = ({ permissions }) => {
     uploadBusinessDemand(rawFile)
   }
 
+  const totalRowConfiguration = [
+    { field: 'april', aggregate: 'sum' },
+    { field: 'aug', aggregate: 'sum' },
+    { field: 'dec', aggregate: 'sum' },
+    { field: 'feb', aggregate: 'sum' },
+    { field: 'jan', aggregate: 'sum' },
+    { field: 'july', aggregate: 'sum' },
+    { field: 'june', aggregate: 'sum' },
+    { field: 'march', aggregate: 'sum' },
+    { field: 'may', aggregate: 'sum' },
+    { field: 'nov', aggregate: 'sum' },
+    { field: 'oct', aggregate: 'sum' },
+    { field: 'sep', aggregate: 'sum' },
+  ]
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -541,6 +556,7 @@ const BusinessDemand = ({ permissions }) => {
         groupBy='Particulars'
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
+        totalRowConfiguration={totalRowConfiguration}
       />
 
       {lowerVertName == 'cracker' && (

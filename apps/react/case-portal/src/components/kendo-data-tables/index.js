@@ -136,6 +136,7 @@ const KendoDataTables = ({
   calculatebtnClicked = () => {},
   selectedUsers = [],
   groupBy = null,
+  totalRowConfiguration = null,
   selectedUOM = 'MT/Month',
   note = '',
   titleName = '',
@@ -191,10 +192,30 @@ const KendoDataTables = ({
     ? [
         {
           field: groupBy,
+          aggregates: totalRowConfiguration,
           dir: undefined,
         },
       ]
     : []
+
+  const MyFooterCustomCell = (props) => {
+    const field = props.field
+    const aggObj = props.dataItem?.aggregates?.[field]
+
+    let cellContent = ''
+    if (aggObj) {
+      const aggKey = Object.keys(aggObj)[0]
+      const value = aggObj[aggKey]
+      // cellContent = typeof value === 'number' ? value.toFixed(4) : String(value)
+      cellContent = value != null ? String(value) : ''
+    }
+
+    return (
+      <td {...props.tdProps} colSpan={1}>
+        {cellContent}
+      </td>
+    )
+  }
 
   const fileInputRef = useRef(null)
 
@@ -210,6 +231,11 @@ const KendoDataTables = ({
 
   const handleRowClick = (e) => {
     if (READ_ONLY) {
+      setEdit({})
+      return
+    }
+
+    if (e?.dataItem?.aggregates) {
       setEdit({})
       return
     }
@@ -1358,6 +1384,14 @@ const KendoDataTables = ({
               sortable={{
                 mode: 'multiple',
               }}
+              // groupable={{
+              //   enabled: false,
+              //   footer: 'visible',
+              //   showGroupPanel: false,
+              // }}
+              // cells={{
+              //   groupFooter: MyFooterCustomCell,
+              // }}
               allRedCell={allRedCell}
               allRedCell2={allRedCell2}
               size='small'

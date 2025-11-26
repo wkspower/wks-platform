@@ -91,6 +91,8 @@ const defs = {
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
     tcsinput: 'TCS Input',
+    tcsoutput: 'TCS Output',
+    pimsoutput: 'PIMS Output',
 
     //SSRS
     normComparisonReport: 'Norm Comparison Report',
@@ -286,6 +288,9 @@ const defs = {
         aopDesignBasis: 'AOP Basis',
         tcsinput: 'TCS Input',
         normComparisonReport: 'Norm Comparison Report',
+
+        tcsoutput: 'TCS Output',
+        pimsoutput: 'PIMS Output',
       },
     },
   },

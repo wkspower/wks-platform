@@ -132,7 +132,7 @@ export const CrackerColums = [
     format: '{0:0.0000}',
     type: 'number',
   },
-  { field: 'remark', title: 'Remarks', widthT: 200, editable: true },
+  { field: 'remark', title: 'Remarks', editable: true },
 ]
 export const CrackerColumsForYearlyNorms = [
   {
