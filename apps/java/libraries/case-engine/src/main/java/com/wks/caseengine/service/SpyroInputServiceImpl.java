@@ -379,6 +379,7 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 	        normAttributeTransactionsRepository.save(newRecord);
 	    }
 	}
+	
 	public byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
 			Map<String, List<SpyroInputDTO>> mapForExcel) {
 		try {

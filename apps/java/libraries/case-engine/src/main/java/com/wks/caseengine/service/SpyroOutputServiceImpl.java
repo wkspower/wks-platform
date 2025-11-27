@@ -272,35 +272,42 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	}
 	
 	public void saveData(UUID normParameterFKId, Integer i, Double attributeValue, SpyroOutputDTO spyroOutputDTO, String year) {
-	    // 1. Add null check for the DTO
 	    if (spyroOutputDTO == null) {
 	        throw new IllegalArgumentException("SpyroOutputDTO cannot be null");
 	    }
 
-	    // 2. Get the new remarks and value, handling potential nulls
 	    String newRemarks = Optional.ofNullable(spyroOutputDTO.getRemarks()).orElse("").trim();
-	    String newValue = attributeValue != null ? attributeValue.toString() : "0.0";
+	    Double newDouble = attributeValue != null ? attributeValue : 0.0;
+	    String newValue = newDouble.toString(); 
 
-	    // 3. Find the existing record
 	    Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
 	        .findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
 
 	    if (existingRecord.isPresent()) {
-	        // ----- Updating existing record -----
 	        NormAttributeTransactions normAttributeTransactions = existingRecord.get();
-
-	        // Get existing remarks and value, handling potential nulls
 	        String existingRemarks = Optional.ofNullable(normAttributeTransactions.getRemarks()).orElse("").trim();
-	        String existingValue = Optional.ofNullable(normAttributeTransactions.getAttributeValue()).orElse("").trim();
+	        String existingValueStr = Optional.ofNullable(normAttributeTransactions.getAttributeValue()).orElse("0.0").trim();
 	        
-	        // 4. Add the same condition as the SpyroInputDTO method
-	        if (existingRemarks.equalsIgnoreCase(newRemarks) && !existingValue.equalsIgnoreCase(newValue)) {
+	        Double existingDouble = null;
+	        try {
+	            existingDouble = Double.parseDouble(existingValueStr);
+	        } catch (NumberFormatException e) {
+	        }
+
+	        boolean remarksMatch = existingRemarks.equalsIgnoreCase(newRemarks);
+	        boolean valuesDiffer = false;
+	        if (existingDouble != null) {
+	            valuesDiffer = Double.compare(existingDouble, newDouble) != 0;
+	        } else {
+	            valuesDiffer = !existingValueStr.equalsIgnoreCase(newValue);
+	        }
+	        
+	        if (remarksMatch && valuesDiffer) {
 	            spyroOutputDTO.setSaveStatus("Failed");
 	            spyroOutputDTO.setErrDescription("Please add/update remark");
 	            return;
 	        }
-	        
-	        // Proceed to update
+
 	        normAttributeTransactions.setRemarks(newRemarks);
 	        normAttributeTransactions.setAttributeValue(newValue);
 	        normAttributeTransactions.setModifiedOn(new Date());
@@ -309,9 +316,8 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        normAttributeTransactionsRepository.save(normAttributeTransactions);
 
 	    } else {
-	        // ----- Creating a new record -----
-	        // 5. Add the same condition for new records
-	        if (newRemarks.isEmpty()) {
+	        
+	        if (newRemarks.isEmpty() && newDouble != 0.0) {
 	            spyroOutputDTO.setSaveStatus("Failed");
 	            spyroOutputDTO.setErrDescription("Please add/update remark");
 	            return;
@@ -330,7 +336,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        normAttributeTransactionsRepository.save(newRecord);
 	    }
 	}
-
+	
 	@Override
 	public AOPMessageVM getSpyroOutputYieldData(String year, String plantId) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
