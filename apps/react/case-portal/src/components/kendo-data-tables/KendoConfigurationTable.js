@@ -35,6 +35,10 @@ const ConfigurationTable = () => {
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
 
+  const fetchDataTokenRef = useRef(0)
+  const fetchConstantsTokenRef = useRef(0)
+  const fetchConstantsManualTokenRef = useRef(0)
+
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
     verticalChange,
@@ -120,12 +124,8 @@ const ConfigurationTable = () => {
   }
 
   const fetchData = async (gradeId = null) => {
-    setProductionRows([])
-    setProductionRowsConstants([])
-    setProductionRowsConstantsMannualEntry([])
-    setPioImpactRows([])
-    setShutdownDataRows([])
     setLoading(true)
+    const token = ++fetchDataTokenRef.current
 
     try {
       setLoading(true)
@@ -137,6 +137,14 @@ const ConfigurationTable = () => {
         PLANT_ID,
         AOP_YEAR,
       )
+
+      if (token !== fetchDataTokenRef.current) {
+        return
+      }
+
+      if (!Array.isArray(data)) {
+        return
+      }
 
       const distinctReportTypes = [
         ...new Set(data.map((item) => item.normType).filter(Boolean)),
@@ -164,11 +172,8 @@ const ConfigurationTable = () => {
           srNo: index + 1,
           Particulars: item.normType,
         }))
+
         setProductionRows(formattedData)
-        if (data) {
-          setLoading(false)
-        }
-        // setRows(formattedData)
       } else {
         const groups = new Map()
 
@@ -243,17 +248,31 @@ const ConfigurationTable = () => {
     } catch (error) {
       console.error('Error fetching data:', error)
       setLoading(false)
+    } finally {
+      if (fetchDataTokenRef.current === token) {
+        setLoading(false)
+      } else {
+        console.info(
+          'fetchData: not clearing loading because a newer fetch is active',
+        )
+      }
     }
   }
 
   const fetchDataConstants = async () => {
-    setProductionRowsConstants([])
+    setLoading(true)
+    const token = ++fetchConstantsTokenRef.current
     try {
       var constantsRes = await DataService.getCatalystSelectivityDataConstants(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
+
+      if (token !== fetchConstantsTokenRef.current) {
+        return
+      }
+
       if (constantsRes?.code != 200) {
         setProductionRowsConstants([])
         return
@@ -276,15 +295,20 @@ const ConfigurationTable = () => {
       setProductionRowsConstants(formattedData)
     } catch (error) {
       console.error('Error fetching data:', error)
+    } finally {
+      if (fetchConstantsTokenRef.current === token) {
+        setLoading(false)
+      } else {
+        // console.info('fetchDataConstants: newer fetch active, not clearing loading')
+      }
     }
   }
 
   const [reportTypes, setReportTypes] = useState([])
 
   const fetchDataConstantsMnnualEntry = async () => {
-    setProductionRowsConstantsMannualEntry([])
-    setPioImpactRows([])
-    setShutdownDataRows([])
+    setLoading(true)
+    const token = ++fetchConstantsManualTokenRef.current
     try {
       var constantsRes = await DataService.getCatalystSelectivityData(
         keycloak,
@@ -292,6 +316,10 @@ const ConfigurationTable = () => {
         PLANT_ID,
         AOP_YEAR,
       )
+
+      if (token !== fetchConstantsManualTokenRef.current) {
+        return
+      }
 
       const formattedData = constantsRes.map((item, index) => ({
         ...item,
@@ -319,6 +347,12 @@ const ConfigurationTable = () => {
       setShutdownDataRows(shutdownData)
     } catch (error) {
       console.error('Error fetching data:', error)
+    } finally {
+      if (fetchConstantsManualTokenRef.current === token) {
+        setLoading(false)
+      } else {
+        // console.info('fetchDataConstantsMnnualEntry: newer fetch active, not clearing loading')
+      }
     }
   }
   const fetchGradeData = async () => {

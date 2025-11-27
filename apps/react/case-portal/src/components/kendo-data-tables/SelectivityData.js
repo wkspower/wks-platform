@@ -393,6 +393,8 @@ const SelectivityData = (props) => {
     lowerVertName,
     props?.configType,
     gradeId,
+    AOP_YEAR,
+    PLANT_ID,
   ])
 
   const fetchConfigData = async () => {

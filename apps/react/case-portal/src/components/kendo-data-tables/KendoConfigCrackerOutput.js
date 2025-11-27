@@ -54,7 +54,10 @@ const CrackerConfig = () => {
     setRemarkDialogOpen(true)
   }
 
-  const headerMap = useMemo(() => generateHeaderNames(AOP_YEAR), [])
+  const headerMap = useMemo(
+    () => generateHeaderNames(AOP_YEAR),
+    [AOP_YEAR, PLANT_ID],
+  )
 
   const rawTabsStatic = [
     'Total Feed',
