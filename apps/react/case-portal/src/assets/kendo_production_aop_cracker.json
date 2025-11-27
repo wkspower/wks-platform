@@ -28,7 +28,7 @@
     "field": "uom",
     "title": "UOM",
     "editable": false,
-    "width": 125
+    "widthT": 90
   },
 
   {

@@ -40,12 +40,14 @@ const ProductionNormsCracker = ({ permissions }) => {
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME = plantObject?.name
   const SITE_ID = siteObject?.id
+  const SITE_NAME = siteObject?.name
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const isOldYear = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -64,6 +66,8 @@ const ProductionNormsCracker = ({ permissions }) => {
   const [currentRemarkC2C3R, setCurrentRemarkC2C3R] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [currentRowIdC2C3R, setCurrentRowIdC2C3R] = useState(null)
+
+  const IS_NMD = SITE_NAME?.toLowerCase() == 'nmd'
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -515,33 +519,10 @@ const ProductionNormsCracker = ({ permissions }) => {
     }
   }
 
-  const findSum = (value, row) => {
-    const months = [
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'march',
-    ]
-
-    const values = months.map((month) => Number(row[month]) || 0)
-    const sum = values.reduce((acc, val) => acc + val, 0)
-
-    const total = sum.toFixed(2)
-    return total === '0.00' ? null : total
-  }
-
   useEffect(() => {
     fetchData()
     fetchDataC2C3R()
-  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
+  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak, selectedUnit])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,
@@ -646,7 +627,7 @@ const ProductionNormsCracker = ({ permissions }) => {
   )
 
   const handleRemarkCellClick = (dataItem) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemarkC2C3R(dataItem.remarks || '')
     setCurrentRowIdC2C3R(dataItem.id)
     setRemarkDialogOpenC2C3R(true)
@@ -661,35 +642,38 @@ const ProductionNormsCracker = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <KendoDataTables
-        modifiedCells={modifiedCellsC2C3R}
-        setModifiedCells={setModifiedCellsC2C3R}
-        columns={productionColumnsC2C3R}
-        rows={rowsC2C3R}
-        setRows={setRowsC2C3R}
-        title={'Production AOP'}
-        isCellEditable={isCellEditable}
-        onAddRow={(newRow) => console.log('New Row Added:', newRow)}
-        onDeleteRow={(id) => console.log('Row Deleted:', id)}
-        onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
-        paginationOptions={[100, 200, 300]}
-        saveChanges={saveChangesC2C3R}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        apiRef={apiRefC2C3R}
-        fetchData={fetchDataC2C3R}
-        remarkDialogOpen={remarkDialogOpenC2C3R}
-        setRemarkDialogOpen={setRemarkDialogOpenC2C3R}
-        currentRemark={currentRemarkC2C3R}
-        setCurrentRemark={setCurrentRemarkC2C3R}
-        currentRowId={currentRowIdC2C3R}
-        permissions={adjustedPermissionsForC2C3R}
-        selectedUOM={'UOM'}
-        note={''}
-        handleRemarkCellClick={handleRemarkCellClick}
-      />
+      {/* HIDE THIS GRID FOR NON NMD SITE */}
+      {IS_NMD && (
+        <KendoDataTables
+          modifiedCells={modifiedCellsC2C3R}
+          setModifiedCells={setModifiedCellsC2C3R}
+          columns={productionColumnsC2C3R}
+          rows={rowsC2C3R}
+          setRows={setRowsC2C3R}
+          title={'Production AOP'}
+          isCellEditable={isCellEditable}
+          onAddRow={(newRow) => console.log('New Row Added:', newRow)}
+          onDeleteRow={(id) => console.log('Row Deleted:', id)}
+          onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={saveChangesC2C3R}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          apiRef={apiRefC2C3R}
+          fetchData={fetchDataC2C3R}
+          remarkDialogOpen={remarkDialogOpenC2C3R}
+          setRemarkDialogOpen={setRemarkDialogOpenC2C3R}
+          currentRemark={currentRemarkC2C3R}
+          setCurrentRemark={setCurrentRemarkC2C3R}
+          currentRowId={currentRowIdC2C3R}
+          permissions={adjustedPermissionsForC2C3R}
+          selectedUOM={'UOM'}
+          note={''}
+          handleRemarkCellClick={handleRemarkCellClick}
+        />
+      )}
 
       <KendoDataTables
         modifiedCells={modifiedCells}
