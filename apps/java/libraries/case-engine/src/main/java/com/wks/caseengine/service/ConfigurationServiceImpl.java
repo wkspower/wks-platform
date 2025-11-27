@@ -486,7 +486,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
-	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId,String version) {
+	public AOPMessageVM getConfigurationData(String year, UUID plantFKId,String version) {
 		try {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
@@ -584,8 +584,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				}
 
 			}
-
-			return configurationDTOList;
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(configurationDTOList);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {

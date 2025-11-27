@@ -307,68 +307,78 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 	    }
 
 	    String newRemarks = Optional.ofNullable(spyroInputDTO.getRemarks()).orElse("").trim();
-	    String newValue = attributeValue != null ? attributeValue.toString() : "0.0";
-	    if(newValue.equalsIgnoreCase("123456")) {
-	    	System.out.println(newValue);
-	    }
+	    String newValueStr = attributeValue != null ? attributeValue.toString() : "0.0";
 	    
 	    Optional<NormAttributeTransactions> existingOpt = 
 	        normAttributeTransactionsRepository
 	            .findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
-	    Boolean losses=false;
+	    
+	    Boolean losses = false; 
+	    
 	    if (existingOpt.isPresent()) {
-	        // ----- Updating existing record -----
 	        NormAttributeTransactions existing = existingOpt.get();
 	        String existingRemarks = Optional.ofNullable(existing.getRemarks()).orElse("").trim();
-	        String existingValue = Optional.ofNullable(existing.getAttributeValue()).orElse("").trim();
-	        //Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterFKId);
-	        // List<NormParameters>  normParametersList= normParametersRepository.findByPlantAndDisplayNameAndNormTypeAndDependantAttribute(UUID.fromString(plantId),"Losses",2,"Input");
-	        // for(NormParameters normParameters:normParametersList) {
-	        // 	if(normParameters.getId().toString().equalsIgnoreCase(normParametersOpt.get().getId().toString())) {
-	        // 		losses=true;
-	        // 		break;
-	        // 	}
-	        // }
-	        
-	        if(!losses) {
-	        	if (existingRemarks.equalsIgnoreCase(newRemarks) && !existingValue.equalsIgnoreCase(newValue)) {
-		            spyroInputDTO.setSaveStatus("Failed");
-		            spyroInputDTO.setErrDescription("Please add/update remark");
-		            return;
-		        }
+	        String existingValueStr = Optional.ofNullable(existing.getAttributeValue()).orElse("0.0").trim();
+	        Double existingDouble = null;
+	        Double newDouble = null;
+
+	        try {
+	            existingDouble = Double.parseDouble(existingValueStr);
+	        } catch (NumberFormatException e) {
+	            System.err.println("Error parsing existing attribute value: " + existingValueStr);
+	            if (!existingValueStr.equalsIgnoreCase(newValueStr)) {
+	                 
+	            }
 	        }
 	        
-	        // Proceed to update because remarks changed (or both changed)
+	        newDouble = attributeValue != null ? attributeValue : 0.0;
+
+
+	        if (!losses) {
+	            boolean remarksMatch = existingRemarks.equalsIgnoreCase(newRemarks);
+	            boolean valuesDiffer = false;
+	            if (existingDouble != null && newDouble != null) {
+	                valuesDiffer = Double.compare(existingDouble, newDouble) != 0;
+	            } else {
+	                valuesDiffer = !existingValueStr.equalsIgnoreCase(newValueStr);
+	            }
+
+	            if (remarksMatch && valuesDiffer) {
+	                spyroInputDTO.setSaveStatus("Failed");
+	                spyroInputDTO.setErrDescription("Please add/update remark");
+	                return;
+	            }
+	        } 
+	        
 	        existing.setRemarks(newRemarks);
-	        existing.setAttributeValue(newValue);
+	        existing.setAttributeValue(newValueStr); // Keep setting the canonical string value
 	        existing.setModifiedOn(new Date());
 	        existing.setUserName(Utility.getUserName());
 	        normAttributeTransactionsRepository.save(existing);
 
 	    } else {
-	        // ----- Creating a new record -----
-	    	if(!losses) {
-		        if (newRemarks.isEmpty()) {
+	     	if(!losses) {
+	     		Double newValue = Double.parseDouble(newValueStr);
+		        if (newRemarks.isEmpty() && newValue!=0.0) {
 		            spyroInputDTO.setSaveStatus("Failed");
 		            spyroInputDTO.setErrDescription("Please add/update remark");
 		            return;
 		        }
 	    	}
 
-			NormAttributeTransactions newRecord = new NormAttributeTransactions();
-			newRecord.setCreatedOn(new Date());
-			newRecord.setAttributeValueVersion("V1");
-			newRecord.setUserName(Utility.getUserName());
-			newRecord.setNormParameterFKId(normParameterFKId);
-			newRecord.setAopMonth(i);
-			newRecord.setAuditYear(year);
-			newRecord.setRemarks(newRemarks);
-			newRecord.setAttributeValue(newValue);
+	        NormAttributeTransactions newRecord = new NormAttributeTransactions();
+	        newRecord.setCreatedOn(new Date());
+	        newRecord.setAttributeValueVersion("V1");
+	        newRecord.setUserName(Utility.getUserName());
+	        newRecord.setNormParameterFKId(normParameterFKId);
+	        newRecord.setAopMonth(i);
+	        newRecord.setAuditYear(year);
+	        newRecord.setRemarks(newRemarks);
+	        newRecord.setAttributeValue(newValueStr);
 
-			normAttributeTransactionsRepository.save(newRecord);
-		}
+	        normAttributeTransactionsRepository.save(newRecord);
+	    }
 	}
-
 	public byte[] createExcel(String year, String plantId, String mode, boolean isAfterSave,
 			Map<String, List<SpyroInputDTO>> mapForExcel) {
 		try {

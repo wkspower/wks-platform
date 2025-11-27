@@ -17,7 +17,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface ConfigurationService {
 	
-	public List<ConfigurationDTO> getConfigurationData(String year, UUID plantFKId,String version);
+	public AOPMessageVM getConfigurationData(String year, UUID plantFKId,String version);
 	public List<ConfigurationDTO> getMonthlyProductionData(String year, UUID plantFKId);
 	AOPMessageVM calculateSteadyNorms(String year, String plantId,String periodTo,String periodFrom);
 	AOPMessageVM carryForward(String year, String plantId);
