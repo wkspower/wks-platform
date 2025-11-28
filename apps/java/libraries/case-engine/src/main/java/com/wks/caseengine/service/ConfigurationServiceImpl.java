@@ -2169,6 +2169,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setRemarks(getStringCellValue(row.getCell(16), dto));
 						dto.setNormParameterFKId(getStringCellValue(row.getCell(17), dto));
 					} else {
+						
+						
 						dto.setNormType(getStringCellValue(row.getCell(0), dto));
 						dto.setProductName(getStringCellValue(row.getCell(1), dto));
 						dto.setUOM(getStringCellValue(row.getCell(2), dto));
@@ -2187,6 +2189,24 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setMar(getNumericCellValue(row.getCell(14), dto));
 						dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 						dto.setNormParameterFKId(getStringCellValue(row.getCell(16), dto));
+						if(dto.getProductName().equalsIgnoreCase("TST")) {
+							if (dto.getApr() < 100 || dto.getApr() > 370 ||
+							        dto.getMay() <= 100 || dto.getMay() >= 370 ||
+							        dto.getJun() <= 100 || dto.getJun() >= 370 ||
+							        dto.getJul() <= 100 || dto.getJul() >= 370 ||
+							        dto.getAug() <= 100 || dto.getAug() >= 370 ||
+							        dto.getSep() <= 100 || dto.getSep() >= 370 ||
+							        dto.getOct() <= 100 || dto.getOct() >= 370 ||
+							        dto.getNov() <= 100 || dto.getNov() >= 370 ||
+							        dto.getDec() <= 100 || dto.getDec() >= 370 ||
+							        dto.getJan() <= 100 || dto.getJan() >= 370 ||
+							        dto.getFeb() <= 100 || dto.getFeb() >= 370 ||
+							        dto.getMar() <= 100 || dto.getMar() >= 370) {
+							            
+							        dto.setSaveStatus("Failed");
+							        dto.setErrDescription("Invalid values detected for 'TST' (allowed range: 100 to 370)");
+							  }
+						}
 					}
 
 				} catch (Exception e) {
