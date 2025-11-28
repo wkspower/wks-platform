@@ -191,7 +191,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.add("Type");
 			innerHeaders.add("Particulars");
 			innerHeaders.add("UOM");
-			if(reportTypes.contains("Report Manual Entry")) {
+			if(reportTypes!=null && reportTypes.contains("Report Manual Entry")) {
 				year=getLastYear(year);
 			}
 			List<String> monthsList = getAcademicYearMonths(year);
