@@ -28,25 +28,25 @@ export default function PlantContributionLastFourYears() {
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
   const [snackbarData, setSnackbarData] = useState({
@@ -66,6 +66,8 @@ export default function PlantContributionLastFourYears() {
     lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
   const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
   const FORMAT_VALUES_PRICE = '{0:0}'
+  const FORMAT_VALUES_NORMS =
+    lowerVertName == 'meg' ? '{0:0.00000}' : '{0:0.00}'
 
   const loadAll = async () => {
     setLoading(true)
@@ -82,6 +84,7 @@ export default function PlantContributionLastFourYears() {
             FORMAT_VALUES_2_DECIMAL,
             FORMAT_VALUES_COST,
             FORMAT_VALUES_PRICE,
+            FORMAT_VALUES_NORMS,
           })
 
         const apiResp = await DataService.plantContributionPlanLastFourYears(
@@ -150,7 +153,7 @@ export default function PlantContributionLastFourYears() {
               id: index,
               actualId: item?.id,
               isEditable:
-               key === 'OtherVariableCost' && index >= arr.length - 2
+                key === 'OtherVariableCost' && index >= arr.length - 2
                   ? false
                   : true,
               isdisable:

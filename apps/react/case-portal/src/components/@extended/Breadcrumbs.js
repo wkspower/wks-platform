@@ -79,14 +79,26 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     }
   }
 
+  //Digital AOP Automation for DMD EOEG.pdf
+  //Digital AOP Automation for C2 MEG_Rev2.pdf
+  //Digital AOP Automation for NMD EOEG_Rev02.pdf
+  //Digital AOP Automation for HMD MEG.pdf
+  //Digital AOP Automation for VMD EOEG_Rev2.pdf
+
   async function handleOpenPdfTemp(title) {
     // console.log('titletitle', title)
+    // console.log('SITE_NAME', SITE_NAME?.toLowerCase())
     var url = ''
-    if (title != 'production-aop')
-      url = `${window.location.origin}/files/DTC.xlsx`
-    else {
-      url = `${window.location.origin}/files/Blue Print.docx`
-    }
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'nmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for NMD EOEG_Rev02.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'c2')
+      url = `${window.location.origin}/files/Digital AOP Automation for C2 MEG_Rev2.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'dmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for DMD EOEG.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'hmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for HMD MEG.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'vmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for VMD EOEG_Rev2.pdf`
 
     try {
       const resp = await fetch(url, {
@@ -220,8 +232,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     // if (['productionaop', 'consumptionaop'].includes(normalizedTitle)) {
     if (
       [
-        'monthwiseproductionplan',
-        'overallaopconsumption(norm/quantity)',
+        'production&normsbasis',
+        // 'overallaopconsumption(norm/quantity)',
       ].includes(normalizedTitle) &&
       VERTICAL_NAME?.toLowerCase() == 'meg'
     ) {
@@ -234,7 +246,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         >
           {/* HIDE THE TITLE NAME  */}
           {/* {title1} */}
-          <Tooltip title={`Basis for ${itemTitle}`}>
+          <Tooltip title={`Basis`}>
             <IconButton
               size='medium'
               sx={{
@@ -376,7 +388,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     {VERTICAL_NAME} / {SITE_NAME} / {PLANT_NAME}{' '}
                     {/* {getRoleName(verticalId, item?.id)} */}
                     {/* {keycloak?.realmAccess?.roles[0]} */}
-                  {itemContent}
+                    {itemContent}
                   </Typography>
                 )}
               </Grid>

@@ -7,6 +7,7 @@ export const MockPlantContributionAPILastFourYears = {
     FORMAT_VALUES_2_DECIMAL,
     FORMAT_VALUES_COST,
     FORMAT_VALUES_PRICE,
+    FORMAT_VALUES_NORMS,
   }) {
     const currFY = AOP_YEAR || ''
     let prevFY1 = ''
@@ -184,7 +185,7 @@ export const MockPlantContributionAPILastFourYears = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -197,7 +198,7 @@ export const MockPlantContributionAPILastFourYears = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -210,7 +211,7 @@ export const MockPlantContributionAPILastFourYears = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -223,7 +224,7 @@ export const MockPlantContributionAPILastFourYears = {
                       title: 'Actual',
                       editable: false,
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -236,7 +237,7 @@ export const MockPlantContributionAPILastFourYears = {
                       title: 'Budget',
                       editable: false,
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -371,7 +372,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -385,7 +386,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -399,7 +400,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -413,7 +414,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -427,7 +428,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -753,7 +754,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -767,7 +768,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -781,7 +782,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -795,7 +796,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],
@@ -809,7 +810,7 @@ export const MockPlantContributionAPILastFourYears = {
                       editable: false,
 
                       align: 'right',
-                      format: FORMAT_VALUES_3_DECIMAL,
+                      format: FORMAT_VALUES_NORMS,
                       type: 'number',
                     },
                   ],

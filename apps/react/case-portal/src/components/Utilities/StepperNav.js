@@ -64,8 +64,7 @@ export default function StepperNav() {
   useEffect(() => {
     const newSteps = buildSteps(menuItems)
     const shouldFilterSlowdown =
-      // lowerVertName === verticalEnums.PE && plantName === 'LDPE'
-      lowerVertName === (verticalEnums.PE || verticalEnums.PP)
+      lowerVertName === verticalEnums.PE || lowerVertName === verticalEnums.PP
 
     if (shouldFilterSlowdown) {
       const filteredSteps = newSteps.filter(

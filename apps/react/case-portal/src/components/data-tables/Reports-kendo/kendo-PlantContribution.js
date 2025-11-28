@@ -63,6 +63,8 @@ export default function PlantContribution() {
     lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
   const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
   const FORMAT_VALUES_PRICE = '{0:0}'
+  const FORMAT_VALUES_NORMS =
+    lowerVertName == 'meg' ? '{0:0.00000}' : '{0:0.00}'
 
   const loadAll = async () => {
     setLoading(true)
@@ -78,6 +80,7 @@ export default function PlantContribution() {
           FORMAT_VALUES_2_DECIMAL,
           FORMAT_VALUES_COST,
           FORMAT_VALUES_PRICE,
+          FORMAT_VALUES_NORMS,
         })
 
         const apiResp = await DataService.getPlantContributionYearWisePlan(
@@ -119,7 +122,7 @@ export default function PlantContribution() {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-   
+
       const res = await DataService.calculatePlantContributionReportData(
         PLANT_ID,
         AOP_YEAR,
