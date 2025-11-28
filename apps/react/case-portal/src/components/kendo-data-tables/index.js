@@ -60,6 +60,7 @@ import { NoSpinnerNumericEditorWithUOMValidation } from './Utilities-Kendo/numbe
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
+import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -153,6 +154,7 @@ const KendoDataTables = ({
   disableRedHighlight = false,
   showThreeColors = false,
   resetDataChanges = () => {},
+  isFormatByUOM = false,
   noteOnSaveDialogeBox = '',
   deleteNoteOnDeleteDialogeBox = '',
 }) => {
@@ -188,15 +190,20 @@ const KendoDataTables = ({
   const lowerVertName = vertName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
 
-  const initialGroup = groupBy
-    ? [
-        {
-          field: groupBy,
-          aggregates: totalRowConfiguration,
-          dir: undefined,
-        },
-      ]
-    : []
+ 
+  // const initialGroup = groupBy
+  //   ? [
+  //       {
+  //         field: groupBy,
+  //         dir: undefined,
+  //       },
+  //     ]
+  //   : []
+  const initialGroup = Array.isArray(groupBy)
+  ? groupBy.map((field) => ({ field }))
+  : groupBy
+    ? [{ field: groupBy }]
+    : [];
 
   const MyFooterCustomCell = (props) => {
     const field = props.field
@@ -717,14 +724,15 @@ const KendoDataTables = ({
       children,
       customModifiedCells,
       allRedCell,
+      isFormatByUOM = false,
     } = props
-
+    const uomType= dataItem?.UOM;
     const rowId = dataItem.id
-    const value = dataItem[field]
+    let value =  valueFormatterByUOM(dataItem[field] , uomType);
     if (disableRedHighlight) {
       return (
         <td {...tdProps} title={value}>
-          {children}
+          {isFormatByUOM ?  value : children}
         </td>
       )
     }
@@ -754,7 +762,7 @@ const KendoDataTables = ({
           fontWeight: shouldHighlight ? 'bold' : undefined,
         }}
       >
-        {children}
+        {isFormatByUOM ?  value : children}
       </td>
     )
   }
@@ -768,15 +776,15 @@ const KendoDataTables = ({
       customModifiedCells,
       allRedCell,
       allRedCell2,
+      isFormatByUOM = false,
     } = props
-
+    const uomType= dataItem?.UOM;
     const rowId = dataItem.id
-    const value = dataItem[field]
-
+    let value = valueFormatterByUOM(dataItem[field] , uomType);
     if (disableRedHighlight) {
       return (
         <td {...tdProps} title={value}>
-          {children}
+           {isFormatByUOM ?  value : children}
         </td>
       )
     }
@@ -851,7 +859,7 @@ const KendoDataTables = ({
           // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
         }}
       >
-        {children}
+      {isFormatByUOM ?  value : children}
       </td>
     )
   }
@@ -2029,6 +2037,7 @@ const KendoDataTables = ({
                               allRedCell={allRedCell}
                               allRedCell2={allRedCell2}
                               disableRedHighlight={disableRedHighlight}
+                              isFormatByUOM={isFormatByUOM}
                             />
                           ) : (
                             <RedHighlightCell
@@ -2036,6 +2045,7 @@ const KendoDataTables = ({
                               customModifiedCells={customModifiedCells}
                               allRedCell={allRedCell}
                               disableRedHighlight={disableRedHighlight}
+                              isFormatByUOM={isFormatByUOM}
                             />
                           ),
                         headerCell: SimpleHeaderWithTooltip,

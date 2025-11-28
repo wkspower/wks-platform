@@ -764,6 +764,7 @@ const NormalOpNormsScreen = () => {
           handleGradeChange={handleGradeChange}
           plantID={plantID}
           gridName='main'
+          isFormatByUOM={true}
         />
       )}
 

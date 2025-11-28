@@ -48,6 +48,8 @@ import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafe
 import IntermediateValuesDataSet from 'components/data-tables/Reports/IntermediateValuesDataSet'
 import RawDataSet from 'components/data-tables/Reports/RawDataSet'
 import UtilitiesNormsBasis from 'components/data-tables/Reports/UtilitiesNormsBasis'
+import PlantRequirement from 'components/data-tables/Reports-kendo/phase-two/PlantRequirement'
+import FixedConsumption from 'components/data-tables/Reports-kendo/phase-two/FixedConsumption'
 import SteadyStateNormsHistorianBasis from 'components/data-tables/Reports/SteadyStateNormsHistorianBasis'
 import ConsumptionNormsHistorianBasis from 'components/data-tables/Reports/ConsumptionNormsHistorianBasis'
 import BestAchievedIndividualNorms from 'components/data-tables/Reports/BestAchievedIndividualNorms'
@@ -62,6 +64,10 @@ import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenance
 import FeedStockAvailability from 'components/kendo-data-tables/FeedStockavailability'
 import TurnaroundPlanTable from 'components/kendo-data-tables/TurnaroundPlanTable'
 import NormComparisonReport from 'components/kendo-data-tables/NormComparisonReport'
+import TcsOutput from 'components/kendo-data-tables/TcsOutput'
+import PimsOutput from 'components/kendo-data-tables/PimsOutput'
+import Norms from 'components/data-tables/Reports-kendo/phase-two/Norms'
+import ImportPower from 'components/data-tables/Reports-kendo/phase-two/ImportPower'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -208,6 +214,22 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='tcs-input'>
                 <TcsInput />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'tcs-output',
+            element: (
+              <PrivateRoute routeId='tcs-output'>
+                <TcsOutput />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'pims-output',
+            element: (
+              <PrivateRoute routeId='pims-output'>
+                <PimsOutput />
               </PrivateRoute>
             ),
           },
@@ -500,6 +522,44 @@ export const MainRoutes = (
             ),
           },
         ],
+      },
+      {
+        path: 'utilityPlant',
+        children: [
+          {
+            path: 'norms',
+            element: (
+              <PrivateRoute routeId='norms'>
+                <Norms />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'plant-requirement',
+            element: (
+              <PrivateRoute routeId='plant-requirement'>
+                <PlantRequirement />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'fixed-consumption',
+            element: (
+              <PrivateRoute routeId='fixed-consumption'>
+                <FixedConsumption />
+              </PrivateRoute>
+            ),
+          }, 
+          {
+            path: 'import-power',
+            element: (
+              <PrivateRoute routeId='import-power'>
+                <ImportPower />
+              </PrivateRoute>
+            ),
+          }, 
+          // ...other utilityPlant routes...
+        ]
       },
 
       {
