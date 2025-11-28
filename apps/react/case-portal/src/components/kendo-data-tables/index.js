@@ -99,6 +99,7 @@ export const monthMap = {
 const KendoDataTables = ({
   showCatChemUtilityCheckbox = false,
   showCatChemUtilityCheckbox2 = false,
+  screenType = "slowdown",
   rows = [],
   plantID = null,
   grades = [],
@@ -321,6 +322,7 @@ const KendoDataTables = ({
             'maintEndDateTime' in updated &&
             'durationInHrs' in updated
           ) {
+            if (!(screenType === 'slowdown' && lowerVertName === 'elastomer')) {
             if (
               field === 'maintStartDateTime' ||
               field === 'maintEndDateTime'
@@ -336,6 +338,7 @@ const KendoDataTables = ({
               )
               if (newEnd) {
                 updated.maintEndDateTime = newEnd
+              }
               }
             }
           }
@@ -389,6 +392,7 @@ const KendoDataTables = ({
             'maintEndDateTime' in base &&
             'durationInHrs' in base
           ) {
+            if (!(screenType === 'slowdown' && lowerVertName === 'elastomer')) {
             if (
               field === 'maintStartDateTime' ||
               field === 'maintEndDateTime'
@@ -400,6 +404,7 @@ const KendoDataTables = ({
             } else if (field === 'durationInHrs') {
               const newEnd = recalcEndDate(base.maintStartDateTime, value)
               if (newEnd) base.maintEndDateTime = newEnd.toISOString()
+            }
             }
           }
 
@@ -440,7 +445,7 @@ const KendoDataTables = ({
         }
       })
     },
-    [setRows, setModifiedCells, setCustomModifiedCells],
+    [setRows, setModifiedCells, setCustomModifiedCells, lowerVertName],
   )
 
   useEffect(() => {

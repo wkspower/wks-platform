@@ -319,8 +319,8 @@ const ShutDown = ({ permissions }) => {
         //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
 
         if (
-          lowerVertName != 'elastomer' ||
-          lowerVertName != 'vcm' ||
+          lowerVertName != 'elastomer' &&
+          lowerVertName != 'vcm' &&
           lowerVertName != 'pvc'
         ) {
           for (let i = 0; i < rows.length; i++) {
@@ -941,6 +941,7 @@ const ShutDown = ({ permissions }) => {
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
         deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
+        screenType="shutdown"
       />
     </div>
   )
