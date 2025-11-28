@@ -291,13 +291,21 @@ const NormalOpNormsScreenCracker = () => {
       setProductionRows([])
       setLoading(true)
 
+      var data = []
+
       try {
-        const data = await DataService.getCatalystSelectivityData(
+        const res = await DataService.getCatalystSelectivityData(
           keycloak,
           gradeId,
           PLANT_ID,
           AOP_YEAR,
         )
+
+        if (res?.code != 200) {
+          return
+        } else {
+          data = res?.data
+        }
 
         const distinctReportTypes = [
           ...new Set(data.map((item) => item.normType).filter(Boolean)),

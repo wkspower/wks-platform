@@ -117,6 +117,62 @@ const SelectivityData = (props) => {
       }
 
       if (props?.configType !== 'grades') {
+        //TST VALIDATION SEPERATED
+        if (lowerVertName == 'meg') {
+          const monthNameMap = {
+            jan: 'January',
+            feb: 'February',
+            mar: 'March',
+            apr: 'April',
+            may: 'May',
+            jun: 'June',
+            jul: 'July',
+            aug: 'August',
+            sep: 'September',
+            oct: 'October',
+            nov: 'November',
+            dec: 'December',
+          }
+
+          const monthFields = [
+            'jan',
+            'feb',
+            'mar',
+            'apr',
+            'may',
+            'jun',
+            'jul',
+            'aug',
+            'sep',
+            'oct',
+            'nov',
+            'dec',
+          ]
+
+          for (const row of data) {
+            if ((row.productName || '').trim().toLowerCase() === 'tst') {
+              const failedMonths = []
+
+              for (const month of monthFields) {
+                const value = Number(row[month])
+
+                if (isNaN(value) || value <= 100 || value >= 370) {
+                  failedMonths.push(monthNameMap[month])
+                }
+              }
+
+              if (failedMonths.length > 0) {
+                setSnackbarOpen(true)
+                setSnackbarData({
+                  message: `Invalid values detected for 'TST' in the following months (allowed range: 100 to 370): ${failedMonths.join(', ')}.`,
+                  severity: 'error',
+                })
+                return
+              }
+            }
+          }
+        }
+
         const requiredFields = ['remarks']
         const validationMessage = validateFields(data, requiredFields)
         if (validationMessage) {

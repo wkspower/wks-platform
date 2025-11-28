@@ -185,6 +185,7 @@ export const SlowDownMegColumns = [
     field: 'durationInHrs',
     title: 'Duration (hrs)',
     editable: true,
+    widthT: 140,
   },
 
   {
@@ -245,7 +246,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'may',
@@ -255,7 +256,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'june',
@@ -265,7 +266,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'july',
@@ -275,7 +276,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
 
   {
@@ -286,7 +287,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'september',
@@ -296,7 +297,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'october',
@@ -306,7 +307,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'november',
@@ -316,7 +317,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'december',
@@ -325,7 +326,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'january',
@@ -334,7 +335,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'february',
@@ -343,7 +344,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'march',
@@ -352,7 +353,7 @@ export const NormalOpNormMegColumns = [
     width: 120,
     align: 'right',
     format: '{0:#.###}',
-    type: 'number',
+    type: 'negativeNumber',
   },
   {
     field: 'remarks',
@@ -572,7 +573,7 @@ export const ShutdownConsumptionMegColumns = [
     return {
       field: monthField,
       width: 120,
-      type: 'number',
+      type: 'negativeNumber',
       format: '{0:#.###}',
       editable: false,
       isDisabled: true,

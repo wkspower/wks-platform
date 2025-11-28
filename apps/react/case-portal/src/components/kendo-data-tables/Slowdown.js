@@ -776,6 +776,7 @@ const SlowDown = ({ permissions }) => {
         const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
           title: item.title,
+widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
           editable:
             item.field === 'particulars' || item.field.toLowerCase() === 'uom'
               ? false

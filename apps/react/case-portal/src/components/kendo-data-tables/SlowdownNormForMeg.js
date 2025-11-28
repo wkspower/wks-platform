@@ -226,18 +226,19 @@ const SlowdownNormForMeg = () => {
         const dynamicColumns = response.data.map((column) => ({
           field: column.field,
           title: column.title,
-          widthT: column.field === 'particulars' ? 220 : '',
+widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
 
           editable:
             column.field === 'particulars' ||
             column.field.toLowerCase() === 'uom'
               ? false
               : true,
+
           hidden: hiddenColumns.includes(column.field),
           ...(column.field !== 'particulars' &&
             column.field.toLowerCase() !== 'uom' && {
               format: valueFormat,
-              type: 'number',
+              type: 'negativeNumber',
             }),
         }))
 
