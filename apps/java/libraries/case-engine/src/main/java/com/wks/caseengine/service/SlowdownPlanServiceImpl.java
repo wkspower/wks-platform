@@ -1456,6 +1456,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            String originalEnd = plantMaintenanceTransaction.getMaintEndDateTime() != null ? 
 	                                 plantMaintenanceTransaction.getMaintEndDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
 	            Double originalRate = plantMaintenanceTransaction.getRate();
+	            Double originalDurationInHrs = plantMaintenanceTransaction.getDurationInMins() != null ? 
+                        plantMaintenanceTransaction.getDurationInMins() / 60.0 : null;
 	            String originalRemark = plantMaintenanceTransaction.getRemarks();
 	            plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 	            
@@ -1498,6 +1500,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                String newEnd = plantMaintenanceTransaction.getMaintEndDateTime() != null ? 
 	                                plantMaintenanceTransaction.getMaintEndDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
 	                Double newRate = plantMaintenanceTransaction.getRate();
+	                Double newDurationInHrs = shutDownPlanDTO.getDurationInHrs();
 	                String newRemark = shutDownPlanDTO.getRemark();
 
 	                boolean fieldsChanged = 
@@ -1510,7 +1513,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    shutDownPlanDTO.setSaveStatus("Failed");
 	                    shutDownPlanDTO.setErrDescription("Remark must be updated when changing other fields in an existing record.");
 	                    failedList.add(shutDownPlanDTO);
-	                    continue; // Skip saving this record
+	                    continue; 
+	                }
+	                
+	                if(verticalName.equalsIgnoreCase("ELASTOMER") && (!java.util.Objects.equals(originalDurationInHrs, newDurationInHrs))) {
+	                	if(java.util.Objects.equals(originalRemark, newRemark)) {
+	                		 shutDownPlanDTO.setSaveStatus("Failed");
+	 	                    shutDownPlanDTO.setErrDescription("Remark must be updated when duration is changed.");
+	 	                    failedList.add(shutDownPlanDTO);
+	 	                    continue; 
+	                	}
 	                }
 	                if(("ELASTOMER".equalsIgnoreCase(verticalName)) || ("AROMATICS".equalsIgnoreCase(verticalName)) || ("PTA".equalsIgnoreCase(verticalName))) {
 						if(monthChange) {	
