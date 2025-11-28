@@ -541,7 +541,7 @@ const ShutdownNorms = () => {
       showTitleNameBusiness: true,
 
       titleName:
-        lowerVertName === 'elastomer'
+        lowerVertName === 'elastomer' || lowerVertName ===  'pta' || lowerVertName === 'vcm'
           ? `Shutdown Consumption (Norms/Quantity)`
           : SCREEN_NAME,
       ExcelName: `${VERTICAL_NAME}-${SCREEN_NAME}`,
