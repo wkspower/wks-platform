@@ -68,7 +68,8 @@ public interface PlantMaintenanceTransactionRepository extends JpaRepository<Pla
 	        FROM PlantMaintenance D
 	        INNER JOIN PlantMaintenanceTransaction PMT
 	          ON PMT.PlantMaintenance_FK_Id = D.Id
-	        WHERE D.MaintenanceText = :maintenanceText
+	          INNER JOIN MaintenanceTypes MT ON MT.Id = D.MaintenanceType_FK_Id
+	        WHERE MT.Name = :maintenanceText
 	          AND PMT.AuditYear = :auditYear
 	          AND D.Plant_FK_Id = :plantId
 	          AND PMT.Discription = :description
