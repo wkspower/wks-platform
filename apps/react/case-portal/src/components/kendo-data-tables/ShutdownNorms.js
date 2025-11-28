@@ -521,6 +521,7 @@ const ShutdownNorms = () => {
         lowerVertName == 'elastomer' ||
         lowerVertName == 'aromatics' ||
         lowerVertName == 'pta' ||
+        lowerVertName == 'vcm' ||
         IS_PE_PP_VERTICAL
           ? false
           : true,
