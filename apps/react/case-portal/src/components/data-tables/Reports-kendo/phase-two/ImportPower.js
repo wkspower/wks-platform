@@ -161,7 +161,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -172,7 +172,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -183,7 +183,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -194,7 +194,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -205,7 +205,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -216,7 +216,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -227,7 +227,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -238,7 +238,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -249,7 +249,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -260,7 +260,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -271,7 +271,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -282,7 +282,7 @@ const ImportPower = () => {
       minWidth: 80,
       align: 'left',
       headerAlign: 'left',
-      // type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
   ]

@@ -852,7 +852,25 @@ const AdvanceKendoTable = ({
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
               edit: { text: NoSpinnerNumericEditor },
-              data: toolTipRenderer,
+               data: (props) =>
+                showThreeColors ? (
+                  <RedHighlightCell2
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    allRedCell2={allRedCell2}
+                    disableRedHighlight={disableRedHighlight}
+                    isFormatByUOM={isFormatByUOM}
+                  />
+                ) : (
+                  <RedHighlightCell
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    disableRedHighlight={disableRedHighlight}
+                    isFormatByUOM={isFormatByUOM}
+                  />
+                ),
               headerCell: SimpleHeaderWithTooltip,
             }}
             columnMenu={ColumnMenuCheckboxFilter}

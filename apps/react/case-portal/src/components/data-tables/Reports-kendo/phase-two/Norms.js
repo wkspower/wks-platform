@@ -121,110 +121,110 @@ const Norms = () => {
     {
       title: headerMap[4],
       children: [
-        { field: 'apr_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat},
+        { field: 'apr_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat},
         { field: 'apr_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'apr_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'apr_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat},
+        { field: 'apr_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat},
       ],
     },
     // May
     {
       title: headerMap[5],
       children: [
-        { field: 'may_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'may_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'may_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'may_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'may_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'may_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     // Jun
     {
       title: headerMap[6],
       children: [
-        { field: 'jun_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'jun_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'jun_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'jun_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'jun_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'jun_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     // Jul
     {
       title: headerMap[7],
       children: [
-        { field: 'jul_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'jul_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'jul_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'jul_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'jul_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'jul_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     // Aug
     {
       title: headerMap[8],
       children: [
-        { field: 'aug_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'aug_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'aug_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'aug_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'aug_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'aug_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     // Sep
     {
       title: headerMap[9],
       children: [
-        { field: 'sep_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'sep_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'sep_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'sep_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'sep_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'sep_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     // Oct
     {
       title: headerMap[10],
       children: [
-        { field: 'oct_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'oct_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'oct_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'oct_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'oct_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'oct_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     // Nov
     {
       title: headerMap[11],
       children: [
-        { field: 'nov_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'nov_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'nov_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'nov_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'nov_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'nov_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     //Dec
     {
       title: headerMap[12],
       children: [
-        { field: 'dec_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat },
+        { field: 'dec_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat },
         { field: 'dec_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'dec_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'dec_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'dec_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     //Jan
     {
       title: headerMap[1],
       children: [
-        { field: 'jan_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat, minWidth: 80 },
+        { field: 'jan_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat, minWidth: 80 },
         { field: 'jan_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'jan_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'jan_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'jan_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     //Feb
     {
       title: headerMap[2],
       children: [
-        { field: 'feb_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat, minWidth: 80 },
+        { field: 'feb_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat, minWidth: 80 },
         { field: 'feb_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'feb_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'feb_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'feb_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
     //mar
@@ -232,10 +232,10 @@ const Norms = () => {
       title: headerMap[3],
       minWidth: 320,
       children: [
-        { field: 'mar_norms', title: 'Norms', width: 80, editable: true,type: 'number',format: valueFormat, minWidth: 80 },
+        { field: 'mar_norms', title: 'Norms', width: 80, editable: true,type: 'number1',format: valueFormat, minWidth: 80 },
         { field: 'mar_quantity', title: 'Quantity', width: 80, minWidth: 80,type: 'number',format: valueFormat },
         { field: 'mar_amount', title: 'Amount', width: 80, minWidth: 80,type: 'number',format: valueFormat },
-        { field: 'mar_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number',format: valueFormat },
+        { field: 'mar_price', title: 'Price', width: 80, minWidth: 80,editable: true,type: 'number1',format: valueFormat },
       ],
     },
   ]
@@ -299,6 +299,7 @@ const Norms = () => {
     titleName: screenTitle?.title,
     showExport: false,
     showImport: false,
+    showTitle:true,
   }
 
   // Save handler with API call

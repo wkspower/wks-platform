@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 const dummyRows = [
   {
     id: 1,
@@ -292,6 +293,7 @@ const PlantRequirement = () => {
       field: 'cppUtilities',
       title: 'CPP Utilities',
       widthT: 120,
+      minWidth:80,
       type: 'text',
       editable: false,
     },
@@ -299,13 +301,15 @@ const PlantRequirement = () => {
       field: 'cppUtilityId',
       title: 'CPP Utility IDs',
       widthT: 120,
+      minWidth:80,
       type: 'text',
       editable: false,
     },
     {
       field: 'cppPlant',
       title: 'CPP Plant',
-      widthT: 180,
+      widthT: 120,
+      minWidth:80,
       type: 'text',
       editable: false,
     },
@@ -313,18 +317,20 @@ const PlantRequirement = () => {
       field: 'cppPlantId',
       title: 'CPP Plant ID',
       widthT: 100,
+      minWidth:80,
       type: 'text',
       editable: false,
     },
-    { field: 'uom', title: 'UOM', widthT: 60, type: 'text', editable: false },
+    { field: 'uom', title: 'UOM', widthT: 60,minWidth:60, type: 'text', editable: false },
     {
       field: 'april',
       title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -332,9 +338,10 @@ const PlantRequirement = () => {
       title: headerMap[5],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -342,9 +349,10 @@ const PlantRequirement = () => {
       title: headerMap[6],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -352,9 +360,10 @@ const PlantRequirement = () => {
       title: headerMap[7],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -362,9 +371,10 @@ const PlantRequirement = () => {
       title: headerMap[8],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -372,9 +382,10 @@ const PlantRequirement = () => {
       title: headerMap[9],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -382,9 +393,10 @@ const PlantRequirement = () => {
       title: headerMap[10],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -392,9 +404,10 @@ const PlantRequirement = () => {
       title: headerMap[11],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -402,9 +415,10 @@ const PlantRequirement = () => {
       title: headerMap[12],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -412,9 +426,10 @@ const PlantRequirement = () => {
       title: headerMap[1],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -422,9 +437,10 @@ const PlantRequirement = () => {
       title: headerMap[2],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -432,9 +448,10 @@ const PlantRequirement = () => {
       title: headerMap[3],
       editable: true,
       widthT: 100,
+      minWidth:80,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat
     },
     {
@@ -550,7 +567,8 @@ const PlantRequirement = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <KendoDataTables
+      {/* <KendoDataTables */}
+      <AdvanceKendoTable
         columns={columns}
         rows={rows}
         setRows={setRows}
