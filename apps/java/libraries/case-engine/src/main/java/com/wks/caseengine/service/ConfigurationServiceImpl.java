@@ -14,6 +14,8 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import jakarta.persistence.Query;
 import java.util.Base64;
 import java.util.Collections;
