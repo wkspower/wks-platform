@@ -191,6 +191,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			innerHeaders.add("Type");
 			innerHeaders.add("Particulars");
 			innerHeaders.add("UOM");
+			if(reportTypes.contains("Report Manual Entry")) {
+				year=getLastYear(year);
+			}
 			List<String> monthsList = getAcademicYearMonths(year);
 			innerHeaders.addAll(monthsList);
 			innerHeaders.add("Remarks");
@@ -266,6 +269,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		System.out.println("Ended the createExcel");
 		return null;
 
+	}
+	
+	String getLastYear(String year) {
+		String startYearStr = year.split("-")[0];
+		int startYear = Integer.parseInt(startYearStr);
+		int previousStartYear = startYear - 1; 
+		String previousEndYearLastTwoDigits = startYearStr.substring(2); 
+	    String previousAcademicYear = previousStartYear + "-" + previousEndYearLastTwoDigits; 
+	    return previousAcademicYear;
 	}
 	
 	public byte[] createShutdownRateExcel(String year, UUID plantFKId,String type, boolean isAfterSave, List<ConfigurationDTO> dtoList) {
@@ -498,10 +510,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
-			} /*
-				 * else if(verticalName.equalsIgnoreCase("AROMATICS")){ obj =
-				 * findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,version); }
-				 */else {
+			} else {
 				obj = findByYearAndPlantFkId(year, plantFKId, viewName);
 			}
 			
@@ -2191,11 +2200,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setMar(getNumericCellValue(row.getCell(14), dto));
 						dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 						dto.setNormParameterFKId(getStringCellValue(row.getCell(16), dto));
-						if(dto.getProductName().equalsIgnoreCase("TST")) {
+						if (dto.getProductName().equalsIgnoreCase("TST")) {
 						    
-						    boolean isValueOutOfRange = false;
-						    String monthName = "";
-						    
+						    List<String> invalidMonthNames = new ArrayList<>(); 
+
 						    List<Double> monthValues = Arrays.asList(
 						        dto.getApr(), dto.getMay(), dto.getJun(), dto.getJul(), 
 						        dto.getAug(), dto.getSep(), dto.getOct(), dto.getNov(), 
@@ -2208,23 +2216,23 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 						    for (int i = 0; i < monthValues.size(); i++) {
 						        Double value = monthValues.get(i);
-						        
+						        String currentMonthName = monthNames.get(i);
 						        if (value == null || value < 100.0 || value > 370.0) {
-						            isValueOutOfRange = true;
-						            monthName = monthNames.get(i);
-						            break; 
+						            invalidMonthNames.add(currentMonthName);     
 						        }
 						    }
 						    
-						    if (isValueOutOfRange) {
+						    if (!invalidMonthNames.isEmpty()) {
 						        dto.setSaveStatus("Failed");
 						        
-						        String errorDescription = (monthValues.get(monthNames.indexOf(monthName)) == null) ?
-						            monthName + " value is missing or invalid. " :
-						            monthName + " value (" + monthValues.get(monthNames.indexOf(monthName)) + ") is outside the required range [100.0, 370.0].";
+						        String failedMonths = String.join(", ", invalidMonthNames);
+						        
+						        String errorDescription = "Validation failed for the following months: " + failedMonths + 
+						                                  ". Values must be in the range [100.0, 370.0] and cannot be missing.";
+						                                  
 						        dto.setErrDescription(errorDescription);
 						    }
-						}
+						}						
 					}
 
 				} catch (Exception e) {
