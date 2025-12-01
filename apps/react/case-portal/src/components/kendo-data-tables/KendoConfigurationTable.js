@@ -1270,7 +1270,7 @@ const ConfigurationTable = () => {
                     currentTabDisplayName={currentTabDisplayName}
                   />
                 )
-            case getTheId('Constants'):
+            case getTheId('Constant'):
                 return (
                   <SelectivityData
                     rows={productionRowsConstants}
