@@ -3,7 +3,7 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-
+import com.wks.caseengine.entity.AopCalculation;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
@@ -54,6 +54,7 @@ import com.wks.caseengine.dto.WorkflowStepsMasterDTO;
 import com.wks.caseengine.dto.WorkflowSubmitDTO;
 import com.wks.caseengine.dto.WorkflowYearDTO;
 import com.wks.caseengine.repository.AnnualAOPCostRepository;
+import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -98,6 +99,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
 	@Autowired
 	private SiteRepository siteRepository;
+	
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
 	@Override
 	public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId) {
@@ -275,8 +279,10 @@ public class WorkflowServiceImpl implements WorkflowService {
 	}
 
 	@Override
-	public Map<String, Object> getProductionAOPWorkflowData(String plantId, String year) {
+	public AOPMessageVM getProductionAOPWorkflowData(String plantId, String year) {
 		Map<String, Object> map = new HashMap<>();
+		Map<String, Object> finalMap = new HashMap<>();
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
 
 		try {
 			List<Object[]> results = getProductionWorkflowData(plantId, year);
@@ -301,7 +307,14 @@ public class WorkflowServiceImpl implements WorkflowService {
 			map.put("headers", headers);
 			map.put("keys", keys);
 			map.put("results", workflowList);
-			return map;
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "aop-approval-flow");
+			finalMap.put("aopCalculation", aopCalculation);
+			finalMap.put("data", map);
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(finalMap);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {

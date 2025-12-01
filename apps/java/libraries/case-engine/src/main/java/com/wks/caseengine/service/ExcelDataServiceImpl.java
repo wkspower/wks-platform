@@ -481,25 +481,42 @@ public class ExcelDataServiceImpl implements ExcelDataService {
     @Override
     public Map<String, Object> getProductionAOPWorkflowData(String plantId, String year, List<String> headers) {
 
-        Map<String, Object> outMap = new HashMap<>();
-        Map<String, Object> map = workflowService.getProductionAOPWorkflowData(plantId,
-                year);
+        AOPMessageVM response = workflowService.getProductionAOPWorkflowData(plantId, year);
 
-        // List<String> headers = (List<String>) map.get("headers");
-        List<WorkflowYearDTO> dtoList = (List<WorkflowYearDTO>) map.get("results");
+        Map<String, Object> finalMap = (Map<String, Object>) response.getData();
+        
+        if (finalMap == null) {
+            return new HashMap<>(); 
+        }
+        Map<String, Object> map = (Map<String, Object>) finalMap.get("data");
+
+        if (map == null) {
+            return new HashMap<>();
+        }
+        List<WorkflowYearDTO> dtoList;
+        try {
+            dtoList = (List<WorkflowYearDTO>) map.get("results");
+        } catch (ClassCastException e) {
+            return new HashMap<>(); 
+        }
+        
+        if (dtoList == null) {
+            return map; 
+        }
+
         List<List<Object>> dataList = new ArrayList<>();
-        // Data rows
-
+        
         for (WorkflowYearDTO dto : dtoList) {
             List<Object> list = new ArrayList<>();
             for (String fieldName : headers) {
                 try {
                     Field field = dto.getClass().getDeclaredField(fieldName);
-                    field.setAccessible(true); // in case field is private
-                    String value = (String) field.get(dto);
+                    field.setAccessible(true); // Grant access to private fields
+                    
+                    Object value = field.get(dto); 
                     list.add(value);
+                    
                 } catch (NoSuchFieldException | IllegalAccessException e) {
-                    // If field doesn't exist or not accessible, add null
                     list.add(null);
                 }
             }
@@ -508,7 +525,6 @@ public class ExcelDataServiceImpl implements ExcelDataService {
         map.put("rows", dataList);
         return map;
     }
-
     @Override
     public Map<String, Object> getAnnualAOPWorkflowData(String plantId, String year, List<String> headers) {
         Map<String, Object> outMap = new HashMap<>();
