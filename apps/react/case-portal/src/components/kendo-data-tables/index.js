@@ -342,6 +342,21 @@ const KendoDataTables = ({
               }
             }
           }
+          if (
+          lowerVertName === 'vcm' &&
+          (r.discription || '').trim() === 'Furnace Decoking'
+        ) {
+          if (field === 'maintStartDateTime' && value) {
+            const start = new Date(value)
+            if (!isNaN(start)) {
+              const end = new Date(start)
+              end.setHours(end.getHours() + 192)
+              updated.maintEndDateTime = end
+              updated.durationInHrs = '192.00'
+            }
+          }
+        }
+
           return updated
         }),
       )
@@ -1608,6 +1623,29 @@ const KendoDataTables = ({
                     />
                   )
                 }
+                if (
+              col?.field === 'discription' && col?.type === 'discriptionDrpdwn'
+            ) {
+              return (
+                <GridColumn
+                  key='discription'
+                  field='discription'
+                  title={col.title || col.headerName || 'Particulars'}
+                  editable={col.editable || true}
+                  hidden={col.hidden}
+                  cells={{
+                    data: (cellProps) => (
+                      <ProductCell
+                        {...cellProps}
+                        allProducts={allDescriptionDrpdwn}
+                      />
+                    ),
+                    headerCell: SimpleHeaderWithTooltip,
+                  }}
+                  columnMenu={ColumnMenuCheckboxFilter}
+                />
+              )
+            }
 
                 if (col?.field === 'productName1') {
                   return (

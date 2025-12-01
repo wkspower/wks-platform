@@ -932,6 +932,14 @@ const ConfigurationTable = () => {
       const [start, end] = auditYear.split('-').map(Number)
       displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
     }
+    const megTabsDisplay = megTabs.map(tab =>
+      isAromatics && tab === 'Constants'
+        ? 'User Input'
+        : tab === 'Report Manual Entry'
+        ? `${tab} ${displayYear}`
+        : tab
+    )
+    
     return (
       <div>
         <Backdrop
@@ -945,14 +953,15 @@ const ConfigurationTable = () => {
           <AopTabs
             tabIndex={tabIndex}
             setTabIndex={setTabIndex}
-            tabs={megTabs.map((tab) =>
-              tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
-            )}
+            tabs={megTabsDisplay}
           />
 
           {(() => {
             const currentTab = megTabs[tabIndex]?.toLowerCase()
-            const currentTabDisplayName = megTabs[tabIndex]
+            const currentTabDisplayName = 
+              isAromatics && megTabs[tabIndex] === 'Constants'
+                ? 'User Input'
+                : megTabs[tabIndex]
 
             switch (currentTab) {
               case 'configuration':
@@ -1217,35 +1226,35 @@ const ConfigurationTable = () => {
   }
 
   if (lowerVertName === 'vcm') {
-    const elastomerTabs = ['Configuration', 'Constants', 'Report Manual Entry']
-    const auditYear = AOP_YEAR
-    let displayYear = ''
-    if (auditYear) {
-      const [start, end] = auditYear.split('-').map(Number)
-      displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
-    }
-    return (
-      <div>
-        <Backdrop
+  return (
+    <div>
+      <Backdrop
           sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
           open={!!loading1}
         >
           <CircularProgress color='inherit' />
         </Backdrop>
-        {ConfigurationAccordian}
-        <Box>
-          <AopTabs
-            tabIndex={tabIndex}
-            setTabIndex={setTabIndex}
-            tabs={elastomerTabs.map((tab) =>
-              tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
-            )}
-          />
+      {ConfigurationAccordian}
+      <AopTabs
+        tabIndex={tabIndex}
+        setTabIndex={setTabIndex}
+        tabs={tabs.map((tabId) => {
+          const tabInfo = availableTabs.find(
+            (tab) => tab.id.toLowerCase() === tabId.toLowerCase()
+          )
+          return tabInfo ? tabInfo.displayName : tabId
+        })}
+      />
+      <Box>
           {(() => {
-            const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
-            const currentTabDisplayName = elastomerTabs[tabIndex]
-            switch (currentTab) {
-              case 'configuration':
+          const currentTabId = tabs[tabIndex]?.toLowerCase()
+          const currentTabInfo = availableTabs.find(
+            (tab) => tab.id.toLowerCase() === currentTabId
+          )
+          const currentTabDisplayName = currentTabInfo?.displayName
+
+          switch (currentTabId) {
+            case getTheId('Configuration'):
                 return (
                   <SelectivityData
                     rows={productionRows}
@@ -1261,7 +1270,7 @@ const ConfigurationTable = () => {
                     currentTabDisplayName={currentTabDisplayName}
                   />
                 )
-              case 'constants':
+            case getTheId('Constants'):
                 return (
                   <SelectivityData
                     rows={productionRowsConstants}
@@ -1277,7 +1286,7 @@ const ConfigurationTable = () => {
                     currentTabDisplayName={currentTabDisplayName}
                   />
                 )
-              case 'report manual entry':
+            case getTheId('Report Manual Entry'):
                 return (
                   <SelectivityData
                     rows={productionRowsConstantsMannualEntry}

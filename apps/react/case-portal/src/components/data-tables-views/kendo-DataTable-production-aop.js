@@ -108,13 +108,24 @@ const ProductionAopView = ({
   }
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
-    try {
-      var data = await DataService.getWorkflowDataProduction(
+  setLoading(true)
+  try {
+    const response = await DataService.getWorkflowDataProduction(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
-      var formattedRows = data.results.map((row, id) => {
+    // Correct path is response.data.data
+    const apiData = response?.data?.data
+    
+    if (!apiData?.results || !Array.isArray(apiData.results)) {
+      console.error('No results found')
+      setRows([])
+      setColumns([])
+      return
+    }
+    
+    let formattedRows = apiData.results.map((row, id) => {
         const newRow = { id }
         Object.entries(row).forEach(([key, val]) => {
           if (['syAop', 'fyActual', 'fyAop'].includes(key)) {
@@ -126,18 +137,21 @@ const ProductionAopView = ({
         return newRow
       })
 
-      formattedRows = formattedRows?.map((item) => ({
+    formattedRows = formattedRows.map((item) => ({
         ...item,
+      path: [item.particulates],
       }))
 
       setRows(formattedRows)
 
-      const results = data?.results
-      const numericKeys = getNumericKeysInAllRows(results)
+    // Use apiData.results for numeric keys calculation
+    const numericKeys = getNumericKeysInAllRows(apiData.results)
 
       const generateColumns = ({ headers, keys }) => {
+      // Match keys to headers length to avoid mismatch
+      const validKeys = keys.slice(0, headers.length)
         const cols = headers.map((header, idx) => {
-          const key = keys[idx]
+        const key = validKeys[idx]
           const isRemark = key === 'remark'
           return {
             field: key,
@@ -163,10 +177,12 @@ const ProductionAopView = ({
         return cols
       }
 
-      setColumns(generateColumns(data))
+    setColumns(generateColumns(apiData))
     } catch (error) {
       console.error('Error fetching data:', error)
       setRows([])
+    setColumns([])
+  } finally {
       setLoading(false)
     }
   }

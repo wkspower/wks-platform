@@ -156,7 +156,7 @@ const SelectivityData = (props) => {
               for (const month of monthFields) {
                 const value = Number(row[month])
 
-                if (isNaN(value) || value <= 100 || value >= 370) {
+                if (isNaN(value) || value < 100 || value > 370) {
                   failedMonths.push(monthNameMap[month])
                 }
               }
