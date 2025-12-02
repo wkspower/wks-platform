@@ -1349,8 +1349,10 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 			if (site.getName().equalsIgnoreCase("HMD") || site.getName().equalsIgnoreCase("DMD")) {
 				steamLatentName = "HP.Latent.Heat";
-			} else if ((site.getName().equalsIgnoreCase("NMD"))) {
+			} else if ((site.getName().equalsIgnoreCase("NMD")) || site.getName().equalsIgnoreCase("C2")) {
 				steamLatentName = "MP.Latent.Heat";
+			} else {
+				steamLatentName = "HP.Latent.Heat";
 			}
 
 			for (ConfigurationDTO configurationDTO : configurationDTOList) {

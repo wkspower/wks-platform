@@ -345,6 +345,8 @@ const BusinessDemand = ({ permissions }) => {
       titleName: percentageTitle,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
+      isTotalFooterActive:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
 
       downloadExcelBtn:
         lowerVertName == 'cracker' ||

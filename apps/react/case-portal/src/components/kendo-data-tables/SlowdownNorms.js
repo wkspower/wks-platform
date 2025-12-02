@@ -21,6 +21,7 @@ import { NormalOperationNormsApiService } from 'services/normal-operation-norms-
 import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
+import { SlowdownNormForMegServices } from 'services/SlowdownNormForMegServices'
 const SlowdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
@@ -456,6 +457,13 @@ const SlowdownNorms = () => {
           AOP_YEAR,
           keycloak,
         )
+      } else if (lowerVertName == 'vcm') {
+        response =
+          await SlowdownNormForMegServices.getSlowdownNormsCalculateForMeg({
+            keycloak,
+            PLANT_ID,
+            year: AOP_YEAR,
+          })
       } else {
         response = await DataService.handleCalculateSlowdownNorms(
           PLANT_ID,

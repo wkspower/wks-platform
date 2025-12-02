@@ -67,6 +67,8 @@ const ConsumptionNorms = () => {
   const [gradeId, setGradeId] = useState(null)
   const [grades, setGrades] = useState([])
 
+  const isPEPP = lowerVertName === 'pe' || lowerVertName === 'pp'
+
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
@@ -230,7 +232,6 @@ const ConsumptionNorms = () => {
 
   const fetchGradeDropdowns = async () => {
     try {
-      setGrades([])
       const response =
         await ConsumptionNormsApiService.getConsumptionAOPNormsGrades(
           keycloak,
@@ -242,10 +243,10 @@ const ConsumptionNorms = () => {
         setGrades(response?.data)
       }
 
-      fetchData(gradeId)
+      fetchData(response?.data[0]?.gradeId)
     } catch (error) {
       setGrades([])
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching data:', error)
     }
   }
 
@@ -285,7 +286,7 @@ const ConsumptionNorms = () => {
 
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
-    if ((lowerVertName === 'pe' || lowerVertName === 'pp') && !gradeId) return
+    if (isPEPP && !gradeId) return
     setLoading(true)
     try {
       var response
@@ -366,19 +367,13 @@ const ConsumptionNorms = () => {
   }
 
   useEffect(() => {
-    fetchData(gradeId)
+    // fetchData(gradeId)
     if (lowerVertName === 'pe' || lowerVertName === 'pp') {
       fetchGradeDropdowns()
+    } else {
+      fetchData(null)
     }
-  }, [
-    PLANT_ID,
-    AOP_YEAR,
-    oldYear,
-    yearChanged,
-    keycloak,
-    selectedUnit,
-    gradeId,
-  ])
+  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,
@@ -513,6 +508,7 @@ const ConsumptionNorms = () => {
 
   const handleGradeChange = (gradeId) => {
     setGradeId(gradeId)
+    fetchData(gradeId)
   }
 
   return (
@@ -556,7 +552,7 @@ const ConsumptionNorms = () => {
               setSnackbarData={setSnackbarData}
               handleCalculate={handleCalculate}
               handleRemarkCellClick={handleRemarkCellClick}
-              fetchData={fetchData}
+              // fetchData={fetchData}
               handleUnitChange={handleUnitChange}
               remarkDialogOpen={remarkDialogOpen}
               setRemarkDialogOpen={setRemarkDialogOpen}
@@ -569,6 +565,7 @@ const ConsumptionNorms = () => {
               handleGradeChange={handleGradeChange}
               calculatebtnClicked={calculatebtnClicked}
               downloadExcelForConfiguration={downloadExcelForConfiguration}
+              plantID={PLANT_ID}
             />
           </Box>
         }
