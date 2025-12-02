@@ -385,11 +385,10 @@ const MaintenanceTable = () => {
           saveBtn: dataConfig.isCracker,
           allAction: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `Maintenance Details`,
+          ExcelName: `Net Production Hours`,
           showRefresh: false,
-
           showTitleNameBusiness: true,
-          titleName: 'Maintenance Details',
+          titleName: 'Net Production Hours',
         },
         oldYear?.oldYear,
       ),

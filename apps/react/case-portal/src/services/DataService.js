@@ -136,10 +136,10 @@ export const DataService = {
   getConfigurationExecutionDetailsNorms,
   executeConfigurationNorms,
   getProductionTargetBasis,
-  ImportShutdownDetails,
-  ImportShutdownElastomerDetails,
-  shutdownDetailsExport,
-  shutdownDetailsElastomerExport,
+  ImportShutdownProductWise,
+  ImportShutdownNonProduct,
+  exportShutdownNonProductWise,
+  exportShutdownNonProduct,
   slowdownDetailsExport,
   ExportSlowdownDetailsEOE,
   slowdownDetailsElastomerExport,
@@ -2999,7 +2999,7 @@ async function getProductionTargetBasis(keycloak, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-export async function ImportShutdownDetails(file, keycloak, plantId, year) {
+export async function ImportShutdownProductWise(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const formData = new FormData()
@@ -3020,12 +3020,7 @@ export async function ImportShutdownDetails(file, keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
-export async function ImportShutdownElastomerDetails(
-  file,
-  keycloak,
-  plantId,
-  year,
-) {
+export async function ImportShutdownNonProduct(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-import-non-product?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const formData = new FormData()
@@ -3046,7 +3041,7 @@ export async function ImportShutdownElastomerDetails(
     return Promise.reject(e)
   }
 }
-export async function shutdownDetailsExport(keycloak, plantId, year) {
+export async function exportShutdownNonProductWise(keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3077,7 +3072,7 @@ export async function shutdownDetailsExport(keycloak, plantId, year) {
   }
 }
 
-export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
+export async function exportShutdownNonProduct(keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-export-non-product?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3107,6 +3102,7 @@ export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
+
 export async function ImportSlowdownDetails(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
@@ -3150,6 +3146,7 @@ export async function ImportSlowdownDetailsEOE(file, keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
+
 export async function ImportSlowdownElastomerDetails(
   file,
   keycloak,
@@ -3176,6 +3173,7 @@ export async function ImportSlowdownElastomerDetails(
     return Promise.reject(e)
   }
 }
+
 export async function slowdownDetailsExport(keycloak, plantId, year) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`

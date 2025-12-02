@@ -208,7 +208,7 @@ async function getProductionVolExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production Target.xlsx'
+    a.download = 'Net Production Hours.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()

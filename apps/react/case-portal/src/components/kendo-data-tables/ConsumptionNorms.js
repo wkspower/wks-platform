@@ -10,7 +10,6 @@ import { validateFields } from 'utils/validationUtils'
 import getEnhancedColDefs from '../data-tables/CommonHeader/kendoconsumptionHeader'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { Box } from '@mui/material'
-
 import KendoDataTables from './index'
 import { ConsumptionNormsApiService } from 'services/consumption-norms-api-service'
 import { getRoleName } from 'services/role-service'
@@ -20,8 +19,9 @@ const ConsumptionNorms = () => {
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
-
   const [open1, setOpen1] = useState(false)
+  const valueFormat = ValueFormatterConsumption()
+  const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
@@ -36,6 +36,7 @@ const ConsumptionNorms = () => {
     year,
     screenTitle,
   } = dataGridStore
+
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
@@ -70,6 +71,7 @@ const ConsumptionNorms = () => {
     unsavedRows: {},
     rowsBeforeChange: {},
   })
+
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.aopRemarks || '')
@@ -368,9 +370,15 @@ const ConsumptionNorms = () => {
     if (lowerVertName === 'pe' || lowerVertName === 'pp') {
       fetchGradeDropdowns()
     }
-  }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit, gradeId])
-
-  const valueFormat = ValueFormatterConsumption()
+  }, [
+    PLANT_ID,
+    AOP_YEAR,
+    oldYear,
+    yearChanged,
+    keycloak,
+    selectedUnit,
+    gradeId,
+  ])
 
   const productionColumns = getEnhancedColDefs({
     headerMap,
@@ -426,6 +434,7 @@ const ConsumptionNorms = () => {
       console.error('Error!', error)
     }
   }
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -452,7 +461,6 @@ const ConsumptionNorms = () => {
       setSnackbarOpen(true)
     }
   }
-  const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
