@@ -626,7 +626,16 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				vertical.getId().toString(), year);
 		aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
 				"slowdown-norms-configuration");
-		
+		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("slowdown-norms-configuration-calculate");
+		for (ScreenMapping screenMapping : screenMappingList) {
+			AopCalculation aopCalculation = new AopCalculation();
+			aopCalculation.setAopYear(year);
+			aopCalculation.setIsChanged(true);
+			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+			aopCalculation.setPlantId(UUID.fromString(plantId));
+			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+			aopCalculationRepository.save(aopCalculation);
+		}
 		aopMessageVM.setCode(200);
 		aopMessageVM.setMessage("SP Executed successfully");
 		aopMessageVM.setData(result);
