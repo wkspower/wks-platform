@@ -323,7 +323,6 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
 			Workbook workbook = new XSSFWorkbook();
 			CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm");
-			CellStyle durationStyle = createDateTimeStyle(workbook, "[h]:mm");
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			List<List<Object>> rows = new ArrayList<>();
@@ -346,7 +345,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 					list.add(startDate != null ? formatter.format(startDate) : null);
 					list.add(endDate != null ? formatter.format(endDate) : null);
-					list.add(excelTimeValue);
+					list.add(formattedDuration);
 					list.add(dto.getRemark());
 					list.add(dto.getId());
 					// list.add(productString);
