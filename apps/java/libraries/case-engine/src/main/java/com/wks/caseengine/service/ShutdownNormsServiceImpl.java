@@ -102,7 +102,10 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			if (vertical.getName().equalsIgnoreCase("MEG")) {
-				objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
+				//objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
+				// view converted to sp
+				String storedProcedure = verticalName + "_" + site.getName() + "_GetShutdownnorms";
+				objList = getShutdownConsumptionData( plantId,year, storedProcedure);
 			}else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("PVC") || vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA")) {
 				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
 				objList = getShutdownNormsMEG(year, plant.getId(), viewName);
