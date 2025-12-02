@@ -1286,7 +1286,7 @@ const ConfigurationTable = () => {
                     fetchData={fetchData}
                     setRows={setProductionRows}
                     configType='elastomer'
-                    groupBy='Particulars'
+                    groupBy='TypeDisplayName'
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
@@ -1313,17 +1313,16 @@ const ConfigurationTable = () => {
               case getTheId('Report Manual Entry'):
                 return (
                   <SelectivityData
-                    rows={productionRowsConstantsMannualEntry}
+                    rows={reportManualEntry}
                     loading={loading}
-                    fetchData={fetchDataConstantsMnnualEntry}
-                    setRows={setProductionRowsConstantsMannualEntry}
-                    configType='megConstantsMannualEntry'
-                    groupBy='Particulars'
-                    summaryEdited={summaryEdited}
+                    setRows={setReportManualEntry}
+                    fetchData={fetchData}
+                    configType='Report Manual Entry'
                     summary={debouncedSummary}
+                    summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
-                    tabIndex='2'
                     currentTabDisplayName={currentTabDisplayName}
+                    groupBy='TypeDisplayName'
                   />
                 )
               default:
