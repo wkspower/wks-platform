@@ -970,6 +970,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				rowIterator.next(); // Skip header
 			}
 
+			// Calculate Financial Year bounds once
+			LocalDateTime[] bounds = parseFinancialYearBounds(year);
+			LocalDateTime fyStart = bounds[0];
+			LocalDateTime fyEnd = bounds[1];
+
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
 				ShutDownPlanDTO dto = new ShutDownPlanDTO();
@@ -979,8 +984,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				try {
 					dto.setAudityear(year);
 
+					// --- 1. Description (Cell 0) ---
 					String desc = getStringCellValue(row.getCell(0), dto);
-					dto.setDiscription(desc); 
+					dto.setDiscription(desc);
 
 					if (desc != null && dto.getSaveStatus() == null) {
 						boolean exists = dtoList.stream()
@@ -994,7 +1000,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						}
 					}
 					
-					dto.setProductName(getStringCellValue(row.getCell(1), dto)); // Field 1 set
+					// --- 2. Product Name (Cell 1) ---
+					dto.setProductName(getStringCellValue(row.getCell(1), dto)); 
 					if (dto.getSaveStatus() == null) {
 						if (dto.getProductName() != null) {
 							UUID productId = normParametersRepository
@@ -1012,10 +1019,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						}
 					}
 
-					LocalDateTime[] bounds = parseFinancialYearBounds(year);
-					LocalDateTime fyStart = bounds[0];
-					LocalDateTime fyEnd = bounds[1];
-
+					// --- 3. Start Date/Time (Cell 2) ---
 					String mantStartStr = getCellAsString(row.getCell(2), dto, evaluator);
 
 					if (mantStartStr != null) {
@@ -1023,11 +1027,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
 							ldtStart = LocalDateTime.parse(mantStartStr, fmt);
 							
-							// Set DTO date now, regardless of FY check outcome
+							// Set DTO date now, regardless of validation outcome
 							Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
-							dto.setMaintStartDateTime(startDate); // DTO date set
+							dto.setMaintStartDateTime(startDate); 
 
-							if (dto.getSaveStatus() == null) {
+							if (dto.getSaveStatus() == null) { // Validate only if no prior error
 								if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
 									dto.setSaveStatus("Failed");
 									dto.setErrDescription("Start date/time is outside the financial year " + year);
@@ -1035,8 +1039,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							}
 
 						} catch (Exception ex) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Invalid date/time format in start date/time cell.");
+							if (dto.getSaveStatus() == null) { // Set error status only if no prior error
+								dto.setSaveStatus("Failed");
+								dto.setErrDescription("Invalid date/time format in start date/time cell.");
+							}
 							ex.printStackTrace();
 						}
 					} else if (dto.getSaveStatus() == null) {
@@ -1044,6 +1050,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						dto.setErrDescription("Start Date/Time is missing.");
 					}
 
+					// --- 4. End Date/Time (Cell 3) ---
 					String mantEndStr = getCellAsString(row.getCell(3), dto, evaluator);
 
 					if (mantEndStr != null) {
@@ -1052,9 +1059,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
 							Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 							
-							dto.setMaintEndDateTime(endDate); 
+							dto.setMaintEndDateTime(endDate); // Set DTO date now
 
-							if (dto.getSaveStatus() == null) {
+							if (dto.getSaveStatus() == null) { // Validate only if no prior error
 								if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
 									dto.setSaveStatus("Failed");
 									dto.setErrDescription("End date/time is outside the financial year " + year);
@@ -1064,7 +1071,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 								}
 							}
 							
-							// Overlap check
+							// Overlap check (needs ldtStart/ldtEnd and no prior error)
 							if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
 								boolean overlaps = false;
 								for (LocalDateTime[] prev : validTimeRanges) {
@@ -1082,8 +1089,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							}
 
 						} catch (Exception ex) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Invalid date/time format in end date/time cell.");
+							if (dto.getSaveStatus() == null) { // Set error status only if no prior error
+								dto.setSaveStatus("Failed");
+								dto.setErrDescription("Invalid date/time format in end date/time cell.");
+							}
 							ex.printStackTrace();
 						}
 					} else if (mantEndStr == null && dto.getSaveStatus() == null) {
@@ -1091,32 +1100,41 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						dto.setErrDescription("End Date/Time is missing.");
 					}
 
-					// Duration calculation and add to validTimeRanges only if all date checks passed
-					if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
+					if (ldtStart != null && ldtEnd != null) {
 						try {
-							Instant startInstant = dto.getMaintStartDateTime().toInstant();
-							Instant endInstant = dto.getMaintEndDateTime().toInstant();
-							Duration duration = Duration.between(startInstant, endInstant);
+							// Using ldtStart/ldtEnd which were populated from the parsing steps
+							Duration duration = Duration.between(ldtStart, ldtEnd);
 							long totalMinutes = duration.toMinutes();
 							
 							if (totalMinutes < 0) {
-								dto.setSaveStatus("Failed");
-								dto.setErrDescription("Calculated negative duration.");
+								// If this happens, it means the earlier date validation failed,
+								// but we still set the failure status if it wasn't set earlier.
+								if (dto.getSaveStatus() == null) {
+									dto.setSaveStatus("Failed");
+									dto.setErrDescription("Calculated negative duration.");
+								}
 							} else {
 								double durationInHrs = (double) totalMinutes / 60.0;
-								dto.setDurationInHrs(durationInHrs); // Field 4 (implicitly) set
-
-								validTimeRanges.add(new LocalDateTime[]{ldtStart, ldtEnd});
+								dto.setDurationInHrs(durationInHrs); // DTO field set
 							}
 						} catch (Exception e) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Error calculating duration.");
+							if (dto.getSaveStatus() == null) {
+								dto.setSaveStatus("Failed");
+								dto.setErrDescription("Error calculating duration.");
+							}
 							e.printStackTrace();
 						}
 					}
+					
+					// Add to validTimeRanges ONLY if validation was a success (after duration check)
+					if (dto.getSaveStatus() != null && dto.getSaveStatus().equals("Success") && ldtStart != null && ldtEnd != null) {
+						validTimeRanges.add(new LocalDateTime[]{ldtStart, ldtEnd});
+					}
 
+
+					// --- 5. Rate (Cell 5) ---
 					Double rate = getNumericCellValue(row.getCell(5), dto);
-					dto.setRate(rate); // Field 5 set
+					dto.setRate(rate); 
 					if (dto.getSaveStatus() == null) {
 						if (rate == null) {
 							dto.setSaveStatus("Failed");
@@ -1124,17 +1142,19 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						}
 					}
 
+					// --- 6. Remark (Cell 6) ---
 					String remark = getStringCellValue(row.getCell(6), dto);
-					dto.setRemark(remark); // Field 6 set
+					dto.setRemark(remark); 
 					if (dto.getSaveStatus() == null) {
-						if (remark == null) {
+						if (remark == null || remark.trim().isEmpty()) {
 							dto.setSaveStatus("Failed");
 							dto.setErrDescription("Please enter remark");
 						}
 					}
 
+					// --- 7. ID (Cell 7) ---
 					String idString = getStringCellValue(row.getCell(7), dto);
-					dto.setId(idString); // Field 7 set
+					dto.setId(idString); 
 
 					if (dto.getId() == null && dto.getSaveStatus() == null) {
 						List<Object[]> obj = shutDownPlanRepository
@@ -1158,6 +1178,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					}
 				}
 
+				// Always add the DTO to the list
 				dtoList.add(dto);
 			}
 		} catch (Exception e) {
@@ -1361,7 +1382,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					String idString = getStringCellValue(row.getCell(6), dto);
 					dto.setId(idString); // Field 7 set
 					
-					if (dto.getId() == null && dto.getDiscription() != null && !alreadyFailed) {
+					if (dto.getId() == null && dto.getDiscription() != null && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
 						// Check DB for existing records with the same description
 						List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Slowdown", plantFKId.toString(), year, dto.getDiscription());
 
