@@ -55,7 +55,7 @@ const ProductionAopView = ({
   const IS_OLD_YEAR = oldYear?.oldYear
 
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
-
+  const [calculationObject, setCalculationObject] = useState([])
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
 
@@ -119,6 +119,8 @@ const ProductionAopView = ({
         PLANT_ID,
         AOP_YEAR,
       )
+
+      setCalculationObject(response?.data?.aopCalculation)
     // Correct path is response.data.data
     const apiData = response?.data?.data
     
@@ -268,6 +270,8 @@ const ProductionAopView = ({
           allAction: !isOldYear,
           showCalculate: !isOldYear,
           showTitle: true,
+          showCalculateVisibility:
+        Object.keys(calculationObject || {}).length > 0 ? true : false,
         }}
       />
       {/* </Box> */}

@@ -669,8 +669,16 @@ const KendoDataTablesReports = ({
               <Button
                 variant='contained'
                 onClick={handleCalculateBtn}
-                disabled={isButtonDisabled || READ_ONLY}
+                // disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
+
+                disabled={
+                    READ_ONLY ||
+                    (rows?.length === 0
+                      ? false
+                      : isButtonDisabled ||
+                        !permissions?.showCalculateVisibility)
+                  }
               >
                 Calculate
               </Button>
