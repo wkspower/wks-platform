@@ -219,7 +219,8 @@ const KendoDataTables = ({
     if (aggObj) {
       const aggKey = Object.keys(aggObj)[0]
       const value = aggObj[aggKey]
-      cellContent = value != null ? Number(value).toFixed(4) : ''
+      cellContent =
+        value != null ? Math.trunc(Number(value) * 10000) / 10000 : ''
     }
 
     return (
