@@ -832,8 +832,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	    }
 
 	    return dtoList;
-	}
-	
+	}	
 	public List<ShutDownPlanDTO> readNonProductShutdown(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
@@ -1009,23 +1008,24 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                     alreadyFailed = true;
 	                }
 	                
-	                if (ldtStart != null && ldtEnd != null && !alreadyFailed) {
+	                if (ldtStart != null && ldtEnd != null) {
 	                    try {
 	                        Duration duration = Duration.between(ldtStart, ldtEnd);
 	                        long totalMinutes = duration.toMinutes();
+
 	                        if (totalMinutes < 0) {
 	                            throw new IllegalStateException("Calculated negative duration.");
 	                        }
 
 	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
 	                        dto.setDurationInHrs(durationInDecimalHours);
-	                        
 	                    } catch (Exception e) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription(
-	                                "Error calculating duration between maintenance dates or duration is negative.");
+	                        if (!alreadyFailed) { 
+	                             dto.setSaveStatus("Failed");
+	                             dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
+	                             alreadyFailed = true;
+	                        }
 	                        e.printStackTrace();
-	                        alreadyFailed = true;
 	                    }
 	                }
 	                
