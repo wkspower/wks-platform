@@ -33,7 +33,7 @@ const TcsInput = () => {
   const PLANT_NAME = plantObject?.name?.toLowerCase()
 
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'crude'
+  const lowerVertName = vertName?.toLowerCase()
 
   // State management
   const [snackbarData, setSnackbarData] = useState({

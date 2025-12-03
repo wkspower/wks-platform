@@ -15,7 +15,7 @@ const ProductionAopView = ({
   handleExport,
 }) => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [columns, setColumns] = useState([])
@@ -37,7 +37,7 @@ const ProductionAopView = ({
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   // remark dialog state
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -51,7 +51,11 @@ const ProductionAopView = ({
   })
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
-  const isOldYear = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const formatValueToNoDecimals = (val) =>
     val && !isNaN(val) ? Math.round(val) : val
 

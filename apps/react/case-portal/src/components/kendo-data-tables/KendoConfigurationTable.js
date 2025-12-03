@@ -33,7 +33,7 @@ import { getRoleName } from 'services/role-service'
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const fetchDataTokenRef = useRef(0)
   const fetchConstantsTokenRef = useRef(0)
@@ -55,8 +55,11 @@ const ConfigurationTable = () => {
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
-  const isOldYearFlag = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
@@ -850,7 +853,7 @@ const ConfigurationTable = () => {
                     </Box>
 
                     {/* Load Button */}
-                    {!isOldYearFlag && (
+                    {!isOldYear && (
                       <Button
                         variant='contained'
                         onClick={handleOpenDialog}

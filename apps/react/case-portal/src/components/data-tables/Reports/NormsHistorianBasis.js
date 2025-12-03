@@ -31,7 +31,7 @@ import NormsHistorianBasisPe from './NormsHistorianBasisPe'
 import { getRoleName } from 'services/role-service'
 const NormsHistorianBasis = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const [rowsHistorianValues, setHistorianValues] = useState([])
   const [rowsMcuAndNormGrid, setMcuAndNormGrid] = useState([])
@@ -63,7 +63,10 @@ const NormsHistorianBasis = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
 
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)

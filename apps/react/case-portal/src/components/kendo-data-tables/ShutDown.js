@@ -53,7 +53,8 @@ const ShutDown = ({ permissions }) => {
   const lowerPlantName = PLANT_NAME?.toLowerCase()
   const plantName = plantObject?.name
   const siteName = siteObject?.name
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
 
   const IS_NON_PRODUCT_VERTICAL =
     lowerVertName === 'elastomer' ||
@@ -88,7 +89,8 @@ const ShutDown = ({ permissions }) => {
   const [currentRowId, setCurrentRowId] = useState(null)
   const keycloak = useSession()
 
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
 

@@ -76,7 +76,8 @@ const AnnualProductionPlan = () => {
   const [currentRowId3, setCurrentRowId3] = useState(null)
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [rows, setRows] = useState()
-  const isOldYear = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
 
   const columnsAssumptions = [
     {

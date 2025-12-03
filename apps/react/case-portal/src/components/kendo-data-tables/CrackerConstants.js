@@ -31,7 +31,7 @@ import { getRoleName } from 'services/role-service'
 const CrakcerConstants = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -45,8 +45,10 @@ const CrakcerConstants = () => {
     verticalObject,
     year,
   } = dataGridStore
-  const isOldYear = oldYear?.oldYear
-  const isOldYearFlag = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
@@ -431,7 +433,7 @@ const CrakcerConstants = () => {
                       disabled={READ_ONLY}
                     />
                   </Box>
-                  {!isOldYearFlag && (
+                  {!isOldYear && (
                     <Button
                       variant='contained'
                       onClick={handleOpenDialog}

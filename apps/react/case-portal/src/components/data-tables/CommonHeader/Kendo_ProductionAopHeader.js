@@ -30,9 +30,9 @@ const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
     cols = productionColDefsPE
   } else if (lowerVertName === 'cracker') {
     cols = productionColDefsCracker
-  } else if(lowerVertName === 'pta' || lowerVertName === 'vcm'){
-    cols= productionColDefsvcmpta
-  }else {
+  } else if (lowerVertName === 'pta' || lowerVertName === 'vcm') {
+    cols = productionColDefsvcmpta
+  } else {
     cols = productionColDefs
   }
 
@@ -51,7 +51,7 @@ const getEnhancedColDefs = ({ headerMap, valueFormat }) => {
     if (headerMap && headerMap[col.title] !== undefined) {
       updatedCol.title = headerMap[col.title]
     }
-     if (col.type === 'number' && valueFormat) {
+    if (col.type === 'number' && valueFormat) {
       updatedCol.format = valueFormat
     }
 

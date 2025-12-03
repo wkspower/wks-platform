@@ -182,9 +182,13 @@ const KendoDataTables = ({
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
-  const { verticalChange } = dataGridStore
+  const { verticalChange, oldYear } = dataGridStore
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
@@ -734,23 +738,27 @@ const KendoDataTables = ({
       </td>
     )
   }
-  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      READ_ONLY || (!dataItem.isEditable && dataItem?.isEditable !== undefined)
-    const hasError = dataItem?.isError
-    const isTotal = dataItem?.isTotal
-    const rowClassName = hasError
-      ? 'error-row'
-      : isDisabled || isTotal
-        ? 'custom-disabled-row'
-        : className
+  const CustomRow = useCallback(
+    ({ dataItem, className, ...rest }) => {
+      const isDisabled =
+        READ_ONLY ||
+        (!dataItem.isEditable && dataItem?.isEditable !== undefined)
+      const hasError = dataItem?.isError
+      const isTotal = dataItem?.isTotal
+      const rowClassName = hasError
+        ? 'error-row'
+        : isDisabled || isTotal
+          ? 'custom-disabled-row'
+          : className
 
-    return (
-      <tr {...rest?.trProps} className={rowClassName}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
+      return (
+        <tr {...rest?.trProps} className={rowClassName}>
+          {rest.children}
+        </tr>
+      )
+    },
+    [IS_OLD_YEAR],
+  )
 
   const toolTipRendererdescLimit = (props) => {
     const value = props.dataItem[props.field]

@@ -13,7 +13,7 @@ import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
 const MaintenanceProcessTable = ({ viewOnly }) => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -32,8 +32,12 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const plantName = plantObject?.name?.toLowerCase()
-  const siteName = siteObject?.name?.toLowerCase() 
+  const siteName = siteObject?.name?.toLowerCase()
   const lowerVertName = verticalObject?.name?.toLowerCase()
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const dataConfig = useMemo(
     () => ({
       serviceFn: () =>
@@ -62,7 +66,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [calculationObject, setCalculationObject] = useState([]) 
+  const [calculationObject, setCalculationObject] = useState([])
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     // if (!row?.isEditable) return
@@ -404,7 +408,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     hidden: true,
   }
 
-  let basecols 
+  let basecols
   if (siteName === 'dmd') {
     basecols = crackercolumnsDMD
   } else if (siteName === 'nmd') {
@@ -412,7 +416,6 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   } else {
     basecols = crackercolumns
   }
-  
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -429,7 +432,6 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       allAction: false,
       uploadExcelBtn: false,
       downloadExcelBtn: false,
-
     }
   }
 

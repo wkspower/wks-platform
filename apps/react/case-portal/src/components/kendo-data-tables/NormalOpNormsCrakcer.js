@@ -82,7 +82,8 @@ const NormalOpNormsScreenCracker = () => {
   const { verticalChange, yearChanged, oldYear, plantObject, year } =
     dataGridStore || {}
 
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical || ''
@@ -90,7 +91,9 @@ const NormalOpNormsScreenCracker = () => {
 
   const dispatch = useDispatch()
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const headerMap = generateHeaderNames(AOP_YEAR)
 
   const [loading, setLoading] = useState(false)

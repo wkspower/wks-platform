@@ -43,7 +43,8 @@ const ProductionTarget = ({ permissions }) => {
     verticalObject,
     year,
   } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const PLANT_ID = plantObject?.id
   const VERTICAL_ID = verticalObject?.id
   const SITE_ID = siteObject?.id

@@ -10,25 +10,26 @@ const TextSubmitMUI = () => {
   const [showCreateCasebutton, setShowCreateCasebutton] = useState(false)
   const [taskId, setTaskId] = useState('')
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
   const caseData = {
     caseDefinitionId: 'aopv5',
     owner: {
@@ -51,10 +52,16 @@ const TextSubmitMUI = () => {
   }, [])
 
   const getCaseId = async () => {
-    if(!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
+    if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
     try {
       // console.log("keycloak",keycloak);
-      const data = await DataService.getCaseId(keycloak, PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID)
+      const data = await DataService.getCaseId(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
       // console.log('API Response:', data)
       if (!data || data.length === 0) {
         // console.log('API Response:')

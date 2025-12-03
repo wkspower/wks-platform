@@ -28,7 +28,7 @@ import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { getRoleName } from 'services/role-service.js'
 const DecokingConfig = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const tabs = ['IBR Plan']
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -48,11 +48,14 @@ const DecokingConfig = () => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const SCREEN_NAME = screenTitle?.title
-  const siteName = siteObject?.name?.toLowerCase() 
+  const siteName = siteObject?.name?.toLowerCase()
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -993,9 +996,9 @@ const DecokingConfig = () => {
   }
   const rowClass = (row) => (row.isError ? 'row-error' : '')
   const filteredIbrGridThree =
-  siteName === 'dmd'
-    ? ibrGridThree.filter((col) => col.field !== 'demo')
-    : ibrGridThree;
+    siteName === 'dmd'
+      ? ibrGridThree.filter((col) => col.field !== 'demo')
+      : ibrGridThree
   return (
     <Box>
       <Backdrop

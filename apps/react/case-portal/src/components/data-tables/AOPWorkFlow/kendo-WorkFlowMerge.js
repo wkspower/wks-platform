@@ -48,7 +48,7 @@ import SpecificConsumptionNorm from '../Reports-kendo/SpecificConsumptionnorm'
 import { getRoleName } from 'services/role-service'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   // const [steps, setSteps] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   // const [openRejectDialog, setOpenRejectDialog] = useState(false)
@@ -99,9 +99,13 @@ const WorkFlowMerge = () => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [businessKey, setBusinessKey] = useState('')
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})

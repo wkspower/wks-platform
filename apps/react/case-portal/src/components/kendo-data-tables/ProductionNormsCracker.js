@@ -20,7 +20,7 @@ const ProductionNormsCracker = ({ permissions }) => {
   const [modifiedCellsC2C3R, setModifiedCellsC2C3R] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const apiRef = useGridApiRef()
   const apiRefC2C3R = useGridApiRef()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -45,7 +45,11 @@ const ProductionNormsCracker = ({ permissions }) => {
   const SITE_NAME = siteObject?.name
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)

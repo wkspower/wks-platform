@@ -9,6 +9,7 @@ import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
+import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -40,9 +41,13 @@ const ProductionTargetBasis = () => {
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
 
   const timeoutIdsRef = useRef([])
   const isMountedRef = useRef(true)
@@ -357,6 +362,7 @@ const ProductionTargetBasis = () => {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
+          disabled={READ_ONLY}
         >
           Export
         </Button>

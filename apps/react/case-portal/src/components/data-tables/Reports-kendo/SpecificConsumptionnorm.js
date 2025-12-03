@@ -71,7 +71,8 @@ export default function SpecificConsumptionNorm() {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)
@@ -131,39 +132,39 @@ export default function SpecificConsumptionNorm() {
         } else if (apiResp?.data?.plantProductionData) {
           rows = apiResp.data.plantProductionData
         }
-      out[key] = { columns, rows }
-    }),
-  )
+        out[key] = { columns, rows }
+      }),
+    )
 
-  await Promise.all(
-    Object.keys(categoriesWithNorms).map(async (key) => {
-          try {
-            const normsResp = await DataService.getConsumptionNorms(
-              keycloak,
-              key,
-              PLANT_ID,
-              AOP_YEAR,
-            )
-            const normsRows = normsResp?.data?.data || []
-            const allNormsColumns = normsResp?.data?.columns || []
-            normsOut[key] = normsRows
+    await Promise.all(
+      Object.keys(categoriesWithNorms).map(async (key) => {
+        try {
+          const normsResp = await DataService.getConsumptionNorms(
+            keycloak,
+            key,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+          const normsRows = normsResp?.data?.data || []
+          const allNormsColumns = normsResp?.data?.columns || []
+          normsOut[key] = normsRows
 
-            const columnToSkip = 'NormParameterTypeName'
+          const columnToSkip = 'NormParameterTypeName'
 
-            const normsColumns = allNormsColumns.filter(
-              (col) => col.field !== columnToSkip,
-            )
+          const normsColumns = allNormsColumns.filter(
+            (col) => col.field !== columnToSkip,
+          )
 
-            if (normsColumns.length > 0 && dynamicColumns.length === 0) {
-              dynamicColumns = normsColumns.map((col) => ({
-                ...col,
-                format: valueFormat,
-              }))
-            }
-          } catch (error) {
-            console.error(`Error loading norms for ${key}:`, error)
-            normsOut[key] = []
+          if (normsColumns.length > 0 && dynamicColumns.length === 0) {
+            dynamicColumns = normsColumns.map((col) => ({
+              ...col,
+              format: valueFormat,
+            }))
           }
+        } catch (error) {
+          console.error(`Error loading norms for ${key}:`, error)
+          normsOut[key] = []
+        }
       }),
     )
     setReports(out)

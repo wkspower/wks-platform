@@ -45,9 +45,10 @@ const SlowDown = ({ permissions }) => {
   const FORMATE_DECIMAL = ValueFormatterProduction()
   const vertName = verticalChange?.selectedVertical
   const plantName = plantObject?.name
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const [errorRows, setErrorRows] = useState(new Set())
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [rowModesModel, setRowModesModel] = useState({})
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCells2, setModifiedCells2] = React.useState({})
@@ -67,7 +68,8 @@ const SlowDown = ({ permissions }) => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const SHOW_EXCEL_UPLOAD_BUTTON =
     lowerVertName === 'pe' ||

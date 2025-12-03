@@ -45,6 +45,7 @@ import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
 import { PostCrDaysEditor } from './Utilities-Kendo/numbericColumns_dmd'
+import { useSelector } from 'react-redux'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -155,7 +156,13 @@ const KendoDataTablesCracker = ({
   const [isDateFilterActive, setIsDateFilterActive] = useState([])
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+
+  const { oldYear } = dataGridStore
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const initialGroup = groupBy
     ? [
@@ -169,16 +176,16 @@ const KendoDataTablesCracker = ({
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
   }, [])
-  const originalIsCrRef = useRef({});
-  
+  const originalIsCrRef = useRef({})
+
   useEffect(() => {
-    rows.forEach(row => {
+    rows.forEach((row) => {
       // Only set if not already set (preserve original state)
       if (!(row.id in originalIsCrRef.current)) {
-        originalIsCrRef.current[row.id] = row.isCr === true;
+        originalIsCrRef.current[row.id] = row.isCr === true
       }
-    });
-  }, [rows]);
+    })
+  }, [rows])
 
   const handleRowClick = (e) => {
     if (READ_ONLY) {
@@ -220,9 +227,9 @@ const KendoDataTablesCracker = ({
         prev.map((r) => {
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
-            if (field === 'postCrDays' || field === 'isCr') {
-          updated.originalIsCr = originalIsCrRef.current[itemId];
-        }
+          if (field === 'postCrDays' || field === 'isCr') {
+            updated.originalIsCr = originalIsCrRef.current[itemId]
+          }
           // Auto-calculate preCrDays
           if (field === 'actualRunLength' || field === 'reduction') {
             updated.preCrDays = calcPreCoilReplacementRunLength(
@@ -274,9 +281,9 @@ const KendoDataTablesCracker = ({
   }
   const saveConfirmation = async () => {
     saveChanges()
-    rows.forEach(row => {
-      originalIsCrRef.current[row.id] = row.isCr === true;
-    });
+    rows.forEach((row) => {
+      originalIsCrRef.current[row.id] = row.isCr === true
+    })
     setOpenSaveDialogeBox(false)
     setEdit({})
   }
@@ -319,18 +326,21 @@ const KendoDataTablesCracker = ({
       isColumnMenuSortActive(field, sort)
     )
   }
-  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    let rowClassName = className || ''
-    if (dataItem.isError) rowClassName += ' error-row'
-    if (isDisabled) rowClassName += ' custom-disabled-row'
-    return (
-      <tr {...rest?.trProps} className={rowClassName.trim()}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
+  const CustomRow = useCallback(
+    ({ dataItem, className, ...rest }) => {
+      const isDisabled =
+        !dataItem.isEditable && dataItem?.isEditable !== undefined
+      let rowClassName = className || ''
+      if (dataItem.isError) rowClassName += ' error-row'
+      if (isDisabled) rowClassName += ' custom-disabled-row'
+      return (
+        <tr {...rest?.trProps} className={rowClassName.trim()}>
+          {rest.children}
+        </tr>
+      )
+    },
+    [IS_OLD_YEAR],
+  )
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -465,25 +475,25 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-         if (col.field === 'postCrDays') {
-            return (
-              <GridColumn
-                key={col.field}
-                field={col.field}
-                title={col.title || col.headerName}
-                hidden={col.hidden}
-                className='k-number-right'
-                cells={{
-                  edit: { text: PostCrDaysEditor },
-                  data: toolTipRenderer,
-                  headerCell: SimpleHeaderWithTooltip,
-                }}
-                filter='numeric'
-                format={col.format}
-                sortable={false}
-              />
-            );
-          }
+        if (col.field === 'postCrDays') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              hidden={col.hidden}
+              className='k-number-right'
+              cells={{
+                edit: { text: PostCrDaysEditor },
+                data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
+              }}
+              filter='numeric'
+              format={col.format}
+              sortable={false}
+            />
+          )
+        }
         if (col?.field === 'productName1') {
           return (
             <GridColumn
@@ -786,7 +796,8 @@ const KendoDataTablesCracker = ({
                   className='btn-save'
                   onClick={saveModalOpen}
                   disabled={
-                    isButtonDisabled || READ_ONLY ||
+                    isButtonDisabled ||
+                    READ_ONLY ||
                     (!summaryEdited && Object.keys(modifiedCells).length === 0)
                   }
                   {...(loading ? {} : {})}

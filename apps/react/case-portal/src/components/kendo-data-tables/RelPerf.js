@@ -16,7 +16,7 @@ import { getRoleName } from 'services/role-service'
 export default function RelPerf() {
   // Reliability Performance Grid (already present)
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const [loading, setLoading] = useState(false)
   const FORMATE_DECIMAL = ValueFormatterProduction()
 
@@ -75,6 +75,9 @@ export default function RelPerf() {
     verticalObject,
     year,
   } = dataGridStore
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
@@ -311,7 +314,7 @@ export default function RelPerf() {
   //     bestAchieved: '',
   //     fy25Aop: '',
   //     fy25Actual: '',
-  //     fy26Plan: '100 ± 10%',
+  //     fy26Plan: '100 Â± 10%',
   //     rationale: '',
   //     id: 2,
   //   },
@@ -488,25 +491,25 @@ export default function RelPerf() {
   }
 
   const handleRemarkCellClickIncidents = (dataItem) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemarkMajorIncidents(dataItem.remarks || '')
     setCurrentRowIdMajorIncidents(dataItem.id)
     setRemarkDialogOpenMajorIncidents(true)
   }
   const handleRemarkCellClickImprovement = (dataItem) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemarkReliabilityInitiative(dataItem.remarks || '')
     setCurrentRowIdReliabilityInitiative(dataItem.id)
     setRemarkDialogOpenReliabilityInitiative(true)
   }
   const handleRemarkCellClickFinancial = (dataItem) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemarkFinancial(dataItem.remarks || '')
     setCurrentRowIdFinancial(dataItem.id)
     setRemarkDialogOpenFinancial(true)
   }
   const handleRemarkCellClickReliabilityPerformance = (dataItem) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemarkReliability(dataItem.remarks || '')
     setCurrentRowIdReliability(dataItem.id)
     setRemarkDialogOpenReliability(true)

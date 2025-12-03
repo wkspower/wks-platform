@@ -45,6 +45,7 @@ import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import { RemarkCell } from './Utilities-Kendo/RemarkCell'
 import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
+import { useSelector } from 'react-redux'
 
 export const particulars = [
   'normParameterId',
@@ -133,9 +134,13 @@ const KendoDataTablesReports = ({
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
+  const dataGridStore = useSelector((state) => state.dataGridStore)
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  const { verticalChange, oldYear } = dataGridStore
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const initialGroup = groupBy
     ? [
@@ -335,10 +340,10 @@ const KendoDataTablesReports = ({
         onDoubleClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
-        if (!isDisabled) {
-          onRemarkClick(dataItem)
-          setEdit?.({})
-        }
+          if (!isDisabled) {
+            onRemarkClick(dataItem)
+            setEdit?.({})
+          }
         }}
       >
         {displayText || 'Add remark'}
@@ -346,22 +351,27 @@ const KendoDataTablesReports = ({
     )
   }
 
-  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = [
-      className,
-      isDisabled ? 'custom-disabled-row' : '',
-      dataItem.isBold ? 'custom-bold-row' : '',
-    ]
-      .filter(Boolean)
-      .join(' ')
-    return (
-      <tr {...rest?.trProps} className={rowClassName}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
+  const CustomRow = useCallback(
+    ({ dataItem, className, ...rest }) => {
+      const isDisabled =
+        READ_ONLY ||
+        (!dataItem.isEditable && dataItem?.isEditable !== undefined)
+
+      const rowClassName = [
+        className,
+        isDisabled ? 'custom-disabled-row' : '',
+        dataItem.isBold ? 'custom-bold-row' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+      return (
+        <tr {...rest?.trProps} className={rowClassName}>
+          {rest.children}
+        </tr>
+      )
+    },
+    [IS_OLD_YEAR],
+  )
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -864,7 +874,9 @@ const KendoDataTablesReports = ({
         <DialogActions>
           <Button onClick={() => setRemarkDialogOpen(false)}>Cancel</Button>
           {/* <Button onClick={handleCloseRemark}>Cancel</Button> */}
-          <Button onClick={handleRemarkSave} disabled={READ_ONLY}>Add</Button>
+          <Button onClick={handleRemarkSave} disabled={READ_ONLY}>
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

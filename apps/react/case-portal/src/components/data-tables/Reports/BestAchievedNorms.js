@@ -174,7 +174,7 @@ function GridPanel({
 // ---------------------------------------------------------------------------
 export default function BestAchievedNorms() {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -197,6 +197,9 @@ export default function BestAchievedNorms() {
   const VERTICAL_ID = verticalObject?.id
 
   const AOP_YEAR = year?.selectedYear
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'

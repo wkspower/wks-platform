@@ -51,7 +51,8 @@ const NormalOpNormsScreen = () => {
     screenTitle,
     year,
   } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
 
   const [_plantID, set_PlantID] = useState('')
 
@@ -73,7 +74,9 @@ const NormalOpNormsScreen = () => {
   const isPEPP = lowerVertName === 'pe' || lowerVertName === 'pp'
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
     if (isPEPP && !gradeId) return

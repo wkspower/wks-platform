@@ -21,7 +21,8 @@ const ShutdownNorms = () => {
   const menu = useSelector((state) => state.dataGridStore)
   const [shutdownMonths, setShutdownMonths] = useState([])
   const { yearChanged, oldYear, plantID } = menu
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState([])
@@ -70,7 +71,9 @@ const ShutdownNorms = () => {
     'Warning : Adding shutdown consumption to all grades will replace any existing individual grade consumption entries.'
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)

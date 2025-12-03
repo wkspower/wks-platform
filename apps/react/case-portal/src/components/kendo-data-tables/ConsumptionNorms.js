@@ -18,7 +18,7 @@ const ConsumptionNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const [open1, setOpen1] = useState(false)
   const valueFormat = ValueFormatterConsumption()
   const defaultCustomHeight = { mainBox: '55vh', otherBox: '112%' }
@@ -45,7 +45,11 @@ const ConsumptionNorms = () => {
   const SCREEN_NAME = screenTitle?.title
   const headerMap = generateHeaderNames(AOP_YEAR)
 
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
@@ -265,7 +269,6 @@ const ConsumptionNorms = () => {
       }
 
       if (response?.data?.length === 0) {
-        // no grades � clear selection and fetch blank data
         setGradeId(null)
         await fetchData(null)
         return

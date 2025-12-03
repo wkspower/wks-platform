@@ -45,9 +45,10 @@ const AopSummary = ({ permissions }) => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
 
