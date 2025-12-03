@@ -53,8 +53,9 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.utility.Utility;
+import com.wks.caseengine.dto.BusinessDemandDataDTO;
 import com.wks.caseengine.dto.ConfigurationDTO;
-
+import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
@@ -506,7 +507,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			String viewName = "vwScrn" + verticalName + "GetConfigTypes";
 			List<Object[]> obj = new ArrayList<>();
 			if ((verticalName.equalsIgnoreCase("MEG")) || (verticalName.equalsIgnoreCase("ELASTOMER"))
-					|| (verticalName.equalsIgnoreCase("CRACKER")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
+					|| (verticalName.equalsIgnoreCase("CRACKER"))) {
 
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
@@ -559,7 +560,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						: 0.0);
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
 
-				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PTA") || (verticalName.equalsIgnoreCase("VCM"))) {
+				if (verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PTA") || (verticalName.equalsIgnoreCase("VCM")) || (verticalName.equalsIgnoreCase("AROMATICS"))) {
 					configurationDTO.setId(row[14] != null ? row[14].toString() : i + "#");
 
 					configurationDTO.setAuditYear(row[15] != null ? row[15].toString() : "");
@@ -578,7 +579,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				 */
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
-						|| verticalName.equalsIgnoreCase("CRACKER") || (verticalName.equalsIgnoreCase("AROMATICS"))) {
+						|| verticalName.equalsIgnoreCase("CRACKER")) {
 
 					configurationDTO.setAuditYear(row[14] != null ? row[14].toString() : "");
 					configurationDTO.setUOM(row[15] != null ? row[15].toString() : "");
@@ -2937,28 +2938,72 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Override
 	public AOPMessageVM getConfigurationVersion(String year, String plantId) {
 		String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-		String viewName= "vwScrn"+verticalName+"GetVersion";
-		List<String> versions = getVersion(viewName);
-		Map<String, Object> map = new HashMap<String,Object>();
-		map.put("versions", versions);
+		List<ConfigurationVersionDTO> configurationVersionDTOs = new ArrayList<>();
+		String viewName= "vwScrn"+verticalName+"GetRevision";
+		List<Object[]> versions = getVersion(viewName,year);
+		for (Object[] row : versions) {
+			ConfigurationVersionDTO configurationVersionDTO = new ConfigurationVersionDTO();
+			configurationVersionDTO.setAttributeValue(row[0] != null ? row[0].toString() : null);  
+			configurationVersionDTO.setNormParameterId(row[2] != null ? row[2].toString() : null); 
+			configurationVersionDTO.setYear(row[1] != null ? row[1].toString() : null); 
+			configurationVersionDTOs.add(configurationVersionDTO);
+		}
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		aopMessageVM.setCode(200);
-		aopMessageVM.setData(map);
+		aopMessageVM.setData(configurationVersionDTOs);
 		aopMessageVM.setMessage("Versions fetched successfully");
 		return aopMessageVM;
 	}
 
-	public List<String> getVersion(String viewName) {
+	public List<Object[]> getVersion(String viewName,String year) {
 		try {
-			String sql = "SELECT * FROM " + viewName;
+			String sql = "SELECT * FROM " + viewName + " where AuditYear = :year" ;
 
 			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("year", year);
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public AOPMessageVM updateConfigurationVersion(List<ConfigurationVersionDTO> configurationVersionDTOs) {
+		
+		try {
+			for(ConfigurationVersionDTO configurationVersionDTO : configurationVersionDTOs) {
+				UUID normId= UUID.fromString(configurationVersionDTO.getNormParameterId());
+				String year=configurationVersionDTO.getYear();
+				List<NormAttributeTransactions> normAttributeTransactionsList=	normAttributeTransactionsRepository.findByNormParameterIdAndAuditYear(normId,year);
+				if(normAttributeTransactionsList!=null && normAttributeTransactionsList.size()>0) {
+					for(NormAttributeTransactions normAttributeTransactions :normAttributeTransactionsList) {
+						normAttributeTransactions.setAttributeValue(configurationVersionDTO.getAttributeValue());
+						normAttributeTransactions.setAttributeValueVersion(configurationVersionDTO.getAttributeValueVersion());
+						normAttributeTransactionsRepository.save(normAttributeTransactions);
+					}
+				}else {
+					NormAttributeTransactions normAttributeTransactions = new NormAttributeTransactions();
+					normAttributeTransactions.setAopMonth(4);
+					normAttributeTransactions.setAttributeValue(configurationVersionDTO.getAttributeValue());
+					normAttributeTransactions.setAttributeValueVersion(configurationVersionDTO.getAttributeValueVersion());
+					normAttributeTransactions.setAuditYear(configurationVersionDTO.getYear());
+					normAttributeTransactions.setCreatedOn(new Date());
+					normAttributeTransactions.setNormParameterFKId(UUID.fromString(configurationVersionDTO.getNormParameterId()));
+					normAttributeTransactions.setRemarks(null);
+					normAttributeTransactions.setUserName(Utility.getUserName());
+					normAttributeTransactionsRepository.save(normAttributeTransactions);
+				}
+			}
+		}catch (Exception ex) {
+			throw new RuntimeException("Failed to update data", ex);
+		}
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(configurationVersionDTOs);
+		aopMessageVM.setMessage("Data updated successfully");	
+		return aopMessageVM;
 	}
 
 }

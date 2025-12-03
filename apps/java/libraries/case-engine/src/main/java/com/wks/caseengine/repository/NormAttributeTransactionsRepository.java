@@ -213,5 +213,6 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	     @Param("normParameterFKId") UUID normParameterFKId,
 	     @Param("auditYear") String auditYear	    
 );
+	
 
 }

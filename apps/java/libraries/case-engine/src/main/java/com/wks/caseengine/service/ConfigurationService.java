@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
@@ -38,7 +39,8 @@ public interface ConfigurationService {
     public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId,String version, MultipartFile file);
 	public AOPMessageVM getConfigurationExecution( String year, String plantId);
 	public AOPMessageVM getConfigurationExecutionNorms( String year, String plantId);
-	public AOPMessageVM getConfigurationVersion( String year, String plantId);
+	public AOPMessageVM getConfigurationVersion(String year, String plantId);
+	public AOPMessageVM updateConfigurationVersion(List<ConfigurationVersionDTO> configurationVersionDTOs);
     public AOPMessageVM saveConfigurationExecution( List<ExecutionDetailDto> executionDetailDtoList);
     public AOPMessageVM saveConfigurationExecutionNorms( List<ExecutionDetailDto> executionDetailDtoList);
     byte[] createConfigurationConstantsExcelResponse(String year, UUID plantFKId, List<ConfigurationDTO> list);

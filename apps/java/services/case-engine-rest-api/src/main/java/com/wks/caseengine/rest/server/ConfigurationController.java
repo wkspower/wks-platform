@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -271,5 +272,11 @@ public class ConfigurationController {
 	public AOPMessageVM getConfigurationVersion(@RequestParam String year,@RequestParam String plantId) {
 		return configurationService.getConfigurationVersion(year,plantId);
 	}
+	
+	@PostMapping(value="/configuration-version")
+	public AOPMessageVM updateConfigurationVersion(@RequestBody List<ConfigurationVersionDTO> configurationVersionDTOs) {
+		return configurationService.updateConfigurationVersion(configurationVersionDTOs);
+	}
+
 
 }

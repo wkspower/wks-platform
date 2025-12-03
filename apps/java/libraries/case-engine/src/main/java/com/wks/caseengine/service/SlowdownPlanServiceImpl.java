@@ -617,7 +617,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			List<ShutDownPlanDTO> data = readSlowdownRateData(file.getInputStream(), plantId, year);
 			List<ShutDownPlanDTO> failedList = saveShutdownData(plantId, data);
 			if (failedList != null && failedList.size() > 0) {
-				byte[] fileByteArray = slowdownExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
+				byte[] fileByteArray = slowdownRateExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
@@ -873,7 +873,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					}
 
 					// --- Duration Calculation and Adding to validTimeRanges ---
-					if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
+					if (ldtStart != null && ldtEnd != null) {
 						try {
 							Instant startInstant = dto.getMaintStartDateTime().toInstant();
 							Instant endInstant = dto.getMaintEndDateTime().toInstant();
@@ -1419,21 +1419,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	public List<ShutDownPlanDTO> readNonProductSlowdownElastomer(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 	    
-	    List<ShutDownPlanDTO> shutdownList = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantFKId, "Shutdown", year);
-	    List<LocalDateTime[]> shutdownTimeRanges = new ArrayList<>();
-	    if (shutdownList != null) {
-	        for (ShutDownPlanDTO shutdown : shutdownList) {
-	            if (shutdown.getMaintStartDateTime() != null && shutdown.getMaintEndDateTime() != null) {
-	                // Convert Date to LocalDateTime for precise comparison
-	                LocalDateTime shutdownStart = shutdown.getMaintStartDateTime()
-	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-	                LocalDateTime shutdownEnd = shutdown.getMaintEndDateTime()
-	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-	                shutdownTimeRanges.add(new LocalDateTime[]{shutdownStart, shutdownEnd});
-	            }
-	        }
-	    }
-	    
 	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>(); 
 	    
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -1527,22 +1512,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                            
 	                            // Overlap Checks (only proceed if dates are valid)
 	                            if (ldtStart != null && !alreadyFailed) {
-	                                boolean overlapsShutdown = false;
-	                                for (LocalDateTime[] shutdownPeriod : shutdownTimeRanges) {
-	                                    LocalDateTime shutdownStart = shutdownPeriod[0];
-	                                    LocalDateTime shutdownEnd = shutdownPeriod[1];
-	                                    if (ldtStart.isBefore(shutdownEnd) && ldtEnd.isAfter(shutdownStart)) {
-	                                        overlapsShutdown = true;
-	                                        break;
-	                                    }
-	                                }
-	                                
-	                                if (overlapsShutdown) {
-	                                    dto.setSaveStatus("Failed");
-	                                    dto.setErrDescription("The date range is overlapping with an existing **Shutdown** period.");
-	                                    alreadyFailed = true;
-	                                }
-
 	                                if (!alreadyFailed) {
 	                                    boolean overlapsFile = false;
 	                                    for (LocalDateTime[] prevPeriod : validTimeRanges) {
