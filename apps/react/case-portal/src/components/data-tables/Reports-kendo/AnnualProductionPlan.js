@@ -94,7 +94,7 @@ const AnnualProductionPlan = () => {
       flex: 1,
     },
     {
-      field: 'id',
+      field: 'idFromApi',
       hidden: true,
     },
   ]
@@ -467,13 +467,21 @@ const AnnualProductionPlan = () => {
         return
       }
 
-      const dataList = data.map((row) => ({
-        id: row.idFromApi,
-        uom: row.uom,
-        sno: row.sno,
-        activity: row.activity,
-        rateValue: row.rateValue,
-      }))
+      const dataList = data.map((row) => {
+        const obj = {
+          uom: row.uom,
+          sno: row.sno,
+          activity: row.activity,
+          rateValue: row.rateValue,
+        }
+
+        if (row.idFromApi) {
+          obj.id = row.idFromApi
+        }
+
+        return obj
+      })
+
       const res = await DataService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
