@@ -500,6 +500,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	public String getVersion(String year,UUID plantId) {
+		UUID id=normParametersRepository.findNormParameterIdByNameAndPlant("REVISION_AROMATICS",plantId);
+		List<NormAttributeTransactions> normAttributeTransactions=normAttributeTransactionsRepository.findByNormParameterIdAndAuditYear(id,year);
+		if(normAttributeTransactions.size()>0) {
+			return normAttributeTransactions.get(0).getAttributeValue();
+		}
+		return null;
+	}
 
 	public AOPMessageVM getConfigurationData(String year, UUID plantFKId,String version) {
 		try {
@@ -511,6 +520,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
+			}else if(verticalName.equalsIgnoreCase("AROMATICS")) {		
+				obj = findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,getVersion(year,plantFKId));
 			} else {
 				obj = findByYearAndPlantFkId(year, plantFKId, viewName);
 			}
@@ -619,10 +630,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			if (vertical) {
 				String procedureName = verticalName + "_GetConfiguration";
 				obj = findByYearAndPlantFkIdMEG(year, plantFKId, procedureName);
-			} /*
-				 * else if(verticalName.equalsIgnoreCase("AROMATICS")){ obj =
-				 * findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,version); }
-				 */else {
+			} 
+				 else if(verticalName.equalsIgnoreCase("AROMATICS"))
+				 {   
+					 obj =findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,getVersion(year,plantFKId));
+				   }
+				else {
 				obj = findData(year, plantFKId, viewName,reportTypes.get(0));
 			}
 
@@ -1379,7 +1392,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				for (int i = 1; i <= 12; i++) {
 					Double attributeValue = getAttributeValue(configurationDTO, i);
 					configurationDTO.setVertical(verticalName);
-					saveData(optionNormParameters.get(), i, year, attributeValue, configurationDTO);
+					saveData(optionNormParameters.get(), i, year, attributeValue, configurationDTO,plantFKId);
 					if(configurationDTO.getSaveStatus()!=null && configurationDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
 						failedList.add(configurationDTO);
 						break;
@@ -1558,10 +1571,18 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	void saveData(NormParameters normParameter, Integer i, String year, Double attributeValue,
-			ConfigurationDTO configurationDTO) {
-
-		Optional<NormAttributeTransactions> existingRecord = normAttributeTransactionsRepository
-				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameter.getId(), i, year);
+			ConfigurationDTO configurationDTO,String plantFKId) {
+		String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantFKId));
+		Optional<NormAttributeTransactions> existingRecord=null;
+		String version=null;
+		if(verticalName.equalsIgnoreCase("AROMATICS")) {
+			 version=getVersion(year,UUID.fromString(plantFKId));
+			 existingRecord = normAttributeTransactionsRepository
+			.findByNormParameterFKIdAndAOPMonthAndAuditYearAndVersion(normParameter.getId(), i, year,version);
+		}else {
+			 existingRecord = normAttributeTransactionsRepository
+					.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameter.getId(), i, year);
+		}
 
 		NormAttributeTransactions normAttributeTransactions;
 
@@ -1574,12 +1595,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			normAttributeTransactions = new NormAttributeTransactions();
 			
 			normAttributeTransactions.setCreatedOn(new Date());
-			normAttributeTransactions.setAttributeValueVersion("V1");
-			/*
-			 * if(configurationDTO.getVertical().equalsIgnoreCase("AROMATICS")) {
-			 * normAttributeTransactions.setAttributeValueVersion(configurationDTO.
-			 * getVersion()); }
-			 */
+			if(verticalName.equalsIgnoreCase("AROMATICS")) {
+				normAttributeTransactions.setAttributeValueVersion(version);
+			}else {
+				normAttributeTransactions.setAttributeValueVersion("V1");
+			}
+			
 			normAttributeTransactions.setUserName(Utility.getUserName());
 			normAttributeTransactions.setNormParameterFKId(normParameter.getId());
 			normAttributeTransactions.setAopMonth(i);
@@ -1850,42 +1871,56 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 	
-	public List<Object[]> findByYearAndPlantFkIdAROMATICS(String year, UUID plantFKId, String viewName,String version) {
-		try {
-			String sql = "SELECT " + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, "
-					+ "    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, "
-					+ "    MAX(NAT.Remarks) AS Remarks, " + "    MAX(NAT.Id) AS NormAttributeTransaction_Id, "
-					+ "    MAX(NAT.AuditYear) AS AuditYear, " + "    MAX(NP.UOM) AS UOM, "
-					+ "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
-					+ "    NP.TypeDisplayName AS TypeDisplayName, " + "    NP.ConfigTypeName AS ConfigTypeName, "
-					+ "    NP.TypeName AS TypeName, MAX(NP.DisplayName), MAX(NAT.Version) " + "FROM " + viewName + " NP "
-					+ "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
-					+ "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
-					+ "    AND NAT.AuditYear = :year " + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
-					+ "  AND NP.Plant_FK_Id = :plantFKId AND NAT.Version = :version " + "GROUP BY " + "    NP.NormParameter_FK_Id, "
-					+ "    NP.TypeDisplayName, " + "    NP.TypeDisplayOrder, " + "    NP.ConfigTypeDisplayName, "
-					+ "    NP.ConfigTypeName, " + "    NP.TypeName, " + "    NP.DisplayOrder "
-					+ "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
+	public List<Object[]> findByYearAndPlantFkIdAROMATICS(String year, UUID plantFKId, String viewName, String version) {
+	    try {
+	        String sql = "SELECT "
+	                + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, "
+	                + "    MAX(NAT.Remarks) AS Remarks, "
+	                + "    MAX(NAT.Id) AS NormAttributeTransaction_Id, "
+	                + "    MAX(NAT.AuditYear) AS AuditYear, "
+	                + "    MAX(NP.UOM) AS UOM, "
+	                + "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
+	                + "    NP.TypeDisplayName AS TypeDisplayName, "
+	                + "    NP.ConfigTypeName AS ConfigTypeName, "
+	                + "    NP.TypeName AS TypeName, MAX(NP.DisplayName), MAX(NAT.AttributeValueVersion) "
+	                + "FROM " + viewName + " NP "
+	                + "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
+	                + "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
+	                + "    AND NAT.AuditYear = :year "
+	                + "    AND NAT.AuditYear = :year "
+	                + "    AND NAT.AttributeValueVersion = :version "
+	                + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
+	                + "  AND NP.Plant_FK_Id = :plantFKId "
+	                + "GROUP BY "
+	                + "    NP.NormParameter_FK_Id, "
+	                + "    NP.TypeDisplayName, "
+	                + "    NP.TypeDisplayOrder, "
+	                + "    NP.ConfigTypeDisplayName, "
+	                + "    NP.ConfigTypeName, "
+	                + "    NP.TypeName, "
+	                + "    NP.DisplayOrder "
+	                + "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
 
-			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("year", year);
-			query.setParameter("plantFKId", plantFKId);
-			query.setParameter("version", version);
-			return query.getResultList();
-		} catch (Exception e) {
-			throw new RuntimeException("Error fetching data with dynamic view name", e);
-		}
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("year", year);
+	        query.setParameter("plantFKId", plantFKId);
+	        query.setParameter("version", version);
+	        return query.getResultList();
+	    } catch (Exception e) {
+	        throw new RuntimeException("Error fetching data with dynamic view name", e);
+	    }
 	}
 	
 	public List<Object[]> findShutdownRate(String year, UUID plantFKId,String type, String viewName) {
