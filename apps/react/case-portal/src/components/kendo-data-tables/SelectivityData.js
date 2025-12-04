@@ -488,6 +488,9 @@ const SelectivityData = (props) => {
   } else {
     FORMATE_VALUE = ValueFormatterProduction()
   }
+   if(props?.configType == 'PIO Impact' && lowerVertName == 'pta'){
+    FORMATE_VALUE = '{0:0.000}'
+  }
 
   const productionColumns = getEnhancedAOPColDefs({
     allGradesReciepes,

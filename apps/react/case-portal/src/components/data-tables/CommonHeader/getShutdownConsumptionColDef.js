@@ -4,6 +4,7 @@ import { ShutdownConsumptionCrackerColumns } from 'components/colums/CrackerColu
 import { ShutdownConsumptionPeColumns } from 'components/colums/PeColums'
 import { ShutdownConsumptionPpColumns } from 'components/colums/PpColums'
 import { ShutdownConsumptionPtaColumns } from 'components/colums/PtaColums'
+import { ShutdownConsumptionVcmColumns } from 'components/colums/VcmColums'
 import { verticalEnums } from 'enums/verticalEnums'
 import { useSelector } from 'react-redux'
 
@@ -15,8 +16,8 @@ const VERTICAL_COLDEFS_MAP = {
   [verticalEnums.PTA]: ShutdownConsumptionPtaColumns,
   [verticalEnums.ELASTOMER]: ShutdownConsumptionElastomerColumns,
   [verticalEnums.AROMATICS]: ShutdownConsumptionElastomerColumns,
-  [verticalEnums.VCM]: ShutdownConsumptionElastomerColumns,
-  [verticalEnums.PTA]: ShutdownConsumptionElastomerColumns,
+  [verticalEnums.VCM]: ShutdownConsumptionVcmColumns,
+  //[verticalEnums.PTA]: ShutdownConsumptionElastomerColumns,
   [verticalEnums.MEG]: ShutdownConsumptionMegColumns,
   [verticalEnums.CRACKER]: ShutdownConsumptionCrackerColumns,
 }

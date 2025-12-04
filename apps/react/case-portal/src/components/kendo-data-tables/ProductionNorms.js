@@ -43,6 +43,8 @@ const ProductionNorms = ({ permissions }) => {
   const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const plantName = plantObject?.name?.toLowerCase()
+  const siteName = siteObject?.name?.toLowerCase()
 
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
@@ -627,7 +629,12 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'meg' &&
           lowerVertName !== 'cracker' &&
           lowerVertName !== 'elastomer' &&
-          lowerVertName !== 'vcm'
+          lowerVertName !== 'vcm' &&
+          !(
+          lowerVertName === 'pta' &&
+          siteName === 'dmd' &&
+          plantName === 'pta 5'
+        )
         ) {
           finalData = [...formattedData, totalsRow]
         } else {
