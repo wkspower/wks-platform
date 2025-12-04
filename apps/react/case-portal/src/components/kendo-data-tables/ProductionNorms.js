@@ -44,7 +44,7 @@ const ProductionNorms = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const plantName = plantObject?.name?.toLowerCase()
-  const SITE_NAME_LOWER = siteObject?.name?.toLowerCase()
+  const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
 
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
@@ -630,9 +630,7 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'cracker' &&
           lowerVertName !== 'elastomer' &&
           lowerVertName !== 'vcm' &&
-          !(
-          lowerVertName === 'pta' &&
-          SITE_NAME_LOWER === 'dmd')
+          !(lowerVertName === 'pta' && SITE_NAME_LOWERCASE === 'dmd')
         ) {
           finalData = [...formattedData, totalsRow]
         } else {

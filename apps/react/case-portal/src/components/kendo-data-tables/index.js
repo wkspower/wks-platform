@@ -561,7 +561,6 @@ const KendoDataTables = ({
 
   const handleAddRow = () => {
     setEdit({})
-    console.log(1)
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
     const newRowId = rows.length
@@ -1063,7 +1062,12 @@ const KendoDataTables = ({
         return prev
       }
       const firstGrade = grades[0]
-      handleGradeChange(firstGrade.gradeId, firstGrade?.displayName)
+
+      handleGradeChange(
+        firstGrade.gradeId,
+        firstGrade?.displayName,
+        firstGrade?.name,
+      )
       return firstGrade.gradeId
     })
   }, [grades, permissions?.showG])
@@ -1213,6 +1217,7 @@ const KendoDataTables = ({
                     handleGradeChange(
                       selectedGradeObj?.gradeId,
                       selectedGradeObj?.displayName,
+                      selectedGradeObj?.name,
                     )
                   }}
                   className='dropdown-select'

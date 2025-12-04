@@ -16,6 +16,7 @@ import { getRoleName } from 'services/role-service'
 
 const ShutdownNorms = () => {
   const [gradeId, setGradeId] = useState(null)
+  const [gradeName, setGradeName] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
@@ -516,7 +517,11 @@ const ShutdownNorms = () => {
       saveWithRemark: false,
 
       showNote: lowerVertName === 'meg' || IS_PE_PP_VERTICAL ? true : false,
-      showNoteWhileSaving: IS_PE_PP_VERTICAL ? true : false,
+      showNoteWhileSaving: IS_PE_PP_VERTICAL
+        ? gradeName == 'All Grade'
+          ? true
+          : false
+        : false,
 
       saveBtn: true,
       showCalculate:
@@ -554,7 +559,8 @@ const ShutdownNorms = () => {
     isOldYear,
   )
 
-  const handleGradeChange = (gradeId) => {
+  const handleGradeChange = (gradeId, gradeDisplayName, gradeName) => {
+    setGradeName(gradeName)
     setGradeId(gradeId)
   }
 

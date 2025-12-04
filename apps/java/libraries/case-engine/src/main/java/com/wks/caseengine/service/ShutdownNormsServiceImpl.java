@@ -745,6 +745,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			    Map<String, Object> singleEntryMap = new HashMap<>();
 			    singleEntryMap.put("gradeId", grade[0] != null ? grade[0].toString() : null);
 			    singleEntryMap.put("displayName", grade[2] != null ? grade[2].toString() : null);
+				singleEntryMap.put("name", grade[1] != null ? grade[1].toString() : null);
 			    listOfMaps.add(singleEntryMap);
 			}
 			
