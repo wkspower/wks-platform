@@ -627,6 +627,8 @@ public class WorkflowServiceImpl implements WorkflowService {
 			aopMessageVM.setCode(200);
 			aopMessageVM.setMessage("SP Executed successfully");
 			aopMessageVM.setData(result);
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year,
+					"aop-approval-flow");
 			return aopMessageVM;
 		} catch (Exception e) {
 			e.printStackTrace();
