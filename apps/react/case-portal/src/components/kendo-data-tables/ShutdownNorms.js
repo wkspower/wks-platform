@@ -516,7 +516,12 @@ const ShutdownNorms = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
 
-      showNote: lowerVertName === 'meg' || IS_PE_PP_VERTICAL ? true : false,
+      showNote:
+        lowerVertName === 'meg' || IS_PE_PP_VERTICAL
+          ? gradeName == 'All Grade'
+            ? true
+            : false
+          : false,
       showNoteWhileSaving: IS_PE_PP_VERTICAL
         ? gradeName == 'All Grade'
           ? true
