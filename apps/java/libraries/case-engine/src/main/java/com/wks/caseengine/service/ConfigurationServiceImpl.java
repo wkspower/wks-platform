@@ -1382,6 +1382,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 					saveData(optionNormParameters.get(), i, year, attributeValue, configurationDTO);
 					if(configurationDTO.getSaveStatus()!=null && configurationDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
 						failedList.add(configurationDTO);
+						break;
 					}
 
 					if (!steamLatentName.isEmpty() && attributeValue != null
