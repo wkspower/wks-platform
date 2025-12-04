@@ -135,7 +135,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 
 				objList = getSlowdownNorms(year, plant.getId(), storedProcedure);
 			} else if (vertical.getName().equalsIgnoreCase("ELASTOMER")  || vertical.getName().equalsIgnoreCase("AROMATICS")  || vertical.getName().equalsIgnoreCase("VCM")) {
-				String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSlowtdownnorms";
+				String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSlowdownnorms";
 
 				objList = getSlowdownConsumptionData(plant.getId().toString(),year, storedProcedure);
 			} else {
