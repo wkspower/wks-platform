@@ -839,6 +839,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 									// Start/End Order Check
 									dto.setSaveStatus("Failed");
 									dto.setErrDescription("End date/time cannot be before start date/time.");
+								} else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
+									dto.setSaveStatus("Failed");
+									dto.setErrDescription("Start and end date/time must belong to the same month.");
 								}
 							}
 

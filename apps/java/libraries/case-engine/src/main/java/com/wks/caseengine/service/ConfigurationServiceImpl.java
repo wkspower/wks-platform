@@ -1598,10 +1598,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		boolean remarksChanged = !isBlank(dtoRemarks);
 		  
 
-		boolean attributeChanged = newValue != null
+		boolean attributeChanged = newValue != null 
 		    && !newValue.equalsIgnoreCase(existingValue);
 
-		// Save only if there?s a meaningful change
+		if(newValue.equalsIgnoreCase("0.0") && !existingRecord.isPresent()) {
+			return;
+		}
 		if (remarksChanged) {
 			// Update entity
 			normAttributeTransactions.setAttributeValue(newValue != null ? newValue : "0.0");
