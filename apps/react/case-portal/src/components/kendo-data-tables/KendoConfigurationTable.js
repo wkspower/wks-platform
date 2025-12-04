@@ -23,12 +23,15 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from '../../../node_modules/@mui/material/index'
 import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinputs/index'
 import SelectivityData from './SelectivityData'
 import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
 import { getRoleName } from 'services/role-service'
+import { ButtonGroup } from '../../../node_modules/@progress/kendo-react-buttons/index'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
@@ -111,6 +114,8 @@ const ConfigurationTable = () => {
     useState([])
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
   const [gradeId, setGradeId] = React.useState(null)
+  const [revision, setRevision] = useState('1')
+  const [revisionDetails, setRevisionDetails] = useState([])
 
   // const { isReadOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
@@ -433,6 +438,35 @@ const ConfigurationTable = () => {
       setLoading(false)
     }
   }
+
+  const getRevision = async () => {
+    try {
+      var response = await DataService.getRevision(keycloak, PLANT_ID, AOP_YEAR)
+      if (response?.code == 200) {
+        setRevision(response?.data[0]?.attributeValue)
+        setRevisionDetails(response?.data[0])
+      } else {
+        setRevision(1)
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setRevision(1)
+    }
+  }
+  const updateRevision = async (Payload) => {
+    try {
+      var response = await DataService.updateRevision(
+        keycloak,
+        Payload,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      fetchData()
+    } catch (error) {
+      console.error('Error updating data:', error)
+    }
+  }
+
   const getConfigurationAvailableTabs = async () => {
     setLoading(true)
     try {
@@ -493,6 +527,10 @@ const ConfigurationTable = () => {
         lowerVertName != 'meg' &&
         lowerVertName != 'elastomer'
       ) {
+        if (lowerVertName === 'aromatics') {
+          getRevision()
+        }
+
         getConfigurationTabsMatrix()
         getConfigurationAvailableTabs()
         fetchGradeData()
@@ -542,6 +580,7 @@ const ConfigurationTable = () => {
     const day = String(date.getDate()).padStart(2, '0')
     return `${year}-${month}-${day}`
   }
+
   function formatDateForText(date, time = false) {
     if (!date) return ''
     const parsedDate = new Date(date)
@@ -561,6 +600,7 @@ const ConfigurationTable = () => {
     }
     return formatted
   }
+
   const getAopSummary = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     try {
@@ -575,6 +615,7 @@ const ConfigurationTable = () => {
       console.error('Error fetching data:', error)
     }
   }
+
   const onLoadTest = async (startDateObj, endDateObj) => {
     setLoading1(true)
 
@@ -616,6 +657,7 @@ const ConfigurationTable = () => {
       setLoading1(false)
     }
   }
+
   useEffect(() => {
     if (!PLANT_ID || !AOP_YEAR) {
       return
@@ -800,6 +842,15 @@ const ConfigurationTable = () => {
 
   const handleGradeChange = (gradeId) => {
     setGradeId(gradeId)
+  }
+
+  const handleRevisionChange = async (num) => {
+    setRevision(num)
+    if (!revisionDetails || revisionDetails.length === 0) return
+    const payload = { ...revisionDetails }
+    payload.attributeValueVersion = num
+    payload.attributeValue = num
+    await updateRevision([payload])
   }
 
   const ConfigurationAccordian = useMemo(() => {
@@ -1319,6 +1370,35 @@ const ConfigurationTable = () => {
             if (tabInfo) return tabInfo?.displayName || 'loading..'
           })}
         />
+
+        {lowerVertName === 'aromatics' && (
+          <Box mt={0.5}>
+            <ButtonGroup aria-label='revision group'>
+              {['1', '2', '3'].map((num) => {
+                const selected = revision === num
+
+                return (
+                  <Button
+                    key={num}
+                    onClick={() => handleRevisionChange(num)}
+                    variant={selected ? 'contained' : 'outlined'}
+                    color={selected ? 'primary' : 'inherit'}
+                    size='small'
+                    sx={{
+                      textTransform: 'none',
+                      fontSize: '0.75rem',
+                      padding: '1px 7px',
+                      minWidth: '36px',
+                      mr: 0.5,
+                    }}
+                  >
+                    {`Rev ${num}`}
+                  </Button>
+                )
+              })}
+            </ButtonGroup>
+          </Box>
+        )}
 
         <Box>
           {(() => {

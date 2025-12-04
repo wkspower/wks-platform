@@ -488,3 +488,7 @@ main.MuiBox-root.css-vognfw {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+.rev-btn--active {
+  background: rgba(25, 118, 210, 0.08);
+}
