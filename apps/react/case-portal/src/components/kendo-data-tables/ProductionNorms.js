@@ -948,6 +948,8 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'elastomer' &&
           lowerVertName !== 'aromatics' &&
           lowerVertName !== 'vcm' &&
+          lowerVertName !== 'pe' &&
+          lowerVertName !== 'pp' &&
           lowerVertName !== 'pta'
             ? '* MT per Annum'
             : ''

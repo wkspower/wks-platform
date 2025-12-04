@@ -197,7 +197,7 @@ const ProductionVolumeDataBasis = () => {
     exportRef1.current.save(options1)
   }
 
-  const fileName = `${VERTICAL_NAME}-Production Volume Data.xlsx`
+  const fileName = `${VERTICAL_NAME}-Production Target Data.xlsx`
 
   if (lowerVertName != 'meg') {
     return <ProductionVolumeDataBasisPe />

@@ -153,6 +153,11 @@ const KendoDataTablesReciepe = ({
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
 
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { oldYear } = dataGridStore
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const shouldShowExportImportButtons = () => {
     const dataGridStore = useSelector((state) => state.dataGridStore)
     const {

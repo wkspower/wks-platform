@@ -396,7 +396,7 @@ const ProductionVolumeDataBasisPe = () => {
     }
   }, [gridNames, dataMap])
 
-  const fileName = `${VERTICAL_NAME}-Production Basis.xlsx`
+  const fileName = `${VERTICAL_NAME}-Production Target Basis.xlsx`
 
   const renderTitle = (t) => t
 
