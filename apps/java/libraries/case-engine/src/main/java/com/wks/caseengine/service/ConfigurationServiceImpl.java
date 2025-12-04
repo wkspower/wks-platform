@@ -1623,7 +1623,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		boolean attributeChanged = newValue != null 
 		    && !newValue.equalsIgnoreCase(existingValue);
 
-		if(newValue.equalsIgnoreCase("0.0") && !existingRecord.isPresent()) {
+		if(newValue!=null && newValue.equalsIgnoreCase("0.0") && !existingRecord.isPresent()) {
 			return;
 		}
 		if (remarksChanged) {
