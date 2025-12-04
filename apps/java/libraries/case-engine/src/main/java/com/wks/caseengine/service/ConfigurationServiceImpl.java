@@ -1422,7 +1422,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						Double attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
 
 						if (optionNormParametersHP.isPresent()) {
-							saveData(optionNormParametersHP.get(), i, year, attributeValueHP, configurationDTO);
+							saveData(optionNormParametersHP.get(), i, year, attributeValueHP, configurationDTO,plantFKId);
 						}
 
 					}
