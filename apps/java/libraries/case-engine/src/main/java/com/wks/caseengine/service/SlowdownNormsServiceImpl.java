@@ -130,10 +130,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 						vertical.getId().toString());
 
 				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
-			} else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("PTA") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("PVC") || vertical.getName().equalsIgnoreCase("VCM")) {
+			} else if (vertical.getName().equalsIgnoreCase("PTA")  || vertical.getName().equalsIgnoreCase("PVC")) {
 				String storedProcedure = "vwScrn"+vertical.getName() + "SlowdownNorms";
 
 				objList = getSlowdownNorms(year, plant.getId(), storedProcedure);
+			} else if (vertical.getName().equalsIgnoreCase("ELASTOMER")  || vertical.getName().equalsIgnoreCase("AROMATICS")  || vertical.getName().equalsIgnoreCase("VCM")) {
+				String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSlowtdownnorms";
+
+				objList = getSlowdownConsumptionData(plant.getId().toString(),year, storedProcedure);
 			} else {
 				String viewName = "vwScrn" + vertical.getName() + "SlowdownNorms";
 				
@@ -189,6 +193,25 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<Object[]> getSlowdownConsumptionData(String plantId, String aopYear,String storedProcedure) {
+		try {
+			
+			String sql = "EXEC " + storedProcedure
+					+ " @plantId = :plantId, @FinYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
