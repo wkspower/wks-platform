@@ -671,6 +671,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	private boolean isDifferent(double oldVal, double newVal) {
 	    return Double.compare(oldVal, newVal) != 0;
 	}
+	
+	@Override
+	@Transactional
+	public AOPMessageVM loadGradeWiseConsumptionNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadGradewiseConsumptionNorms";
+		System.out.println("storedProcedure" + storedProcedure);
+		int result = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("SP Executed successfully");
+		aopMessageVM.setData(result);
+		return aopMessageVM;
+	}
 
 	@Override
 	@Transactional
@@ -756,6 +772,32 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			stmt.setString(2, siteId);
 			stmt.setString(3, verticalId);
 			stmt.setString(4, finYear);
+
+			// Execute the stored procedure
+			int rowsAffected = stmt.executeUpdate();
+
+			// Optional: commit if auto-commit is off
+			if (!connection.getAutoCommit()) {
+				connection.commit();
+			}
+
+			return rowsAffected;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String year) {
+		String callSql = "{call " + procedureName + "(?, ?)}";
+
+		try (Connection connection = dataSource.getConnection();
+				CallableStatement stmt = connection.prepareCall(callSql)) {
+
+			// Set parameters
+			stmt.setString(1, plantId);
+			stmt.setString(2, year);
 
 			// Execute the stored procedure
 			int rowsAffected = stmt.executeUpdate();
