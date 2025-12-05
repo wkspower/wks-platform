@@ -357,7 +357,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						list.add("Error Product Lookup");
 					}
 				} else {
-					list.add(null); // Add null if product is null, maintaining column structure
+					list.add(dto.getProductName()); // Add null if product is null, maintaining column structure
 				}
 				
 				// --- Date/Time Formatting ---
@@ -990,7 +990,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				try {
 					dto.setAudityear(year);
 
-					// --- 1. Description (Cell 0) ---
 					String desc = getStringCellValue(row.getCell(0), dto);
 					dto.setDiscription(desc);
 
