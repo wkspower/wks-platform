@@ -751,214 +751,217 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	}
 
 	public List<ShutDownPlanDTO> readSlowdownRateData(InputStream inputStream, UUID plantFKId, String year) {
-		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
+	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
+	    // shutdownList is fetched at the beginning
+	    List<ShutDownPlanDTO> shutdownList = shutDownPlanService.findMaintenanceDetailsByPlantIdAndType(plantFKId, "Shutdown", year);
 
-		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rowIterator = sheet.iterator();
-			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-			if (rowIterator.hasNext())
-				rowIterator.next(); // Skip header
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-				ShutDownPlanDTO dto = new ShutDownPlanDTO();
-				LocalDateTime ldtStart = null;
-				LocalDateTime ldtEnd = null;
+	        if (rowIterator.hasNext())
+	            rowIterator.next(); 
 
-				try {
-					dto.setAudityear(year);
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
+	            LocalDateTime ldtStart = null;
+	            LocalDateTime ldtEnd = null;
 
-					String desc = getStringCellValue(row.getCell(0), dto);
-					dto.setDiscription(desc); // Field 0 set
+	            try {
+	                dto.setAudityear(year);
 
-					// Only do duplicate check if desc is non-null
-					if (desc != null && dto.getSaveStatus() == null) {
-						boolean exists = dtoList.stream()
-							.anyMatch(existing -> desc.equals(existing.getDiscription()) && "Success".equals(existing.getSaveStatus()));
-						if (exists) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Description cannot be duplicate");
-						}
-					}
+	                String desc = getStringCellValue(row.getCell(0), dto);
+	                dto.setDiscription(desc); 
 
-					// --- Date Bounds ---
-					LocalDateTime[] bounds = parseFinancialYearBounds(year);
-					LocalDateTime fyStart = bounds[0];
-					LocalDateTime fyEnd = bounds[1];
+	                if (desc != null && dto.getSaveStatus() == null) {
+	                    boolean exists = dtoList.stream()
+	                        .anyMatch(existing -> desc.equals(existing.getDiscription()) && "Success".equals(existing.getSaveStatus()));
+	                    if (exists) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Description cannot be duplicate");
+	                    }
+	                }
 
-					// --- Start Date/Time Validation (Cell 1) ---
-					String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
+	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
+	                LocalDateTime fyStart = bounds[0];
+	                LocalDateTime fyEnd = bounds[1];
 
-					if (mantStartStr != null) { // Read first, then check status
-						try {
-							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-							ldtStart = LocalDateTime.parse(mantStartStr, fmt);
+	                String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
 
-							// Set DTO date now, regardless of FY check outcome
-							Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
-							dto.setMaintStartDateTime(startDate);
+	                if (mantStartStr != null) { 
+	                    try {
+	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
 
-							if (dto.getSaveStatus() == null) {
-								// Check within financial year
-								if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("Start date/time is outside the financial year " + year);
-								}
-							}
+	                        Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
+	                        dto.setMaintStartDateTime(startDate);
 
-						} catch (Exception ex) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Invalid date/time format in cell 3.");
-							ex.printStackTrace();
-						}
-					} else if (dto.getSaveStatus() == null) {
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("Start Date/Time is missing.");
-					}
+	                        if (dto.getSaveStatus() == null) {
+	                            if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("Start date/time is outside the financial year " + year);
+	                            }
+	                        }
 
-					// --- End Date/Time Validation and Overlap Check (Cell 2) ---
-					String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
+	                    } catch (Exception ex) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Invalid date/time format in cell 3.");
+	                    }
+	                } else if (dto.getSaveStatus() == null) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Start Date/Time is missing.");
+	                }
 
-					if (mantEndStr != null) { // Read first, then check status
-						try {
-							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-							ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
-							Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+	                String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
 
-							// Set DTO date now, regardless of checks below
-							dto.setMaintEndDateTime(endDate);
+	                if (mantEndStr != null) { 
+	                    try {
+	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
+	                        Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 
-							if (dto.getSaveStatus() == null) {
-								// Financial Year Check
-								if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("End date/time is outside the financial year " + year);
-								} else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
-									// Start/End Order Check
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("End date/time cannot be before start date/time.");
-								} else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("Start and end date/time must belong to the same month.");
-								}
-							}
+	                        dto.setMaintEndDateTime(endDate);
 
-							// Overlap Check (only if dates are valid and DTO hasn't failed yet)
-							if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
+	                        if (dto.getSaveStatus() == null) {
+	                            if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("End date/time is outside the financial year " + year);
+	                            } else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("End date/time cannot be before start date/time.");
+	                            } else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("Start and end date/time must belong to the same month.");
+	                            }
+	                        }
 
-								boolean overlapsFile = false;
-								for (LocalDateTime[] prevPeriod : validTimeRanges) {
-									LocalDateTime prevLdtStart = prevPeriod[0];
-									LocalDateTime prevLdtEnd = prevPeriod[1];
-									// Check for overlap: (StartA < EndB) AND (EndA > StartB)
-									if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-										overlapsFile = true;
-										break;
-									}
-								}
+	                        if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
 
-								if (overlapsFile) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
-								}
-							}
+	                            boolean overlapsFile = false;
+	                            for (LocalDateTime[] prevPeriod : validTimeRanges) {
+	                                LocalDateTime prevLdtStart = prevPeriod[0];
+	                                LocalDateTime prevLdtEnd = prevPeriod[1];
+	                                if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
+	                                    overlapsFile = true;
+	                                    break;
+	                                }
+	                            }
 
-						} catch (Exception ex) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Invalid date/time format in cell 4.");
-							ex.printStackTrace();
-						}
-					} else if (dto.getSaveStatus() == null) {
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("End Date/Time is missing.");
-					}
+	                            if (overlapsFile) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
+	                            }
+	                        }
 
-					// --- Duration Calculation and Adding to validTimeRanges ---
-					if (ldtStart != null && ldtEnd != null) {
-						try {
-							Instant startInstant = dto.getMaintStartDateTime().toInstant();
-							Instant endInstant = dto.getMaintEndDateTime().toInstant();
-							Duration duration = Duration.between(startInstant, endInstant);
-							long totalMinutes = duration.toMinutes();
+	                        if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
+	                            boolean overlapsShutdown = false;
+	                            if (shutdownList != null && !shutdownList.isEmpty()) {
+	                                for (ShutDownPlanDTO shutdownDto : shutdownList) {
+	                                    Date shutdownStart = shutdownDto.getMaintStartDateTime();
+	                                    Date shutdownEnd = shutdownDto.getMaintEndDateTime();
+	                                    if (shutdownStart != null && shutdownEnd != null) {
+	                                        LocalDateTime shutdownLdtStart = shutdownStart.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	                                        LocalDateTime shutdownLdtEnd = shutdownEnd.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	                                        if (ldtStart.isBefore(shutdownLdtEnd) && ldtEnd.isAfter(shutdownLdtStart)) {
+	                                            overlapsShutdown = true;
+	                                            break;
+	                                        }
+	                                    }
+	                                }
+	                            }
+	                            
+	                            if (overlapsShutdown) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("The maintenance period overlaps with an existing Shutdown period.");
+	                            }
+	                        }
 
-							if (totalMinutes < 0) {
-								throw new IllegalStateException("Calculated negative duration.");
-							}
+	                    } catch (Exception ex) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Invalid date/time format in cell 4.");
+	                    }
+	                } else if (dto.getSaveStatus() == null) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("End Date/Time is missing.");
+	                }
 
-							double durationInDecimalHours = (double) totalMinutes / 60.0;
-							dto.setDurationInHrs(durationInDecimalHours); // Field set
+	                if (ldtStart != null && ldtEnd != null) {
+	                    try {
+	                        Instant startInstant = dto.getMaintStartDateTime().toInstant();
+	                        Instant endInstant = dto.getMaintEndDateTime().toInstant();
+	                        Duration duration = Duration.between(startInstant, endInstant);
+	                        long totalMinutes = duration.toMinutes();
 
-							// Add range to the validation list now that it is fully validated (date and overlap)
-							validTimeRanges.add(new LocalDateTime[] { ldtStart, ldtEnd });
+	                        if (totalMinutes < 0) {
+	                            throw new IllegalStateException("Calculated negative duration.");
+	                        }
 
-						} catch (Exception e) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
-							e.printStackTrace();
-						}
-					}
+	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
+	                        dto.setDurationInHrs(durationInDecimalHours); // Field set
+	                        if (dto.getSaveStatus() == null || "Success".equals(dto.getSaveStatus())) {
+	                            validTimeRanges.add(new LocalDateTime[] { ldtStart, ldtEnd });
+	                        }
 
-					// --- Rate EOE Validation (Cell 4) ---
-					dto.setRateEOE(getNumericCellValue(row.getCell(4), dto)); // Field 4 set
-					if (dto.getSaveStatus() == null) {
-						if(dto.getRateEOE()==null) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Please enter Rate EOE");
-						}
-					}
+	                    } catch (Exception e) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
+	                    }
+	                }
 
-					// --- Rate EO Validation (Cell 5) ---
-					dto.setRateEO(getNumericCellValue(row.getCell(5), dto)); // Field 5 set
-					if (dto.getSaveStatus() == null) {
-						if(dto.getRateEO()==null) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Please enter Rate EO");
-						}
-					}
+	                dto.setRateEOE(getNumericCellValue(row.getCell(4), dto)); // Field 4 set
+	                if (dto.getSaveStatus() == null) {
+	                    if (dto.getRateEOE() == null) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Please enter Rate EOE");
+	                    }
+	                }
 
-					// --- Remark Validation (Cell 6) ---
-					dto.setRemark(getStringCellValue(row.getCell(6), dto)); // Field 6 set
-					if (dto.getSaveStatus() == null) {
-						if(dto.getRemark()==null) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Please enter remark");
-						}
-					}
+	                dto.setRateEO(getNumericCellValue(row.getCell(5), dto)); // Field 5 set
+	                if (dto.getSaveStatus() == null) {
+	                    if (dto.getRateEO() == null) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Please enter Rate EO");
+	                    }
+	                }
+	                dto.setRemark(getStringCellValue(row.getCell(6), dto)); // Field 6 set
+	                if (dto.getSaveStatus() == null) {
+	                    if (dto.getRemark() == null) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Please enter remark");
+	                    }
+	                }
 
-					// --- DB Duplicate Check (Cell 7) ---
-					String idString = getStringCellValue(row.getCell(7), dto);
-					dto.setId(idString); // Field 7 set
+	                String idString = getStringCellValue(row.getCell(7), dto);
+	                dto.setId(idString); 
 
-					if(dto.getId()==null && dto.getSaveStatus() == null) {
-						List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown",plantFKId.toString(),year,dto.getDiscription());
+	                if (dto.getId() == null && dto.getSaveStatus() == null) {
+	                    List<Object[]> obj = shutDownPlanRepository.findDiscriptionByPlantIdAndType("Shutdown", plantFKId.toString(), year, dto.getDiscription());
 
-						if(obj.size()>0) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("The Description "+dto.getDiscription()+" already exists in the list. please enter unique description to avoid duplication.");
-						}
-					}
+	                    if (obj.size() > 0) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("The Description " + dto.getDiscription() + " already exists in the list. please enter unique description to avoid duplication.");
+	                    }
+	                }
 
-					// Final Success Check
-					if (dto.getSaveStatus() == null) {
-						dto.setSaveStatus("Success");
-					}
+	                if (dto.getSaveStatus() == null) {
+	                    dto.setSaveStatus("Success");
+	                }
 
-				} catch (Exception e) {
-					e.printStackTrace();
-					if (dto.getSaveStatus() == null) {
-						dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
-						dto.setSaveStatus("Failed");
-					}
-				}
-				dtoList.add(dto);
-			}
+	            } catch (Exception e) {
+	                if (dto.getSaveStatus() == null) {
+	                    dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
+	                    dto.setSaveStatus("Failed");
+	                }
+	            }
+	            dtoList.add(dto);
+	        }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return dtoList;
+	    } catch (Exception e) {
+	    }
+	    return dtoList;
 	}
 	
 	public List<ShutDownPlanDTO> readSlowdownData(InputStream inputStream, UUID plantFKId, String year) {
