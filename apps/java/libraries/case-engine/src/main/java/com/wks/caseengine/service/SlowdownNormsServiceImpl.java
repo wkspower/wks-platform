@@ -130,11 +130,12 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 						vertical.getId().toString());
 
 				objList = getSlowdownNorms(year, plant.getId(), "vwScrnSlowdownNorms");
-			} else if (vertical.getName().equalsIgnoreCase("PTA")  || vertical.getName().equalsIgnoreCase("PVC")) {
-				String storedProcedure = "vwScrn"+vertical.getName() + "SlowdownNorms";
+			} else if (vertical.getName().equalsIgnoreCase("PVC")) {
+				String storedProcedure = "vwScrn" + vertical.getName() + "SlowdownNorms";
 
 				objList = getSlowdownNorms(year, plant.getId(), storedProcedure);
-			} else if (vertical.getName().equalsIgnoreCase("ELASTOMER")  || vertical.getName().equalsIgnoreCase("AROMATICS")  || vertical.getName().equalsIgnoreCase("VCM")) {
+			} else if (vertical.getName().equalsIgnoreCase("PTA") || vertical.getName().equalsIgnoreCase("ELASTOMER")
+					|| vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("VCM")) {
 				String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetSlowdownnorms";
 
 				objList = getSlowdownConsumptionData(plant.getId().toString(),year, storedProcedure);

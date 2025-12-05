@@ -101,12 +101,12 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			if (vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("MEG")) {
+			if (vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("MEG") || vertical.getName().equalsIgnoreCase("PTA")) {
 				//objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
 				// view converted to sp
 				String storedProcedure = verticalName + "_" + site.getName() + "_GetShutdownnorms";
 				objList = getShutdownConsumptionData( plantId,year, storedProcedure);
-			}else if (  vertical.getName().equalsIgnoreCase("PVC") ||  vertical.getName().equalsIgnoreCase("PTA")) {
+			}else if (  vertical.getName().equalsIgnoreCase("PVC") ) {
 				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
 				objList = getShutdownNormsMEG(year, plant.getId(), viewName);
 			}else if(vertical.getName().equalsIgnoreCase("CRACKER")) {
