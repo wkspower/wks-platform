@@ -1274,6 +1274,7 @@ const NormalOpNormsScreenCracker = () => {
                 value={gradeId || ''}
                 label='Mode'
                 onChange={onModeSelect}
+                MenuProps={{ disableScrollLock: true }}
               >
                 {grades.map((g) => (
                   <MenuItem key={g.gradeId} value={g.gradeId}>

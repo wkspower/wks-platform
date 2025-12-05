@@ -395,9 +395,12 @@ export default function HeaderContent({ keycloak }) {
                   value={selectedYear}
                   onChange={handleYearChange}
                   className='custom-title-dropdown-content'
-                  MenuProps={{
-                    PaperProps: { style: { maxHeight: 200 } },
-                  }}
+                  MenuProps={
+                    ({
+                      PaperProps: { style: { maxHeight: 200 } },
+                    },
+                    { disableScrollLock: true })
+                  }
                 >
                   {aopYears.map((y) => (
                     <MenuItem key={y.AOPYear} value={y.AOPYear}>
@@ -422,9 +425,12 @@ export default function HeaderContent({ keycloak }) {
                   value={selectedVertical}
                   onChange={handleVertChange}
                   className='custom-title-dropdown-content'
-                  MenuProps={{
-                    PaperProps: { style: { maxHeight: 200 } },
-                  }}
+                  MenuProps={
+                    ({
+                      PaperProps: { style: { maxHeight: 200 } },
+                    },
+                    { disableScrollLock: true })
+                  }
                 >
                   {verticals.map((v) => (
                     <MenuItem key={v.id} value={v.id}>
@@ -450,9 +456,12 @@ export default function HeaderContent({ keycloak }) {
                   onChange={handleSiteChange}
                   disabled={!sites.length}
                   className='custom-title-dropdown-content'
-                  MenuProps={{
-                    PaperProps: { style: { maxHeight: 200 } },
-                  }}
+                  MenuProps={
+                    ({
+                      PaperProps: { style: { maxHeight: 200 } },
+                    },
+                    { disableScrollLock: true })
+                  }
                 >
                   {sites.map((s) => (
                     <MenuItem key={s.id} value={s.id}>
@@ -478,9 +487,12 @@ export default function HeaderContent({ keycloak }) {
                   onChange={handlePlantChange}
                   disabled={!plants.length}
                   className='custom-title-dropdown-content'
-                  MenuProps={{
-                    PaperProps: { style: { maxHeight: 200 } },
-                  }}
+                  MenuProps={
+                    ({
+                      PaperProps: { style: { maxHeight: 200 } },
+                    },
+                    { disableScrollLock: true })
+                  }
                 >
                   {plants.map((p) => (
                     <MenuItem key={p.id} value={p.id}>

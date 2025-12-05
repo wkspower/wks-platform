@@ -96,7 +96,7 @@ export default function StepperNav() {
   const getAbbrev = (label) => {
     if (!label) return ''
     const text = label.trim()
-    return text.length <= 15 ? text : `${text.slice(0, 15)}…`
+    return text.length <= 12 ? text : `${text.slice(0, 12)}…`
   }
 
   // shared Stepper element so we don't duplicate mapping logic
@@ -143,6 +143,7 @@ export default function StepperNav() {
                   sx={{
                     minWidth: 28,
                     display: 'inline-block',
+                    maxWidth: 80,
                     textAlign: 'center',
                     fontWeight: (theme) =>
                       activeStep === steps.findIndex((s) => s.key === step.key)
@@ -180,6 +181,7 @@ export default function StepperNav() {
               borderColor: 'divider',
               py: 0,
               transition: 'left 200ms ease',
+              maxHeight: '70px',
             }}
           >
             <Box>{StepperElement}</Box>

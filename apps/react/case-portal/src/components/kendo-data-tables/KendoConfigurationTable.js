@@ -349,6 +349,13 @@ const ConfigurationTable = () => {
         Particulars: item.normType,
       }))
 
+      //Consition Missing For ELASTOMER VERTICAL #1
+      const distinctReportTypes = [
+        ...new Set(formattedData.map((item) => item.normType).filter(Boolean)),
+      ]
+      //Consition Missing For ELASTOMER VERTICAL #2
+      setReportTypes(distinctReportTypes)
+
       var data = formattedData?.filter(
         (item) => item?.Particulars == 'Report Manual Entry',
       )
@@ -1211,6 +1218,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
                     currentTabDisplayName={currentTabDisplayName}
+                    reportTypes={reportTypes}
                   />
                 )
               case 'report manual entry':
@@ -1227,6 +1235,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='2'
                     currentTabDisplayName={currentTabDisplayName}
+                    reportTypes={reportTypes}
                   />
                 )
               default:
@@ -1288,6 +1297,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='0'
                     currentTabDisplayName={currentTabDisplayName}
+                    reportTypes={reportTypes}
                   />
                 )
               case getTheId('Constant'):
@@ -1304,6 +1314,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     tabIndex='1'
                     currentTabDisplayName={currentTabDisplayName}
+                    reportTypes={reportTypes}
                   />
                 )
               case getTheId('Report Manual Entry'):
@@ -1319,6 +1330,7 @@ const ConfigurationTable = () => {
                     onSummaryEditChange={setSummaryEdited}
                     currentTabDisplayName={currentTabDisplayName}
                     groupBy='TypeDisplayName'
+                    reportTypes={reportTypes}
                   />
                 )
               default:

@@ -49,6 +49,9 @@ const BusinessDemand = ({ permissions }) => {
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+
+  const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
+
   const SCREEN_NAME = screenTitle?.title
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
@@ -91,14 +94,14 @@ const BusinessDemand = ({ permissions }) => {
 
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching data:', error)
       setLoading(false)
     }
   }
 
   useEffect(() => {
     fetchData()
-  }, [PLANT_ID, oldYear, yearChanged, keycloak])
+  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak])
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
@@ -137,7 +140,6 @@ const BusinessDemand = ({ permissions }) => {
         setLoading(false)
         return
       }
-      const isPPorPE_NMD = lowerVertName === 'pp' || lowerVertName === 'pe'
       //
 
       if (isPPorPE_NMD) {
@@ -328,10 +330,10 @@ const BusinessDemand = ({ permissions }) => {
       // showStepper:false,
     }
   }
-  const percentageTitle =
-    lowerVertName === 'pp' || lowerVertName === 'pe'
-      ? `${SCREEN_NAME} (%)`
-      : `${SCREEN_NAME}`
+
+  const percentageTitle = IS_PE_PP_VERTICAL
+    ? `${SCREEN_NAME} (%)`
+    : `${SCREEN_NAME}`
 
   const adjustedPermissions = getAdjustedPermissions(
     {
@@ -348,28 +350,15 @@ const BusinessDemand = ({ permissions }) => {
       titleName: percentageTitle,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
-      isTotalFooterActive:
-        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      isTotalFooterActive: IS_PE_PP_VERTICAL ? true : false,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
-          ? true
-          : false,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? true : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
-          ? true
-          : false,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? true : false,
 
       downloadExcelBtnFromUI:
-        lowerVertName == 'cracker' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
-          ? false
-          : true,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? false : true,
     },
     isOldYear,
   )

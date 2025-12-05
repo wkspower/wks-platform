@@ -630,7 +630,7 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'cracker' &&
           lowerVertName !== 'elastomer' &&
           lowerVertName !== 'vcm' &&
-          !(lowerVertName === 'pta' && SITE_NAME_LOWERCASE === 'dmd')
+          lowerVertName !== 'pta'
         ) {
           finalData = [...formattedData, totalsRow]
         } else {

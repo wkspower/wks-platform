@@ -3,16 +3,13 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { useSession } from 'SessionStoreContext'
-import { validateFields } from 'utils/validationUtils'
-import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
-import KendoDataTables from './index'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import { getRoleName } from 'services/role-service'
+import { useSession } from 'SessionStoreContext'
+import KendoDataTables from './index'
 const MaintenanceTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const keycloak = useSession()
-  // const READ_ONLY = getRoleName(keycloak)
 
   const {
     verticalChange,
@@ -39,22 +36,12 @@ const MaintenanceTable = () => {
   const lowerVertName = vertName?.toLowerCase()
   const dataConfig = useMemo(
     () => ({
-      isCracker: lowerVertName === 'cracker',
-      serviceFn:
-        lowerVertName === 'cracker'
-          ? (keycloak, PLANT_ID, AOP_YEAR) =>
-              MaintenanceDetailsApiService.getCrackerMaintenanceData(
-                keycloak,
-                PLANT_ID,
-                AOP_YEAR,
-              )
-          : (keycloak, PLANT_ID, AOP_YEAR) =>
-              MaintenanceDetailsApiService.getMaintenanceData(
-                keycloak,
-                PLANT_ID,
-                AOP_YEAR,
-              ),
-      editable: lowerVertName === 'cracker',
+      serviceFn: (keycloak, PLANT_ID, AOP_YEAR) =>
+        MaintenanceDetailsApiService.getMaintenanceData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        ),
     }),
     [PLANT_ID, AOP_YEAR, lowerVertName],
   )
@@ -82,107 +69,6 @@ const MaintenanceTable = () => {
     setRemarkDialogOpen(true)
   }
 
-  const saveChanges = useCallback(async () => {
-    try {
-      setLoading(true)
-      if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setLoading(false)
-        return
-      }
-
-      const rawData = Object.values(modifiedCells)
-      const data = rawData.filter((row) => row.inEdit)
-      if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setLoading(false)
-        return
-      }
-
-      const validationMessage = validateFields(data, ['remarks'])
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: validationMessage, severity: 'error' })
-        setLoading(false)
-        return
-      }
-
-      await saveCrackerMaintenanceData(data)
-    } catch (err) {
-      console.error('Save Cracker Data Error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [modifiedCells])
-  const saveCrackerMaintenanceData = async (newRows) => {
-    setLoading(true)
-    try {
-      let plantId = PLANT_ID
-      let year = AOP_YEAR
-
-      const payloadData = newRows.map((row) => ({
-        fourFD: row.fourFD,
-        aopYear: year,
-        totalSAD: row.totalSAD,
-        monthName: row.monthName ?? null,
-        plantId: plantId,
-        numberOfDays: row.numberOfDays,
-        demoBBU: row.demoBBU,
-        coilReplacement: row.coilReplacement,
-        ibr: row.coilReplacement,
-        demoSAD: row.demoSAD,
-        demoSD: row.demoSD,
-        fourF: row.fourF,
-        mnt: row.mnt,
-        total: row.total,
-        fourFHours: row.fourFHours,
-        bbu: row.bbu,
-        bbd: row.bbd,
-        sad: row.sad,
-        demoHSS: row.demoHSS,
-        fiveF: row.fiveF,
-        id: row.idFromApi || row.id,
-        shutdown: row.shutdown,
-        slowdown: row.slowdown,
-        remarks: row.remarks ?? row.remark ?? '',
-      }))
-
-      const response =
-        await MaintenanceDetailsApiService.saveCrackerMaintenance(
-          plantId,
-          year,
-          payloadData,
-          keycloak,
-        )
-
-      if (response?.code === 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Saved successfully!',
-          severity: 'success',
-        })
-        setModifiedCells({})
-        fetchData()
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Error saving data!',
-          severity: 'error',
-        })
-      }
-    } catch (error) {
-      console.error('Error saving data:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Unexpected error occurred!',
-        severity: 'error',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
   const fetchData = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     setRows([])
@@ -230,35 +116,9 @@ const MaintenanceTable = () => {
     }
   }, [PLANT_ID, AOP_YEAR, keycloak, dataConfig])
 
-  const handleCalculate = useCallback(async () => {
-    const plantId = PLANT_ID
-    const year = AOP_YEAR
-    try {
-      const result =
-        await MaintenanceDetailsApiService.handleCalculateMaintenance(
-          plantId,
-          year,
-          keycloak,
-        )
-      setSnackbarData({
-        message:
-          result === 0
-            ? 'Data refreshed successfully!'
-            : 'Data Refresh Failed!',
-        severity: result === 0 ? 'success' : 'error',
-      })
-      setSnackbarOpen(true)
-      if (result === 0) fetchData()
-    } catch (err) {
-      console.error(err)
-      setSnackbarData({ message: err.message || 'Error!', severity: 'error' })
-      setSnackbarOpen(true)
-    }
-  }, [keycloak, fetchData])
-
   useEffect(() => {
     fetchData()
-  }, [fetchData, oldYear, yearChanged, PLANT_ID])
+  }, [fetchData, oldYear, yearChanged, PLANT_ID, AOP_YEAR])
 
   // Helper to generate monthly fields
   const getMonthlyColumns = () => {
@@ -340,9 +200,6 @@ const MaintenanceTable = () => {
   let basecols
 
   switch (lowerVertName) {
-    case 'cracker':
-      basecols = crackercolumns
-      break
     case 'meg':
       basecols = productionColumnsMEG
       break
@@ -389,14 +246,14 @@ const MaintenanceTable = () => {
           saveBtn: dataConfig.isCracker,
           allAction: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `Net Production Hours`,
+          ExcelName: SCREEN_NAME,
           showRefresh: false,
           showTitleNameBusiness: true,
-          titleName: 'Net Production Hours',
+          titleName: SCREEN_NAME,
         },
         oldYear?.oldYear,
       ),
-    [dataConfig.isCracker, oldYear],
+    [oldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
   )
 
   return (
@@ -414,7 +271,6 @@ const MaintenanceTable = () => {
           rows={rows}
           setRows={setRows}
           fetchData={fetchData}
-          handleCalculate={handleCalculate}
           deleteId={deleteId}
           setDeleteId={setDeleteId}
           open1={open1}
@@ -424,14 +280,6 @@ const MaintenanceTable = () => {
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
           permissions={adjustedPermissions}
-          saveChanges={saveChanges}
-          modifiedCells={modifiedCells}
-          setModifiedCells={setModifiedCells}
-          handleRemarkCellClick={handleRemarkCellClick}
-          remarkDialogOpen={remarkDialogOpen}
-          setRemarkDialogOpen={setRemarkDialogOpen}
-          currentRemark={currentRemark}
-          setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
         />
       </div>

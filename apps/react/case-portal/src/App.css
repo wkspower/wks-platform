@@ -492,3 +492,17 @@ main.MuiBox-root.css-vognfw {
 .rev-btn--active {
   background: rgba(25, 118, 210, 0.08);
 }
+
+html {
+  overflow-y: scroll;
+}
+
+body {
+  background: transparent;
+}
+
+.custom-toggle-btn {
+  color: #ffffff !important;
+  font-size: 1.5rem !important;
+  margin-left: -22 !important;
+}

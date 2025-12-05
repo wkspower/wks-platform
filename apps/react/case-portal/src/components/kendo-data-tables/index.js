@@ -205,6 +205,13 @@ const KendoDataTables = ({
 
   const MyFooterCustomCell = (props) => {
     const { tdProps } = props
+    const { dataItem } = props
+    const groupName = dataItem?.value
+    // Skip footer for non-Production groups
+    if (groupName !== 'Production') {
+      return
+    }
+
     const field = props.field
 
     const labelColumn = 'displayName'
@@ -1229,6 +1236,11 @@ const KendoDataTables = ({
                       fontWeight: 'bold',
                     },
                   }}
+                  SelectProps={{
+                    MenuProps: {
+                      disableScrollLock: true,
+                    },
+                  }}
                 >
                   <MenuItem value='' disabled>
                     {permissions?.dropdownLabel || 'Select'}
@@ -1389,6 +1401,11 @@ const KendoDataTables = ({
                   className='dropdown-select'
                   variant='outlined'
                   label='Select UOM'
+                  SelectProps={{
+                    MenuProps: {
+                      disableScrollLock: true,
+                    },
+                  }}
                 >
                   <MenuItem value='' disabled>
                     Select UOM
@@ -1410,10 +1427,15 @@ const KendoDataTables = ({
                   onChange={(e) => setSelectMode(e.target.value)}
                   className='dropdown-select'
                   variant='outlined'
-                  label='Select Modes'
+                  label='Select Mode'
+                  SelectProps={{
+                    MenuProps: {
+                      disableScrollLock: true,
+                    },
+                  }}
                 >
                   <MenuItem value='' disabled>
-                    Select Modes
+                    Select Mode
                   </MenuItem>
 
                   {permissions.modes.map((m) => (
