@@ -1739,6 +1739,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            Double originalDurationInHrs = plantMaintenanceTransaction.getDurationInMins() != null ? 
                         plantMaintenanceTransaction.getDurationInMins() / 60.0 : null;
 	            String originalRemark = plantMaintenanceTransaction.getRemarks();
+	            Double originalRateEO = plantMaintenanceTransaction.getRateEO()!=null? plantMaintenanceTransaction.getRateEO():null;
+	            Double originalRateEOE = plantMaintenanceTransaction.getRateEOE()!=null? plantMaintenanceTransaction.getRateEOE():null;
 	            plantMaintenanceTransaction.setDiscription(shutDownPlanDTO.getDiscription());
 	            
 	            int durationMins = 0;
@@ -1782,7 +1784,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                Double newRate = plantMaintenanceTransaction.getRate();
 	                Double newDurationInHrs = shutDownPlanDTO.getDurationInHrs();
 	                String newRemark = shutDownPlanDTO.getRemark();
-
+	                Double newRateEo= shutDownPlanDTO.getRateEO()!=null? shutDownPlanDTO.getRateEO():null;
+	                Double newRateEOE= shutDownPlanDTO.getRateEOE()!=null? shutDownPlanDTO.getRateEOE():null;
 	                boolean fieldsChanged = 
 	                    !java.util.Objects.equals(originalDesc, newDesc) ||
 	                    !java.util.Objects.equals(originalStart, newStart) ||
@@ -1800,6 +1803,22 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                	if(java.util.Objects.equals(originalRemark, newRemark)) {
 	                		 shutDownPlanDTO.setSaveStatus("Failed");
 	 	                    shutDownPlanDTO.setErrDescription("Remark must be updated when duration is changed.");
+	 	                    failedList.add(shutDownPlanDTO);
+	 	                    continue; 
+	                	}
+	                }
+	                if(verticalName.equalsIgnoreCase("MEG") && (!java.util.Objects.equals(originalRateEO, newRateEo))) {
+	                	if(java.util.Objects.equals(originalRemark, newRemark)) {
+	                		 shutDownPlanDTO.setSaveStatus("Failed");
+	 	                    shutDownPlanDTO.setErrDescription("Remark must be updated when Rate EO is changed.");
+	 	                    failedList.add(shutDownPlanDTO);
+	 	                    continue; 
+	                	}
+	                }
+	                if(verticalName.equalsIgnoreCase("MEG") && (!java.util.Objects.equals(originalRateEOE, newRateEOE))) {
+	                	if(java.util.Objects.equals(originalRemark, newRemark)) {
+	                		 shutDownPlanDTO.setSaveStatus("Failed");
+	 	                    shutDownPlanDTO.setErrDescription("Remark must be updated when Rate EOE is changed.");
 	 	                    failedList.add(shutDownPlanDTO);
 	 	                    continue; 
 	                	}
