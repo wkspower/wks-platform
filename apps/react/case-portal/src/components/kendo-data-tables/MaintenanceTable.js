@@ -251,9 +251,9 @@ const MaintenanceTable = () => {
           showTitleNameBusiness: true,
           titleName: SCREEN_NAME,
         },
-        oldYear?.oldYear,
+        isOldYear,
       ),
-    [oldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
+    [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
   )
 
   return (
