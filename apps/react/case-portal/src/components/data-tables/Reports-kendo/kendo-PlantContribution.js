@@ -8,6 +8,7 @@ import { DataService } from 'services/DataService'
 import { MockReportService } from './mockPlantContributionAPI'
 import { useSelector } from 'react-redux'
 import { getRoleName } from 'services/role-service'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 
 export default function PlantContribution() {
   const keycloak = useSession()
@@ -126,7 +127,7 @@ export default function PlantContribution() {
     try {
       setLoading(true)
 
-      const res = await DataService.calculatePlantContributionReportData(
+      const res = await AOPWorkFlowService.calculatePlantContributionReportData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,

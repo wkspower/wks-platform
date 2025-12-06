@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { TextField, Button, Box } from '@mui/material'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 
 const TextSubmitMUI = () => {
   const [text, setText] = useState('')
@@ -55,7 +56,7 @@ const TextSubmitMUI = () => {
     if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
     try {
       // console.log("keycloak",keycloak);
-      const data = await DataService.getCaseId(
+      const data = await AOPWorkFlowService.getCaseId(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -118,7 +119,7 @@ const TextSubmitMUI = () => {
         // console.log('Please enter a message!')
         return
       }
-      const result = await DataService.completeTask(
+      const result = await AOPWorkFlowService.completeTask(
         keycloak,
         taskId,
         caseData.attributes,

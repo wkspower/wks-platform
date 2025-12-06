@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import {
   Backdrop,
@@ -349,7 +349,7 @@ const MonthwiseRawMaterial = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      var res = await DataService.getMonthwiseRawData(
+      var res = await AOPWorkFlowService.getMonthwiseRawData(
         keycloak,
         'NormQuantity',
         PLANT_ID,
@@ -361,7 +361,7 @@ const MonthwiseRawMaterial = () => {
         lowerVertName != 'pp' &&
         lowerVertName != 'elastomer'
       ) {
-        var res2 = await DataService.getMonthwiseRawData(
+        var res2 = await AOPWorkFlowService.getMonthwiseRawData(
           keycloak,
           'Selectivity',
           PLANT_ID,
@@ -473,7 +473,7 @@ const MonthwiseRawMaterial = () => {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-      const res = await DataService.handleCalculatePlantConsumptionData(
+      const res = await AOPWorkFlowService.handleCalculatePlantConsumptionData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,
@@ -557,7 +557,7 @@ const MonthwiseRawMaterial = () => {
         setLoading(false)
         return
       }
-      const res = await DataService.postMonthwiseRawData(
+      const res = await AOPWorkFlowService.postMonthwiseRawData(
         keycloak,
         rowsToUpdate,
         PLANT_ID,

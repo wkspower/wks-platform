@@ -8,7 +8,7 @@ import { remarkColumn } from 'components/Utilities/remarkColumn'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { Box } from '../../../node_modules/@mui/material/index'
 import { getRoleName } from 'services/role-service'
-
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 const ProductionAopView = ({
   handleCalculate,
   fetchSecondGridData,
@@ -114,7 +114,7 @@ const ProductionAopView = ({
     if (!PLANT_ID || !AOP_YEAR) return
   setLoading(true)
   try {
-    const response = await DataService.getWorkflowDataProduction(
+    const response = await AOPWorkFlowService.getWorkflowDataProduction(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -206,7 +206,7 @@ const ProductionAopView = ({
   const saveChanges = async () => {
     try {
       // console.log(rows, 'workflowDto')
-      await DataService.saveAnnualWorkFlowData(keycloak, rows, PLANT_ID)
+      await AOPWorkFlowService.saveAnnualWorkFlowData(keycloak, rows, PLANT_ID)
       // console.log(response, 'response')
       setSnackbarData({
         message: 'Data Saved Successfully!',

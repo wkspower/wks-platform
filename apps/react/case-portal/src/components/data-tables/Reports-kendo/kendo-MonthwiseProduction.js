@@ -2,6 +2,7 @@ import { Box } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import { truncateRemarks } from 'utils/remarksUtils'
 import { useSelector } from 'react-redux'
@@ -470,7 +471,7 @@ const MonthwiseProduction = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.handleCalculateMonthwiseProduction(
+      const res = await AOPWorkFlowService.handleCalculateMonthwiseProduction(
         PLANT_ID,
         AOP_YEAR,
         keycloak,

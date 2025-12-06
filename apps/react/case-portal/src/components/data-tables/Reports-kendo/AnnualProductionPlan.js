@@ -1,6 +1,7 @@
 import { Box } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import {
   Backdrop,
@@ -326,7 +327,7 @@ const AnnualProductionPlan = () => {
   const fetchData = async (type) => {
     try {
       setLoading(true)
-      var res = await DataService.getAnnualProductionPlanReportData(
+      var res = await AOPWorkFlowService.getAnnualProductionPlanReportData(
         keycloak,
         type,
         PLANT_ID,
@@ -417,7 +418,7 @@ const AnnualProductionPlan = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.calculateAnnualProductionPlanData(
+      const res = await AOPWorkFlowService.calculateAnnualProductionPlanData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,
@@ -482,7 +483,7 @@ const AnnualProductionPlan = () => {
         return obj
       })
 
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'assumptions',
@@ -538,7 +539,7 @@ const AnnualProductionPlan = () => {
         activity: row.activity,
         maxHourlyRateValue: row.maxHourlyRateValue,
       }))
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'maxRate',
@@ -593,7 +594,7 @@ const AnnualProductionPlan = () => {
         activity: row.activity,
         rateValue: row.rateValue,
       }))
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'OperatingHrs',
@@ -662,7 +663,7 @@ const AnnualProductionPlan = () => {
               .toISOString()
           : null,
       }))
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'AverageHourlyrate',
@@ -709,7 +710,7 @@ const AnnualProductionPlan = () => {
     setLoading(true)
     // If row is saved to API, call delete API
     try {
-      const response = await DataService.deleteAnnualProduction(
+      const response = await AOPWorkFlowService.deleteAnnualProduction(
         row.idFromApi,
         keycloak,
       )

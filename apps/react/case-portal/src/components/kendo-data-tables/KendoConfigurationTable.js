@@ -1032,12 +1032,13 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    (lowerVertName == 'meg' || lowerVertName == 'pvc') &&
-    lowerVertName !== 'cracker' &&
-    lowerVertName !== 'elastomer'
+    (lowerVertName == 'meg' || lowerVertName == 'pvc' || lowerVertName == 'elastomer') &&
+    lowerVertName !== 'cracker'
   ) {
-    const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
-
+    // const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
+    const megTabs = lowerVertName === 'elastomer' 
+    ? ['Constants', 'Report Manual Entry']
+    : ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {
@@ -1153,184 +1154,6 @@ const ConfigurationTable = () => {
                     tabIndex='4'
                     reportTypes={reportTypes}
                     currentTabDisplayName={currentTabDisplayName}
-                  />
-                )
-              default:
-                return null
-            }
-          })()}
-        </Box>
-        <Notification
-          open={snackbarOpen}
-          message={snackbarData?.message || ''}
-          severity={snackbarData?.severity || 'info'}
-          onClose={() => setSnackbarOpen(false)}
-        />
-        {ConfigurationDialog}
-      </div>
-    )
-  }
-
-  if (lowerVertName === 'elastomer') {
-    const elastomerTabs = ['Constants', 'Report Manual Entry']
-    const auditYear = AOP_YEAR
-    let displayYear = ''
-    if (auditYear) {
-      const [start, end] = auditYear.split('-').map(Number)
-      displayYear = `(${start - 1}-${(end - 1).toString().slice(-2)})`
-    }
-    return (
-      <div>
-        <Backdrop
-          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={!!loading1}
-        >
-          <CircularProgress color='inherit' />
-        </Backdrop>
-        {ConfigurationAccordian}
-
-        <Box>
-          {true && (
-            <AopTabs
-              tabIndex={tabIndex}
-              setTabIndex={setTabIndex}
-              tabs={elastomerTabs.map((tab) =>
-                tab === 'Report Manual Entry' ? `${tab} ${displayYear}` : tab,
-              )}
-            />
-          )}
-
-          {(() => {
-            const currentTab = elastomerTabs[tabIndex]?.toLowerCase()
-            const currentTabDisplayName = elastomerTabs[tabIndex]
-            switch (currentTab) {
-              case 'constants':
-                return (
-                  <SelectivityData
-                    rows={productionRowsConstants}
-                    loading={loading}
-                    fetchData={fetchDataConstants}
-                    setRows={setProductionRowsConstants}
-                    configType='megConstants'
-                    groupBy='Particulars'
-                    summaryEdited={summaryEdited}
-                    summary={debouncedSummary}
-                    onSummaryEditChange={setSummaryEdited}
-                    tabIndex='1'
-                    currentTabDisplayName={currentTabDisplayName}
-                    reportTypes={reportTypes}
-                  />
-                )
-              case 'report manual entry':
-                return (
-                  <SelectivityData
-                    rows={productionRowsConstantsMannualEntry}
-                    loading={loading}
-                    fetchData={fetchDataConstantsMnnualEntry}
-                    setRows={setProductionRowsConstantsMannualEntry}
-                    configType='megConstantsMannualEntry'
-                    groupBy='Particulars'
-                    summaryEdited={summaryEdited}
-                    summary={debouncedSummary}
-                    onSummaryEditChange={setSummaryEdited}
-                    tabIndex='2'
-                    currentTabDisplayName={currentTabDisplayName}
-                    reportTypes={reportTypes}
-                  />
-                )
-              default:
-                return null
-            }
-          })()}
-        </Box>
-        <Notification
-          open={snackbarOpen}
-          message={snackbarData?.message || ''}
-          severity={snackbarData?.severity || 'info'}
-          onClose={() => setSnackbarOpen(false)}
-        />
-        {ConfigurationDialog}
-      </div>
-    )
-  }
-
-  if (lowerVertName === 'vcm') {
-    return (
-      <div>
-        <Backdrop
-          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={!!loading1}
-        >
-          <CircularProgress color='inherit' />
-        </Backdrop>
-        {ConfigurationAccordian}
-        <AopTabs
-          tabIndex={tabIndex}
-          setTabIndex={setTabIndex}
-          tabs={tabs.map((tabId) => {
-            const tabInfo = availableTabs.find(
-              (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-            )
-            return tabInfo ? tabInfo.displayName : tabId
-          })}
-        />
-        <Box>
-          {(() => {
-            const currentTabId = tabs[tabIndex]?.toLowerCase()
-            const currentTabInfo = availableTabs.find(
-              (tab) => tab.id.toLowerCase() === currentTabId,
-            )
-            const currentTabDisplayName = currentTabInfo?.displayName
-
-            switch (currentTabId) {
-              case getTheId('Configuration'):
-                return (
-                  <SelectivityData
-                    rows={productionRows}
-                    loading={loading}
-                    fetchData={fetchData}
-                    setRows={setProductionRows}
-                    configType='elastomer'
-                    groupBy='TypeDisplayName'
-                    summary={debouncedSummary}
-                    summaryEdited={summaryEdited}
-                    onSummaryEditChange={setSummaryEdited}
-                    tabIndex='0'
-                    currentTabDisplayName={currentTabDisplayName}
-                    reportTypes={reportTypes}
-                  />
-                )
-              case getTheId('Constant'):
-                return (
-                  <SelectivityData
-                    rows={productionRowsConstants}
-                    loading={loading}
-                    fetchData={fetchDataConstants}
-                    setRows={setProductionRowsConstants}
-                    configType='megConstants'
-                    groupBy='Particulars'
-                    summaryEdited={summaryEdited}
-                    summary={debouncedSummary}
-                    onSummaryEditChange={setSummaryEdited}
-                    tabIndex='1'
-                    currentTabDisplayName={currentTabDisplayName}
-                    reportTypes={reportTypes}
-                  />
-                )
-              case getTheId('Report Manual Entry'):
-                return (
-                  <SelectivityData
-                    rows={reportManualEntry}
-                    loading={loading}
-                    setRows={setReportManualEntry}
-                    fetchData={fetchData}
-                    configType='Report Manual Entry'
-                    summary={debouncedSummary}
-                    summaryEdited={summaryEdited}
-                    onSummaryEditChange={setSummaryEdited}
-                    currentTabDisplayName={currentTabDisplayName}
-                    groupBy='TypeDisplayName'
-                    reportTypes={reportTypes}
                   />
                 )
               default:
@@ -1553,6 +1376,7 @@ const ConfigurationTable = () => {
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
                     currentTabDisplayName={currentTabDisplayName}
+                    groupBy='TypeDisplayName'
                   />
                 )
 
@@ -1567,6 +1391,22 @@ const ConfigurationTable = () => {
                     summary={debouncedSummary}
                     summaryEdited={summaryEdited}
                     onSummaryEditChange={setSummaryEdited}
+                    currentTabDisplayName={currentTabDisplayName}
+                  />
+                )
+                case getTheId('Constants'):
+                return (
+                  <SelectivityData
+                    rows={productionRowsConstants}
+                    loading={loading}
+                    fetchData={fetchDataConstants}
+                    setRows={setProductionRowsConstants}
+                    configType='megConstants'
+                    groupBy='Particulars'
+                    summaryEdited={summaryEdited}
+                    summary={debouncedSummary}
+                    onSummaryEditChange={setSummaryEdited}
+                    tabIndex='1'
                     currentTabDisplayName={currentTabDisplayName}
                   />
                 )

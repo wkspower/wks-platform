@@ -8,7 +8,7 @@ import Notification from 'components/Utilities/Notification'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
-import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -379,7 +379,7 @@ const OptimizerReport = () => {
       const payload = []
 
       // Await the API call here to ensure completion
-      const data = await DataService.getExcel(
+      const data = await AOPWorkFlowService.getExcel(
         keycloak,
         payload,
         PLANT_ID,

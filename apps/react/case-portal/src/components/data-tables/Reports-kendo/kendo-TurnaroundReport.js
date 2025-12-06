@@ -4,6 +4,7 @@ import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { Typography } from '../../../../node_modules/@mui/material/index'
 import KendoDataTables from 'components/kendo-data-tables/index'
 import { validateFields } from 'utils/validationUtils'
@@ -361,7 +362,7 @@ const TurnaroundReport = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.calculateTurnAroundPlanReportData(
+      const res = await AOPWorkFlowService.calculateTurnAroundPlanReportData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,

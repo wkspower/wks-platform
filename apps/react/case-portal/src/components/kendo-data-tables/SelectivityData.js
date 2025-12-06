@@ -587,7 +587,8 @@ const SelectivityData = (props) => {
           lowerVertName == 'pe' ||
           lowerVertName == 'pp' ||
           lowerVertName == 'pta' ||
-          lowerVertName == 'aromatics'
+          lowerVertName == 'aromatics' ||
+          lowerVertName == 'vcm'
         ) {
           await DataService.getConfigurationExcelType(
             keycloak,

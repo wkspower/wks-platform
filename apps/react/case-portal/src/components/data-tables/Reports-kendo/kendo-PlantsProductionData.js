@@ -3,7 +3,7 @@ import { useSession } from 'SessionStoreContext'
 import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSelector } from 'react-redux'
 import {
   Backdrop,
@@ -206,7 +206,7 @@ const PlantsProductionSummary = () => {
     if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
-      var res = await DataService.getPlantProductionSummary(
+      var res = await AOPWorkFlowService.getPlantProductionSummary(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -259,7 +259,7 @@ const PlantsProductionSummary = () => {
         remark: row.Remark,
         ActualPrevYear: row.ActualPrevYear,
       }))
-      const res = await DataService.savePlantProductionData(
+      const res = await AOPWorkFlowService.savePlantProductionData(
         keycloak,
         rowsToUpdate,
         PLANT_ID,
@@ -299,7 +299,7 @@ const PlantsProductionSummary = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.handleCalculatePlantProductionData(
+      const res = await AOPWorkFlowService.handleCalculatePlantProductionData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,
