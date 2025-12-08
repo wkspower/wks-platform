@@ -272,7 +272,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 							.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 					
 					if(vertical.getName().equalsIgnoreCase("Cracker")) {
-					//	updateMaxEthyleneProduction( aOPMCCalculatedDataDTO, plant, year);
+						updateMaxEthyleneProduction( aOPMCCalculatedDataDTO, plant, year);
 					}
 					
 					aOPMCCalculatedData = aOPMCCalculatedDataOptional.get();

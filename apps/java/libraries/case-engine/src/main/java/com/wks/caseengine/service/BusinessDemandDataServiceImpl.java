@@ -709,11 +709,12 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 				.findByNormParameterFKIdAndAOPMonthAndAuditYear(normParameterFKId, i, year);
 		
 		Optional<NormParameters> normParametersOpt=normParametersRepository.findById(normParameterFKId);
-		if(normParametersOpt.get().getDependantAttributeId()!=null && normParametersOpt.get().getDependantAttributeId().equalsIgnoreCase("Output")){
-			if(attributeValue!=null) {
-				attributeValue = attributeValue/24.0;
-			}	
-		}
+		// No need to do anything 
+		/*
+		 * if(normParametersOpt.get().getDependantAttributeId()!=null &&
+		 * normParametersOpt.get().getDependantAttributeId().equalsIgnoreCase("Output"))
+		 * { if(attributeValue!=null) { attributeValue = attributeValue/24.0; } }
+		 */
 
 		NormAttributeTransactions normAttributeTransactions;
 
