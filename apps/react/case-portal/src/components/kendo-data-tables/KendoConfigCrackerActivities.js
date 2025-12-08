@@ -10,7 +10,8 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import moment from '../../../node_modules/moment/moment.js'
-import { ibrGridThree, ibrPlanColumns } from './columnDefs'
+// import { ibrGridThree, ibrPlanColumns } from './columnDefs'
+import { ibrGridThree } from './columnDefs'
 import FurnaceRunLengthGrid from './FurnaceRunLengthGrid.js'
 import SDTAActivitiesGrid from './SDTAActivitiesGrid.js'
 import { validateFields } from 'utils/validationUtils.js'
@@ -77,6 +78,8 @@ const DecokingConfig = () => {
   const [ibrScreen2Rows, setIbrScreen2Rows] = useState([])
   const [globalTaStartDate, setGlobalTaStartDate] = useState(null)
   const [globalTaEndDate, setGlobalTaEndDate] = useState(null)
+
+  const [ibrPlanColumns, serIbrPlanColumns] = useState([])
 
   useEffect(() => {
     if (!globalTaStartDate || !globalTaEndDate || ibrScreen2Rows.length === 0)
@@ -157,6 +160,7 @@ const DecokingConfig = () => {
       setRunningDurationRows(data)
     }
   }, [])
+
   function calcPreCoilReplacementRunLength(actualRunLength, reduction) {
     if (
       actualRunLength === null ||
@@ -179,25 +183,29 @@ const DecokingConfig = () => {
       try {
         if (currentTab === 'IBR Plan') {
           // Screen 1
-          if (!screen || screen === 1) {
-            const data1 = await DataService.getIbr(keycloak, PLANT_ID, AOP_YEAR)
-            if (data1?.code === 200) {
-              const processedData = data1.data
-                .map((item, index) => ({
-                  ...item,
-                  idFromApi: item.id,
-                  id: index,
-                  month:
-                    item?.month === 'Invalid month'
-                      ? 'N/A'
-                      : item?.month || 'N/A',
-                }))
-                .sort((a, b) => b?.isMonthAdd - a?.isMonthAdd)
-              setRowsForTab(currentTab, processedData, 1)
-            } else {
-              setRowsForTab(currentTab, [], 1)
-            }
-          }
+
+          //THIS SCREEN IS HIDDEN
+
+          // if (!screen || screen === 1) {
+          //   const data1 = await DataService.getIbr(keycloak, PLANT_ID, AOP_YEAR)
+          //   if (data1?.code === 200) {
+          //     const processedData = data1.data
+          //       .map((item, index) => ({
+          //         ...item,
+          //         idFromApi: item.id,
+          //         id: index,
+          //         month:
+          //           item?.month === 'Invalid month'
+          //             ? 'N/A'
+          //             : item?.month || 'N/A',
+          //       }))
+          //       .sort((a, b) => b?.isMonthAdd - a?.isMonthAdd)
+          //     setRowsForTab(currentTab, processedData, 1)
+          //   } else {
+          //     setRowsForTab(currentTab, [], 1)
+          //   }
+          // }
+
           // Screen 2
           if (!screen || screen === 2) {
             const data2 = await DataService.getIbrSdTa(
@@ -209,24 +217,51 @@ const DecokingConfig = () => {
               value ? moment(value, 'MMM D, YYYY').toDate() : null
 
             if (data2?.code === 200) {
-              const processedData = data2.data.map((item, index) => ({
+              const dateColumns =
+                data2?.data?.columns
+                  ?.filter((col) => col.type === 'date')
+                  ?.map((col) => col.field) || []
+
+              const processedData1 = data2.data?.data.map((item, index) => ({
                 ...item,
                 idFromApi: item.id,
                 id: index,
-                originalRemark: item?.remarks || '',
-                ibrStartDate: toDateObject(item.ibrStartDate),
-                ibrEndDate: toDateObject(item.ibrEndDate),
-                taStartDate: toDateObject(item.taStartDate),
-                taEndDate: toDateObject(item.taEndDate),
-                shutDownStartDate: toDateObject(item.shutDownStartDate),
-                shutDownEndDate: toDateObject(item.shutDownEndDate),
-                actualRunLength: item.actualRunLength || null,
-                reduction: item.reduction || null,
-                preCrDays: calcPreCoilReplacementRunLength(
-                  item.actualRunLength,
-                  item.reduction,
-                ),
+                // originalRemark: item?.remarks || '',
+                // ibrStartDate: toDateObject(item.ibrStartDate),
+                // ibrEndDate: toDateObject(item.ibrEndDate),
+                // taStartDate: toDateObject(item.taStartDate),
+                // taEndDate: toDateObject(item.taEndDate),
+                // shutDownStartDate: toDateObject(item.shutDownStartDate),
+                // shutDownEndDate: toDateObject(item.shutDownEndDate),
+                // actualRunLength: item.actualRunLength || null,
+                // reduction: item.reduction || null,
+                // preCrDays: calcPreCoilReplacementRunLength(
+                //   item.actualRunLength,
+                //   item.reduction,
+                // ),
               }))
+
+              const processedData = data2.data?.data.map((item, index) => {
+                const converted = {}
+
+                dateColumns.forEach((field) => {
+                  converted[field] = toDateObject(item[field])
+                })
+
+                return {
+                  ...item,
+                  ...converted,
+                  idFromApi: item.Id,
+                  id: index,
+                }
+              })
+
+              serIbrPlanColumns(
+                data2?.data?.columns?.map((col) => ({
+                  ...col,
+                  editable: true,
+                })),
+              )
 
               setRowsForTab(currentTab, processedData, 2)
 
@@ -291,7 +326,7 @@ const DecokingConfig = () => {
   }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak, fetchData])
 
   function validateAllDateOverlaps(rows) {
-    const pairs = [['ibrStartDate', 'ibrEndDate', 'IBR']]
+    const pairs = [['IBR_SD', 'IBR_ED', 'IBR']]
     rows.forEach((row) => {
       row.isError = false
     })
@@ -375,8 +410,8 @@ const DecokingConfig = () => {
   // Check if TA dates overlap with IBR or Maintenance dates in any row
   function checkTaDateOverlapWithRows(taStart, taEnd, rows) {
     for (const row of rows) {
-      const ibrStart = row.ibrStartDate ? new Date(row.ibrStartDate) : null
-      const ibrEnd = row.ibrEndDate ? new Date(row.ibrEndDate) : null
+      const ibrStart = row.IBR_SD ? new Date(row.IBR_SD) : null
+      const ibrEnd = row.IBR_ED ? new Date(row.IBR_ED) : null
       // const maintStart = row.shutDownStartDate ? new Date(row.shutDownStartDate) : null
       // const maintEnd = row.shutDownEndDate ? new Date(row.shutDownEndDate) : null
 
@@ -401,7 +436,7 @@ const DecokingConfig = () => {
 
       var rawData = Object.values(modifiedCellsSdTa)
 
-      const dateFields = ['ibrStartDate', 'ibrEndDate']
+      const dateFields = ['IBR_SD', 'IBR_ED']
       const allRows = [...ibrScreen2Rows] // get all rows, not just modified
       let hasDateError = false
 
@@ -452,6 +487,7 @@ const DecokingConfig = () => {
         setLoading(false)
         return
       }
+
       postIbr2(rawData)
     } catch (error) {
       console.log('Error saving changes:', error)
@@ -516,7 +552,7 @@ const DecokingConfig = () => {
       }
       var rawData = Object.values(modifiedCellsSdTa)
 
-      const dateFields = ['ibrStartDate', 'ibrEndDate']
+      const dateFields = ['IBR_SD', 'IBR_ED']
       const allRows = [...ibrScreen2Rows] // get all rows, not just modified
       let hasDateError = false
 
@@ -665,33 +701,33 @@ const DecokingConfig = () => {
           : value
       }
 
-      const payload = newRow.map((row) => ({
-        id: row?.idFromApi || null,
-        ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
-        ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
-        taStartDate: null,
-        taEndDate: null,
-        shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
-        shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
-        preCrDays:
-          row?.actualRunLength != null && row?.reduction != null
-            ? Math.ceil(
-                Number(row.actualRunLength) -
-                  (Number(row.actualRunLength) * Number(row.reduction)) / 100,
-              )
-            : null,
-        postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
-        remarks: row.remarks || '',
-        isCr: row?.isCr ? true : false,
-        actualRunLength: row?.actualRunLength
-          ? Number(row.actualRunLength)
-          : null,
-        reduction: row?.reduction ? Number(row.reduction) : null,
-      }))
+      // const payload = newRow.map((row) => ({
+      //   id: row?.idFromApi || null,
+      //   ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
+      //   ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
+      //   taStartDate: null,
+      //   taEndDate: null,
+      //   shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
+      //   shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
+      //   preCrDays:
+      //     row?.actualRunLength != null && row?.reduction != null
+      //       ? Math.ceil(
+      //           Number(row.actualRunLength) -
+      //             (Number(row.actualRunLength) * Number(row.reduction)) / 100,
+      //         )
+      //       : null,
+      //   postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
+      //   remarks: row.remarks || '',
+      //   isCr: row?.isCr ? true : false,
+      //   actualRunLength: row?.actualRunLength
+      //     ? Number(row.actualRunLength)
+      //     : null,
+      //   reduction: row?.reduction ? Number(row.reduction) : null,
+      // }))
 
       const response = await DataService.postIbr(
         PLANT_ID,
-        payload,
+        newRow,
         keycloak,
         AOP_YEAR,
       )
@@ -831,6 +867,7 @@ const DecokingConfig = () => {
   const handleExcelUpload = (rawFile) => {
     saveExcelFile(rawFile)
   }
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -854,6 +891,7 @@ const DecokingConfig = () => {
       // optional cleanup or logging
     }
   }
+
   const saveExcelFile = async (rawFile) => {
     setLoading(true)
     try {
@@ -997,11 +1035,13 @@ const DecokingConfig = () => {
     const y = date.getFullYear()
     return `${d}/${m}/${y}`
   }
+
   const rowClass = (row) => (row.isError ? 'row-error' : '')
   const filteredIbrGridThree =
     siteName === 'dmd'
       ? ibrGridThree.filter((col) => col.field !== 'demo')
       : ibrGridThree
+
   return (
     <Box>
       <Backdrop
