@@ -573,6 +573,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 					decokeMaintenance.setSad(decokePlanningDTO.getSad());
 					decokeMaintenance.setSlowdown(decokePlanningDTO.getSlowdown());
 					decokeMaintenance.setTotal(decokePlanningDTO.getTotal());
+					decokeMaintenance.setCoilReplacement(decokePlanningDTO.getCoilReplacement());
 					decokeMaintenanceList.add(decokeMaintenanceRepository.save(decokeMaintenance));
 				}
 			}
@@ -650,6 +651,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 					dto.setFourF(getNumericCellValue(row.getCell(2), dto));
 					dto.setFourFD(getNumericCellValue(row.getCell(3), dto));
 					dto.setCoilReplacement(getNumericCellValue(row.getCell(4), dto));
+					dto.setIbr(getNumericCellValue(row.getCell(4), dto));
 					dto.setShutdown(getNumericCellValue(row.getCell(5), dto));
 					dto.setSlowdown(getNumericCellValue(row.getCell(6), dto));
 					dto.setSad(getNumericCellValue(row.getCell(7), dto));
