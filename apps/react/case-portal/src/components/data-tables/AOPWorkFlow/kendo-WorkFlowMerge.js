@@ -724,7 +724,11 @@ const WorkFlowMerge = () => {
           ))}
         </Stepper>
 
-        <Typography component='div' className='text-note'>
+        <Typography
+          component='div'
+          className='text-note'
+          style={{ marginTop: 24 }}
+        >
           * Prices - MIIS BPC (Last Budget Year), Actual Values - MIIS
           Contribution (YTD).
         </Typography>
