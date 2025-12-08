@@ -36,6 +36,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const lowerVertName = verticalObject?.name?.toLowerCase()
 
   const IS_OLD_YEAR = oldYear?.oldYear
+  const isOldYear = false
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const dataConfig = useMemo(
@@ -454,9 +455,9 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
           showCalculateVisibility: true,
           showNote: true,
         },
-        oldYear?.oldYear,
+        isOldYear,
       ),
-    [oldYear],
+    [isOldYear],
   )
 
   return (

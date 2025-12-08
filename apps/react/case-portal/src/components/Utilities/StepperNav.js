@@ -142,16 +142,19 @@ export default function StepperNav() {
                   variant='caption'
                   sx={{
                     minWidth: 28,
-                    display: 'inline-block',
                     maxWidth: 80,
+                    display: 'inline-block',
                     textAlign: 'center',
+                    whiteSpace: 'nowrap', // *** Prevent wrapping ***
+                    overflow: 'hidden', // *** Hide overflow text ***
+                    textOverflow: 'ellipsis', // *** Show "…" automatically ***
                     fontWeight: (theme) =>
                       activeStep === steps.findIndex((s) => s.key === step.key)
                         ? '700'
                         : '500',
                   }}
                 >
-                  {abbrev}
+                  {step.label}
                 </Typography>
               </Tooltip>
             </StepLabel>
@@ -169,16 +172,17 @@ export default function StepperNav() {
           <Box
             sx={{
               position: 'fixed',
-              top: '42px',
+              top: '45px',
               left: drawerOpen ? `${drawerWidth + 12}px` : '12px',
               right: '12px',
               zIndex: (theme) => (theme.zIndex?.appBar ?? 1100) + 1,
               bgcolor: 'background.paper',
               boxShadow: 1,
               borderBottom: '1px solid',
+              borderTop: '1px solid',
               borderLeft: '1px solid',
               borderRight: '1px solid',
-              borderColor: 'divider',
+              borderColor: 'grey.700',
               py: 0,
               transition: 'left 200ms ease',
               maxHeight: '70px',

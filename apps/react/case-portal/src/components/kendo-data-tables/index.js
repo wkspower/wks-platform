@@ -10,8 +10,8 @@ import Notification from 'components/Utilities/Notification'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import PropaneDropdown from './Utilities-Kendo/PropaneDropdown'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
-
 import { useSelector } from 'react-redux'
+
 import {
   Box,
   Button,
@@ -80,7 +80,6 @@ export const dateFields1 = [
   'targetDate',
 ]
 
-export const hiddenFields = []
 export const monthMap = {
   january: 1,
   february: 2,
@@ -213,7 +212,6 @@ const KendoDataTables = ({
     }
 
     const field = props.field
-
     const labelColumn = 'displayName'
     if (field === labelColumn) {
       return (
@@ -222,18 +220,14 @@ const KendoDataTables = ({
         </td>
       )
     }
-
     const aggObj = props.dataItem?.aggregates?.[field]
-
     let cellContent = ''
-
     if (aggObj) {
       const aggKey = Object.keys(aggObj)[0]
       const value = aggObj[aggKey]
       cellContent =
         value != null ? Math.trunc(Number(value) * 10000) / 10000 : ''
     }
-
     return (
       <td {...props.tdProps} colSpan={1}>
         {cellContent}
@@ -2476,6 +2470,7 @@ const KendoDataTables = ({
         onClose={() => setOpenDeleteDialogeBox(false)}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
       >
         <DialogTitle id='alert-dialog-title'>{'Delete ?'}</DialogTitle>
         <DialogContent>
@@ -2498,6 +2493,7 @@ const KendoDataTables = ({
         onClose={closeSaveDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
@@ -2520,6 +2516,7 @@ const KendoDataTables = ({
         onClose={closeResetDataDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
       >
         <DialogTitle id='alert-dialog-title'>{'Reset ?'}</DialogTitle>
         <DialogContent>
@@ -2538,6 +2535,7 @@ const KendoDataTables = ({
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
+        disableScrollLock
       >
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>
@@ -2556,6 +2554,11 @@ const KendoDataTables = ({
             multiline
             rows={8}
             disabled={READ_ONLY}
+            SelectProps={{
+              MenuProps: {
+                disableScrollLock: true,
+              },
+            }}
           />
         </DialogContent>
         <DialogActions>
