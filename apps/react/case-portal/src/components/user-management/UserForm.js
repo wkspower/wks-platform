@@ -1185,6 +1185,10 @@ const UserForm = ({ keycloak }) => {
             onClose={closeSaveDialogeBox}
             aria-labelledby='alert-dialog-title'
             aria-describedby='alert-dialog-description'
+            disableScrollLock
+            slotProps={{
+              backdrop: { disableScrollLock: true },
+            }}
           >
             <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
             <DialogContent>

@@ -475,6 +475,28 @@ const KendoDataTablesCracker = ({
             />
           )
         }
+
+        if (col.type == 'date') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              cells={{
+                edit: {
+                  date: DateOnlyPicker,
+                },
+                data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
+              }}
+              format='{0:dd-MM-yyyy}'
+              editor='date'
+              hidden={col.hidden}
+              sortable={false}
+            />
+          )
+        }
+
         if (col.field === 'postCrDays') {
           return (
             <GridColumn
@@ -902,6 +924,10 @@ const KendoDataTablesCracker = ({
         onClose={closeSaveDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
@@ -919,6 +945,10 @@ const KendoDataTablesCracker = ({
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>

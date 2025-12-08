@@ -228,6 +228,7 @@ main.MuiBox-root.css-vognfw {
   font-weight: bold;
   white-space: nowrap;
   font-size: 0.7rem;
+  margin-top: 16px;
 }
 
 .text-header {
@@ -506,3 +507,6 @@ body {
   font-size: 1.5rem !important;
   margin-left: -22 !important;
 }
+/* * {
+  user-select: text !important;
+} */

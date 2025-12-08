@@ -2494,6 +2494,9 @@ const KendoDataTables = ({
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
         disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
@@ -2536,6 +2539,9 @@ const KendoDataTables = ({
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
         disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>
@@ -2554,11 +2560,6 @@ const KendoDataTables = ({
             multiline
             rows={8}
             disabled={READ_ONLY}
-            SelectProps={{
-              MenuProps: {
-                disableScrollLock: true,
-              },
-            }}
           />
         </DialogContent>
         <DialogActions>

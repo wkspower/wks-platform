@@ -452,7 +452,11 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
           uploadExcelBtn: viewOnly ? false : true,
           showRefresh: false,
           showCalculate: viewOnly ? false : true,
-          showCalculateVisibility: true,
+          // showCalculateVisibility: true,
+
+          //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
+          showCalculateVisibility: false,
+
           showNote: true,
         },
         isOldYear,

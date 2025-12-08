@@ -21,7 +21,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "fourF",
@@ -32,7 +32,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -78,7 +78,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -90,7 +90,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "bbu",
@@ -101,7 +101,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "bbd",
@@ -112,7 +112,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -124,7 +124,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -136,7 +136,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -160,7 +160,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -172,7 +172,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -185,7 +185,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "numberOfDays",
@@ -197,7 +197,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "totalSAD",
@@ -209,7 +209,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -221,12 +221,12 @@
     "hidden": true,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 120
+    "widthT": 70
   },
 
   {
     "field": "remarks",
     "title": "Remarks",
-    "widthT": 120
+    "widthT": 80
   }
 ]

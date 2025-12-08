@@ -814,13 +814,16 @@ const DecokingConfig = () => {
       showTitleName: true,
       showAccordian: true,
       showCalculate: true,
-      showCalculateVisibility:
-        Object.keys(calculationObject || {}).length > 0 ? true : false,
+      // showCalculateVisibility:
+      //   Object.keys(calculationObject || {}).length > 0 ? true : false,
+
+      //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
+      showCalculateVisibility: false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       byDefCollaps: false,
       showTitleNameBusiness: true,
-      titleName: 'Furnace Actual and Proposed Runlength',
+      titleName: '',
     },
     isOldYear,
   )
@@ -1020,13 +1023,8 @@ const DecokingConfig = () => {
               value={globalTaStartDate}
               onChange={(e) => setGlobalTaStartDate(e.value)}
               style={{ height: '80px' }}
-              size={'medium'}
+              size={'small'}
               disabled={READ_ONLY}
-
-              // min={getAopYearLimits().startLimit}
-              // max={
-              //   globalTaEndDate ? globalTaEndDate : getAopYearLimits().endLimit
-              // }
             />
           </Box>
 
@@ -1040,15 +1038,8 @@ const DecokingConfig = () => {
               value={globalTaEndDate}
               onChange={(e) => setGlobalTaEndDate(e.value)}
               style={{ height: '80px' }}
-              size={'medium'}
+              size={'small'}
               disabled={READ_ONLY}
-
-              // min={
-              //   globalTaStartDate
-              //     ? globalTaStartDate
-              //     : getAopYearLimits().startLimit
-              // }
-              // max={getAopYearLimits().endLimit}
             />
           </Box>
         </Box>

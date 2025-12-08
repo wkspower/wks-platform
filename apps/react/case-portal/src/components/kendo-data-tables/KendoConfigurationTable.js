@@ -759,6 +759,12 @@ const ConfigurationTable = () => {
     try {
       setStartDateObj(startDateObj)
       setEndDateObj(endDateObj)
+      //1st SAVE THE BASIS
+      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+        saveSummary(summary)
+        setSummaryEdited(false)
+      }
+
       const payload = [
         {
           apr: formatDate(startDate),
@@ -779,6 +785,8 @@ const ConfigurationTable = () => {
           plantId: PLANT_ID,
         },
       ]
+
+      //2ND CALL THE EXECUTION API
       const response = await DataService.executeConfiguration(payload, keycloak)
       if (response) {
         setSnackbarOpen(true)
@@ -787,10 +795,7 @@ const ConfigurationTable = () => {
           severity: 'success',
         })
         // setIsLoadEnabled(false)
-        if (lowerVertName == 'pe' || lowerVertName == 'pp') {
-          saveSummary(summary)
-          setSummaryEdited(false)
-        }
+
         getConfigurationExecutionDetails()
         setLoading(false)
       } else {
@@ -1032,13 +1037,16 @@ const ConfigurationTable = () => {
   }, [openConfirmDialog])
 
   if (
-    (lowerVertName == 'meg' || lowerVertName == 'pvc' || lowerVertName == 'elastomer') &&
+    (lowerVertName == 'meg' ||
+      lowerVertName == 'pvc' ||
+      lowerVertName == 'elastomer') &&
     lowerVertName !== 'cracker'
   ) {
     // const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
-    const megTabs = lowerVertName === 'elastomer' 
-    ? ['Constants', 'Report Manual Entry']
-    : ['Configuration', 'Constants', 'Report Manual Entry']
+    const megTabs =
+      lowerVertName === 'elastomer'
+        ? ['Constants', 'Report Manual Entry']
+        : ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {

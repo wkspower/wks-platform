@@ -671,14 +671,12 @@ const KendoDataTablesReports = ({
                 onClick={handleCalculateBtn}
                 // disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
-
                 disabled={
-                    READ_ONLY ||
-                    (rows?.length === 0
-                      ? false
-                      : isButtonDisabled ||
-                        !permissions?.showCalculateVisibility)
-                  }
+                  READ_ONLY ||
+                  (rows?.length === 0
+                    ? false
+                    : isButtonDisabled || !permissions?.showCalculateVisibility)
+                }
               >
                 Calculate
               </Button>
@@ -841,6 +839,10 @@ const KendoDataTablesReports = ({
         onClose={closeSaveDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
@@ -859,6 +861,10 @@ const KendoDataTablesReports = ({
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>
