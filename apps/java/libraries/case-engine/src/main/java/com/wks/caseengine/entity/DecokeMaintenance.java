@@ -81,4 +81,9 @@ public class DecokeMaintenance {
 
     @Column(name = "DemoSD")
     private Double demoSd;
+    
+    @Column(name = "CoilReplacement")
+    private Double coilReplacement;
+    
+    
 }
