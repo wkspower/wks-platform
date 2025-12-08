@@ -844,10 +844,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                            for (LocalDateTime[] prevPeriod : validTimeRanges) {
 	                                LocalDateTime prevLdtStart = prevPeriod[0];
 	                                LocalDateTime prevLdtEnd = prevPeriod[1];
-	                                if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-	                                    overlapsFile = true;
-	                                    break;
-	                                }
+	                                if (prevLdtStart.isBefore(prevLdtEnd)) { 
+							            if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
+							            	overlapsFile = true;
+							                break;
+							            }
+							        }
 	                            }
 
 	                            if (overlapsFile) {
@@ -1079,16 +1081,17 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                            }
 							}
 							
-							// Overlap check (needs ldtStart/ldtEnd and no prior error)
 							if (ldtStart != null && ldtEnd != null && dto.getSaveStatus() == null) {
 								boolean overlaps = false;
 								for (LocalDateTime[] prev : validTimeRanges) {
 									LocalDateTime prevStart = prev[0];
 									LocalDateTime prevEnd = prev[1];
-									if (ldtStart.isBefore(prevEnd) && ldtEnd.isAfter(prevStart)) {
-										overlaps = true;
-										break;
-									}
+									if (prevStart.isBefore(prevEnd)) { 
+							            if (ldtStart.isBefore(prevEnd) && ldtEnd.isAfter(prevStart)) {
+							                overlaps = true;
+							                break;
+							            }
+							        }
 								}
 								if (overlaps) {
 									dto.setSaveStatus("Failed");

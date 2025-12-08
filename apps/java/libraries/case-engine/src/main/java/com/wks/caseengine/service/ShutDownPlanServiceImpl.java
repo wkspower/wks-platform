@@ -705,18 +705,17 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                            }
 	                        }
 	                        
-	                        // --- Overlap checks (only run if date validation passed) ---
 	                        if (dto.getSaveStatus() == null && ldtStart != null) {
 
-	                            // Check for overlap within the uploaded file's successfully validated records
 	                            boolean overlapsFile = false;
 	                            for (LocalDateTime[] prevPeriod : validTimeRanges) {
 	                                LocalDateTime prevLdtStart = prevPeriod[0];
 	                                LocalDateTime prevLdtEnd = prevPeriod[1];
-	                                // Overlap condition: startA < endB AND endA > startB
-	                                if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-	                                    overlapsFile = true;
-	                                    break;
+	                                if (prevLdtStart.isBefore(prevLdtEnd)) { 
+	                                    if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
+	                                    	overlapsFile = true;
+	                                        break;
+	                                    }
 	                                }
 	                            }
 
