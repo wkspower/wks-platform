@@ -11,8 +11,12 @@ const dummyRowsData = [
   {
     id: 1,
     plant: 'NMD - Power Plant 1',
+ 
     plantId: '40NB',
-    costCenter: 'NG-GT1-Process',
+   
+    //costCenter: 'NG-GT1-Process',    
+    costCenter: 'Demo',
+   
     costCenterId: 'RIL_10709000',
     cppUtility: 'LP Steam_Dis',
     cppUtilityId: '310027965',
@@ -550,9 +554,15 @@ const FixedConsumption = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
+
+      const formattedData = res.map((item, index) => ({
+        ...item,
+        id: index,
+      }))
       // Process and set the fetched data to rows
-      console.log('res',res)
-      setRows(res)
+      console.log('*** fixed consumption data', formattedData)
+    
+      setRows(formattedData)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -577,6 +587,7 @@ const FixedConsumption = () => {
   // Dummy save handler
   const saveChanges = async () => {
     setLoading(true)
+    
 
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
@@ -588,10 +599,15 @@ const FixedConsumption = () => {
       setLoading(false)
       return
     }
-    const payload = JSON.stringify(modifiedData)
+
+    console.log('modifiedData', modifiedData)
+    // const payload = JSON.stringify(modifiedData)
+    const payload = modifiedData
+
+    
      try {
       // Transform modifiedCells into the format expected by the API
-      console.log('modifiedData', modifiedData)
+    
 
       // Call the API to save changes
       const response = await UtilityPlantApiServiceV2.saveFixedConsumptionData(
@@ -605,7 +621,7 @@ const FixedConsumption = () => {
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
-        message: `Successfully saved ${modifiedData.length} changes!`,
+        message: `Successfully saved ${modifiedData.length} rows changes!`,
         severity: 'success',
       })
     } catch (error) {

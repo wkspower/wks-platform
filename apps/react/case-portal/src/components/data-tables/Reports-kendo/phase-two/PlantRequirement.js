@@ -12,8 +12,9 @@ const dummyRows = [
     id: 1,
     // processPlant: 'NMD - EG',
     // processPlantId: '40N3',
-    cppUtility: 'COMPRESSED AIR',
-    cppUtilityId: '310027904',
+   // cppUtilities: 'COMPRESSED AIR',
+   ccpUtility: 'DEMO',
+    cppUtilityId: '310027904', 
     cppPlant: 'NMD - Utility Plant',
     cppPlantId: '40NF',
     uom: 'NM3',
@@ -298,7 +299,7 @@ const PlantRequirement = () => {
       editable: false,
     },
     {
-      field: 'cppUtilityId',
+      field: 'cppUtiltiyIds',
       title: 'CPP Utility IDs',
       widthT: 120,
       minWidth:80,
@@ -477,7 +478,7 @@ const PlantRequirement = () => {
         PLANT_ID,
       )
       if (res?.length === 0) {
-        setRows([])
+        setRows(dummyRows)
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
@@ -497,6 +498,7 @@ const PlantRequirement = () => {
     } finally {
       // setRows(dummyRows)
       setLoading(false)
+    //  setRows(dummyRows)
     }
   }
 
@@ -506,7 +508,7 @@ const PlantRequirement = () => {
     addButton: false,
     deleteButton: false,
     editButton: true,
-    saveBtn: true,
+    saveBtn: false,
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,

@@ -1,0 +1,256 @@
+package com.wks.caseengine.service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wks.caseengine.dto.NormBasedUtilityBudgetMonthDTO;
+import com.wks.caseengine.dto.NormBasedUtilityBudgetResponseDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@Slf4j
+public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudgetService {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    private final ObjectMapper objectMapper;
+
+    public NormBasedUtilityBudgetServiceImpl() {
+        this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false);
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+        this.objectMapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
+    }
+
+    @Override
+    public AOPMessageVM getNormBasedUtilityBudget(UUID cppPlantId, String financialYear) {
+
+        log.info("=== Starting getNormBasedUtilityBudget ===");
+        log.info("CPPPlantId: {}, FinancialYear: {}", cppPlantId, financialYear);
+
+        AOPMessageVM vm = new AOPMessageVM();
+
+        try {
+            if (cppPlantId == null) {
+                log.error("CPPPlantId is null");
+                vm.setCode(400);
+                vm.setMessage("CPPPlantId cannot be null");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
+            // ✅ Call stored procedure with positional parameters (safer)
+            StoredProcedureQuery sp = entityManager
+                    .createStoredProcedureQuery("dbo.Testing3")
+                    .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
+                    .registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
+
+            sp.setParameter(1, cppPlantId.toString());
+            sp.setParameter(2, financialYear);
+
+            log.info("Executing stored procedure dbo.Testing3 ...");
+            sp.execute();
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = sp.getResultList();
+            log.info("Retrieved {} rows from stored procedure", rows.size());
+
+            if (rows.isEmpty()) {
+                log.warn("No rows returned from stored procedure");
+                vm.setCode(200);
+                vm.setMessage("No data found");
+                vm.setData(new ArrayList<>());
+                return vm;
+            }
+
+            // Debug: log column count of first row
+            Object[] firstRow = rows.get(0);
+            log.info("First row column count: {}", firstRow.length);
+
+            List<NormBasedUtilityBudgetResponseDTO> list = new ArrayList<>();
+
+            for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+                Object[] row = rows.get(rowIndex);
+                log.debug("Processing row {} with {} columns", rowIndex, row.length);
+
+                try {
+                    NormBasedUtilityBudgetResponseDTO dto = mapRowToDto(row, rowIndex);
+                    list.add(dto);
+                } catch (Exception e) {
+                    log.error("Skipping bad row {} due to mapping error: {}", rowIndex, e.getMessage(), e);
+                }
+            }
+
+            log.info("Successfully processed {} rows into DTO list", list.size());
+
+            vm.setCode(200);
+            vm.setMessage("Norm Based Utility Budget fetched successfully");
+            vm.setData(list);
+
+            log.info("=== Completed getNormBasedUtilityBudget successfully ===");
+            return vm;
+
+        } catch (Exception e) {
+            log.error("=== STORED PROCEDURE FAILURE / SERVICE ERROR ===");
+            log.error("Message: {}", e.getMessage());
+            log.error("Class: {}", e.getClass().getName());
+            if (e.getCause() != null) {
+                log.error("Cause: {}", e.getCause().getMessage());
+                log.error("Cause Class: {}", e.getCause().getClass().getName());
+            }
+
+            vm.setCode(500);
+            vm.setMessage("Error: " + e.getMessage());
+            vm.setData(new ArrayList<>());
+            return vm;
+        }
+    }
+
+    // =========================
+    //  ROW → DTO MAPPING
+    // =========================
+    private NormBasedUtilityBudgetResponseDTO mapRowToDto(Object[] r, int rowIndex) {
+        NormBasedUtilityBudgetResponseDTO dto = new NormBasedUtilityBudgetResponseDTO();
+
+        try {
+            if (r == null) {
+                log.warn("Row {} is null, returning empty DTO", rowIndex);
+                return dto;
+            }
+
+            // Expected columns: id, generatingPlantName, utilityName, utilityId, uom, accountName, 
+            // materialName, issuingPlantName, issuingUom, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
+            if (r.length < 21) {
+                log.warn("Row {} has less than 21 columns ({}), returning empty DTO", rowIndex, r.length);
+                return dto;
+            }
+            
+            int i = 0;
+            
+            // Basic columns
+            dto.setId(getInteger(r[i++]));
+            dto.setNormHeaderId(getString(r[i++]));
+            dto.setGeneratingPlantName(getString(r[i++]));
+            dto.setUtilityName(getString(r[i++]));
+            dto.setUtilityId(getString(r[i++]));
+            dto.setUom(getString(r[i++]));
+            dto.setAccountName(getString(r[i++]));
+            dto.setMaterialName(getString(r[i++]));
+            dto.setIssuingPlantName(getString(r[i++]));
+            dto.setIssuingUom(getString(r[i++]));
+            // Month columns (each contains JSON)
+            dto.setApr(parseMonthJson(getString(r[i++]), "apr", rowIndex));
+            dto.setMay(parseMonthJson(getString(r[i++]), "may", rowIndex));
+            dto.setJun(parseMonthJson(getString(r[i++]), "jun", rowIndex));
+            dto.setJul(parseMonthJson(getString(r[i++]), "jul", rowIndex));
+            dto.setAug(parseMonthJson(getString(r[i++]), "aug", rowIndex));
+            dto.setSep(parseMonthJson(getString(r[i++]), "sep", rowIndex));
+            dto.setOct(parseMonthJson(getString(r[i++]), "oct", rowIndex));
+            dto.setNov(parseMonthJson(getString(r[i++]), "nov", rowIndex));
+            dto.setDec(parseMonthJson(getString(r[i++]), "dec", rowIndex));
+            dto.setJan(parseMonthJson(getString(r[i++]), "jan", rowIndex));
+            dto.setFeb(parseMonthJson(getString(r[i++]), "feb", rowIndex));
+            dto.setMar(parseMonthJson(getString(r[i++]), "mar", rowIndex));
+
+            return dto;
+
+        } catch (Exception e) {
+            log.error("Error mapping row {} to DTO, returning empty DTO. Error: {}", rowIndex, e.getMessage(), e);
+            return dto; // return empty DTO instead of crashing
+        }
+    }
+
+    // =========================
+    //  JSON → Month DTO
+    // =========================
+    private NormBasedUtilityBudgetMonthDTO parseMonthJson(String json, String monthName, int rowIndex) {
+        try {
+            if (json == null) {
+                log.debug("Row {} - {} is null, returning empty DTO with all null fields", rowIndex, monthName);
+                return createEmptyMonthDTO();
+            }
+
+            json = json.trim();
+            if (json.isEmpty() || "null".equalsIgnoreCase(json)) {
+                log.debug("Row {} - {} is empty or 'null', returning empty DTO with all null fields", rowIndex, monthName);
+                return createEmptyMonthDTO();
+            }
+
+            NormBasedUtilityBudgetMonthDTO result = objectMapper.readValue(
+                    json,
+                    NormBasedUtilityBudgetMonthDTO.class);
+
+            log.debug("Row {} - Successfully parsed {} month data", rowIndex, monthName);
+
+            return result;
+
+        } catch (Exception e) {
+            log.error("Row {} - Failed to parse {} JSON, returning empty DTO with all null fields", rowIndex, monthName, e);
+            log.debug("JSON content: {}", json);
+            return createEmptyMonthDTO();
+        }
+    }
+
+    // =========================
+    //  CREATE EMPTY MONTH DTO
+    // =========================
+    private NormBasedUtilityBudgetMonthDTO createEmptyMonthDTO() {
+        NormBasedUtilityBudgetMonthDTO dto = new NormBasedUtilityBudgetMonthDTO();
+        dto.setNorms(null);
+        dto.setQuantity(null);
+        dto.setAmount(null);
+        dto.setPrice(null);
+        dto.setFinancialYearMonthId(null);
+        dto.setQty(null);
+        dto.setGenerationUom(null);
+        return dto;
+    }
+
+    // =========================
+    //  HELPER METHODS
+    // =========================
+    private String getString(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        String str = obj.toString();
+        str = str.trim();
+        return str.isEmpty() ? null : str;
+    }
+
+    private Integer getInteger(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+
+        if (obj instanceof Integer) {
+            return (Integer) obj;
+        }
+
+        if (obj instanceof Number) {
+            return ((Number) obj).intValue();
+        }
+
+        try {
+            String str = obj.toString().trim();
+            return str.isEmpty() ? null : Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            log.warn("Could not parse integer from: {}", obj);
+            return null;
+        }
+    }
+}

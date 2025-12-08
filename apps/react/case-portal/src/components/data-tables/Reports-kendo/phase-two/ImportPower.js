@@ -137,7 +137,7 @@ const ImportPower = () => {
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
     {
-      field: 'plant',
+      field: 'assetName',
       title: 'Plant',
       width: 150,
       minWidth: 150,
@@ -288,33 +288,33 @@ const ImportPower = () => {
   ]
 
   useEffect(() => {
-    if(PLANT_ID){
-      fetchImportConsumptionData(keycloak, PLANT_ID)
+    if(AOP_YEAR){
+      fetchImportConsumptionData(keycloak, AOP_YEAR)
     }
-  }, [PLANT_ID])
+  }, [AOP_YEAR])
 
-  const fetchImportConsumptionData = async (keycloak, PLANT_ID) => {
+  const fetchImportConsumptionData = async (keycloak, AOP_YEAR) => {
     setLoading(true)
     try {
       const res = await UtilityPlantApiServiceV2.getImportConsumptionData(
         keycloak,
-        PLANT_ID,
+        AOP_YEAR,
       )
-      if (res?.length === 0) {
+      if (res?.data?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
       // Process and set the fetched data to rows
-      console.log('res',res)
-      setRows(res)
+      setRows(res?.data)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
+      // setRows(dummyRowsData)
     }
   }
 

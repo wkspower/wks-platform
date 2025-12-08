@@ -42,8 +42,15 @@ export function unflattenMonthObject(data = []) {
         
         result[month][field] = value;
       } else {
-        // Keep flat properties as-is (e.g., id, generatingPlant, etc.)
-        result[key] = value;
+        // Map normHeaderId to NormsHeader_FK_Id for API payload
+        if (key === "normHeaderId") {
+          result["NormsHeader_FK_Id"] = value;
+        } else if (key === "inEdit") {
+          // Skip inEdit field - don't include in payload
+        } else {
+          // Keep flat properties as-is (e.g., id, generatingPlant, etc.)
+          result[key] = value;
+        }
       }
     });
     

@@ -9,6 +9,7 @@ import KendoDataTables from 'components/kendo-data-tables/index'
 import { min } from 'lodash'
 import { nestedDummyRows } from './nestedDummyData'
 import { flattenMonthObject, unflattenMonthObject } from 'components/Utilities/commonUtilityFunctions'
+import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 
 const Norms = () => {
   const keycloak = useSession()
@@ -45,7 +46,7 @@ const Norms = () => {
   const columns = [
     //Generating Plant
     {
-      field: 'generatingPlant',
+      field: 'generatingPlantName',
       title: 'Generating Plant',
       width: 150,
       type: 'text',
@@ -55,7 +56,7 @@ const Norms = () => {
     },
     //Utility
     {
-      field: 'utility',
+      field: 'utilityName',
       title: 'Utility',
       width: 120,
       type: 'text',
@@ -75,7 +76,7 @@ const Norms = () => {
     },
     //UOM
     {
-      field: 'uom1',
+      field: 'uom',
       title: 'UOM',
       width: 80,
       type: 'text',
@@ -84,7 +85,7 @@ const Norms = () => {
     },
     // Account
     {
-      field: 'account',
+      field: 'accountName',
       title: 'Account',
       width: 100,
       type: 'text',
@@ -93,7 +94,7 @@ const Norms = () => {
     },
     // Material
     {
-      field: 'material',
+      field: 'materialName',
       title: 'Material',
       width: 100,
       type: 'text',
@@ -102,7 +103,7 @@ const Norms = () => {
     },
     // Issuing Plant
     {
-      field: 'issuingPlant',
+      field: 'issuingPlantName',
       title: 'Issuing Plant',
       width: 100,
       type: 'text',
@@ -110,8 +111,8 @@ const Norms = () => {
       minWidth: 100,
     },
     {
-      field: 'uom2',
-      title: 'UOM',
+      field: 'issuingUom',
+      title: 'Issuing UOM',
       width: 80,
       type: 'text',
       editable: false,
@@ -250,26 +251,21 @@ const Norms = () => {
 
   const fetchPlantRequirementData = async () => {
     setLoading(true)
-    try {
-      let res = []
-        
-      // const res = await UtilityPlantApiServiceV2.getPlantRequirementData(
-      //   keycloak,
-      //   PLANT_ID,
-      // )
+    try {        
+      const res = await UtilityPlantApiServiceV2.getNormBasedUtilityBudget(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR
+      )
       
-      setTimeout(() => {
-        res = nestedDummyRows
-      }, 300)
-      
-      if (res?.length === 0) {
+      if (res?.data?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
       console.log('res', res)
-      setRows(res) 
+      setRows(flattenMonthObject(res?.data)) 
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Data fetched successfully!',
@@ -280,9 +276,6 @@ const Norms = () => {
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
-      let temp=flattenMonthObject(nestedDummyRows)
-      console.log('temp',temp)
-      setRows(temp)
       setLoading(false)
     }
   }
@@ -321,6 +314,7 @@ const Norms = () => {
     
     try {
       // Transform modifiedCells into the format expected by the API
+     
       console.log('payload', payload)
 
       // Call the API to save changes
@@ -372,7 +366,7 @@ const Norms = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        groupBy={['generatingPlant', 'account']}
+        groupBy={['generatingPlantName', 'accountName']}
       />
     </Box>
   )
