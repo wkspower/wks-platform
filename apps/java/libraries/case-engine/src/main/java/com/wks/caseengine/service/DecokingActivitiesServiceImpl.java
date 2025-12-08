@@ -35,7 +35,15 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.util.LinkedHashMap;
+import org.hibernate.Session;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import com.wks.caseengine.dto.CrackerConfigurationDTO;
 
 import com.wks.caseengine.dto.DecokeRunLengthDTO;
@@ -410,53 +418,89 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 		aopMessageVM.setData(normAttributeTransactionsList);
 		return aopMessageVM;
 	}
-
+	
 	@Override
+	@Transactional
 	public AOPMessageVM updateDecokingActivitiesIBRData(String year, String plantId, String reportType,
-			List<CrackerConfigurationDTO> crackerConfigurationDTOList) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<CrackerConfiguration> crackerConfigurationList = new ArrayList<>();
-		try {
-			for (CrackerConfigurationDTO crackerConfigurationDTO : crackerConfigurationDTOList) {
-				if (crackerConfigurationDTO.getId() != null) {
-					CrackerConfiguration crackerConfiguration=null;
-					Optional<CrackerConfiguration> crackerConfigurationopt = crackerConfigurationRepository.findById(crackerConfigurationDTO.getId());
-					if(crackerConfigurationopt.isPresent()) {
-						crackerConfiguration=crackerConfigurationopt.get();
-						crackerConfiguration.setIbrEndDate(crackerConfigurationDTO.getIbrEndDate());
-						crackerConfiguration.setIbrStartDate(crackerConfigurationDTO.getIbrStartDate());
-						crackerConfiguration.setIsCr(crackerConfigurationDTO.getIsCr());
-						crackerConfiguration.setPostCrDays(crackerConfigurationDTO.getPostCrDays());
-						crackerConfiguration.setPreCrDays(crackerConfigurationDTO.getPreCrDays());
-						crackerConfiguration.setRemarks(crackerConfigurationDTO.getRemarks());
-						crackerConfiguration.setShutDownEndDate(crackerConfigurationDTO.getShutDownEndDate());
-						crackerConfiguration.setShutDownStartDate(crackerConfigurationDTO.getShutDownStartDate());
-						crackerConfiguration.setTaEndDate(crackerConfigurationDTO.getTaEndDate());
-						crackerConfiguration.setTaStartDate(crackerConfigurationDTO.getTaStartDate());
-						crackerConfiguration.setActualRunLength(crackerConfigurationDTO.getActualRunLength());	
-						crackerConfiguration.setReduction(crackerConfigurationDTO.getReduction());
-						crackerConfigurationList.add(crackerConfigurationRepository.save(crackerConfiguration));
-					}
-				}
+	        List<Map<String, Object>> payloadList) { // Changed payload to List<Map<String, Object>>
+	    
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    int totalUpdatedRows = 0;
+	    final Set<String> EXCLUDE_FIELDS = Set.of("Id", "Plant_FK_Id", "AOPYear", "TA_Duration_Days");
+
+	    try {
+	        for (Map<String, Object> payload : payloadList) {
+	            
+	            String idString = (String) payload.get("Id");
+	            if (idString == null) {
+	                continue; 
+	            }
+
+	            StringBuilder setClause = new StringBuilder();
+	            Map<String, Object> parameters = new java.util.HashMap<>();
+	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+	                String columnName = entry.getKey();
+	                Object value = entry.getValue();
+	                if (EXCLUDE_FIELDS.contains(columnName)) {
+	                    continue;
+	                }
+	                
+	                if (value == null) {
+	                    continue;
+	                }
+
+	                if (setClause.length() > 0) {
+	                    setClause.append(", ");
+	                }
+
+	                setClause.append("[").append(columnName).append("] = :").append(columnName);
+
+	                parameters.put(columnName, value);
+	            }
+
+	            if (setClause.length() == 0) {
+	                continue; 
+	            }
+
+	            String sql = "UPDATE [dbo].[CrackerConfiguration] SET " + setClause.toString()
+	                        + " WHERE [Id] = :id AND [Plant_FK_Id] = :plantFkId AND [AOPYear] = :aopYear";
+
+	            jakarta.persistence.Query nativeQuery = entityManager.createNativeQuery(sql);
+
+	            parameters.forEach(nativeQuery::setParameter);
+	            nativeQuery.setParameter("id", UUID.fromString(idString));
+	            nativeQuery.setParameter("plantFkId", UUID.fromString(plantId));
+	            nativeQuery.setParameter("aopYear", year);
+
+	            totalUpdatedRows += nativeQuery.executeUpdate();
+	        }
+
+	        if (totalUpdatedRows > 0) {
+	            aopMessageVM.setCode(200);
+	            aopMessageVM.setMessage("CrackerConfiguration updated successfully. Total rows updated: " + totalUpdatedRows);
+	        } else {
+	            aopMessageVM.setCode(404);
+	            aopMessageVM.setMessage("No CrackerConfiguration records found or no changes made.");
+	        }
+
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("sd-ta-activity");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
 			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Failed to update data");
-		}
-		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("sd-ta-activity");
-		for (ScreenMapping screenMapping : screenMappingList) {
-			AopCalculation aopCalculation = new AopCalculation();
-			aopCalculation.setAopYear(year);
-			aopCalculation.setIsChanged(true);
-			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-			aopCalculation.setPlantId(UUID.fromString(plantId));
-			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-			aopCalculationRepository.save(aopCalculation);
-		}
-		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("Data Updated successfully");
-		aopMessageVM.setData(crackerConfigurationList);
-		return aopMessageVM;
+			return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        aopMessageVM.setCode(500);
+	        aopMessageVM.setMessage("Failed to process updates: " + ex.getMessage());
+	        return aopMessageVM;
+	    }
 	}
 
 	public byte[] createExcel(String year, String plantId, String reportType, boolean isAfterSave,
@@ -947,14 +991,11 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			try (Connection connection = dataSource.getConnection();
 					CallableStatement stmt = connection.prepareCall(callSql)) {
 
-				// Set parameters in the correct order
-				stmt.setString(1, plantId); // @finYear
-				stmt.setString(2, aopYear); // @plantId
+				stmt.setString(1, plantId); 
+				stmt.setString(2, aopYear); 
 
-				// Execute the stored procedure
 				int rowsAffected = stmt.executeUpdate();
 
-				// Optional: commit if auto-commit is off
 				if (!connection.getAutoCommit()) {
 					connection.commit();
 				}
@@ -989,80 +1030,153 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 			return aopMessageVM;
 		}
 	}
-
+	
 	@Override
 	public AOPMessageVM getDecokingActivitiesIBRData(String year, String plantId, String reportType) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<CrackerConfigurationDTO> crackerConfigurationDTOList = new ArrayList<>();
-		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-		String viewName =  vertical.getName() + "_" + site.getName() + "_GetDecokePlanningDatesForScrn";
-		try {
-			List<Object[]> crackerConfigurationList = findByYearAndPlantFkId(year, UUID.fromString(plantId), viewName);
-			for (Object[] row : crackerConfigurationList) {
-				CrackerConfigurationDTO dto = new CrackerConfigurationDTO();
-
-				dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
-				dto.setDisplayName(row[2] != null ? row[2].toString() : null);
-
-				dto.setIbrStartDate(row[3] != null ? (Date) row[3] : null);
-				dto.setIbrEndDate(row[4] != null ? (Date) row[4] : null);
-				dto.setTaStartDate(row[5] != null ? (Date) row[5] : null);
-				dto.setTaEndDate(row[6] != null ? (Date) row[6] : null);
-				dto.setShutDownStartDate(row[7] != null ? (Date) row[7] : null);
-				dto.setShutDownEndDate(row[8] != null ? (Date) row[8] : null);
-				dto.setActualRunLength(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
-				dto.setReduction(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
-				dto.setPostCrDays(row[11] != null ? ((Number) row[11]).intValue() : null);
-				dto.setPreCrDays(row[12] != null ? ((Number) row[12]).intValue() : null);
-				dto.setIsCr(row[13] != null ? (Boolean) row[13] : null);
-	            dto.setRemarks(row[16] != null ? row[16].toString() : "");
-	            Object val = row[18];
-	            if (val instanceof Number) {
-	                int i = ((Number) val).intValue();
-	                dto.setIsEditable(i != 0);
-	            } else if (val instanceof Boolean) {
-	                dto.setIsEditable((Boolean) val);
-	            } else {
-	                dto.setIsEditable(null); // or choose default
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        
+	        String storedProcedure = vertical.getName() + "_" + site.getName() + "_GetDecokePlanningDatesForScrn";
+	        List<Object[]> results = findByYearAndPlantFkId(year, UUID.fromString(plantId), storedProcedure);
+	        List<String> columnNames = getDecokingActivityDataColumns(plantId, year, storedProcedure);
+	        List<Map<String, Object>> resultList = new ArrayList<>();
+	        for (Object[] row : results) {
+	            Map<String, Object> rowMap = new LinkedHashMap<>();
+	            for (int i = 0; i < columnNames.size(); i++) {
+	                rowMap.put(columnNames.get(i), row[i]);
 	            }
-				crackerConfigurationDTOList.add(dto);
-			}
+	            resultList.add(rowMap);
+	        }
+	        Map<String, Object> data = new HashMap<>();
+	        data.put("data", resultList);
+	        data.put("columns", getDecokingActivityColumnMetadata(plantId, year, storedProcedure)); 
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(crackerConfigurationDTOList);
-			return aopMessageVM;
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(data);
+	        return aopMessageVM;
 
-		} catch (IllegalArgumentException iae) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Failed to update data", ex);
-		}
+	    } catch (IllegalArgumentException iae) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
+	    } catch (Exception ex) {
+	        ex.printStackTrace(); 
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
 	}
 
-	
 	public List<Object[]> findByYearAndPlantFkId(String year, UUID plantFkId, String procedureName) {
-		try {
-			Plants plant = plantsRepository.findById(plantFkId).orElseThrow();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-			String sql = "EXEC " + procedureName +
-					" @plantId = :plantId, @aopYear = :aopYear";
+	    try {
+	        String sql = "EXEC " + procedureName +
+	                " @plantId = :plantId, @aopYear = :aopYear";
 
-			Query query = entityManager.createNativeQuery(sql);
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", plantFkId.toString()); // Ensure correct type for parameter
+	        query.setParameter("aopYear", year);
+	        
+	        return query.getResultList();
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format ", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
 
-			query.setParameter("plantId", plantFkId);
-			query.setParameter("aopYear", year);
-			
+	public List<String> getDecokingActivityDataColumns(String plantId, String year, String storedProcedure) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<String> columnNames = new ArrayList<>();
+	        
+	        String sql = "EXEC " + storedProcedure + " @plantId = ?, @aopYear = ?";
 
-			return query.getResultList();
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setString(1, plantId);
+	            ps.setString(2, year);
+	            
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData rsMetaData = rs.getMetaData();
+	                for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                    columnNames.add(rsMetaData.getColumnLabel(i)); 
+	                }
+	            }
+	        }
+	        return columnNames;
+	    });
+	}
+
+
+	public List<Map<String, Object>> getDecokingActivityColumnMetadata(String plantId, String year, String storedProcedure) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<Map<String, Object>> columnMetadata = new ArrayList<>();
+	        
+	        String sql = "EXEC " + storedProcedure + " @plantId = ?, @aopYear = ?";
+	        
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setString(1, plantId);
+	            ps.setString(2, year);
+	            
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData rsMetaData = rs.getMetaData();
+	                for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                    Map<String, Object> columnInfo = new HashMap<>();
+	                    String columnName = rsMetaData.getColumnLabel(i);
+	                    String columnType = rsMetaData.getColumnTypeName(i);
+
+	                    columnInfo.put("field", columnName);
+	                    columnInfo.put("title", formatTitle(columnName)); 
+	                    columnInfo.put("editable", false); 
+	                    columnInfo.put("type", getFrontendType(columnType)); 
+	                    columnMetadata.add(columnInfo);
+	                }
+	            }
+	        }
+	        return columnMetadata;
+	    });
+	}
+	
+	private String formatTitle(String columnName) {
+		return columnName.replace("_", " ");
+	}
+	
+	private String getFrontendType(String sqlTypeName) {
+	    if (sqlTypeName == null) {
+	        return "string"; 
+	    }
+	    
+	    switch (sqlTypeName.toUpperCase()) {
+	        case "VARCHAR":
+	        case "NVARCHAR":
+	        case "CHAR":
+	            return "string";
+
+	        case "INT":
+	        case "TINYINT":
+	        case "BIGINT":
+	        case "SMALLINT":
+	        case "DECIMAL":
+	        case "FLOAT":
+	        case "DOUBLE":
+	        case "NUMERIC":
+	        case "REAL": 
+	            return "number";
+
+	        case "DATE":
+	        case "DATETIME":
+	        case "DATETIME2":
+	        case "SMALLDATETIME": 
+	        case "TIME": 
+	            return "date";
+
+	        case "BIT": 
+	            return "boolean";
+
+	        case "UNIQUEIDENTIFIER": 
+	            return "string"; 
+	            
+	        default:
+	            return "string"; 
+	    }
 	}
 
 	@Override

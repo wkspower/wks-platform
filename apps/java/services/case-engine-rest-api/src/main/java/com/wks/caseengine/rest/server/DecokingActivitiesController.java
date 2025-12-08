@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,8 @@ public class DecokingActivitiesController {
 	}
 	
 	@PostMapping(value="/decoking-activities/ibr")
-	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<CrackerConfigurationDTO> crackerConfigurationDTOList) {
-		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,crackerConfigurationDTOList);
+	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<Map<String, Object>> payloadList) {
+		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,payloadList);
 	}
 
 	@GetMapping(value = "/run-length-export-excel")

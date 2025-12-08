@@ -1,6 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +16,7 @@ public interface DecokingActivitiesService {
 	public AOPMessageVM getDecokingActivitiesData( String year, String plantId,String reportType);
 	public AOPMessageVM getDecokingActivitiesIBRData( String year, String plantId,String reportType);
 	public AOPMessageVM updateDecokingActivitiesData( String year, String plantId, String reportType, List<DecokingActivitiesDTO> decokingActivitiesDTOList);
-	public AOPMessageVM updateDecokingActivitiesIBRData( String year, String plantId, String reportType, List<CrackerConfigurationDTO> crackerConfigurationDTOList);
+	public AOPMessageVM updateDecokingActivitiesIBRData( String year, String plantId, String reportType, List<Map<String, Object>> payloadList);
     public byte[] createExcel(String year, String plantId, String reportType, boolean isAfterSave, List<DecokeRunLengthDTO> decokeRunLengthDTOList);
 	public AOPMessageVM updateDecokingActivitiesRunLengthData( String year, String plantId, String reportType, List<DecokeRunLengthDTO> decokeRunLengthDTOList);
     public AOPMessageVM importExcel(String year, UUID fromString, String reportType, MultipartFile file);
