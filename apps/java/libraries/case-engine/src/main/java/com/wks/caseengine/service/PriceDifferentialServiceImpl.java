@@ -89,9 +89,6 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 					configurationDTO.setProductName(row[7] != null ? row[7].toString() : "");
 				
 				configurationDTOList.add(configurationDTO);
-				if (row[14] == null) {
-					i++;
-				}
 			}
 			Map<String, Object> map = new HashMap<>(); 
 			

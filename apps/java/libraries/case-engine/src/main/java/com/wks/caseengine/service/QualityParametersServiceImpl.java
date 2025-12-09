@@ -69,7 +69,7 @@ public class QualityParametersServiceImpl implements QualityParametersService{
 			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 			List<Object[]> obj = new ArrayList<>();
 			
-				String procedureName = verticalName + "_" + site.getName() + "_GetPriceDifferential";
+				String procedureName = verticalName + "_" + site.getName() + "_GetQualityParameters";
 				obj = findByYearAndPlantId(year, UUID.fromString(plantId), procedureName);
 			
 			List<ConfigurationDTO> configurationDTOList = new ArrayList<>();
