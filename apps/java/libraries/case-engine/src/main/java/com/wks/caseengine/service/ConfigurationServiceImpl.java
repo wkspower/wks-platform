@@ -2978,20 +2978,41 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	public AOPMessageVM getConfigurationVersion(String year, String plantId) {
 		String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 		List<ConfigurationVersionDTO> configurationVersionDTOs = new ArrayList<>();
-		String viewName= "vwScrn"+verticalName+"GetRevision";
-		List<Object[]> versions = getVersion(viewName,year);
+
+		// build SP name dynamically (same pattern you used earlier for views)
+		String spName = "spScrn" + verticalName + "GetRevision";
+
+		// call the helper which executes the SP
+		List<Object[]> versions = getConfigurationVersionSP(spName, year);
+
 		for (Object[] row : versions) {
-			ConfigurationVersionDTO configurationVersionDTO = new ConfigurationVersionDTO();
-			configurationVersionDTO.setAttributeValue(row[0] != null ? row[0].toString() : null);  
-			configurationVersionDTO.setNormParameterId(row[2] != null ? row[2].toString() : null); 
-			configurationVersionDTO.setYear(row[1] != null ? row[1].toString() : null); 
-			configurationVersionDTOs.add(configurationVersionDTO);
+			ConfigurationVersionDTO dto = new ConfigurationVersionDTO();
+			dto.setAttributeValue(row[0] != null ? row[0].toString() : null);
+			dto.setYear(row[1] != null ? row[1].toString() : null);
+			dto.setNormParameterId(row[2] != null ? row[2].toString() : null);
+			configurationVersionDTOs.add(dto);
 		}
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		aopMessageVM.setCode(200);
 		aopMessageVM.setData(configurationVersionDTOs);
 		aopMessageVM.setMessage("Versions fetched successfully");
 		return aopMessageVM;
+	}
+
+	@Transactional
+	public List<Object[]> getConfigurationVersionSP(String procedureName, String aopYear) {
+		try {
+			String sql = "EXEC " + procedureName + " @AOPYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid argument passed to procedure", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data from stored procedure: " + procedureName, ex);
+		}
 	}
 
 	public List<Object[]> getVersion(String viewName,String year) {
