@@ -142,7 +142,7 @@ const BusinessDemand = ({ permissions }) => {
       }
       //
 
-      if (isPPorPE_NMD) {
+      if (IS_PE_PP_VERTICAL) {
         const productionRows = (rows || []).filter(
           (row) => row.Particulars?.toLowerCase() === 'production',
         )
