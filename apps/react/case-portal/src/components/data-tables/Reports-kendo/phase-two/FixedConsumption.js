@@ -413,7 +413,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -423,7 +423,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -433,7 +433,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -443,7 +443,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -453,7 +453,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -463,7 +463,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -473,7 +473,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -483,7 +483,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -493,7 +493,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -503,7 +503,7 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -513,17 +513,17 @@ const FixedConsumption = () => {
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
-      field: 'march',
+      field: 'mar',
       title: headerMap[3],
       editable: true,
       widthT: 100,
       align: 'left',
       headerAlign: 'left',
-      type: 'number',
+      type: 'number1',
       format: valueFormat,
     },
     {
@@ -644,9 +644,9 @@ const FixedConsumption = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <KendoDataTables
+      {/* <KendoDataTables */}
       
-      // <AdvanceKendoTable
+      <AdvanceKendoTable
         columns={columns}
         rows={rows}
         setRows={setRows}

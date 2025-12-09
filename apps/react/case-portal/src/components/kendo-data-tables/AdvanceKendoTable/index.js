@@ -31,6 +31,7 @@ import { getRoleName } from 'services/role-service'
 import { TextCellEditorUpdated } from '../Utilities-Kendo/phase-two/TextCellEditorUpdated'
 import { SelectCellEditor } from '../Utilities-Kendo/phase-two/SelectCellEditor'
 import { MultiselectCellEditor } from '../Utilities-Kendo/phase-two/MultiselectCellEditor'
+import { BooleanCellEditor } from '../Utilities-Kendo/phase-two/BooleanCellEditor'
 import RemarkDialog from './components/RemarkDialog'
 import { NoSpinnerNumericEditor } from '../Utilities-Kendo/numbericColumns'
 import {
@@ -49,6 +50,7 @@ import {
 import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
 import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
+import { ExcelExport } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
 
 export const particulars = [
   'normParameterId',
@@ -138,7 +140,7 @@ const AdvanceKendoTable = ({
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
   const gridRef = useRef(null)
-
+  const _export = useRef(null)
   const [filter, setFilter] = useState({ logic: 'and', filters: [] })
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
@@ -243,6 +245,12 @@ const AdvanceKendoTable = ({
     setEdit(e.edit)
     // }
   }, [])
+
+  const excelExport = () => {
+    if (_export.current !== null) {
+      _export.current.save()
+    }
+  }
 
   const handleRowClick = (e) => {
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
@@ -661,6 +669,60 @@ const AdvanceKendoTable = ({
       )
     }
   
+  const BooleanHighlightCell = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      customModifiedCells,
+      allRedCell,
+      disableRedHighlight = false,
+    } = props
+
+    const value = dataItem[field]
+    const rowId = dataItem.id
+    const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
+
+    if (disableRedHighlight) {
+      return (
+        <td {...tdProps} title={displayValue} style={{ textAlign: 'center' }}>
+          {displayValue}
+        </td>
+      )
+    }
+
+    // Check if this cell was modified
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    const month = field
+    const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
+
+    // Check if this cell is in the red highlight list
+    const isRedFromAllRedCell = allRedCell?.some(
+      (cell) =>
+        cell.month === month &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    const shouldHighlight = isEdited || isRedFromAllRedCell
+
+    return (
+      <td
+        {...tdProps}
+        title={displayValue}
+        style={{
+          color: shouldHighlight ? 'orange' : undefined,
+          fontWeight: shouldHighlight ? 'bold' : undefined,
+          textAlign: 'center',
+        }}
+      >
+        {displayValue}
+      </td>
+    )
+  }
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -905,6 +967,44 @@ const AdvanceKendoTable = ({
         )
       }
 
+      // Boolean Type Handler
+      if (col.type === 'boolean') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <BooleanCellEditor
+                    {...cellProps}
+                    useCheckbox={col?.useCheckbox !== false}
+                    trueLabel={col?.trueLabel || 'Yes'}
+                    falseLabel={col?.falseLabel || 'No'}
+                  />
+                ),
+              },
+              data: (cellProps) => (
+                <BooleanHighlightCell
+                  {...cellProps}
+                  customModifiedCells={customModifiedCells}
+                  allRedCell={allRedCell}
+                  disableRedHighlight={disableRedHighlight}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
       // Example: Using SelectCellEditor for specific field
       if (col?.field === 'property') {
         let allOptions = [
@@ -1015,15 +1115,20 @@ const AdvanceKendoTable = ({
 
     const isRed = isRedFromAllRedCell
 
+    // Convert boolean values to Yes/No for display
+    const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
+    const cellContent = typeof value === 'boolean' ? displayValue : props.children
+
     return (
       <td
         {...props.tdProps}
-        title={value}
+        title={displayValue}
         style={{
           color: isRed ? 'orange' : undefined,
+          textAlign: typeof value === 'boolean' ? 'center' : undefined,
         }}
       >
-        {props.children}
+        {cellContent}
       </td>
     )
   }
@@ -1131,6 +1236,17 @@ const AdvanceKendoTable = ({
               </Button>
             )}
 
+            {permissions?.downloadExcelBtnFromUI && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={excelExport}
+                disabled={READ_ONLY || rows?.length === 0}
+              >
+                Export
+              </Button>
+            )}
+
             {permissions?.showImport && (
               <>
                 <Button
@@ -1168,6 +1284,11 @@ const AdvanceKendoTable = ({
 
       <div className='kendo-data-grid'>
         <Tooltip openDelay={50} position='auto' anchorElement='target'>
+          <ExcelExport
+            data={rows}
+            ref={_export}
+            fileName={`${permissions?.ExcelName}.xlsx`}
+          >
           <Grid
             modifiedCells={modifiedCells}
             data={rows}
@@ -1222,6 +1343,7 @@ const AdvanceKendoTable = ({
               />
             )}
           </Grid>
+          </ExcelExport>
         </Tooltip>
       </div>
 

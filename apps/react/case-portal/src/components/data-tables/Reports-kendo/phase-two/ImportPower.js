@@ -154,7 +154,8 @@ const ImportPower = () => {
     },
     { field: 'uom', title: 'UOM', widthT: 60, minWidth: 80, type: 'text', editable: false },
     {
-      field: 'april',
+      // field: 'april',
+      field:headerMap[4],
       title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
       editable: true, 
       widthT: 100,
@@ -165,7 +166,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'may',
+      // field: 'may',
+      field: headerMap[5],
       title: headerMap[5],
       editable: true,
       widthT: 100,
@@ -176,7 +178,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'june',
+      // field: 'june',
+      field: headerMap[6],
       title: headerMap[6],
       editable: true,
       widthT: 100,
@@ -187,7 +190,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'july',
+      // field: 'july',
+      field: headerMap[7],
       title: headerMap[7],
       editable: true,
       widthT: 100,
@@ -198,7 +202,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'aug',
+      // field: 'aug',
+      field: headerMap[8],
       title: headerMap[8],
       editable: true,
       widthT: 100,
@@ -209,7 +214,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'sep',
+      // field: 'sep',
+      field: headerMap[9],
       title: headerMap[9],
       editable: true,
       widthT: 100,
@@ -220,7 +226,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'oct',
+      // field: 'oct',
+      field: headerMap[10],
       title: headerMap[10],
       editable: true,
       widthT: 100,
@@ -231,7 +238,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'nov',
+      // field: 'nov',
+      field: headerMap[11],
       title: headerMap[11],
       editable: true,
       widthT: 100,
@@ -242,7 +250,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'dec',
+      // field: 'dec',
+      field: headerMap[12],
       title: headerMap[12],
       editable: true,
       widthT: 100,
@@ -253,7 +262,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'jan',
+      // field: 'jan',
+      field: headerMap[1],
       title: headerMap[1],
       editable: true,
       widthT: 100,
@@ -264,7 +274,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'feb',
+      // field: 'feb',
+      field: headerMap[2],
       title: headerMap[2],
       editable: true,
       widthT: 100,
@@ -275,7 +286,8 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      field: 'march',
+      // field: 'march',
+      field: headerMap[3],
       title: headerMap[3],
       editable: true,
       widthT: 100,
@@ -307,7 +319,10 @@ const ImportPower = () => {
         return
       }
       // Process and set the fetched data to rows
-      setRows(res?.data)
+      let tempRes=res?.data.map((item, index)=>{
+        return { ...item, id: index + 1 }
+      })
+      setRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -344,7 +359,11 @@ const ImportPower = () => {
       setLoading(false)
       return
     }
-    const payload = JSON.stringify(modifiedData)
+    const payload = modifiedData.map((item) => {
+      const { inEdit, ...rest } = item
+      return rest
+    })
+    const tempPayload = JSON.stringify(payload)
      try {
       // Transform modifiedCells into the format expected by the API
       console.log('modifiedData', modifiedData)
@@ -353,7 +372,7 @@ const ImportPower = () => {
       const response = await UtilityPlantApiServiceV2.saveImportConsumptionData(
         keycloak,
         PLANT_ID,
-        payload
+        tempPayload
       )
       console.log('response',response)
       // Update the local state with the saved data

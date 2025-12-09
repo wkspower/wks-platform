@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.wks.caseengine.dto.NormsMonthUpdateRequestDTO;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.NormBasedUtilityBudgetService;
 
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -64,4 +67,59 @@ public class NormBasedUtilityBudgetController {
             return ResponseEntity.status(500).body(errorResponse);
         }
     }
+
+
+
+
+    //Controller To Save The NormsMonthDetails
+
+
+
+
+    @PostMapping("/saveOrUpdateNormsMonths")
+    public ResponseEntity<?> saveOrUpdateNormsMonth(
+            @RequestBody List<NormsMonthUpdateRequestDTO> dtoList) {
+
+        try {
+            log.info("=== saveOrUpdateNormsMonth BULK Request Received ===");
+
+            if (dtoList == null || dtoList.isEmpty()) {
+                AOPMessageVM errorResponse = new AOPMessageVM();
+                errorResponse.setCode(400);
+                errorResponse.setMessage("Request body cannot be empty");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            log.info("Total records received from frontend: {}", dtoList.size());
+
+            AOPMessageVM response = normBasedUtilityBudgetService.saveOrUpdateBulk(dtoList);
+
+            return ResponseEntity.ok(response);
+
+        } catch (RestInvalidArgumentException e) {
+            log.error("Validation error: {}", e.getMessage());
+
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(400);
+            errorResponse.setMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        } catch (Exception e) {
+            log.error("=== ERROR in saveOrUpdateNormsMonth BULK ===");
+            log.error("Type: {}", e.getClass().getName());
+            log.error("Message: {}", e.getMessage());
+            e.printStackTrace();
+
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(500);
+            errorResponse.setMessage("Error: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+    
+
+
+
+
+
 }

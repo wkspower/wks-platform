@@ -300,7 +300,7 @@ const PlantRequirement = () => {
     },
     {
       field: 'cppUtiltiyIds',
-      title: 'CPP Utility IDs',
+      title: 'CPP Utility ID',
       widthT: 120,
       minWidth:80,
       type: 'text',
@@ -326,7 +326,7 @@ const PlantRequirement = () => {
     {
       field: 'april',
       title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -337,7 +337,7 @@ const PlantRequirement = () => {
     {
       field: 'may',
       title: headerMap[5],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -348,7 +348,7 @@ const PlantRequirement = () => {
     {
       field: 'june',
       title: headerMap[6],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -359,7 +359,7 @@ const PlantRequirement = () => {
     {
       field: 'july',
       title: headerMap[7],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -370,7 +370,7 @@ const PlantRequirement = () => {
     {
       field: 'aug',
       title: headerMap[8],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -381,7 +381,7 @@ const PlantRequirement = () => {
     {
       field: 'sep',
       title: headerMap[9],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -392,7 +392,7 @@ const PlantRequirement = () => {
     {
       field: 'oct',
       title: headerMap[10],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -403,7 +403,7 @@ const PlantRequirement = () => {
     {
       field: 'nov',
       title: headerMap[11],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -414,7 +414,7 @@ const PlantRequirement = () => {
     {
       field: 'dec',
       title: headerMap[12],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -425,7 +425,7 @@ const PlantRequirement = () => {
     {
       field: 'jan',
       title: headerMap[1],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -436,7 +436,7 @@ const PlantRequirement = () => {
     {
       field: 'feb',
       title: headerMap[2],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -447,7 +447,7 @@ const PlantRequirement = () => {
     {
       field: 'march',
       title: headerMap[3],
-      editable: true,
+      editable: false,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -478,7 +478,7 @@ const PlantRequirement = () => {
         PLANT_ID,
       )
       if (res?.length === 0) {
-        setRows(dummyRows)
+        setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
@@ -487,18 +487,16 @@ const PlantRequirement = () => {
       // Process and set the fetched data to rows
       setRows(res)
       setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data fetched successfully!',
-        severity: 'success',
-      })
+      // setSnackbarData({
+      //   message: 'Data fetched successfully!',
+      //   severity: 'success',
+      // })
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
-      // setRows(dummyRows)
       setLoading(false)
-    //  setRows(dummyRows)
     }
   }
 

@@ -16,6 +16,7 @@ export const UtilityPlantApiServiceV2 = {
 
   //Norm Based Utility Budget APIs
   getNormBasedUtilityBudget,
+  saveNormsData,
 }
 
 // ===================== || Fixed Consumption APIs || ===================== //
@@ -166,3 +167,26 @@ async function getNormBasedUtilityBudget(keycloak, PLANT_ID, financialYear) {
   }
 }
 
+async function saveNormsData(keycloak, payload) {
+  const url = `${Config.CaseEngineUrl}/task/saveOrUpdateNormsMonths`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}

@@ -40,11 +40,16 @@ export function unflattenMonthObject(data = []) {
           result[month] = {};
         }
         
-        result[month][field] = value;
+        // Map financialYearMonthId to financialYearMonthFkId within month objects
+        if (field === "financialYearMonthId") {
+          result[month]["financialYearMonthFkId"] = value;
+        } else {
+          result[month][field] = value;
+        }
       } else {
-        // Map normHeaderId to NormsHeader_FK_Id for API payload
+        // Map normHeaderId to normsHeaderFkId for API payload
         if (key === "normHeaderId") {
-          result["NormsHeader_FK_Id"] = value;
+          result["normsHeaderFkId"] = value;
         } else if (key === "inEdit") {
           // Skip inEdit field - don't include in payload
         } else {
