@@ -2,7 +2,9 @@ package com.wks.caseengine.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -125,9 +127,14 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 					i++;
 				}
 			}
+			Map<String, Object> map = new HashMap<>(); 
+			
+			List<AopCalculation> aopCalculation=aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"packaging-consumables");
+			map.put("configurationDTOList", configurationDTOList);
+			map.put("aopCalculation", aopCalculation);
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
-			aopMessageVM.setData(configurationDTOList);
+			aopMessageVM.setData(map);
 			aopMessageVM.setMessage("Data fetched successfully");
 
 			return aopMessageVM;
