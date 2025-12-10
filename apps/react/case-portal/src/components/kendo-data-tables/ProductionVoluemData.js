@@ -716,52 +716,19 @@ const ProductionvolumeData = ({ permissions }) => {
           ...item,
           idFromApi: item?.id,
           productName: item?.materialDisplayName,
-          april:
-            isTPD && item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
-          may:
-            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
-          june:
-            isTPD && item.june
-              ? (item.june * 24).toFixed(2)
-              : item.june || null,
-          july:
-            isTPD && item.july
-              ? (item.july * 24).toFixed(2)
-              : item.july || null,
-          august:
-            isTPD && item.august
-              ? (item.august * 24).toFixed(2)
-              : item.august || null,
+          april: isTPD && item.april ? item.april * 24 : item.april,
+          may: isTPD && item.may ? item.may * 24 : item.may,
+          june: isTPD && item.june ? item.june * 24 : item.june,
+          july: isTPD && item.july ? item.july * 24 : item.july,
+          august: isTPD && item.august ? item.august * 24 : item.august,
           september:
-            isTPD && item.september
-              ? (item.september * 24).toFixed(2)
-              : item.september || null,
-          october:
-            isTPD && item.october
-              ? (item.october * 24).toFixed(2)
-              : item.october || null,
-          november:
-            isTPD && item.november
-              ? (item.november * 24).toFixed(2)
-              : item.november || null,
-          december:
-            isTPD && item.december
-              ? (item.december * 24).toFixed(2)
-              : item.december || null,
-          january:
-            isTPD && item.january
-              ? (item.january * 24).toFixed(2)
-              : item.january || null,
-          february:
-            isTPD && item.february
-              ? (item.february * 24).toFixed(2)
-              : item.february || null,
-          march:
-            isTPD && item.march
-              ? (item.march * 24).toFixed(2)
-              : item.march || null,
+            isTPD && item.september ? item.september * 24 : item.september,
+          october: isTPD && item.october ? item.october * 24 : item.october,
+          november: isTPD && item.november ? item.november * 24 : item.november,
+          december: isTPD && item.december ? item.december * 24 : item.december,
+          january: isTPD && item.january ? item.january * 24 : item.january,
+          february: isTPD && item.february ? item.february * 24 : item.february,
+          march: isTPD && item.march ? item.march * 24 : item.march,
           isEditable: false,
         }))
         setRowsMaxCapacity(formatted)

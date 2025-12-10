@@ -1121,7 +1121,6 @@ const ProductionTarget = ({ permissions }) => {
       )}
 
       {/* CURRENT_OPERATING_CAPACITY */}
-      {/* PROPSED_OPERATING_CAPACITY */}
       <KendoDataTables
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
