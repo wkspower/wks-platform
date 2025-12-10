@@ -75,7 +75,7 @@ const MaintenanceTable = () => {
     setLoading(true)
     try {
       const resp = await dataConfig.serviceFn(keycloak, PLANT_ID, AOP_YEAR)
-      const raw = dataConfig.isCracker ? resp.data?.data : resp
+      const raw = resp
       const monthFields = [
         'April',
         'May',
@@ -101,7 +101,7 @@ const MaintenanceTable = () => {
           ...item,
           idFromApi: item.id,
           id: idx,
-          isEditable: dataConfig.editable,
+          isEditable: false,
           originalRemark: item.remarks,
           allMonthsTotal,
         }
@@ -164,6 +164,7 @@ const MaintenanceTable = () => {
       headerAlign: 'left',
       widthT: nameWidthT,
       editable: false,
+      isEditable: false,
     },
     ...getMonthlyColumns(),
     isEditableField,

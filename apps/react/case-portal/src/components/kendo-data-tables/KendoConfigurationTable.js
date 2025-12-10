@@ -32,6 +32,7 @@ import SelectivityData from './SelectivityData'
 import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/index'
 import { getRoleName } from 'services/role-service'
 import { ButtonGroup } from '../../../node_modules/@progress/kendo-react-buttons/index'
+import QualityParameters from './QualityParameters'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
@@ -1225,7 +1226,6 @@ const ConfigurationTable = () => {
                     key={num}
                     onClick={() => handleRevisionChange(num)}
                     variant={selected ? 'contained' : 'outlined'}
-                    color={selected ? 'primary' : 'inherit'}
                     size='small'
                     sx={{
                       textTransform: 'none',
@@ -1233,6 +1233,17 @@ const ConfigurationTable = () => {
                       padding: '1px 7px',
                       minWidth: '36px',
                       mr: 0.5,
+                      ...(selected && {
+                        bgcolor: '#0100cb',
+                        color: '#fff',
+                        borderColor: '#0100cb',
+                        fontWeight: 'bold',
+                      }),
+                      ...(!selected && {
+                        borderColor: '#000000ff',
+                        color: '#000000ff',
+                        fontWeight: 'bold',
+                      }),
                     }}
                   >
                     {`Rev ${num}`}
@@ -1402,7 +1413,7 @@ const ConfigurationTable = () => {
                     currentTabDisplayName={currentTabDisplayName}
                   />
                 )
-                case getTheId('Constants'):
+              case getTheId('Constants'):
                 return (
                   <SelectivityData
                     rows={productionRowsConstants}
@@ -1418,6 +1429,9 @@ const ConfigurationTable = () => {
                     currentTabDisplayName={currentTabDisplayName}
                   />
                 )
+
+              case getTheId('Quality'):
+                return <QualityParameters />
 
               default:
                 return null
