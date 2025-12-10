@@ -11,6 +11,7 @@ export const ProductionVolumeDataApiService = {
   getMaxAchievedCapacityExcel,
   saveProductionVolDataExcel,
   getProductionVolExcel,
+  editMaxAchievedCapacityData,
 }
 
 async function editAOPMCCalculatedData(
@@ -233,6 +234,30 @@ async function saveProductionVolDataExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
       method: 'POST',
       headers,
       body: formData,
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function editMaxAchievedCapacityData(
+  payload,
+  PLANT_ID,
+  AOP_YEAR,
+  keycloak,
+) {
+  const url = `${Config.CaseEngineUrl}/task/max-achieved-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
     })
     return json(keycloak, resp)
   } catch (e) {
