@@ -131,6 +131,7 @@ const KendoDataTables = ({
   handleLoad = () => {},
   fetchData = () => {},
   handleUnitChange = () => {},
+  handleYearChange = () => {},
   handleGradeChange = () => {},
   handleRemarkCellClick = () => {},
   calculatebtnClicked = () => {},
@@ -138,6 +139,7 @@ const KendoDataTables = ({
   groupBy = null,
   totalRowConfiguration = null,
   selectedUOM = 'MT/Month',
+  selectedPackagingYear = 'Budget',
   note = '',
   titleName = '',
   gridName,
@@ -1243,6 +1245,40 @@ const KendoDataTables = ({
                   {grades?.map((unit) => (
                     <MenuItem key={unit.gradeId} value={unit.gradeId}>
                       {unit.displayName}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+
+              {permissions?.showPackagingYear && (
+                <TextField
+                  select
+                  value={selectedPackagingYear || permissions?.packagingYears?.[0]}
+                  onChange={(e) => {
+                    handleYearChange(e.target.value)
+                  }}
+                  className='dropdown-select'
+                  variant='outlined'
+                  label='Select Year'
+                  InputLabelProps={{
+                    shrink: true,
+                    sx: {
+                      fontWeight: 'bold',
+                    },
+                  }}
+                  SelectProps={{
+                    MenuProps: {
+                      disableScrollLock: true,
+                    },
+                  }}
+                >
+                  <MenuItem value='' disabled>
+                    Select Year
+                  </MenuItem>
+
+                  {permissions?.packagingYears?.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
                     </MenuItem>
                   ))}
                 </TextField>

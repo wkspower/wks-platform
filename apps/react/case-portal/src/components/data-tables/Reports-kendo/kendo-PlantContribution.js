@@ -234,9 +234,9 @@ export default function PlantContribution() {
         open={!!loading}
       ></Backdrop>
 
-      {/* Main Categories Except 'OtherVariableCost' */}
+      {/* Main Categories Except 'OtherVariableCost' and 'ProductionCostCalculations' */}
       {categories()
-        .filter(({ key }) => key !== 'OtherVariableCost')
+        .filter(({ key }) => key !== 'OtherVariableCost' && key !== 'ProductionCostCalculations')
         .map(({ key, title }, idx) => {
           const rpt = reports[key] || {}
           return (
@@ -289,6 +289,28 @@ export default function PlantContribution() {
                 showTitle: true,
               }}
               saveChanges={saveChanges}
+            />
+          </Box>
+        )
+      })()}
+
+      {/* 'ProductionCostCalculations' as Last Grid */}
+      {(() => {
+        const key = 'ProductionCostCalculations'
+        const rpt = reports[key] || {}
+        return (
+          <Box key={key} sx={{ mt: 1 }}>
+            <KendoDataTablesReports
+              columns={rpt.columns || []}
+              rows={rpt.rows || []}
+              handleCalculate={handleCalculate}
+              title={'Production Cost Calculation'}
+              permissions={{
+                textAlignment: 'center',
+                showCalculate: false,
+                showFinalSubmit: false,
+                showTitle: true,
+              }}
             />
           </Box>
         )

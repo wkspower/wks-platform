@@ -346,37 +346,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       setLoading(false)
       return
     }
-    // [
-    //         {
-    //             "id": "3B7BAB8F-2B78-409F-A178-757EAFC3089C",
-    //             "april": 10000,
-    //             "may": 41.67,
-    //             "june": 58.33,
-    //             "july": 20.7,
-    //             "august": 22.72,
-    //             "september": 24.44,
-    //             "october": 19.49,
-    //             "november": 12.36,
-    //             "december": 25.0,
-    //             "january": 3.76,
-    //             "february": 18.01,
-    //             "march": 24.33,
-    //             "displayOrder": null,
-    //             "remarks": " ",
-    //             "plantFKId": null,
-    //             "siteFKId": null,
-    //             "verticalFKId": null,
-    //             "materialFKId": "CE03B799-6CDB-4B71-B585-F46EF8B7FAA3",
-    //             "financialYear": null,
-    //             "createdOn": null,
-    //             "modifiedOn": null,
-    //             "mcuVersion": null,
-    //             "updatedBy": null,
-    //             "productName": null,
-    //             "saveStatus": null,
-    //             "errDescription": null,
-    //             "materialDisplayName": "ORTHOXYLENE"
-    //         }]
+
     const months = [
       'april', 'may', 'june', 'july', 'august', 'september',
       'october', 'november', 'december', 'january', 'february', 'march'
@@ -397,7 +367,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
         modifiedOn: null,
         mcuVersion: null,
         updatedBy: null,
-        productName:  row.productName || row.materialDisplayName || null,
+        productName: row.productName || row.materialDisplayName || null,
         saveStatus: null,
         errDescription: null,
       }
@@ -415,9 +385,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
     )
     console.log('Save Max Achieved Capacity response:', response);
 
-    // Always call fetchMaxCapacityData after save
-    fetchMaxCapacityData(unitMaxCapacity)
-
+    // ? ONLY fetch if save was successful
     if (response && response.code === 200) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -426,6 +394,9 @@ const AromaticsProductionGrids = ({ permissions }) => {
       })
       setModifiedCellsMaxCapacity({})
       setEnableSaveAddBtnMaxCapacity(false)
+      
+      // Fetch fresh data ONLY after successful save
+      await fetchMaxCapacityData(unitMaxCapacity)
     } else {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -737,89 +708,52 @@ const AromaticsProductionGrids = ({ permissions }) => {
   }
 
   const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
-    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+  if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
-    setLoading(true)
-    try {
-      const response =
-        await ProductionVolumeDataApiService.getDesignCapacityData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      let data = response?.data?.aopMCCalculatedDataDTOList
-      if (data && !Array.isArray(data)) {
-        data = [data]
-      }
-      if (response?.code === 200 && data) {
-        const isTPD = unit === 'TPD'
-        const formatted = data.map((item, index) => ({
-          ...item,
+  setLoading(true)
+  try {
+    const response =
+      await ProductionVolumeDataApiService.getDesignCapacityData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+    let data = response?.data?.aopMCCalculatedDataDTOList
+    if (data && !Array.isArray(data)) {
+      data = [data]
+    }
+    if (response?.code === 200 && data) {
+      const isTPD = unit === 'TPD'
+      const formatted = data.map((item, index) => {
+        const april = isTPD && item.april ? (item.april * 24).toFixed(2) : item.april || null
+        const may = isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null
+        const june = isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null
+        const total = [april, may, june].map(v => Number(v) || 0).reduce((a, b) => a + b, 0).toFixed(2)
+
+        return {
           id: item?.id,
           productName: item?.materialDisplayName,
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
           remark: item.remarks?.trim() || '',
           isEditable: IS_PE_PP ? false : true,
-
-          april:
-            isTPD && item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
-          may:
-            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
-          june:
-            isTPD && item.june
-              ? (item.june * 24).toFixed(2)
-              : item.june || null,
-          july:
-            isTPD && item.july
-              ? (item.july * 24).toFixed(2)
-              : item.july || null,
-          august:
-            isTPD && item.august
-              ? (item.august * 24).toFixed(2)
-              : item.august || null,
-          september:
-            isTPD && item.september
-              ? (item.september * 24).toFixed(2)
-              : item.september || null,
-          october:
-            isTPD && item.october
-              ? (item.october * 24).toFixed(2)
-              : item.october || null,
-          november:
-            isTPD && item.november
-              ? (item.november * 24).toFixed(2)
-              : item.november || null,
-          december:
-            isTPD && item.december
-              ? (item.december * 24).toFixed(2)
-              : item.december || null,
-          january:
-            isTPD && item.january
-              ? (item.january * 24).toFixed(2)
-              : item.january || null,
-          february:
-            isTPD && item.february
-              ? (item.february * 24).toFixed(2)
-              : item.february || null,
-          march:
-            isTPD && item.march
-              ? (item.march * 24).toFixed(2)
-              : item.march || null,
-        }))
-        setRowsDesignCapacity(formatted)
-      } else {
-        setRowsDesignCapacity([])
-      }
-    } catch (error) {
-      console.error('Error fetching Design Capacity:', error)
+          april,
+          may,
+          june,
+          total,
+        }
+      })
+      setRowsDesignCapacity(formatted)
+    } else {
       setRowsDesignCapacity([])
-    } finally {
-      setLoading(false)
     }
+  } catch (error) {
+    console.error('Error fetching Design Capacity:', error)
+    setRowsDesignCapacity([])
+  } finally {
+    setLoading(false)
   }
+}
   const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
@@ -847,7 +781,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
         const total = [april, may, june]
           .map((v) => Number(v) || 0)
           .reduce((acc, val) => acc + val, 0)
-          .toFixed(2)
+          .toFixed(3)
 
         return {
           ...item,
@@ -939,11 +873,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       showCalculate: false,
     }
   }
-  const percentageTitle = IS_PE_PP
-    ? 'Current MCU'
-    : VERTICAL_NAME === 'cracker'
-      ? 'Max Achieved Capacity (Ethylene)'
-      : 'Max Achieved Capacity'
+  
   const adjustedPermissionsGrid1 = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -957,7 +887,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       saveBtn: true,
       units: ['TPH', 'TPD'],
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      titleName: percentageTitle,
+      titleName: 'Max Achieved Based On Current Unit Performance',
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
@@ -994,10 +924,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
-      titleName:
-        VERTICAL_NAME === 'cracker'
-          ? 'Design Capacity (Ethylene)'
-          : 'Design Capacity',
+      titleName:'Max Achieved',
     },
     isOldYear,
   )

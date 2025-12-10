@@ -11,6 +11,7 @@ import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBa
 import BestAchievedNorms from 'components/data-tables/Reports/BestAchievedNorms'
 import BusinessDemand from 'components/kendo-data-tables/BusinessDemand'
 import ConsumptionNorms from 'components/kendo-data-tables/ConsumptionNorms'
+import PackagingConsumables from 'components/kendo-data-tables/PackagingConsumables'
 import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
 import CrackerConfig from 'components/kendo-data-tables/KendoConfigCrackerInput'
 import CrackerConfigOutput from 'components/kendo-data-tables/KendoConfigCrackerOutput'
@@ -281,6 +282,14 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='consumption-aop'>
                 <ConsumptionNorms />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'packaging-consumables',
+            element: (
+              <PrivateRoute routeId='packaging-consumables'>
+                <PackagingConsumables />
               </PrivateRoute>
             ),
           },

@@ -60,6 +60,7 @@ const defs = {
     monthlyAop: 'Maintenance',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
+    packagingConsumables: 'Consumíveis de Embalagem',
   },
   pages: {
     dashboard: {
@@ -227,6 +228,7 @@ const defs = {
         manufacturingDivision: 'Manufacturing Division',
         plantSafetyPerformanceTarget: 'S&OR',
         plantTeam: 'People',
+        packagingConsumables: 'Consumíveis de Embalagem',
       },
     },
   },
