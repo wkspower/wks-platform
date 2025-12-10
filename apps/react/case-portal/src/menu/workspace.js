@@ -194,31 +194,31 @@ const workspace = {
       breadcrumbs: true,
     },
 
-    {
-      id: 'functional-aop',
-      title: i18n.t('menu.functionalAop'),
-      type: 'collapse',
-      icon: icons.IconReport,
-      children: [
-        {
-          id: 'aop-budget',
-          title: i18n.t('menu.monthlyAop'),
-          type: 'item',
-          url: '/functional-aop/aop-budget',
-          icon: icons.IconFile,
-          breadcrumbs: true,
-        },
+    // {
+    //   id: 'functional-aop',
+    //   title: i18n.t('menu.functionalAop'),
+    //   type: 'collapse',
+    //   icon: icons.IconReport,
+    //   children: [
+    //     {
+    //       id: 'aop-budget',
+    //       title: i18n.t('menu.monthlyAop'),
+    //       type: 'item',
+    //       url: '/functional-aop/aop-budget',
+    //       icon: icons.IconFile,
+    //       breadcrumbs: true,
+    //     },
 
-        {
-          id: 'reliability-performance',
-          title: i18n.t('menu.reliabilityPerformance'),
-          type: 'item',
-          url: '/functional-aop/reliability-performance',
-          icon: icons.IconFileText,
-          breadcrumbs: true,
-        },
-      ],
-    },
+    //     {
+    //       id: 'reliability-performance',
+    //       title: i18n.t('menu.reliabilityPerformance'),
+    //       type: 'item',
+    //       url: '/functional-aop/reliability-performance',
+    //       icon: icons.IconFileText,
+    //       breadcrumbs: true,
+    //     },
+    //   ],
+    // },
 
     {
       id: 'functional-reports',
@@ -226,23 +226,23 @@ const workspace = {
       type: 'collapse',
       icon: icons.IconReport,
       children: [
-        {
-          id: 'maintenance-summary',
-          title: i18n.t('menu.maintenanceSummary'),
-          type: 'item',
-          url: '/functional-reports/maintenance-summary',
-          icon: icons.IconFile,
-          breadcrumbs: true,
-        },
+        // {
+        //   id: 'maintenance-summary',
+        //   title: i18n.t('menu.maintenanceSummary'),
+        //   type: 'item',
+        //   url: '/functional-reports/maintenance-summary',
+        //   icon: icons.IconFile,
+        //   breadcrumbs: true,
+        // },
 
-        {
-          id: 'site-maintenance-summary',
-          title: i18n.t('menu.siteMaintenanceSummary'),
-          type: 'item',
-          url: '/functional-reports/site-maintenance-summary',
-          icon: icons.IconFile,
-          breadcrumbs: true,
-        },
+        // {
+        //   id: 'site-maintenance-summary',
+        //   title: i18n.t('menu.siteMaintenanceSummary'),
+        //   type: 'item',
+        //   url: '/functional-reports/site-maintenance-summary',
+        //   icon: icons.IconFile,
+        //   breadcrumbs: true,
+        // },
 
         {
           id: 'plant-budget-summary',
