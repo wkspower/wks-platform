@@ -6,17 +6,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -91,10 +84,10 @@ public class MCUMaxCapacity {
     private String remarks;
 
     @Column(name = "CreatedOn")
-    private LocalDateTime createdOn;
+    private Date createdOn;
 
     @Column(name = "ModifiedOn")
-    private LocalDateTime modifiedOn;
+    private Date modifiedOn;
 
     @Column(name = "MCUVersion", length = 10)
     private String mcuVersion;
