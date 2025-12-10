@@ -13,6 +13,7 @@ public interface AOPMCCalculatedDataService {
 	
 	public  AOPMessageVM getAOPMCCalculatedData(String plantId, String year);
 	public  AOPMessageVM getMaxAchievedCapacity(String plantId, String year);
+	public  AOPMessageVM updateMaxAchievedCapacity(String plantId, String year,List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOs);
 	public  AOPMessageVM getDesignCapacity(String plantId, String year);
 	public  AOPMessageVM updateDesignCapacity(String plantId, String year,List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTO);
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantFKId);
