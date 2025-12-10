@@ -16,26 +16,25 @@ import { validateFields } from 'utils/validationUtils'
 import { ProductionVolumeDataApiService } from 'services/production-volume-data-api-service'
 import { DataService } from 'services/DataService'
 import {
-  getColDefsDesignCapacity,
-  getColDefsDesignCapacityPEPP,
-  getColDefsMaxAchievedCapacity,
+  getColDefsDesignCapacityAROMATICS,
+  getColDefsMaxAchievedCapacityAROMATICS,
   getColDefsNonEditable,
   getColDefsPercentageSummary,
 } from './Utilities-Kendo/productionTargetColDefs'
-import ProductionTarget from './ProductionTarget'
-import  AromaticsProductionGrids  from './AromaticsProductionGrids'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
-const ProductionvolumeData = ({ permissions }) => {
-  // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
-  //   usePermissions()
-
+const AromaticsProductionGrids = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
     React.useState({})
   const [enableSaveAddBtnDesignCapacity, setEnableSaveAddBtnDesignCapacity] =
     useState(false)
+  const [modifiedCellsMaxCapacity, setModifiedCellsMaxCapacity] = useState({})
+  const [enableSaveAddBtnMaxCapacity, setEnableSaveAddBtnMaxCapacity] = useState(false)
+  const [remarkDialogOpenMaxCapacity, setRemarkDialogOpenMaxCapacity] = useState(false)
+  const [currentRemarkMaxCapacity, setCurrentRemarkMaxCapacity] = useState('')
+  const [currentRowIdMaxCapacity, setCurrentRowIdMaxCapacity] = useState(null)
   const [_plantID, set_PlantID] = useState('')
 
   const keycloak = useSession()
@@ -115,6 +114,12 @@ const ProductionvolumeData = ({ permissions }) => {
     setCurrentRowIdDesignCapacity(row.id)
     setRemarkDialogOpenDesignCapacity(true)
   }
+  const handleRemarkCellClickMaxCapacity = (row) => {
+  if (READ_ONLY) return
+  setCurrentRemarkMaxCapacity(row.remarks || '')
+  setCurrentRowIdMaxCapacity(row.id)
+  setRemarkDialogOpenMaxCapacity(true)
+}
 
   const findAvg = (value, row) => {
     const months = [
@@ -317,7 +322,129 @@ const ProductionvolumeData = ({ permissions }) => {
       console.log('Facing issue at saving data', error)
     }
   }, [modifiedCellsDesignCapacity, unitDesignCapacity])
+  
+  const saveChangesMaxCapacity = React.useCallback(async () => {
+  try {
+    const data = Object.values(modifiedCellsMaxCapacity)
+    if (data.length === 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      return
+    }
 
+    const requiredFields = ['remarks']
+    const validationMessage = validateFields(data, requiredFields)
+    if (validationMessage) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationMessage,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+    // [
+    //         {
+    //             "id": "3B7BAB8F-2B78-409F-A178-757EAFC3089C",
+    //             "april": 10000,
+    //             "may": 41.67,
+    //             "june": 58.33,
+    //             "july": 20.7,
+    //             "august": 22.72,
+    //             "september": 24.44,
+    //             "october": 19.49,
+    //             "november": 12.36,
+    //             "december": 25.0,
+    //             "january": 3.76,
+    //             "february": 18.01,
+    //             "march": 24.33,
+    //             "displayOrder": null,
+    //             "remarks": " ",
+    //             "plantFKId": null,
+    //             "siteFKId": null,
+    //             "verticalFKId": null,
+    //             "materialFKId": "CE03B799-6CDB-4B71-B585-F46EF8B7FAA3",
+    //             "financialYear": null,
+    //             "createdOn": null,
+    //             "modifiedOn": null,
+    //             "mcuVersion": null,
+    //             "updatedBy": null,
+    //             "productName": null,
+    //             "saveStatus": null,
+    //             "errDescription": null,
+    //             "materialDisplayName": "ORTHOXYLENE"
+    //         }]
+    const months = [
+      'april', 'may', 'june', 'july', 'august', 'september',
+      'october', 'november', 'december', 'january', 'february', 'march'
+    ]
+    const isTPH = unitMaxCapacity === 'TPD'
+    const payload = data.map((row) => {
+      const mapped = {
+        id: row.idFromApi || row.id || null,
+        remarks: row.remarks || row.remark || '',
+        materialFKId: row.materialFKId || row.normParametersFKId || null,
+        materialDisplayName: row.productName || row.materialDisplayName || null,
+        displayOrder: null,
+        plantFKId: PLANT_ID,
+        siteFKId: SITE_ID,
+        verticalFKId: VERTICAL_ID,
+        financialYear: AOP_YEAR,
+        createdOn: null,
+        modifiedOn: null,
+        mcuVersion: null,
+        updatedBy: null,
+        productName:  row.productName || row.materialDisplayName || null,
+        saveStatus: null,
+        errDescription: null,
+      }
+      months.forEach((month) => {
+        mapped[month] = isTPH && row[month] ? row[month] / 24 : row[month] || null
+      })
+      return mapped
+    })
+
+    const response = await ProductionVolumeDataApiService.editMaxAchievedCapacityData(
+      payload,
+      PLANT_ID,
+      AOP_YEAR,
+      keycloak,
+    )
+    console.log('Save Max Achieved Capacity response:', response);
+
+    // Always call fetchMaxCapacityData after save
+    fetchMaxCapacityData(unitMaxCapacity)
+
+    if (response && response.code === 200) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Saved Successfully!',
+        severity: 'success',
+      })
+      setModifiedCellsMaxCapacity({})
+      setEnableSaveAddBtnMaxCapacity(false)
+    } else {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Please fill all fields, try again!',
+        severity: 'error',
+      })
+    }
+    setLoading(false)
+    return response
+  } catch (error) {
+    console.error('Error saving Max Achieved Capacity:', error)
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Error saving Max Achieved Capacity!',
+      severity: 'error',
+    })
+    setLoading(false)
+  }
+}, [modifiedCellsMaxCapacity, unitMaxCapacity])
   //
   const saveChanges = React.useCallback(async () => {
     try {
@@ -566,11 +693,9 @@ const ProductionvolumeData = ({ permissions }) => {
     headerMap,
     valueFormat,
   )
-  const colDefs_design_capacity = IS_PE_PP
-    ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
-    : getColDefsDesignCapacity(headerMap, valueFormat)
+  const colDefs_design_capacity = getColDefsDesignCapacityAROMATICS(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(
+  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacityAROMATICS(
     headerMap,
     valueFormat,
   )
@@ -711,29 +836,32 @@ const ProductionvolumeData = ({ permissions }) => {
         data = [data]
       }
       if (response?.code === 200 && data) {
-        // Conversion logic
-        const isTPD = unit === 'TPD'
-        const formatted = data.map((item, index) => ({
+      // Conversion logic
+      const isTPD = unit === 'TPD'
+      const formatted = data.map((item, index) => {
+        const april = isTPD && item.april ? (item.april * 24).toFixed(2) : item.april || null
+        const may = isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null
+        const june = isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null
+
+        // Calculate total after conversion
+        const total = [april, may, june]
+          .map((v) => Number(v) || 0)
+          .reduce((acc, val) => acc + val, 0)
+          .toFixed(2)
+
+        return {
           ...item,
           idFromApi: item?.id,
           productName: item?.materialDisplayName,
-          april: isTPD && item.april ? item.april * 24 : item.april,
-          may: isTPD && item.may ? item.may * 24 : item.may,
-          june: isTPD && item.june ? item.june * 24 : item.june,
-          july: isTPD && item.july ? item.july * 24 : item.july,
-          august: isTPD && item.august ? item.august * 24 : item.august,
-          september:
-            isTPD && item.september ? item.september * 24 : item.september,
-          october: isTPD && item.october ? item.october * 24 : item.october,
-          november: isTPD && item.november ? item.november * 24 : item.november,
-          december: isTPD && item.december ? item.december * 24 : item.december,
-          january: isTPD && item.january ? item.january * 24 : item.january,
-          february: isTPD && item.february ? item.february * 24 : item.february,
-          march: isTPD && item.march ? item.march * 24 : item.march,
-          isEditable: false,
-        }))
-        setRowsMaxCapacity(formatted)
-      } else {
+          april,
+          may,
+          june,
+          total,
+          isEditable: true,
+        }
+      })
+      setRowsMaxCapacity(formatted)
+    } else {
         setRowsMaxCapacity([])
       }
     } catch (error) {
@@ -826,7 +954,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: false,
+      saveBtn: true,
       units: ['TPH', 'TPD'],
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       titleName: percentageTitle,
@@ -901,10 +1029,8 @@ const ProductionvolumeData = ({ permissions }) => {
             : true,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
-
-      //TEXT NOTE CHANGED TO 01 YEARS
       titleAndInformation:
-        'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.',
+        'Average Ethylene Production achieved in the last 01 year historical data in different furnace mode of operation.',
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
       titleName:
@@ -1061,20 +1187,6 @@ const ProductionvolumeData = ({ permissions }) => {
 
   max_achieved_capacity = colDefs_max_achieved_capacity
 
-  if (
-    ( VERTICAL_NAME?.toLowerCase() == 'elastomer') &&
-    conditionForFirst
-  ) {
-    return <ProductionTarget />
-  }
-  if (
-  VERTICAL_NAME?.toLowerCase() == 'aromatics' &&
-  conditionForFirst
-) {
-  return <AromaticsProductionGrids />
-}
-
-
   return (
     <div>
       <Backdrop
@@ -1122,14 +1234,30 @@ const ProductionvolumeData = ({ permissions }) => {
       {/* MAX_ACHIEVED_CAPACITY */}
       {conditionForFirst && (
         <KendoDataTables
+          modifiedCells={modifiedCellsMaxCapacity}
+          setModifiedCells={setModifiedCellsMaxCapacity}
+          enableSaveAddBtn={enableSaveAddBtnMaxCapacity}
           setRows={setRowsMaxCapacity}
           columns={max_achieved_capacity}
           rows={rowsMaxCapacity}
           fetchData={fetchMaxCapacityData}
+          saveChanges={saveChangesMaxCapacity}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
           permissions={adjustedPermissionsGrid1}
           selectedUnit={unitMaxCapacity}
           setSelectedUnit={setUnitMaxCapacity}
           handleUnitChange={handleUnitChangeMaxCapacity}
+          handleRemarkCellClick={handleRemarkCellClickMaxCapacity}
+          experimentalFeatures={{ newEditingApi: true }}
+          remarkDialogOpen={remarkDialogOpenMaxCapacity}
+          setRemarkDialogOpen={setRemarkDialogOpenMaxCapacity}
+          currentRemark={currentRemarkMaxCapacity}
+          setCurrentRemark={setCurrentRemarkMaxCapacity}
+          currentRowId={currentRowIdMaxCapacity}
+          setEnableSaveAddBtn={setEnableSaveAddBtnMaxCapacity}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
@@ -1187,4 +1315,4 @@ const ProductionvolumeData = ({ permissions }) => {
   )
 }
 
-export default ProductionvolumeData
+export default AromaticsProductionGrids
