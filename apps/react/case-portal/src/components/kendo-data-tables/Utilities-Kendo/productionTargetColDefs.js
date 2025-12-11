@@ -104,7 +104,6 @@ export function getColDefsDesignCapacityAROMATICS(headerMap = {}, valueFormat) {
       field: 'remarks',
       title: 'Remark',
       editable: true,
-      widthT: 200,
       align: 'left',
       headerAlign: 'left',
     },
@@ -204,7 +203,7 @@ export function getColDefsMaxAchievedCapacityAROMATICS(headerMap = {}, valueForm
       editable: true,
       align: 'left',
       headerAlign: 'left',
-      widthT: 200,
+      
     },
     
   ]

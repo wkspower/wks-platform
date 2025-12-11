@@ -407,11 +407,13 @@ const PackagingConsumables = (permissions) => {
       marginBottom: true,
       allAction: true,
       downloadExcelBtn: false,
+      downloadExcelBtnFromUI: true,
       showNoteWhileDeleting: false,
       showTitleNameBusiness: true,
       titleName: `${SCREEN_NAME}`,
       uploadExcelBtn: false,
       packagingYears: ['Budget', 'Actual'], // Year dropdown options
+      ExcelName: `${selectedYear}_${PLANT_NAME}_${SCREEN_NAME}`,
     },
     isOldYear,
   )

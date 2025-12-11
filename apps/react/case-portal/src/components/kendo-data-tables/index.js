@@ -1259,7 +1259,7 @@ const KendoDataTables = ({
                   }}
                   className='dropdown-select'
                   variant='outlined'
-                  label='Select Year'
+                  label='Select'
                   InputLabelProps={{
                     shrink: true,
                     sx: {
