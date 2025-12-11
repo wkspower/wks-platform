@@ -633,7 +633,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			} 
 				 else if(verticalName.equalsIgnoreCase("AROMATICS"))
 				 {   
-					 obj =findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,getVersion(year,plantFKId));
+					 obj =findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,getVersion(year,plantFKId),reportTypes.get(0));
 				   }
 				else {
 				obj = findData(year, plantFKId, viewName,reportTypes.get(0));
@@ -701,10 +701,11 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				}
 				
-				/*
-				 * if(verticalName.equalsIgnoreCase("AROMATICS")) {
-				 * configurationDTO.setVersion(row[22] != null ? row[22].toString() : ""); }
-				 */
+				
+				  if(verticalName.equalsIgnoreCase("AROMATICS")) {
+					  configurationDTO.setVersion(row[22] != null ? row[22].toString() : ""); 
+			      }
+				 
 
 				if (verticalName.equalsIgnoreCase("MEG") || verticalName.equalsIgnoreCase("ELASTOMER")
 						|| verticalName.equalsIgnoreCase("CRACKER")
@@ -1871,7 +1872,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 	
-	public List<Object[]> findByYearAndPlantFkIdAROMATICS(String year, UUID plantFKId, String viewName, String version) {
+	public List<Object[]> findByYearAndPlantFkIdAROMATICS(String year, UUID plantFKId, String viewName, String version,String reportType) {
 	    try {
 	        String sql = "SELECT "
 	                + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
@@ -1902,7 +1903,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	                + "    AND NAT.AuditYear = :year "
 	                + "    AND NAT.AttributeValueVersion = :version "
 	                + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
-	                + "  AND NP.Plant_FK_Id = :plantFKId "
+	                + "  AND NP.Plant_FK_Id = :plantFKId AND NP.ConfigTypeName = :reportType "
 	                + "GROUP BY "
 	                + "    NP.NormParameter_FK_Id, "
 	                + "    NP.TypeDisplayName, "
@@ -1917,6 +1918,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	        query.setParameter("year", year);
 	        query.setParameter("plantFKId", plantFKId);
 	        query.setParameter("version", version);
+	        query.setParameter("reportType", reportType);
 	        return query.getResultList();
 	    } catch (Exception e) {
 	        throw new RuntimeException("Error fetching data with dynamic view name", e);
