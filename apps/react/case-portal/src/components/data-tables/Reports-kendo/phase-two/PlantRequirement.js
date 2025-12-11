@@ -465,10 +465,10 @@ const PlantRequirement = () => {
   ]
 
   useEffect(() => {
-    if(PLANT_ID){
+    if(PLANT_ID && AOP_YEAR){
       fetchPlantRequirementData();
     }
-  }, [PLANT_ID])
+  }, [PLANT_ID,AOP_YEAR])
 
   const fetchPlantRequirementData = async () => {
     setLoading(true)
@@ -476,6 +476,7 @@ const PlantRequirement = () => {
       const res = await UtilityPlantApiServiceV2.getPlantRequirementData(
         keycloak,
         PLANT_ID,
+        AOP_YEAR
       )
       if (res?.length === 0) {
         setRows([])
@@ -486,7 +487,7 @@ const PlantRequirement = () => {
       console.log('res', res)
       // Process and set the fetched data to rows
       setRows(res)
-      setSnackbarOpen(true)
+      // setSnackbarOpen(true)
       // setSnackbarData({
       //   message: 'Data fetched successfully!',
       //   severity: 'success',
@@ -509,6 +510,7 @@ const PlantRequirement = () => {
     saveBtn: false,
     allAction: true,
     showTitleNameBusiness: true,
+    showTitle:true,
     titleName: screenTitle?.title,
   }
 
@@ -574,7 +576,7 @@ const PlantRequirement = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        title='Plant Requirement'
+        title={permissions.showTitle ? permissions.titleName : ''}
         permissions={permissions}
         saveChanges={saveChanges}
         snackbarData={snackbarData}

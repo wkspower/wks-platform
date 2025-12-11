@@ -536,17 +536,18 @@ const FixedConsumption = () => {
   ]
 
   useEffect(() => {
-    if(PLANT_ID){
-      fetchFixedConsumptionData(keycloak, PLANT_ID)
+    if(PLANT_ID&&AOP_YEAR){
+      fetchFixedConsumptionData(keycloak, PLANT_ID,AOP_YEAR)
     }
-  }, [PLANT_ID])
+  }, [PLANT_ID,AOP_YEAR])
 
-  const fetchFixedConsumptionData = async (keycloak, PLANT_ID) => {
+  const fetchFixedConsumptionData = async (keycloak, PLANT_ID,AOP_YEAR) => {
     setLoading(true)
     try {
       const res = await UtilityPlantApiServiceV2.getFixedConsumptionData(
         keycloak,
         PLANT_ID,
+        AOP_YEAR
       )
       if (res?.length === 0) {
         setRows(dummyRowsData)
@@ -581,7 +582,7 @@ const FixedConsumption = () => {
     saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
-    titleName: screenTitle?.title,
+    showTitle:true,
   }
 
   // Dummy save handler
@@ -652,7 +653,8 @@ const FixedConsumption = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        title='Fixed Consumption'
+        // title='Fixed Consumption'
+        title={screenTitle?.title}
         permissions={permissions}
         saveChanges={saveChanges}
         snackbarData={snackbarData}

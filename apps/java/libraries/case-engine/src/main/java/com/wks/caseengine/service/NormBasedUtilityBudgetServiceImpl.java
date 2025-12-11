@@ -225,7 +225,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         dto.setQuantity(null);
         dto.setAmount(null);
         dto.setPrice(null);
-        dto.setFinancialYearMonthId(null);
+        dto.setFinancialYearMonthFkId(null);
         dto.setQty(null);
         dto.setGenerationUom(null);
         return dto;

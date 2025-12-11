@@ -268,10 +268,10 @@ const Norms = () => {
   const [rows, setRows] = useState([])
 
   useEffect(() => {
-    if (PLANT_ID) {
+    if (PLANT_ID && AOP_YEAR) {
       fetchPlantRequirementData()
     }
-  }, [PLANT_ID])
+  }, [PLANT_ID,AOP_YEAR])
 
   const fetchPlantRequirementData = async () => {
     setLoading(true)
@@ -290,11 +290,7 @@ const Norms = () => {
       }
       console.log('res', res)
       setRows(flattenMonthObject(res?.data)) 
-      setSnackbarOpen(true)
-      // setSnackbarData({
-      //   message: 'Data fetched successfully!',
-      //   severity: 'success',
-      // })
+
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)

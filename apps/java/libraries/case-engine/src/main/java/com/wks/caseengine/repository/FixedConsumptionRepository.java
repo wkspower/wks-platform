@@ -39,6 +39,45 @@ public interface FixedConsumptionRepository extends JpaRepository<DummyEntity, L
    @Query(value = "UPDATE UtilityFixedConsumption SET ConsumptionValue = :consumptionValue WHERE Id IN :utilityFixedConsumptionIds AND FinancialYearMonth_FK_Id = :financialYearMonthId", nativeQuery = true)
    void updateUtilityFixedConsumption(@Param("consumptionValue") Double consumptionValue, @Param("utilityFixedConsumptionIds") List<String> utilityFixedConsumptionIds, @Param("financialYearMonthId") String financialYearMonthId);
 
+   //get FinancialYearMonthIds for UtilityFixedConsumptionIds
+   @Query(value = "SELECT FinancialYearMonth_FK_Id FROM UtilityFixedConsumption WHERE Id IN :utilityFixedConsumptionIds", nativeQuery = true)
+   List<String> getFinancialYearMonthIdsForUtilityFixedConsumptionIds(@Param("utilityFixedConsumptionIds") List<String> utilityFixedConsumptionIds);
+
+   // data entry for missing month
+   // @Modifying
+   // @Transactional                                                                                                                    
+   // @Query(value = "INSERT INTO UtilityFixedConsumption (FinancialYearMonth_FK_Id, NormParameter_FK_Id, CostCenter_FK_Id, ConsumptionValue) VALUES (:financialYearMonthId, :normParameterId, :costCenterId, :consumptionValue)", nativeQuery = true)
+   // void insertUtilityFixedConsumption(@Param("financialYearMonthId") String financialYearMonthId, @Param("normParameterId") String normParameterId, @Param("costCenterId") String costCenterId, @Param("consumptionValue") Double consumptionValue);
+
+   
+   // @Modifying
+   // @Transactional
+   // @Query(value = "INSERT INTO UtilityFixedConsumption " +
+   //         "(FinancialYearMonth_FK_Id, NormParameter_FK_Id, CostCenter_FK_Id, ConsumptionValue) " +
+   //         "OUTPUT INSERTED.Id " +
+   //         "VALUES (:financialYearMonthId, :normParameterId, :costCenterId, :consumptionValue)",
+   //         nativeQuery = true)
+   // String insertUtilityFixedConsumption(
+   //         @Param("financialYearMonthId") String financialYearMonthId,
+   //         @Param("normParameterId") String normParameterId,
+   //         @Param("costCenterId") String costCenterId,
+   //         @Param("consumptionValue") Double consumptionValue);
+   
+
+
+ @Transactional
+@Query(value = 
+    "INSERT INTO UtilityFixedConsumption " +
+    "(FinancialYearMonth_FK_Id, NormParameter_FK_Id, CostCenter_FK_Id, ConsumptionValue) " +
+    "OUTPUT INSERTED.Id " +
+    "SELECT :financialYearMonthId, :normParameterId, :costCenterId, :consumptionValue",
+    nativeQuery = true)
+String insertUtilityFixedConsumption(
+        @Param("financialYearMonthId") String financialYearMonthId,
+        @Param("normParameterId") String normParameterId,
+        @Param("costCenterId") String costCenterId,
+        @Param("consumptionValue") Double consumptionValue);
+
 
      
     

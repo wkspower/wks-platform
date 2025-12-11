@@ -9,6 +9,7 @@ import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from './AdvanceKendoTable/index'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 
 const TcsInput = () => {
   const keycloak = useSession()
@@ -34,6 +35,7 @@ const TcsInput = () => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'crude'
 
+  const headerMap = generateHeaderNames(AOP_YEAR)
   // State management
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -280,18 +282,18 @@ const TcsInput = () => {
             width: 150,
             editable: true,
           },
-          { field: 'jan', title: 'Jan-25', width: 70, editable: true },
-          { field: 'feb', title: 'Feb-25', width: 70, editable: true },
-          { field: 'march', title: 'March-25', width: 70, editable: true },
-          { field: 'apr', title: 'Apr-25', width: 70, editable: true },
-          { field: 'may', title: 'May-25', width: 70, editable: true },
-          { field: 'june', title: 'June-25', width: 70, editable: true },
-          { field: 'july', title: 'July-25', width: 70, editable: true },
-          { field: 'aug', title: 'Aug-25', width: 70, editable: true },
-          { field: 'sep', title: 'Sep-25', width: 70, editable: true },
-          { field: 'oct', title: 'Oct-25', width: 70, editable: true },
-          { field: 'nov', title: 'Nov-25', width: 70, editable: true },
-          { field: 'dec', title: 'Dec-25', width: 70, editable: true },
+          { field: 'apr', title: headerMap[4], width: 70, editable: true },
+          { field: 'may', title: headerMap[5], width: 70, editable: true },
+          { field: 'june', title: headerMap[6], width: 70, editable: true },
+          { field: 'july', title: headerMap[7], width: 70, editable: true },
+          { field: 'aug', title: headerMap[8], width: 70, editable: true },
+          { field: 'sep', title: headerMap[9], width: 70, editable: true },
+          { field: 'oct', title: headerMap[10], width: 70, editable: true },
+          { field: 'nov', title: headerMap[11], width: 70, editable: true },
+          { field: 'dec', title: headerMap[12], width: 70, editable: true },
+          { field: 'jan', title: headerMap[1], width: 70, editable: true },
+          { field: 'feb', title: headerMap[2], width: 70, editable: true },
+          { field: 'march', title:headerMap[3], width: 70, editable: true },
         ]
       case 'ROGC':
           return [
@@ -302,31 +304,19 @@ const TcsInput = () => {
             editable: true,
             type:'text'
           },
-          // {field:'qtr1',title:'Qtr1', children:[ 
-            {field: 'jan', title: 'Jan-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'feb', title: 'Feb-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'march', title: 'March-25', width: 70, editable: true, format: valueFormat,},
-          // ]},
-          // {field:'qtr2',title:'Qtr2', children:[ 
-            { field: 'apr', title: 'Apr-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'may', title: 'May-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'june', title: 'June-25', width: 70, editable: true, format: valueFormat,},
-          // ]},
-          // {field:'qtr3',title:'Qtr3', children:[
-            { field: 'july', title: 'July-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'aug', title: 'Aug-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'sep', title: 'Sep-25', width: 70, editable: true, format: valueFormat,},
-          // ]},
-          // {field:'qtr4',title:'Qtr4', children:[
-            { field: 'oct', title: 'Oct-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'nov', title: 'Nov-25', width: 70, editable: true, format: valueFormat,},
-            { field: 'dec', title: 'Dec-25', width: 70, editable: true, format: valueFormat,},
-          // ]},
-          //  {field:'qtr1',title:'Qtr1', children:[ 
-            // {field: 'jan', title: 'Jan-26', width: 70, editable: true, format: valueFormat,},
-            // { field: 'feb', title: 'Feb-26', width: 70, editable: true, format: valueFormat,},
-            // { field: 'march', title: 'March-26', width: 70, editable: true, format: valueFormat,},
-          // ]},
+            { field: 'apr', title: headerMap[4], width: 70, editable: true, format: valueFormat,},
+            { field: 'may', title: headerMap[5], width: 70, editable: true, format: valueFormat,},
+            { field: 'june', title: headerMap[6], width: 70, editable: true, format: valueFormat,},
+            { field: 'july', title:headerMap[7], width: 70, editable: true, format: valueFormat,},
+            { field: 'aug', title: headerMap[8], width: 70, editable: true, format: valueFormat,},
+            { field: 'sep', title: headerMap[9], width: 70, editable: true, format: valueFormat,},
+            { field: 'oct', title: headerMap[10], width: 70, editable: true, format: valueFormat,},
+            { field: 'nov', title: headerMap[11], width: 70, editable: true, format: valueFormat,},
+            { field: 'dec', title: headerMap[12], width: 70, editable: true, format: valueFormat,},
+            {field: 'jan', title:headerMap[1], width: 70, editable: true, format: valueFormat,},
+            { field: 'feb', title: headerMap[2], width: 70, editable: true, format: valueFormat,},
+            { field: 'march', title: headerMap[3], width: 70, editable: true, format: valueFormat,},
+
         ] 
       case 'Crude Blend Window':
         return [

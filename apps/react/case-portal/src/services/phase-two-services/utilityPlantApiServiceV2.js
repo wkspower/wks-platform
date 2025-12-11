@@ -20,8 +20,8 @@ export const UtilityPlantApiServiceV2 = {
 }
 
 // ===================== || Fixed Consumption APIs || ===================== //
-async function getFixedConsumptionData(keycloak, PLANT_ID) {
- const url = `${Config.CaseEngineUrl}/task/fixed-consumption/${PLANT_ID}`
+async function getFixedConsumptionData(keycloak, PLANT_ID,AOP_YEAR) {
+ const url = `${Config.CaseEngineUrl}/task/fixed-consumption/${PLANT_ID}?financialYear=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -64,8 +64,8 @@ async function saveFixedConsumptionData(keycloak, PLANT_ID, payload) {
 }
 
 // ===================== || Plant Requirement APIs || ===================== //
-async function getPlantRequirementData(keycloak, PLANT_ID) {
-  const url = `${Config.CaseEngineUrl}/task/plant-requirement/${PLANT_ID}`
+async function getPlantRequirementData(keycloak, PLANT_ID,AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/plant-requirement/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

@@ -26,14 +26,14 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 	private PlantsRepository plantsRepository;
 
 	@Override
-	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId) {
+	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId, String year) {
 		
 		List<PlantRequirementDTO> cppConsumptionData = new ArrayList<>();
 		Plants plant = plantsRepository.findById(plantId)
 				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 		String procedureName = "GetPlantConsumptionByMaterial";
 		try {
-			List<Object[]> results = getAllCPPPlantConsumptionData(procedureName, plantId);
+			List<Object[]> results = getAllCPPPlantConsumptionData(procedureName, plantId,year);
 
 			for (Object[] row : results) {
 				PlantRequirementDTO materialYearlyConsumptionData = new PlantRequirementDTO();
@@ -69,16 +69,15 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
 	}
 
-	public List<Object[]> getAllCPPPlantConsumptionData(String procedureName, UUID plantId) {
+	public List<Object[]> getAllCPPPlantConsumptionData(String procedureName, UUID plantId,String financialYear) {
 		try {
 
 			String sql = "EXEC " + procedureName +
-					" @CPPPlantId = :CPPPlantId";
-
+					" @CPPPlantId = :CPPPlantId, @AOPYear = :AOPYear";
 			Query query = entityManager.createNativeQuery(sql);
 
 			query.setParameter("CPPPlantId", plantId);
-
+			query.setParameter("AOPYear", financialYear);
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format ", e);

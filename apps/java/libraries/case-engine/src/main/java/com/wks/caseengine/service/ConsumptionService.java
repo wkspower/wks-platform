@@ -6,6 +6,6 @@ import com.wks.caseengine.dto.PlantRequirementDTO;
 
 public interface ConsumptionService {
 	
-	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId);
+	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId, String financialYear);
 
 }

@@ -24,9 +24,9 @@ public class ConsumptionController {
 	@Autowired
 	private ConsumptionService consumptionService; 
 	
-	@GetMapping(value = "/plant-requirement/{plantId}")
-	public ResponseEntity<List<PlantRequirementDTO>> getAllSites(@PathVariable UUID plantId) {
-		List<PlantRequirementDTO> listOfCppConsumptions = consumptionService.getCppConsumptions(plantId);
+	@GetMapping(value = "/plant-requirement/{plantId}/{financialYear}")
+	public ResponseEntity<List<PlantRequirementDTO>> getAllSites(@PathVariable UUID plantId, @PathVariable String financialYear) {
+		List<PlantRequirementDTO> listOfCppConsumptions = consumptionService.getCppConsumptions(plantId, financialYear);
 	    return ResponseEntity.ok(listOfCppConsumptions);
 	}
 

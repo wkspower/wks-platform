@@ -54,6 +54,26 @@ public class FixedConsumptionService {
            System.out.println("*** fixedComsuption normParameterIds : " + normParameterId);
            System.out.println("*** fixedComsuption fixedConsumptionIds : " + utilityFixedConsumptionIds);
 
+           // Data entry for missing month. this is to allow edit feature for blank cells. 
+           // find the missing month
+           if(utilityFixedConsumptionIds.size() != 12) {  
+            // get FinancialYearMonthIds from apr 2025 to march 2026
+            List<String> AllfinancialYearMonthIdsBetweenApril25AndMarch26 = financialYearMonthList.stream().filter(f -> (Integer.parseInt(f.getMonth()) >= 4 && f.getYear().equals("2025")) || (Integer.parseInt(f.getMonth()) <= 3 && f.getYear().equals("2026"))).map(f -> f.getId()).toList();
+          
+          
+         List<String> financialYearMonthIdsForUtilityFixedConsumptionIds = repository.getFinancialYearMonthIdsForUtilityFixedConsumptionIds(utilityFixedConsumptionIds);
+
+         List<String> missingMonthIds = AllfinancialYearMonthIdsBetweenApril25AndMarch26.stream().filter(f -> !financialYearMonthIdsForUtilityFixedConsumptionIds.contains(f)).toList();
+            System.out.println("*** missingMonthIds : " + missingMonthIds);
+            // make insert query for missing month
+             for(String missingMonthId : missingMonthIds) {
+                System.out.println("making entry for missing month : " + missingMonthId);
+                String utilityFixedConsumptionId = repository.insertUtilityFixedConsumption(missingMonthId, normParameterId, costCenterIds.get(0), 0.0);
+                System.out.println("*** utilityFixedConsumptionId : " + utilityFixedConsumptionId);
+                utilityFixedConsumptionIds.add(utilityFixedConsumptionId);
+             }
+           }
+ 
             if(fixedConsumptionDto.getApril() != null) {  
 
             String financialYearMonthId =    financialYearMonthList.stream()

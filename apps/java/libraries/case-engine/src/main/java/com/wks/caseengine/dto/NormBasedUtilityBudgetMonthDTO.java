@@ -22,8 +22,8 @@ public class NormBasedUtilityBudgetMonthDTO {
     @JsonProperty("price")
     private Double price;
 
-    @JsonProperty("financialYearMonthId")
-    private String financialYearMonthId;
+    @JsonProperty("financialYearMonthFkId")
+    private String financialYearMonthFkId;
 
     @JsonProperty("QTY")
     private Double qty;
