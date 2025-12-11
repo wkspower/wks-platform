@@ -633,7 +633,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			} 
 				 else if(verticalName.equalsIgnoreCase("AROMATICS"))
 				 {   
-					 obj =findByYearAndPlantFkIdAROMATICS(year, plantFKId, viewName,getVersion(year,plantFKId),reportTypes.get(0));
+					 obj =findByYearAndPlantFkIdAROMATICSExcel(year, plantFKId, viewName,getVersion(year,plantFKId),reportTypes.get(0));
 				   }
 				else {
 				obj = findData(year, plantFKId, viewName,reportTypes.get(0));
@@ -1872,7 +1872,59 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 	
-	public List<Object[]> findByYearAndPlantFkIdAROMATICS(String year, UUID plantFKId, String viewName, String version,String reportType) {
+	public List<Object[]> findByYearAndPlantFkIdAROMATICS(String year, UUID plantFKId, String viewName, String version) {
+	    try {
+	        String sql = "SELECT "
+	                + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '1' THEN NAT.AttributeValue ELSE NULL END) AS Jan, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '2' THEN NAT.AttributeValue ELSE NULL END) AS Feb, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '3' THEN NAT.AttributeValue ELSE NULL END) AS Mar, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '4' THEN NAT.AttributeValue ELSE NULL END) AS Apr, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '5' THEN NAT.AttributeValue ELSE NULL END) AS May, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '6' THEN NAT.AttributeValue ELSE NULL END) AS Jun, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '7' THEN NAT.AttributeValue ELSE NULL END) AS Jul, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '8' THEN NAT.AttributeValue ELSE NULL END) AS Aug, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '9' THEN NAT.AttributeValue ELSE NULL END) AS Sep, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '10' THEN NAT.AttributeValue ELSE NULL END) AS Oct, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '11' THEN NAT.AttributeValue ELSE NULL END) AS Nov, "
+	                + "    MAX(CASE WHEN NAT.AOPMonth = '12' THEN NAT.AttributeValue ELSE NULL END) AS Dec, "
+	                + "    MAX(NAT.Remarks) AS Remarks, "
+	                + "    MAX(NAT.Id) AS NormAttributeTransaction_Id, "
+	                + "    MAX(NAT.AuditYear) AS AuditYear, "
+	                + "    MAX(NP.UOM) AS UOM, "
+	                + "    NP.ConfigTypeDisplayName AS ConfigTypeDisplayName, "
+	                + "    NP.TypeDisplayName AS TypeDisplayName, "
+	                + "    NP.ConfigTypeName AS ConfigTypeName, "
+	                + "    NP.TypeName AS TypeName, MAX(NP.DisplayName), MAX(NAT.AttributeValueVersion) "
+	                + "FROM " + viewName + " NP "
+	                + "JOIN NormParameterType NPT ON NP.NormParameterType_FK_Id = NPT.Id "
+	                + "LEFT JOIN NormAttributeTransactions NAT ON NAT.NormParameter_FK_Id = NP.NormParameter_FK_Id "
+	                + "    AND NAT.AuditYear = :year "
+	                + "    AND NAT.AuditYear = :year "
+	                + "    AND NAT.AttributeValueVersion = :version "
+	                + "WHERE (NPT.Name = 'Configuration'  OR NPT.Name = 'Constant') "
+	                + "  AND NP.Plant_FK_Id = :plantFKId "
+	                + "GROUP BY "
+	                + "    NP.NormParameter_FK_Id, "
+	                + "    NP.TypeDisplayName, "
+	                + "    NP.TypeDisplayOrder, "
+	                + "    NP.ConfigTypeDisplayName, "
+	                + "    NP.ConfigTypeName, "
+	                + "    NP.TypeName, "
+	                + "    NP.DisplayOrder "
+	                + "ORDER BY NP.TypeDisplayOrder, NP.DisplayOrder";
+
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("year", year);
+	        query.setParameter("plantFKId", plantFKId);
+	        query.setParameter("version", version);
+	        return query.getResultList();
+	    } catch (Exception e) {
+	        throw new RuntimeException("Error fetching data with dynamic view name", e);
+	    }
+	}
+	
+	public List<Object[]> findByYearAndPlantFkIdAROMATICSExcel(String year, UUID plantFKId, String viewName, String version,String reportType) {
 	    try {
 	        String sql = "SELECT "
 	                + "    NP.NormParameter_FK_Id AS NormParameter_FK_Id, "
@@ -1924,6 +1976,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	        throw new RuntimeException("Error fetching data with dynamic view name", e);
 	    }
 	}
+
 	
 	public List<Object[]> findShutdownRate(String year, UUID plantFKId,String type, String viewName) {
 		try {
