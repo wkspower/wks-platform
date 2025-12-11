@@ -20,9 +20,9 @@ public class FixedConsumptionService {
     @Autowired
     private FixedConsumptionRepository repository;
 
-    public List<FixedConsumptionDto> getData(UUID plantId) {
+    public List<FixedConsumptionDto> getData(UUID plantId, String financialYear) {
 
-        return repository.getFixedConsumption(plantId)
+        return repository.getFixedConsumption(plantId, financialYear)
                          .stream()
                          .map(this::toDto)
                          .toList();
@@ -211,31 +211,31 @@ public class FixedConsumptionService {
         dto.setUom(p.getUom());
         dto.setNormParameterId(p.getNormParameterId());
 
-        dto.setApril(p.get202504());
-        dto.setMay(p.get202505());
-        dto.setJune(p.get202506());
-        dto.setJuly(p.get202507());
-        dto.setAug(p.get202508());
-        dto.setSep(p.get202509());
-        dto.setOct(p.get202510());
-        dto.setNov(p.get202511());
-        dto.setDec(p.get202512());
-        dto.setJan(p.get202601());
-        dto.setFeb(p.get202602());
-        dto.setMar(p.get202603());
+        dto.setApril(p.getApr());
+        dto.setMay(p.getMay());
+        dto.setJune(p.getJun());
+        dto.setJuly(p.getJul());
+        dto.setAug(p.getAug());
+        dto.setSep(p.getSep());
+        dto.setOct(p.getOct());
+        dto.setNov(p.getNov());
+        dto.setDec(p.getDec());
+        dto.setJan(p.getJan());
+        dto.setFeb(p.getFeb());
+        dto.setMar(p.getMar());
 
-        dto.setGrandTotal(  Optional.ofNullable(p.get202504()).orElse(0.0) +
-        Optional.ofNullable(p.get202505()).orElse(0.0) +
-        Optional.ofNullable(p.get202506()).orElse(0.0) +
-        Optional.ofNullable(p.get202507()).orElse(0.0) +
-        Optional.ofNullable(p.get202508()).orElse(0.0) +
-        Optional.ofNullable(p.get202509()).orElse(0.0) +
-        Optional.ofNullable(p.get202510()).orElse(0.0) +
-        Optional.ofNullable(p.get202511()).orElse(0.0) +
-        Optional.ofNullable(p.get202512()).orElse(0.0) +
-        Optional.ofNullable(p.get202601()).orElse(0.0) +
-        Optional.ofNullable(p.get202602()).orElse(0.0) +
-        Optional.ofNullable(p.get202603()).orElse(0.0));
+        dto.setGrandTotal(  Optional.ofNullable(p.getApr()).orElse(0.0) +
+        Optional.ofNullable(p.getMay()).orElse(0.0) +
+        Optional.ofNullable(p.getJun()).orElse(0.0) +
+        Optional.ofNullable(p.getJul()).orElse(0.0) +
+        Optional.ofNullable(p.getAug()).orElse(0.0) +
+        Optional.ofNullable(p.getSep()).orElse(0.0) +
+        Optional.ofNullable(p.getOct()).orElse(0.0) +
+        Optional.ofNullable(p.getNov()).orElse(0.0) +
+        Optional.ofNullable(p.getDec()).orElse(0.0) +
+        Optional.ofNullable(p.getJan()).orElse(0.0) +
+        Optional.ofNullable(p.getFeb()).orElse(0.0) +
+        Optional.ofNullable(p.getMar()).orElse(0.0));
 
         return dto;
     }

@@ -21,7 +21,7 @@ export const UtilityPlantApiServiceV2 = {
 
 // ===================== || Fixed Consumption APIs || ===================== //
 async function getFixedConsumptionData(keycloak, PLANT_ID,AOP_YEAR) {
- const url = `${Config.CaseEngineUrl}/task/fixed-consumption/${PLANT_ID}?financialYear=${AOP_YEAR}`
+ const url = `${Config.CaseEngineUrl}/task/fixed-consumption/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

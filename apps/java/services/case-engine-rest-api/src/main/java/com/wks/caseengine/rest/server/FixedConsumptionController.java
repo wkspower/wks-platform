@@ -17,9 +17,9 @@ public class FixedConsumptionController {
     @Autowired
     private FixedConsumptionService service;
 
-    @GetMapping("/fixed-consumption/{plantId}")
-    public List<FixedConsumptionDto> getData(@PathVariable UUID plantId) {
-        return service.getData(plantId);
+    @GetMapping("/fixed-consumption/{plantId}/{financialYear}")
+    public List<FixedConsumptionDto> getData(@PathVariable UUID plantId, @PathVariable String financialYear) {
+        return service.getData(plantId, financialYear);
     }
 
     @PostMapping("/update-fixed-consumption")

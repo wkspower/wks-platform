@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface FixedConsumptionRepository extends JpaRepository<DummyEntity, Long> {
    // @Transactional
-    @Query(value = "EXEC GetFixedConsumptionByPlant :plantId", nativeQuery = true)
-    List<FixedConsumptionProjection> getFixedConsumption(@Param("plantId") UUID plantId);
+    @Query(value = "EXEC GetFixedConsumptionByPlant :plantId, :financialYear", nativeQuery = true)
+    List<FixedConsumptionProjection> getFixedConsumption(@Param("plantId") UUID plantId, @Param("financialYear") String financialYear);
 
     @Query(value = "SELECT Id, Year, Month FROM FinancialYearMonth", nativeQuery = true)
     List<FinancialYearMonthProjection> getFinancialYearMonth();

@@ -13,17 +13,17 @@ public interface FixedConsumptionProjection {
     String getUom();
     String getNormParameterId();
 
-    Double get202504();
-    Double get202505();
-    Double get202506();
-    Double get202507();
-    Double get202508();
-    Double get202509();
-    Double get202510();
-    Double get202511();
-    Double get202512();
-    Double get202601();
-    Double get202602();
-    Double get202603();
+    Double getApr();
+	Double getMay();
+	Double getJun();
+	Double getJul();
+	Double getAug();
+	Double getSep();
+	Double getOct();
+	Double getNov();
+	Double getDec();
+	Double getJan();
+	Double getFeb();
+	Double getMar();
 }
 
