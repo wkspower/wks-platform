@@ -346,7 +346,7 @@ const CrakcerConstants = () => {
       showAction: false,
       allAction: true,
       showTitleNameBusiness: true,
-      titleName: 'Criteria',
+      titleName: 'Constant',
       saveWithRemark: true,
       saveBtn: true,
       showCalculate: false,
