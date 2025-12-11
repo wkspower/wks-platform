@@ -2313,6 +2313,17 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						dto.setProductName(getStringCellValue(row.getCell(1), dto));
 						dto.setAuditYear(year);
 						dto.setApr(getNumericCellValue(row.getCell(2), dto));
+						dto.setMay(getNumericCellValue(row.getCell(2), dto));
+						dto.setJun(getNumericCellValue(row.getCell(2), dto));
+						dto.setJul(getNumericCellValue(row.getCell(2), dto));
+						dto.setAug(getNumericCellValue(row.getCell(2), dto));
+						dto.setSep(getNumericCellValue(row.getCell(2), dto));
+						dto.setOct(getNumericCellValue(row.getCell(2), dto));
+						dto.setNov(getNumericCellValue(row.getCell(2), dto));
+						dto.setDec(getNumericCellValue(row.getCell(2), dto));
+						dto.setJan(getNumericCellValue(row.getCell(2), dto));
+						dto.setFeb(getNumericCellValue(row.getCell(2), dto));
+						dto.setMar(getNumericCellValue(row.getCell(2), dto));
 						dto.setRemarks(getStringCellValue(row.getCell(3), dto));
 						dto.setNormParameterFKId(getStringCellValue(row.getCell(4), dto)); 
 						dto.setId(getStringCellValue(row.getCell(5), dto)); 
