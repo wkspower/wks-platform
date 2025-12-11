@@ -48,9 +48,9 @@ const specificConsumptionCategories = () => [
 // Categories that should have norms grid with their custom titles
 const categoriesWithNorms = {
   RawMaterial: 'Raw Material',
-  CatChem: 'Cat Chem',
+  ByProducts: 'By Product',
+  CatChem: 'Catalysts & Chemicals',
   UtilityConsumption: 'Utilities',
-  ByProducts: 'By Products',
 }
 
 export default function SpecificConsumptionNorm() {

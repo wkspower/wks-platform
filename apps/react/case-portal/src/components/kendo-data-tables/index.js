@@ -1253,7 +1253,9 @@ const KendoDataTables = ({
               {permissions?.showPackagingYear && (
                 <TextField
                   select
-                  value={selectedPackagingYear || permissions?.packagingYears?.[0]}
+                  value={
+                    selectedPackagingYear || permissions?.packagingYears?.[0]
+                  }
                   onChange={(e) => {
                     handleYearChange(e.target.value)
                   }}
@@ -1273,7 +1275,7 @@ const KendoDataTables = ({
                   }}
                 >
                   <MenuItem value='' disabled>
-                    Select Year
+                    Select
                   </MenuItem>
 
                   {permissions?.packagingYears?.map((year) => (

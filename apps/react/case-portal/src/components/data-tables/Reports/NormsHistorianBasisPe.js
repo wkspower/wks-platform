@@ -455,7 +455,7 @@ const NormsHistorianBasisPe = () => {
         })}
       </div>
 
-      {activeTabs?.length > 1 && (
+      {/* {activeTabs?.length > 1 && (
         <Tabs
           value={tabIndex}
           onChange={(e, newIndex) => setTabIndex(newIndex)}
@@ -484,7 +484,7 @@ const NormsHistorianBasisPe = () => {
             />
           ))}
         </Tabs>
-      )}
+      )} */}
 
       {tabIndex === 0 && (
         <Box display='flex' justifyContent='flex-end' mb='2px'>
@@ -547,7 +547,7 @@ const NormsHistorianBasisPe = () => {
             })}
           </>
         )}
-
+        {/* THIS TAB IS NOT LONGER REQUIRED */}
         {tabIndex === 1 && <ConsumptionNormsHistorianBasis />}
       </Box>
     </div>
