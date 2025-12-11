@@ -28,7 +28,7 @@ import moment from '../../../node_modules/moment/moment'
 import AopDesignBasisNorms from './AopDesignBasisNorms'
 import useValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
-const CrakcerConstants = () => {
+const CrakcerConstantsBestAchieved = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
@@ -869,4 +869,4 @@ const CrakcerConstants = () => {
   )
 }
 
-export default CrakcerConstants
+export default CrakcerConstantsBestAchieved

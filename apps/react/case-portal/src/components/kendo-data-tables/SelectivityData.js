@@ -632,6 +632,7 @@ const SelectivityData = (props) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          `${VERTICAL_NAME}_Production Norms Basis - Constant`,
         )
       }
 

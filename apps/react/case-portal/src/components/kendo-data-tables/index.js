@@ -1554,12 +1554,14 @@ const KendoDataTables = ({
               allRedCell2={allRedCell2}
               size='small'
               pageable={
-                rows?.length > 100
-                  ? {
-                      buttonCount: 4,
-                      pageSizes: [10, 50, 100],
-                    }
-                  : false
+                permissions?.makePagable === false
+                  ? false
+                  : rows?.length > 100
+                    ? {
+                        buttonCount: 4,
+                        pageSizes: [10, 50, 100],
+                      }
+                    : false
               }
             >
               {groupBy && <ExcelExportColumn field={groupBy} title='Type' />}

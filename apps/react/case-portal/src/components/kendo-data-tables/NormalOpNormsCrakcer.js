@@ -18,13 +18,15 @@ import { useDispatch, useSelector } from 'react-redux'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
 import { useSession } from 'SessionStoreContext'
 import { setIsBlocked } from 'store/reducers/dataGridStore'
-import CrakcerConstants from './CrackerConstants'
+
 import KendoDataTables from './index'
 import SelectivityData from './SelectivityData'
 import { DataService } from 'services/DataService'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service.js'
 import { OptimizerDataApiService } from 'services/optimizer-api-service'
+import CrakcerConstantsBestAchieved from './CrakcerConstantsBestAchieved'
+import CrakcerConstants from './CrakcerConstants'
 // Constants
 const MONTHS = [
   'april',
@@ -337,36 +339,6 @@ const NormalOpNormsScreenCracker = () => {
     [keycloak, PLANT_ID, AOP_YEAR],
   )
 
-  const fetchConstantsData = useCallback(async () => {
-    setProductionRowsConstants([])
-    try {
-      const constantsRes =
-        await DataService.getCatalystSelectivityDataConstants(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      if (constantsRes?.code !== 200) {
-        setProductionRowsConstants([])
-        return
-      }
-
-      const data = constantsRes?.data
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        idFromApi: item.id,
-        id: index,
-        originalRemark: item.Remarks,
-        srNo: index + 1,
-        Particulars: item.NormTypeName,
-        remarks: item.Remarks,
-      }))
-
-      setProductionRowsConstants(formattedData)
-    } catch (error) {
-      console.error('Error fetching constants data:', error)
-    }
-  }, [keycloak, PLANT_ID, AOP_YEAR])
   // permission helper: if old year, getAdjustedPermissions blocks actions
   const getAdjustedPermissions = useCallback((permissions, isOldYearFlag) => {
     if (isOldYearFlag != 1) return permissions
@@ -739,8 +711,6 @@ const NormalOpNormsScreenCracker = () => {
         // Load data based on selected tab
         if (tabIndex === 0) {
           promises.push(fetchData(gId))
-        } else if (tabIndex === 1) {
-          promises.push(fetchConstantsData())
         }
         // else if (tabIndex === 3) {
         //   promises.push(fetchModeData(gId))
@@ -760,7 +730,7 @@ const NormalOpNormsScreenCracker = () => {
       fetchModeData,
       fetchFinalNorms,
       fetchData,
-      fetchConstantsData,
+
       selectedTab,
       PLANT_ID,
       AOP_YEAR,
@@ -1247,7 +1217,7 @@ const NormalOpNormsScreenCracker = () => {
           reportTypes={reportTypes}
         />
       )}
-      {selectedTab === 1 && (
+      {/* {selectedTab === 1 && (
         <SelectivityData
           rows={productionRowsConstants}
           loading={loading}
@@ -1257,10 +1227,13 @@ const NormalOpNormsScreenCracker = () => {
           groupBy='Particulars'
           tabIndex='1'
         />
-      )}
+      )} */}
+
+      {/* Constant Tab */}
+      {selectedTab === 1 && <CrakcerConstants />}
 
       {/* Criteria Tab */}
-      {selectedTab === 2 && <CrakcerConstants />}
+      {selectedTab === 2 && <CrakcerConstantsBestAchieved />}
 
       {/* Norms Selection Tab */}
       {selectedTab === 3 && (

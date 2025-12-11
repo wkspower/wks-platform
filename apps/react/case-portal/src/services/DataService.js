@@ -1832,7 +1832,12 @@ async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function getConfigurationExcelConstants(keycloak, PLANT_ID, AOP_YEAR) {
+async function getConfigurationExcelConstants(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  FILE_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
 
   const headers = {
@@ -1852,7 +1857,7 @@ async function getConfigurationExcelConstants(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis - Constants.xlsx'
+    a.download = FILE_NAME || 'Production & Norms Basis - Constants.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()
