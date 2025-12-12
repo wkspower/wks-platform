@@ -28,7 +28,14 @@ public class FixedConsumptionService {
                          .toList();
     }
 
-    public void updateData(List<FixedConsumptionDto> fixedConsumptionDtoList) { 
+    public void updateData(List<FixedConsumptionDto> fixedConsumptionDtoList, String financialYear) { 
+
+// get start year and end year from financialYear
+        String input = financialYear;    // payload must contain 2026-27 format
+
+        String startYear = input.substring(0, 4);               // "2026"
+        String endYearSuffix = input.substring(5);              // "27"
+        String endYear = startYear.substring(0, 2) + endYearSuffix; // "2027"
 
         List<FinancialYearMonthProjection> financialYearMonthList = repository.getFinancialYearMonth();
 
@@ -48,7 +55,11 @@ public class FixedConsumptionService {
 
            String normParameterId =  fixedConsumptionDto.getNormParameterId();
 
-           List<String> utilityFixedConsumptionIds = repository.getUtilityFixedConsumptionIds(costCenterIds, normParameterId);
+           // will only fetch utilityFixedConsumptionIds for given year 
+           List<String> utilityFixedConsumptionIds = repository.getUtilityFixedConsumptionIds(costCenterIds, normParameterId , financialYearMonthList.stream()
+                                                    .filter(f -> (Integer.parseInt(f.getMonth()) >= 4 && f.getYear()
+                                                    .equals(startYear)) || (Integer.parseInt(f.getMonth()) <= 3 && f.getYear().equals(endYear)))
+                                                    .map(f -> f.getId()).toList());
 
            System.out.println("*** fixedComsuption costCenterIds : " + costCenterIds);
            System.out.println("*** fixedComsuption normParameterIds : " + normParameterId);
@@ -58,7 +69,7 @@ public class FixedConsumptionService {
            // find the missing month
            if(utilityFixedConsumptionIds.size() != 12) {  
             // get FinancialYearMonthIds from apr 2025 to march 2026
-            List<String> AllfinancialYearMonthIdsBetweenApril25AndMarch26 = financialYearMonthList.stream().filter(f -> (Integer.parseInt(f.getMonth()) >= 4 && f.getYear().equals("2025")) || (Integer.parseInt(f.getMonth()) <= 3 && f.getYear().equals("2026"))).map(f -> f.getId()).toList();
+            List<String> AllfinancialYearMonthIdsBetweenApril25AndMarch26 = financialYearMonthList.stream().filter(f -> (Integer.parseInt(f.getMonth()) >= 4 && f.getYear().equals(startYear)) || (Integer.parseInt(f.getMonth()) <= 3 && f.getYear().equals(endYear))).map(f -> f.getId()).toList();
           
           
          List<String> financialYearMonthIdsForUtilityFixedConsumptionIds = repository.getFinancialYearMonthIdsForUtilityFixedConsumptionIds(utilityFixedConsumptionIds);
@@ -77,7 +88,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getApril() != null) {  
 
             String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("4") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("4") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -88,7 +99,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getMay() != null) {  
 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("5") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("5") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -98,7 +109,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getJune() != null) {  
 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("6") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("6") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -108,7 +119,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getJuly() != null) {  
 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("7") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("7") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -118,7 +129,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getAug() != null) {  
 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("8") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("8") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -128,7 +139,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getSep() != null) {  
 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("9") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("9") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -138,7 +149,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getOct() != null) {  
 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("10") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("10") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -148,7 +159,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getNov() != null) {  
                 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("11") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("11") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -158,7 +169,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getDec() != null) {  
                 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("12") && f.getYear().equals("2025"))
+                .filter(f -> f.getMonth().equals("12") && f.getYear().equals(startYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -167,7 +178,7 @@ public class FixedConsumptionService {
 
             if(fixedConsumptionDto.getJan() != null) {  
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("1") && f.getYear().equals("2026"))
+                .filter(f -> f.getMonth().equals("1") && f.getYear().equals(endYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -177,7 +188,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getFeb() != null) {  
                 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("2") && f.getYear().equals("2026"))
+                .filter(f -> f.getMonth().equals("2") && f.getYear().equals(endYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
@@ -187,7 +198,7 @@ public class FixedConsumptionService {
             if(fixedConsumptionDto.getMar() != null) {  
                 
                 String financialYearMonthId =    financialYearMonthList.stream()
-                .filter(f -> f.getMonth().equals("3") && f.getYear().equals("2026"))
+                .filter(f -> f.getMonth().equals("3") && f.getYear().equals(endYear))
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 

@@ -38,8 +38,8 @@ async function getFixedConsumptionData(keycloak, PLANT_ID,AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function saveFixedConsumptionData(keycloak, PLANT_ID, payload) {
-  const url = `${Config.CaseEngineUrl}/task/update-fixed-consumption`
+async function saveFixedConsumptionData(keycloak, PLANT_ID, payload,AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/update-fixed-consumption/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

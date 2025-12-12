@@ -31,8 +31,8 @@ public interface FixedConsumptionRepository extends JpaRepository<DummyEntity, L
     @Query(value = "SELECT Id FROM NormParameters np WHERE np.Id IN ( Select NormParameterFK_Id from CostCenterNormParameterMapping map where map.CostCenterFK_Id IN :costCenterIds)", nativeQuery = true)
     List<String> getNormParameterIds(@Param("costCenterIds") List<String> costCenterIds);
 
-    @Query(value = "SELECT Id from UtilityFixedConsumption  WHERE CostCenter_FK_Id IN :costCenterIds AND NormParameter_FK_Id = :normParameterId", nativeQuery = true)
-    List<String> getUtilityFixedConsumptionIds(@Param("costCenterIds") List<String> costCenterIds, @Param("normParameterId") String normParameterId);
+    @Query(value = "SELECT Id from UtilityFixedConsumption  WHERE CostCenter_FK_Id IN :costCenterIds AND NormParameter_FK_Id = :normParameterId AND FinancialYearMonth_FK_Id IN :financialYearMonthIds", nativeQuery = true)
+    List<String> getUtilityFixedConsumptionIds(@Param("costCenterIds") List<String> costCenterIds, @Param("normParameterId") String normParameterId, @Param("financialYearMonthIds") List<String> financialYearMonthIds);
 
    @Modifying
    @Transactional

@@ -344,6 +344,16 @@ const AdvanceKendoTable = ({
       if (isModifiedCellsEmpty && !isCustomModifiedCellsEmpty) {
         setCustomModifiedCells({})
       }
+
+      if (isModifiedCellsEmpty) {
+        setEdit({})
+        setRows((prev) =>
+          prev.map((r) => ({
+            ...r,
+            inEdit: false,
+          }))
+        )
+      }
     }, [modifiedCells, customModifiedCells])
 
   const handleRemarkSave = () => {

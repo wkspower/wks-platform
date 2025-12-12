@@ -538,6 +538,7 @@ const FixedConsumption = () => {
   useEffect(() => {
     if(PLANT_ID&&AOP_YEAR){
       fetchFixedConsumptionData(keycloak, PLANT_ID,AOP_YEAR)
+      setModifiedCells({})
     }
   }, [PLANT_ID,AOP_YEAR])
 
@@ -550,7 +551,7 @@ const FixedConsumption = () => {
         AOP_YEAR
       )
       if (res?.length === 0) {
-        setRows(dummyRowsData)
+        setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
@@ -614,7 +615,8 @@ const FixedConsumption = () => {
       const response = await UtilityPlantApiServiceV2.saveFixedConsumptionData(
         keycloak,
         PLANT_ID,
-        payload
+        payload,
+        AOP_YEAR
       )
       console.log('response',response)
       // Update the local state with the saved data

@@ -22,10 +22,10 @@ public class FixedConsumptionController {
         return service.getData(plantId, financialYear);
     }
 
-    @PostMapping("/update-fixed-consumption")
-    public void updateData(@RequestBody List<FixedConsumptionDto> fixedConsumptionDtoList) {   
+    @PostMapping("/update-fixed-consumption/{financialYear}")
+    public void updateData(@PathVariable String financialYear, @RequestBody List<FixedConsumptionDto> fixedConsumptionDtoList) {   
 
-        service.updateData(fixedConsumptionDtoList);
+        service.updateData(fixedConsumptionDtoList, financialYear);
     }
 
     

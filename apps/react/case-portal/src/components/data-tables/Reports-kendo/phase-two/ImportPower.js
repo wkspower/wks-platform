@@ -7,6 +7,8 @@ import { useSession } from 'SessionStoreContext'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
+import AssetAvailability from './AssetAvailability'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
 const dummyRowsData = [
   {
     id: 1,
@@ -342,6 +344,7 @@ const ImportPower = () => {
     saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
+    showTitle:true,
     titleName: screenTitle?.title,
   }
 
@@ -418,6 +421,10 @@ const ImportPower = () => {
         setSnackbarData={setSnackbarData}
         //groupBy="plant"
       />
+
+    <Stack sx={{mt:2}}>
+      <AssetAvailability/>
+    </Stack>
     </Box>
   )
 }
