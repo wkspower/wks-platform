@@ -40,7 +40,7 @@ const CrakcerConstants = () => {
   const AOP_YEAR = year?.selectedYear
   const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
-  const [loading, setLoading] = useState(false)
+
   const [loading1, setLoading1] = useState(false)
 
   const [productionRowsConstants, setProductionRowsConstants] = useState([])
@@ -140,7 +140,7 @@ const CrakcerConstants = () => {
   ]
 
   const saveCatalystData = async (newRow) => {
-    setLoading(true)
+    setLoading1(true)
     try {
       var payload = []
 
@@ -177,7 +177,7 @@ const CrakcerConstants = () => {
           severity: 'success',
         })
         setModifiedCellsConstants({})
-        setLoading(false)
+        setLoading1(false)
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -189,10 +189,10 @@ const CrakcerConstants = () => {
       return response
     } catch (error) {
       console.error('Error saving data:', error)
-      setLoading(false)
+      setLoading1(false)
     } finally {
       fetchConstantsData()
-      setLoading(false)
+      setLoading1(false)
     }
   }
 
@@ -235,7 +235,6 @@ const CrakcerConstants = () => {
   }
 
   const uploadCrackerConstant = async (rawFile) => {
-    setLoading(true)
     setLoading1(true)
 
     try {
@@ -255,7 +254,6 @@ const CrakcerConstants = () => {
           severity: 'success',
         })
 
-        setLoading(false)
         setLoading1(false)
 
         setModifiedCellsConstants({})
@@ -285,7 +283,7 @@ const CrakcerConstants = () => {
           message: 'Partial data saved. Error file downloaded.',
           severity: 'warning',
         })
-        setLoading(false)
+
         setLoading1(false)
         fetchConstantsData()
       } else {
@@ -294,7 +292,7 @@ const CrakcerConstants = () => {
           message: 'Upload Failed!',
           severity: 'error',
         })
-        setLoading(false)
+
         setLoading1(false)
       }
 
@@ -308,7 +306,7 @@ const CrakcerConstants = () => {
         severity: 'error',
       })
     } finally {
-      setLoading(false)
+      setLoading1(false)
     }
   }
 

@@ -475,28 +475,6 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-
-        if (col.type == 'date') {
-          return (
-            <GridColumn
-              key={col.field}
-              field={col.field}
-              title={col.title || col.headerName}
-              cells={{
-                edit: {
-                  date: DateOnlyPicker,
-                },
-                data: toolTipRenderer,
-                headerCell: SimpleHeaderWithTooltip,
-              }}
-              format='{0:dd-MM-yyyy}'
-              editor='date'
-              hidden={col.hidden}
-              sortable={false}
-            />
-          )
-        }
-
         if (col.field === 'postCrDays') {
           return (
             <GridColumn

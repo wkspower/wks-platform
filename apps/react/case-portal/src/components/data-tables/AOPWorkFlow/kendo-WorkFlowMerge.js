@@ -194,7 +194,7 @@ const WorkFlowMerge = () => {
             AOP_YEAR,
             keycloak,
           ),
-          
+
           AOPWorkFlowService.calculatePlantContributionBusinessDemand(
             PLANT_ID,
             AOP_YEAR,
@@ -205,11 +205,22 @@ const WorkFlowMerge = () => {
             AOP_YEAR,
             keycloak,
           ),
-          
+
           Promise.resolve(null),
         ])
 
-      const responses = [data, res1, res2, res3, res4, res5, res6, res7, res8, res9]
+      const responses = [
+        data,
+        res1,
+        res2,
+        res3,
+        res4,
+        res5,
+        res6,
+        res7,
+        res8,
+        res9,
+      ]
 
       const allSuccess = responses.every(
         (res) => res !== null && res !== undefined,
@@ -285,10 +296,10 @@ const WorkFlowMerge = () => {
   }
 
   const handleRemarkCellClick = async (row) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     // do not delete commented code
     // try {
-    //   const cases = await DataService.getCaseId(keycloak)
+    //   const cases = await AOPWorkFlowService.getCaseId(keycloak)
     //   console.log(cases?.workflowList?.length)
     //   if (cases?.workflowList?.length !== 0) return
     setCurrentRemark(row.remark || '')
@@ -372,7 +383,7 @@ const WorkFlowMerge = () => {
   }
 
   const fetchData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       const { headers, keys, results } = await AOPWorkFlowService.getWorkflowData(
         keycloak,
@@ -406,7 +417,7 @@ const WorkFlowMerge = () => {
   }
 
   const getCaseId = async () => {
-    if(!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
+    if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
     try {
       const cases = await AOPWorkFlowService.getCaseId(
         keycloak,

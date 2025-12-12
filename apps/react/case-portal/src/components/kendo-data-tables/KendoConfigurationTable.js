@@ -1211,7 +1211,17 @@ const ConfigurationTable = () => {
             const tabInfo = availableTabs.find(
               (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
             )
-            if (tabInfo) return tabInfo?.displayName || 'loading..'
+
+            if (tabInfo) {
+              const originalName = tabInfo.displayName
+              if (
+                lowerVertName === 'aromatics' &&
+                ['constant', 'constants'].includes(originalName?.toLowerCase())
+              ) {
+                return 'User Input'
+              }
+              return originalName
+            }
           })}
         />
 

@@ -66,8 +66,8 @@ export function getColDefsDesignCapacityAROMATICS(headerMap = {}, valueFormat) {
     {
       field: 'april',
       title: 'PAREX#1',
-      align: 'left',
       editable: true,
+      align: 'left',
       widthT: 200,
       headerAlign: 'left',
       type: 'number',
@@ -76,8 +76,8 @@ export function getColDefsDesignCapacityAROMATICS(headerMap = {}, valueFormat) {
     {
       field: 'may',
       title: 'PAREX#2',
-      align: 'left',
       editable: true,
+      align: 'left',
       widthT: 200,
       headerAlign: 'left',
       type: 'number',
@@ -86,8 +86,8 @@ export function getColDefsDesignCapacityAROMATICS(headerMap = {}, valueFormat) {
     {
       field: 'june',
       title: 'PAREX#3',
-      align: 'left',
       editable: true,
+      align: 'left',
       widthT: 200,
       headerAlign: 'left',
       type: 'number',
@@ -141,11 +141,19 @@ export function getColDefsMaxAchievedCapacity(headerMap = {}, valueFormat) {
       editable: true,
       hidden: true,
     },
-    { field: 'productName', title: 'Particulars', widthT: 100, editable: true },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
     ...generateMonthColumnsFixedWidth(headerMap, true, valueFormat),
   ]
 }
-export function getColDefsMaxAchievedCapacityAROMATICS(headerMap = {}, valueFormat) {
+export function getColDefsMaxAchievedCapacityAROMATICS(
+  headerMap = {},
+  valueFormat,
+) {
   return [
     {
       field: 'materialFKId',
@@ -155,10 +163,10 @@ export function getColDefsMaxAchievedCapacityAROMATICS(headerMap = {}, valueForm
       hidden: true,
     },
     {
-     field: 'productName',
-     title: 'Particulars',
-     widthT: 200,
-     editable: true 
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 200,
+      editable: false,
     },
     {
       field: 'april',
@@ -206,9 +214,7 @@ export function getColDefsMaxAchievedCapacityAROMATICS(headerMap = {}, valueForm
       editable: true,
       align: 'left',
       headerAlign: 'left',
-      
     },
-    
   ]
 }
 

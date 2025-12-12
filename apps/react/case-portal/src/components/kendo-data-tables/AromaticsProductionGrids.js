@@ -31,8 +31,10 @@ const AromaticsProductionGrids = ({ permissions }) => {
   const [enableSaveAddBtnDesignCapacity, setEnableSaveAddBtnDesignCapacity] =
     useState(false)
   const [modifiedCellsMaxCapacity, setModifiedCellsMaxCapacity] = useState({})
-  const [enableSaveAddBtnMaxCapacity, setEnableSaveAddBtnMaxCapacity] = useState(false)
-  const [remarkDialogOpenMaxCapacity, setRemarkDialogOpenMaxCapacity] = useState(false)
+  const [enableSaveAddBtnMaxCapacity, setEnableSaveAddBtnMaxCapacity] =
+    useState(false)
+  const [remarkDialogOpenMaxCapacity, setRemarkDialogOpenMaxCapacity] =
+    useState(false)
   const [currentRemarkMaxCapacity, setCurrentRemarkMaxCapacity] = useState('')
   const [currentRowIdMaxCapacity, setCurrentRowIdMaxCapacity] = useState(null)
   const [_plantID, set_PlantID] = useState('')
@@ -115,11 +117,11 @@ const AromaticsProductionGrids = ({ permissions }) => {
     setRemarkDialogOpenDesignCapacity(true)
   }
   const handleRemarkCellClickMaxCapacity = (row) => {
-  if (READ_ONLY) return
-  setCurrentRemarkMaxCapacity(row.remarks || '')
-  setCurrentRowIdMaxCapacity(row.id)
-  setRemarkDialogOpenMaxCapacity(true)
-}
+    if (READ_ONLY) return
+    setCurrentRemarkMaxCapacity(row.remarks || '')
+    setCurrentRowIdMaxCapacity(row.id)
+    setRemarkDialogOpenMaxCapacity(true)
+  }
 
   const findAvg = (value, row) => {
     const months = [
@@ -282,10 +284,10 @@ const AromaticsProductionGrids = ({ permissions }) => {
       setLoading(false)
       return response
     } catch (error) {
-      console.error('Error saving Design Capacity:', error)
+      console.error('Error saving data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Error saving Design Capacity!',
+        message: 'Error saving data!',
         severity: 'error',
       })
       setLoading(false)
@@ -322,100 +324,113 @@ const AromaticsProductionGrids = ({ permissions }) => {
       console.log('Facing issue at saving data', error)
     }
   }, [modifiedCellsDesignCapacity, unitDesignCapacity])
-  
-  const saveChangesMaxCapacity = React.useCallback(async () => {
-  try {
-    const data = Object.values(modifiedCellsMaxCapacity)
-    if (data.length === 0) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'No Records to Save!',
-        severity: 'info',
-      })
-      return
-    }
 
-    const requiredFields = ['remarks']
-    const validationMessage = validateFields(data, requiredFields)
-    if (validationMessage) {
+  const saveChangesMaxCapacity = React.useCallback(async () => {
+    try {
+      const data = Object.values(modifiedCellsMaxCapacity)
+      if (data.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        return
+      }
+
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        setLoading(false)
+        return
+      }
+
+      const months = [
+        'april',
+        'may',
+        'june',
+        'july',
+        'august',
+        'september',
+        'october',
+        'november',
+        'december',
+        'january',
+        'february',
+        'march',
+      ]
+      const isTPH = unitMaxCapacity === 'TPD'
+      const payload = data.map((row) => {
+        const mapped = {
+          id: row.idFromApi || row.id || null,
+          remarks: row.remarks || row.remark || '',
+          materialFKId: row.materialFKId || row.normParametersFKId || null,
+          materialDisplayName:
+            row.productName || row.materialDisplayName || null,
+          displayOrder: null,
+          plantFKId: PLANT_ID,
+          siteFKId: SITE_ID,
+          verticalFKId: VERTICAL_ID,
+          financialYear: AOP_YEAR,
+          createdOn: null,
+          modifiedOn: null,
+          mcuVersion: null,
+          updatedBy: null,
+          productName: row.productName || row.materialDisplayName || null,
+          saveStatus: null,
+          errDescription: null,
+        }
+        months.forEach((month) => {
+          mapped[month] =
+            isTPH && row[month] ? row[month] / 24 : row[month] || null
+        })
+        return mapped
+      })
+
+      const response =
+        await ProductionVolumeDataApiService.editMaxAchievedCapacityData(
+          payload,
+          PLANT_ID,
+          AOP_YEAR,
+          keycloak,
+        )
+      // console.log('Save Max Achieved Capacity response:', response)
+
+      // ? ONLY fetch if save was successful
+      if (response && response.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCellsMaxCapacity({})
+        setEnableSaveAddBtnMaxCapacity(false)
+
+        // Fetch fresh data ONLY after successful save
+        await fetchMaxCapacityData(unitMaxCapacity)
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Please fill all fields, try again!',
+          severity: 'error',
+        })
+      }
+      setLoading(false)
+      return response
+    } catch (error) {
+      console.error('Error saving Max Achieved Capacity:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: validationMessage,
+        message: 'Error saving Max Achieved Capacity!',
         severity: 'error',
       })
       setLoading(false)
-      return
     }
-
-    const months = [
-      'april', 'may', 'june', 'july', 'august', 'september',
-      'october', 'november', 'december', 'january', 'february', 'march'
-    ]
-    const isTPH = unitMaxCapacity === 'TPD'
-    const payload = data.map((row) => {
-      const mapped = {
-        id: row.idFromApi || row.id || null,
-        remarks: row.remarks || row.remark || '',
-        materialFKId: row.materialFKId || row.normParametersFKId || null,
-        materialDisplayName: row.productName || row.materialDisplayName || null,
-        displayOrder: null,
-        plantFKId: PLANT_ID,
-        siteFKId: SITE_ID,
-        verticalFKId: VERTICAL_ID,
-        financialYear: AOP_YEAR,
-        createdOn: null,
-        modifiedOn: null,
-        mcuVersion: null,
-        updatedBy: null,
-        productName: row.productName || row.materialDisplayName || null,
-        saveStatus: null,
-        errDescription: null,
-      }
-      months.forEach((month) => {
-        mapped[month] = isTPH && row[month] ? row[month] / 24 : row[month] || null
-      })
-      return mapped
-    })
-
-    const response = await ProductionVolumeDataApiService.editMaxAchievedCapacityData(
-      payload,
-      PLANT_ID,
-      AOP_YEAR,
-      keycloak,
-    )
-    console.log('Save Max Achieved Capacity response:', response);
-
-    // ? ONLY fetch if save was successful
-    if (response && response.code === 200) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Saved Successfully!',
-        severity: 'success',
-      })
-      setModifiedCellsMaxCapacity({})
-      setEnableSaveAddBtnMaxCapacity(false)
-      
-      // Fetch fresh data ONLY after successful save
-      await fetchMaxCapacityData(unitMaxCapacity)
-    } else {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Please fill all fields, try again!',
-        severity: 'error',
-      })
-    }
-    setLoading(false)
-    return response
-  } catch (error) {
-    console.error('Error saving Max Achieved Capacity:', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error saving Max Achieved Capacity!',
-      severity: 'error',
-    })
-    setLoading(false)
-  }
-}, [modifiedCellsMaxCapacity, unitMaxCapacity])
+  }, [modifiedCellsMaxCapacity, unitMaxCapacity])
   //
   const saveChanges = React.useCallback(async () => {
     try {
@@ -664,7 +679,10 @@ const AromaticsProductionGrids = ({ permissions }) => {
     headerMap,
     valueFormat,
   )
-  const colDefs_design_capacity = getColDefsDesignCapacityAROMATICS(headerMap, valueFormat)
+  const colDefs_design_capacity = getColDefsDesignCapacityAROMATICS(
+    headerMap,
+    valueFormat,
+  )
 
   const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacityAROMATICS(
     headerMap,
@@ -708,52 +726,60 @@ const AromaticsProductionGrids = ({ permissions }) => {
   }
 
   const fetchDesignCapacityData = async (unit = unitDesignCapacity) => {
-  if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
-  setLoading(true)
-  try {
-    const response =
-      await ProductionVolumeDataApiService.getDesignCapacityData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-    let data = response?.data?.aopMCCalculatedDataDTOList
-    if (data && !Array.isArray(data)) {
-      data = [data]
-    }
-    if (response?.code === 200 && data) {
-      const isTPD = unit === 'TPD'
-      const formatted = data.map((item, index) => {
-        const april = isTPD && item.april ? (item.april * 24).toFixed(2) : item.april || null
-        const may = isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null
-        const june = isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null
-        const total = [april, may, june].map(v => Number(v) || 0).reduce((a, b) => a + b, 0).toFixed(2)
+    setLoading(true)
+    try {
+      const response =
+        await ProductionVolumeDataApiService.getDesignCapacityData(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      let data = response?.data?.aopMCCalculatedDataDTOList
+      if (data && !Array.isArray(data)) {
+        data = [data]
+      }
+      if (response?.code === 200 && data) {
+        const isTPD = unit === 'TPD'
+        const formatted = data.map((item, index) => {
+          const april =
+            isTPD && item.april
+              ? (item.april * 24).toFixed(2)
+              : item.april || null
+          const may =
+            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null
+          const june =
+            isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null
+          const total = [april, may, june]
+            .map((v) => Number(v) || 0)
+            .reduce((a, b) => a + b, 0)
+            .toFixed(2)
 
-        return {
-          id: item?.id,
-          productName: item?.materialDisplayName,
-          remarks: item?.remarks?.trim() || null,
-          originalRemark: item?.remarks?.trim() || null,
-          remark: item.remarks?.trim() || '',
-          isEditable: IS_PE_PP ? false : true,
-          april,
-          may,
-          june,
-          total,
-        }
-      })
-      setRowsDesignCapacity(formatted)
-    } else {
+          return {
+            id: item?.id,
+            productName: item?.materialDisplayName,
+            remarks: item?.remarks?.trim() || null,
+            originalRemark: item?.remarks?.trim() || null,
+            remark: item.remarks?.trim() || '',
+            isEditable: IS_PE_PP ? false : true,
+            april,
+            may,
+            june,
+            total,
+          }
+        })
+        setRowsDesignCapacity(formatted)
+      } else {
+        setRowsDesignCapacity([])
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error)
       setRowsDesignCapacity([])
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Error fetching Design Capacity:', error)
-    setRowsDesignCapacity([])
-  } finally {
-    setLoading(false)
   }
-}
   const fetchMaxCapacityData = async (unit = unitMaxCapacity) => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
@@ -770,32 +796,34 @@ const AromaticsProductionGrids = ({ permissions }) => {
         data = [data]
       }
       if (response?.code === 200 && data) {
-      // Conversion logic
-      const isTPD = unit === 'TPD'
-      const formatted = data.map((item, index) => {
-        const april = isTPD && item.april ? (item.april * 24).toFixed(2) : item.april || null
-        const may = isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null
-        const june = isTPD && item.june ? (item.june * 24).toFixed(2) : item.june || null
+        // Conversion logic
+        const isTPD = unit === 'TPD'
+        const formatted = data.map((item, index) => {
+          const april =
+            isTPD && item.april ? item.april * 24 : item.april || null
+          const may = isTPD && item.may ? item.may * 24 : item.may || null
+          const june = isTPD && item.june ? item.june * 24 : item.june || null
 
-        // Calculate total after conversion
-        const total = [april, may, june]
-          .map((v) => Number(v) || 0)
-          .reduce((acc, val) => acc + val, 0)
-          .toFixed(3)
+          // Calculate total after conversion
+          const total = [april, may, june]
+            .map((v) => Number(v) || 0)
+            .reduce((acc, val) => acc + val, 0)
+            .toFixed(3)
 
-        return {
-          ...item,
-          idFromApi: item?.id,
-          productName: item?.materialDisplayName,
-          april,
-          may,
-          june,
-          total,
-          isEditable: true,
-        }
-      })
-      setRowsMaxCapacity(formatted)
-    } else {
+          return {
+            ...item,
+            idFromApi: item?.id,
+            productName: item?.materialDisplayName,
+            originalRemark: item?.remarks?.trim() || null,
+            april,
+            may,
+            june,
+            total,
+            isEditable: true,
+          }
+        })
+        setRowsMaxCapacity(formatted)
+      } else {
         setRowsMaxCapacity([])
       }
     } catch (error) {
@@ -873,7 +901,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       showCalculate: false,
     }
   }
-  
+
   const adjustedPermissionsGrid1 = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -887,7 +915,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       saveBtn: true,
       units: ['TPH', 'TPD'],
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      titleName: 'Max Achieved Based On Current Unit Performance',
+      titleName: 'Max Achievable Based On Current Unit Performance',
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
@@ -896,7 +924,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${VERTICAL_NAME}_Max Achieved Capacity`,
+      ExcelName: `${VERTICAL_NAME}_Max Achievable Based On Current Unit Performance`,
     },
     isOldYear,
   )
@@ -916,7 +944,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${VERTICAL_NAME}_Design Capacity`,
+      ExcelName: `${VERTICAL_NAME}_Max Achieved `,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
@@ -924,7 +952,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
-      titleName:'Max Achieved',
+      titleName: 'Max Achieved',
     },
     isOldYear,
   )
@@ -1123,9 +1151,6 @@ const AromaticsProductionGrids = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {/* DESIGN_CAPACITY */}
-      
-
       {/* MAX_ACHIEVED_CAPACITY */}
       {conditionForFirst && (
         <KendoDataTables
@@ -1158,6 +1183,8 @@ const AromaticsProductionGrids = ({ permissions }) => {
           }
         />
       )}
+
+      {/* DESIGN_CAPACITY */}
       {conditionForFirst && (
         <KendoDataTables
           modifiedCells={modifiedCellsDesignCapacity}
