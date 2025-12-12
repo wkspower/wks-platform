@@ -532,8 +532,29 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	                    productionDtos.add(dto); 
 	                }
 	                dto.setRemark(getStringCellValue(row.getCell(14), dto));
+	               
 	                dto.setId(getStringCellValue(row.getCell(15), dto));
-	                
+	                dto.setId(getStringCellValue(row.getCell(15), dto));
+
+	             // Check if id is null AND all month values are zero or null
+	             boolean allMonthsZero = (dto.getApril() == null || dto.getApril() == 0.0)
+	                     && (dto.getMay() == null || dto.getMay() == 0.0)
+	                     && (dto.getJune() == null || dto.getJune() == 0.0)
+	                     && (dto.getJuly() == null || dto.getJuly() == 0.0)
+	                     && (dto.getAug() == null || dto.getAug() == 0.0)
+	                     && (dto.getSep() == null || dto.getSep() == 0.0)
+	                     && (dto.getOct() == null || dto.getOct() == 0.0)
+	                     && (dto.getNov() == null || dto.getNov() == 0.0)
+	                     && (dto.getDec() == null || dto.getDec() == 0.0)
+	                     && (dto.getJan() == null || dto.getJan() == 0.0)
+	                     && (dto.getFeb() == null || dto.getFeb() == 0.0)
+	                     && (dto.getMarch() == null || dto.getMarch() == 0.0);
+
+	             if (dto.getId() == null && allMonthsZero) {
+	                 // Skip this DTO — do not add
+	                 continue;
+	             }
+
 	                
 	                Plants plant = plantsRepository.findById(plantFKId)
 	                        .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
@@ -666,18 +687,29 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 	}
 	
 	private static String getStringCellValue(Cell cell, BusinessDemandDataDTO dto) {
-		try {
-			if (cell == null)
-				return null;
-			cell.setCellType(CellType.STRING);
-			return cell.getStringCellValue().trim();
-		} catch (Exception e) {
-			dto.setSaveStatus("Failed");
-			dto.setErrDescription("Please enter correct values");
-			e.printStackTrace();
-		}
-		return null;
+	    try {
+	        if (cell == null) {
+	            return null;
+	        }
 
+	        // Get value as string
+	        cell.setCellType(CellType.STRING);
+	        String value = cell.getStringCellValue();
+
+	        // Return null if value is empty or whitespace only
+	        if (value == null || value.trim().isEmpty()) {
+	            return null;
+	        }
+
+	        return value.trim();
+
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+
+	    return null;
 	}
 
 	@Override
