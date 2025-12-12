@@ -3049,7 +3049,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		String spName = "spScrn" + verticalName + "GetRevision";
 
 		// call the helper which executes the SP
-		List<Object[]> versions = getConfigurationVersionSP(spName, year);
+		List<Object[]> versions = getConfigurationVersionSP(spName, year,plantId);
 
 		for (Object[] row : versions) {
 			ConfigurationVersionDTO dto = new ConfigurationVersionDTO();
@@ -3066,13 +3066,13 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Transactional
-	public List<Object[]> getConfigurationVersionSP(String procedureName, String aopYear) {
+	public List<Object[]> getConfigurationVersionSP(String procedureName, String aopYear,String plantId) {
 		try {
-			String sql = "EXEC " + procedureName + " @AOPYear = :aopYear";
+			String sql = "EXEC " + procedureName + " @AOPYear = :aopYear,@plantId = :plantId";
 
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("aopYear", aopYear);
-
+			query.setParameter("plantId", plantId);
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid argument passed to procedure", e);
