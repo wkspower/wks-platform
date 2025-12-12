@@ -67,6 +67,7 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				shutdownHistoryConfigDTO.setMonth(shutdownHistoryConfig.getMonth());
 				shutdownHistoryConfigDTO.setRemark(shutdownHistoryConfig.getRemark());
 				shutdownHistoryConfigDTO.setAopYear(shutdownHistoryConfig.getAopYear());
+				shutdownHistoryConfigDTO.setYear(shutdownHistoryConfig.getYear());
 				shutdownHistoryConfigDTOs.add(shutdownHistoryConfigDTO);
 			}
 		} catch (IllegalArgumentException e) {

@@ -67,7 +67,7 @@ export const ShutdownConsumptionVcmColumns = [
     width: 180,
     editable: false,
   },
-  { field: 'UOM/MT', headerName: 'UOM', width: 150, editable: false },
+  { field: 'UOM', headerName: 'UOM/MT', width: 150, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12

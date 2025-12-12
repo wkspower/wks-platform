@@ -1124,39 +1124,7 @@ const AromaticsProductionGrids = ({ permissions }) => {
       </Backdrop>
 
       {/* DESIGN_CAPACITY */}
-      {conditionForFirst && (
-        <KendoDataTables
-          modifiedCells={modifiedCellsDesignCapacity}
-          setModifiedCells={setModifiedCellsDesignCapacity}
-          enableSaveAddBtn={enableSaveAddBtnDesignCapacity}
-          setRows={setRowsDesignCapacity}
-          columns={colDefs_design_capacity}
-          rows={rowsDesignCapacity}
-          paginationOptions={[100, 200, 300]}
-          saveChanges={saveChangesDesignCapacity}
-          snackbarData={snackbarData}
-          snackbarOpen={snackbarOpen}
-          setSnackbarOpen={setSnackbarOpen}
-          setSnackbarData={setSnackbarData}
-          apiRef={apiRef}
-          fetchData={fetchDesignCapacityData}
-          handleUnitChange={handleUnitChangeDesignCapacity}
-          handleRemarkCellClick={handleRemarkCellClickDesignCapacity}
-          experimentalFeatures={{ newEditingApi: true }}
-          remarkDialogOpen={remarkDialogOpenDesignCapacity}
-          setRemarkDialogOpen={setRemarkDialogOpenDesignCapacity}
-          currentRemark={currentRemarkDesignCapacity}
-          setCurrentRemark={setCurrentRemarkDesignCapacity}
-          currentRowId={currentRowIdDesignCapacity}
-          setEnableSaveAddBtn={setEnableSaveAddBtnDesignCapacity}
-          permissions={adjustedPermissionsGrid2}
-          selectedUnit={unitDesignCapacity}
-          setSelectedUnit={setUnitDesignCapacity}
-          downloadExcelForConfiguration={() =>
-            downloadExcelForConfiguration('design')
-          }
-        />
-      )}
+      
 
       {/* MAX_ACHIEVED_CAPACITY */}
       {conditionForFirst && (
@@ -1187,6 +1155,39 @@ const AromaticsProductionGrids = ({ permissions }) => {
           setEnableSaveAddBtn={setEnableSaveAddBtnMaxCapacity}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
+          }
+        />
+      )}
+      {conditionForFirst && (
+        <KendoDataTables
+          modifiedCells={modifiedCellsDesignCapacity}
+          setModifiedCells={setModifiedCellsDesignCapacity}
+          enableSaveAddBtn={enableSaveAddBtnDesignCapacity}
+          setRows={setRowsDesignCapacity}
+          columns={colDefs_design_capacity}
+          rows={rowsDesignCapacity}
+          paginationOptions={[100, 200, 300]}
+          saveChanges={saveChangesDesignCapacity}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          apiRef={apiRef}
+          fetchData={fetchDesignCapacityData}
+          handleUnitChange={handleUnitChangeDesignCapacity}
+          handleRemarkCellClick={handleRemarkCellClickDesignCapacity}
+          experimentalFeatures={{ newEditingApi: true }}
+          remarkDialogOpen={remarkDialogOpenDesignCapacity}
+          setRemarkDialogOpen={setRemarkDialogOpenDesignCapacity}
+          currentRemark={currentRemarkDesignCapacity}
+          setCurrentRemark={setCurrentRemarkDesignCapacity}
+          currentRowId={currentRowIdDesignCapacity}
+          setEnableSaveAddBtn={setEnableSaveAddBtnDesignCapacity}
+          permissions={adjustedPermissionsGrid2}
+          selectedUnit={unitDesignCapacity}
+          setSelectedUnit={setUnitDesignCapacity}
+          downloadExcelForConfiguration={() =>
+            downloadExcelForConfiguration('design')
           }
         />
       )}

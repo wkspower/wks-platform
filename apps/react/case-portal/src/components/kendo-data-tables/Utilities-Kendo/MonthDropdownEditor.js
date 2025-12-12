@@ -2,18 +2,18 @@ import React from 'react'
 import { DropDownList } from '@progress/kendo-react-dropdowns'
 
 const monthOptions = [
-  { value: 1, text: 'Jan' },
-  { value: 2, text: 'Feb' },
-  { value: 3, text: 'Mar' },
-  { value: 4, text: 'Apr' },
+  { value: 1, text: 'January' },
+  { value: 2, text: 'February' },
+  { value: 3, text: 'March' },
+  { value: 4, text: 'April' },
   { value: 5, text: 'May' },
-  { value: 6, text: 'Jun' },
-  { value: 7, text: 'Jul' },
-  { value: 8, text: 'Aug' },
-  { value: 9, text: 'Sep' },
-  { value: 10, text: 'Oct' },
-  { value: 11, text: 'Nov' },
-  { value: 12, text: 'Dec' }
+  { value: 6, text: 'June' },
+  { value: 7, text: 'July' },
+  { value: 8, text: 'August' },
+  { value: 9, text: 'September' },
+  { value: 10, text: 'October' },
+  { value: 11, text: 'November' },
+  { value: 12, text: 'December' }
 ]
 
 const MonthDropdownEditor = (props) => {
@@ -37,7 +37,7 @@ const MonthDropdownEditor = (props) => {
       dataItemKey="value"
       value={selectedMonth}
       onChange={handleChange}
-      style={{ width: '100%' }}
+      style={{ width: '100px' }}
     />
   )
 }

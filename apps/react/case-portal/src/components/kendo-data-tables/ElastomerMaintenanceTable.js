@@ -7,8 +7,10 @@ import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-s
 import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
 import KendoDataTables from './index'
-import ElastomerMaintenanceTable from './ElastomerMaintenanceTable'
-const MaintenanceTable = () => {
+import { validateFields } from 'utils/validationUtils'
+import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
+
+const ElastomerMaintenanceTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const keycloak = useSession()
 
@@ -29,9 +31,7 @@ const MaintenanceTable = () => {
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
-
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
-
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
   const lowerVertName = vertName?.toLowerCase()
@@ -50,6 +50,7 @@ const MaintenanceTable = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
 
   const [rows, setRows] = useState([])
+  const [slowdownRows, setSlowdownRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -63,10 +64,13 @@ const MaintenanceTable = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [currentRowId1, setCurrentRowId1] = useState(null)
+  const [tabIndex, setTabIndex] = useState(0)
+  const defaultTabs = ['Net Production Hours', 'Slowdown History Config']
+
   const handleRemarkCellClick = (row) => {
-    if (READ_ONLY) return
     setCurrentRemark(row.remarks || '')
-    setCurrentRowId(row.id)
+    setCurrentRowId1(row.id)
     setRemarkDialogOpen(true)
   }
 
@@ -116,6 +120,38 @@ const MaintenanceTable = () => {
       setLoading(false)
     }
   }, [PLANT_ID, AOP_YEAR, keycloak, dataConfig])
+
+  const slowdownFetchData = useCallback(async () => {
+  if (!PLANT_ID || !AOP_YEAR) return
+  setSlowdownRows([]) 
+  setLoading(true)
+  try {//
+    const resp = await MaintenanceDetailsApiService.getSlowdownConfig(keycloak, PLANT_ID, AOP_YEAR)
+    // Add isEditable: true to each row
+    const formatted = (resp.data || []).map((item, idx) => ({
+      ...item,
+      monthly: item.month,
+      originalRemark: item.remark,
+      remarks: item.remark,  
+      year: item.year,      
+      isEditable: true,
+      id: idx,
+      idFromApi: item.id,
+    }))
+    setSlowdownRows(formatted) 
+  } catch (err) {
+    console.error('Error fetching data:', err)
+    setSlowdownRows([]) 
+  } finally {
+    setLoading(false)
+  }
+}, [PLANT_ID, AOP_YEAR, keycloak])
+
+useEffect(() => {
+  if (tabIndex === 1) {
+    slowdownFetchData();
+  }
+}, [tabIndex, slowdownFetchData]);
 
   useEffect(() => {
     fetchData()
@@ -218,6 +254,130 @@ const MaintenanceTable = () => {
       basecols = productionColumnsNonMEG
       break
   }
+   const slowdownColumns = [
+  {
+    field: 'monthly',
+    title: 'Month',
+    type: 'monthDropdown',
+    editable: true,
+    width: 200,
+  },
+  {
+    field: 'year',
+    title: 'Year',
+    type: 'yeardropdown',
+    editable: true,
+    width: 200,
+  },
+  
+  {
+    field: 'remarks',
+    title: 'Remark',
+    editable: true,
+    width: 200,
+  },
+  
+  
+]
+const saveChanges = async () => {
+    try {
+      const data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+     const requiredFields = ['remarks']
+    const validationMessage = validateFields(data, requiredFields)
+    if (validationMessage) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationMessage,
+        severity: 'error',
+      })
+      return
+    }
+
+      const dataList = data.map((row) => {
+        const obj = {
+          month: row.monthly,
+          year: row.year,
+          aopYear: AOP_YEAR, 
+          remark: row.remarks,
+        }
+
+        if (row.idFromApi) {
+          obj.id = row.idFromApi
+        }
+
+        return obj
+      })
+
+      const res = await MaintenanceDetailsApiService.saveSlowdownConfig(
+        PLANT_ID,
+        AOP_YEAR,
+        dataList,
+        keycloak,
+      )
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        slowdownFetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
+  }
+
+const handleDeleteSlowdownConfig = async (row) => {
+    if (!row.idFromApi) {
+      setSlowdownRows((prev) => prev.filter((r) => r.id !== row.id))
+      return
+    }
+    setLoading(true)
+    try {
+      const response = await MaintenanceDetailsApiService.deleteSlowdownConfig(
+        row.idFromApi,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR, 
+      )
+      if (response && response?.code === 200) {
+        setSlowdownRows((prev) => prev.filter((r) => r.id !== row.id))
+        setSnackbarData({
+          message: 'Deleted Successfully!',
+          severity: 'success',
+        })
+        setSnackbarOpen(true)
+        slowdownFetchData()
+      } else {
+        throw new Error('Unexpected response from server')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      setSnackbarData({ message: 'Error deleting record!', severity: 'error' })
+      setSnackbarOpen(true)
+    }
+  }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -257,11 +417,30 @@ const MaintenanceTable = () => {
       ),
     [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
   )
-  if (
-    lowerVertName == 'elastomer') {
-    return <ElastomerMaintenanceTable />
-  }
-
+  //adjustedPermissionsslowdown
+  const adjustedPermissionsslowdown = useMemo(
+    () =>
+      getAdjustedPermissions(
+        {
+          showAction: false,
+          addButton: true,
+          deleteButton: true,
+          editButton: false,
+          showUnit: false,
+          saveWithRemark: false,
+          saveBtn: true,
+          allAction: true,
+          downloadExcelBtnFromUI: true,
+          ExcelName: SCREEN_NAME,
+          showRefresh: false,
+          showTitleNameBusiness: true,
+          titleName:'Slowdown History Config',
+        },
+        isOldYear,
+      ),
+    [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
+  )
+  
   return (
     <>
       <div>
@@ -271,7 +450,37 @@ const MaintenanceTable = () => {
         >
           <CircularProgress color='inherit' />
         </Backdrop>
-
+       {defaultTabs?.length > 1 && (
+               <Tabs
+                 value={tabIndex}
+                 onChange={(e, newIndex) => setTabIndex(newIndex)}
+                 variant='scrollable'
+                 scrollButtons='auto'
+                 sx={{
+                   borderBottom: '0px solid #ccc',
+                   '.MuiTabs-indicator': { display: 'none' },
+                   margin: '0px 0px 10px 0px',
+                   minHeight: '28px',
+                 }}
+                 textColor='primary'
+                 indicatorColor='primary'
+               >
+                 {defaultTabs.map((label, idx) => (
+                   <Tab
+                     key={idx}
+                     label={label}
+                     sx={{
+                       border: '1px solid #ADD8E6',
+                       borderBottom: '1px solid #ADD8E6',
+                       fontSize: '0.75rem',
+                       padding: '9px',
+                       minHeight: '12px',
+                     }}
+                   />
+                 ))}
+               </Tabs>
+             )}
+         {tabIndex === 0 && (    
         <KendoDataTables
           columns={basecols}
           rows={rows}
@@ -288,8 +497,36 @@ const MaintenanceTable = () => {
           permissions={adjustedPermissions}
           currentRowId={currentRowId}
         />
+         )}
+         {tabIndex === 1 && (
+        <KendoDataTables
+          columns={slowdownColumns}
+          rows={slowdownRows}
+          setRows={setSlowdownRows}
+          fetchData={slowdownFetchData} 
+          deleteRowData={handleDeleteSlowdownConfig}
+          saveChanges={saveChanges}
+          deleteId={deleteId}
+          setDeleteId={setDeleteId}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          open1={open1}
+          setOpen1={setOpen1}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId1}
+          handleRemarkCellClick={handleRemarkCellClick}
+          snackbarData={snackbarData}
+          setSnackbarData={setSnackbarData}
+          permissions={adjustedPermissionsslowdown}
+        />
+         )}
       </div>
     </>
   )
 }
-export default MaintenanceTable
+export default ElastomerMaintenanceTable
