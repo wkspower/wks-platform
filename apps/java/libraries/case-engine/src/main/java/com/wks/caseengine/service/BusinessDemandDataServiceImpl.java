@@ -702,8 +702,10 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 
 				if (businessDemandDataDTO.getId() == null || businessDemandDataDTO.getId().contains("#")) {
 					businessDemand.setId(null);
+					businessDemand.setCreatedOn(new Date());
 				} else {
 					businessDemand.setId(UUID.fromString(businessDemandDataDTO.getId()));
+					businessDemand.setModifiedOn(new Date());
 				}
 
 				businessDemand.setJan(businessDemandDataDTO.getJan());
@@ -711,7 +713,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 				businessDemand.setJune(businessDemandDataDTO.getJune());
 				businessDemand.setMarch(businessDemandDataDTO.getMarch());
 				businessDemand.setMay(businessDemandDataDTO.getMay());
-
+				businessDemand.setUpdatedBy(Utility.getUserName());
 				if (businessDemandDataDTO.getNormParameterId() != null
 						&& !businessDemandDataDTO.getNormParameterId().isEmpty()) {
 					businessDemand.setNormParameterId(UUID.fromString(businessDemandDataDTO.getNormParameterId()));
