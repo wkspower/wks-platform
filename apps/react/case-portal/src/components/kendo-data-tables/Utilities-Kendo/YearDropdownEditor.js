@@ -32,7 +32,6 @@ const YearDropdownEditor = (props) => {
         })
       }
       style={{ width: '100%' }}
-      popupSettings={{ width: 'auto' }}
     />
   )
 }

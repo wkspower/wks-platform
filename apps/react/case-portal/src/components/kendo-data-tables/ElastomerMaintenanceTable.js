@@ -148,6 +148,10 @@ const ElastomerMaintenanceTable = () => {
 }, [PLANT_ID, AOP_YEAR, keycloak])
 
 useEffect(() => {
+  setTabIndex(0)
+}, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
+
+useEffect(() => {
   if (tabIndex === 1) {
     slowdownFetchData();
   }
