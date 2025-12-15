@@ -27,6 +27,7 @@ import { getRoleName } from 'services/role-service.js'
 import { OptimizerDataApiService } from 'services/optimizer-api-service'
 import CrakcerConstantsBestAchieved from './CrakcerConstantsBestAchieved'
 import CrakcerConstants from './CrakcerConstants'
+import { validateFields } from 'utils/validationUtils'
 // Constants
 const MONTHS = [
   'april',
@@ -248,7 +249,7 @@ const NormalOpNormsScreenCracker = () => {
         format: valueFormat,
       })),
       { field: 'isEditable', title: 'isEditable', hidden: true },
-      { field: 'remarks', title: 'Remark', widthT: 140, editable: true },
+      { field: 'remark', title: 'Remark', widthT: 140, editable: true },
     ],
     [headerMap, valueFormat],
   )
@@ -839,7 +840,16 @@ const NormalOpNormsScreenCracker = () => {
         setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
         return
       }
-
+      const requiredFields = ['remark']
+          const validationMessage = validateFields(rowsToSave, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            return
+          }
       setLoading(true)
       try {
         const payload = mapGridRowToPayload(rowsToSave, savingAllMonthValues)

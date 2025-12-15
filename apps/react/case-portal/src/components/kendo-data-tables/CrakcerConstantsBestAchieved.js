@@ -28,6 +28,7 @@ import moment from '../../../node_modules/moment/moment'
 import AopDesignBasisNorms from './AopDesignBasisNorms'
 import useValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
+import { validateFields } from 'utils/validationUtils'
 const CrakcerConstantsBestAchieved = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
@@ -660,6 +661,16 @@ const CrakcerConstantsBestAchieved = () => {
   const saveChangesConstants = React.useCallback(async () => {
     try {
       const data = Object.values(modifiedCellsConstants)
+      const requiredFields = ['remarks']
+          const validationMessage = validateFields(data, requiredFields)
+          if (validationMessage) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: validationMessage,
+              severity: 'error',
+            })
+            return
+          } 
 
       saveSummary(summary)
 
