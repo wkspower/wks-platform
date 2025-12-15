@@ -1470,7 +1470,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				aopCalculationRepository.save(aopCalculation);
 			}
 			if(verticalName.equalsIgnoreCase("Cracker")) {
-				String procedure=verticalName+site.getName()+"svhEquivalent_Calculation";
+				String procedure=verticalName+"_"+site.getName()+"_svhEquivalent_Calculation";
 				executeProcedure(procedure, plantFKId, year);
 			}
 			
