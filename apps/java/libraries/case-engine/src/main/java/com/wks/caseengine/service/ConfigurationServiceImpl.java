@@ -1069,6 +1069,35 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		}
 	}
 
+	public int executeProcedure(String procedureName, String plantId,
+			String aopYear) {
+		try {
+			
+			String callSql = "{call " + procedureName + "(?, ?)}";
+
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+	            stmt.setString(1, plantId); 
+	            stmt.setString(2, aopYear); 
+	            int rowsAffected = stmt.executeUpdate();
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 
 	public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId) {
 		try {
@@ -1440,8 +1469,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
+			if(verticalName.equalsIgnoreCase("Cracker")) {
+				String procedure=verticalName+site.getName()+"svhEquivalent_Calculation";
+				executeProcedure(procedure, plantFKId, year);
+			}
+			
 			return failedList;
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			throw new RuntimeException("Failed to save data", ex);
 		}
 	}
