@@ -154,8 +154,10 @@ useEffect(() => {
 }, [tabIndex, slowdownFetchData]);
 
   useEffect(() => {
+    if (tabIndex === 0) {
     fetchData()
-  }, [fetchData, oldYear, yearChanged, PLANT_ID, AOP_YEAR])
+  }
+  }, [fetchData, oldYear, yearChanged, PLANT_ID, AOP_YEAR, tabIndex])
 
   // Helper to generate monthly fields
   const getMonthlyColumns = () => {
