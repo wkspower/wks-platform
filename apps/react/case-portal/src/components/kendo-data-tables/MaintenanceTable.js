@@ -257,8 +257,7 @@ const MaintenanceTable = () => {
       ),
     [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
   )
-  if (
-    lowerVertName == 'elastomer') {
+  if (lowerVertName == 'elastomer') {
     return <ElastomerMaintenanceTable />
   }
 

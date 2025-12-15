@@ -13,31 +13,33 @@ const monthOptions = [
   { value: 9, text: 'September' },
   { value: 10, text: 'October' },
   { value: 11, text: 'November' },
-  { value: 12, text: 'December' }
+  { value: 12, text: 'December' },
 ]
 
 const MonthDropdownEditor = (props) => {
   const { dataItem, field, onChange } = props
-  
+
   const handleChange = (e) => {
     onChange({
       dataItem: dataItem,
       field: field,
       syntheticEvent: e.syntheticEvent,
-      value: e.target.value?.value || e.target.value
+      value: e.target.value?.value || e.target.value,
     })
   }
 
-  const selectedMonth = monthOptions.find(month => month.value === dataItem[field])
+  const selectedMonth = monthOptions.find(
+    (month) => month.value === dataItem[field],
+  )
 
   return (
     <DropDownList
       data={monthOptions}
-      textField="text"
-      dataItemKey="value"
+      textField='text'
+      dataItemKey='value'
       value={selectedMonth}
       onChange={handleChange}
-      style={{ width: '100px' }}
+      style={{ width: '100%' }} // <--- use full cell width
     />
   )
 }

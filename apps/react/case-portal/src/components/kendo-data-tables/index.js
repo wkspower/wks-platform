@@ -185,7 +185,7 @@ const KendoDataTables = ({
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
 
-  const { verticalChange, oldYear, year} = dataGridStore
+  const { verticalChange, oldYear, year } = dataGridStore
   const IS_OLD_YEAR = oldYear?.oldYear
   const AOP_YEAR = year?.selectedYear
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -678,33 +678,42 @@ const KendoDataTables = ({
       isColumnMenuSortActive(field, sort)
     )
   }
-const ElastomerMonthDisplayCell = (props) => {
-  const { dataItem, field, tdProps } = props
-  const value = dataItem[field]
 
-  const monthNames = {
-    1: 'January',
-    2: 'February',
-    3: 'March',
-    4: 'April',
-    5: 'May',
-    6: 'June',
-    7: 'July',
-    8: 'August',
-    9: 'September',
-    10: 'October',
-    11: 'November',
-    12: 'December',
+  const ElastomerYearDisplayCell = ({ dataItem, field, tdProps }) => {
+    return (
+      <td {...tdProps} title={dataItem[field]}>
+        {dataItem[field]}
+      </td>
+    )
   }
 
-  const displayValue = monthNames[value] || value
+  const ElastomerMonthDisplayCell = (props) => {
+    const { dataItem, field, tdProps } = props
+    const value = dataItem[field]
 
-  return (
-    <td {...tdProps} title={displayValue}>
-      {displayValue}
-    </td>
-  )
-}
+    const monthNames = {
+      1: 'January',
+      2: 'February',
+      3: 'March',
+      4: 'April',
+      5: 'May',
+      6: 'June',
+      7: 'July',
+      8: 'August',
+      9: 'September',
+      10: 'October',
+      11: 'November',
+      12: 'December',
+    }
+
+    const displayValue = monthNames[value] || value
+
+    return (
+      <td {...tdProps} title={displayValue}>
+        {displayValue}
+      </td>
+    )
+  }
   const MonthDisplayCell = (props) => {
     const { dataItem, field, tdProps, children } = props
     const value = dataItem[field]
@@ -1956,6 +1965,7 @@ const ElastomerMonthDisplayCell = (props) => {
                     />
                   )
                 }
+
                 if (col.type === 'monthDropdown') {
                   return (
                     <GridColumn
@@ -1975,6 +1985,10 @@ const ElastomerMonthDisplayCell = (props) => {
                     />
                   )
                 }
+
+                const YearDropdownEditorWrapper = (props) => (
+                  <YearDropdownEditor {...props} AOP_YEAR={AOP_YEAR} />
+                )
                 if (col.type === 'yeardropdown') {
                   return (
                     <GridColumn
@@ -1983,23 +1997,18 @@ const ElastomerMonthDisplayCell = (props) => {
                       title={col.title || col.headerName}
                       width={col.width}
                       hidden={col.hidden}
-                      editable={col?.editable ? true : false}
+                      editable={!!col?.editable}
                       headerClassName={isActive ? 'active-column' : ''}
                       cells={{
-                        edit: { text: YearDropdownEditor },
-                        //data: YearDropdownEditor,
-                        data: (props) => (
-                          <YearDropdownEditor
-                            {...props}
-                            AOP_YEAR={AOP_YEAR}
-                          />
-                        ),
+                        edit: { text: YearDropdownEditorWrapper }, // ✅ REQUIRED
+                        data: ElastomerYearDisplayCell,
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       columnMenu={ColumnMenuCheckboxFilter}
                     />
                   )
                 }
+
                 if (col?.field === 'DisplayName') {
                   return (
                     <GridColumn
