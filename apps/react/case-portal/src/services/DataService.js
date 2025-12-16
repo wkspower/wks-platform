@@ -1794,7 +1794,13 @@ async function exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
 }
 
 //--
-async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
+async function getConfigurationExcel(
+  keycloak,
+  reportType,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+) {
   const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
@@ -1822,7 +1828,8 @@ async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis.xlsx'
+
+    a.download = `${EXCEL_EXPORT_TITLE}_Production & Norms Basis.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

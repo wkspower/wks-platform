@@ -73,7 +73,7 @@ async function ssrsSiteMaintenanceSummary(
   AOP_YEAR,
   REPORT_CODE,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=site-maintenance-summary`
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${REPORT_CODE}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -244,8 +244,14 @@ async function savepropanebusiness(
   }
 }
 
-async function SSRS_NormComparisonReport(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=norm-comparison-report`
+async function SSRS_NormComparisonReport(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  REPORT_CODE,
+) {
+  // const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=norm-comparison-report`
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${REPORT_CODE}`
 
   const headers = {
     Accept: 'application/json',

@@ -68,13 +68,14 @@ export default function MaintenanceSummary() {
   const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME_LOWERCASE = verticalObject?.name.toLowerCase()
   const AOP_YEAR = year?.selectedYear
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     let REPORT_CODE = ''
-    if (PLANT_NAME_LOWERCASE == 'pe' || PLANT_NAME_LOWERCASE == 'pp') {
+    if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
       REPORT_CODE = 'maintenance-summary-pepp'
     } else {
       REPORT_CODE = 'maintenance-summary'

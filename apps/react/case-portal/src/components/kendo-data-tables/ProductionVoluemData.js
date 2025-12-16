@@ -1185,7 +1185,7 @@ const ProductionvolumeData = ({ permissions }) => {
       />
 
       {/* PERCENTAGE_SUMMARY */}
-      {!permissions?.hideSummary && (
+      {!permissions?.hideSummary && VERTICAL_NAME !== 'pta' && (
         <>
           <KendoDataTables
             setRows={setRowsPercentageSummary}

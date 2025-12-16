@@ -41,6 +41,12 @@ const CrakcerConstants = () => {
   const lowerVertName = vertName?.toLowerCase()
   const [tabIndex, setTabIndex] = useState(0)
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const [loading1, setLoading1] = useState(false)
 
   const [productionRowsConstants, setProductionRowsConstants] = useState([])
@@ -326,7 +332,7 @@ const CrakcerConstants = () => {
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        `${VERTICAL_NAME}_Constant`,
+        `${EXCEL_EXPORT_TITLE}_Constant`,
       )
     } catch (error) {
       console.error('Error downloading Excel:', error)

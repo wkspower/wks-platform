@@ -18,6 +18,7 @@ export default function PlantBudgetSummary() {
 
   const PLANT_ID = plantObject?.id
   const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
+  const VERTICAL_NAME_LOWERCASE = verticalObject?.name.toLowerCase()
 
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
@@ -27,7 +28,7 @@ export default function PlantBudgetSummary() {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
     let REPORT_CODE = ''
-    if (PLANT_NAME_LOWERCASE == 'pe' || PLANT_NAME_LOWERCASE == 'pp') {
+    if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
       REPORT_CODE = 'plant-budget-summary-pepp'
     } else {
       REPORT_CODE = 'plant-budget-summary'

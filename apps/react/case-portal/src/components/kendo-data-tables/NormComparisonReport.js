@@ -22,11 +22,20 @@ export default function NormComparisonReport() {
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
+    let REPORT_CODE = ''
+    if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
+      REPORT_CODE = 'norm-comparison-report-pepp'
+    } else {
+      REPORT_CODE = 'norm-comparison-report'
+    }
+
     try {
       var data = await BusinessDemandDataApiService.SSRS_NormComparisonReport(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        REPORT_CODE,
       )
 
       setBase(data?.data[0]?.reportURL)

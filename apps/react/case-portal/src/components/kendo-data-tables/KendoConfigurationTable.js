@@ -155,6 +155,7 @@ const ConfigurationTable = () => {
   const handleCloseDialog = () => {
     setOpenConfirmDialog(false)
   }
+
   const handleConfirmLoad = () => {
     setOpenConfirmDialog(false)
     onLoad()
@@ -504,6 +505,7 @@ const ConfigurationTable = () => {
       setRevision(1)
     }
   }
+
   const updateRevision = async (Payload) => {
     try {
       var response = await DataService.updateRevision(
@@ -810,6 +812,7 @@ const ConfigurationTable = () => {
       if (lowerVertName == 'pe' || lowerVertName == 'pp') {
         saveSummary(summary)
         setSummaryEdited(false)
+        setDateEdited(false)
       }
 
       const payload = [
@@ -860,6 +863,7 @@ const ConfigurationTable = () => {
     } finally {
       setLoading(false)
       setLoading1(false)
+      setDateEdited(false)
     }
   }
 

@@ -510,7 +510,7 @@ const ConsumptionNorms = () => {
         lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
       downloadExcelBtn:
         lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
-      ExcelName: `${lowerVertName}_${SCREEN_NAME}`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
       showTitleNameBusiness: true,
       titleName: `${SCREEN_NAME}`,

@@ -641,6 +641,7 @@ const SelectivityData = (props) => {
             report_t,
             PLANT_ID,
             AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
           )
         }
       } else {
@@ -648,7 +649,7 @@ const SelectivityData = (props) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
-          `${VERTICAL_NAME}_Production Norms Basis - Constant`,
+          `${EXCEL_EXPORT_TITLE}_Production Norms Basis - Constant`,
         )
       }
 
