@@ -13,7 +13,7 @@ import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.utility.Utility;
-
+import jakarta.persistence.Query;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -110,7 +110,19 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	public AOPMessageVM getAOPMCCalculatedData(String plantId, String year) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> obj = aOPMCCalculatedDataRepository.getDataMCUValuesAllData(year, plantId);
+			String view = "";
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			if(vertical.getName().equalsIgnoreCase("PTA")) {
+				view="vw"+vertical.getName()+"_"+site.getName()+"_AOPMCValues";
+			}else {
+				view="vwAOPMCValues";
+			}
+			List<Object[]> obj = getDataMCUValuesAllData(year, plantId,view);
 			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
 
 			for (Object[] row : obj) {
@@ -153,12 +165,43 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+    public List<Object[]> getDataMCUValuesAllData(String year, String plantId, String viewName) {
+        String sql = "SELECT TOP (1000) "
+                   + "Id, Site_FK_Id, Plant_FK_Id, Material_FK_Id, "
+                   + "April, May, June, July, August, September, October, November, December, "
+                   + "January, February, March, "
+                   + "FinancialYear, Remarks, CreatedOn, ModifiedOn, MCUVersion, UpdatedBy, "
+                   + "Vertical_FK_Id, NormParameterDisplayOrder, ProductName "
+                   + "FROM " + viewName + " " 
+                   + "WHERE PLANT_FK_ID = :plantId "
+                   + "AND FinancialYear = :year "
+                   + "ORDER BY NormParameterDisplayOrder";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("year", year);
+        query.setParameter("plantId", plantId);
+
+        return query.getResultList();
+    }
 
 	@Override
 	public AOPMessageVM getMaxAchievedCapacity(String plantId, String year) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
 		try {
-			List<Object[]> obj = aOPMCCalculatedDataRepository.getMaxAchievedCapacityData(year, plantId);
+			String view = "";
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+			Sites site = siteRepository.findById(plant.getSiteFkId())
+					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+			if(vertical.getName().equalsIgnoreCase("PTA")) {
+				view="vw"+vertical.getName()+"_"+site.getName()+"_AOPMCValuesMaxAchivedCapacity";
+			}else {
+				view="vwAOPMCValuesMaxAchivedCapacity";
+			}
+			List<Object[]> obj = getMaxAchievedCapacityData(year, plantId,view);
 			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
 
 			for (Object[] row : obj) {
@@ -194,6 +237,23 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+    public List<Object[]> getMaxAchievedCapacityData(String year, String plantId, String viewName) {
+        String sql = "SELECT TOP (1000) "
+                   + "Id, Material_FK_Id, MaterialDisplayName, "
+                   + "April, May, June, July, August, September, October, November, December, "
+                   + "January, February, March, "
+                   + "FinancialYear, Remarks, CreatedOn, ModifiedOn, UpdatedBy, PlantId "
+                   + "FROM " + viewName + " " 
+                   + "WHERE PlantId = :plantId "
+                   + "AND FinancialYear = :year";
+
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("year", year);
+        query.setParameter("plantId", plantId);
+
+        return query.getResultList();
+    }
 
 	@Override
 	public AOPMessageVM getDesignCapacity(String plantId, String year) {
