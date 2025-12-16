@@ -30,6 +30,12 @@ const MaintenanceTable = () => {
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const vertName = verticalChange?.selectedVertical
@@ -248,7 +254,7 @@ const MaintenanceTable = () => {
           saveBtn: dataConfig.isCracker,
           allAction: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: SCREEN_NAME,
+          ExcelName: `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}`,
           showRefresh: false,
           showTitleNameBusiness: true,
           titleName: SCREEN_NAME,

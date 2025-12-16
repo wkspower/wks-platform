@@ -131,7 +131,12 @@ async function handleCalculateProductionVolData(PLANT_ID, AOP_YEAR, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getDesignCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+async function getDesignCapacityExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+) {
   const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
@@ -150,7 +155,7 @@ async function getDesignCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Design Capacity.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Design Capacity.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -161,7 +166,12 @@ async function getDesignCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function getMaxAchievedCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+async function getMaxAchievedCapacityExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+) {
   const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
@@ -180,7 +190,7 @@ async function getMaxAchievedCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'max_achieved_capacity.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_max_achieved_capacity.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -190,7 +200,12 @@ async function getMaxAchievedCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-async function getProductionVolExcel(keycloak, PLANT_ID, AOP_YEAR) {
+async function getProductionVolExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+) {
   const url = `${Config.CaseEngineUrl}/task/production-target-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     'Content-Type': 'application/json',
@@ -210,7 +225,7 @@ async function getProductionVolExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const a = document.createElement('a')
     a.href = urlBlob
     //NAME CORRECTED FOR EXCEL FILE
-    a.download = 'Proposed_Operating_Capacity.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Proposed_Operating_Capacity.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

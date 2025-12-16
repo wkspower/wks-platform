@@ -19,11 +19,12 @@ import {
   getColDefsDesignCapacity,
   getColDefsDesignCapacityPEPP,
   getColDefsMaxAchievedCapacity,
+  getColDefsMaxAchievedCapacityPEPP,
   getColDefsNonEditable,
   getColDefsPercentageSummary,
 } from './Utilities-Kendo/productionTargetColDefs'
 import ProductionTarget from './ProductionTarget'
-import  AromaticsProductionGrids  from './AromaticsProductionGrids'
+import AromaticsProductionGrids from './AromaticsProductionGrids'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
 const ProductionvolumeData = ({ permissions }) => {
@@ -67,7 +68,14 @@ const ProductionvolumeData = ({ permissions }) => {
   const AOP_YEAR = year?.selectedYear
 
   const PLANT_NAME = plantObject?.name?.toLowerCase()
+
   const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
+
+  const PLANT_NAME_NO_CASE = plantObject?.name
+  const SITE_NAME_NO_CASE = siteObject?.name
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const IS_PE_PP =
     verticalObject?.name?.toLowerCase() == 'pe' ||
     verticalObject?.name?.toLowerCase() == 'pp'
@@ -570,10 +578,10 @@ const ProductionvolumeData = ({ permissions }) => {
     ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
     : getColDefsDesignCapacity(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(
-    headerMap,
-    valueFormat,
-  )
+  const colDefs_max_achieved_capacity = IS_PE_PP
+    ? getColDefsMaxAchievedCapacityPEPP(headerMap, valueFormat)
+    : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
+
   const colDefs_non_editable = getColDefsNonEditable(headerMap, valueFormat)
 
   useEffect(() => {
@@ -597,6 +605,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const handleUnitChangeMaxCapacity = (unit) => {
     setUnitMaxCapacity(unit)
+    setUnitDesignCapacity(unit)
+    setSelectedUnit(unit)
   }
 
   const handleUnitChangeMain = (unit) => {
@@ -811,8 +821,11 @@ const ProductionvolumeData = ({ permissions }) => {
       showCalculate: false,
     }
   }
+
+  //POINT-1 Current MCU to be rename as Max Achieved capacity.
   const percentageTitle = IS_PE_PP
-    ? 'Current MCU'
+    ? // ? 'Current MCU'
+      'Max Achieved Capacity.'
     : VERTICAL_NAME === 'cracker'
       ? 'Max Achieved Capacity (Ethylene)'
       : 'Max Achieved Capacity'
@@ -823,7 +836,7 @@ const ProductionvolumeData = ({ permissions }) => {
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? true,
+      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: false,
@@ -838,7 +851,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${VERTICAL_NAME}_Max Achieved Capacity`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}_Max Achieved Capacity`,
     },
     isOldYear,
   )
@@ -858,7 +871,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${VERTICAL_NAME}_Design Capacity`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}_Design Capacity`,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
@@ -881,7 +894,7 @@ const ProductionvolumeData = ({ permissions }) => {
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? true,
+      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? true,
@@ -924,7 +937,9 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Percentage Summary (Ethylene)'
-          : 'Percentage Summary',
+          : !IS_PE_PP
+            ? 'Percentage Summary'
+            : '% Summary of Proposed Operating Capacity',
     },
     isOldYear,
   )
@@ -953,18 +968,21 @@ const ProductionvolumeData = ({ permissions }) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else if (gridType === 'max') {
         await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
         await ProductionVolumeDataApiService.getProductionVolExcel(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       }
 
@@ -1061,19 +1079,12 @@ const ProductionvolumeData = ({ permissions }) => {
 
   max_achieved_capacity = colDefs_max_achieved_capacity
 
-  if (
-    ( VERTICAL_NAME?.toLowerCase() == 'elastomer') &&
-    conditionForFirst
-  ) {
+  if (VERTICAL_NAME?.toLowerCase() == 'elastomer' && conditionForFirst) {
     return <ProductionTarget />
   }
-  if (
-  VERTICAL_NAME?.toLowerCase() == 'aromatics' &&
-  conditionForFirst
-) {
-  return <AromaticsProductionGrids />
-}
-
+  if (VERTICAL_NAME?.toLowerCase() == 'aromatics' && conditionForFirst) {
+    return <AromaticsProductionGrids />
+  }
 
   return (
     <div>
@@ -1101,7 +1112,7 @@ const ProductionvolumeData = ({ permissions }) => {
           setSnackbarData={setSnackbarData}
           apiRef={apiRef}
           fetchData={fetchDesignCapacityData}
-          handleUnitChange={handleUnitChangeDesignCapacity}
+          handleUnitChange={handleUnitChangeMaxCapacity}
           handleRemarkCellClick={handleRemarkCellClickDesignCapacity}
           experimentalFeatures={{ newEditingApi: true }}
           remarkDialogOpen={remarkDialogOpenDesignCapacity}
@@ -1113,6 +1124,7 @@ const ProductionvolumeData = ({ permissions }) => {
           permissions={adjustedPermissionsGrid2}
           selectedUnit={unitDesignCapacity}
           setSelectedUnit={setUnitDesignCapacity}
+          supressGridHeight={true}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
@@ -1127,9 +1139,10 @@ const ProductionvolumeData = ({ permissions }) => {
           rows={rowsMaxCapacity}
           fetchData={fetchMaxCapacityData}
           permissions={adjustedPermissionsGrid1}
-          selectedUnit={unitMaxCapacity}
-          setSelectedUnit={setUnitMaxCapacity}
+          selectedUnit={unitDesignCapacity}
+          setSelectedUnit={setUnitDesignCapacity}
           handleUnitChange={handleUnitChangeMaxCapacity}
+          supressGridHeight={true}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
@@ -1152,7 +1165,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setSnackbarData={setSnackbarData}
         apiRef={apiRef}
         fetchData={fetchData}
-        handleUnitChange={handleUnitChangeMain}
+        handleUnitChange={handleUnitChangeMaxCapacity}
         handleRemarkCellClick={handleRemarkCellClick}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
@@ -1162,9 +1175,10 @@ const ProductionvolumeData = ({ permissions }) => {
         currentRowId={currentRowId}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
-        selectedUnit={selectedUnit}
-        setSelectedUnit={setSelectedUnit}
+        selectedUnit={unitDesignCapacity}
+        setSelectedUnit={setUnitDesignCapacity}
         handleExcelUpload={handleExcelUpload}
+        supressGridHeight={true}
         downloadExcelForConfiguration={() =>
           downloadExcelForConfiguration('main')
         }
@@ -1180,6 +1194,7 @@ const ProductionvolumeData = ({ permissions }) => {
             title='Production target Reference'
             fetchData={fetchData}
             permissions={adjustedPermissionsLast}
+            supressGridHeight={true}
           />
         </>
       )}

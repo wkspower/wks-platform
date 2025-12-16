@@ -36,6 +36,12 @@ const SelectivityData = (props) => {
   const VERTICAL_NAME = verticalObject?.name
   const SCREEN_NAME = screenTitle?.title
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
@@ -571,7 +577,12 @@ const SelectivityData = (props) => {
 
     try {
       if (props?.configType === 'grades') {
-        await DataService.getRecipeExcel(keycloak, PLANT_ID, AOP_YEAR)
+        await DataService.getRecipeExcel(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+        )
 
         //NEW BUILD 17 NOV
       } else if (
@@ -584,6 +595,7 @@ const SelectivityData = (props) => {
           props?.configType,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else if (props?.tabIndex != 1) {
         if (
@@ -598,6 +610,7 @@ const SelectivityData = (props) => {
             PLANT_ID,
             AOP_YEAR,
             [props?.configType],
+            EXCEL_EXPORT_TITLE,
           )
         } else {
           var report_t = []

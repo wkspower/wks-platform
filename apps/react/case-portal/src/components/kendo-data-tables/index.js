@@ -1348,7 +1348,7 @@ const KendoDataTables = ({
                   variant='contained'
                   className='btn-save'
                   onClick={downloadExcelForConfiguration}
-                  disabled={isButtonDisabled || READ_ONLY}
+                  disabled={isButtonDisabled || READ_ONLY || rows?.length === 0}
                 >
                   Export
                 </Button>
@@ -1359,7 +1359,9 @@ const KendoDataTables = ({
                   <Button
                     variant='contained'
                     onClick={triggerFileUpload}
-                    disabled={isButtonDisabled || READ_ONLY}
+                    disabled={
+                      isButtonDisabled || READ_ONLY || rows?.length === 0
+                    }
                     className='btn-save'
                   >
                     Import
@@ -1473,6 +1475,7 @@ const KendoDataTables = ({
                       disableScrollLock: true,
                     },
                   }}
+                  disabled={rows?.length === 0}
                 >
                   <MenuItem value='' disabled>
                     Select UOM

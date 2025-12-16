@@ -56,10 +56,16 @@ const PackagingConsumables = (permissions) => {
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   // Calculate year based on selected year dropdown
   const getYearForAPI = () => {
     if (!AOP_YEAR) return null
-    
+
     if (selectedYear === 'Actual') {
       // For Actual, use previous year
       const yearParts = AOP_YEAR.split('-')
@@ -111,142 +117,142 @@ const PackagingConsumables = (permissions) => {
   const valueFormat = ValueFormatterConsumption()
 
   const monthColumns = [
-    { 
+    {
       field: 'apr',
       title: headerMap[4],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'may',
       title: headerMap[5],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'jun',
       title: headerMap[6],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'jul',
       title: headerMap[7],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'aug',
       title: headerMap[8],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'sep',
       title: headerMap[9],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'oct',
       title: headerMap[10],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'nov',
       title: headerMap[11],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'dec',
       title: headerMap[12],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'jan',
       title: headerMap[1],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'feb',
       title: headerMap[2],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-    { 
+    {
       field: 'mar',
       title: headerMap[3],
       editable: true,
       width: 120,
       align: 'right',
       format: valueFormat,
-      type: 'number' 
+      type: 'number',
     },
-  ];
+  ]
 
   const colDefs = [
-    { 
+    {
       field: 'NormParameter_FK_Id',
       title: 'Particulars',
       widthT: 160,
       hidden: true,
     },
-    { 
+    {
       field: 'productName',
       title: 'Particulars',
       widthT: 120,
     },
-    { 
+    {
       field: 'UOM',
       title: 'UOM',
       widthT: 60,
       editable: false,
     },
     ...monthColumns,
-    { 
+    {
       field: 'remarks',
       title: 'Remark',
       widthT: 100,
       editable: true,
     },
-    { 
+    {
       field: 'idFromApi',
       title: 'idFromApi',
       hidden: true,
@@ -262,7 +268,7 @@ const PackagingConsumables = (permissions) => {
 
   const savepackagingdata = async (rows) => {
     setLoading(true)
-    
+
     try {
       const payload = rows.map((row) => ({
         apr: row.apr || null,
@@ -279,11 +285,11 @@ const PackagingConsumables = (permissions) => {
         mar: row.mar || null,
         UOM: row.UOM,
         remarks: row.remarks,
-        auditYear: API_YEAR, 
+        auditYear: API_YEAR,
         normParameterFKId: row.normParameterFKId,
         id: null,
       }))
-      
+
       if (payload.length > 0) {
         const response = await PackagingConsumablesApiService.savePackagingData(
           PLANT_ID,
@@ -330,14 +336,14 @@ const PackagingConsumables = (permissions) => {
           PLANT_ID,
           API_YEAR,
         )
-      } 
-      
+      }
+
       if (data?.code != 200) {
         setRows([])
         setLoading(false)
         return
       }
-      
+
       let formattedData = []
       formattedData = data?.data?.configurationDTOList?.map((item, index) => {
         const baseItem = {
@@ -372,8 +378,8 @@ const PackagingConsumables = (permissions) => {
 
   // Reset to Budget when plant or year changes
   useEffect(() => {
-    setSelectedYear('Budget');
-  }, [AOP_YEAR, PLANT_ID]);
+    setSelectedYear('Budget')
+  }, [AOP_YEAR, PLANT_ID])
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -413,7 +419,7 @@ const PackagingConsumables = (permissions) => {
       titleName: `${SCREEN_NAME}`,
       uploadExcelBtn: false,
       packagingYears: ['Budget', 'Actual'], // Year dropdown options
-      ExcelName: `${selectedYear}_${PLANT_NAME}_${SCREEN_NAME}`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}`,
     },
     isOldYear,
   )

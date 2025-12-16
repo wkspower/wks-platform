@@ -4,8 +4,8 @@ export const ConsumptionNormsApiService = {
   saveAOPConsumptionNorm,
   getConsumptionAOPNormsGrades,
   getConsumptionNormsData,
-  handleCalculateonsumptionNorms,
-  OverallconsumptionppExport,
+  handleCalculateConsumptionNorms,
+  OverallConsumptionPEPPExport,
 }
 async function saveAOPConsumptionNorm(PLANT_ID, shutdownDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/overall-consumption`
@@ -68,7 +68,7 @@ async function getConsumptionNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function handleCalculateonsumptionNorms(PLANT_ID, AOP_YEAR, keycloak) {
+async function handleCalculateConsumptionNorms(PLANT_ID, AOP_YEAR, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/calculate-overall-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
     Accept: 'application/json',
@@ -89,7 +89,13 @@ async function handleCalculateonsumptionNorms(PLANT_ID, AOP_YEAR, keycloak) {
     return Promise.reject(e)
   }
 }
-export async function OverallconsumptionppExport(keycloak, plantId, year) {
+export async function OverallConsumptionPEPPExport(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+  SCREEN_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/overall-consumption-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}`
   const headers = {
     'Content-Type': 'application/json',
@@ -108,7 +114,7 @@ export async function OverallconsumptionppExport(keycloak, plantId, year) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Overall_consumption.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

@@ -55,6 +55,13 @@ const ProductionTarget = ({ permissions }) => {
     verticalObject?.name?.toLowerCase() == 'pe' ||
     verticalObject?.name?.toLowerCase() == 'pp'
   const SITE_NAME = siteObject?.name?.toLowerCase()
+
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
   const [rowsPercentageSummary, setRowsPercentageSummary] = useState()
@@ -951,18 +958,21 @@ const ProductionTarget = ({ permissions }) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else if (gridType === 'max') {
         await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
         await ProductionVolumeDataApiService.getProductionVolExcel(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       }
 

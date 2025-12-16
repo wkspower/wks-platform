@@ -258,9 +258,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         </Typography>
       )
     } else if (
-      (['aopapprovalflow'].includes(normalizedTitle) &&
-        VERTICAL_NAME?.toLowerCase() === 'pe') ||
-      VERTICAL_NAME?.toLowerCase() === 'pp'
+      ['aopapprovalflow'].includes(normalizedTitle) &&
+      ['pe', 'pp'].includes(VERTICAL_NAME?.toLowerCase())
     ) {
       itemContent = (
         <Typography

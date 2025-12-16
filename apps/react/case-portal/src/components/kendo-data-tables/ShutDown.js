@@ -48,6 +48,12 @@ const ShutDown = ({ permissions }) => {
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const lowerVertName = vertName?.toLowerCase()
   const lowerSiteName = SITE_NAME?.toLowerCase()
   const lowerPlantName = PLANT_NAME?.toLowerCase()
@@ -775,12 +781,14 @@ const ShutDown = ({ permissions }) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
         response = await DataService.exportShutdownNonProductWise(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       }
     } catch (error) {

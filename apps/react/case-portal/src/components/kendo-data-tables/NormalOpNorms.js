@@ -62,6 +62,12 @@ const NormalOpNormsScreen = () => {
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const dispatch = useDispatch()
@@ -584,7 +590,7 @@ const NormalOpNormsScreen = () => {
         Object.keys(calculationObject || {}).length > 0 ? true : false,
 
       showTitleNameBusiness: true,
-      titleName: SCREEN_NAME,
+      titleName: !isPEPP ? SCREEN_NAME : 'Steady State Consumption (Norm)',
 
       downloadExcelBtn: true,
       uploadExcelBtn: true,
@@ -628,6 +634,8 @@ const NormalOpNormsScreen = () => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+          SCREEN_NAME,
         )
       } else {
         await NormalOperationNormsApiService.getNormalOpsNormsExcel(
@@ -635,6 +643,8 @@ const NormalOpNormsScreen = () => {
           gradeId,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+          SCREEN_NAME,
         )
       }
 

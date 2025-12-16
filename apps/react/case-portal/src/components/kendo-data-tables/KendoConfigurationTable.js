@@ -70,7 +70,9 @@ const ConfigurationTable = () => {
   const [tabIndex, setTabIndex] = useState(0)
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
+  const [dateEdited, setDateEdited] = useState(false)
   const [summaryEdited, setSummaryEdited] = useState(false)
+
   const [configurationRows, setConfigurationRows] = useState([])
   const [startUpRows, setStartUpRows] = useState([])
   const [otherLossRows, setOtherLossRows] = useState([])
@@ -122,8 +124,31 @@ const ConfigurationTable = () => {
   //   usePermissions()
 
   const handleOpenDialog = () => {
+    const isPEorPP = lowerVertName === 'pe' || lowerVertName === 'pp'
+
+    if (isPEorPP) {
+      if (!summaryEdited && !summary) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Please add AOP Design Basis.',
+          severity: 'error',
+        })
+        return
+      }
+
+      if (!summaryEdited && summary) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Please update AOP Design Basis.',
+          severity: 'error',
+        })
+        return
+      }
+    }
+
     setOpenConfirmDialog(true)
   }
+
   const handleCloseDialog = () => {
     setOpenConfirmDialog(false)
   }
@@ -520,6 +545,8 @@ const ConfigurationTable = () => {
     setTabIndex(0)
     carryForwardRecords()
     getConfigurationExecutionDetails()
+    setSummaryEdited(false)
+    setDateEdited(false)
   }, [PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
@@ -913,7 +940,10 @@ const ConfigurationTable = () => {
                         id='start-date'
                         format='dd-MM-yyyy'
                         value={startDate}
-                        onChange={(e) => setStartDate(e.value)}
+                        onChange={(e) => {
+                          setStartDate(e.value)
+                          setDateEdited(true)
+                        }}
                         style={{ height: '80px' }}
                         size='medium'
                         disabled={READ_ONLY}
@@ -934,7 +964,10 @@ const ConfigurationTable = () => {
                         id='end-date'
                         format='dd-MM-yyyy'
                         value={endDate}
-                        onChange={(e) => setEndDate(e.value)}
+                        onChange={(e) => {
+                          setEndDate(e.value)
+                          setDateEdited(true)
+                        }}
                         style={{ height: '80px' }}
                         size='medium'
                         disabled={READ_ONLY}
@@ -951,10 +984,7 @@ const ConfigurationTable = () => {
                         // disabled={READ_ONLY || !summaryEdited}
                         disabled={
                           lowerVertName === 'pe' || lowerVertName === 'pp'
-                            ? READ_ONLY ||
-                              !summaryEdited ||
-                              !summary ||
-                              summary.trim() === ''
+                            ? READ_ONLY || !dateEdited
                             : READ_ONLY
                         }
                       >
@@ -1020,6 +1050,7 @@ const ConfigurationTable = () => {
         onClose={handleCloseDialog}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
       >
         <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
         <DialogContent>

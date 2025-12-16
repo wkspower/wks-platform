@@ -45,6 +45,12 @@ const ConsumptionNorms = () => {
   const SCREEN_NAME = screenTitle?.title
   const headerMap = generateHeaderNames(AOP_YEAR)
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
 
@@ -395,7 +401,7 @@ const ConsumptionNorms = () => {
   const handleCalculateMeg = async () => {
     try {
       const data =
-        await ConsumptionNormsApiService.handleCalculateonsumptionNorms(
+        await ConsumptionNormsApiService.handleCalculateConsumptionNorms(
           PLANT_ID,
           AOP_YEAR,
           keycloak,
@@ -443,11 +449,14 @@ const ConsumptionNorms = () => {
     try {
       let response
       if (lowerVertName === 'pe' || lowerVertName === 'pp') {
-        response = await ConsumptionNormsApiService.OverallconsumptionppExport(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+        response =
+          await ConsumptionNormsApiService.OverallConsumptionPEPPExport(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+            SCREEN_NAME,
+          )
       }
     } catch (error) {
       console.error('Error downloading Excel:', error)

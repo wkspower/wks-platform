@@ -628,6 +628,7 @@ const MonthwiseRawMaterial = () => {
         )}
 
       {(lowerVertName === 'pe' ||
+        lowerVertName === 'pta' ||
         lowerVertName === 'pp' ||
         lowerVertName === 'vcm' ||
         lowerVertName === 'elastomer') && (

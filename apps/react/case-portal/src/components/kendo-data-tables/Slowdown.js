@@ -42,6 +42,12 @@ const SlowDown = ({ permissions }) => {
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const FORMATE_DECIMAL = ValueFormatterProduction()
   const vertName = verticalChange?.selectedVertical
   const plantName = plantObject?.name
@@ -1008,18 +1014,21 @@ const SlowDown = ({ permissions }) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else if (lowerVertName === 'chemical' || lowerVertName === 'meg') {
         response = await DataService.ExportSlowdownDetailsEOE(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
         response = await DataService.slowdownDetailsExport(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       }
     } catch (error) {
@@ -1273,7 +1282,7 @@ const SlowDown = ({ permissions }) => {
             allAction: true,
             onlyCellUpdate: true,
             downloadExcelBtnFromUI: true,
-            ExcelName: `${lowerVertName}-Slowdown Activities Configuration`,
+            ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown Activities(Configuration)`,
             showTitleNameBusiness: true,
             titleName: 'Configuration',
           }}

@@ -72,6 +72,9 @@ export default function HeaderContent({ keycloak }) {
   const [selectedSite, setSelectedSite] = useState('')
   const [selectedPlant, setSelectedPlant] = useState('')
 
+  const HIDE_VERTICAL_DROPDOWN =
+    keycloak?.realmAccess?.roles?.includes('maintenance_users')
+
   useEffect(() => {
     let parsed = []
     try {
@@ -413,34 +416,35 @@ export default function HeaderContent({ keycloak }) {
           </Box>
 
           {/* Vertical */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body2' className='custom-title-dropdown'>
-              Vertical:
-            </Typography>
-            {headerLoading ? (
-              <DropdownSkeleton />
-            ) : (
-              <FormControl sx={{ width: 100 }}>
-                <Select
-                  value={selectedVertical}
-                  onChange={handleVertChange}
-                  className='custom-title-dropdown-content'
-                  MenuProps={
-                    ({
+          {!HIDE_VERTICAL_DROPDOWN && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant='body2' className='custom-title-dropdown'>
+                Vertical:
+              </Typography>
+
+              {headerLoading ? (
+                <DropdownSkeleton />
+              ) : (
+                <FormControl sx={{ width: 100 }}>
+                  <Select
+                    value={selectedVertical}
+                    onChange={handleVertChange}
+                    className='custom-title-dropdown-content'
+                    MenuProps={{
                       PaperProps: { style: { maxHeight: 200 } },
-                    },
-                    { disableScrollLock: true })
-                  }
-                >
-                  {verticals.map((v) => (
-                    <MenuItem key={v.id} value={v.id}>
-                      {v.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-          </Box>
+                      disableScrollLock: true,
+                    }}
+                  >
+                    {verticals.map((v) => (
+                      <MenuItem key={v.id} value={v.id}>
+                        {v.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              )}
+            </Box>
+          )}
 
           {/* Site */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

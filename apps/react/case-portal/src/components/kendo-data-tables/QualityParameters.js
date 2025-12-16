@@ -37,6 +37,13 @@ const QualityParameters = ({ permissions }) => {
   const PLANT_NAME = plantObject?.name
   const SITE_ID = siteObject?.id
   const SITE_NAME = siteObject?.name
+
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
@@ -360,7 +367,7 @@ const QualityParameters = ({ permissions }) => {
           titleName: 'Quality Parameters',
           saveBtn: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `${vertName}_Quality Parameters`,
+          ExcelName: `${EXCEL_EXPORT_TITLE}_Quality Parameters`,
         },
         isOldYear,
       ),
@@ -401,7 +408,7 @@ const QualityParameters = ({ permissions }) => {
           titleName: 'Price Differential',
           saveBtn: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `${vertName}_Price Differential`,
+          ExcelName: `${EXCEL_EXPORT_TITLE}_Price Differential`,
         },
         isOldYear,
       ),
