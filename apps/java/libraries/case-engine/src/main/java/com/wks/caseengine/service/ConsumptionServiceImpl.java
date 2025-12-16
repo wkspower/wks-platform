@@ -37,10 +37,12 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
 			for (Object[] row : results) {
 				PlantRequirementDTO materialYearlyConsumptionData = new PlantRequirementDTO();
-				materialYearlyConsumptionData.setCppUtilities(row[0] != null ? row[0].toString() : null);
-				materialYearlyConsumptionData.setCppUtiltiyIds(row[1] != null ? row[1].toString() : null);
-				materialYearlyConsumptionData.setCppPlant(row[2] != null ? row[2].toString() : null);
-				materialYearlyConsumptionData.setCppPlantId(row[3] != null ? row[3].toString() : null);
+				materialYearlyConsumptionData.setPlantName(row[0] != null ? row[0].toString() : null);
+				materialYearlyConsumptionData.setPlantCode(row[1] != null ? row[1].toString() : null);
+				materialYearlyConsumptionData.setCppUtilities(row[2] != null ? row[2].toString() : null);
+				materialYearlyConsumptionData.setCppUtiltiyIds(row[3] != null ? row[3].toString() : null);
+				// materialYearlyConsumptionData.setCppPlant(row[4] != null ? row[4].toString() : null);
+				// materialYearlyConsumptionData.setCppPlantId(row[5] != null ? row[5].toString() : null);
 				materialYearlyConsumptionData.setUom(row[4] != null ? row[4].toString() : null);
 				materialYearlyConsumptionData.setApril(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
 				materialYearlyConsumptionData.setMay(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
@@ -55,7 +57,6 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 				materialYearlyConsumptionData.setFeb(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
 				materialYearlyConsumptionData.setMarch(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
 				materialYearlyConsumptionData.setGrandTotal(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
-
 				cppConsumptionData.add(materialYearlyConsumptionData);
 
 			}

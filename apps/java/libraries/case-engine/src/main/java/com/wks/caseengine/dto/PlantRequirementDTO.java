@@ -13,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class PlantRequirementDTO {
-	
+	private String plantName;
+    private String plantCode;
 	private String cppUtilities;
     private String cppUtiltiyIds;
     private String cppPlant; 

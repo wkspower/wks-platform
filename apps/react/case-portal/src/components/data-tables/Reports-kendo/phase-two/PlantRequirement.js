@@ -275,17 +275,19 @@ const PlantRequirement = () => {
   // Column definitions
   const columns = [
     {
-      field: 'processPlant',
+      field: 'plantName',
       title: 'Process Plant',
       width: 150,
+      minWidth:150,
       type: 'text',
       editable: false,
       hidden: false,
     },
     {
-      field: 'processPlantId',
-      title: 'Process Plant ID',
-      widthT: 120,
+      field: 'plantCode',
+      title: 'Plant Code',
+      width: 120,
+      minWidth:120,
       type: 'text',
       editable: false,
       hidden: true,
@@ -584,7 +586,7 @@ const PlantRequirement = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        // groupBy="processPlant"
+        groupBy={['plantName']}
       />
     </Box>
   )
