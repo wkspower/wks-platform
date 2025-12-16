@@ -92,6 +92,15 @@ const Norms = () => {
       editable: false,
       minWidth: 100,
     },
+    // SAP Code
+    {
+      field: 'sapCode',
+      title: 'SAP Code',
+      width: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
     // Material
     {
       field: 'materialName',
@@ -270,6 +279,7 @@ const Norms = () => {
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchPlantRequirementData()
+      setModifiedCells({})
     }
   }, [PLANT_ID,AOP_YEAR])
 

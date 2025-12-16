@@ -274,22 +274,22 @@ const PlantRequirement = () => {
   const [rows, setRows] = useState([])
   // Column definitions
   const columns = [
-    // {
-    //   field: 'processPlant',
-    //   title: 'Process Plant',
-    //   width: 150,
-    //   type: 'text',
-    //   editable: false,
-    //   hidden: true,
-    // },
-    // {
-    //   field: 'processPlantId',
-    //   title: 'Process Plant ID',
-    //   widthT: 120,
-    //   type: 'text',
-    //   editable: false,
-    //   hidden: true,
-    // },
+    {
+      field: 'processPlant',
+      title: 'Process Plant',
+      width: 150,
+      type: 'text',
+      editable: false,
+      hidden: false,
+    },
+    {
+      field: 'processPlantId',
+      title: 'Process Plant ID',
+      widthT: 120,
+      type: 'text',
+      editable: false,
+      hidden: true,
+    },
     {
       field: 'cppUtilities',
       title: 'CPP Utilities',
@@ -321,6 +321,7 @@ const PlantRequirement = () => {
       minWidth:80,
       type: 'text',
       editable: false,
+      hidden: true,
     },
     { field: 'uom', title: 'UOM', widthT: 60,minWidth:60, type: 'text', editable: false },
     {

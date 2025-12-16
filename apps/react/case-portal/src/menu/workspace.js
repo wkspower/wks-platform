@@ -140,40 +140,39 @@ const workspace = {
       type: 'collapse',
       icon: icons.IconReport, // You can choose an appropriate icon
       children: [
-        {
-          id: 'norms',
-          title: i18n.t('menu.norms'),
-          type: 'item',
-          url: '/utilityPlant/norms',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-        {
-          id: 'plant-requirement',
-          title: i18n.t('menu.plantRequirement'),
-          type: 'item',
-          url: '/utilityPlant/plant-requirement',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
+             {
+              id: 'inputs',
+              title: i18n.t('menu.inputs'),
+              type: 'item',
+              url: '/utilityPlant/inputs',
+              icon: icons.IconReport,
+              breadcrumbs: true,
+            },
+            {
+              id: 'plant-requirement',
+              title: i18n.t('menu.plantRequirement'),
+              type: 'item',
+              url: '/utilityPlant/plant-requirement',
+              icon: icons.IconReport,
+              breadcrumbs: true,
+            },
 
-        {
-          id: 'fixed-consumption',
-          title: i18n.t('menu.fixedConsumption'),
-          type: 'item',
-          url: '/utilityPlant/fixed-consumption',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-        {
-          id: 'import-power',
-          title: i18n.t('menu.importPower'),
-          type: 'item',
-          url: '/utilityPlant/import-power',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-    
+            {
+              id: 'fixed-consumption',
+              title: i18n.t('menu.fixedConsumption'),
+              type: 'item',
+              url: '/utilityPlant/fixed-consumption',
+              icon: icons.IconReport,
+              breadcrumbs: true,
+            },
+            {
+              id: 'norms',
+              title: i18n.t('menu.norms'),
+              type: 'item',
+              url: '/utilityPlant/norms',
+              icon: icons.IconReport,
+              breadcrumbs: true,
+            },
           ],
         },
 

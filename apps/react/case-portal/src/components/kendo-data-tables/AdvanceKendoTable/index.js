@@ -51,6 +51,7 @@ import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
 import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
 import { ExcelExport } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
+import { NumberCellEditor } from '../Utilities-Kendo/phase-two/NumberCellEditor'
 
 export const particulars = [
   'normParameterId',
@@ -952,6 +953,48 @@ const AdvanceKendoTable = ({
           />
         )
       }
+   
+      if (col.type === 'wholeNumber') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: { text: (cellProps) => <NumberCellEditor {...cellProps} wholeNumberOnly={col?.wholeNumberOnly || false} /> },
+               data: (props) =>
+                showThreeColors ? (
+                  <RedHighlightCell2
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    allRedCell2={allRedCell2}
+                    disableRedHighlight={disableRedHighlight}
+                    isFormatByUOM={isFormatByUOM}
+                  />
+                ) : (
+                  <RedHighlightCell
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    disableRedHighlight={disableRedHighlight}
+                    isFormatByUOM={isFormatByUOM}
+                  />
+                ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+
 
       //New Creted Code for Text Type
       if (col.type == 'text') {

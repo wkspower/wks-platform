@@ -353,7 +353,7 @@ const FixedConsumption = () => {
       width: 150,
       type: 'text',
       editable: false,
-      hidden: true,
+      hidden: false,
     },
     {
       field: 'plantId',
@@ -361,7 +361,7 @@ const FixedConsumption = () => {
       width: 120,
       type: 'text',
       editable: false,
-      hidden: true,
+      hidden: false,
     },
     {
       field: 'costCenter',
@@ -369,6 +369,7 @@ const FixedConsumption = () => {
       widthT: 120,
       type: 'text',
       editable: false,
+      hidden:true,
     },
     {
       field: 'costCenterId',
@@ -376,6 +377,7 @@ const FixedConsumption = () => {
       widthT: 95,
       type: 'text',
       editable: false,
+      hidden: true,
     },
     {
       field: 'cppUtility',
@@ -663,8 +665,8 @@ const FixedConsumption = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        //groupBy="plant"
-        groupBy={['plant', 'plantId']}
+        groupBy="plant"
+        // groupBy={['plant', 'plantId']}
       />
     </Box>
   )

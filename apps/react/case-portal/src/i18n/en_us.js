@@ -58,6 +58,7 @@ const defs = {
     plantRequirement: 'Plant Requirement',
     fixedConsumption: 'Fixed Consumption',
     norms:'Norms',
+    inputs:'Inputs',
     importPower:'Import Power',
     productionVolumeDataBasis: 'Production Volume Data',
     normsHistorianBasis: 'Norms Historian',

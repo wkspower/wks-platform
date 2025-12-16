@@ -7,105 +7,105 @@ import { useSession } from 'SessionStoreContext'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import AssetAvailability from './AssetAvailability'
-import { Stack } from '../../../../../node_modules/@mui/material/index'
+import { Stack } from '../../../../../../node_modules/@mui/material/index'
+
 const dummyRowsData = [
   {
     id: 1,
-    plant: "Power from MEL",
-    utility: "Power_Dis",
+    generatingPlant: "40NB - NMD - Power Plant 1",
+    utilityDistributed: "310027910 - Power_Dis",
+    utilityGenerated: "310027907 - POWERGEN",
+    distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    april: 25.0,
-    may: 25.0,
-    june: 33.0,
-    july: 33.0,
-    aug: 33.0,
-    sep: 33.0,
-    oct: 33.0,
-    nov: 33.0,
-    dec: 33.0,
-    jan: 33.0,
-    feb: 33.0,
-    march: 33.0,
+    distributionNormMapping: 1.00,
+    minCapacity: null,
+    maxCapacity: 22.00,
+    april: 15.0,
+    may: 16.0,
+    june: 17.0,
+    july: 18.0,
+    aug: 19.0,
+    sep: 18.5,
+    oct: 17.5,
+    nov: 16.5,
+    dec: 15.5,
+    jan: 14.5,
+    feb: 14.0,
+    march: 15.0,
   },
   {
     id: 2,
-    utility: "POWERGEN",
-    plant: "NMD - Power Plant 1",
+    generatingPlant: "40NC - NMD - Power Plant 2",
+    utilityDistributed: "310027910 - Power_Dis",
+    utilityGenerated: "310027907 - POWERGEN",
+    distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    april: 12.81,
-    may: 7.63,
-    june: 8.14,
-    july: 9.45,
-    aug: 10.79,
-    sep: 9.89,
-    oct: 7.76,
-    nov: 9.94,
-    dec: 7.94,
-    jan: 10.63,
-    feb: 11.03,
-    march: 0,
+    distributionNormMapping: 1.00,
+    minCapacity: null,
+    maxCapacity: 22.00,
+    april: 12.0,
+    may: 13.0,
+    june: 14.0,
+    july: 15.0,
+    aug: 16.0,
+    sep: 15.5,
+    oct: 14.5,
+    nov: 13.5,
+    dec: 12.5,
+    jan: 11.5,
+    feb: 11.0,
+    march: 12.0,
   },
   {
     id: 3,
-    utility: "POWERGEN",
-    plant: "NMD - Power Plant 2",
+    generatingPlant: "40ND - NMD - Power Plant 3",
+    utilityDistributed: "310027910 - Power_Dis",
+    utilityGenerated: "310027907 - POWERGEN",
+    distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    april: 11.20,
-    may: 11.60,
-    june: null,
-    july: 6.93,
-    aug: null,
-    sep: null,
-    oct: null,
-    nov: null,
-    dec: null,
-    jan: null,
-    feb: null,
-    march: null,
+    distributionNormMapping: 1.00,
+    minCapacity: null,
+    maxCapacity: 22.00,
+    april: 10.0,
+    may: 11.0,
+    june: 12.0,
+    july: 13.0,
+    aug: 14.0,
+    sep: 13.5,
+    oct: 12.5,
+    nov: 11.5,
+    dec: 10.5,
+    jan: 9.5,
+    feb: 9.0,
+    march: 10.0,
   },
   {
     id: 4,
-    utility: "POWERGEN",
-    plant: "NMD - Power Plant 3",
+    generatingPlant: "40NE - NMD - STG Power Plant",
+    utilityDistributed: "310027910 - Power_Dis",
+    utilityGenerated: "310027907 - POWERGEN",
+    distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    april: 12.57,
-    may: null,
-    june: 6.41,
-    july: null,
-    aug: 7.90,
-    sep: 9.19,
-    oct: 8.29,
-    nov: 6.77,
-    dec: 8.39,
-    jan: 6.39,
-    feb: 9.04,
-    march: 9.44,
-  },
-  {
-    id: 5,
-    utility: "POWERGEN",
-    plant: "NMD - STG Power Plant",
-    uom: "MW",
-    april: 14.21,
-    may: 14.21,
-    june: 12.24,
-    july: 12.30,
-    aug: 11.92,
-    sep: 11.84,
-    oct: 11.92,
-    nov: 12.24,
-    dec: 11.92,
-    jan: 11.92,
-    feb: 11.67,
-    march: 11.92,
+    distributionNormMapping: 1.00,
+    minCapacity: 5.00,
+    maxCapacity: 25.00,
+    april: 20.0,
+    may: 21.0,
+    june: 22.0,
+    july: 23.0,
+    aug: 24.0,
+    sep: 23.5,
+    oct: 22.5,
+    nov: 21.5,
+    dec: 20.5,
+    jan: 19.5,
+    feb: 19.0,
+    march: 20.0,
   }
 ];
 
-
-const ImportPower = () => {
+const AssetCapacity = () => {
   const keycloak = useSession()
-  // State management
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -132,34 +132,71 @@ const ImportPower = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState([])
-  const valueFormat= ValueFormatterProduction()
+  const valueFormat = ValueFormatterProduction()
 
-
-  // Column definitions
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
     {
-      field: 'assetName',
-      title: 'Plant',
-      width: 150,
-      minWidth: 150,
+      field: 'generatingPlant',
+      title: 'Generating Plant',
+      width: 180,
+      minWidth: 180,
       type: 'text',
       editable: false,
     },
     {
-      field: 'utility',
-      title: 'Utility',
-      width: 150,
-      minWidth: 150,
+      field: 'utilityDistributed',
+      title: 'Utility Distributed',
+      width: 180,
+      minWidth: 180,
+      type: 'text',
+      editable: false,
+    },
+    {
+      field: 'utilityGenerated',
+      title: 'Utility Generated',
+      width: 180,
+      minWidth: 180,
+      type: 'text',
+      editable: false,
+    },
+    {
+      field: 'distributionPlant',
+      title: 'Distribution Plant',
+      width: 180,
+      minWidth: 180,
       type: 'text',
       editable: false,
     },
     { field: 'uom', title: 'UOM', widthT: 60, minWidth: 80, type: 'text', editable: false },
     {
-      // field: 'april',
-      field:headerMap[4],
-      title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
-      editable: true, 
+      field: 'distributionNormMapping',
+      title: 'Distribution Norm Mapping',
+      width: 150,
+      minWidth: 120,
+      type: 'number',
+      editable: false,
+    },
+    {
+      field: 'minCapacity',
+      title: 'Min Capacity',
+      width: 120,
+      minWidth: 100,
+      type: 'number1',
+      editable: true,
+    },
+    {
+      field: 'maxCapacity',
+      title: 'Max Capacity',
+      width: 120,
+      minWidth: 100,
+      type: 'number1',
+      editable: true,
+    },
+    {
+      field: 'april',
+      title: headerMap[4],
+      editable: true,
       widthT: 100,
       minWidth: 80,
       align: 'left',
@@ -168,8 +205,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'may',
-      field: headerMap[5],
+      field: 'may',
       title: headerMap[5],
       editable: true,
       widthT: 100,
@@ -180,8 +216,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'june',
-      field: headerMap[6],
+      field: 'june',
       title: headerMap[6],
       editable: true,
       widthT: 100,
@@ -192,8 +227,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'july',
-      field: headerMap[7],
+      field: 'july',
       title: headerMap[7],
       editable: true,
       widthT: 100,
@@ -204,8 +238,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'aug',
-      field: headerMap[8],
+      field: 'aug',
       title: headerMap[8],
       editable: true,
       widthT: 100,
@@ -216,8 +249,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'sep',
-      field: headerMap[9],
+      field: 'sep',
       title: headerMap[9],
       editable: true,
       widthT: 100,
@@ -228,8 +260,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'oct',
-      field: headerMap[10],
+      field: 'oct',
       title: headerMap[10],
       editable: true,
       widthT: 100,
@@ -240,8 +271,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'nov',
-      field: headerMap[11],
+      field: 'nov',
       title: headerMap[11],
       editable: true,
       widthT: 100,
@@ -252,8 +282,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'dec',
-      field: headerMap[12],
+      field: 'dec',
       title: headerMap[12],
       editable: true,
       widthT: 100,
@@ -264,8 +293,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'jan',
-      field: headerMap[1],
+      field: 'jan',
       title: headerMap[1],
       editable: true,
       widthT: 100,
@@ -276,8 +304,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'feb',
-      field: headerMap[2],
+      field: 'feb',
       title: headerMap[2],
       editable: true,
       widthT: 100,
@@ -288,8 +315,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'march',
-      field: headerMap[3],
+      field: 'march',
       title: headerMap[3],
       editable: true,
       widthT: 100,
@@ -302,15 +328,16 @@ const ImportPower = () => {
   ]
 
   useEffect(() => {
-    if(AOP_YEAR){
-      fetchImportConsumptionData(keycloak, AOP_YEAR)
+    if (AOP_YEAR) {
+    //   fetchAssetCapacityData(keycloak, AOP_YEAR)
+    setRows(dummyRowsData)
     }
   }, [AOP_YEAR])
 
-  const fetchImportConsumptionData = async (keycloak, AOP_YEAR) => {
+  const fetchAssetCapacityData = async (keycloak, AOP_YEAR) => {
     setLoading(true)
     try {
-      const res = await UtilityPlantApiServiceV2.getImportConsumptionData(
+      const res = await UtilityPlantApiServiceV2.getAssetCapacityData(
         keycloak,
         AOP_YEAR,
       )
@@ -320,22 +347,19 @@ const ImportPower = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      // Process and set the fetched data to rows
-      let tempRes=res?.data.map((item, index)=>{
+      let tempRes = res?.data.map((item, index) => {
         return { ...item, id: index + 1 }
       })
       setRows(tempRes)
     } catch (error) {
-      console.error('Error fetching fixed consumption data:', error)
+      console.error('Error fetching asset capacity data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
-      // setRows(dummyRowsData)
     }
   }
 
-  // Permissions (adjust as needed)
   const permissions = {
     showAction: true,
     addButton: false,
@@ -344,11 +368,10 @@ const ImportPower = () => {
     saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
-    showTitle:true,
+    showTitle: true,
     titleName: screenTitle?.title,
   }
 
-  // Dummy save handler
   const saveChanges = async () => {
     setLoading(true)
 
@@ -367,19 +390,15 @@ const ImportPower = () => {
       return rest
     })
     const tempPayload = JSON.stringify(payload)
-     try {
-      // Transform modifiedCells into the format expected by the API
+    try {
       console.log('modifiedData', modifiedData)
 
-      // Call the API to save changes
-      const response = await UtilityPlantApiServiceV2.saveImportConsumptionData(
+      const response = await UtilityPlantApiServiceV2.saveAssetCapacityData(
         keycloak,
         PLANT_ID,
         tempPayload
       )
-      console.log('response',response)
-      // Update the local state with the saved data
-      // setRows(updatedRows)
+      console.log('response', response)
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
@@ -387,7 +406,7 @@ const ImportPower = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error saving plant requirement data:', error)
+      console.error('Error saving asset capacity data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -412,21 +431,16 @@ const ImportPower = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        title='Import Consumption'
+        title='Asset Capacity Input'
         permissions={permissions}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        //groupBy="plant"
       />
-
-    <Stack sx={{mt:2}}>
-      <AssetAvailability/>
-    </Stack>
     </Box>
   )
 }
 
-export default ImportPower
+export default AssetCapacity

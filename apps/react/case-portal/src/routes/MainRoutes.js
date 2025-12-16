@@ -57,7 +57,6 @@ import RunLengthDataSet from 'components/data-tables/Reports/RunLengthDataSet'
 import MaintenanceSummary from 'components/kendo-data-tables/MaintenanceSummary'
 import PlantBudgetSummary from 'components/kendo-data-tables/PlantBudgetSummary'
 import AopDesignBasis from 'components/kendo-data-tables/AopDesignBasis'
-import TcsInput from 'components/kendo-data-tables/TcsInput'
 import ProductionTargetBasis from 'components/data-tables/Reports/ProductionTargetBasis'
 
 import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenanceSummary'
@@ -67,7 +66,8 @@ import NormComparisonReport from 'components/kendo-data-tables/NormComparisonRep
 import TcsOutput from 'components/kendo-data-tables/TcsOutput'
 import PimsOutput from 'components/kendo-data-tables/PimsOutput'
 import Norms from 'components/data-tables/Reports-kendo/phase-two/Norms'
-import ImportPower from 'components/data-tables/Reports-kendo/phase-two/ImportPower'
+import TcsInput from 'components/kendo-data-tables/phase-two/TcsInput'
+import Inputs from 'components/data-tables/Reports-kendo/phase-two/Inputs/index'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -551,10 +551,10 @@ export const MainRoutes = (
             ),
           }, 
           {
-            path: 'import-power',
+            path: 'inputs',
             element: (
-              <PrivateRoute routeId='import-power'>
-                <ImportPower />
+              <PrivateRoute routeId='inputs'>
+                <Inputs />
               </PrivateRoute>
             ),
           }, 
