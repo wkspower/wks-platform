@@ -69,6 +69,7 @@ const MaintenanceTable = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remarks || '')
@@ -176,6 +177,28 @@ const MaintenanceTable = () => {
     ...getMonthlyColumns(),
     isEditableField,
   ]
+  // Base function to generate column set
+  const generateColumnsPEPP = (nameWidthT) => [
+    {
+      field: 'Name',
+      title: 'Description',
+      align: 'left',
+      headerAlign: 'left',
+      widthT: nameWidthT,
+      editable: false,
+      isEditable: false,
+    },
+    ...getMonthlyColumns(),
+    isEditableField,
+
+    {
+      field: 'allMonthsTotal',
+      title: 'Total Hrs',
+      type: 'number',
+      format: '{0:n2}',
+      editable: false,
+    },
+  ]
 
   const generateColumnsELASTOMER = (nameWidthT) => [
     {
@@ -199,8 +222,8 @@ const MaintenanceTable = () => {
 
   // Column sets
   const productionColumnsMEG = generateColumns(390)
-  const productionColumnsPE = generateColumns(150)
-  const productionColumnsPP = generateColumns(220)
+  const productionColumnsPE = generateColumnsPEPP(150)
+  const productionColumnsPP = generateColumnsPEPP(220)
   const productionColumnsNonMEG = generateColumns(200)
   const productionColumnsELASTOMER = generateColumnsELASTOMER(200)
 

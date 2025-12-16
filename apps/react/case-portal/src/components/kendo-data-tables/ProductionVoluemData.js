@@ -825,7 +825,7 @@ const ProductionvolumeData = ({ permissions }) => {
   //POINT-1 Current MCU to be rename as Max Achieved capacity.
   const percentageTitle = IS_PE_PP
     ? // ? 'Current MCU'
-      'Max Achieved Capacity.'
+      'Max Achieved Capacity'
     : VERTICAL_NAME === 'cracker'
       ? 'Max Achieved Capacity (Ethylene)'
       : 'Max Achieved Capacity'

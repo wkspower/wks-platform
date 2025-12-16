@@ -1,68 +1,3 @@
-// import React, { useEffect, useState } from 'react'
-// import { useSelector } from 'react-redux'
-// import { useSession } from 'SessionStoreContext'
-// export default function PlantBudgetSummary() {
-//   const keycloak = useSession()
-
-//   const [row, setRows] = useState([])
-//   const [loading, setLoading] = useState(false)
-//   const [openSaveDialog, setOpenSaveDialog] = useState(false)
-//   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-//   const [currentRemark, setCurrentRemark] = useState('')
-//   const [currentRowId, setCurrentRowId] = useState(null)
-//   const [modifiedCells, setModifiedCells] = React.useState({})
-//   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
-
-//   const dataGridStore = useSelector((state) => state.dataGridStore)
-//   const {
-//     verticalChange,
-//     yearChanged,
-//     oldYear,
-//     plantID,
-//     plantObject,
-//     siteObject,
-//     verticalObject,
-//     year,
-//   } = dataGridStore
-
-//   const PLANT_ID = plantObject?.id
-//   const SITE_ID = siteObject?.id
-//   const VERTICAL_ID = verticalObject?.id
-//   const AOP_YEAR = year?.selectedYear
-//   const isOldYear = oldYear?.oldYear
-//   const vertName = verticalChange?.selectedVertical
-//   const lowerVertName = vertName?.toLowerCase() || 'meg'
-
-//   async function handleOpenPdfTempSSRS() {
-//     try {
-//       let baseurl = ''
-//       baseurl =
-//         'http://sjmnpb174/ReportServer/Pages/ReportViewer.aspx?%2fAOP&rs:Command=Render'
-//       const params = new URLSearchParams({
-//         verticalId: VERTICAL_ID,
-//         siteId: SITE_ID,
-//         plantId: PLANT_ID,
-//         finYear: AOP_YEAR,
-//       })
-//       const url = `${baseurl}?${params.toString()}`
-
-//       window.open(url, '_blank')
-//       return true
-//     } catch (e) {
-//       console.error('Error opening link:', e)
-//       return Promise.reject(e)
-//     }
-//   }
-
-//   useEffect(() => {
-//     handleOpenPdfTempSSRS()
-//   }, [])
-
-//   return null
-// }
-
-// PlantBudgetSummary.jsx
-
 import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CircularProgress, Box, Typography, Button } from '@mui/material'
@@ -82,12 +17,22 @@ export default function PlantBudgetSummary() {
   const { plantObject, siteObject, verticalObject, year } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
+
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
+    let REPORT_CODE = ''
+    if (PLANT_NAME_LOWERCASE == 'pe' || PLANT_NAME_LOWERCASE == 'pp') {
+      REPORT_CODE = 'plant-budget-summary-pepp'
+    } else {
+      REPORT_CODE = 'plant-budget-summary'
+    }
+
     try {
       var data = await BusinessDemandDataApiService.ssrsBudgetSummary(
         keycloak,

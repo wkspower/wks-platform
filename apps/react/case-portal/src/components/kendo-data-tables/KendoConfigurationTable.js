@@ -116,9 +116,12 @@ const ConfigurationTable = () => {
   const [configurationExecutionDetails, setConfigurationExecutionDetails] =
     useState([])
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
+  const [openConfirmDialogRev, setOpenConfirmDialogRev] = useState(false)
   const [gradeId, setGradeId] = React.useState(null)
   const [revision, setRevision] = useState('1')
   const [revisionDetails, setRevisionDetails] = useState([])
+
+  const [selectedRevNum, setSelectedRevNum] = useState(null)
 
   // const { isReadOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
@@ -155,6 +158,21 @@ const ConfigurationTable = () => {
   const handleConfirmLoad = () => {
     setOpenConfirmDialog(false)
     onLoad()
+  }
+
+  const handleOpenDialogRev = (num) => {
+    setSelectedRevNum(num)
+    setOpenConfirmDialogRev(true)
+  }
+
+  const handleCloseDialogRev = () => {
+    setOpenConfirmDialogRev(false)
+    setSelectedRevNum(null)
+  }
+
+  const handleConfirmLoadRev = () => {
+    setOpenConfirmDialogRev(false)
+    handleRevisionChange(selectedRevNum)
   }
 
   const fetchData = async (gradeId = null) => {
@@ -547,6 +565,7 @@ const ConfigurationTable = () => {
     getConfigurationExecutionDetails()
     setSummaryEdited(false)
     setDateEdited(false)
+    setSelectedRevNum(null)
   }, [PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
@@ -1068,6 +1087,31 @@ const ConfigurationTable = () => {
     )
   }, [openConfirmDialog])
 
+  const ConfigurationDialogRev = useMemo(() => {
+    return (
+      <Dialog
+        open={openConfirmDialogRev}
+        onClose={handleCloseDialogRev}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+        disableScrollLock
+      >
+        <DialogTitle id='alert-dialog-title'>{'Change?'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            {`Are you sure you want to change the Revision`}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialogRev}>Cancel</Button>
+          <Button onClick={handleConfirmLoadRev} autoFocus>
+            Change
+          </Button>
+        </DialogActions>
+      </Dialog>
+    )
+  }, [openConfirmDialogRev])
+
   if (
     (lowerVertName == 'meg' ||
       lowerVertName == 'pvc' ||
@@ -1208,6 +1252,7 @@ const ConfigurationTable = () => {
           onClose={() => setSnackbarOpen(false)}
         />
         {ConfigurationDialog}
+        {ConfigurationDialogRev}
       </div>
     )
   }
@@ -1228,7 +1273,7 @@ const ConfigurationTable = () => {
         onClose={() => setSnackbarOpen(false)}
       />
       {ConfigurationDialog}
-
+      {ConfigurationDialogRev}
       <div
         style={{
           display: 'flex',
@@ -1265,7 +1310,7 @@ const ConfigurationTable = () => {
                 return (
                   <Button
                     key={num}
-                    onClick={() => handleRevisionChange(num)}
+                    onClick={() => handleOpenDialogRev(num)}
                     variant={selected ? 'contained' : 'outlined'}
                     size='small'
                     sx={{

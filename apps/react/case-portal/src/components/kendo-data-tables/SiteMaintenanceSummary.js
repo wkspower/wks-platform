@@ -16,12 +16,22 @@ export default function SiteMaintenanceSummary() {
   const { plantObject, siteObject, verticalObject, year } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
+
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
+    let REPORT_CODE = ''
+    if (PLANT_NAME_LOWERCASE == 'pe' || PLANT_NAME_LOWERCASE == 'pp') {
+      REPORT_CODE = 'site-maintenance-summary-pepp'
+    } else {
+      REPORT_CODE = 'site-maintenance-summary'
+    }
+
     try {
       var data = await BusinessDemandDataApiService.ssrsSiteMaintenanceSummary(
         keycloak,
