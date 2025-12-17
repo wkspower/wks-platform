@@ -134,6 +134,98 @@ const ImportPower = () => {
   const [rows, setRows] = useState([])
   const valueFormat= ValueFormatterProduction()
 
+  const dummyRowsData=[
+    {
+      id: 1,
+      utility: "Power from MEL",
+      assetName: "NMD-Rev Proc",
+      uom: "MW",
+      [headerMap[4]]: 25.00,
+      [headerMap[5]]: 25.00,
+      [headerMap[6]]: 33.00,
+      [headerMap[7]]: 33.00,
+      [headerMap[8]]: 33.00,
+      [headerMap[9]]: 33.00,
+      [headerMap[10]]: 33.00,
+      [headerMap[11]]: 33.00,
+      [headerMap[12]]: 33.00,
+      [headerMap[1]]: 33.00,
+      [headerMap[2]]: 33.00,
+      [headerMap[3]]: 33.00,
+    },
+    {
+      id: 2,
+      utility: "POWERGEN",
+      assetName: "NMD - Power Plant 1",
+      uom: "MW",
+      [headerMap[4]]: null,
+      [headerMap[5]]: 12.81,
+      [headerMap[6]]: 7.63,
+      [headerMap[7]]: 8.14,
+      [headerMap[8]]: 9.45,
+      [headerMap[9]]: 10.79,
+      [headerMap[10]]: 9.89,
+      [headerMap[11]]: 7.76,
+      [headerMap[12]]: 9.94,
+      [headerMap[1]]: 7.94,
+      [headerMap[2]]: 10.63,
+      [headerMap[3]]: 11.03,
+    },
+    {
+      id: 3,
+      utility: "POWERGEN",
+      assetName: "NMD - Power Plant 2",
+      uom: "MW",
+      [headerMap[4]]: 11.20,
+      [headerMap[5]]: 11.60,
+      [headerMap[6]]: null,
+      [headerMap[7]]: 6.93,
+      [headerMap[8]]: null,
+      [headerMap[9]]: null,
+      [headerMap[10]]: null,
+      [headerMap[11]]: null,
+      [headerMap[12]]: null,
+      [headerMap[1]]: null,
+      [headerMap[2]]: null,
+      [headerMap[3]]: null,
+    },
+    {
+      id: 4,
+      utility: "POWERGEN",
+      assetName: "NMD - Power Plant 3",
+      uom: "MW",
+      [headerMap[4]]: 12.57,
+      [headerMap[5]]: null,
+      [headerMap[6]]: 6.41,
+      [headerMap[7]]: null,
+      [headerMap[8]]: 7.90,
+      [headerMap[9]]: 9.19,
+      [headerMap[10]]: 8.29,
+      [headerMap[11]]: 6.77,
+      [headerMap[12]]: 8.39,
+      [headerMap[1]]: 6.39,
+      [headerMap[2]]: 9.04,
+      [headerMap[3]]: 9.44,
+    },
+    {
+      id: 5,
+      utility: "POWERGEN",
+      assetName: "NMD - STG Power Plant",
+      uom: "MW",
+      [headerMap[4]]: 14.21,
+      [headerMap[5]]: 14.21,
+      [headerMap[6]]: 12.24,
+      [headerMap[7]]: 12.30,
+      [headerMap[8]]: 11.92,
+      [headerMap[9]]: 11.84,
+      [headerMap[10]]: 11.92,
+      [headerMap[11]]: 12.24,
+      [headerMap[12]]: 11.92,
+      [headerMap[1]]: 11.92,
+      [headerMap[2]]: 11.67,
+      [headerMap[3]]: 11.92,
+    }
+  ]
 
   // Column definitions
   const columns = [
@@ -311,7 +403,8 @@ const ImportPower = () => {
 
   useEffect(() => {
     if(AOP_YEAR){
-      fetchImportConsumptionData(keycloak, AOP_YEAR)
+      // fetchImportConsumptionData(keycloak, AOP_YEAR)
+      setRows(dummyRowsData);
     }
   }, [AOP_YEAR])
 
