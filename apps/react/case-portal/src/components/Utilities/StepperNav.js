@@ -27,6 +27,22 @@ export default function StepperNav() {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+
+  const {
+    yearChanged,
+    oldYear,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+
+  const PLANT_NAME = plantObject?.name?.toLowerCase()
+
+  const SITE_NAME = siteObject?.name?.toLowerCase()
+
   const [steps, setSteps] = useState([])
 
   const { items: menuItems } = useMenuContext()
@@ -63,8 +79,13 @@ export default function StepperNav() {
 
   useEffect(() => {
     const newSteps = buildSteps(menuItems)
-    const shouldFilterSlowdown =
-      lowerVertName === verticalEnums.PE || lowerVertName === verticalEnums.PP
+
+    const isPE =
+      lowerVertName === 'pe' &&
+      SITE_NAME === 'nmd' &&
+      !['lldpe1', 'lldpe2'].includes(PLANT_NAME)
+
+    const shouldFilterSlowdown = lowerVertName === verticalEnums.PP || isPE
 
     if (shouldFilterSlowdown) {
       const filteredSteps = newSteps.filter(

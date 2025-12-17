@@ -39,6 +39,7 @@ export default function PlantBudgetSummary() {
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        REPORT_CODE,
       )
 
       setBase(data?.data[0]?.reportURL)
@@ -49,6 +50,7 @@ export default function PlantBudgetSummary() {
   }
 
   useEffect(() => {
+    setLoading(true)
     fetchData()
   }, [PLANT_ID, AOP_YEAR, keycloak])
 

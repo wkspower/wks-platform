@@ -20,6 +20,8 @@ export default function NormComparisonReport() {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
+  const VERTICAL_NAME_LOWERCASE = verticalObject?.name.toLowerCase()
+
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
 
@@ -46,6 +48,7 @@ export default function NormComparisonReport() {
   }
 
   useEffect(() => {
+    setLoading(true)
     fetchData()
   }, [PLANT_ID, AOP_YEAR, keycloak])
 

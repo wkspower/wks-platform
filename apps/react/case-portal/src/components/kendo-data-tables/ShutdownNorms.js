@@ -4,7 +4,7 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getShutdownConsumptionColDef from 'components/data-tables/CommonHeader/getShutdownConsumptionColDef'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
@@ -60,11 +60,25 @@ const ShutdownNorms = () => {
 
   const PLANT_NAME = plantObject?.name
   const SITE_NAME = siteObject?.name
+  const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
   const headerMap = generateHeaderNames(AOP_YEAR)
+
   const IS_PE_PP_VERTICAL = ['pe', 'pp'].includes(lowerVertName)
+
+  // const IS_PE_PP_VERTICAL_NMD_LLDPE =
+  //   ['pe'].includes(lowerVertName) &&
+  //   ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+  //   ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
+
+  const IS_PE_PP_VERTICAL_NMD_LLDPE =
+    ['pe'].includes(lowerVertName) &&
+    ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+    ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
+
   const textNote = IS_PE_PP_VERTICAL
     ? '*Adding shutdown consumption to all grades will replace any existing individual grade consumption entries.'
     : '*Quantities are per day basis'
@@ -316,7 +330,11 @@ const ShutdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'Particulars',
-            isEditable: isElastomer ? item?.isEditable : true,
+            isEditable: isElastomer
+              ? item?.isEditable
+              : IS_PE_PP_VERTICAL_NMD_LLDPE
+                ? false
+                : true,
           }
 
           return baseItem
@@ -528,7 +546,7 @@ const ShutdownNorms = () => {
           : false
         : false,
 
-      saveBtn: true,
+      saveBtn: IS_PE_PP_VERTICAL_NMD_LLDPE ? false : true,
       showCalculate:
         lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||

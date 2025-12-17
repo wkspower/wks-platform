@@ -81,12 +81,7 @@ export const ShutDownPeColumnsldpe12 = [
     editable: true,
     type: 'descLimit',
   },
-  {
-    field: 'productName1',
-    title: 'Particulars',
-    editable: true,
-    widthT: 130,
-  },
+
   {
     field: 'maintenanceId',
     title: 'Maintenance ID',

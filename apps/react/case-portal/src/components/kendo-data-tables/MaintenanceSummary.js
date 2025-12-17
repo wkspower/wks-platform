@@ -96,6 +96,7 @@ export default function MaintenanceSummary() {
   }
 
   useEffect(() => {
+    setLoading(true)
     fetchData()
   }, [PLANT_ID, AOP_YEAR, keycloak])
 

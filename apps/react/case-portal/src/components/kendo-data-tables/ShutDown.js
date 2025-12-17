@@ -70,8 +70,7 @@ const ShutDown = ({ permissions }) => {
     lowerVertName === 'pta' ||
     lowerVertName === 'pet' ||
     lowerVertName === 'meg' ||
-    (lowerVertName === 'pe' &&
-      !['lldpe1', 'lldpe2'].includes(lowerPlantName)) ||
+    lowerVertName === 'pe' ||
     lowerVertName === 'pp'
 
   const DELETE_NOTE =
@@ -179,12 +178,8 @@ const ShutDown = ({ permissions }) => {
       //2 REMARKS VALIDATION
       let requiredFields
       if (lowerVertName === 'pe') {
-        if (
-          siteName?.toLowerCase() === 'nmd' &&
-          (plantName?.toLowerCase() === 'lldpe1' ||
-            plantName?.toLowerCase() === 'lldpe2')
-        ) {
-          requiredFields = ['discription', 'remark', 'productName1']
+        if (siteName?.toLowerCase() === 'nmd') {
+          requiredFields = ['discription', 'remark']
         } else {
           requiredFields = ['discription', 'remark']
         }

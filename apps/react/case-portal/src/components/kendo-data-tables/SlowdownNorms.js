@@ -51,6 +51,20 @@ const SlowdownNorms = () => {
   const IS_OLD_YEAR = oldYear?.oldYear
   const isOldYear = false
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
+  const VERTICAL_NAME_LOWERCASE = verticalObject?.name?.toLowerCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+  const IS_PE_PP_VERTICAL_NMD_LLDPE =
+    ['pe'].includes(VERTICAL_NAME_LOWERCASE) &&
+    ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+    ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
+
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
@@ -521,7 +535,7 @@ const SlowdownNorms = () => {
       showG: IS_PE_PP ? true : false,
       marginBottom: IS_PE_PP ? true : false,
 
-      ExcelName: `${lowerVertName}-Slowdown Consumption (Norms/Quantity)`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown Consumption`,
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
 
@@ -529,7 +543,9 @@ const SlowdownNorms = () => {
       titleName:
         lowerVertName === 'elastomer'
           ? `Slowdown Consumption (Norms/Quantity)`
-          : `${SCREEN_NAME}`,
+          : IS_PE_PP_VERTICAL_NMD_LLDPE
+            ? 'Total Loss'
+            : `${SCREEN_NAME}`,
     },
     isOldYear,
   )

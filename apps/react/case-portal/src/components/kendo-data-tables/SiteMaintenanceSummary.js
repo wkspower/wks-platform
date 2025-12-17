@@ -49,6 +49,7 @@ export default function SiteMaintenanceSummary() {
   }
 
   useEffect(() => {
+    setLoading(true)
     fetchData()
   }, [PLANT_ID, AOP_YEAR, keycloak])
 
