@@ -20,5 +20,6 @@ public class MaintenanceReportURLDTO {
     private String plantId;
     private String aopYear;
     private String reportURL;
+    private Boolean isPlantWise;
     
 }

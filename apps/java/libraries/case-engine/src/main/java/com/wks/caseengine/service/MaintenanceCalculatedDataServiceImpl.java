@@ -1458,6 +1458,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	public AOPMessageVM getMaintenanceReportURLs(String plantId, String year, String type) {
 		try {
 			List<MaintenanceReportURLDTO> maintenanceReportURLDTOs = new ArrayList<MaintenanceReportURLDTO>();
+			Boolean isPlantWise=false;
+			List<MaintenanceReportURLDTO> isPlantWiseURLDTOs = new ArrayList<MaintenanceReportURLDTO>();
 			List<Object[]> obj = findByYearAndPlantIdAndType(year, UUID.fromString(plantId),type, "vwMaintenanceReports");
 			for(Object[] row:obj) {
 				MaintenanceReportURLDTO maintenanceReportURLDTO = new MaintenanceReportURLDTO();
@@ -1466,11 +1468,25 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 				maintenanceReportURLDTO.setPlantId(row[2]!=null ? row[2].toString():"");
 				maintenanceReportURLDTO.setAopYear(row[3]!=null ? row[3].toString():"");
 				maintenanceReportURLDTO.setReportURL(row[4]!=null ? row[4].toString():"");
-				maintenanceReportURLDTOs.add(maintenanceReportURLDTO);
+				maintenanceReportURLDTO.setIsPlantWise(
+					    row[5] != null ? Boolean.valueOf(row[5].toString()) : null
+					);
+				if(maintenanceReportURLDTO.getIsPlantWise()) {
+					if(maintenanceReportURLDTO.getPlantId().equalsIgnoreCase(plantId)) {
+						isPlantWiseURLDTOs.add(maintenanceReportURLDTO);
+						isPlantWise=true;
+					}
+				}else {
+					maintenanceReportURLDTOs.add(maintenanceReportURLDTO);
+				}
 			}
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
-			aopMessageVM.setData(maintenanceReportURLDTOs);
+			if(isPlantWise) {
+				aopMessageVM.setData(isPlantWiseURLDTOs);
+			}else {
+				aopMessageVM.setData(maintenanceReportURLDTOs);
+			}
 			aopMessageVM.setMessage("Data fetched successfully");
 			return aopMessageVM;
 		}catch (IllegalArgumentException e) {
@@ -1478,12 +1494,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
-		
 	}
 	
 	public List<Object[]> findByYearAndPlantIdAndType(String year, UUID plantId,String type, String viewName) {
 		try {
-			String sql = "SELECT " + "Id, ReportCode, PlantId, AOPYear, ReportURL "
+			String sql = "SELECT " + "Id, ReportCode, PlantId, AOPYear, ReportURL, isPlantWise "
 					 + "FROM " + viewName + " "
 					+ "WHERE ReportCode = :type";
 					
