@@ -7,7 +7,7 @@ import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-s
 import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
 import KendoDataTables from './index'
-import ElastomerMaintenanceTable from './ElastomerMaintenanceTable'
+//import ElastomerMaintenanceTable from './ElastomerMaintenanceTable'
 const MaintenanceTable = () => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const keycloak = useSession()
@@ -286,9 +286,9 @@ const MaintenanceTable = () => {
       ),
     [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
   )
-  if (lowerVertName == 'elastomer') {
-    return <ElastomerMaintenanceTable />
-  }
+  // if (lowerVertName == 'elastomer') {
+  //   return <ElastomerMaintenanceTable />
+  // }
 
   return (
     <>

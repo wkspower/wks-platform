@@ -1,9 +1,10 @@
 import { useGridApiRef } from '@mui/x-data-grid'
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
+import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import { useSession } from 'SessionStoreContext'
-
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 import { validateFields } from 'utils/validationUtils'
@@ -14,12 +15,12 @@ import { ShutDownPeColumnsldpe12 } from 'components/colums/ShutdownColumn'
 import { ShutDownPpColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownPTAColumns } from 'components/colums/ShutdownColumn'
-import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import { getRoleName } from 'services/role-service'
-import ElastomerShutDown from './ElastomerShutDown'
-const ShutDown = ({ permissions }) => {
+import { Box, Button, Tab, Tabs, Typography } from '@mui/material'
+const ElastomerShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
+  const [modifiedCells1, setModifiedCells1] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -62,7 +63,7 @@ const ShutDown = ({ permissions }) => {
   const siteName = siteObject?.name
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
-
+  const [slowdownRows, setSlowdownRows] = useState([])
   const IS_NON_PRODUCT_VERTICAL =
     lowerVertName === 'elastomer' ||
     lowerVertName === 'pvc' ||
@@ -79,6 +80,7 @@ const ShutDown = ({ permissions }) => {
 
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
+  const [deleteId1, setDeleteId1] = useState(null)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const [rowsSlowdown, setRowsSlowdown] = useState()
@@ -92,19 +94,96 @@ const ShutDown = ({ permissions }) => {
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRemark1, setCurrentRemark1] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+  const [currentRowId1, setCurrentRowId1] = useState(null)
+  const [remarkDialogOpen1, setRemarkDialogOpen1] = useState(false)
   const keycloak = useSession()
-
+  const [tabIndex, setTabIndex] = useState(0)
+  const defaultTabs = ['Shutdown/TA Activities', 'Shutdown History Config']
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
-
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
-
+  const handleRemarkCellClick1 = (row) => {
+    setCurrentRemark1(row.remarks || '')
+    setCurrentRowId1(row.id)
+    setRemarkDialogOpen1(true)
+  }
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+  }
+  const saveChangesHHistory = async () => {
+    try {
+      const data = Object.values(modifiedCells)
+      if (data.length == 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
+      }
+      const requiredFields = ['remarks']
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
+
+      const dataList = data.map((row) => {
+        const obj = {
+          month: row.monthly,
+          year: row.year,
+          aopYear: AOP_YEAR,
+          remark: row.remarks,
+          PlantFKId: PLANT_ID,
+        }
+
+        if (row.idFromApi) {
+          obj.id = row.idFromApi
+        }
+
+        return obj
+      })
+
+      const res = await MaintenanceDetailsApiService.saveSlowdownConfig(
+        PLANT_ID,
+        AOP_YEAR,
+        dataList,
+        keycloak,
+      )
+
+      if (res?.code == 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        slowdownFetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Saved Failed!',
+          severity: 'error',
+        })
+      }
+    } catch (err) {
+      console.error('Error while save', err)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: err.message, severity: 'error' })
+    } finally {
+      setSnackbarOpen(true)
+    }
   }
 
   const saveChanges = React.useCallback(async () => {
@@ -503,7 +582,7 @@ const ShutDown = ({ permissions }) => {
     }
   }
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
@@ -568,11 +647,54 @@ const ShutDown = ({ permissions }) => {
       console.error('Error fetching data:', error)
       setLoading(false)
     }
-  }
+  }, [PLANT_ID, AOP_YEAR, keycloak])
+  const slowdownFetchData = useCallback(async () => {
+      if (!PLANT_ID || !AOP_YEAR) return
+      setSlowdownRows([]) 
+      setLoading(true)
+      try {
+        //
+        const resp = await MaintenanceDetailsApiService.getSlowdownConfig(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        // Add isEditable: true to each row
+        const formatted = (resp.data || []).map((item, idx) => ({
+          ...item,
+          monthly: item.month,
+          originalRemark: item.remark,
+          remarks: item.remark,
+          year: item.year,
+          isEditable: true,
+          id: idx,
+          idFromApi: item.id,
+        }))
+        setSlowdownRows(formatted)
+      } catch (err) {
+        console.error('Error fetching data:', err)
+        setSlowdownRows([])
+      } finally {
+        setLoading(false)
+      }
+    }, [PLANT_ID, AOP_YEAR, keycloak])
+  
+    useEffect(() => {
+      setTabIndex(0)
+    }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
+    useEffect(() => {
+        if (tabIndex === 1) {
+          slowdownFetchData()
+        }
+      }, [tabIndex, slowdownFetchData])
+    
+      useEffect(() => {
+        if (tabIndex === 0) {
+            fetchData()
+        }
+        }, [tabIndex, fetchData])
 
-  useEffect(() => {
-    fetchData()
-  }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
+  
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -727,7 +849,29 @@ const ShutDown = ({ permissions }) => {
         return ShutDownAllColumns
     }
   }, [lowerVertName, plantName])
+ const slowdownColumns = [
+    {
+      field: 'monthly',
+      title: 'Month',
+      type: 'monthDropdown',
+      editable: true,
+      width: 200,
+    },
+    {
+      field: 'year',
+      title: 'Year',
+      type: 'yeardropdown',
+      editable: true,
+      width: 200,
+    },
 
+    {
+      field: 'remarks',
+      title: 'Remark',
+      editable: true,
+      width: 200,
+    },
+  ]
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
 
@@ -878,6 +1022,36 @@ const ShutDown = ({ permissions }) => {
   const handleExcelUpload = (rawFile) => {
     importShutdown(rawFile)
   }
+  const handleDeleteSlowdownConfig = async (row) => {
+    if (!row.idFromApi) {
+      setSlowdownRows((prev) => prev.filter((r) => r.id !== row.id))
+      return
+    }
+    setLoading(true)
+    try {
+      const response = await MaintenanceDetailsApiService.deleteSlowdownConfig(
+        row.idFromApi,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      if (response && response?.code === 200) {
+        setSlowdownRows((prev) => prev.filter((r) => r.id !== row.id))
+        setSnackbarData({
+          message: 'Deleted Successfully!',
+          severity: 'success',
+        })
+        setSnackbarOpen(true)
+        slowdownFetchData()
+      } else {
+        throw new Error('Unexpected response from server')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      setSnackbarData({ message: 'Error deleting record!', severity: 'error' })
+      setSnackbarOpen(true)
+    }
+  }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -926,9 +1100,28 @@ const ShutDown = ({ permissions }) => {
     },
     isOldYear,
   )
-  if (lowerVertName == 'elastomer') {
-    return <ElastomerShutDown permissions={permissions} />
-  }
+  const adjustedPermissionsslowdown = useMemo(
+    () =>
+      getAdjustedPermissions(
+        {
+          showAction: false,
+          addButton: true,
+          deleteButton: true,
+          editButton: false,
+          showUnit: false,
+          saveWithRemark: false,
+          saveBtn: true,
+          allAction: true,
+          downloadExcelBtnFromUI: true,
+          ExcelName: 'Shutdown History Config',
+          showRefresh: false,
+          showTitleNameBusiness: true,
+          titleName: 'Shutdown History Config',
+        },
+        isOldYear,
+      ),
+    [isOldYear, AOP_YEAR, PLANT_ID, SCREEN_NAME],
+  )
 
   return (
     <div>
@@ -938,7 +1131,37 @@ const ShutDown = ({ permissions }) => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
+      {defaultTabs?.length > 1 && (
+          <Tabs
+            value={tabIndex}
+            onChange={(e, newIndex) => setTabIndex(newIndex)}
+            variant='scrollable'
+            scrollButtons='auto'
+            sx={{
+              borderBottom: '0px solid #ccc',
+              '.MuiTabs-indicator': { display: 'none' },
+              margin: '0px 0px 10px 0px',
+              minHeight: '28px',
+            }}
+            textColor='primary'
+            indicatorColor='primary'
+          >
+            {defaultTabs.map((label, idx) => (
+              <Tab
+                key={idx}
+                label={label}
+                sx={{
+                  border: '1px solid #ADD8E6',
+                  borderBottom: '1px solid #ADD8E6',
+                  fontSize: '0.75rem',
+                  padding: '9px',
+                  minHeight: '12px',
+                }}
+              />
+            ))}
+          </Tabs>
+        )}
+       {tabIndex === 0 && (
       <KendoDataTables
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
@@ -974,8 +1197,36 @@ const ShutDown = ({ permissions }) => {
         deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
         screenType='shutdown'
       />
+        )}
+       {tabIndex === 1 && (
+        <KendoDataTables
+        columns={slowdownColumns}
+        rows={slowdownRows}
+        setRows={setSlowdownRows}
+        fetchData={slowdownFetchData}
+        deleteRowData={handleDeleteSlowdownConfig}
+        saveChanges={saveChangesHHistory}
+        deleteId={deleteId}
+        setDeleteId={setDeleteId}
+        modifiedCells={modifiedCells}
+        setModifiedCells={setModifiedCells}
+        open1={open1}
+        setOpen1={setOpen1}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        remarkDialogOpen={remarkDialogOpen1}
+        setRemarkDialogOpen={setRemarkDialogOpen1}
+        currentRemark={currentRemark1}
+        setCurrentRemark={setCurrentRemark1}
+        currentRowId={currentRowId1}
+        handleRemarkCellClick={handleRemarkCellClick1}
+        snackbarData={snackbarData}
+        setSnackbarData={setSnackbarData}
+        permissions={adjustedPermissionsslowdown}
+        />
+        )}
     </div>
   )
 }
 
-export default ShutDown
+export default ElastomerShutDown
