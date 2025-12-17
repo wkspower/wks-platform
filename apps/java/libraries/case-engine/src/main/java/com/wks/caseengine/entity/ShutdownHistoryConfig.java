@@ -25,6 +25,9 @@ public class ShutdownHistoryConfig {
 
     @Column(name = "Month")
     private Integer month;
+    
+    @Column(name = "PlantFKId")
+    private UUID plantFKId;
 
     @Column(name = "Year", length = 4)
     private String year;

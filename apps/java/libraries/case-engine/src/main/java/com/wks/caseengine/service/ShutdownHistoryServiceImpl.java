@@ -17,11 +17,7 @@ import com.wks.caseengine.entity.ShutdownHistoryConfig;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-import com.wks.caseengine.repository.AopCalculationRepository;
-import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
-import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
-import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutdownHistoryConfigRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.utility.Utility;
@@ -41,17 +37,6 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 	@Autowired
 	private SiteRepository siteRepository;
 	
-	@Autowired
-	private NormParametersRepository normParametersRepository;
-	
-	@Autowired
-	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
-	
-	@Autowired
-	private AopCalculationRepository aopCalculationRepository;
-	
-	@Autowired
-	private ScreenMappingRepository screenMappingRepository;
 	
 	@Autowired
 	private ShutdownHistoryConfigRepository shutdownHistoryConfigRepository;
@@ -60,7 +45,7 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 	public AOPMessageVM getShutdownHistory(String plantId, String year) {
 		List<ShutdownHistoryConfigDTO> shutdownHistoryConfigDTOs=new ArrayList<ShutdownHistoryConfigDTO>();
 		try {
-			List<ShutdownHistoryConfig> shutdownHistoryConfigList=shutdownHistoryConfigRepository.findByAopYear(year);
+			List<ShutdownHistoryConfig> shutdownHistoryConfigList=shutdownHistoryConfigRepository.findByAopYear(year,UUID.fromString(plantId));
 			for(ShutdownHistoryConfig shutdownHistoryConfig:shutdownHistoryConfigList) {
 				ShutdownHistoryConfigDTO shutdownHistoryConfigDTO= new ShutdownHistoryConfigDTO();
 				shutdownHistoryConfigDTO.setId(shutdownHistoryConfig.getId());
@@ -68,6 +53,7 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				shutdownHistoryConfigDTO.setRemark(shutdownHistoryConfig.getRemark());
 				shutdownHistoryConfigDTO.setAopYear(shutdownHistoryConfig.getAopYear());
 				shutdownHistoryConfigDTO.setYear(shutdownHistoryConfig.getYear());
+				shutdownHistoryConfigDTO.setPlantId(shutdownHistoryConfig.getPlantFKId().toString());
 				shutdownHistoryConfigDTOs.add(shutdownHistoryConfigDTO);
 			}
 		} catch (IllegalArgumentException e) {
@@ -111,6 +97,7 @@ public class ShutdownHistoryServiceImpl implements ShutdownHistoryService{
 				shutdownHistoryConfig.setMonth(shutdownHistoryConfigDTO.getMonth());
 				shutdownHistoryConfig.setRemark(shutdownHistoryConfigDTO.getRemark());
 				shutdownHistoryConfig.setYear(shutdownHistoryConfigDTO.getYear());
+				shutdownHistoryConfig.setPlantFKId(plantId);
 				list.add(shutdownHistoryConfigRepository.save(shutdownHistoryConfig));
 				
 			}

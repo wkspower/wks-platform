@@ -14,9 +14,9 @@ import com.wks.caseengine.entity.ShutdownHistoryConfig;
 
 @Repository
 public interface ShutdownHistoryConfigRepository extends JpaRepository<ShutdownHistoryConfig,UUID>{
-	 @Query(value = "SELECT * FROM Elastomer_ShutdownHistoryConfig WHERE AOPYear = :aopYear", 
+	 @Query(value = "SELECT * FROM Elastomer_ShutdownHistoryConfig WHERE AOPYear = :aopYear AND PlantFKId = :plantFKId", 
 	           nativeQuery = true)
-	    List<ShutdownHistoryConfig> findByAopYear(@Param("aopYear") String aopYear);
+	    List<ShutdownHistoryConfig> findByAopYear(@Param("aopYear") String aopYear,@Param("plantFKId") UUID plantFKId);
 	
 	
 }
