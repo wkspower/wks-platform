@@ -598,7 +598,8 @@ const MonthwiseRawMaterial = () => {
       {lowerVertName !== 'pe' &&
         lowerVertName !== 'pp' &&
         lowerVertName !== 'vcm' &&
-        lowerVertName !== 'elastomer' && (
+        lowerVertName !== 'elastomer' &&
+        lowerVertName !== 'pta' && (
           <KendoDataTablesReports
             rows={row2}
             columns={columns}

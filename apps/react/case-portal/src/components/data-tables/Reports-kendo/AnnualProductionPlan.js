@@ -41,6 +41,7 @@ const AnnualProductionPlan = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_PTA_VERTICAL = lowerVertName === 'pta'
 
   let oldYear1 = ''
   if (thisYear && thisYear.includes('-')) {
@@ -767,8 +768,8 @@ const AnnualProductionPlan = () => {
           saveBtn: !isOldYear,
           allAction: true,
           showReportTitle: true,
-          addButton: IS_PE_PP_VERTICAL ? true : false,
-          deleteButton: IS_PE_PP_VERTICAL ? true : false,
+          addButton: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
+          deleteButton: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
         }}
       />
 

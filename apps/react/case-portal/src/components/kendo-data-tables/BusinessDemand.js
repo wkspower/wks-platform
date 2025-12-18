@@ -51,6 +51,7 @@ const BusinessDemand = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase()
 
   const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
+  const IS_PTA_VERTICAL = lowerVertName === 'pta'
 
   const SCREEN_NAME = screenTitle?.title
   const apiRef = useGridApiRef()
@@ -142,7 +143,7 @@ const BusinessDemand = ({ permissions }) => {
       }
       //
 
-      if (IS_PE_PP_VERTICAL) {
+      if (IS_PE_PP_VERTICAL || IS_PTA_VERTICAL) {
         const productionRows = (rows || []).filter(
           (row) => row.Particulars?.toLowerCase() === 'production',
         )
@@ -350,7 +351,7 @@ const BusinessDemand = ({ permissions }) => {
       titleName: percentageTitle,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
-      isTotalFooterActive: IS_PE_PP_VERTICAL ? true : false,
+      isTotalFooterActive: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
 
       downloadExcelBtn:
         lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? true : false,
