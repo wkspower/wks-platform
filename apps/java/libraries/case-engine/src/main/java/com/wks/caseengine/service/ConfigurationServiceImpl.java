@@ -2575,19 +2575,30 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	private static Double getNumericCellValue(Cell cell, NormAttributeTransactionReceipeRequestDTO dto) {
-		if (cell == null)
-			return null;
-		if (cell.getCellType() == CellType.NUMERIC) {
-			return cell.getNumericCellValue();
-		} else if (cell.getCellType() == CellType.STRING) {
-			try {
-				return Double.parseDouble(cell.getStringCellValue().trim());
-			} catch (NumberFormatException e) {
-				dto.setSaveStatus("Failed");
-				dto.setErrDescription("Please enter numeric values");
-			}
-		}
-		return null;
+	    if (cell == null) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String value = cell.getStringCellValue().trim();
+	        
+	        if (value.isEmpty()) {
+	            return null;
+	        }
+
+	        try {
+	            return Double.parseDouble(value);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    
+	    return null;
 	}
 
 	@Override
