@@ -196,6 +196,35 @@ const ShutdownAndOperational = () => {
   const [rows, setRows] = useState([])
   const valueFormat = ValueFormatterProduction()
 
+  const generateMonthHours = (aopYear) => {
+    if (!aopYear) return {}
+    
+    const [startYear, endYear] = aopYear.split('-').map(y => parseInt(y))
+    const fullStartYear = startYear < 100 ? 2000 + startYear : startYear
+    const fullEndYear = endYear < 100 ? 2000 + endYear : endYear
+    
+    const getDaysInMonth = (month, year) => {
+      return new Date(year, month, 0).getDate()
+    }
+    
+    const hourRows = {
+      apr: getDaysInMonth(4, fullStartYear) * 24,
+      may: getDaysInMonth(5, fullStartYear) * 24,
+      jun: getDaysInMonth(6, fullStartYear) * 24,
+      jul: getDaysInMonth(7, fullStartYear) * 24,
+      aug: getDaysInMonth(8, fullStartYear) * 24,
+      sep: getDaysInMonth(9, fullStartYear) * 24,
+      oct: getDaysInMonth(10, fullStartYear) * 24,
+      nov: getDaysInMonth(11, fullStartYear) * 24,
+      dec: getDaysInMonth(12, fullStartYear) * 24,
+      jan: getDaysInMonth(1, fullEndYear) * 24,
+      feb: getDaysInMonth(2, fullEndYear) * 24,
+      mar: getDaysInMonth(3, fullEndYear) * 24,
+    }
+    
+    return hourRows
+  }
+
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
     {
@@ -316,12 +345,30 @@ const ShutdownAndOperational = () => {
     },
   ]
 
+  const [hoursRows, setHoursRows] = useState([]);
+  const hoursColumns = [
+    { field: 'apr', title: headerMap[4] || 'Apr', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'may', title: headerMap[5] || 'May', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'jun', title: headerMap[6] || 'Jun', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'jul', title: headerMap[7] || 'Jul', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'aug', title: headerMap[8] || 'Aug', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'sep', title: headerMap[9] || 'Sep', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'oct', title: headerMap[10] || 'Oct', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'nov', title: headerMap[11] || 'Nov', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'dec', title: headerMap[0] || 'Dec', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'jan', title: headerMap[1] || 'Jan', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'feb', title: headerMap[2] || 'Feb', width: 40, editable: false, type: 'number1', format: valueFormat },
+    { field: 'mar', title: headerMap[3] || 'Mar', width: 40, editable: false, type: 'number1', format: valueFormat },
+  ]
+
   useEffect(() => {
     if (AOP_YEAR) {
     //   fetchShutdownAndOperationalData(keycloak, AOP_YEAR)
     setRows(dummyRowsData);
+    const hoursData = generateMonthHours(AOP_YEAR);
+    setHoursRows([hoursData]);
     }
-  }, [AOP_YEAR])
+  }, [AOP_YEAR, generateMonthHours]);
 
   const fetchShutdownAndOperationalData = async (keycloak, AOP_YEAR) => {
     setLoading(true)
@@ -359,6 +406,17 @@ const ShutdownAndOperational = () => {
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: screenTitle?.title,
+  }
+  const hoursPermissions = {
+    showAction: false,
+    addButton: false,
+    deleteButton: false,
+    editButton: false,
+    saveBtn: false,
+    allAction: true,
+    showTitleNameBusiness: false,
+    showTitle: true,
+    titleName: 'Total available hours',
   }
 
   const saveChanges = async () => {
@@ -414,6 +472,20 @@ const ShutdownAndOperational = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+      <AdvanceKendoTable
+        columns={hoursColumns}
+        rows={hoursRows}
+        setRows={setHoursRows}
+        modifiedCells={{}}
+        setModifiedCells={{}}
+        title={hoursPermissions?.titleName}
+        permissions={hoursPermissions}
+        saveChanges={saveChanges}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+      />
       <AdvanceKendoTable
         columns={columns}
         rows={rows}

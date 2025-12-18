@@ -8,8 +8,8 @@ export const TcsApiService = {
   getTcsAllTabs,
   getTcsVisibleTabs,
 
-  // TCS Input Data APIs
-  getTcsInputData,
+  // TCS Unit Capacity Data APIs
+  getTcsUnitCapacityData,
   saveTcsInputData,
 
   // Excel Import/Export APIs
@@ -53,9 +53,9 @@ async function getTcsVisibleTabs(keycloak, VERTICAL_ID, SITE_ID, PLANT_ID) {
   }
 }
 
-// ===================== || TCS Input Data APIs || ===================== //
-async function getTcsInputData(keycloak, PLANT_ID, AOP_YEAR, tabName) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-input-data?plantId=${PLANT_ID}&year=${AOP_YEAR}&tabName=${encodeURIComponent(tabName)}`
+// ===================== || TCS Unit Capacity Data APIs || ===================== //
+async function getTcsUnitCapacityData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${plantId}&year=${year}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

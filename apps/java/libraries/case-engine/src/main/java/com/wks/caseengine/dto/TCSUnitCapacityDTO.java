@@ -1,0 +1,19 @@
+package com.wks.caseengine.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Data
+public class TCSUnitCapacityDTO {
+
+    private String id;          
+    private String particulates;
+    private String uom;
+    private Double kbpsd;
+    private String remark;
+}

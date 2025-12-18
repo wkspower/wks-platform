@@ -10,13 +10,12 @@ const TAB_ID_MAP = {
 }
 
 // Column configurations for each tab
-export const getColumnsForTab = (tabId, headerMap, valueFormat) => {
-  const tabName = TAB_ID_MAP[tabId] || 'Unit Capacity'
+export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
   switch (tabName) {
     case 'Unit Capacity':
       return [
         {
-          field: 'Particulars',
+          field: 'particulates',
           title: 'Units',
           widthT: 120,
           locked: true,
@@ -42,7 +41,7 @@ export const getColumnsForTab = (tabId, headerMap, valueFormat) => {
               minWidth: 100,
             },
             {
-              field: 'remarks',
+              field: 'remark',
               title: 'Remarks',
               minWidth: 200,
               editable: true,

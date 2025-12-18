@@ -10,6 +10,7 @@ import { min } from 'lodash'
 import { nestedDummyRows } from './nestedDummyData'
 import { flattenMonthObject, unflattenMonthObject } from 'components/Utilities/commonUtilityFunctions'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
+import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
 
 const Norms = () => {
   const keycloak = useSession()
@@ -42,6 +43,238 @@ const Norms = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
   
+
+   // Column definitions
+  const nestedColumns = [
+    //Generating Plant
+    {
+      field: 'generatingPlantName',
+      title: 'Generating Plant',
+      width: 150,
+      type: 'text',
+      editable: false,
+      locked: true,
+      minWidth: 100,
+    },
+    //Utility
+    {
+      field: 'utilityName',
+      title: 'Utility',
+      width: 120,
+      type: 'text',
+      editable: false,
+      locked: true,
+      minWidth: 100,
+    },
+    // Utility ID
+    {
+      field: 'utilityId',
+      title: 'Utility ID',
+      width: 120,
+      type: 'text',
+      editable: false,
+      locked: true,
+      minWidth: 100,
+    },
+    //UOM
+    {
+      field: 'uom',
+      title: 'UOM',
+      width: 80,
+      type: 'text',
+      editable: false,
+      minWidth: 80,
+    },
+    // Account
+    {
+      field: 'accountName',
+      title: 'Account',
+      width: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
+    // SAP Code
+    {
+      field: 'sapCode',
+      title: 'SAP Code',
+      width: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
+    // Material
+    {
+      field: 'materialName',
+      title: 'Material',
+      width: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
+    // Issuing Plant
+    {
+      field: 'issuingPlantName',
+      title: 'Issuing Plant',
+      width: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
+    {
+      field: 'issuingUom',
+      title: 'Issuing UOM',
+      width: 80,
+      type: 'text',
+      editable: false,
+      minWidth: 80,
+    },
+    // Apr
+    {
+      title: headerMap[4],
+      children: [
+        { field: 'apr.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'apr.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'apr.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'apr.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'apr.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'apr.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // May
+    {
+      title: headerMap[5],
+      children: [
+        { field: 'may.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'may.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'may.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'may.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'may.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'may.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // Jun
+    {
+      title: headerMap[6],
+      children: [
+        { field: 'jun.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jun.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jun.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'jun.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'jun.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'jun.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // Jul
+    {
+      title: headerMap[7],
+      children: [
+        { field: 'jul.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jul.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jul.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'jul.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'jul.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'jul.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // Aug
+    {
+      title: headerMap[8],
+      children: [
+        { field: 'aug.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'aug.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'aug.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'aug.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'aug.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'aug.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // Sep
+    {
+      title: headerMap[9],
+      children: [
+        { field: 'sep.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'sep.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'sep.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'sep.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'sep.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'sep.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // Oct
+    {
+      title: headerMap[10],
+      children: [
+        { field: 'oct.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'oct.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'oct.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'oct.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'oct.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'oct.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    // Nov
+    {
+      title: headerMap[11],
+      children: [
+        { field: 'nov.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'nov.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'nov.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'nov.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'nov.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'nov.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    //Dec
+    {
+      title: headerMap[12],
+      children: [
+        { field: 'dec.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'dec.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'dec.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
+        { field: 'dec.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'dec.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'dec.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    //Jan
+    {
+      title: headerMap[1],
+      children: [
+        { field: 'jan.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jan.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jan.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat, minWidth: 80 },
+        { field: 'jan.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'jan.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'jan.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    //Feb
+    {
+      title: headerMap[2],
+      children: [
+        { field: 'feb.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'feb.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'feb.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat, minWidth: 80 },
+        { field: 'feb.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'feb.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'feb.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+    //Mar
+    {
+      title: headerMap[3],
+      minWidth: 320,
+      children: [
+        { field: 'mar.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'mar.generationUom', title: 'Generation Uom', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'mar.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat, minWidth: 80 },
+        { field: 'mar.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'mar.amount', title: 'Amount', width: 80, minWidth: 80, type: 'number', format: valueFormat },
+        { field: 'mar.price', title: 'Price', width: 80, minWidth: 80, editable: true, type: 'number1', format: valueFormat },
+      ],
+    },
+  ]
   // Column definitions
   const columns = [
     //Generating Plant
@@ -300,7 +533,7 @@ const Norms = () => {
       }
       console.log('res', res)
       setRows(flattenMonthObject(res?.data)) 
-
+      //setRows(res?.data) 
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -342,6 +575,7 @@ const Norms = () => {
       return
     }
 
+    // const payload = modifiedData
     const payload = unflattenMonthObject(modifiedData)
     
     try {
@@ -384,6 +618,7 @@ const Norms = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+      {/* <NestedKendoTable */}
       <AdvanceKendoTable
         columns={columns}
         rows={rows}
