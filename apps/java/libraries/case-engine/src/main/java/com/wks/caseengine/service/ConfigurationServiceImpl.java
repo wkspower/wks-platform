@@ -1381,7 +1381,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
 	public List<ConfigurationDTO> saveConfigurationData(String year, String plantFKId,String version,
-			List<ConfigurationDTO> configurationDTOList) {
+			List<ConfigurationDTO> configurationDTOList,Boolean calculation) {
 		try {
 			List<ConfigurationDTO> failedList = new ArrayList<>();
 			UUID plantId = UUID.fromString(plantFKId);
@@ -1469,7 +1469,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
 				aopCalculationRepository.save(aopCalculation);
 			}
-			if(verticalName.equalsIgnoreCase("Cracker")) {
+			if(verticalName.equalsIgnoreCase("Cracker") && calculation != null && calculation) {
 				String procedure=verticalName+"_"+site.getName()+"_svhEquivalent_Calculation";
 				executeProcedure(procedure, plantFKId, year);
 			}
@@ -2201,7 +2201,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 	
 	@Override
-	public AOPMessageVM importShutdownRateExcel(String year, UUID plantFKId,String type,String version, MultipartFile file) {
+	public AOPMessageVM importShutdownRateExcel(String year, UUID plantFKId,String type,String version, MultipartFile file,Boolean calculation) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -2213,7 +2213,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<ConfigurationDTO> data = readShutdownRate(file.getInputStream(), plantFKId, year);
 			System.out.println("Ended Read configuration in importExcel");
 			System.out.println("Started Save configuration in importExcel");
-			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantFKId.toString(),version, data);
+			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantFKId.toString(),version, data,calculation);
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
@@ -2238,7 +2238,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId,List<String> reportTypes,String version, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId,List<String> reportTypes,String version, MultipartFile file,Boolean calculation) {
 		// TODO Auto-generated method stub
 		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
 			throw new IllegalArgumentException("Invalid or empty Excel file.");
@@ -2250,7 +2250,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			List<ConfigurationDTO> data = readConfigurations(file.getInputStream(), plantFKId, year);
 			System.out.println("Ended Read configuration in importExcel");
 			System.out.println("Started Save configuration in importExcel");
-			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantFKId.toString(),version, data);
+			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantFKId.toString(),version, data,calculation);
 			System.out.println("Ended Save configuration in importExcel");
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
@@ -2793,12 +2793,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 	}
 
 	@Override
-	public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId,String version, MultipartFile file) {
+	public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId,String version, MultipartFile file,Boolean calculation) {
 		// TODO Auto-generated method stub
 		try {
 			List<ConfigurationDTO> data = readConfigurationConstants(file.getInputStream(), plantId, year);
 
-			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantId.toString(),version, data);
+			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantId.toString(),version, data,calculation);
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {

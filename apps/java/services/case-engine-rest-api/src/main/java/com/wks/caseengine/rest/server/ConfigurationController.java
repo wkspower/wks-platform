@@ -63,8 +63,8 @@ public class ConfigurationController {
 	}
 	
 	@PostMapping(value="/production-norms")
-	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year,@RequestParam String plantFKId,@RequestParam(required=false) String version, @RequestBody List<ConfigurationDTO> configurationDTOList) {
-		configurationService.saveConfigurationData(year,plantFKId,version,configurationDTOList);
+	public List<ConfigurationDTO> saveConfigurationData(@RequestParam String year,@RequestParam String plantFKId,@RequestParam(required=false) String version, @RequestBody List<ConfigurationDTO> configurationDTOList,@RequestParam(required=false) Boolean calculation) {
+		configurationService.saveConfigurationData(year,plantFKId,version,configurationDTOList,calculation);
 		return configurationDTOList;
 	}
 	
@@ -220,10 +220,10 @@ public class ConfigurationController {
 	@PostMapping(value = "/configuration-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year,@RequestParam(required=false) List<String> reportTypes,@RequestParam(required=false) String version,
+            @RequestParam("year") String year,@RequestParam(required=false) List<String> reportTypes,@RequestParam(required=false) String version,@RequestParam(required=false) Boolean calculation,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			return	configurationService.importExcel(year,UUID.fromString(plantId),reportTypes,version, file); 
+			return	configurationService.importExcel(year,UUID.fromString(plantId),reportTypes,version, file,calculation); 
 	}
 	
 	@PostMapping(value = "/shutdown-rate-import", consumes = "multipart/form-data")
@@ -232,9 +232,10 @@ public class ConfigurationController {
             @RequestParam("year") String year,
             @RequestParam("type") String type,
             @RequestParam(required=false) String version,
-			@RequestParam("file") MultipartFile file
+			@RequestParam("file") MultipartFile file,
+			@RequestParam(required=false) Boolean calculation
 	        ) {
-			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId),type,version, file); 
+			return	configurationService.importShutdownRateExcel(year,UUID.fromString(plantId),type,version, file,calculation); 
 	}
 	
 	@PostMapping(value = "/configuration-constants-import-excel", consumes = "multipart/form-data")
@@ -242,10 +243,11 @@ public class ConfigurationController {
 	         @RequestParam("plantFKId") String plantFKId,
             @RequestParam("year") String year,
             @RequestParam(required=false) String version,
+            @RequestParam(required=false) Boolean calculation,
 			@RequestParam("file") MultipartFile file
 	        ) {
 		
-	        return configurationService.importConfigurationConstantsExcel(year,UUID.fromString(plantFKId),version, file); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        return configurationService.importConfigurationConstantsExcel(year,UUID.fromString(plantFKId),version, file,calculation); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
 	}
 	
 	@GetMapping(value="/configuration-execution")
