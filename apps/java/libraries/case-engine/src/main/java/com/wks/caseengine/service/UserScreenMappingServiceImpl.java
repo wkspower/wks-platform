@@ -76,10 +76,15 @@ public class UserScreenMappingServiceImpl implements UserScreenMappingService {
 	                .filter(Objects::nonNull)
 	                .collect(Collectors.toSet());
 
-	        // Fetch all groups in one query
-	        Map<UUID, GroupMaster> groupMap = groupMasterRepository.findAllById(groupIds)
-	                .stream()
-	                .collect(Collectors.toMap(GroupMaster::getId, Function.identity()));
+	        List<GroupMaster> groups = groupMasterRepository.findAllByIdInOrderBySequenceAsc(groupIds);
+
+		     Map<UUID, GroupMaster> groupMap = groups.stream()
+		         .collect(Collectors.toMap(
+		             GroupMaster::getId, 
+		             Function.identity(), 
+		             (existing, replacement) -> existing, // Merge function (handles duplicates)
+		             LinkedHashMap::new                  // Supplier to ensure order preservation
+		         ));
 
 	        // Assuming you have a way to fetch the VerticalMaster based on verticalId
 	        // Replace this with your actual logic to get the VerticalMaster
