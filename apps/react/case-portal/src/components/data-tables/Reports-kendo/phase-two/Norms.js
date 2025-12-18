@@ -532,8 +532,8 @@ const Norms = () => {
         return
       }
       console.log('res', res)
-      setRows(flattenMonthObject(res?.data)) 
-      //setRows(res?.data) 
+      // setRows(flattenMonthObject(res?.data)) 
+      setRows(res?.data) 
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -575,8 +575,7 @@ const Norms = () => {
       return
     }
 
-    // const payload = modifiedData
-    const payload = unflattenMonthObject(modifiedData)
+    const payload = modifiedData
     
     try {
       // Transform modifiedCells into the format expected by the API
@@ -618,9 +617,8 @@ const Norms = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      {/* <NestedKendoTable */}
-      <AdvanceKendoTable
-        columns={columns}
+      <NestedKendoTable
+        columns={nestedColumns}
         rows={rows}
         setRows={setRows}
         modifiedCells={modifiedCells}

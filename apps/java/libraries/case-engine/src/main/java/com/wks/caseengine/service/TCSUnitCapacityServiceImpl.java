@@ -167,20 +167,17 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
     }
 
     @Override
-    public AOPMessageVM saveOrUpdate(List<TCSUnitCapacityDTO> dtoList) {
-
+    public AOPMessageVM saveOrUpdate(
+        String plantId,
+        String year,
+        List<TCSUnitCapacityDTO> dtoList) {
         if (dtoList == null || dtoList.isEmpty()) {
             throw new RestInvalidArgumentException("Payload cannot be empty", null);
         }
 
-        AOPMessageVM vm = new AOPMessageVM();
-
         try {
             List<TCSUnitCapacity> savedList = new ArrayList<>();
-
             for (TCSUnitCapacityDTO dto : dtoList) {
-
-                
                 if (dto.getUom() == null || dto.getUom().isBlank()) {
                     throw new RestInvalidArgumentException("UOM is required", null);
                 }
@@ -188,37 +185,38 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                 if (dto.getParticulates() == null || dto.getParticulates().isBlank()) {
                     throw new RestInvalidArgumentException("Particulates is required", null);
                 }
-
                 
-                tcsUnitCapacityRepository.findByParticulatesAndUom(dto.getParticulates(), dto.getUom())
-                        .ifPresent(existing -> {
-                            throw new RestInvalidArgumentException(
-                                "Record already exists with same Particulates + UOM. Duplicate not allowed.",
-                                null
-                            );
-                        });
-
-                
-                TCSUnitCapacity entity = new TCSUnitCapacity();
-
-                
+                String existingId = null;
                 if (dto.getId() != null && !dto.getId().isBlank()) {
                     try {
-                        entity.setId(UUID.fromString(dto.getId()));
+                        existingId = dto.getId();
                     } catch (IllegalArgumentException ex) {
                         throw new RestInvalidArgumentException("Invalid UUID format", ex);
                     }
                 }
 
+                TCSUnitCapacity entity = new TCSUnitCapacity();
+                if (existingId == null || existingId.trim().isEmpty()) {
+                    // The entity is being created
+                    entity.setInsertedDateTime(new Date());
+                } else {
+                    // The entity is being updated
+                    entity.setId(UUID.fromString(dto.getId()));
+                    entity.setInsertedDateTime(dto.getInsertedDateTime());
+                    entity.setUpdatedDateTime(new Date());
+                }
                 entity.setParticulates(dto.getParticulates());
                 entity.setUom(dto.getUom());
                 entity.setKbpsd(dto.getKbpsd());
                 entity.setRemark(dto.getRemark());
+                entity.setAopYear(year);
+                entity.setPlantFkId(UUID.fromString(plantId));
 
                 tcsUnitCapacityRepository.save(entity);
                 savedList.add(entity);
             }
 
+            AOPMessageVM vm = new AOPMessageVM();
             vm.setCode(200);
             vm.setMessage("Data saved successfully");
             vm.setData(savedList.stream().map(this::toDTO).toList());

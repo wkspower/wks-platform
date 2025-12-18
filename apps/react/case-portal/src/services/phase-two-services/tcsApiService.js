@@ -10,7 +10,7 @@ export const TcsApiService = {
 
   // TCS Unit Capacity Data APIs
   getTcsUnitCapacityData,
-  saveTcsInputData,
+  saveUnitCapacityData,
 
   // Excel Import/Export APIs
   downloadTcsExcel,
@@ -73,19 +73,14 @@ async function getTcsUnitCapacityData(keycloak, plantId, year) {
   }
 }
 
-async function saveTcsInputData(keycloak, PLANT_ID, AOP_YEAR, tabName, payload) {
-  const url = `${Config.CaseEngineUrl}/task/save-tcs-input-data`
+async function saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
-  const body = JSON.stringify({
-    plantId: PLANT_ID,
-    year: AOP_YEAR,
-    tabName: tabName,
-    data: payload,
-  })
+  const body = JSON.stringify(payload);
   try {
     const resp = await fetch(url, {
       method: 'POST',

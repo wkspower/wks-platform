@@ -97,6 +97,15 @@ const UnitCapacity = ({
   }, [PLANT_ID, AOP_YEAR, fetchUnitCapacityData])
 
   // Column configuration for Unit Capacity - dynamically generated from API response
+  const columnConfig = {
+    particulates: { editable: false, type: 'text', minWidth: 50 },
+    uom: { editable: false, type: 'text', minWidth: 50 },
+    kbpsd: { editable: true, type: 'number', minWidth: 80 },
+    ktpd: { editable: true, type: 'number', minWidth: 50 },
+    tph: { editable: true, type: 'number', minWidth: 50 },
+    remark: { editable: true, type: 'text', minWidth: 100 },
+  }
+
   const columns = useMemo(() => {
     const { headers, keys } = apiMetadata
     
@@ -116,10 +125,8 @@ const UnitCapacity = ({
       title: columnMap['particulates'] || 'Particulars',
       widthT: 120,
       locked: true,
-      editable: false,
+      ...columnConfig.particulates,
       disable: false,
-      type: 'text',
-      minWidth: 50,
     }
 
     // Group remaining columns under "Capacity"
@@ -128,12 +135,11 @@ const UnitCapacity = ({
     
     capacityKeys.forEach((key) => {
       if (columnMap[key]) {
+        const config = columnConfig[key] || { editable: true, type: 'text', minWidth: 80 }
         capacityChildren.push({
           field: key,
           title: columnMap[key],
-          editable: true,
-          type: 'text',
-          minWidth: key === 'remark' ? 100 : 80,
+          ...config,
         })
       }
     })
@@ -220,7 +226,8 @@ const UnitCapacity = ({
       }
 
       // TODO: Replace with actual API call
-      // const response = await TcsApiService.saveUnitCapacityData(keycloak, data, PLANT_ID, AOP_YEAR)
+      const response = await TcsApiService.saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, data);
+      console.log('Save Unit Capacity response:', response);
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -243,11 +250,11 @@ const UnitCapacity = ({
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: true,
+    addButton: false,
     remarksEditable: true,
     showCalculate: false,
-    showExport: true,
-    showImport: true,
+    showExport: false,
+    showImport: false,
     saveBtnForRemark: true,
     saveBtn: true,
     showWorkFlowBtns: false,

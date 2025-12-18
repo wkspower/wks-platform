@@ -3,7 +3,14 @@ import NotificationTST from 'components/Utilities/NotificationTST'
 import { useState, useEffect, useRef } from 'react'
 
 export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
-  const initialValue = dataItem[field] ?? ''
+  // Handle nested field paths (e.g., "apr.shutdownHrs")
+  const getNestedValue = (obj, path) => {
+    if (!path || !obj) return undefined
+    const keys = path.split('.')
+    return keys.reduce((acc, key) => acc?.[key], obj)
+  }
+  
+  const initialValue = getNestedValue(dataItem, field) ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
   const isFirstRender = useRef(true)
 

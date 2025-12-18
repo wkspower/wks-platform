@@ -2,8 +2,17 @@ import { Input } from '@progress/kendo-react-inputs'
 import NotificationTST from 'components/Utilities/NotificationTST'
 import { useState, useEffect, useRef } from 'react'
 
-export const NumberCellEditor = ({ dataItem, field, onChange, wholeNumberOnly = false }) => {
-  const initialValue = dataItem[field] ?? ''
+// Utility: Get nested property value by path (supports any depth)
+// Handles both nested fields (e.g., "april.shutdownHrs") and flat fields (e.g., "apr")
+const getNestedValue = (obj, path) => {
+  if (!path || !obj) return undefined
+  const keys = path.split('.')
+  return keys.reduce((acc, key) => acc?.[key], obj)
+}
+
+export const NumberCellEditor = ({ dataItem, field, onChange, wholeNumberOnly = false, maxValue = null }) => {
+  // Handle nested fields (e.g., "april.shutdownHrs")
+  const initialValue = getNestedValue(dataItem, field) ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
 
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -17,6 +26,16 @@ export const NumberCellEditor = ({ dataItem, field, onChange, wholeNumberOnly = 
     // Allow only whole numbers if wholeNumberOnly is true, otherwise allow decimals
     const pattern = wholeNumberOnly ? /^\d*$/ : /^\d*(\.\d*)?$/
     if (val === '' || pattern.test(val)) {
+      // Check if value exceeds maxValue (for shutdownHrs validation)
+      if (maxValue !== null && val !== '' && parseFloat(val) > maxValue) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Value cannot exceed ${maxValue}!`,
+          severity: 'warning',
+        })
+        return
+      }
+
       if (dataItem?.productName?.trim().toLowerCase() === 'tst') {
         setSnackbarOpen(true)
         setSnackbarData({

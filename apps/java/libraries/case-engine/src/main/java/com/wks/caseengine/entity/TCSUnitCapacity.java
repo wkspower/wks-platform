@@ -1,6 +1,8 @@
 package com.wks.caseengine.entity;
 
 import lombok.Data;
+
+import java.util.Date;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -37,4 +39,16 @@ public class TCSUnitCapacity {
     @Column(name = "Remark", length = 1000)
     private String remark;
 
+    @Size(max = 20)
+    @Column(name = "AOPYear", length = 20)
+    private String aopYear;
+
+    @Column(name = "Plant_FK_ID")
+    private UUID plantFkId;
+
+    @Column(name = "InsertedDateTime")
+	private Date insertedDateTime;
+
+	@Column(name = "UpdatedDateTime")
+	private Date updatedDateTime;
 }

@@ -26,6 +26,7 @@ import DeleteDialog from '../AdvanceKendoTable/components/DeleteDialog'
 import SaveConfirmationDialog from '../AdvanceKendoTable/components/SaveConfirmationDialog'
 import { ExcelExport } from '@progress/kendo-react-excel-export'
 import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
+import { NumberCellEditor } from '../Utilities-Kendo/phase-two/NumberCellEditor'
 
 export const hiddenFields = [
   'maintenanceId',
@@ -60,7 +61,8 @@ const NestedKendoTable = ({
   fetchData = () => {},
   deleteRowData = () => {},
   groupBy = null,
-  filterable=false,
+  filterable = false,
+  hoursRows={}
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -106,7 +108,7 @@ const NestedKendoTable = ({
     if (!gridRef.current) return
 
     const allColumns = extractAllColumns(columns)
-    
+
     minGridWidth.current = 0
     allColumns.forEach((col) => {
       if (col.minWidth !== undefined) {
@@ -120,8 +122,11 @@ const NestedKendoTable = ({
 
     const handleResize = () => {
       if (!gridRef.current) return
-      
-      if (gridRef.current.offsetWidth < minGridWidth.current && !applyMinWidth) {
+
+      if (
+        gridRef.current.offsetWidth < minGridWidth.current &&
+        !applyMinWidth
+      ) {
         setApplyMinWidth(true)
       } else if (gridRef.current.offsetWidth > minGridWidth.current) {
         setGridCurrent(gridRef.current.offsetWidth)
@@ -144,7 +149,8 @@ const NestedKendoTable = ({
       }
 
       const allColumns = extractAllColumns(columns)
-      const totalColumns = allColumns.length + (permissions?.deleteButton ? 1 : 0)
+      const totalColumns =
+        allColumns.length + (permissions?.deleteButton ? 1 : 0)
 
       let width = applyMinWidth
         ? minWidth
@@ -156,7 +162,13 @@ const NestedKendoTable = ({
 
       return width
     },
-    [applyMinWidth, gridCurrent, columns, permissions?.deleteButton, extractAllColumns],
+    [
+      applyMinWidth,
+      gridCurrent,
+      columns,
+      permissions?.deleteButton,
+      extractAllColumns,
+    ],
   )
 
   const handleEditChange = useCallback((e) => {
@@ -203,6 +215,35 @@ const NestedKendoTable = ({
     return obj
   }
 
+  // Get total hours for a month from hoursRows
+  const getTotalHoursForMonth = (monthKey) => {
+    if (!hoursRows || hoursRows.length === 0) return null
+    
+    // Map full month names to short month keys used in hoursRows
+    const monthMapping = {
+      april: 'apr',
+      may: 'may',
+      june: 'jun',
+      july: 'jul',
+      august: 'aug',
+      september: 'sep',
+      october: 'oct',
+      november: 'nov',
+      december: 'dec',
+      january: 'jan',
+      february: 'feb',
+      march: 'mar',
+    }
+    
+    const shortMonthKey = monthMapping[monthKey?.toLowerCase()] || monthKey
+    const firstRow = hoursRows[0]
+    
+    if (firstRow && firstRow[shortMonthKey] !== undefined) {
+      return firstRow[shortMonthKey]
+    }
+    return null
+  }
+
   // Handle item change with nested data support (supports any depth)
   const itemChange = useCallback(
     (e) => {
@@ -211,19 +252,19 @@ const NestedKendoTable = ({
 
       // Parse field path for nested properties (e.g., "apr.norms" or "apr.details.value")
       const fieldParts = field.split('.')
-      
+
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
-          
+
           const updated = { ...r }
-          
+
           // Handle nested field updates at any depth
           if (fieldParts.length > 1) {
             // Deep clone the nested path to avoid mutation
             const keys = [...fieldParts]
             const lastKey = keys.pop()
-            
+
             // Navigate to the parent object
             let target = updated
             keys.forEach((key, index) => {
@@ -235,13 +276,24 @@ const NestedKendoTable = ({
                 target = target[key]
               }
             })
-            
+
             // Set the value
             target[lastKey] = value
+
+            // Real-time calculation: Auto-calculate netOperationHrs when shutdownHrs is edited
+            if (lastKey === 'shutdownHrs' && keys.length === 1) {
+              const monthKey = keys[0]
+              const totalHrsForMonth = getTotalHoursForMonth(monthKey)
+              if (totalHrsForMonth !== null && totalHrsForMonth !== undefined) {
+                const shutdownHrs = Math.floor(parseFloat(value)) || 0
+                const netOperationHrs = Math.max(0, totalHrsForMonth - shutdownHrs)
+                target.netOperationHrs = netOperationHrs
+              }
+            }
           } else {
             updated[field] = value
           }
-          
+
           return updated
         }),
       )
@@ -249,11 +301,23 @@ const NestedKendoTable = ({
       // Track modified cells
       setModifiedCells((prev) => {
         const existingItem = prev[itemId] || { ...dataItem }
-        
+
         if (fieldParts.length > 1) {
           // Deep clone and set nested value
           const cloned = JSON.parse(JSON.stringify(existingItem))
           setNestedValue(cloned, field, value)
+
+          // Real-time calculation: Auto-calculate netOperationHrs when shutdownHrs is edited
+          if (fieldParts[fieldParts.length - 1] === 'shutdownHrs' && fieldParts.length === 2) {
+            const monthKey = fieldParts[0]
+            const totalHrsForMonth = getTotalHoursForMonth(monthKey)
+            if (totalHrsForMonth !== null && totalHrsForMonth !== undefined) {
+              const shutdownHrs = Math.floor(parseFloat(value)) || 0
+              const netOperationHrs = Math.max(0, totalHrsForMonth - shutdownHrs)
+              setNestedValue(cloned, `${monthKey}.netOperationHrs`, netOperationHrs)
+            }
+          }
+
           return { ...prev, [itemId]: cloned }
         } else {
           existingItem[field] = value
@@ -263,33 +327,41 @@ const NestedKendoTable = ({
 
       setCustomModifiedCells((prev) => {
         const base = { ...(prev[itemId] || {}), [field]: value }
+
+        // Real-time calculation: Auto-calculate netOperationHrs when shutdownHrs is edited
+        if (fieldParts.length === 2 && fieldParts[fieldParts.length - 1] === 'shutdownHrs') {
+          const monthKey = fieldParts[0]
+          const totalHrsForMonth = getTotalHoursForMonth(monthKey)
+          if (totalHrsForMonth !== null && totalHrsForMonth !== undefined) {
+            const shutdownHrs = Math.floor(parseFloat(value)) || 0
+            const netOperationHrs = Math.max(0, totalHrsForMonth - shutdownHrs)
+            base[`${monthKey}.netOperationHrs`] = netOperationHrs
+          }
+        }
+
         return {
           ...prev,
           [itemId]: base,
         }
       })
     },
-    [setRows, setModifiedCells],
+    [setRows, setModifiedCells, hoursRows],
   )
 
   useEffect(() => {
     const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
-    const isCustomModifiedCellsEmpty = Object.keys(customModifiedCells).length === 0
-
-    if (isModifiedCellsEmpty && !isCustomModifiedCellsEmpty) {
-      setCustomModifiedCells({})
-    }
 
     if (isModifiedCellsEmpty) {
+      setCustomModifiedCells({})
       setEdit({})
       setRows((prev) =>
         prev.map((r) => ({
           ...r,
           inEdit: false,
-        }))
+        })),
       )
     }
-  }, [modifiedCells, customModifiedCells])
+  }, [modifiedCells])
 
   const saveConfirmation = async () => {
     saveChanges()
@@ -336,7 +408,8 @@ const NestedKendoTable = ({
   }
 
   const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled = !dataItem.isEditable && dataItem?.isEditable !== undefined
+    const isDisabled =
+      !dataItem.isEditable && dataItem?.isEditable !== undefined
     const rowClassName = [
       className,
       isDisabled ? 'custom-disabled-row' : '',
@@ -353,22 +426,31 @@ const NestedKendoTable = ({
 
   // Cell renderer with highlight support for nested fields (supports any depth)
   const NestedHighlightCell = (props) => {
-    const { dataItem, field, tdProps, children, customModifiedCells, isFormatByUOM = false } = props
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      isFormatByUOM = false,
+    } = props
     const uomType = dataItem?.uom
     const rowId = dataItem.id
-    
+
     // Get value from nested structure at any depth
     const fieldParts = field.split('.')
     let value
-    
+
     if (fieldParts.length > 1) {
       // Use utility function to get nested value at any depth
       value = getNestedValue(dataItem, field)
     } else {
       value = dataItem[field]
     }
-    
-    const formattedValue = isFormatByUOM ? valueFormatterByUOM(value, uomType) : value
+
+    const formattedValue = isFormatByUOM
+      ? valueFormatterByUOM(value, uomType)
+      : value
 
     const isEdited = Object.prototype.hasOwnProperty.call(
       customModifiedCells?.[rowId] || {},
@@ -401,7 +483,7 @@ const NestedKendoTable = ({
           padding: '0px',
           borderRight: '1px solid #878787',
           textAlign: 'center',
-          width: restThProps['width']
+          width: restThProps['width'],
         }}
       >
         <Tooltip
@@ -431,6 +513,8 @@ const NestedKendoTable = ({
       const isEditable = col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
+      const headerColorClass = undefined
+
       // Handle parent columns with children
       if (col.children) {
         return (
@@ -452,7 +536,9 @@ const NestedKendoTable = ({
             field={col.field}
             title={col.title || col.headerName}
             hidden={col.hidden}
-            className={!col.editable ? 'k-number-right-disabled' : 'k-number-right'}
+            className={
+              !col.editable ? 'k-number-right-disabled' : 'k-number-right'
+            }
             editable={col?.editable ? true : false}
             headerClassName={isActive ? 'active-column' : ''}
             cells={{
@@ -470,6 +556,55 @@ const NestedKendoTable = ({
             filter='numeric'
             format={col.format}
             width={setWidth(col?.minWidth || col?.width)}
+          />
+        )
+      }
+
+      if (col.type === 'wholeNumber') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => {
+                  // For shutdownHrs fields, pass maxValue (total hours for that month)
+                  let maxValue = null
+                  if (col.field?.includes('shutdownHrs')) {
+                    const fieldParts = col.field.split('.')
+                    if (fieldParts.length === 2) {
+                      const monthKey = fieldParts[0]
+                      maxValue = getTotalHoursForMonth(monthKey)
+                    }
+                  }
+                  
+                  return (
+                    <NumberCellEditor
+                      {...cellProps}
+                      wholeNumberOnly={col?.wholeNumberOnly || true}
+                      maxValue={maxValue}
+                    />
+                  )
+                },
+              },
+              data: (props) => (
+                <NestedHighlightCell
+                  {...props}
+                  customModifiedCells={customModifiedCells}
+                  isFormatByUOM={true}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
           />
         )
       }
@@ -517,9 +652,19 @@ const NestedKendoTable = ({
     })
 
   const toolTipRenderer = (props) => {
-    const value = props.dataItem[props.field]
-    const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
-    const cellContent = typeof value === 'boolean' ? displayValue : props.children
+    const fieldParts = props.field.split('.')
+    let value
+
+    if (fieldParts.length > 1) {
+      value = getNestedValue(props.dataItem, props.field)
+    } else {
+      value = props.dataItem[props.field]
+    }
+
+    const displayValue =
+      typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
+    const cellContent =
+      typeof value === 'boolean' ? displayValue : props.children
 
     return (
       <td
