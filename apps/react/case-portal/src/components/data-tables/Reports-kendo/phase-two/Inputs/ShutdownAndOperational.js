@@ -421,10 +421,6 @@ const ShutdownAndOperational = () => {
     },
   ]
 
-  //   useEffect(() => {
-  //     setRows(dummyOperationalHoursData)
-  //   }, [])
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchShutdownAndOperationalData()
@@ -447,7 +443,7 @@ const ShutdownAndOperational = () => {
         PLANT_ID,
         AOP_YEAR,
       )
-      console.log('Shutdown and Operational data:', res)
+
       if (!res || res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
@@ -507,10 +503,16 @@ const ShutdownAndOperational = () => {
       return
     }
 
-    const payload = modifiedData
+    const payload = modifiedData.map(({ id, inEdit, ...rest }) => rest)
 
     try {
       console.log('payload', payload)
+
+      const response = await InputApiService.saveOperationHours(
+        keycloak,
+        AOP_YEAR,
+        payload,
+      )
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -529,7 +531,7 @@ const ShutdownAndOperational = () => {
       setLoading(false)
     }
   }
-console.log('hoursRows',hoursRows);
+
   return (
     <Box>
       <Backdrop
@@ -559,7 +561,7 @@ console.log('hoursRows',hoursRows);
           title='Shutdown and Operational Hours Input'
           permissions={permissions}
           saveChanges={saveChanges}
-          snackbarData={snackbarData} 
+          snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
           setSnackbarData={setSnackbarData}

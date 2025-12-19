@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
+import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
 
 const dummyRowsData = [
@@ -17,21 +17,18 @@ const dummyRowsData = [
     utilityGenerated: "310027907 - POWERGEN",
     distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    distributionNormMapping: 1.00,
-    minCapacity: null,
-    maxCapacity: 22.00,
-    april: 15.0,
-    may: 16.0,
-    june: 17.0,
-    july: 18.0,
-    aug: 19.0,
-    sep: 18.5,
-    oct: 17.5,
-    nov: 16.5,
-    dec: 15.5,
-    jan: 14.5,
-    feb: 14.0,
-    march: 15.0,
+    april: { minCapacity: 10.0, maxCapacity: 20.0 },
+    may: { minCapacity: 11.0, maxCapacity: 21.0 },
+    june: { minCapacity: 12.0, maxCapacity: 22.0 },
+    july: { minCapacity: 13.0, maxCapacity: 23.0 },
+    aug: { minCapacity: 14.0, maxCapacity: 24.0 },
+    sep: { minCapacity: 13.5, maxCapacity: 23.5 },
+    oct: { minCapacity: 12.5, maxCapacity: 22.5 },
+    nov: { minCapacity: 11.5, maxCapacity: 21.5 },
+    dec: { minCapacity: 10.5, maxCapacity: 20.5 },
+    jan: { minCapacity: 9.5, maxCapacity: 19.5 },
+    feb: { minCapacity: 9.0, maxCapacity: 19.0 },
+    march: { minCapacity: 10.0, maxCapacity: 20.0 },
   },
   {
     id: 2,
@@ -40,21 +37,18 @@ const dummyRowsData = [
     utilityGenerated: "310027907 - POWERGEN",
     distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    distributionNormMapping: 1.00,
-    minCapacity: null,
-    maxCapacity: 22.00,
-    april: 12.0,
-    may: 13.0,
-    june: 14.0,
-    july: 15.0,
-    aug: 16.0,
-    sep: 15.5,
-    oct: 14.5,
-    nov: 13.5,
-    dec: 12.5,
-    jan: 11.5,
-    feb: 11.0,
-    march: 12.0,
+    april: { minCapacity: 8.0, maxCapacity: 18.0 },
+    may: { minCapacity: 9.0, maxCapacity: 19.0 },
+    june: { minCapacity: 10.0, maxCapacity: 20.0 },
+    july: { minCapacity: 11.0, maxCapacity: 21.0 },
+    aug: { minCapacity: 12.0, maxCapacity: 22.0 },
+    sep: { minCapacity: 11.5, maxCapacity: 21.5 },
+    oct: { minCapacity: 10.5, maxCapacity: 20.5 },
+    nov: { minCapacity: 9.5, maxCapacity: 19.5 },
+    dec: { minCapacity: 8.5, maxCapacity: 18.5 },
+    jan: { minCapacity: 7.5, maxCapacity: 17.5 },
+    feb: { minCapacity: 7.0, maxCapacity: 17.0 },
+    march: { minCapacity: 8.0, maxCapacity: 18.0 },
   },
   {
     id: 3,
@@ -63,21 +57,18 @@ const dummyRowsData = [
     utilityGenerated: "310027907 - POWERGEN",
     distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    distributionNormMapping: 1.00,
-    minCapacity: null,
-    maxCapacity: 22.00,
-    april: 10.0,
-    may: 11.0,
-    june: 12.0,
-    july: 13.0,
-    aug: 14.0,
-    sep: 13.5,
-    oct: 12.5,
-    nov: 11.5,
-    dec: 10.5,
-    jan: 9.5,
-    feb: 9.0,
-    march: 10.0,
+    april: { minCapacity: 6.0, maxCapacity: 16.0 },
+    may: { minCapacity: 7.0, maxCapacity: 17.0 },
+    june: { minCapacity: 8.0, maxCapacity: 18.0 },
+    july: { minCapacity: 9.0, maxCapacity: 19.0 },
+    aug: { minCapacity: 10.0, maxCapacity: 20.0 },
+    sep: { minCapacity: 9.5, maxCapacity: 19.5 },
+    oct: { minCapacity: 8.5, maxCapacity: 18.5 },
+    nov: { minCapacity: 7.5, maxCapacity: 17.5 },
+    dec: { minCapacity: 6.5, maxCapacity: 16.5 },
+    jan: { minCapacity: 5.5, maxCapacity: 15.5 },
+    feb: { minCapacity: 5.0, maxCapacity: 15.0 },
+    march: { minCapacity: 6.0, maxCapacity: 16.0 },
   },
   {
     id: 4,
@@ -86,21 +77,18 @@ const dummyRowsData = [
     utilityGenerated: "310027907 - POWERGEN",
     distributionPlant: "40NG - NMD - Utility/Power Dist",
     uom: "MW",
-    distributionNormMapping: 1.00,
-    minCapacity: 5.00,
-    maxCapacity: 25.00,
-    april: 20.0,
-    may: 21.0,
-    june: 22.0,
-    july: 23.0,
-    aug: 24.0,
-    sep: 23.5,
-    oct: 22.5,
-    nov: 21.5,
-    dec: 20.5,
-    jan: 19.5,
-    feb: 19.0,
-    march: 20.0,
+    april: { minCapacity: 15.0, maxCapacity: 25.0 },
+    may: { minCapacity: 16.0, maxCapacity: 26.0 },
+    june: { minCapacity: 17.0, maxCapacity: 27.0 },
+    july: { minCapacity: 18.0, maxCapacity: 28.0 },
+    aug: { minCapacity: 19.0, maxCapacity: 29.0 },
+    sep: { minCapacity: 18.5, maxCapacity: 28.5 },
+    oct: { minCapacity: 17.5, maxCapacity: 27.5 },
+    nov: { minCapacity: 16.5, maxCapacity: 26.5 },
+    dec: { minCapacity: 15.5, maxCapacity: 25.5 },
+    jan: { minCapacity: 14.5, maxCapacity: 24.5 },
+    feb: { minCapacity: 14.0, maxCapacity: 24.0 },
+    march: { minCapacity: 15.0, maxCapacity: 25.0 },
   }
 ];
 
@@ -143,6 +131,7 @@ const AssetCapacity = () => {
       minWidth: 180,
       type: 'text',
       editable: false,
+      locked: true,
     },
     {
       field: 'utilityDistributed',
@@ -151,6 +140,7 @@ const AssetCapacity = () => {
       minWidth: 180,
       type: 'text',
       editable: false,
+      locked: true,
     },
     {
       field: 'utilityGenerated',
@@ -159,6 +149,7 @@ const AssetCapacity = () => {
       minWidth: 180,
       type: 'text',
       editable: false,
+      locked: true,
     },
     {
       field: 'distributionPlant',
@@ -167,163 +158,260 @@ const AssetCapacity = () => {
       minWidth: 180,
       type: 'text',
       editable: false,
+      locked: true,
     },
-    { field: 'uom', title: 'UOM', widthT: 60, minWidth: 80, type: 'text', editable: false },
+    { field: 'uom', title: 'UOM', width: 80, minWidth: 80, type: 'text', editable: false },
     {
-      field: 'distributionNormMapping',
-      title: 'Distribution Norm Mapping',
-      width: 150,
-      minWidth: 120,
-      type: 'number',
-      editable: false,
-    },
-    {
-      field: 'minCapacity',
-      title: 'Min Capacity',
-      width: 120,
-      minWidth: 100,
-      type: 'number1',
-      editable: true,
-    },
-    {
-      field: 'maxCapacity',
-      title: 'Max Capacity',
-      width: 120,
-      minWidth: 100,
-      type: 'number1',
-      editable: true,
-    },
-    {
-      field: 'april',
       title: headerMap[4],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'april.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'april.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'may',
       title: headerMap[5],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'may.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'may.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'june',
       title: headerMap[6],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'june.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'june.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'july',
       title: headerMap[7],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'july.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'july.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'aug',
       title: headerMap[8],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'aug.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'aug.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'sep',
       title: headerMap[9],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'sep.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'sep.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'oct',
       title: headerMap[10],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'oct.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'oct.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'nov',
       title: headerMap[11],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'nov.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'nov.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'dec',
       title: headerMap[12],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'dec.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'dec.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'jan',
       title: headerMap[1],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'jan.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'jan.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'feb',
       title: headerMap[2],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'feb.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'feb.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
     {
-      field: 'march',
       title: headerMap[3],
-      editable: true,
-      widthT: 100,
-      minWidth: 80,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
-      format: valueFormat,
+      children: [
+        {
+          field: 'march.minCapacity',
+          title: 'Min Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+        {
+          field: 'march.maxCapacity',
+          title: 'Max Capacity',
+          width: 80,
+          editable: true,
+          type: 'number1',
+          format: valueFormat,
+        },
+      ],
     },
   ]
 
@@ -374,7 +462,7 @@ const AssetCapacity = () => {
 
   const saveChanges = async () => {
     setLoading(true)
-
+    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
@@ -385,20 +473,18 @@ const AssetCapacity = () => {
       setLoading(false)
       return
     }
-    const payload = modifiedData.map((item) => {
-      const { inEdit, ...rest } = item
-      return rest
-    })
-    const tempPayload = JSON.stringify(payload)
+
+    const payload = modifiedData
+
     try {
-      console.log('modifiedData', modifiedData)
+      console.log('payload', payload)
 
       const response = await UtilityPlantApiServiceV2.saveAssetCapacityData(
         keycloak,
         PLANT_ID,
-        tempPayload
+        payload
       )
-      console.log('response', response)
+
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
@@ -425,7 +511,7 @@ const AssetCapacity = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <AdvanceKendoTable
+      <NestedKendoTable
         columns={columns}
         rows={rows}
         setRows={setRows}

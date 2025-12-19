@@ -9,99 +9,7 @@ import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import AssetAvailability from './AssetAvailability'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
-const dummyRowsData = [
-  {
-    id: 1,
-    plant: "Power from MEL",
-    utility: "Power_Dis",
-    uom: "MW",
-    april: 25.0,
-    may: 25.0,
-    june: 33.0,
-    july: 33.0,
-    aug: 33.0,
-    sep: 33.0,
-    oct: 33.0,
-    nov: 33.0,
-    dec: 33.0,
-    jan: 33.0,
-    feb: 33.0,
-    march: 33.0,
-  },
-  {
-    id: 2,
-    utility: "POWERGEN",
-    plant: "NMD - Power Plant 1",
-    uom: "MW",
-    april: 12.81,
-    may: 7.63,
-    june: 8.14,
-    july: 9.45,
-    aug: 10.79,
-    sep: 9.89,
-    oct: 7.76,
-    nov: 9.94,
-    dec: 7.94,
-    jan: 10.63,
-    feb: 11.03,
-    march: 0,
-  },
-  {
-    id: 3,
-    utility: "POWERGEN",
-    plant: "NMD - Power Plant 2",
-    uom: "MW",
-    april: 11.20,
-    may: 11.60,
-    june: null,
-    july: 6.93,
-    aug: null,
-    sep: null,
-    oct: null,
-    nov: null,
-    dec: null,
-    jan: null,
-    feb: null,
-    march: null,
-  },
-  {
-    id: 4,
-    utility: "POWERGEN",
-    plant: "NMD - Power Plant 3",
-    uom: "MW",
-    april: 12.57,
-    may: null,
-    june: 6.41,
-    july: null,
-    aug: 7.90,
-    sep: 9.19,
-    oct: 8.29,
-    nov: 6.77,
-    dec: 8.39,
-    jan: 6.39,
-    feb: 9.04,
-    march: 9.44,
-  },
-  {
-    id: 5,
-    utility: "POWERGEN",
-    plant: "NMD - STG Power Plant",
-    uom: "MW",
-    april: 14.21,
-    may: 14.21,
-    june: 12.24,
-    july: 12.30,
-    aug: 11.92,
-    sep: 11.84,
-    oct: 11.92,
-    nov: 12.24,
-    dec: 11.92,
-    jan: 11.92,
-    feb: 11.67,
-    march: 11.92,
-  }
-];
-
+import { InputApiService } from 'services/phase-two-services/inputApiService'
 
 const ImportPower = () => {
   const keycloak = useSession()
@@ -132,34 +40,13 @@ const ImportPower = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState([])
-  const valueFormat= ValueFormatterProduction()
-
-  const dummyRowsData=[
-    {
-      id: 1,
-      utility: "Power from MEL",
-      assetName: "NMD-Rev Proc",
-      uom: "MW",
-      [headerMap[4]]: 25.00,
-      [headerMap[5]]: 25.00,
-      [headerMap[6]]: 33.00,
-      [headerMap[7]]: 33.00,
-      [headerMap[8]]: 33.00,
-      [headerMap[9]]: 33.00,
-      [headerMap[10]]: 33.00,
-      [headerMap[11]]: 33.00,
-      [headerMap[12]]: 33.00,
-      [headerMap[1]]: 33.00,
-      [headerMap[2]]: 33.00,
-      [headerMap[3]]: 33.00,
-    },
-  ]
+  const valueFormat = ValueFormatterProduction()
 
   // Column definitions
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
     {
-      field: 'assetName',
+      field: 'plant',
       title: 'Plant',
       width: 150,
       minWidth: 150,
@@ -167,27 +54,17 @@ const ImportPower = () => {
       editable: false,
     },
     {
-      field: 'utility',
-      title: 'Utility',
-      width: 150,
-      minWidth: 150,
+      field: 'uom',
+      title: 'UOM',
+      widthT: 60,
+      minWidth: 80,
       type: 'text',
       editable: false,
     },
-    // {
-    //   field: 'material',
-    //   title: 'Material',
-    //   width: 150,
-    //   minWidth: 150,
-    //   type: 'text',
-    //   editable: false,
-    // },
-    { field: 'uom', title: 'UOM', widthT: 60, minWidth: 80, type: 'text', editable: false },
     {
-      // field: 'april',
-      field:headerMap[4],
-      title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
-      editable: true, 
+      field: 'april',
+      title: headerMap[4],
+      editable: true,
       widthT: 100,
       minWidth: 80,
       align: 'left',
@@ -196,8 +73,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'may',
-      field: headerMap[5],
+      field: 'may',
       title: headerMap[5],
       editable: true,
       widthT: 100,
@@ -208,8 +84,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'june',
-      field: headerMap[6],
+      field: 'june',
       title: headerMap[6],
       editable: true,
       widthT: 100,
@@ -220,8 +95,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'july',
-      field: headerMap[7],
+      field: 'july',
       title: headerMap[7],
       editable: true,
       widthT: 100,
@@ -232,8 +106,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'aug',
-      field: headerMap[8],
+      field: 'aug',
       title: headerMap[8],
       editable: true,
       widthT: 100,
@@ -244,8 +117,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'sep',
-      field: headerMap[9],
+      field: 'sept',
       title: headerMap[9],
       editable: true,
       widthT: 100,
@@ -256,8 +128,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'oct',
-      field: headerMap[10],
+      field: 'oct',
       title: headerMap[10],
       editable: true,
       widthT: 100,
@@ -268,8 +139,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'nov',
-      field: headerMap[11],
+      field: 'nov',
       title: headerMap[11],
       editable: true,
       widthT: 100,
@@ -280,8 +150,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'dec',
-      field: headerMap[12],
+      field: 'dec',
       title: headerMap[12],
       editable: true,
       widthT: 100,
@@ -292,8 +161,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'jan',
-      field: headerMap[1],
+      field: 'jan',
       title: headerMap[1],
       editable: true,
       widthT: 100,
@@ -304,8 +172,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'feb',
-      field: headerMap[2],
+      field: 'feb',
       title: headerMap[2],
       editable: true,
       widthT: 100,
@@ -316,8 +183,7 @@ const ImportPower = () => {
       format: valueFormat,
     },
     {
-      // field: 'march',
-      field: headerMap[3],
+      field: 'mar',
       title: headerMap[3],
       editable: true,
       widthT: 100,
@@ -330,37 +196,42 @@ const ImportPower = () => {
   ]
 
   useEffect(() => {
-    if(AOP_YEAR){
-      // fetchImportConsumptionData(keycloak, AOP_YEAR)
-      setRows(dummyRowsData);
+    if (PLANT_ID && AOP_YEAR) {
+      fetchImportConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+      // setRows(dummyRowsData);
     }
-  }, [AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR])
 
-  const fetchImportConsumptionData = async (keycloak, AOP_YEAR) => {
+  const fetchImportConsumptionData = async (keycloak, PLANT_ID, AOP_YEAR) => {
     setLoading(true)
     try {
-      const res = await UtilityPlantApiServiceV2.getImportConsumptionData(
+      const res = await InputApiService.getImportPowerData(
         keycloak,
+        PLANT_ID,
         AOP_YEAR,
       )
-      if (res?.data?.length === 0) {
+      if (res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      // Process and set the fetched data to rows
-      let tempRes=res?.data.map((item, index)=>{
-        return { ...item, id: index + 1 }
+
+      let tempRes = res.map((item, index) => {
+        const transformed = {
+          id: item?.id || index + 1,
+          ...item,
+        }
+        return transformed
       })
+      console.log('tempRes', tempRes)
       setRows(tempRes)
     } catch (error) {
-      console.error('Error fetching fixed consumption data:', error)
+      console.error('Error fetching import consumption data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
       setLoading(false)
-      // setRows(dummyRowsData)
     }
   }
 
@@ -373,15 +244,15 @@ const ImportPower = () => {
     saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
-    showTitle:true,
+    showTitle: true,
     titleName: screenTitle?.title,
   }
 
-  // Dummy save handler
   const saveChanges = async () => {
     setLoading(true)
-
+    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
+    console.log('modifiedData', modifiedData)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -391,32 +262,27 @@ const ImportPower = () => {
       setLoading(false)
       return
     }
-    const payload = modifiedData.map((item) => {
-      const { inEdit, ...rest } = item
-      return rest
-    })
-    const tempPayload = JSON.stringify(payload)
-     try {
-      // Transform modifiedCells into the format expected by the API
-      console.log('modifiedData', modifiedData)
 
-      // Call the API to save changes
-      const response = await UtilityPlantApiServiceV2.saveImportConsumptionData(
+    const payload = modifiedData?.map(({ id, inEdit, ...rest }) => rest)
+
+    try {
+      console.log('payload', payload)
+
+      const response = await InputApiService.saveImportPower(
         keycloak,
         PLANT_ID,
-        tempPayload
+        AOP_YEAR,
+        payload,
       )
-      console.log('response',response)
-      // Update the local state with the saved data
-      // setRows(updatedRows)
+
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
-        message: `Successfully saved ${modifiedData.length} changes!`,
+        message: `Successfully saved ${modifiedData.length} rows changes!`,
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error saving plant requirement data:', error)
+      console.error('Error saving import consumption data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -450,8 +316,6 @@ const ImportPower = () => {
         setSnackbarData={setSnackbarData}
         //groupBy="plant"
       />
-
-  
     </Box>
   )
 }

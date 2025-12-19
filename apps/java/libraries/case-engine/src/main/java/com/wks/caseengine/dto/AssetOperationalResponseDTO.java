@@ -1,6 +1,7 @@
 package com.wks.caseengine.dto;
 
 import java.util.Map;
+import java.util.UUID;
 
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import lombok.Data;
 public class AssetOperationalResponseDTO {
 
     private String assetName;
+    private UUID assetId;
    // private Map<String, MonthlyHoursDTO> months;
     private MonthlyHoursDTO april;
     private MonthlyHoursDTO may; 

@@ -1,9 +1,11 @@
 package com.wks.caseengine.dto;
 
+import java.util.UUID;
+
 public interface AssetMonthlyOperationalProjection {
 
     String getAssetName();
-
+    UUID getAssetId();
     Double getApril();
     Double getMay();
     Double getJune();
@@ -18,4 +20,3 @@ public interface AssetMonthlyOperationalProjection {
     Double getFebruary();
     Double getMarch();
 }
-

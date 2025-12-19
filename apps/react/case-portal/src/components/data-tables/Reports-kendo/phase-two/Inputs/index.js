@@ -61,7 +61,6 @@ const Inputs = () => {
   const currentTab = tabObj[tabIndex] || {}
   const currentTabDisplay = currentTab.displayName || 'Purchase Power Input'
 
-  console.log('currentTab:', currentTab)
 
   // Store data for any tab dynamically
   const setRowsForTab = useCallback((tabId, data) => {

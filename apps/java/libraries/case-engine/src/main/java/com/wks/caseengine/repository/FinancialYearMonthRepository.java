@@ -2,6 +2,8 @@ package com.wks.caseengine.repository;
 
 import com.wks.caseengine.entity.FinancialYearMonth;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,4 +16,14 @@ public interface FinancialYearMonthRepository extends JpaRepository<FinancialYea
     Optional<FinancialYearMonth> findByMonthAndYear(Integer month, Integer year);
 
     List<FinancialYearMonth> findByYear(Integer year);
+
+    @Query(value = """
+        SELECT Id
+        FROM FinancialYearMonth
+        WHERE Year = :year AND Month = :month
+        """, nativeQuery = true)
+    UUID findFinancialMonthId(
+            @Param("year") int year,
+            @Param("month") int month
+    );
 }

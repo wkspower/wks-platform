@@ -7,6 +7,8 @@ import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { dummyDataForAssetAvailability } from '../nestedDummyData'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
+import { InputApiService } from 'services/phase-two-services/inputApiService'
+import { TcsApiService } from 'services/phase-two-services/tcsApiService'
 
 const AssetAvailability = () => {
   const keycloak = useSession()
@@ -38,7 +40,7 @@ const AssetAvailability = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
-  
+
   // Column definitions
   const columns = [
     //Generating Plant
@@ -51,7 +53,7 @@ const AssetAvailability = () => {
       locked: true,
       minWidth: 100,
     },
- 
+
     // Apr
     {
       title: headerMap[4],
@@ -161,49 +163,39 @@ const AssetAvailability = () => {
       wholeNumberOnly: true,
     },
   ]
-  
+
   const [rows, setRows] = useState([])
 
-  const nonEditableRows = ['HRSG1','HRSG2','HRSG3','PRDS']
+  const nonEditableRows = ['HRSG1', 'HRSG2', 'HRSG3', 'PRDS']
 
   useEffect(() => {
     if (PLANT_ID) {
-      const rowsWithEditableFlag = dummyDataForAssetAvailability.map((row) => ({
-        ...row,
-        isEditable: !nonEditableRows.includes(row.assetName),
-      }))
-      setRows(rowsWithEditableFlag)
+      fetchAssetPriorityData()
     }
-  }, [PLANT_ID,AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR])
 
-  const fetchPlantRequirementData = async () => {
+  const fetchAssetPriorityData = async () => {
     setLoading(true)
-    try {        
-      const res = await UtilityPlantApiServiceV2.getNormBasedUtilityBudget(
+    try {
+      const res = await InputApiService.getAssetPriority(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
-      
-      if (res?.data?.length === 0) {
+
+      if (res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      console.log('res', res)
-      const rowsWithEditableFlag = res?.data?.map((row) => ({
+      const rowsWithEditableFlag = res?.map((row, index) => ({
         ...row,
-        isEditable: !nonEditableRows.includes(row.assetName),
+        id: index + 1,
       }))
-      setRows(rowsWithEditableFlag) 
-      setSnackbarOpen(true)
-      // setSnackbarData({
-      //   message: 'Data fetched successfully!',
-      //   severity: 'success',
-      // })
+      setRows(rowsWithEditableFlag)
     } catch (error) {
-      console.error('Error fetching fixed consumption data:', error)
+      console.error('Error fetching asset priority data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -223,13 +215,13 @@ const AssetAvailability = () => {
     titleName: screenTitle?.title,
     showExport: false,
     showImport: false,
-    showTitle:true,
+    showTitle: true,
   }
 
   // Save handler with API call
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells',modifiedCells)
+    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
@@ -240,22 +232,22 @@ const AssetAvailability = () => {
       setLoading(false)
       return
     }
-    
+
     try {
       const payload = modifiedData.map((item) => {
-        const { inEdit, ...rest } = item
+        const { id, inEdit, ...rest } = item
         return rest
       })
-      const tempPayload = JSON.stringify(payload)
-      
-      console.log('payload', tempPayload)
+
+      console.log('payload', payload)
 
       // Call the API to save changes
-      // const response = await UtilityPlantApiServiceV2.savePlantRequirementData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   tempPayload
-      // )
+      const response = await InputApiService.saveAssetPriority(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        payload,
+      )
 
       setModifiedCells({})
       setSnackbarOpen(true)
