@@ -126,7 +126,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				Verticals vertical = verticalRepository.findById(UUID.fromString(row[3].toString())).get();
-				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
 					mCUNormsValueDTO.setGradeId(row[4].toString());
 					mCUNormsValueDTO.setMaterialFkId(row[5].toString());
 					mCUNormsValueDTO.setApril(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
