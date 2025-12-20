@@ -124,7 +124,7 @@ async function getAssetPriority(keycloak, plantId, year) {
 }
 
 async function saveAssetPriority(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/asset-priority/${PLANT_ID}/${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/asset-priority/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
