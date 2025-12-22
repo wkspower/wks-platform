@@ -1218,7 +1218,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	private static void setError(DecokePlanningDTO dto) {
 	    dto.setSaveStatus("Failed");
-	    dto.setErrDescription("Please enter numeric values");
+	    dto.setErrDescription("Please enter integer values");
 	}
 
 	public static Boolean getBooleanCellValue(Cell cell) {
