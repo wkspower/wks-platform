@@ -290,56 +290,6 @@ const NormalOpNormsScreenCracker = () => {
     [headerMap, valueFormat],
   )
 
-  const [reportTypes, setReportTypes] = useState([])
-
-  const fetchData = useCallback(
-    async (gradeId = null) => {
-      setProductionRows([])
-      setLoading(true)
-
-      var data = []
-
-      try {
-        const res = await DataService.getCatalystSelectivityData(
-          keycloak,
-          gradeId,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-
-        if (res?.code != 200) {
-          return
-        } else {
-          data = res?.data
-        }
-
-        const distinctReportTypes = [
-          ...new Set(data.map((item) => item.normType).filter(Boolean)),
-        ]
-
-        setReportTypes(distinctReportTypes)
-
-        const filteredData = data?.filter(
-          (item) => item.normType !== 'Report Manual Entry',
-        )
-        const formattedData = filteredData.map((item, index) => ({
-          ...item,
-          idFromApi: item.id,
-          id: index,
-          originalRemark: item.remarks,
-          srNo: index + 1,
-          Particulars: item.normType,
-        }))
-        setProductionRows(formattedData)
-      } catch (error) {
-        console.error('Error fetching configuration data:', error)
-      } finally {
-        setLoading(false)
-      }
-    },
-    [keycloak, PLANT_ID, AOP_YEAR],
-  )
-
   // permission helper: if old year, getAdjustedPermissions blocks actions
   const getAdjustedPermissions = useCallback((permissions, isOldYearFlag) => {
     if (isOldYearFlag != 1) return permissions
@@ -714,13 +664,13 @@ const NormalOpNormsScreenCracker = () => {
         const promises = []
 
         // Load data based on selected tab
-        if (tabIndex === 0) {
-          promises.push(fetchData(gId))
-        }
+        // if (tabIndex === 0) {
+        //   promises.push(fetchData(gId))
+        // }
         // else if (tabIndex === 3) {
         //   promises.push(fetchModeData(gId))
         // }
-        else if (tabIndex === 4) {
+        if (tabIndex === 4) {
           promises.push(fetchFinalNorms())
         }
 
@@ -734,8 +684,6 @@ const NormalOpNormsScreenCracker = () => {
     [
       fetchModeData,
       fetchFinalNorms,
-      fetchData,
-
       selectedTab,
       PLANT_ID,
       AOP_YEAR,
@@ -1227,7 +1175,7 @@ const NormalOpNormsScreenCracker = () => {
           ))}
         </Tabs>
       </Box>
-      {selectedTab === 0 && (
+      {/* {selectedTab === 0 && (
         <SelectivityData
           rows={productionRows}
           loading={loading}
@@ -1238,10 +1186,11 @@ const NormalOpNormsScreenCracker = () => {
           tabIndex='0'
           setGradeId={handleGradeChange}
           reportTypes={reportTypes}
-          onSummaryEditChange={setSummaryEdited}
-          isCalculationParam='true'
         />
-      )}
+      )} */}
+      {selectedTab === 0 && (
+          <CrackerConfiguration tabIndex={0} />
+        )}
       {/* {selectedTab === 1 && (
         <SelectivityData
           rows={productionRowsConstants}
