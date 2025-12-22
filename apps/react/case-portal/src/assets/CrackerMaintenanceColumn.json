@@ -190,7 +190,7 @@
   {
     "field": "numberOfDays",
     "title": "No of Days",
-    "editable": true,
+    "editable": false,
 
     "type": "number",
     "format": "{0:#.##}",

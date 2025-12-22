@@ -81,9 +81,9 @@ export default function StepperNav() {
     const newSteps = buildSteps(menuItems)
 
     const isPE =
-      lowerVertName === 'pe' &&
-      SITE_NAME === 'nmd' &&
-      !['lldpe1', 'lldpe2'].includes(PLANT_NAME)
+      lowerVertName === verticalEnums.PE &&
+      SITE_NAME?.toLowerCase() === 'nmd' &&
+      PLANT_NAME?.toLowerCase() === 'lldpe'
 
     const shouldFilterSlowdown = lowerVertName === verticalEnums.PP || isPE
 
