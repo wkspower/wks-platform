@@ -312,6 +312,9 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				List<Object> list = new ArrayList<>();
 				list.add(dto.getTypeDisplayName());
 				list.add(dto.getProductName());
+				if(type.equalsIgnoreCase("Constant")) {
+					list.add(dto.getUOM());
+				}
 				list.add(dto.getApr());
 				list.add(dto.getRemarks());
 				list.add(dto.getNormParameterFKId());
@@ -329,6 +332,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			
 			innerHeaders.add("Type");
 			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
 			innerHeaders.add("Values");
 			innerHeaders.add("Remarks");
 			innerHeaders.add("NormParameterId");
@@ -379,8 +383,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 				}
 			}
-			sheet.setColumnHidden(4, true);
-			sheet.setColumnHidden(5, true);
+			if(type.equalsIgnoreCase("Constant")) {
+				sheet.setColumnHidden(5, true);
+				sheet.setColumnHidden(6, true);	
+			}else {
+				sheet.setColumnHidden(4, true);
+				sheet.setColumnHidden(5, true);
+			}
+			
 			try {
 
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -2207,7 +2217,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		try {
 
 			System.out.println("started Read configuration in importExcel");
-			List<ConfigurationDTO> data = readShutdownRate(file.getInputStream(), plantFKId, year);
+			List<ConfigurationDTO> data = readShutdownRate(file.getInputStream(), plantFKId, year,type);
 			System.out.println("Ended Read configuration in importExcel");
 			System.out.println("Started Save configuration in importExcel");
 			List<ConfigurationDTO> failedRecords = saveConfigurationData(year, plantFKId.toString(),version, data,calculation);
@@ -2381,7 +2391,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 		return configList;
 	}
 	
-	public List<ConfigurationDTO> readShutdownRate(InputStream inputStream, UUID plantFKId, String year) {
+	public List<ConfigurationDTO> readShutdownRate(InputStream inputStream, UUID plantFKId, String year,String type) {
 		List<ConfigurationDTO> configList = new ArrayList<>();
 		String verticalName = plantsRepository.findVerticalNameByPlantId(plantFKId);
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -2399,22 +2409,43 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 				try {
 						dto.setTypeDisplayName(getStringCellValue(row.getCell(0), dto));
 						dto.setProductName(getStringCellValue(row.getCell(1), dto));
+						if(type.equalsIgnoreCase("Constant")) {
+							dto.setUOM(getStringCellValue(row.getCell(2), dto));
+							dto.setApr(getNumericCellValue(row.getCell(3), dto));
+							dto.setMay(getNumericCellValue(row.getCell(3), dto));
+							dto.setJun(getNumericCellValue(row.getCell(3), dto));
+							dto.setJul(getNumericCellValue(row.getCell(3), dto));
+							dto.setAug(getNumericCellValue(row.getCell(3), dto));
+							dto.setSep(getNumericCellValue(row.getCell(3), dto));
+							dto.setOct(getNumericCellValue(row.getCell(3), dto));
+							dto.setNov(getNumericCellValue(row.getCell(3), dto));
+							dto.setDec(getNumericCellValue(row.getCell(3), dto));
+							dto.setJan(getNumericCellValue(row.getCell(3), dto));
+							dto.setFeb(getNumericCellValue(row.getCell(3), dto));
+							dto.setMar(getNumericCellValue(row.getCell(3), dto));
+							dto.setRemarks(getStringCellValue(row.getCell(4), dto));
+							dto.setNormParameterFKId(getStringCellValue(row.getCell(5), dto)); 
+							dto.setId(getStringCellValue(row.getCell(6), dto)); 
+						}else {
+							dto.setApr(getNumericCellValue(row.getCell(2), dto));
+							dto.setMay(getNumericCellValue(row.getCell(2), dto));
+							dto.setJun(getNumericCellValue(row.getCell(2), dto));
+							dto.setJul(getNumericCellValue(row.getCell(2), dto));
+							dto.setAug(getNumericCellValue(row.getCell(2), dto));
+							dto.setSep(getNumericCellValue(row.getCell(2), dto));
+							dto.setOct(getNumericCellValue(row.getCell(2), dto));
+							dto.setNov(getNumericCellValue(row.getCell(2), dto));
+							dto.setDec(getNumericCellValue(row.getCell(2), dto));
+							dto.setJan(getNumericCellValue(row.getCell(2), dto));
+							dto.setFeb(getNumericCellValue(row.getCell(2), dto));
+							dto.setMar(getNumericCellValue(row.getCell(2), dto));
+							dto.setRemarks(getStringCellValue(row.getCell(3), dto));
+							dto.setNormParameterFKId(getStringCellValue(row.getCell(4), dto)); 
+							dto.setId(getStringCellValue(row.getCell(5), dto)); 
+						}
+						
 						dto.setAuditYear(year);
-						dto.setApr(getNumericCellValue(row.getCell(2), dto));
-						dto.setMay(getNumericCellValue(row.getCell(2), dto));
-						dto.setJun(getNumericCellValue(row.getCell(2), dto));
-						dto.setJul(getNumericCellValue(row.getCell(2), dto));
-						dto.setAug(getNumericCellValue(row.getCell(2), dto));
-						dto.setSep(getNumericCellValue(row.getCell(2), dto));
-						dto.setOct(getNumericCellValue(row.getCell(2), dto));
-						dto.setNov(getNumericCellValue(row.getCell(2), dto));
-						dto.setDec(getNumericCellValue(row.getCell(2), dto));
-						dto.setJan(getNumericCellValue(row.getCell(2), dto));
-						dto.setFeb(getNumericCellValue(row.getCell(2), dto));
-						dto.setMar(getNumericCellValue(row.getCell(2), dto));
-						dto.setRemarks(getStringCellValue(row.getCell(3), dto));
-						dto.setNormParameterFKId(getStringCellValue(row.getCell(4), dto)); 
-						dto.setId(getStringCellValue(row.getCell(5), dto)); 
+						
 
 				} catch (Exception e) {
 					e.printStackTrace();
