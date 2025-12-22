@@ -545,7 +545,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        innerHeaders.add("SD-To");
 	        innerHeaders.add("Duration (hrs)"); 
 	        innerHeaders.add("Rate (TPH)");
-	        innerHeaders.add("Shutdown Basis");
+	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Id");
 	        
 	        if (isAfterSave) {
