@@ -80,6 +80,7 @@ const SlowDown = ({ permissions }) => {
   const SHOW_EXCEL_UPLOAD_BUTTON =
     lowerVertName === 'pe' ||
     lowerVertName === 'pp' ||
+    lowerVertName === 'pet' ||
     lowerVertName == 'elastomer' ||
     lowerVertName == 'pvc' ||
     lowerVertName == 'vcm' ||
@@ -88,6 +89,7 @@ const SlowDown = ({ permissions }) => {
     lowerVertName == 'meg'
 
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_PET = lowerVertName === 'pet'
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -402,7 +404,7 @@ const SlowDown = ({ permissions }) => {
           ? requiredFieldsForElastomer
           : lowerVertName === 'meg'
             ? requiredFieldsForMeg
-            : IS_PE_PP
+            : IS_PE_PP || IS_PET
               ? requiredFieldsForPe
               : requiredFields
 
@@ -521,7 +523,8 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'pvc' ||
         lowerVertName === 'pta' ||
         lowerVertName === 'pe' ||
-        lowerVertName === 'pp'
+        lowerVertName === 'pp' ||
+        lowerVertName === 'pet'
       ) {
         // Month span check
         //check timeframe Multiple month spilt into single
@@ -875,7 +878,7 @@ const SlowDown = ({ permissions }) => {
         var data = []
         if (lowerVertName == 'meg')
           data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
-        else if (IS_PE_PP) {
+        else if (IS_PE_PP || IS_PET) {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(
@@ -893,7 +896,7 @@ const SlowDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
-        } else if (IS_PE_PP) {
+        } else if (IS_PE_PP || IS_PET) {
           productList = data?.data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
@@ -954,6 +957,8 @@ const SlowDown = ({ permissions }) => {
         return SlowDownElastomerColumns
       case verticalEnums.VCM:
         return SlowDownVcmColumns
+      case verticalEnums.PET:
+        return SlowDownPeColumns 
       default:
         return SlowDownMegColumns
     }

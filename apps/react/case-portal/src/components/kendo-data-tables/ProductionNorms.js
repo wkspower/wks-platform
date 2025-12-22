@@ -953,7 +953,8 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'vcm' &&
           lowerVertName !== 'pe' &&
           lowerVertName !== 'pp' &&
-          lowerVertName !== 'pta'
+          lowerVertName !== 'pta' &&
+          lowerVertName !== 'pet'
             ? '* MT per Annum'
             : ''
         }

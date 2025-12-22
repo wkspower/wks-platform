@@ -580,8 +580,7 @@ const ConfigurationTable = () => {
     setTimeout(() => {
       if (
         lowerVertName != 'cracker' &&
-        lowerVertName != 'meg' &&
-        lowerVertName != 'elastomer'
+        lowerVertName != 'meg' 
       ) {
         if (lowerVertName === 'aromatics') {
           getRevision()
@@ -1118,15 +1117,11 @@ const ConfigurationTable = () => {
 
   if (
     (lowerVertName == 'meg' ||
-      lowerVertName == 'pvc' ||
-      lowerVertName == 'elastomer') &&
+      lowerVertName == 'pvc') &&
     lowerVertName !== 'cracker'
   ) {
     // const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
-    const megTabs =
-      lowerVertName === 'elastomer'
-        ? ['Constants', 'Report Manual Entry']
-        : ['Configuration', 'Constants', 'Report Manual Entry']
+    const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']
     const auditYear = AOP_YEAR
     let displayYear = ''
     if (auditYear) {

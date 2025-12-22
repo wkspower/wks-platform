@@ -78,6 +78,7 @@ const ConsumptionNorms = () => {
   const [grades, setGrades] = useState([])
 
   const isPEPP = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const isPET = lowerVertName === 'pet'
 
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
@@ -190,7 +191,7 @@ const ConsumptionNorms = () => {
         }
       }
 
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+      if (lowerVertName == 'pe' || lowerVertName == 'pp' || lowerVertName == 'pet') {
         try {
           setLoading(true)
 
@@ -295,12 +296,12 @@ const ConsumptionNorms = () => {
 
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
-    if (isPEPP && !gradeId) return
+    if ((isPEPP || isPET) && !gradeId) return
     setLoading(true)
     try {
       var response
       setRows([])
-      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+      if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
         response = await ConsumptionNormsApiService.getConsumptionNormsData(
           keycloak,
           gradeId,
@@ -377,7 +378,7 @@ const ConsumptionNorms = () => {
 
   useEffect(() => {
     // fetchData(gradeId)
-    if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+    if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
       fetchGradeDropdowns()
     } else {
       fetchData(null)
@@ -415,7 +416,7 @@ const ConsumptionNorms = () => {
           severity: 'success',
         })
 
-        if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
           fetchGradeDropdownsAfterCalc()
         } else {
           fetchData(null)
@@ -448,7 +449,7 @@ const ConsumptionNorms = () => {
 
     try {
       let response
-      if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+      if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
         response =
           await ConsumptionNormsApiService.OverallConsumptionPEPPExport(
             keycloak,
@@ -502,14 +503,14 @@ const ConsumptionNorms = () => {
       showRefresh: false,
       noColor: false,
       customHeight: defaultCustomHeight,
-      showG: lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+      showG: lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet' ? true : false,
       marginBottom:
-        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+        lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet' ? true : false,
       dropdownLabel: 'Select Grade',
       downloadExcelBtnFromUI:
-        lowerVertName === 'pe' || lowerVertName === 'pp' ? false : true,
+        lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet' ? false : true,
       downloadExcelBtn:
-        lowerVertName === 'pe' || lowerVertName === 'pp' ? true : false,
+        lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet' ? true : false,
       ExcelName: `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
       showTitleNameBusiness: true,

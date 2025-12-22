@@ -25,7 +25,7 @@
   },
   {
     "field": "fourF",
-    "title": "4F",
+    "title": "4F/5F+D",
     "editable": true,
     "type": "number",
     "format": "{0:#.##}",
@@ -178,7 +178,7 @@
   {
     "field": "total",
     "title": "Total",
-    "editable": false,
+    "editable": true,
 
     "type": "number",
     "format": "{0:#.##}",
@@ -190,7 +190,7 @@
   {
     "field": "numberOfDays",
     "title": "No of Days",
-    "editable": false,
+    "editable": true,
 
     "type": "number",
     "format": "{0:#.##}",
@@ -202,7 +202,7 @@
   {
     "field": "totalSAD",
     "title": "No of SADs",
-    "editable": false,
+    "editable": true,
 
     "type": "number",
     "format": "{0:#.##}",

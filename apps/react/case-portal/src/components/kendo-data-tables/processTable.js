@@ -117,24 +117,24 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         November: 30,
         December: 31,
       }
-      for (const row of data) {
-        const month = row.monthName
-        if (month && monthDays[month]) {
-          const sum =
-            Number(row.fourF || 0) +
-            Number(row.fiveF || 0) +
-            Number(row.fourFD || 0)
-          if (sum !== monthDays[month]) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `Sum of 4F, 5F, and 4F with Demo for ${month} must be ${monthDays[month]} days. Current sum: ${sum}`,
-              severity: 'error',
-            })
-            setLoading(false)
-            return
-          }
-        }
-      }
+      // for (const row of data) {
+      //   const month = row.monthName
+      //   if (month && monthDays[month]) {
+      //     const sum =
+      //       Number(row.fourF || 0) +
+      //       Number(row.fiveF || 0) +
+      //       Number(row.fourFD || 0)
+      //     if (sum !== monthDays[month]) {
+      //       setSnackbarOpen(true)
+      //       setSnackbarData({
+      //         message: `Sum of 4F, 5F, and 4F with Demo for ${month} must be ${monthDays[month]} days. Current sum: ${sum}`,
+      //         severity: 'error',
+      //       })
+      //       setLoading(false)
+      //       return
+      //     }
+      //   }
+      // }
       // --- END VALIDATION ---
 
       const validationMessage = validateFields(data, ['remarks'])

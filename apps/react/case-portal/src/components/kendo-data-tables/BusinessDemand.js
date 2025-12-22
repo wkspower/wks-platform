@@ -52,6 +52,7 @@ const BusinessDemand = ({ permissions }) => {
 
   const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
   const IS_PTA_VERTICAL = lowerVertName === 'pta'
+  const IS_PET_VERTICAL = lowerVertName === 'pet'
 
   const SCREEN_NAME = screenTitle?.title
   const apiRef = useGridApiRef()
@@ -143,7 +144,7 @@ const BusinessDemand = ({ permissions }) => {
       }
       //
 
-      if (IS_PE_PP_VERTICAL || IS_PTA_VERTICAL) {
+      if (IS_PE_PP_VERTICAL || IS_PTA_VERTICAL || IS_PET_VERTICAL) {
         const productionRows = (rows || []).filter(
           (row) => row.Particulars?.toLowerCase() === 'production',
         )
@@ -332,7 +333,7 @@ const BusinessDemand = ({ permissions }) => {
     }
   }
 
-  const percentageTitle = IS_PE_PP_VERTICAL
+  const percentageTitle = IS_PE_PP_VERTICAL || IS_PET_VERTICAL
     ? `${SCREEN_NAME} (%)`
     : `${SCREEN_NAME}`
 
@@ -351,15 +352,15 @@ const BusinessDemand = ({ permissions }) => {
       titleName: percentageTitle,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
-      isTotalFooterActive: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
+      isTotalFooterActive: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? true : false,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? true : false,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       downloadExcelBtnFromUI:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL ? false : true,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
     },
     isOldYear,
   )

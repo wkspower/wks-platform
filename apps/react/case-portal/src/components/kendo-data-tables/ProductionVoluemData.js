@@ -80,6 +80,7 @@ const ProductionvolumeData = ({ permissions }) => {
     verticalObject?.name?.toLowerCase() == 'pe' ||
     verticalObject?.name?.toLowerCase() == 'pp'
   const SITE_NAME = siteObject?.name?.toLowerCase()
+  const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
 
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
@@ -574,11 +575,11 @@ const ProductionvolumeData = ({ permissions }) => {
     headerMap,
     valueFormat,
   )
-  const colDefs_design_capacity = IS_PE_PP
+  const colDefs_design_capacity = IS_PE_PP || IS_PET
     ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
     : getColDefsDesignCapacity(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = IS_PE_PP
+  const colDefs_max_achieved_capacity = IS_PE_PP || IS_PET
     ? getColDefsMaxAchievedCapacityPEPP(headerMap, valueFormat)
     : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
 
@@ -645,7 +646,7 @@ const ProductionvolumeData = ({ permissions }) => {
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
           remark: item.remarks?.trim() || '',
-          isEditable: IS_PE_PP ? false : true,
+          isEditable: IS_PE_PP || IS_PET ? false : true,
 
           april:
             isTPD && item.april
@@ -823,7 +824,7 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   //POINT-1 Current MCU to be rename as Max Achieved capacity.
-  const percentageTitle = IS_PE_PP
+  const percentageTitle = IS_PE_PP || IS_PET
     ? // ? 'Current MCU'
       'Max Achieved Capacity'
     : VERTICAL_NAME === 'cracker'
@@ -866,7 +867,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: IS_PE_PP ? false : true,
+      saveBtn: IS_PE_PP || IS_PET ? false : true,
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
@@ -937,7 +938,7 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Percentage Summary (Ethylene)'
-          : !IS_PE_PP
+          : !IS_PE_PP && !IS_PET
             ? 'Percentage Summary'
             : '% Summary of Proposed Operating Capacity',
     },

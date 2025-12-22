@@ -485,7 +485,7 @@ export default function HeaderContent({ keycloak }) {
             {headerLoading ? (
               <DropdownSkeleton />
             ) : (
-              <FormControl sx={{ width: 100 }}>
+              <FormControl sx={{ width: 110}}>
                 <Select
                   value={selectedPlant}
                   onChange={handlePlantChange}

@@ -677,7 +677,7 @@ const WorkFlowMerge = () => {
     lowerVertName === 'vcm'
   ) {
     activeTabs = elastomerTabs
-  } else if (lowerVertName === 'pe') {
+  } else if (lowerVertName === 'pe' || lowerVertName === 'pet') {
     activeTabs = customPETabs
   } else if (lowerVertName === 'pp') {
     activeTabs = customPPTabs
@@ -814,7 +814,8 @@ const WorkFlowMerge = () => {
         {/* For OTHER verticals */}
         {(lowerVertName === 'meg' ||
           lowerVertName === 'pe' ||
-          lowerVertName === 'pp') && (
+          lowerVertName === 'pp' ||
+          lowerVertName === 'pet') && (
           <>
             {tabIndex === 0 && (
               <ProductionAopView
@@ -879,7 +880,7 @@ const WorkFlowMerge = () => {
             {tabIndex === 5 && <AnnualProductionPlan />}
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
-            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
+            {(lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') && (
               <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
             )}
 

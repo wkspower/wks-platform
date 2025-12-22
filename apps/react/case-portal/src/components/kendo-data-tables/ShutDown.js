@@ -99,6 +99,7 @@ const ShutDown = ({ permissions }) => {
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_PET_VERTICAL = lowerVertName === 'pet'
 
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
@@ -290,7 +291,8 @@ const ShutDown = ({ permissions }) => {
         lowerVertName == 'pvc' ||
         lowerVertName == 'pta' ||
         lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
+        lowerVertName == 'pp' ||
+        lowerVertName == 'pet'
       ) {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
@@ -601,7 +603,7 @@ const ShutDown = ({ permissions }) => {
         let data = []
         if (lowerVertName === 'meg') {
           data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        } else if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(
@@ -619,7 +621,7 @@ const ShutDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        } else if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
           productList = data?.data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
@@ -909,7 +911,8 @@ const ShutDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
-      showNoteWhileDeleting: IS_PE_PP_VERTICAL ? true : false,
+      showNoteWhileDeleting: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
+
 
       showTitleNameBusiness: true,
       titleName: `${SCREEN_NAME}`,
@@ -920,7 +923,8 @@ const ShutDown = ({ permissions }) => {
         lowerVertName === 'elastomer' ||
         lowerVertName === 'pvc' ||
         lowerVertName === 'vcm' ||
-        lowerVertName === 'pta'
+        lowerVertName === 'pta' ||
+        lowerVertName === 'pet' 
           ? true
           : false,
     },

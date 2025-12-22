@@ -68,6 +68,7 @@ const ShutdownNorms = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
 
   const IS_PE_PP_VERTICAL = ['pe', 'pp'].includes(lowerVertName)
+  const IS_PET_VERTICAL = ['pet'].includes(lowerVertName)
 
   // const IS_PE_PP_VERTICAL_NMD_LLDPE =
   //   ['pe'].includes(lowerVertName) &&
@@ -553,7 +554,7 @@ const ShutdownNorms = () => {
         lowerVertName == 'aromatics' ||
         lowerVertName == 'pta' ||
         lowerVertName == 'vcm' ||
-        IS_PE_PP_VERTICAL
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? false
           : true,
       showCalculateVisibility:
@@ -563,12 +564,12 @@ const ShutdownNorms = () => {
           ? true
           : false,
 
-      showG: IS_PE_PP_VERTICAL ? true : false,
-      marginBottom: IS_PE_PP_VERTICAL ? true : false,
+      showG: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
+      marginBottom: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       dropdownLabel: 'Select Grade',
       allAction: true,
-      downloadExcelBtnFromUI: IS_PE_PP_VERTICAL ? false : true,
-      downloadExcelBtn: IS_PE_PP_VERTICAL ? true : false,
+      downloadExcelBtnFromUI: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
+      downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       showTitleNameBusiness: true,
 
       titleName:
