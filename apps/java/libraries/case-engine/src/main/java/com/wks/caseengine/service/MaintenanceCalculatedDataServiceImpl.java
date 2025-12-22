@@ -1187,20 +1187,38 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    if (cell == null || cell.getCellType() == CellType.BLANK) {
 	        return null;
 	    }
-	    
+
 	    if (cell.getCellType() == CellType.NUMERIC) {
-	        return (int) cell.getNumericCellValue(); 
-	    } else if (cell.getCellType() == CellType.STRING) {
+	        double value = cell.getNumericCellValue();
+	        
+	        if (value % 1 != 0) {
+	            setError(dto);
+	            return null;
+	        }
+	        return (int) value;
+	    } 
+
+	    else if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        
+	        if (val.isEmpty()) {
+	            return null; 
+	        }
+	        
 	        try {
-	            String val = cell.getStringCellValue().trim();
-	            return val.isEmpty() ? null : Integer.parseInt(val);
+	            return Integer.parseInt(val);
 	        } catch (NumberFormatException e) {
-	            dto.setSaveStatus("Failed");
-	            dto.setErrDescription("Please enter numeric values");
+	            setError(dto);
 	            return null;
 	        }
 	    }
+
 	    return null;
+	}
+
+	private static void setError(DecokePlanningDTO dto) {
+	    dto.setSaveStatus("Failed");
+	    dto.setErrDescription("Please enter numeric values");
 	}
 
 	public static Boolean getBooleanCellValue(Cell cell) {
