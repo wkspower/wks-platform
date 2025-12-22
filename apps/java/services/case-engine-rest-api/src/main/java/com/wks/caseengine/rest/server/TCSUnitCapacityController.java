@@ -18,7 +18,10 @@ public class TCSUnitCapacityController {
     private TCSUnitCapacityService tcsUnitCapacityService;
 
     @GetMapping("/tcs-unit-capacity")
-    public Map<String, Object> getAllTCSUnitCapacity(@RequestParam String plantId, @RequestParam String year) {
+    public Map<String, Object> getAllTCSUnitCapacity(
+        @RequestParam String plantId,
+        @RequestParam String year) {
+
         return tcsUnitCapacityService.getAll(plantId, year);
     }
 
@@ -27,6 +30,7 @@ public class TCSUnitCapacityController {
         @RequestParam String plantId,
         @RequestParam String year,
         @RequestBody List<TCSUnitCapacityDTO> payload) {
+
         return tcsUnitCapacityService.saveOrUpdate(plantId, year, payload);
     }
 }

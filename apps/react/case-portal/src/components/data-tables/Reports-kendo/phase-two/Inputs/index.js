@@ -47,12 +47,12 @@ const Inputs = () => {
   // Initialize tabs
   useEffect(() => {
     const tabs = [
-      { id: 'purchase-power', displayName: 'Purchase Power Input', displaySequence: 1 },
-      { id: 'export-availability', displayName: 'Export Availability', displaySequence: 2 },
-      { id: 'shutdown-operational', displayName: 'Shutdown and Operational Hrs.', displaySequence: 3 },
-      { id: 'asset-priority', displayName: 'Asset Priority', displaySequence: 4 },
-      { id: 'asset-capacity', displayName: 'Asset Capacity', displaySequence: 5 },
-      { id: 'heat-rate', displayName: 'Heat Rate', displaySequence: 6 },
+      { id: 'purchase-power',name:'purchasePowerInput', displayName: 'Purchase Power Input', displaySequence: 1 },
+      { id: 'shutdown-operational',name:'shutdownOperationalHrs', displayName: 'Shutdown and Operational Hrs.', displaySequence: 2 },
+      { id: 'asset-priority',name:'assetPriority', displayName: 'Asset Priority', displaySequence: 3 },
+      { id: 'asset-capacity',name:'assetCapacity', displayName: 'Asset Capacity', displaySequence: 4 },
+      { id: 'heat-rate',name:'heatRate', displayName: 'Heat Rate', displaySequence: 5 },
+      { id: 'export-availability',name:'exportAvailability', displayName: 'Export Availability', displaySequence: 6 },
     ]
     setTabObj(tabs)
   }, [])

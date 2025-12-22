@@ -15,16 +15,16 @@ import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.dto.TCSUnitCapacityDTO;
+import com.wks.caseengine.dto.TCSSlowdownDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
-import com.wks.caseengine.entity.TCSUnitCapacity;
+import com.wks.caseengine.entity.TCSSlowdown;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
-import com.wks.caseengine.repository.TCSUnitCapacityRepository;
+import com.wks.caseengine.repository.TCSSlowdownRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
 
 import jakarta.persistence.EntityManager;
@@ -32,7 +32,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 
 @Service
-public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
+public class TCSSlowdownServiceImpl implements TCSSlowdownService {
+
     @PersistenceContext
     private EntityManager entityManager;
     @Autowired
@@ -44,64 +45,8 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 	@Autowired
 	private VerticalsRepository verticalRepository;
     @Autowired
-    private TCSUnitCapacityRepository tcsUnitCapacityRepository;
-
-    private static final Set<String> DTA_KEYS = Set.of(
-        "id",
-        "particulates",
-        "uom",
-        "kbpsd",
-        "remark",
-        "insertedDateTime");
-
-    private static final Set<String> SEZ_KEYS = Set.of(
-        "id",
-        "particulates",
-        "kbpsd",
-        "ktpd",
-        "remark",
-        "insertedDateTime");
-
-    private static final Set<String> C2_KEYS = Set.of(
-        "id",
-        "particulates",
-        "tph",
-        "remark",
-        "insertedDateTime");
-
-    private static final Map<String, Set<String>> SITE_KEYS = Map.of(
-        "DTA", DTA_KEYS,
-        "SEZ", SEZ_KEYS,
-        "C2", C2_KEYS);
-
-    private static final Set<String> DTA_HEADERS = Set.of(
-        "Id",
-        "Particulars",
-        "UOM",
-        "KBPSD",
-        "Remark",
-        "InsertedDateTime");
-
-    private static final Set<String> SEZ_HEADERS = Set.of(
-        "Id",
-        "Particulars",
-        "KBPSD",
-        "KTPD",
-        "Remark",
-        "InsertedDateTime");
-
-    private static final Set<String> C2_HEADERS = Set.of(
-        "Id",
-        "Particulars",
-        "TPH",
-        "Remark",
-        "InsertedDateTime");
-
-    private static final Map<String, Set<String>> SITE_HEADERS = Map.of(
-        "DTA", DTA_HEADERS,
-        "SEZ", SEZ_HEADERS,
-        "C2", C2_HEADERS);
-   
+    private TCSSlowdownRepository tcsSlowdownRepository;
+    
     @Override
     public Map<String, Object> getAll(String plantId, String aopYear) {
         // Validation
@@ -114,7 +59,7 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         Verticals vertical = verticalRepository
             .findById(plant.getVerticalFKId())
             .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
-
+        
         Map<String, Object> map = new HashMap<>();
         try {
             DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -123,42 +68,18 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                 aopYear,
                 vertical.getName().toUpperCase(),
                 site.getName().toUpperCase());
-            List<TCSUnitCapacityDTO> resultsList = new ArrayList<>();
-            // values mapping
-            if (site.getName().equalsIgnoreCase("SEZ")) {
-                for (Object[] row : results) {
-                    TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
-                    dto.setId(row[0] != null ? row[0].toString() : null);
-                    dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                    dto.setUom(null);
-                    dto.setKbpsd(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
-                    dto.setKtpd(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                    dto.setRemark(row[4] != null ? row[4].toString() : null);
-                    dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
-                    resultsList.add(dto);
-                }
-            }
-            else if (site.getName().equalsIgnoreCase("DTA")) {
-                for (Object[] row : results) {
-                    TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
-                    dto.setId(row[0] != null ? row[0].toString() : null);
-                    dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                    dto.setUom(row[2] != null ? row[2].toString() : null);
-                    dto.setKbpsd(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                    dto.setRemark(row[4] != null ? row[4].toString() : null);
-                    dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
-                    resultsList.add(dto);
-                }
-            }
-            else if (site.getName().equalsIgnoreCase("C2")) {
-                for (Object[] row : results) {
-                    TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
-                    dto.setId(row[0] != null ? row[0].toString() : null);
-                    dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                    dto.setTph(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
-                    dto.setRemark(row[3] != null ? row[3].toString() : null);
-                    resultsList.add(dto);
-                }
+            List<TCSSlowdownDTO> resultsList = new ArrayList<>();
+            //values mapping
+            for (Object[] row : results) {
+                TCSSlowdownDTO dto = new TCSSlowdownDTO();
+                dto.setId(row[0] != null ? row[0].toString() : null);
+                dto.setParticulates(row[1] != null ? row[1].toString() : null);
+                dto.setTentativeDurationInDays(row[2] != null ? Integer.parseInt(row[2].toString()) : null);
+                dto.setThroughputDuringSlowdown(row[3] != null ? row[3].toString() : null);
+                dto.setTentativeMonth(row[4] != null ? row[4].toString() : null);
+                dto.setPurposeOfSlowdown(row[5] != null ? row[5].toString() : null);
+                dto.setInsertedDateTime(row[6] != null ? dateFormatter.parse(row[6].toString()) : null);
+                resultsList.add(dto);
             }
             map.put("results", resultsList);
 
@@ -170,12 +91,10 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                 site.getName().toUpperCase());
             map.put("headers", headers);
 
-            List<String> keys = new ArrayList<>();
             // keys mapping
-            var allowedKeys = SITE_KEYS.get(site.getName().toUpperCase());
-            for (Field field : TCSUnitCapacityDTO.class.getDeclaredFields()) {
+            List<String> keys = new ArrayList<>();
+            for (Field field : TCSSlowdownDTO.class.getDeclaredFields()) {
                 String fieldName = field.getName();
-                if (allowedKeys != null && allowedKeys.contains(fieldName))
                     keys.add(fieldName);
             }
             map.put("keys", keys);
@@ -194,9 +113,9 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
             
         try {            
             // Stored Procedure name
-            String procedureName = "GetTcsUnitCapacity";
+            String procedureName = "GetTcsSlowdown";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
-                procedureName = verticalName + "_" + siteName + "_GetTcsUnitCapacity";
+                procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown";
             }
 
             // Prepare native SQL call with parameters
@@ -221,9 +140,9 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         String verticalName,
         String siteName) {
 
-        String procedureName = "GetTcsUnitCapacity";
+        String procedureName = "GetTcsSlowdown";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
-            procedureName = verticalName + "_" + siteName + "_GetTcsUnitCapacity";
+            procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown";
         }
         String callableSql = "{call " + procedureName + "(?, ?)}";
 
@@ -247,12 +166,10 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 				try (ResultSet rs = stmt.getResultSet()) {
 					ResultSetMetaData metaData = rs.getMetaData();
 					int columnCount = metaData.getColumnCount();
-                    var allowedHeaders = SITE_HEADERS.get(siteName.toUpperCase());
 
 					for (int i = 1; i <= columnCount; i++)
                     {
                         String columnLabel = metaData.getColumnLabel(i);
-                        if (allowedHeaders != null && allowedHeaders.contains(columnLabel))
 						    headers.add(columnLabel);
 					}
 				}
@@ -263,19 +180,23 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 
         return headers;
     }
-
+    
     @Override
     public AOPMessageVM saveOrUpdate(
         String plantId,
         String year,
-        List<TCSUnitCapacityDTO> dtoList) {
+        List<TCSSlowdownDTO> dtoList) {
+
         if (dtoList == null || dtoList.isEmpty()) {
             throw new RestInvalidArgumentException("Payload cannot be empty", null);
         }
 
+        AOPMessageVM vm = new AOPMessageVM();
+
         try {
-            List<TCSUnitCapacity> savedList = new ArrayList<>();
-            for (TCSUnitCapacityDTO dto : dtoList) {                
+            List<TCSSlowdown> savedList = new ArrayList<>();
+
+            for (TCSSlowdownDTO dto : dtoList) {
                 String existingId = null;
                 if (dto.getId() != null && !dto.getId().isBlank()) {
                     try {
@@ -285,7 +206,23 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                     }
                 }
 
-                TCSUnitCapacity entity = new TCSUnitCapacity();
+                if (dto.getTentativeDurationInDays() == null || dto.getTentativeDurationInDays() <= 0) {
+                    throw new RestInvalidArgumentException("Tentative Duration (Days) must be greater than 0", null);
+                }
+
+                if (dto.getThroughputDuringSlowdown() == null || dto.getThroughputDuringSlowdown().isBlank()) {
+                    throw new RestInvalidArgumentException("Throughput during Slowdown is required", null);
+                }
+
+                if (dto.getTentativeMonth() == null || dto.getTentativeMonth().isBlank()) {
+                    throw new RestInvalidArgumentException("Tentative Month is required", null);
+                }
+
+                if (dto.getPurposeOfSlowdown() == null || dto.getPurposeOfSlowdown().isBlank()) {
+                    throw new RestInvalidArgumentException("Purpose of Slowdown is required", null);
+                }
+               
+                TCSSlowdown entity = new TCSSlowdown();
                 if (existingId == null || existingId.trim().isEmpty()) {
                     // The entity is being created
                     entity.setInsertedDateTime(new Date());
@@ -295,20 +232,17 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                     entity.setInsertedDateTime(dto.getInsertedDateTime());
                     entity.setUpdatedDateTime(new Date());
                 }
-                entity.setUom(dto.getUom());
-                entity.setKbpsd(dto.getKbpsd());
-                entity.setKtpd(dto.getKtpd());
-                entity.setTpd(dto.getTpd());
-                entity.setTph(dto.getTph());
-                entity.setRemark(dto.getRemark());
-                entity.setAopYear(year);
                 entity.setPlantFkId(UUID.fromString(plantId));
+                entity.setAopYear(year);
+                entity.setTentativeDurationInDays(dto.getTentativeDurationInDays());
+                entity.setThroughputDuringSlowdown(dto.getThroughputDuringSlowdown());
+                entity.setTentativeMonth(dto.getTentativeMonth());
+                entity.setPurposeOfSlowdown(dto.getPurposeOfSlowdown());
 
-                tcsUnitCapacityRepository.save(entity);
+                tcsSlowdownRepository.save(entity);
                 savedList.add(entity);
             }
 
-            AOPMessageVM vm = new AOPMessageVM();
             vm.setCode(200);
             vm.setMessage("Data saved successfully");
             vm.setData(savedList.stream().map(this::toDTO).toList());
@@ -320,13 +254,14 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
             throw new RuntimeException("Failed to save data", ex);
         }
     }
-   
-    private TCSUnitCapacityDTO toDTO(TCSUnitCapacity entity) {
-        return TCSUnitCapacityDTO.builder()
+
+    private TCSSlowdownDTO toDTO(TCSSlowdown entity) {
+        return TCSSlowdownDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
-            .uom(entity.getUom())
-            .kbpsd(entity.getKbpsd())
-            .remark(entity.getRemark())
+            .tentativeDurationInDays(entity.getTentativeDurationInDays())
+            .throughputDuringSlowdown(entity.getThroughputDuringSlowdown())
+            .tentativeMonth(entity.getTentativeMonth())
+            .purposeOfSlowdown(entity.getPurposeOfSlowdown())
             .build();
     }
 }

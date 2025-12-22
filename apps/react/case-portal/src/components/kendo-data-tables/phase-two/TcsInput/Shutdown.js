@@ -6,7 +6,7 @@ import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/in
 import { generateMockData } from './utility'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
-const UnitCapacity = ({
+const Shutdown = ({
   PLANT_ID,
   AOP_YEAR,
   currentTab,
@@ -52,15 +52,15 @@ const UnitCapacity = ({
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
-  // Fetch Unit Capacity data
-  const fetchUnitCapacityData = useCallback(async () => {
+  // Fetch Shutdown Data
+  const fetchShutdownData = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       let transformedData = []
 
-      const response = await TcsApiService.getTcsUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR)
-      console.log('TCS Unit Capacity Response:', response)
+      const response = await TcsApiService.getTcsShutdownData(keycloak, PLANT_ID, AOP_YEAR)
+      console.log('TCS Shutdown Response:', response)
 
       if (response?.results && Array.isArray(response.results)) {
         transformedData = response.results.map((item, index) => ({
@@ -77,9 +77,9 @@ const UnitCapacity = ({
       
       setRows(transformedData)
     } catch (err) {
-      console.error('Error fetching Unit Capacity data:', err)
+      console.error('Error fetching Shutdown data:', err)
       setSnackbarData({
-        message: `Failed to load Unit Capacity data. Please try again.`,
+        message: `Failed to load Shutdown data. Please try again.`,
         severity: 'error',
       })
       setSnackbarOpen(true)
@@ -92,18 +92,18 @@ const UnitCapacity = ({
   // Fetch data on mount or when dependencies change
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchUnitCapacityData()
+      fetchShutdownData()
     }
-  }, [PLANT_ID, AOP_YEAR, fetchUnitCapacityData])
+  }, [PLANT_ID, AOP_YEAR, fetchShutdownData])
 
-  // Column configuration for Unit Capacity - dynamically generated from API response
+  // Column configuration for Shutdown - dynamically generated from API response
   const columnConfig = {
     particulates: { editable: false, type: 'text',minWidth: 50,width: 100, },
-    uom: { editable: false, type: 'text', minWidth: 50,width: 100, },
-    kbpsd: { editable: true, type: 'number', minWidth: 80,width: 100, },
-    ktpd: { editable: true, type: 'number', minWidth: 50,width: 100, },
-    tph: { editable: true, type: 'number', minWidth: 50,width: 100, },
-    remark: { editable: true, type: 'text', minWidth: 100,width: 100, },
+    sdTotalDurationInDays: { editable: true, type: 'wholeNumber', minWidth: 50,width: 100, },
+    tentativeMonth: { editable: true, type: 'date', minWidth: 80,width: 100, },
+    startDate: { editable: true, type: 'date', minWidth: 50,width: 100, },
+    endDate: { editable: true, type: 'date', minWidth: 50,width: 100, },
+    purposeOfShutdown: { editable: true, type: 'text', minWidth: 100,width: 100, },
   }
 
   const columns = useMemo(() => {
@@ -119,24 +119,14 @@ const UnitCapacity = ({
       columnMap[keys[index]] = header
     })
 
-    // Build columns with UI structure
-    const firstColumn = {
-      field: 'particulates',
-      title: columnMap['particulates'] || 'Particulars',
-      widthT: 120,
-      locked: true,
-      ...columnConfig.particulates,
-      disable: false,
-    }
-
-    // Group remaining columns under "Capacity"
-    const capacityChildren = []
-    const capacityKeys = ['uom', 'kbpsd','ktpd','tph']
+    // Build columns - all top-level, no nesting
+    const columns = []
+    const topLevelKeys = ['particulates','sdTotalDurationInDays', 'tentativeMonth','startDate','endDate', 'purposeOfShutdown']
     
-    capacityKeys.forEach((key) => {
+    topLevelKeys.forEach((key) => {
       if (columnMap[key]) {
         const config = columnConfig[key] || { editable: true, type: 'text', minWidth: 80 }
-        capacityChildren.push({
+        columns.push({
           field: key,
           title: columnMap[key],
           ...config,
@@ -144,31 +134,13 @@ const UnitCapacity = ({
       }
     })
 
-    const columns = [firstColumn]
-    
-    if (capacityChildren.length > 0) {
-      columns.push({
-        title: 'Capacity',
-        children: capacityChildren,
-      })
-    }
-
-    // Add remark as top-level column
-    if (columnMap['remark']) {
-      const config = columnConfig['remark'] || { editable: true, type: 'text', minWidth: 100 }
-      columns.push({
-        field: 'remark',
-        title: columnMap['remark'],
-        ...config,
-      })
-    }
-
     return columns
   }, [apiMetadata])
 
   // Apply numeric formatting to detected numeric fields
-  const numericKeys = useMemo(() => getNumericKeysInAllRows(rows), [rows])
-
+//   useMemo(() => getNumericKeysInAllRows(rows), [rows])
+  const numericKeys = []
+  const wholeNumberKeys = ['sdTotalDurationInDays']
   const columnsWithFormatting = useMemo(() => {
     return columns.map((col) => {
       if (col.children) {
@@ -193,13 +165,20 @@ const UnitCapacity = ({
           format: valueFormat,
         }
       }
+      if(wholeNumberKeys.includes(col.field)){
+        return {
+          ...col,
+          type: 'wholeNumber',
+        //   format: valueFormat,
+        }
+      }
       return col
     })
   }, [columns, numericKeys, valueFormat])
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.purposeOfShutdown || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -236,25 +215,25 @@ const UnitCapacity = ({
       }
 
       // TODO: Replace with actual API call
-      const response = await TcsApiService.saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, data);
-      console.log('Save Unit Capacity response:', response);
+      const response = await TcsApiService.saveShutdownData(keycloak, PLANT_ID, AOP_YEAR, data);
+      console.log('Save Shutdown response:', response);
 
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Unit Capacity data saved successfully!',
+        message: 'Shutdown data saved successfully!',
         severity: 'success',
       })
       setModifiedCells({})
-      fetchUnitCapacityData()
+      fetchShutdownData()
     } catch (error) {
-      console.error('Error saving Unit Capacity data:', error)
+      console.error('Error saving Shutdown data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Error saving Unit Capacity data!',
+        message: 'Error saving Shutdown data!',
         severity: 'error',
       })
     }
-  }, [modifiedCells, keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen, fetchUnitCapacityData])
+  }, [modifiedCells, keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen, fetchShutdownData])
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
@@ -269,6 +248,7 @@ const UnitCapacity = ({
     saveBtn: true,
     showWorkFlowBtns: false,
     showTitle: true,
+    filterable:false,
   }
 
   return (
@@ -283,8 +263,8 @@ const UnitCapacity = ({
       <AdvanceKendoTable
         rows={rows}
         setRows={setRows}
-        fetchData={fetchUnitCapacityData}
-        configType='tcs_unit_capacity'
+        fetchData={fetchShutdownData}
+        configType='tcs_shutdown'
         handleRemarkCellClick={handleRemarkCellClick}
         columns={columnsWithFormatting}
         remarkDialogOpen={remarkDialogOpen}
@@ -306,4 +286,4 @@ const UnitCapacity = ({
   )
 }
 
-export default UnitCapacity
+export default Shutdown;

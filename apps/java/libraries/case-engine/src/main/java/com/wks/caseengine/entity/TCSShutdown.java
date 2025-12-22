@@ -12,9 +12,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "TCSUnitCapacity")
+@Table(name = "TCSShutdown")
 @Data
-public class TCSUnitCapacity {
+public class TCSShutdown {
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -22,26 +22,19 @@ public class TCSUnitCapacity {
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
-    @NotNull(message = "UOM is required")
+    @NotNull(message = "SD Total Duration (Days) is required")
+    @Column(name = "SDTotalDurationInDays")
+    private Integer sdTotalDurationInDays;
+
+    @NotNull(message = "Tentative Month is required")
     @Size(max = 50)
-    @Column(name = "UOM", length = 50, nullable = false)
-    private String uom;
+    @Column(name = "TentativeMonth", length = 50)
+    private String tentativeMonth;
 
-    @Column(name = "KBPSD", precision = 18, scale = 4)
-    private Double kbpsd;
-
-    @Column(name = "KTPD", precision = 18, scale = 4)
-    private Double ktpd;
-
-    @Column(name = "TPD", precision = 18, scale = 4)
-    private Double tpd;
-
-    @Column(name = "TPH", precision = 18, scale = 4)
-    private Double tph;
-
+    @NotNull(message = "Purpose of Shutdown is required")
     @Size(max = 1000)
-    @Column(name = "Remark", length = 1000)
-    private String remark;
+    @Column(name = "Purpose", length = 1000)
+    private String purposeOfShutdown;
 
     @Size(max = 20)
     @Column(name = "AOPYear", length = 20)

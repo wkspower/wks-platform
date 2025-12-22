@@ -11,14 +11,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Data
-public class TCSUnitCapacityDTO {
-    private String id;          
+public class TCSSlowdownDTO {
+
+    private String id;
     private String particulates;
-    private String uom;
-    private Double kbpsd;
-    private Double ktpd;
-    private Double tpd;
-    private Double tph;
-    private String remark;
+    private Integer tentativeDurationInDays;
+    private String throughputDuringSlowdown;
+    private String tentativeMonth;
+    private String purposeOfSlowdown;
     private Date insertedDateTime;
 }

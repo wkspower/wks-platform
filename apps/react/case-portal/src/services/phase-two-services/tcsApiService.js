@@ -12,6 +12,10 @@ export const TcsApiService = {
   getTcsUnitCapacityData,
   saveUnitCapacityData,
 
+  // TCS Shutdown Data APIs
+  getTcsShutdownData,
+  saveShutdownData,
+
   // Excel Import/Export APIs
   downloadTcsExcel,
   uploadTcsExcel,
@@ -75,6 +79,51 @@ async function getTcsUnitCapacityData(keycloak, plantId, year) {
 
 async function saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, payload) {
   const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload);
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// ===================== || TCS Shutdown Data APIs || ===================== //
+async function getTcsShutdownData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?plantId=${plantId}&year=${year}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveShutdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

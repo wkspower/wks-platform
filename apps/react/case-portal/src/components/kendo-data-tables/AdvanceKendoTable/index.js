@@ -368,6 +368,7 @@ const AdvanceKendoTable = ({
             'remarks',
             'remark',
             'Remark',
+            'purposeOfShutdown'
           ].filter((key) => key in row)
           keyToUpdate = keysToUpdate[0] || 'remark'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
@@ -790,7 +791,7 @@ const AdvanceKendoTable = ({
         )
       }
 
-      if (['aopRemarks', 'remarks', 'remark', 'Remark'].includes(col.field)) {
+      if (['aopRemarks', 'remarks', 'remark', 'Remark','purposeOfShutdown'].includes(col.field)) {
         return (
           <GridColumn
             key={col.field}
@@ -1363,7 +1364,7 @@ const AdvanceKendoTable = ({
             defaultGroup={initialGroup}
             defaultTake={100}
             contextMenu={true}
-            filterable={columns.some((col) => dateFields.includes(col.field))}
+            filterable={permissions.filterable && columns.some((col) => dateFields.includes(col.field))}
             size='small'
             pageable={
               rows?.length > 100
