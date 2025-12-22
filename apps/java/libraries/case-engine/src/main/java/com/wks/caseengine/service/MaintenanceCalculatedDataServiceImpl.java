@@ -326,7 +326,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        }
 
 	        List<String> innerHeaders = new ArrayList<>(Arrays.asList(
-	            "Month", "5F", "4f", "4F With Demo", "IBR/Coil Replacement", "Shutdown(TA)",
+	            "Month", "5F", "4F/5F+D", "4F With Demo", "IBR/Coil Replacement", "Shutdown(TA)",
 	            "Slowdown", "SAD", "BBU", "BBD", "Demo SAD", "Demo SD", "Demo BBU/BBD",
 	            "Demo HHS", "MNT", "Total", "No of Days", "No of SADs", "Remarks", "Id"
 	        ));
