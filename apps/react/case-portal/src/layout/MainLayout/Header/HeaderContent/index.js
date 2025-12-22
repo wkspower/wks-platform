@@ -355,6 +355,21 @@ export default function HeaderContent({ keycloak }) {
     }
   }
 
+  const verticalFromDashboard = useSelector(
+    (state) => state.dataGridStore.verticalChangeFromDashboard,
+  )
+
+  useEffect(() => {
+    if (verticalFromDashboard?.id) {
+      setSelectedVertical('')
+      handleVertChange({
+        target: {
+          value: verticalFromDashboard.id,
+        },
+      })
+    }
+  }, [verticalFromDashboard])
+
   return (
     <>
       <Box
