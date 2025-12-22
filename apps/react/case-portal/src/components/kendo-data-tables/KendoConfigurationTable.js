@@ -212,8 +212,7 @@ const ConfigurationTable = () => {
 
       if (
         lowerVertName == verticalEnums.MEG ||
-        lowerVertName == verticalEnums.CRACKER ||
-        lowerVertName == verticalEnums.ELASTOMER
+        lowerVertName == verticalEnums.CRACKER
       ) {
         data = data?.filter(
           (item) =>
@@ -1352,10 +1351,10 @@ const ConfigurationTable = () => {
               case getTheId('Configuration'):
                 return (
                   <SelectivityData
-                    rows={lowerVertName === 'elastomer' ? productionRows : configurationRows}
+                    rows={configurationRows}
                     loading={loading}
                     fetchData={fetchData}
-                    setRows={lowerVertName === 'elastomer' ? setProductionRows : setConfigurationRows}
+                    setRows={setConfigurationRows}
                     configType='Configuration'
                     groupBy='TypeDisplayName'
                     summary={debouncedSummary}
