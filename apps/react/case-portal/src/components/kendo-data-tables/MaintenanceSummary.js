@@ -76,7 +76,7 @@ export default function MaintenanceSummary() {
 
     let REPORT_CODE = ''
     if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
-      REPORT_CODE = 'maintenance-summary-pepp'
+      REPORT_CODE = 'maintenance-summary'
     } else {
       REPORT_CODE = 'maintenance-summary'
     }

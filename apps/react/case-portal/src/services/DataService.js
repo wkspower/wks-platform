@@ -1155,8 +1155,13 @@ async function saveCatalystData(
   turnAroundDetails,
   keycloak,
   AOP_YEAR,
+  isCalculationParam,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/production-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
+  var url = `${Config.CaseEngineUrl}/task/production-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
+
+  if (isCalculationParam) {
+    url = `${Config.CaseEngineUrl}/task/production-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}&calculation=true`
+  }
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -1561,8 +1566,18 @@ async function getTurnaroundReportData(keycloak, type, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function saveConfigurationExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+async function saveConfigurationExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  isCalculationParam,
+) {
+  var url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  if (isCalculationParam) {
+    url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}&calculation=true`
+  }
   const formData = new FormData()
   formData.append('file', file)
   const headers = {

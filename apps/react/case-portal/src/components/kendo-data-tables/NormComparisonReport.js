@@ -27,7 +27,7 @@ export default function NormComparisonReport() {
 
     let REPORT_CODE = ''
     if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
-      REPORT_CODE = 'norm-comparison-report-pepp'
+      REPORT_CODE = 'norm-comparison-report'
     } else {
       REPORT_CODE = 'norm-comparison-report'
     }

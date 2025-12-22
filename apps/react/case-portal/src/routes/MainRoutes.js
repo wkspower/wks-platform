@@ -63,6 +63,7 @@ import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenance
 import FeedStockAvailability from 'components/kendo-data-tables/FeedStockavailability'
 import TurnaroundPlanTable from 'components/kendo-data-tables/TurnaroundPlanTable'
 import NormComparisonReport from 'components/kendo-data-tables/NormComparisonReport'
+import AopDashboard from 'components/kendo-data-tables/AopDashboard'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -580,6 +581,15 @@ export const MainRoutes = (
         element: (
           <PrivateRoute routeId='plant-team'>
             <PlantTeam />
+          </PrivateRoute>
+        ),
+      },
+
+      {
+        path: 'aop-dashboard',
+        element: (
+          <PrivateRoute routeId='aop-dashboard'>
+            <AopDashboard />
           </PrivateRoute>
         ),
       },

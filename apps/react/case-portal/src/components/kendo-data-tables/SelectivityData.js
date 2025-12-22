@@ -297,6 +297,7 @@ const SelectivityData = (props) => {
           payload,
           keycloak,
           AOP_YEAR,
+          props?.isCalculationParam,
         )
       }
 
@@ -313,7 +314,7 @@ const SelectivityData = (props) => {
         saveSummary(props?.summary)
         props?.onSummaryEditChange(false)
 
-        if (props?.configType !== 'grades' && lowerVertName !== 'cracker') {
+        if (props?.configType !== 'grades') {
           props?.fetchData(gradeId)
         }
       } else {
@@ -701,6 +702,7 @@ const SelectivityData = (props) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          props?.isCalculationParam,
         )
       } else {
         response = await DataService.saveConfigurationExcelConstants(

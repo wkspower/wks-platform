@@ -687,6 +687,10 @@ const NormalOpNormsScreenCracker = () => {
           fetchAllDataNormsSelection(mapped[0]?.gradeId)
         } else {
           setGrades([])
+          setRowsExpression([])
+          setRows([])
+          setRowsExpression([])
+          setRowsBestAchivedIndividual([])
         }
       } catch (err) {
         console.error('Error fetching grades:', err)
@@ -774,13 +778,17 @@ const NormalOpNormsScreenCracker = () => {
 
   useEffect(() => {
     setSelectedTab(0)
+    setGrades([])
   }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
+    setGrades([])
+    setGradeId(null)
+
     if (selectedTab == 3) {
       fetchGrades('2')
     }
-  }, [selectedTab, keycloak, PLANT_ID, AOP_YEAR])
+  }, [selectedTab, keycloak, PLANT_ID, AOP_YEAR, fetchGrades])
 
   useEffect(() => {
     if (!gradeId && grades.length > 0) {
@@ -840,16 +848,19 @@ const NormalOpNormsScreenCracker = () => {
         setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
         return
       }
-      const requiredFields = ['remark']
-          const validationMessage = validateFields(rowsToSave, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            return
-          }
+
+      //REMARKS VALIDATION REMOVED
+
+      // const requiredFields = ['remark']
+      // const validationMessage = validateFields(rowsToSave, requiredFields)
+      // if (validationMessage) {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: validationMessage,
+      //     severity: 'error',
+      //   })
+      //   return
+      // }
       setLoading(true)
       try {
         const payload = mapGridRowToPayload(rowsToSave, savingAllMonthValues)
@@ -1163,6 +1174,8 @@ const NormalOpNormsScreenCracker = () => {
     [grades, handleGradeChange],
   )
 
+  const [summaryEdited, setSummaryEdited] = useState(false)
+
   // tabs
   const handleTabChange = useCallback(
     (_, newValue) => {
@@ -1225,6 +1238,8 @@ const NormalOpNormsScreenCracker = () => {
           tabIndex='0'
           setGradeId={handleGradeChange}
           reportTypes={reportTypes}
+          onSummaryEditChange={setSummaryEdited}
+          isCalculationParam='true'
         />
       )}
       {/* {selectedTab === 1 && (

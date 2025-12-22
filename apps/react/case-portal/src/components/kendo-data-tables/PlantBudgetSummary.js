@@ -29,7 +29,7 @@ export default function PlantBudgetSummary() {
 
     let REPORT_CODE = ''
     if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
-      REPORT_CODE = 'plant-budget-summary-pepp'
+      REPORT_CODE = 'plant-budget-summary'
     } else {
       REPORT_CODE = 'plant-budget-summary'
     }

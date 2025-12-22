@@ -1,0 +1,65 @@
+/* -------- Dashboard Header -------- */
+.dashboard-header {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: rgb(0 42 100);
+  width: 100%;
+  background-color: rgb(177 189 214);
+  padding: 8px 8px;
+  border-left: 4px solid rgb(1 0 203);
+  box-sizing: border-box;
+}
+
+/* -------- Layout -------- */
+.dashboard-container {
+  padding: 2px;
+}
+
+.plant-section {
+  margin-bottom: 24px;
+}
+
+.plant-title {
+  font-weight: 600;
+  /* margin-bottom: 8px; */
+  color: #1f2937;
+}
+
+.chip-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chip-item {
+  /* width: 150px; */
+}
+
+.chip-label {
+  font-size: 12px;
+  /* margin-bottom: 4px; */
+  color: #374151;
+}
+
+/* -------- Chip Status Colors -------- */
+.chip-development {
+  background-color: #e0e0e0 !important;
+  color: #000 !important;
+}
+
+.chip-pre-uat {
+  background-color: #ffb74d !important;
+  color: #000 !important;
+}
+
+.chip-uat {
+  background-color: #64b5f6 !important;
+  color: #000 !important;
+}
+
+.chip-go-live {
+  background-color: #2e7d32 !important;
+  color: #fff !important;
+}

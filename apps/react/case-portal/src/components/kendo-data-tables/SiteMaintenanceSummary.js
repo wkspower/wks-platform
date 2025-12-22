@@ -28,7 +28,7 @@ export default function SiteMaintenanceSummary() {
 
     let REPORT_CODE = ''
     if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
-      REPORT_CODE = 'site-maintenance-summary-pepp'
+      REPORT_CODE = 'site-maintenance-summary'
     } else {
       REPORT_CODE = 'site-maintenance-summary'
     }

@@ -428,7 +428,7 @@ export default function RelPerf() {
       editable: false,
       type: 'number',
     },
-    { field: 'parameter', title: 'Parameter', editable: true },
+    { field: 'parameter', title: 'Parameter', editable: false },
     { field: 'uom', title: 'UOM', editable: false, widthT: 70 },
     {
       field: 'bestAchieved',

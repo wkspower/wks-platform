@@ -170,14 +170,14 @@ const ProductionTarget = ({ permissions }) => {
         })
         setModifiedCells({})
 
-        const responseForNorms =
-          await DataService.calculateNormsHistorianValues(
-            PLANT_ID,
-            AOP_YEAR,
-            startDate,
-            endDate,
-            keycloak,
-          )
+        // wait for this also before stopping loader
+        await DataService.calculateNormsHistorianValues(
+          PLANT_ID,
+          AOP_YEAR,
+          startDate,
+          endDate,
+          keycloak,
+        )
 
         setLoading(false)
       } else {
@@ -1009,15 +1009,14 @@ const ProductionTarget = ({ permissions }) => {
         })
         setModifiedCells({})
 
-        const responseForNorms =
-          await DataService.calculateNormsHistorianValues(
-            PLANT_ID,
-            AOP_YEAR,
-            startDate,
-            endDate,
-            keycloak,
-          )
-
+        // wait for this also before stopping loader
+        await DataService.calculateNormsHistorianValues(
+          PLANT_ID,
+          AOP_YEAR,
+          startDate,
+          endDate,
+          keycloak,
+        )
         setLoading(false)
 
         // setLoading(false)
