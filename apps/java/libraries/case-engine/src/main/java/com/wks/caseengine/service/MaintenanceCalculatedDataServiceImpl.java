@@ -420,7 +420,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    double sumFiveF = 0;
 	    double sumTotal = 0;
 	    double sumTotalSAD = 0;
-	    double sumNumberOfDays = 0;
+	    int sumNumberOfDays = 0;
 	    double sumDemoHHS=0;
 
 	    for (Object[] row : results) {
@@ -451,7 +451,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        dto.setTotal(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0);
 	        dto.setFourFHours(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0);
 	        dto.setTotalSAD(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
-	        dto.setNumberOfDays(row[22] != null ? Double.parseDouble(row[22].toString()) : 0.0);
+	        dto.setNumberOfDays(row[22] != null ? Integer.parseInt(row[22].toString()) : 0);
 
 	        // Accumulate totals
 	        sumCoilReplacement += dto.getCoilReplacement();
@@ -574,6 +574,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 					decokeMaintenance.setSlowdown(decokePlanningDTO.getSlowdown());
 					decokeMaintenance.setTotal(decokePlanningDTO.getTotal());
 					decokeMaintenance.setCoilReplacement(decokePlanningDTO.getCoilReplacement());
+					decokeMaintenance.setNumberOfDays(decokePlanningDTO.getNumberOfDays());
+					decokeMaintenance.setTotalSAD(decokePlanningDTO.getTotalSAD());
 					decokeMaintenanceList.add(decokeMaintenanceRepository.save(decokeMaintenance));
 				}
 			}
@@ -663,7 +665,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 					dto.setDemoHSS(getNumericCellValue(row.getCell(13), dto));
 					dto.setMnt(getNumericCellValue(row.getCell(14), dto));
 					dto.setTotal(getNumericCellValue(row.getCell(15), dto));
-					dto.setNumberOfDays(getNumericCellValue(row.getCell(16), dto));
+					dto.setNumberOfDays(getIntegerCellValue(row.getCell(16), dto));
 					dto.setTotalSAD(getNumericCellValue(row.getCell(17), dto));
 					dto.setRemarks(getStringCellValue(row.getCell(18), dto));
 					
@@ -1179,6 +1181,26 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			}
 		}
 		return null;
+	}
+	
+	private static Integer getIntegerCellValue(Cell cell, DecokePlanningDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+	    
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return (int) cell.getNumericCellValue(); 
+	    } else if (cell.getCellType() == CellType.STRING) {
+	        try {
+	            String val = cell.getStringCellValue().trim();
+	            return val.isEmpty() ? null : Integer.parseInt(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	            return null;
+	        }
+	    }
+	    return null;
 	}
 
 	public static Boolean getBooleanCellValue(Cell cell) {

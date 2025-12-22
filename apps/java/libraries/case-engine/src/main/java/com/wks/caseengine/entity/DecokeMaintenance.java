@@ -85,5 +85,10 @@ public class DecokeMaintenance {
     @Column(name = "CoilReplacement")
     private Double coilReplacement;
     
+    @Column(name = "TotalSAD")
+    private Double totalSAD;
+    
+    @Column(name = "NumberOfDays")
+    private Integer numberOfDays;
     
 }
