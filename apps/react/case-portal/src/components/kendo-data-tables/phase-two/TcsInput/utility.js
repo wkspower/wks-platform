@@ -144,9 +144,7 @@ export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
       ]
     case 'CPP Units SD Plan':
       return [
-        {
-          title: "CPP Shutdown plan January'25 - March'26",
-          children: [
+       
             {
               field: 'Particulars',
               title: 'JMD-CPP',
@@ -203,8 +201,6 @@ export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
               editable: true,
               type: 'text',
             },
-          ],
-        },
       ]
     case 'PCG Outlook':
       return [
@@ -251,9 +247,7 @@ export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
       ]
     case 'Crude Blend Window':
       return [
-        {
-          title: 'Crude Blend Window',
-          children: [
+      
             {
               field: 'property',
               title: 'Property',
@@ -276,9 +270,7 @@ export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
               width: 400,
               editable: true,
             },
-          ],
-        },
-      ]
+          ]
     default:
       return []
   }

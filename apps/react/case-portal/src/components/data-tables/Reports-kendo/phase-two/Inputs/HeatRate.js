@@ -6,10 +6,11 @@ import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { dummyDataForHeatRate } from '../nestedDummyData'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
+import { MenuItem, TextField } from '../../../../../../node_modules/@mui/material/index'
 
 const HeatRate = () => {
   const keycloak = useSession()
-  
+
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -29,7 +30,7 @@ const HeatRate = () => {
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
   const valueFormat = ValueFormatterProduction()
-  
+
   const columns = [
     {
       field: 'equipType',
@@ -73,24 +74,30 @@ const HeatRate = () => {
       minWidth: 100,
     },
   ]
-  
+
   const [rows, setRows] = useState([])
+  const [selectedPlant, setSelectedPlant] = useState('')
 
   useEffect(() => {
-    if (PLANT_ID) {
-      setRows(dummyDataForHeatRate)
+    if (PLANT_ID && selectedPlant) {
+      if(selectedPlant=='NMD-Power Plant-1'){
+        setRows(dummyDataForHeatRate)
+      }
+      else{
+       setRows([])
+      }
     }
-  }, [PLANT_ID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR,selectedPlant])
 
   const fetchHeatRateData = async () => {
     setLoading(true)
-    try {        
+    try {
       const res = await UtilityPlantApiServiceV2.getNormBasedUtilityBudget(
         keycloak,
         PLANT_ID,
-        AOP_YEAR
+        AOP_YEAR,
       )
-      
+
       if (res?.data?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
@@ -98,7 +105,7 @@ const HeatRate = () => {
         return
       }
       console.log('res', res)
-      setRows(res?.data) 
+      setRows(res?.data)
       setSnackbarOpen(true)
     } catch (error) {
       console.error('Error fetching heat rate data:', error)
@@ -136,14 +143,14 @@ const HeatRate = () => {
       setLoading(false)
       return
     }
-    
+
     try {
       const payload = modifiedData.map((item) => {
         const { inEdit, ...rest } = item
         return rest
       })
       const tempPayload = JSON.stringify(payload)
-      
+
       console.log('payload', tempPayload)
 
       setModifiedCells({})
@@ -172,6 +179,39 @@ const HeatRate = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
+
+      <TextField
+        select
+        value={selectedPlant || ''}
+        onChange={(e) => {
+          const selectedPlantId = e.target.value
+          // const selectedGradeObj = grades.find(
+          //   (g) => g.gradeId === selectedGradeId,
+          // )
+          setSelectedPlant(selectedPlantId)
+        }}
+        className='dropdown-select'
+        variant='outlined'
+        label='Select'
+        InputLabelProps={{
+          shrink: true,
+          sx: {
+            fontWeight: 'bold',
+          },
+        }}
+      >
+        <MenuItem value='' disabled>
+          Select
+        </MenuItem>
+
+        {['NMD-Power Plant-1', 'NMD-Power Plant-2', 'NMD-Power Plant-3']?.map(
+          (plant) => (
+            <MenuItem key={plant} value={plant}>
+              {plant}
+            </MenuItem>
+          ),
+        )}
+      </TextField>
       <AdvanceKendoTable
         columns={columns}
         rows={rows}

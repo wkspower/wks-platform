@@ -79,68 +79,85 @@ public class PowerGenerationService {
         return response;
     }
 
-    public void setAssetOperationalHours( String financialYear, List<AssetOperationalResponseDTO> payload) {
-         
-            int startYear = Integer.parseInt(financialYear.substring(0, 4));
+    public void setAssetOperationalHours(String financialYear, List<AssetOperationalResponseDTO> payload) {
+        int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
+        
+        // Fetch all financial month IDs in a single query
+        Map<Integer, UUID> financialMonthIds = new LinkedHashMap<>();
+        List<Object[]> fyMonths = financialYearMonthRepo.findFinancialYearMonths(startYear, endYear);
+        for (Object[] row : fyMonths) {
+            Integer month = (Integer) row[0];
+            UUID id = UUID.fromString((String) row[1]);
+            financialMonthIds.put(month, id);
+        }
 
+        // Validate all data first before any database operations (fail-fast)
         for (AssetOperationalResponseDTO asset : payload) {
-
-            saveMonth(asset, asset.getApril(), startYear, 4);
-            saveMonth(asset, asset.getMay(), startYear, 5);
-            saveMonth(asset, asset.getJune(), startYear, 6);
-            saveMonth(asset, asset.getJuly(), startYear, 7);
-            saveMonth(asset, asset.getAug(), startYear, 8);
-            saveMonth(asset, asset.getSep(), startYear, 9);
-            saveMonth(asset, asset.getOct(), startYear, 10);
-            saveMonth(asset, asset.getNov(), startYear, 11);
-            saveMonth(asset, asset.getDec(), startYear, 12);
-
-            saveMonth(asset, asset.getJan(), endYear, 1);
-            saveMonth(asset, asset.getFeb(), endYear, 2);
-            saveMonth(asset, asset.getMarch(), endYear, 3);
-
-    }
-}
-
-
-  private void saveMonth(
-            AssetOperationalResponseDTO asset,
-            MonthlyHoursDTO dto,
-            int year,
-            int month) {
-
-        if (dto == null) return;
-
-        validateMonth(asset.getAssetName(), dto, year, month);
-
-        UUID financialMonthId = financialYearMonthRepo
-                .findFinancialMonthId(year, month);
-
-        if (financialMonthId == null) {
-            throw new IllegalArgumentException(
-                "FinancialYearMonth not found for " + year + "-" + month
-            );
+            Map<Integer, MonthlyHoursDTO> monthlyData = buildAssetMonthlyData(asset);
+            for (Map.Entry<Integer, MonthlyHoursDTO> entry : monthlyData.entrySet()) {
+                Integer month = entry.getKey();
+                MonthlyHoursDTO dto = entry.getValue();
+                int year = month <= 3 ? endYear : startYear;
+                
+                if (dto != null) {
+                    validateMonth(asset.getAssetName(), dto, year, month);
+                }
+            }
         }
 
-        int updated = repository.updateOperationalHours(
-                asset.getAssetId(),
-                financialMonthId,
-                dto.getNetOperationHrs()
-        );
-
-        if (updated == 0) {
-            System.out.println(" Inserting operational hours for asset " + asset.getAssetName() + " for " + year + "-" + month);
-            repository.insertOperationalHours(
-                    asset.getAssetId(),
-                    financialMonthId,
-                    dto.getNetOperationHrs()
-            );
+        // Execute UPSERT operations for all assets and months
+        // This uses MERGE statement (single operation per record - no check-then-act)
+        for (AssetOperationalResponseDTO asset : payload) {
+            Map<Integer, MonthlyHoursDTO> monthlyData = buildAssetMonthlyData(asset);
+            
+            for (Map.Entry<Integer, MonthlyHoursDTO> entry : monthlyData.entrySet()) {
+                Integer month = entry.getKey();
+                MonthlyHoursDTO dto = entry.getValue();
+                
+                if (dto != null) {
+                    UUID financialMonthId = financialMonthIds.get(month);
+                    if (financialMonthId == null) {
+                        int year = month <= 3 ? endYear : startYear;
+                        throw new IllegalArgumentException(
+                            "FinancialYearMonth id must be provided for " + year + "-" + month
+                        );
+                    }
+                    
+                    // Use MERGE UPSERT - no longer check-then-act pattern
+                    repository.upsertOperationalHours(
+                        asset.getAssetId(),
+                        financialMonthId,
+                        dto.getNetOperationHrs()
+                    );
+                }
+            }
         }
     }
 
+    /**
+     * Builds a map of all monthly operational data for an asset.
+     * This consolidates the month mapping logic.
+     */
+    private Map<Integer, MonthlyHoursDTO> buildAssetMonthlyData(AssetOperationalResponseDTO asset) {
+        Map<Integer, MonthlyHoursDTO> monthMap = new LinkedHashMap<>();
+        monthMap.put(4, asset.getApril());
+        monthMap.put(5, asset.getMay());
+        monthMap.put(6, asset.getJune());
+        monthMap.put(7, asset.getJuly());
+        monthMap.put(8, asset.getAug());
+        monthMap.put(9, asset.getSep());
+        monthMap.put(10, asset.getOct());
+        monthMap.put(11, asset.getNov());
+        monthMap.put(12, asset.getDec());
+        monthMap.put(1, asset.getJan());
+        monthMap.put(2, asset.getFeb());
+        monthMap.put(3, asset.getMarch());
+        return monthMap;
+    }
 
-      private void validateMonth(
+
+    private void validateMonth(
             String assetName,
             MonthlyHoursDTO dto,
             int year,
@@ -177,3 +194,4 @@ public class PowerGenerationService {
         return new MonthlyHoursDTO(operationalHours, shutdownHours);
     }
 }
+

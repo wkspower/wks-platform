@@ -8,6 +8,7 @@ import UnitCapacity from './UnitCapacity'
 import DefaultTcsInput from './DefaultTcsInput'
 import { generateMockData, getColumnsForTab } from './utility'
 import Shutdown from './Shutdown'
+import Slowdown from './Slowdown'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -17,6 +18,7 @@ const renderTabComponent = (tabDisplayName, props) => {
     case 'Shutdown':
       return <Shutdown {...props} />
     case 'Slowdown':
+      return <Slowdown {...props} />
     case 'CPP Units SD Plan':
     case 'PCG Outlook':
     case 'ROGC':

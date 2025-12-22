@@ -8,6 +8,7 @@ import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPla
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
+import { InputApiService } from 'services/phase-two-services/inputApiService'
 
 const dummyRowsData = [
   {
@@ -400,25 +401,26 @@ const AssetCapacity = () => {
 
   useEffect(() => {
     if (AOP_YEAR) {
-      //   fetchAssetCapacityData(keycloak, AOP_YEAR)
-      setRows(dummyRowsData)
+        fetchAssetCapacityData(keycloak, AOP_YEAR)
+      // setRows(dummyRowsData)
     }
   }, [AOP_YEAR])
 
   const fetchAssetCapacityData = async (keycloak, AOP_YEAR) => {
     setLoading(true)
     try {
-      const res = await UtilityPlantApiServiceV2.getAssetCapacityData(
+      const res = await InputApiService.getAssetCapacity(
         keycloak,
+        PLANT_ID,
         AOP_YEAR,
       )
-      if (res?.data?.length === 0) {
+      if (res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      let tempRes = res?.data.map((item, index) => {
+      let tempRes = res?.map((item, index) => {
         return { ...item, id: index + 1 }
       })
       setRows(tempRes)
@@ -433,7 +435,7 @@ const AssetCapacity = () => {
 
   const permissions = {
     showAction: true,
-    addButton: false,
+    addButton: true,
     deleteButton: false,
     editButton: true,
     saveBtn: true,
@@ -462,9 +464,10 @@ const AssetCapacity = () => {
     try {
       console.log('payload', payload)
 
-      const response = await UtilityPlantApiServiceV2.saveAssetCapacityData(
+      const response = await InputApiService.saveAssetCapacity(
         keycloak,
         PLANT_ID,
+        AOP_YEAR,
         payload,
       )
 

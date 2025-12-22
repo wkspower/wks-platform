@@ -26,4 +26,16 @@ public interface FinancialYearMonthRepository extends JpaRepository<FinancialYea
             @Param("year") int year,
             @Param("month") int month
     );
+
+    @Query(value = """
+        SELECT Month, Id from FinancialYearMonth
+        WHERE Year = :startYear and Month between 4 and 12 or 
+              Year = :endYear and Month between 1 and 3  """
+        , nativeQuery = true)
+          List<Object[]> findFinancialYearMonths(
+            @Param("startYear") int startYear,
+            @Param("endYear") int endYear
+    );
+
+
 }

@@ -1,6 +1,7 @@
 package com.wks.caseengine.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -52,4 +53,44 @@ public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Lo
             @Param("financialMonthId") UUID financialMonthId,
             @Param("hours") Double hours
     );
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+        MERGE OperationalHours AS target
+        USING (SELECT :assetId AS Asset_FK_Id, :financialMonthId AS FinancialMonthId) AS source
+        ON target.Asset_FK_Id = source.Asset_FK_Id
+           AND target.FinancialMonthId = source.FinancialMonthId
+        WHEN MATCHED THEN
+            UPDATE SET OperationalHours = :hours
+        WHEN NOT MATCHED THEN
+            INSERT (Id, Asset_FK_Id, FinancialMonthId, OperationalHours)
+            VALUES (NEWID(), :assetId, :financialMonthId, :hours);
+        """, nativeQuery = true)
+    void upsertOperationalHours(
+            @Param("assetId") UUID assetId,
+            @Param("financialMonthId") UUID financialMonthId,
+            @Param("hours") Double hours
+    );
+
+    // @Modifying
+    // @Transactional
+    // @Query(value = """
+    //     DECLARE @TempData TABLE (Asset_FK_Id UNIQUEIDENTIFIER, FinancialMonthId UNIQUEIDENTIFIER, OperationalHours FLOAT)
+    //     INSERT INTO @TempData VALUES :dataList;
+        
+    //     MERGE OperationalHours AS target
+    //     USING @TempData AS source
+    //     ON target.Asset_FK_Id = source.Asset_FK_Id
+    //        AND target.FinancialMonthId = source.FinancialMonthId
+    //     WHEN MATCHED THEN
+    //         UPDATE SET OperationalHours = source.OperationalHours
+    //     WHEN NOT MATCHED THEN
+    //         INSERT (Id, Asset_FK_Id, FinancialMonthId, OperationalHours)
+    //         VALUES (NEWID(), source.Asset_FK_Id, source.FinancialMonthId, source.OperationalHours);
+    //     """, nativeQuery = true)
+    // int batchUpsertOperationalHours(
+    //         @Param("dataList") List<Object[]> dataList
+    // );
+
 }
