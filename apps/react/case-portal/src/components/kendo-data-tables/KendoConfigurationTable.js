@@ -1352,10 +1352,10 @@ const ConfigurationTable = () => {
               case getTheId('Configuration'):
                 return (
                   <SelectivityData
-                    rows={configurationRows}
+                    rows={lowerVertName === 'elastomer' ? productionRows : configurationRows}
                     loading={loading}
                     fetchData={fetchData}
-                    setRows={setConfigurationRows}
+                    setRows={lowerVertName === 'elastomer' ? setProductionRows : setConfigurationRows}
                     configType='Configuration'
                     groupBy='TypeDisplayName'
                     summary={debouncedSummary}
