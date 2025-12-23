@@ -1,5 +1,7 @@
 package com.wks.caseengine.dto;
 
+import java.util.Date;
+
 import org.springframework.context.annotation.Configuration;
 
 import lombok.AllArgsConstructor;
@@ -56,6 +58,9 @@ public class AOPProposedNormsDTO {
     private Double	currYearProposedMarch;
     private String remarks;
     private String gradeId;
-    private String plantId; private String	aopYear;
+    private String plantId; 
+    private String	aopYear;
     private String modifiedBy;
+    private Date modifiedOn;
+    private Boolean isEditable;
 }

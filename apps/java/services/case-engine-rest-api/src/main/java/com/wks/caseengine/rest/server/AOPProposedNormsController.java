@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.CalculatedConsumptionNormsDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.dto.AOPConsumptionNormDTO;
+import com.wks.caseengine.dto.AOPProposedNormsDTO;
 import com.wks.caseengine.service.AOPConsumptionNormService;
 import com.wks.caseengine.service.AOPDashboardService;
 import com.wks.caseengine.service.AOPProposedNormsService;
@@ -33,6 +34,11 @@ public class AOPProposedNormsController {
 	@GetMapping(value="/proposed-consumption")
 	public AOPMessageVM getProposedNorms(@RequestParam String year,@RequestParam String plantId,@RequestParam String gradeId){
 		return aopProposedNormsService.getProposedNorms(year,plantId,gradeId);
+	}
+	
+	@PostMapping(value="/proposed-consumption")
+	public AOPMessageVM updateProposedNorms(@RequestParam String year,@RequestParam String plantId,@RequestBody List<AOPProposedNormsDTO> aopProposedNormsDTO){
+		return aopProposedNormsService.updateProposedNorms(year,plantId,aopProposedNormsDTO);
 	}
 	
 }
