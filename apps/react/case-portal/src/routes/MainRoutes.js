@@ -80,14 +80,14 @@ export const MainRoutes = (
     children: [
       {
         path: '/',
-        element: <Navigate to='/production-norms-plan/configuration' />,
+        element: <Navigate to='/home' />,
       },
 
       {
         path: 'home',
         element: (
           <PrivateRoute routeId='home'>
-            <DashboardDefault />
+            <AopDashboard />
           </PrivateRoute>
         ),
       },
@@ -586,11 +586,11 @@ export const MainRoutes = (
       },
 
       {
-        path: 'aop-dashboard',
+        path: 'dashboard',
         element: (
-          <PrivateRoute routeId='aop-dashboard'>
-            <AopDashboard />
-          </PrivateRoute>
+          // <PrivateRoute routeId='dashboard'>
+          <AopDashboard />
+          // </PrivateRoute>
         ),
       },
 

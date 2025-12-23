@@ -52,6 +52,25 @@ const useFilteredMenu = () => {
     breadcrumbs: false,
   }
 
+  const dashboardRoute = {
+    children: [
+      {
+        id: 'dashboard',
+        title: i18n.t('menu.dashboard'),
+        type: 'item',
+        url: '/dashboard',
+        icon: IconUserCog,
+        breadcrumbs: true,
+      },
+    ],
+    id: 'utilities',
+    title: '',
+    type: 'group',
+    url: '',
+    icon: undefined,
+    breadcrumbs: false,
+  }
+
   const filteredMenu = useMemo(() => {
     const filteredMenuItem = filterMenuByRole(menuItems || [])
     const updatedMenu = isPlantManager

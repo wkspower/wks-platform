@@ -4,6 +4,30 @@ import { useDispatch } from 'react-redux'
 import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
 import '../../dashboard.css'
 
+import { Box } from '@mui/material'
+import Backdrop from '@mui/material/Backdrop'
+import CircularProgress from '@mui/material/CircularProgress'
+import Typography from '@mui/material/Typography'
+import { useGridApiRef } from '@mui/x-data-grid'
+import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
+import { useSession } from 'SessionStoreContext'
+import {
+  CustomAccordion,
+  CustomAccordionDetails,
+  CustomAccordionSummary,
+} from 'utils/CustomAccrodian'
+import { validateFields } from 'utils/validationUtils'
+import KendoDataTables from './index'
+import ProductionvolumeData from './ProductionVoluemData'
+import PropaneBusiness from 'components/kendo-data-tables/PropaneBusiness'
+import { getRoleName } from 'services/role-service'
+
+import { useNavigate } from 'react-router-dom'
+
 /* ---------------- DATA ---------------- */
 
 const ID_MAP = {
@@ -112,6 +136,95 @@ const getStatusStyle = (status) => {
 
 const AopDashboard = () => {
   const dispatch = useDispatch()
+  const keycloak = useSession()
+
+  const [open1, setOpen1] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
+
+  const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
+  const IS_PTA_VERTICAL = lowerVertName === 'pta'
+  const IS_PET_VERTICAL = lowerVertName === 'pet'
+
+  const SCREEN_NAME = screenTitle?.title
+  const apiRef = useGridApiRef()
+  const [rows, setRows] = useState()
+  const headerMap = generateHeaderNames(AOP_YEAR)
+  const [snackbarData, setSnackbarData] = useState({
+    message: '',
+    severity: 'info',
+  })
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  const unsavedChangesRef = React.useRef({
+    unsavedRows: {},
+    rowsBeforeChange: {},
+  })
+
+  const navigate = useNavigate()
+
+  const handleChipClick = (id) => {
+    // console.log(id)
+
+    dispatch(
+      setVerticalChangeFromDashboard({
+        id,
+        trigger: Date.now(),
+      }),
+    )
+
+    // navigate('/production-norms-plan/configuration')
+  }
+
+  const fetchData = async () => {
+    if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+    setLoading(true)
+    try {
+      var data = await BusinessDemandDataApiService.getDashboardData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      // console.log(data)
+
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak])
+
   return (
     <div className='dashboard-container'>
       <h6 className='dashboard-header'>Digital AOP Dashboard</h6>
@@ -127,13 +240,7 @@ const AopDashboard = () => {
 
                 <Chip
                   text={row.status}
-                  onClick={() => {
-                    dispatch(
-                      setVerticalChangeFromDashboard({
-                        id: row.id,
-                      }),
-                    )
-                  }}
+                  onClick={() => handleChipClick(row.id)}
                   style={{
                     ...getStatusStyle(row.status),
                     width: '100%',

@@ -16,7 +16,14 @@ import { setScreenTitle } from 'store/reducers/dataGridStore'
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
 import StepperNav from 'components/Utilities/StepperNav'
-import { Box, Skeleton } from '../../../node_modules/@mui/material/index'
+import { useNavigate } from 'react-router-dom'
+
+import {
+  Box,
+  Button,
+  Skeleton,
+} from '../../../node_modules/@mui/material/index'
+import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -25,6 +32,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     dataGridStore
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
 
   const PLANT_ID = plantObject?.id
@@ -187,22 +195,28 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
   let mainContent
   let itemContent
+  let itemContentDashboard
   let breadcrumbContent = <Typography />
   let itemTitle = ''
 
-  // collapse item
-  // if (main && main.type === 'collapse') {
-  //   mainContent = (
-  //     // <Typography component={Link} to={document.location.pathname} variant="h6" sx={{ textDecoration: 'none' }} color="textSecondary">
-  //     <Typography
-  //       variant='h6'
-  //       sx={{ textDecoration: 'none' }}
-  //       color='textSecondary'
-  //     >
-  //       {main.title}
-  //     </Typography>
-  //   )
-  // }
+  itemContentDashboard = (
+    <Button
+      variant='outlined'
+      size='small'
+      className='btn-dashboard'
+      disableRipple
+      onClick={() => {
+        // dispatch(
+        //   setVerticalChangeFromDashboard({
+        //     id: '21F54684-3AB2-43C8-8459-D1A7C8F158F0',
+        //   }),
+        // )
+        navigate('/dashboard')
+      }}
+    >
+      Go to Dashboard
+    </Button>
+  )
 
   // items
   if (item && item.type === 'item') {
@@ -243,6 +257,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
           <Tooltip title={`Basis`}>
             <IconButton
               size='small'
+              disableRipple
               sx={{
                 backgroundColor: 'transparent',
                 '&:hover': {
@@ -298,7 +313,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     if (
       item.breadcrumbs !== false &&
       location?.pathname !== '/user-management' &&
-      location?.pathname !== '/user-form'
+      location?.pathname !== '/user-form' &&
+      location?.pathname !== '/dashboard'
     ) {
       breadcrumbContent = (
         <MainCard
@@ -353,9 +369,9 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
             <Grid
               container
-              sx={{ mt: 1, ml: 1 }}
-              justifyContent='space-between'
+              sx={{ mt: 1, px: 1, width: '100%' }}
               alignItems='center'
+              wrap='nowrap'
             >
               <Grid item>
                 {loading ? (
@@ -364,7 +380,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     width={100}
                     height={30}
                     animation='wave'
-                    sx={{ mt: 0.5 }}
+                    sx={{ mt: 0.5, mb: 1 }}
                   />
                 ) : (
                   <Typography
@@ -384,9 +400,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     {itemContent}
                   </Typography>
                 )}
-              </Grid>
 
-              {/* <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
+                {/* <Stack spacing={0.5} sx={{ alignItems: 'center' }}>
                 <Grid item>
                   <Chip
                     color='primary'
@@ -397,6 +412,10 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                   />
                 </Grid>
               </Stack> */}
+              </Grid>
+              {/* SPACER (THIS IS THE KEY) */}
+              <Box sx={{ flexGrow: 1 }} />
+              <Grid item>{itemContentDashboard}</Grid>{' '}
             </Grid>
 
             {/* HIDE THE TITLE NAME */}
