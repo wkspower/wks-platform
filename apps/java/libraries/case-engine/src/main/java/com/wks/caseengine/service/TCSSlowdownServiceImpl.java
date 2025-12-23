@@ -63,6 +63,7 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
         Map<String, Object> map = new HashMap<>();
         try {
             DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             List<Object[]> results = getData(
                 plantId,
                 aopYear,
@@ -74,11 +75,13 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
                 TCSSlowdownDTO dto = new TCSSlowdownDTO();
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                dto.setTentativeDurationInDays(row[2] != null ? Integer.parseInt(row[2].toString()) : null);
-                dto.setThroughputDuringSlowdown(row[3] != null ? row[3].toString() : null);
-                dto.setTentativeMonth(row[4] != null ? row[4].toString() : null);
-                dto.setPurposeOfSlowdown(row[5] != null ? row[5].toString() : null);
-                dto.setInsertedDateTime(row[6] != null ? dateFormatter.parse(row[6].toString()) : null);
+                dto.setDurationInDays(row[2] != null ? Integer.parseInt(row[2].toString()) : null);
+                dto.setThroughputDuringSlowdown(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
+                dto.setThroughputUOM(row[4] != null ? row[4].toString() : null);
+                dto.setStartDate(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
+                dto.setEndDate(row[6] != null ? dateFormatter.parse(row[6].toString()) : null);
+                dto.setPurpose(row[7] != null ? row[7].toString() : null);
+                dto.setInsertedDateTime(row[8] != null ? dateTimeFormatter.parse(row[8].toString()) : null);
                 resultsList.add(dto);
             }
             map.put("results", resultsList);
@@ -206,19 +209,23 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
                     }
                 }
 
-                if (dto.getTentativeDurationInDays() == null || dto.getTentativeDurationInDays() <= 0) {
+                if (dto.getDurationInDays() == null || dto.getDurationInDays() <= 0) {
                     throw new RestInvalidArgumentException("Tentative Duration (Days) must be greater than 0", null);
                 }
 
-                if (dto.getThroughputDuringSlowdown() == null || dto.getThroughputDuringSlowdown().isBlank()) {
+                if (dto.getThroughputDuringSlowdown() == null || dto.getThroughputDuringSlowdown() < 0) {
                     throw new RestInvalidArgumentException("Throughput during Slowdown is required", null);
                 }
 
-                if (dto.getTentativeMonth() == null || dto.getTentativeMonth().isBlank()) {
-                    throw new RestInvalidArgumentException("Tentative Month is required", null);
+                if (dto.getThroughputUOM() == null || dto.getThroughputUOM().isBlank()) {
+                    throw new RestInvalidArgumentException("Throughput UoM is required", null);
                 }
 
-                if (dto.getPurposeOfSlowdown() == null || dto.getPurposeOfSlowdown().isBlank()) {
+                if (dto.getStartDate() == null) {
+                    throw new RestInvalidArgumentException("Start Date is required", null);
+                }
+
+                if (dto.getPurpose() == null || dto.getPurpose().isBlank()) {
                     throw new RestInvalidArgumentException("Purpose of Slowdown is required", null);
                 }
                
@@ -234,10 +241,11 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
                 }
                 entity.setPlantFkId(UUID.fromString(plantId));
                 entity.setAopYear(year);
-                entity.setTentativeDurationInDays(dto.getTentativeDurationInDays());
+                entity.setTentativeDurationInDays(dto.getDurationInDays());
                 entity.setThroughputDuringSlowdown(dto.getThroughputDuringSlowdown());
-                entity.setTentativeMonth(dto.getTentativeMonth());
-                entity.setPurposeOfSlowdown(dto.getPurposeOfSlowdown());
+                entity.setThroughputUOM(dto.getThroughputUOM());
+                entity.setStartDate(dto.getStartDate());
+                entity.setPurpose(dto.getPurpose());
 
                 tcsSlowdownRepository.save(entity);
                 savedList.add(entity);
@@ -258,10 +266,11 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
     private TCSSlowdownDTO toDTO(TCSSlowdown entity) {
         return TCSSlowdownDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
-            .tentativeDurationInDays(entity.getTentativeDurationInDays())
+            .durationInDays(entity.getTentativeDurationInDays())
             .throughputDuringSlowdown(entity.getThroughputDuringSlowdown())
-            .tentativeMonth(entity.getTentativeMonth())
-            .purposeOfSlowdown(entity.getPurposeOfSlowdown())
+            .throughputUOM(entity.getThroughputUOM())
+            .startDate(entity.getStartDate())
+            .purpose(entity.getPurpose())
             .build();
     }
 }

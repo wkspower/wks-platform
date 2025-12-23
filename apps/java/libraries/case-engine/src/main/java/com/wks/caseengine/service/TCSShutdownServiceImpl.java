@@ -62,6 +62,7 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
         Map<String, Object> map = new HashMap<>();
         try {
             DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+            DateFormat dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             List<Object[]> results = getData(
                 plantId,
                 aopYear,
@@ -73,10 +74,11 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
                 TCSShutdownDTO dto = new TCSShutdownDTO();
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                dto.setSdTotalDurationInDays(row[2] != null ? Integer.parseInt(row[2].toString()) : null);
-                dto.setTentativeMonth(row[3] != null ? row[3].toString() : null);
-                dto.setPurposeOfShutdown(row[4] != null ? row[4].toString() : null);
-                dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
+                dto.setDurationInDays(row[2] != null ? Integer.parseInt(row[2].toString()) : null);
+                dto.setStartDate(row[3] != null ? dateFormatter.parse(row[3].toString()) : null);
+                dto.setEndDate(row[4] != null ? dateFormatter.parse(row[4].toString()) : null);
+                dto.setPurpose(row[5] != null ? row[5].toString() : null);
+                dto.setInsertedDateTime(row[6] != null ? dateTimeFormatter.parse(row[6].toString()) : null);
                 resultsList.add(dto);
             }
             map.put("results", resultsList);
@@ -204,15 +206,15 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
                     }
                 }
 
-                if (dto.getTentativeMonth() == null || dto.getTentativeMonth().isBlank()) {
-                    throw new RestInvalidArgumentException("Tentative Month is required", null);
+                if (dto.getStartDate() == null) {
+                    throw new RestInvalidArgumentException("Start Date is required", null);
                 }
 
-                if (dto.getSdTotalDurationInDays() == null || dto.getSdTotalDurationInDays() <= 0) {
+                if (dto.getDurationInDays() == null || dto.getDurationInDays() <= 0) {
                     throw new RestInvalidArgumentException("SD Total Duration (Days) must be greater than 0", null);
                 }
 
-                if (dto.getPurposeOfShutdown() == null || dto.getPurposeOfShutdown().isBlank()) {
+                if (dto.getPurpose() == null || dto.getPurpose().isBlank()) {
                     throw new RestInvalidArgumentException("Purpose of Shutdown is required", null);
                 }
                
@@ -227,9 +229,9 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
                     entity.setUpdatedDateTime(new Date());
                 }
 
-                entity.setSdTotalDurationInDays(dto.getSdTotalDurationInDays());
-                entity.setTentativeMonth(dto.getTentativeMonth());
-                entity.setPurposeOfShutdown(dto.getPurposeOfShutdown());
+                entity.setSdTotalDurationInDays(dto.getDurationInDays());
+                entity.setStartDate(dto.getStartDate());
+                entity.setPurpose(dto.getPurpose());
                 entity.setAopYear(year);
                 entity.setPlantFkId(UUID.fromString(plantId));
 
@@ -252,9 +254,9 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
     private TCSShutdownDTO toDTO(TCSShutdown entity) {
         return TCSShutdownDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
-            .sdTotalDurationInDays(entity.getSdTotalDurationInDays())
-            .tentativeMonth(entity.getTentativeMonth())
-            .purposeOfShutdown(entity.getPurposeOfShutdown())
+            .durationInDays(entity.getSdTotalDurationInDays())
+            .startDate(entity.getStartDate())
+            .purpose(entity.getPurpose())
             .build();
     }
 }

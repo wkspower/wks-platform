@@ -4,6 +4,7 @@ import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { generateMockData, getColumnsForTab } from './utility'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 
 const DefaultTcsInput = ({
   PLANT_ID,
@@ -42,7 +43,8 @@ const DefaultTcsInput = ({
     return allKeys.filter((key) =>
       rowsData.every((row) => {
         const v = row?.[key]
-        if (v === undefined || v === null || String(v).trim() === '') return true
+        if (v === undefined || v === null || String(v).trim() === '')
+          return true
         const n = Number(String(v).trim())
         return Number.isFinite(n)
       }),
@@ -54,7 +56,7 @@ const DefaultTcsInput = ({
     if (!tabDisplayName) return
     try {
       setLoading(true)
-      
+
       // Get mock data from utility
       const mockData = generateMockData(currentTab.id)
       const transformedData = mockData.map((item, index) => ({
@@ -87,7 +89,11 @@ const DefaultTcsInput = ({
 
   // Column configuration from utility.js
   const columns = useMemo(() => {
-    return getColumnsForTab(tabDisplayName, {}, valueFormat)
+    return getColumnsForTab(
+      tabDisplayName,
+      generateHeaderNames(AOP_YEAR),
+      valueFormat,
+    )
   }, [tabDisplayName, valueFormat])
 
   // Apply numeric formatting to detected numeric fields
@@ -177,7 +183,16 @@ const DefaultTcsInput = ({
         severity: 'error',
       })
     }
-  }, [modifiedCells, keycloak, PLANT_ID, AOP_YEAR, currentTab.displayName, setSnackbarData, setSnackbarOpen, fetchTabData])
+  }, [
+    modifiedCells,
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    currentTab.displayName,
+    setSnackbarData,
+    setSnackbarOpen,
+    fetchTabData,
+  ])
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },

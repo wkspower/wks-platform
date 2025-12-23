@@ -15,8 +15,9 @@ public class TCSShutdownDTO {
 
     private String id;
     private String particulates;
-    private Integer sdTotalDurationInDays;
-    private String tentativeMonth;
-    private String purposeOfShutdown;
+    private Integer durationInDays;
+    private Date startDate;
+    private Date endDate;
+    private String purpose;
     private Date insertedDateTime;
 }

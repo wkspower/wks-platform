@@ -15,9 +15,11 @@ public class TCSSlowdownDTO {
 
     private String id;
     private String particulates;
-    private Integer tentativeDurationInDays;
-    private String throughputDuringSlowdown;
-    private String tentativeMonth;
-    private String purposeOfSlowdown;
+    private Integer durationInDays;
+    private Double throughputDuringSlowdown;
+    private String throughputUOM;
+    private Date startDate;
+    private Date endDate;
+    private String purpose;
     private Date insertedDateTime;
 }

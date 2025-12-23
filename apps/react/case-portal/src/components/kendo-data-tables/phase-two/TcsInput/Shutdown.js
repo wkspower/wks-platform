@@ -1,9 +1,8 @@
 import { Box, Backdrop, CircularProgress } from '@mui/material'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import { generateMockData } from './utility'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const Shutdown = ({
@@ -42,7 +41,8 @@ const Shutdown = ({
     return allKeys.filter((key) =>
       rowsData.every((row) => {
         const v = row?.[key]
-        if (v === undefined || v === null || String(v).trim() === '') return true
+        if (v === undefined || v === null || String(v).trim() === '')
+          return true
         const n = Number(String(v).trim())
         return Number.isFinite(n)
       }),
@@ -59,7 +59,11 @@ const Shutdown = ({
       setLoading(true)
       let transformedData = []
 
-      const response = await TcsApiService.getTcsShutdownData(keycloak, PLANT_ID, AOP_YEAR)
+      const response = await TcsApiService.getTcsShutdownData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       console.log('TCS Shutdown Response:', response)
 
       if (response?.results && Array.isArray(response.results)) {
@@ -69,12 +73,12 @@ const Shutdown = ({
           inEdit: false,
         }))
       }
-      
+
       // Store headers and keys from API response
       if (response?.headers && response?.keys) {
         setApiMetadata({ headers: response.headers, keys: response.keys })
       }
-      
+
       setRows(transformedData)
     } catch (err) {
       console.error('Error fetching Shutdown data:', err)
@@ -87,7 +91,14 @@ const Shutdown = ({
     } finally {
       setLoading(false)
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, currentTab.id, setSnackbarData, setSnackbarOpen])
+  }, [
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    currentTab.id,
+    setSnackbarData,
+    setSnackbarOpen,
+  ])
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
@@ -98,87 +109,42 @@ const Shutdown = ({
 
   // Column configuration for Shutdown - dynamically generated from API response
   const columnConfig = {
-    particulates: { editable: false, type: 'text',minWidth: 50,width: 100, },
-    sdTotalDurationInDays: { editable: true, type: 'wholeNumber', minWidth: 50,width: 100, },
-    tentativeMonth: { editable: true, type: 'date', minWidth: 80,width: 100, },
-    startDate: { editable: true, type: 'date', minWidth: 50,width: 100, },
-    endDate: { editable: true, type: 'date', minWidth: 50,width: 100, },
-    purposeOfShutdown: { editable: true, type: 'text', minWidth: 100,width: 100, },
+    particulates: { editable: false, type: 'text', minWidth: 100, width: 100 },
+    durationInDays: {
+      editable: true,
+      type: 'wholeNumber',
+      minWidth: 50,
+      width: 100,
+    },
+    startDate: { editable: true, type: 'dateTime', minWidth: 100, width: 100 },
+    endDate: { editable: true, type: 'dateTime', minWidth: 100, width: 100 },
+    purpose: { editable: true, type: 'text', minWidth: 100, width: 100 },
   }
 
   const columns = useMemo(() => {
     const { headers, keys } = apiMetadata
-    
+
     if (!headers || !keys || headers.length === 0) {
       return []
     }
 
-    // Map keys to their headers
+    // Map keys to their headers from backend
     const columnMap = {}
     headers.forEach((header, index) => {
       columnMap[keys[index]] = header
     })
 
-    // Build columns - all top-level, no nesting
-    const columns = []
-    const topLevelKeys = ['particulates','sdTotalDurationInDays', 'tentativeMonth','startDate','endDate', 'purposeOfShutdown']
-    
-    topLevelKeys.forEach((key) => {
-      if (columnMap[key]) {
-        const config = columnConfig[key] || { editable: true, type: 'text', minWidth: 80 }
-        columns.push({
-          field: key,
-          title: columnMap[key],
-          ...config,
-        })
-      }
-    })
-
-    return columns
+    // Build columns using columnConfig for type/formatting
+    return Object.entries(columnConfig).map(([key, config]) => ({
+      field: key,
+      title: columnMap[key] || key,
+      ...config,
+    }))
   }, [apiMetadata])
-
-  // Apply numeric formatting to detected numeric fields
-//   useMemo(() => getNumericKeysInAllRows(rows), [rows])
-  const numericKeys = []
-  const wholeNumberKeys = ['sdTotalDurationInDays']
-  const columnsWithFormatting = useMemo(() => {
-    return columns.map((col) => {
-      if (col.children) {
-        return {
-          ...col,
-          children: col.children.map((child) => {
-            if (numericKeys.includes(child.field)) {
-              return {
-                ...child,
-                type: 'number1',
-                format: valueFormat,
-              }
-            }
-            return child
-          }),
-        }
-      }
-      if (numericKeys.includes(col.field)) {
-        return {
-          ...col,
-          type: 'number1',
-          format: valueFormat,
-        }
-      }
-      if(wholeNumberKeys.includes(col.field)){
-        return {
-          ...col,
-          type: 'wholeNumber',
-        //   format: valueFormat,
-        }
-      }
-      return col
-    })
-  }, [columns, numericKeys, valueFormat])
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.purposeOfShutdown || '')
+    setCurrentRemark(row.purpose || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -194,6 +160,15 @@ const Shutdown = ({
       )
     }
   }, [modifiedCells])
+
+  // Helper function to add IST timezone offset (+5:30) to dates before sending to backend
+  const addTimeOffset = (dateTime) => {
+    if (!dateTime) return null
+    const date = new Date(dateTime)
+    date.setUTCHours(date.getUTCHours() + 5)
+    date.setUTCMinutes(date.getUTCMinutes() + 30)
+    return date
+  }
 
   // Save changes
   const saveChanges = useCallback(async () => {
@@ -214,9 +189,25 @@ const Shutdown = ({
         return
       }
 
-      // TODO: Replace with actual API call
-      const response = await TcsApiService.saveShutdownData(keycloak, PLANT_ID, AOP_YEAR, data);
-      console.log('Save Shutdown response:', response);
+      // Format date fields to add IST timezone offset before sending to backend
+      const formattedData = data.map((item) => {
+        const formatted = { ...item }
+        if (formatted.startDate) {
+          formatted.startDate = addTimeOffset(formatted.startDate)
+        }
+        if (formatted.endDate) {
+          formatted.endDate = addTimeOffset(formatted.endDate)
+        }
+        return formatted
+      })
+
+      const response = await TcsApiService.saveShutdownData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        formattedData,
+      )
+      console.log('Save Shutdown response:', response)
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -233,7 +224,15 @@ const Shutdown = ({
         severity: 'error',
       })
     }
-  }, [modifiedCells, keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen, fetchShutdownData])
+  }, [
+    modifiedCells,
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    setSnackbarData,
+    setSnackbarOpen,
+    fetchShutdownData,
+  ])
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
@@ -248,7 +247,7 @@ const Shutdown = ({
     saveBtn: true,
     showWorkFlowBtns: false,
     showTitle: true,
-    filterable:false,
+    filterable: false,
   }
 
   return (
@@ -266,7 +265,7 @@ const Shutdown = ({
         fetchData={fetchShutdownData}
         configType='tcs_shutdown'
         handleRemarkCellClick={handleRemarkCellClick}
-        columns={columnsWithFormatting}
+        columns={columns}
         remarkDialogOpen={remarkDialogOpen}
         setRemarkDialogOpen={setRemarkDialogOpen}
         currentRemark={currentRemark}
@@ -286,4 +285,4 @@ const Shutdown = ({
   )
 }
 
-export default Shutdown;
+export default Shutdown

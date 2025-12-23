@@ -27,19 +27,21 @@ public class TCSSlowdown {
     private Integer tentativeDurationInDays;
 
     @NotNull(message = "Throughput during the Slowdown is required")
-    @Size(max = 300)
-    @Column(name = "ThroughputDuringSlowdown", length = 300)
-    private String throughputDuringSlowdown;
+    @Column(name = "ThroughputDuringSlowdown")
+    private Double throughputDuringSlowdown;
 
-    @NotNull(message = "Tentative Month is required")
-    @Size(max = 50)
-    @Column(name = "TentativeMonth", length = 50)
-    private String tentativeMonth;
+    @NotNull(message = "Throughput UoM is required")
+    @Column(name = "ThroughputUOM")
+    private String throughputUOM;
+
+    @NotNull(message = "Start Date is required")
+    @Column(name = "StartDate")
+    private Date startDate;
 
     @NotNull(message = "Purpose of Slowdown is required")
     @Size(max = 1000)
     @Column(name = "PurposeOfSlowdown", length = 1000)
-    private String purposeOfSlowdown;
+    private String purpose;
 
     @Size(max = 20)
     @Column(name = "AOPYear", length = 20)

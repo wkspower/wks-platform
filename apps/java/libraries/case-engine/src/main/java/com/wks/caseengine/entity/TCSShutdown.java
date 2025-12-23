@@ -26,15 +26,14 @@ public class TCSShutdown {
     @Column(name = "SDTotalDurationInDays")
     private Integer sdTotalDurationInDays;
 
-    @NotNull(message = "Tentative Month is required")
-    @Size(max = 50)
-    @Column(name = "TentativeMonth", length = 50)
-    private String tentativeMonth;
+    @NotNull(message = "Start Date is required")
+    @Column(name = "StartDate")
+    private Date startDate;
 
     @NotNull(message = "Purpose of Shutdown is required")
     @Size(max = 1000)
     @Column(name = "Purpose", length = 1000)
-    private String purposeOfShutdown;
+    private String purpose;
 
     @Size(max = 20)
     @Column(name = "AOPYear", length = 20)

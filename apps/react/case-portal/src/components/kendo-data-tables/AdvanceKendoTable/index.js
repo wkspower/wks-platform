@@ -6,9 +6,9 @@ import {
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import { ColumnMenu } from 'components/@extended/columnMenu'
 import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
 import Notification from 'components/Utilities/Notification'
+import GenericDropdown from 'components/Utilities/GenericDropdown'
 import { useCallback, useRef, useState, useEffect } from 'react'
 
 import { SvgIcon } from '../../../../node_modules/@progress/kendo-react-common/index'
@@ -39,12 +39,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
   Typography,
 } from '../../../../node_modules/@mui/material/index'
 import DeleteDialog from './components/DeleteDialog'
@@ -52,6 +46,8 @@ import SaveConfirmationDialog from './components/SaveConfirmationDialog'
 import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
 import { ExcelExport } from '../../../../node_modules/@progress/kendo-react-excel-export/index'
 import { NumberCellEditor } from '../Utilities-Kendo/phase-two/NumberCellEditor'
+import DateTimePickerEditor from '../Utilities-Kendo/DatePickeronSelectedYr'
+import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
 
 export const particulars = [
   'normParameterId',
@@ -137,6 +133,9 @@ const AdvanceKendoTable = ({
   handleExcelUpload = () => {},
   showThreeColors = false,
   groupBy = null,
+  dropdownConfig = {},
+  selectedDropdownValue,
+  setSelectedDropdownValue,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -158,7 +157,7 @@ const AdvanceKendoTable = ({
   const [isFormatByUOM, setIsFormatByUOM] = useState(false)
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
-
+  const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
   const initialGroup = Array.isArray(groupBy)
     ? groupBy.map((field) => ({ field }))
     : groupBy
@@ -187,7 +186,7 @@ const AdvanceKendoTable = ({
     if (!gridRef.current) return
 
     const allColumns = extractAllColumns(columns)
-    
+
     // Calculate total min width
     minGridWidth.current = 0
     allColumns.forEach((col) => {
@@ -203,8 +202,11 @@ const AdvanceKendoTable = ({
 
     const handleResize = () => {
       if (!gridRef.current) return
-      
-      if (gridRef.current.offsetWidth < minGridWidth.current && !applyMinWidth) {
+
+      if (
+        gridRef.current.offsetWidth < minGridWidth.current &&
+        !applyMinWidth
+      ) {
         setApplyMinWidth(true)
       } else if (gridRef.current.offsetWidth > minGridWidth.current) {
         setGridCurrent(gridRef.current.offsetWidth)
@@ -227,7 +229,8 @@ const AdvanceKendoTable = ({
       }
 
       const allColumns = extractAllColumns(columns)
-      const totalColumns = allColumns.length + (permissions?.deleteButton ? 1 : 0)
+      const totalColumns =
+        allColumns.length + (permissions?.deleteButton ? 1 : 0)
 
       let width = applyMinWidth
         ? minWidth
@@ -239,13 +242,65 @@ const AdvanceKendoTable = ({
 
       return width
     },
-    [applyMinWidth, gridCurrent, columns, permissions?.deleteButton, extractAllColumns],
+    [
+      applyMinWidth,
+      gridCurrent,
+      columns,
+      permissions?.deleteButton,
+      extractAllColumns,
+    ],
   )
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
     // }
   }, [])
+
+  // Helper function to add IST timezone offset (+5:30) to dates before sending to backend
+  const addTimeOffset = (dateTime) => {
+    if (!dateTime) return null
+    const date = new Date(dateTime)
+    date.setUTCHours(date.getUTCHours() + 5)
+    date.setUTCMinutes(date.getUTCMinutes() + 30)
+    return date
+  }
+
+  // Format date fields in data before sending to backend
+  const formatDateFieldsForBackend = (data) => {
+    if (!data) return data
+    const formatted = { ...data }
+    dateFields.forEach((field) => {
+      if (field in formatted && formatted[field]) {
+        formatted[field] = addTimeOffset(formatted[field])
+      }
+    })
+    return formatted
+  }
+
+  // Wrapper for saveChanges that formats date fields
+  const handleSaveChanges = useCallback(() => {
+    // Get modified cells data
+    const modifiedData = Object.values(modifiedCells)
+    if (modifiedData.length === 0) {
+      saveChanges()
+      return
+    }
+
+    // Format date fields in all modified cells
+    const formattedModifiedCells = {}
+    Object.keys(modifiedCells).forEach((key) => {
+      formattedModifiedCells[key] = formatDateFieldsForBackend(
+        modifiedCells[key],
+      )
+    })
+
+    // Temporarily update modifiedCells with formatted data, call saveChanges, then restore
+    const originalModifiedCells = modifiedCells
+    setModifiedCells(formattedModifiedCells)
+
+    // Call the parent's saveChanges with formatted data
+    saveChanges()
+  }, [modifiedCells, saveChanges, setModifiedCells])
 
   const excelExport = () => {
     if (_export.current !== null) {
@@ -266,6 +321,33 @@ const AdvanceKendoTable = ({
       })),
     )
   }
+  // Helper function to calculate days between two dates
+  const calculateDaysBetween = (startDate, endDate) => {
+    if (!startDate || !endDate) return null
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null
+    const diffTime = Math.abs(end - start)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
+
+  // Helper function to add days to a date
+  const addDaysToDate = (date, days) => {
+    if (!date || !days) return null
+    const result = new Date(date)
+    result.setDate(result.getDate() + parseInt(days, 10))
+    return result
+  }
+
+  // Helper function to subtract days from a date
+  const subtractDaysFromDate = (date, days) => {
+    if (!date || !days) return null
+    const result = new Date(date)
+    result.setDate(result.getDate() - parseInt(days, 10))
+    return result
+  }
+
   const itemChange = useCallback(
     (e) => {
       setIsRowEdited(true)
@@ -276,6 +358,7 @@ const AdvanceKendoTable = ({
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
 
+          // Handle fromDate/toDate/durationInHrs calculation
           if (
             'fromDate' in updated &&
             'toDate' in updated &&
@@ -289,19 +372,46 @@ const AdvanceKendoTable = ({
             } else if (field === 'durationInHrs') {
               const newEnd = recalcEndDate(
                 updated.fromDate,
-                value, // string like “10.20”
+                value, // string like "10.20"
               )
               if (newEnd) {
                 updated.toDate = newEnd
               }
             }
           }
+
+          // Handle startDate/endDate/durationInDays calculation
+          if (
+            'startDate' in updated &&
+            'endDate' in updated &&
+            'durationInDays' in updated
+          ) {
+            if (field === 'startDate' && updated.endDate) {
+              // If startDate changed and endDate exists, calculate durationInDays
+              updated.durationInDays = calculateDaysBetween(
+                updated.startDate,
+                updated.endDate,
+              )
+            } else if (field === 'endDate' && updated.startDate) {
+              // If endDate changed and startDate exists, calculate durationInDays
+              updated.durationInDays = calculateDaysBetween(
+                updated.startDate,
+                updated.endDate,
+              )
+            } else if (field === 'durationInDays' && updated.startDate) {
+              // If durationInDays changed and startDate exists, calculate endDate
+              updated.endDate = addDaysToDate(updated.startDate, value)
+            }
+          }
+
           return updated
         }),
       )
 
       setModifiedCells((prev) => {
         const base = { ...dataItem, [field]: value }
+
+        // Handle fromDate/toDate/durationInHrs calculation
         if ('fromDate' in base && 'toDate' in base && 'durationInHrs' in base) {
           if (field === 'fromDate' || field === 'toDate') {
             base.durationInHrs = recalcDuration(base.fromDate, base.toDate)
@@ -310,10 +420,32 @@ const AdvanceKendoTable = ({
             if (newEnd) base.toDate = newEnd.toISOString()
           }
         }
+
+        // Handle startDate/endDate/durationInDays calculation
+        if (
+          'startDate' in base &&
+          'endDate' in base &&
+          'durationInDays' in base
+        ) {
+          if (field === 'startDate' && base.endDate) {
+            base.durationInDays = calculateDaysBetween(
+              base.startDate,
+              base.endDate,
+            )
+          } else if (field === 'endDate' && base.startDate) {
+            base.durationInDays = calculateDaysBetween(
+              base.startDate,
+              base.endDate,
+            )
+          } else if (field === 'durationInDays' && base.startDate) {
+            base.endDate = addDaysToDate(base.startDate, value)
+          }
+        }
+
         return { ...prev, [itemId]: base }
       })
 
-       // customModifiedCells: always set per-row custom changes (include months if percentChange)
+      // customModifiedCells: always set per-row custom changes (include months if percentChange)
       setCustomModifiedCells((prev) => {
         const base = { ...(prev[itemId] || {}), [field]: value }
 
@@ -338,24 +470,24 @@ const AdvanceKendoTable = ({
   )
 
   useEffect(() => {
-      const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
-      const isCustomModifiedCellsEmpty =
-        Object.keys(customModifiedCells).length === 0
-  
-      if (isModifiedCellsEmpty && !isCustomModifiedCellsEmpty) {
-        setCustomModifiedCells({})
-      }
+    const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
+    const isCustomModifiedCellsEmpty =
+      Object.keys(customModifiedCells).length === 0
 
-      if (isModifiedCellsEmpty) {
-        setEdit({})
-        setRows((prev) =>
-          prev.map((r) => ({
-            ...r,
-            inEdit: false,
-          }))
-        )
-      }
-    }, [modifiedCells, customModifiedCells])
+    if (isModifiedCellsEmpty && !isCustomModifiedCellsEmpty) {
+      setCustomModifiedCells({})
+    }
+
+    if (isModifiedCellsEmpty) {
+      setEdit({})
+      setRows((prev) =>
+        prev.map((r) => ({
+          ...r,
+          inEdit: false,
+        })),
+      )
+    }
+  }, [modifiedCells, customModifiedCells])
 
   const handleRemarkSave = () => {
     setRows((prevRows) => {
@@ -368,7 +500,7 @@ const AdvanceKendoTable = ({
             'remarks',
             'remark',
             'Remark',
-            'purposeOfShutdown'
+            'purpose',
           ].filter((key) => key in row)
           keyToUpdate = keysToUpdate[0] || 'remark'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
@@ -441,7 +573,7 @@ const AdvanceKendoTable = ({
   }
 
   const saveConfirmation = async () => {
-    saveChanges()
+    handleSaveChanges()
     setOpenSaveDialogeBox(false)
     setEdit({})
   }
@@ -527,160 +659,164 @@ const AdvanceKendoTable = ({
       .filter(Boolean)
       .join(' ')
     return (
-      <tr {...rest?.trProps} className={rowClassName} style={{width:'200px'}}>
+      <tr
+        {...rest?.trProps}
+        className={rowClassName}
+        style={{ width: '200px' }}
+      >
         {rest.children}
       </tr>
     )
   }, [])
 
   const RedHighlightCell = (props) => {
-      const {
-        dataItem,
-        field,
-        tdProps,
-        children,
-        customModifiedCells,
-        allRedCell,
-        isFormatByUOM = false,
-      } = props
-      const uomType= dataItem?.UOM;
-      const rowId = dataItem.id
-      let value =  valueFormatterByUOM(dataItem[field] , uomType);
-      if (disableRedHighlight) {
-        return (
-          <td {...tdProps} title={value}>
-            {isFormatByUOM ?  value : children}
-          </td>
-        )
-      }
-  
-      const isEdited = Object.prototype.hasOwnProperty.call(
-        customModifiedCells?.[rowId] || {},
-        field,
-      )
-  
-      const month = field
-      const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
-  
-      const isRedFromAllRedCell = allRedCell?.some(
-        (cell) =>
-          cell.month === month &&
-          cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
-      )
-  
-      const shouldHighlight = isEdited || isRedFromAllRedCell
-  
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+      isFormatByUOM = false,
+    } = props
+    const uomType = dataItem?.UOM
+    const rowId = dataItem.id
+    let value = valueFormatterByUOM(dataItem[field], uomType)
+    if (disableRedHighlight) {
       return (
-        <td
-          {...tdProps}
-          title={value}
-          style={{
-            color: shouldHighlight ? 'orange' : undefined,
-            fontWeight: shouldHighlight ? 'bold' : undefined,
-          }}
-        >
-          {isFormatByUOM ?  value : children}
+        <td {...tdProps} title={value}>
+          {isFormatByUOM ? value : children}
         </td>
       )
     }
-  
-    const RedHighlightCell2 = (props) => {
-      const {
-        dataItem,
-        field,
-        tdProps,
-        children,
-        customModifiedCells,
-        allRedCell,
-        allRedCell2,
-        isFormatByUOM = false,
-      } = props
-      const uomType= dataItem?.UOM;
-      const rowId = dataItem.id
-      let value = valueFormatterByUOM(dataItem[field] , uomType);
-      if (disableRedHighlight) {
-        return (
-          <td {...tdProps} title={value}>
-             {isFormatByUOM ?  value : children}
-          </td>
-        )
-      }
-  
-      const isEdited = Object.prototype.hasOwnProperty.call(
-        customModifiedCells?.[rowId] || {},
-        field,
-      )
-  
-      const month = field
-  
-      const normId = dataItem.materialFKId || dataItem.NormParameter_FK_Id
-  
-      const matchedCell = allRedCell?.find(
-        (cell) =>
-          cell.month?.toLowerCase() === month?.toLowerCase() &&
-          cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
-      )
-  
-      const getMonthNumber = (m) => {
-        if (m == null) return null
-        const map = {
-          january: 1,
-          february: 2,
-          march: 3,
-          april: 4,
-          may: 5,
-          june: 6,
-          july: 7,
-          august: 8,
-          september: 9,
-          october: 10,
-          november: 11,
-          december: 12,
-        }
-        const lower = String(m).trim().toLowerCase()
-        return map[lower] || Number(lower) || null
-      }
-  
-      const isRedFromAllRedCell = allRedCell2?.some((cell) => {
-        const cellMonthNum = getMonthNumber(cell.month)
-        const fieldMonthNum = getMonthNumber(month)
-  
-        const sameMonth = cellMonthNum === fieldMonthNum
-        const sameNormId =
-          cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase()
-  
-        return sameMonth && sameNormId
-      })
-  
-      let highlightColor
-      let highlightColorFullCell = false
-  
-      if (isEdited || isRedFromAllRedCell) {
-        highlightColor = 'orange'
-      } else if (matchedCell?.mode === 'Propane(1Z)') {
-        highlightColor = 'red'
-      } else if (matchedCell?.mode === 'Propane(2Z)') {
-        highlightColor = 'green'
-      } else if (matchedCell?.mode === 'Copied') {
-        highlightColor = 'purple'
-        highlightColorFullCell = true
-      }
-  
+
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    const month = field
+    const normId = dataItem.materialFkId || dataItem.NormParameter_FK_Id
+
+    const isRedFromAllRedCell = allRedCell?.some(
+      (cell) =>
+        cell.month === month &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    const shouldHighlight = isEdited || isRedFromAllRedCell
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: shouldHighlight ? 'orange' : undefined,
+          fontWeight: shouldHighlight ? 'bold' : undefined,
+        }}
+      >
+        {isFormatByUOM ? value : children}
+      </td>
+    )
+  }
+
+  const RedHighlightCell2 = (props) => {
+    const {
+      dataItem,
+      field,
+      tdProps,
+      children,
+      customModifiedCells,
+      allRedCell,
+      allRedCell2,
+      isFormatByUOM = false,
+    } = props
+    const uomType = dataItem?.UOM
+    const rowId = dataItem.id
+    let value = valueFormatterByUOM(dataItem[field], uomType)
+    if (disableRedHighlight) {
       return (
-        <td
-          {...tdProps}
-          title={value}
-          style={{
-            color: highlightColor,
-            fontWeight: highlightColor ? 'bold' : undefined,
-            // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
-          }}
-        >
-        {isFormatByUOM ?  value : children}
+        <td {...tdProps} title={value}>
+          {isFormatByUOM ? value : children}
         </td>
       )
     }
-  
+
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    const month = field
+
+    const normId = dataItem.materialFKId || dataItem.NormParameter_FK_Id
+
+    const matchedCell = allRedCell?.find(
+      (cell) =>
+        cell.month?.toLowerCase() === month?.toLowerCase() &&
+        cell.NormParameter_FK_Id?.toLowerCase() === normId?.toLowerCase(),
+    )
+
+    const getMonthNumber = (m) => {
+      if (m == null) return null
+      const map = {
+        january: 1,
+        february: 2,
+        march: 3,
+        april: 4,
+        may: 5,
+        june: 6,
+        july: 7,
+        august: 8,
+        september: 9,
+        october: 10,
+        november: 11,
+        december: 12,
+      }
+      const lower = String(m).trim().toLowerCase()
+      return map[lower] || Number(lower) || null
+    }
+
+    const isRedFromAllRedCell = allRedCell2?.some((cell) => {
+      const cellMonthNum = getMonthNumber(cell.month)
+      const fieldMonthNum = getMonthNumber(month)
+
+      const sameMonth = cellMonthNum === fieldMonthNum
+      const sameNormId =
+        cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase()
+
+      return sameMonth && sameNormId
+    })
+
+    let highlightColor
+    let highlightColorFullCell = false
+
+    if (isEdited || isRedFromAllRedCell) {
+      highlightColor = 'orange'
+    } else if (matchedCell?.mode === 'Propane(1Z)') {
+      highlightColor = 'red'
+    } else if (matchedCell?.mode === 'Propane(2Z)') {
+      highlightColor = 'green'
+    } else if (matchedCell?.mode === 'Copied') {
+      highlightColor = 'purple'
+      highlightColorFullCell = true
+    }
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          color: highlightColor,
+          fontWeight: highlightColor ? 'bold' : undefined,
+          // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
+        }}
+      >
+        {isFormatByUOM ? value : children}
+      </td>
+    )
+  }
+
   const BooleanHighlightCell = (props) => {
     const {
       dataItem,
@@ -693,7 +829,8 @@ const AdvanceKendoTable = ({
 
     const value = dataItem[field]
     const rowId = dataItem.id
-    const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
+    const displayValue =
+      typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
 
     if (disableRedHighlight) {
       return (
@@ -748,7 +885,7 @@ const AdvanceKendoTable = ({
           padding: '0px',
           borderRight: '1px solid #878787',
           textAlign: 'center',
-          width:{...restThProps['width']}
+          width: { ...restThProps['width'] },
         }}
       >
         <Tooltip
@@ -791,7 +928,11 @@ const AdvanceKendoTable = ({
         )
       }
 
-      if (['aopRemarks', 'remarks', 'remark', 'Remark','purposeOfShutdown'].includes(col.field)) {
+      if (
+        ['aopRemarks', 'remarks', 'remark', 'Remark', 'purpose'].includes(
+          col.field,
+        )
+      ) {
         return (
           <GridColumn
             key={col.field}
@@ -828,6 +969,42 @@ const AdvanceKendoTable = ({
             hidden={col.hidden}
             className={!isEditable ? 'non-editable-cell' : ''}
             width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+      if (col.type == 'dateTime') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            cells={{
+              edit: {
+                date:
+                  col?.type == 'dateTime'
+                    ? DateTimePickerEditor
+                    : DateOnlyPicker,
+              },
+              data: (props) => (
+                <RedHighlightCell
+                  {...props}
+                  customModifiedCells={customModifiedCells}
+                  allRedCell={allRedCell}
+                  disableRedHighlight={disableRedHighlight}
+                />
+              ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            format={
+              col.type == 'dateTime'
+                ? '{0:dd-MM-yyyy hh:mm a}'
+                : '{0:dd-MM-yyyy}'
+            }
+            editor='date'
+            hidden={col.hidden}
+            filter='date'
+            columnMenu={ColumnMenuCheckboxFilterDate}
+            width={col?.width}
           />
         )
       }
@@ -926,48 +1103,7 @@ const AdvanceKendoTable = ({
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
               edit: { text: NoSpinnerNumericEditor },
-               data: (props) =>
-                showThreeColors ? (
-                  <RedHighlightCell2
-                    {...props}
-                    customModifiedCells={customModifiedCells}
-                    allRedCell={allRedCell}
-                    allRedCell2={allRedCell2}
-                    disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
-                  />
-                ) : (
-                  <RedHighlightCell
-                    {...props}
-                    customModifiedCells={customModifiedCells}
-                    allRedCell={allRedCell}
-                    disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
-                  />
-                ),
-              headerCell: SimpleHeaderWithTooltip,
-            }}
-            columnMenu={ColumnMenuCheckboxFilter}
-            filter='numeric'
-            format={col.format}
-            width={setWidth(col?.minWidth || col?.widthT)}
-          />
-        )
-      }
-   
-      if (col.type === 'wholeNumber') {
-        return (
-          <GridColumn
-            key={col.field}
-            field={col.field}
-            title={col.title || col.headerName}
-            hidden={col.hidden}
-            editable={col?.editable ? true : false}
-            className={!col?.editable ? 'k-right-disabled' : undefined}
-            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
-            cells={{
-              edit: { text: (cellProps) => <NumberCellEditor {...cellProps} wholeNumberOnly={col?.wholeNumberOnly || false} /> },
-               data: (props) =>
+              data: (props) =>
                 showThreeColors ? (
                   <RedHighlightCell2
                     {...props}
@@ -996,6 +1132,53 @@ const AdvanceKendoTable = ({
         )
       }
 
+      if (col.type === 'wholeNumber') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            className={!col?.editable ? 'k-right-disabled' : undefined}
+            headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <NumberCellEditor
+                    {...cellProps}
+                    wholeNumberOnly={col?.wholeNumberOnly || false}
+                  />
+                ),
+              },
+              data: (props) =>
+                showThreeColors ? (
+                  <RedHighlightCell2
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    allRedCell2={allRedCell2}
+                    disableRedHighlight={disableRedHighlight}
+                    isFormatByUOM={isFormatByUOM}
+                  />
+                ) : (
+                  <RedHighlightCell
+                    {...props}
+                    customModifiedCells={customModifiedCells}
+                    allRedCell={allRedCell}
+                    disableRedHighlight={disableRedHighlight}
+                    isFormatByUOM={isFormatByUOM}
+                  />
+                ),
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            filter='numeric'
+            format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
 
       //New Creted Code for Text Type
       if (col.type == 'text') {
@@ -1170,8 +1353,10 @@ const AdvanceKendoTable = ({
     const isRed = isRedFromAllRedCell
 
     // Convert boolean values to Yes/No for display
-    const displayValue = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
-    const cellContent = typeof value === 'boolean' ? displayValue : props.children
+    const displayValue =
+      typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value
+    const cellContent =
+      typeof value === 'boolean' ? displayValue : props.children
 
     return (
       <td
@@ -1332,6 +1517,18 @@ const AdvanceKendoTable = ({
                 Submit
               </Button>
             )}
+
+            {permissions?.showDropdown && (
+              <GenericDropdown
+                options={dropdownConfig?.options}
+                value={selectedDropdownValue || ''}
+                onChange={(value) => setSelectedDropdownValue(value)}
+                label={dropdownConfig?.label || 'Select'}
+                placeholder={dropdownConfig?.placeholder || 'Select'}
+                valueKey={dropdownConfig?.valueKey || 'id'}
+                labelKey={dropdownConfig?.labelKey || 'name'}
+              />
+            )}
           </Box>
         </Box>
       )}
@@ -1343,60 +1540,63 @@ const AdvanceKendoTable = ({
             ref={_export}
             fileName={`${permissions?.ExcelName}.xlsx`}
           >
-          <Grid
-            modifiedCells={modifiedCells}
-            data={rows}
-            rows={{ data: CustomRow }}
-            sortable={{
-              mode: 'multiple',
-            }}
-            autoProcessData={true}
-            dataItemKey='id'
-            editField='inEdit'
-            editable={{ mode: 'incell' }}
-            onEditChange={handleEditChange}
-            edit={edit}
-            filter={filter}
-            onFilterChange={(e) => setFilter(e.filter)}
-            onItemChange={itemChange}
-            resizable={true}
-            defaultSkip={0}
-            defaultGroup={initialGroup}
-            defaultTake={100}
-            contextMenu={true}
-            filterable={permissions.filterable && columns.some((col) => dateFields.includes(col.field))}
-            size='small'
-            pageable={
-              rows?.length > 100
-                ? {
-                    buttonCount: 4,
-                    pageSizes: [10, 50, 100],
-                  }
-                : false
-            }
-            onRowClick={handleRowClick}
-          >
-            {renderColumns(
-              columns.filter((col) => !hiddenFields.includes(col.field)),
-              filter,
-              sort,
-            )}
+            <Grid
+              modifiedCells={modifiedCells}
+              data={rows}
+              rows={{ data: CustomRow }}
+              sortable={{
+                mode: 'multiple',
+              }}
+              autoProcessData={true}
+              dataItemKey='id'
+              editField='inEdit'
+              editable={{ mode: 'incell' }}
+              onEditChange={handleEditChange}
+              edit={edit}
+              filter={filter}
+              onFilterChange={(e) => setFilter(e.filter)}
+              onItemChange={itemChange}
+              resizable={true}
+              defaultSkip={0}
+              defaultGroup={initialGroup}
+              defaultTake={100}
+              contextMenu={true}
+              filterable={
+                permissions.filterable &&
+                columns.some((col) => dateFields.includes(col.field))
+              }
+              size='small'
+              pageable={
+                rows?.length > 100
+                  ? {
+                      buttonCount: 4,
+                      pageSizes: [10, 50, 100],
+                    }
+                  : false
+              }
+              onRowClick={handleRowClick}
+            >
+              {renderColumns(
+                columns.filter((col) => !hiddenFields.includes(col.field)),
+                filter,
+                sort,
+              )}
 
-            {permissions?.deleteButton && (
-              <GridColumn
-                key='actions'
-                field='actions'
-                title='Action'
-                width={80}
-                className='k-text-center'
-                filterable={false}
-                editable={false}
-                cells={{
-                  data: ActionsCell,
-                }}
-              />
-            )}
-          </Grid>
+              {permissions?.deleteButton && (
+                <GridColumn
+                  key='actions'
+                  field='actions'
+                  title='Action'
+                  width={80}
+                  className='k-text-center'
+                  filterable={false}
+                  editable={false}
+                  cells={{
+                    data: ActionsCell,
+                  }}
+                />
+              )}
+            </Grid>
           </ExcelExport>
         </Tooltip>
       </div>

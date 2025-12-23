@@ -1,9 +1,8 @@
-import { Box, Backdrop, CircularProgress } from '@mui/material'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import { generateMockData } from './utility'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 
 const UnitCapacity = ({
@@ -20,34 +19,20 @@ const UnitCapacity = ({
 
   // State management
   const [loading, setLoading] = useState(false)
-  const [rows, setRows] = useState([])
+
+  const [rowsDesign, setRowsDesign] = useState([])
+  const [rowsMaxAchieved, setRowsMaxAchieved] = useState([])
+  const [rowsCurrent, setRowsCurrent] = useState([])
+
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  // Detect numeric fields from data
-  const getNumericKeysInAllRows = (rowsData = []) => {
-    if (!Array.isArray(rowsData) || rowsData.length === 0) return []
-
-    const allKeys = Array.from(
-      rowsData.reduce((set, row) => {
-        if (row && typeof row === 'object') {
-          Object.keys(row).forEach((k) => set.add(k))
-        }
-        return set
-      }, new Set()),
-    )
-
-    return allKeys.filter((key) =>
-      rowsData.every((row) => {
-        const v = row?.[key]
-        if (v === undefined || v === null || String(v).trim() === '') return true
-        const n = Number(String(v).trim())
-        return Number.isFinite(n)
-      }),
-    )
-  }
+  const [selectedDropdownDesign, setSelectedDropdownDesign] = useState(null)
+  const [selectedDropdownMaxAchieved, setSelectedDropdownMaxAchieved] =
+    useState(null)
+  const [selectedDropdownCurrent, setSelectedDropdownCurrent] = useState(null)
 
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
@@ -59,7 +44,11 @@ const UnitCapacity = ({
       setLoading(true)
       let transformedData = []
 
-      const response = await TcsApiService.getTcsUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR)
+      const response = await TcsApiService.getTcsUnitCapacityData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       console.log('TCS Unit Capacity Response:', response)
 
       if (response?.results && Array.isArray(response.results)) {
@@ -69,13 +58,13 @@ const UnitCapacity = ({
           inEdit: false,
         }))
       }
-      
+
       // Store headers and keys from API response
       if (response?.headers && response?.keys) {
         setApiMetadata({ headers: response.headers, keys: response.keys })
       }
-      
-      setRows(transformedData)
+
+      setRowsDesign(transformedData)
     } catch (err) {
       console.error('Error fetching Unit Capacity data:', err)
       setSnackbarData({
@@ -83,11 +72,18 @@ const UnitCapacity = ({
         severity: 'error',
       })
       setSnackbarOpen(true)
-      setRows([])
+      setRowsDesign([])
     } finally {
       setLoading(false)
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, currentTab.id, setSnackbarData, setSnackbarOpen])
+  }, [
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    currentTab.id,
+    setSnackbarData,
+    setSnackbarOpen,
+  ])
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
@@ -98,17 +94,16 @@ const UnitCapacity = ({
 
   // Column configuration for Unit Capacity - dynamically generated from API response
   const columnConfig = {
-    particulates: { editable: false, type: 'text',minWidth: 50,width: 100, },
-    uom: { editable: false, type: 'text', minWidth: 50,width: 100, },
-    kbpsd: { editable: true, type: 'number', minWidth: 80,width: 100, },
-    ktpd: { editable: true, type: 'number', minWidth: 50,width: 100, },
-    tph: { editable: true, type: 'number', minWidth: 50,width: 100, },
-    remark: { editable: true, type: 'text', minWidth: 100,width: 100, },
+    particulates: { editable: false, type: 'text', minWidth: 50, width: 100 },
+    kbpsd: { editable: true, type: 'number', minWidth: 80, width: 100 },
+    ktpd: { editable: true, type: 'number', minWidth: 50, width: 100 },
+    tph: { editable: true, type: 'number', minWidth: 50, width: 100 },
+    remark: { editable: true, type: 'text', minWidth: 100, width: 100 },
   }
 
   const columns = useMemo(() => {
     const { headers, keys } = apiMetadata
-    
+
     if (!headers || !keys || headers.length === 0) {
       return []
     }
@@ -131,11 +126,15 @@ const UnitCapacity = ({
 
     // Group remaining columns under "Capacity"
     const capacityChildren = []
-    const capacityKeys = ['uom', 'kbpsd','ktpd','tph']
-    
+    const capacityKeys = ['kbpsd', 'ktpd', 'tph']
+
     capacityKeys.forEach((key) => {
       if (columnMap[key]) {
-        const config = columnConfig[key] || { editable: true, type: 'text', minWidth: 80 }
+        const config = columnConfig[key] || {
+          editable: true,
+          type: 'text',
+          minWidth: 80,
+        }
         capacityChildren.push({
           field: key,
           title: columnMap[key],
@@ -145,7 +144,7 @@ const UnitCapacity = ({
     })
 
     const columns = [firstColumn]
-    
+
     if (capacityChildren.length > 0) {
       columns.push({
         title: 'Capacity',
@@ -155,7 +154,11 @@ const UnitCapacity = ({
 
     // Add remark as top-level column
     if (columnMap['remark']) {
-      const config = columnConfig['remark'] || { editable: true, type: 'text', minWidth: 100 }
+      const config = columnConfig['remark'] || {
+        editable: true,
+        type: 'text',
+        minWidth: 100,
+      }
       columns.push({
         field: 'remark',
         title: columnMap['remark'],
@@ -167,7 +170,7 @@ const UnitCapacity = ({
   }, [apiMetadata])
 
   // Apply numeric formatting to detected numeric fields
-  const numericKeys = useMemo(() => getNumericKeysInAllRows(rows), [rows])
+  const numericKeys = ['kbpsd', 'ktpd', 'tph']
 
   const columnsWithFormatting = useMemo(() => {
     return columns.map((col) => {
@@ -207,7 +210,7 @@ const UnitCapacity = ({
   // Track when modifiedCells is cleared and reset inEdit flags
   useEffect(() => {
     if (Object.keys(modifiedCells).length === 0) {
-      setRows((prev) =>
+      setRowsDesign((prev) =>
         prev.map((row) => ({
           ...row,
           inEdit: false,
@@ -235,9 +238,13 @@ const UnitCapacity = ({
         return
       }
 
-      // TODO: Replace with actual API call
-      const response = await TcsApiService.saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, data);
-      console.log('Save Unit Capacity response:', response);
+      const response = await TcsApiService.saveUnitCapacityData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        data,
+      )
+      console.log('Save Unit Capacity response:', response)
 
       setSnackbarOpen(true)
       setSnackbarData({
@@ -254,7 +261,15 @@ const UnitCapacity = ({
         severity: 'error',
       })
     }
-  }, [modifiedCells, keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen, fetchUnitCapacityData])
+  }, [
+    modifiedCells,
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    setSnackbarData,
+    setSnackbarOpen,
+    fetchUnitCapacityData,
+  ])
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
@@ -269,6 +284,41 @@ const UnitCapacity = ({
     saveBtn: true,
     showWorkFlowBtns: false,
     showTitle: true,
+    showDropdown: true,
+  }
+
+  const dropdownConfigDesign = {
+    options: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+      { id: 3, name: 'test3' },
+    ],
+    label: 'Select UOM',
+    placeholder: 'Select',
+    valueKey: 'id',
+    labelKey: 'name',
+  }
+  const dropdownConfigMaxAchieved = {
+    options: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+      { id: 3, name: 'test3' },
+    ],
+    label: 'Select UOM',
+    placeholder: 'Select',
+    valueKey: 'id',
+    labelKey: 'name',
+  }
+  const dropdownConfigCurrent = {
+    options: [
+      { id: 1, name: 'test1' },
+      { id: 2, name: 'test2' },
+      { id: 3, name: 'test3' },
+    ],
+    label: 'Select UOM',
+    placeholder: 'Select',
+    valueKey: 'id',
+    labelKey: 'name',
   }
 
   return (
@@ -280,28 +330,87 @@ const UnitCapacity = ({
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <AdvanceKendoTable
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchUnitCapacityData}
-        configType='tcs_unit_capacity'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columnsWithFormatting}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-      />
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rowsDesign}
+          setRows={setRowsDesign}
+          fetchData={fetchUnitCapacityData}
+          title='Design Capacity'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columnsWithFormatting}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          saveChanges={saveChanges}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          dropdownConfig={dropdownConfigDesign}
+          selectedDropdownValue={selectedDropdownDesign}
+          setSelectedDropdownValue={setSelectedDropdownDesign}
+        />
+      </Stack>
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rowsMaxAchieved}
+          setRows={setRowsMaxAchieved}
+          fetchData={fetchUnitCapacityData}
+          title='Max Achieved Capacity'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columnsWithFormatting}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          saveChanges={saveChanges}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          dropdownConfig={dropdownConfigMaxAchieved}
+          selectedDropdownValue={selectedDropdownMaxAchieved}
+          setSelectedDropdownValue={setSelectedDropdownMaxAchieved}
+        />
+      </Stack>
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rowsCurrent}
+          setRows={setRowsCurrent}
+          fetchData={fetchUnitCapacityData}
+          title='Current Operating Capacity'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columnsWithFormatting}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          saveChanges={saveChanges}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          dropdownConfig={dropdownConfigCurrent}
+          selectedDropdownValue={selectedDropdownCurrent}
+          setSelectedDropdownValue={setSelectedDropdownCurrent}
+        />
+      </Stack>
     </Box>
   )
 }

@@ -4,9 +4,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import { dummyDataForHeatRate } from '../nestedDummyData'
-import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
-import { MenuItem, TextField } from '../../../../../../node_modules/@mui/material/index'
+import { InputApiService } from 'services/phase-two-services/inputApiService'
 
 const HeatRate = () => {
   const keycloak = useSession()
@@ -42,8 +40,8 @@ const HeatRate = () => {
       minWidth: 100,
     },
     {
-      field: 'cpputility',
-      title: 'CPU Utility',
+      field: 'cppUtility',
+      title: 'CPP Utility',
       width: 120,
       type: 'text',
       editable: false,
@@ -66,7 +64,7 @@ const HeatRate = () => {
       minWidth: 100,
     },
     {
-      field: 'freeStmFactor',
+      field: 'freeSteamFactor',
       title: 'Free Steam Factor',
       width: 130,
       type: 'number1',
@@ -77,36 +75,61 @@ const HeatRate = () => {
 
   const [rows, setRows] = useState([])
   const [selectedPlant, setSelectedPlant] = useState('')
+  const [dropdownOptions, setDropdownOptions] = useState([])
+  useEffect(() => {
+    if (selectedPlant) {
+      fetchHeatRateData(selectedPlant)
+    }
+  }, [PLANT_ID, AOP_YEAR, selectedPlant])
 
   useEffect(() => {
-    if (PLANT_ID && selectedPlant) {
-      if(selectedPlant=='NMD-Power Plant-1'){
-        setRows(dummyDataForHeatRate)
-      }
-      else{
-       setRows([])
-      }
-    }
-  }, [PLANT_ID, AOP_YEAR,selectedPlant])
+    getPlantList()
+  }, [PLANT_ID, AOP_YEAR])
 
-  const fetchHeatRateData = async () => {
+  const getPlantList = async () => {
     setLoading(true)
     try {
-      const res = await UtilityPlantApiServiceV2.getNormBasedUtilityBudget(
+      const res = await InputApiService.getPlantList(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      if (res?.data?.length === 0) {
+      // Convert to required format
+      const convertedData = res?.map((item) => ({
+        id: item[0],
+        name: item[1],
+      }))
+
+      if (convertedData?.length === 0) {
+        setDropdownOptions([])
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No data found', severity: 'info' })
+        return
+      }
+      setDropdownOptions(convertedData)
+    } catch (error) {
+      console.error('Error fetching plant list:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Error fetching data', severity: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchHeatRateData = async (assetId) => {
+    setLoading(true)
+    try {
+      const res = await InputApiService.getHeatRateData(keycloak, assetId)
+
+      if (res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
       console.log('res', res)
-      setRows(res?.data)
-      setSnackbarOpen(true)
+      setRows(res)
     } catch (error) {
       console.error('Error fetching heat rate data:', error)
       setSnackbarOpen(true)
@@ -121,13 +144,22 @@ const HeatRate = () => {
     addButton: false,
     deleteButton: false,
     editButton: true,
-    saveBtn: true,
+    saveBtn: false,
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
     showExport: false,
     showImport: false,
     showTitle: true,
+    showDropdown: true,
+  }
+
+  const dropdownConfig = {
+    options: dropdownOptions,
+    label: 'Select Plant',
+    placeholder: 'Select Plant',
+    valueKey: 'id',
+    labelKey: 'name',
   }
 
   const saveChanges = async () => {
@@ -152,6 +184,15 @@ const HeatRate = () => {
       const tempPayload = JSON.stringify(payload)
 
       console.log('payload', tempPayload)
+
+      const res = await InputApiService.saveHeatRateData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        payload,
+      )
+
+      console.log('res', res)
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -180,38 +221,6 @@ const HeatRate = () => {
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <TextField
-        select
-        value={selectedPlant || ''}
-        onChange={(e) => {
-          const selectedPlantId = e.target.value
-          // const selectedGradeObj = grades.find(
-          //   (g) => g.gradeId === selectedGradeId,
-          // )
-          setSelectedPlant(selectedPlantId)
-        }}
-        className='dropdown-select'
-        variant='outlined'
-        label='Select'
-        InputLabelProps={{
-          shrink: true,
-          sx: {
-            fontWeight: 'bold',
-          },
-        }}
-      >
-        <MenuItem value='' disabled>
-          Select
-        </MenuItem>
-
-        {['NMD-Power Plant-1', 'NMD-Power Plant-2', 'NMD-Power Plant-3']?.map(
-          (plant) => (
-            <MenuItem key={plant} value={plant}>
-              {plant}
-            </MenuItem>
-          ),
-        )}
-      </TextField>
       <AdvanceKendoTable
         columns={columns}
         rows={rows}
@@ -225,6 +234,9 @@ const HeatRate = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        dropdownConfig={dropdownConfig}
+        selectedDropdownValue={selectedPlant}
+        setSelectedDropdownValue={setSelectedPlant}
       />
     </Box>
   )
