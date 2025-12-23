@@ -73,6 +73,12 @@ public class AOPProposedNormsServiceImpl implements AOPProposedNormsService {
 	
 	@Autowired
 	private AOPProposedNormsGradeWiseRepository aopProposedNormsGradeWiseRepository;
+	
+	@Autowired
+	private ScreenMappingRepository screenMappingRepository;
+
+	@Autowired
+	private AopCalculationRepository aopCalculationRepository;
 
 	
 	@Override
@@ -152,10 +158,19 @@ public class AOPProposedNormsServiceImpl implements AOPProposedNormsService {
 				    aopProposedNormsDTOList.add(dto);
 				}
 				
-			aopMessageVM.setCode(200);
-			aopMessageVM.setData(aopProposedNormsDTOList);
-			aopMessageVM.setMessage("Data fetched successfully");
-			return aopMessageVM;
+				Map<String, Object> map = new HashMap<>();
+
+				List<AopCalculation> aopCalculation = aopCalculationRepository
+						.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "proposed-norms");
+				map.put("aopProposedNormsDTOList", aopProposedNormsDTOList);
+				map.put("aopCalculation", aopCalculation);
+				aopMessageVM.setCode(200);
+				aopMessageVM.setData(map);
+				aopMessageVM.setMessage("Data fetched successfully");
+				return aopMessageVM;
+
+				
+			
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
@@ -239,6 +254,16 @@ public class AOPProposedNormsServiceImpl implements AOPProposedNormsService {
 	                 aopProposedNormsGradeWiseRepository.save(entity);
 	            }
 	        }
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
+			for (ScreenMapping screenMapping : screenMappingList) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
 	        AOPMessageVM aopMessageVM = new AOPMessageVM();
 	        aopMessageVM.setCode(200);
 	        aopMessageVM.setData(null);
