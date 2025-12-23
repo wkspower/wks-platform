@@ -529,8 +529,7 @@ const NormalOpNormsScreen = () => {
           severity: 'success',
         })
 
-        if (isPEPP || isPET)
-          fetchGradeDropdowns()
+        if (isPEPP || isPET) fetchGradeDropdowns()
         fetchData(gradeId)
         if (lowerVertName == 'meg') fetchDataIntermediateValues()
         getNormTransactions()
@@ -585,14 +584,12 @@ const NormalOpNormsScreen = () => {
       showCheckbox: false,
       showG: isPEPP || isPET ? true : false,
       marginBottom: isPEPP || isPET ? true : false,
-
       dropdownLabel: isPEPP || isPET ? 'Select Grade' : 'Select Mode',
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
-
       showTitleNameBusiness: true,
-      titleName: !isPEPP || !isPET ? SCREEN_NAME : 'Steady State Consumption (Norm)',
-
+      titleName:
+        !isPEPP || !isPET ? SCREEN_NAME : 'Steady State Consumption (Norm)',
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,

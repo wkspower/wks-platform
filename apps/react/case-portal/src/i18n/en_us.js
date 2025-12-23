@@ -98,6 +98,7 @@ const defs = {
     normComparisonReport: 'Norm Comparison Report',
     packagingConsumables: 'Packaging Consumables',
     dashboard: 'AOP Dashboard',
+    proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
   },
   pages: {
     dashboard: {
@@ -295,6 +296,7 @@ const defs = {
         pimsoutput: 'PIMS Output',
         packagingConsumables: 'Packaging Consumables',
         dashboard: 'AOP Dashboard',
+        proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
       },
     },
   },
