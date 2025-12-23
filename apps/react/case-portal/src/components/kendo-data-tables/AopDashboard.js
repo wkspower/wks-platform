@@ -1,30 +1,22 @@
-import React from 'react'
 import { Chip } from '@progress/kendo-react-buttons'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardBody,
+} from '@progress/kendo-react-layout'
+import React from 'react'
 import { useDispatch } from 'react-redux'
 import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
 import '../../dashboard.css'
 
-import { Box } from '@mui/material'
-import Backdrop from '@mui/material/Backdrop'
-import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
 import { useGridApiRef } from '@mui/x-data-grid'
-import kendoGetEnhancedColDefs from 'components/data-tables/CommonHeader/kendoBusinessDemColDef'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
-import { useSession } from 'SessionStoreContext'
-import {
-  CustomAccordion,
-  CustomAccordionDetails,
-  CustomAccordionSummary,
-} from 'utils/CustomAccrodian'
-import { validateFields } from 'utils/validationUtils'
-import KendoDataTables from './index'
-import ProductionvolumeData from './ProductionVoluemData'
-import PropaneBusiness from 'components/kendo-data-tables/PropaneBusiness'
 import { getRoleName } from 'services/role-service'
+import { useSession } from 'SessionStoreContext'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -190,16 +182,12 @@ const AopDashboard = () => {
   const navigate = useNavigate()
 
   const handleChipClick = (id) => {
-    // console.log(id)
-
     dispatch(
       setVerticalChangeFromDashboard({
         id,
         trigger: Date.now(),
       }),
     )
-
-    // navigate('/production-norms-plan/configuration')
   }
 
   const fetchData = async () => {
@@ -211,9 +199,6 @@ const AopDashboard = () => {
         PLANT_ID,
         AOP_YEAR,
       )
-
-      // console.log(data)
-
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -225,33 +210,47 @@ const AopDashboard = () => {
     fetchData()
   }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak])
 
+  const getStatusClass = (status) => {
+    switch (status) {
+      case 'Development':
+        return 'chip-development'
+      case 'Pre UAT':
+        return 'chip-pre-uat'
+      case 'UAT':
+        return 'chip-uat'
+      case 'Go Live':
+        return 'chip-go-live'
+      default:
+        return 'chip-development'
+    }
+  }
+
   return (
-    <div className='dashboard-container'>
-      <h6 className='dashboard-header'>Digital AOP Dashboard</h6>
+    <div className='dashboard-root'>
+      <h2 className='dashboard-title'>Digital AOP Dashboard</h2>
 
       {data.map((section) => (
-        <div key={section.plant} className='plant-section'>
-          <div className='plant-title'>{section.plant}</div>
+        <Card key={section.plant} className='plant-card'>
+          <CardHeader className='plant-card-header'>
+            <CardTitle className='plant-card-title'>{section.plant}</CardTitle>
+          </CardHeader>
 
-          <div className='chip-grid'>
-            {section.rows.map((row) => (
-              <div key={row.id} className='chip-item'>
-                <div className='chip-label'>{row.name}</div>
+          <CardBody className='plant-card-body'>
+            <div className='plant-grid'>
+              {section.rows.map((row) => (
+                <div key={row.id} className='plant-tile'>
+                  <div className='plant-tile-title'>{row.name}</div>
 
-                <Chip
-                  text={row.status}
-                  onClick={() => handleChipClick(row.id)}
-                  style={{
-                    ...getStatusStyle(row.status),
-                    width: '100%',
-                    justifyContent: 'center',
-                    fontWeight: 600,
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+                  <Chip
+                    text={row.status}
+                    onClick={() => handleChipClick(row.id)}
+                    className={`status-chip ${getStatusClass(row.status)}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
       ))}
     </div>
   )

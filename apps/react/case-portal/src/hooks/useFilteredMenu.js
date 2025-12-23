@@ -1,4 +1,4 @@
-import { IconUserCog } from '@tabler/icons-react'
+import { IconUserCog, IconLayoutDashboard } from '@tabler/icons-react'
 import { useMenuContext } from 'menu/menuProvider'
 import { useMemo } from 'react'
 import { useSession } from 'SessionStoreContext'
@@ -59,7 +59,7 @@ const useFilteredMenu = () => {
         title: i18n.t('menu.dashboard'),
         type: 'item',
         url: '/dashboard',
-        icon: IconUserCog,
+        icon: IconLayoutDashboard,
         breadcrumbs: true,
       },
     ],
@@ -74,8 +74,8 @@ const useFilteredMenu = () => {
   const filteredMenu = useMemo(() => {
     const filteredMenuItem = filterMenuByRole(menuItems || [])
     const updatedMenu = isPlantManager
-      ? [...filteredMenuItem, userManagementRoute]
-      : filteredMenuItem
+      ? [dashboardRoute, ...filteredMenuItem, userManagementRoute]
+      : [dashboardRoute, ...filteredMenuItem]
 
     return {
       items: updatedMenu,

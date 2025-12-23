@@ -199,24 +199,19 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   let breadcrumbContent = <Typography />
   let itemTitle = ''
 
-  itemContentDashboard = (
-    <Button
-      variant='outlined'
-      size='small'
-      className='btn-dashboard'
-      disableRipple
-      onClick={() => {
-        // dispatch(
-        //   setVerticalChangeFromDashboard({
-        //     id: '21F54684-3AB2-43C8-8459-D1A7C8F158F0',
-        //   }),
-        // )
-        navigate('/dashboard')
-      }}
-    >
-      Go to Dashboard
-    </Button>
-  )
+  // itemContentDashboard = (
+  //   <Button
+  //     variant='outlined'
+  //     size='small'
+  //     className='btn-dashboard'
+  //     disableRipple
+  //     onClick={() => {
+  //       navigate('/dashboard')
+  //     }}
+  //   >
+  //     Go to Dashboard
+  //   </Button>
+  // )
 
   // items
   if (item && item.type === 'item') {

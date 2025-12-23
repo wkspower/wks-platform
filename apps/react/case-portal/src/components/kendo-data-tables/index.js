@@ -183,6 +183,7 @@ const KendoDataTables = ({
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
   const keycloak = useSession()
+  const gridWrapperRef = useRef(null)
   // const READ_ONLY = getRoleName(keycloak)
 
   const { verticalChange, oldYear, year } = dataGridStore
@@ -193,6 +194,20 @@ const KendoDataTables = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       gridWrapperRef.current && !gridWrapperRef.current.contains(event.target)
+  //     ) {
+  //       setEdit({})
+  //     }
+  //   }
+  //   document.addEventListener('mousedown', handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener('mousedown', handleClickOutside)
+  //   }
+  // }, [])
 
   const initialGroup = groupBy
     ? [
@@ -638,6 +653,7 @@ const KendoDataTables = ({
   }
 
   const saveModalOpen = async () => {
+    setEdit({})
     if (READ_ONLY) return
     setIsButtonDisabled(true)
     setOpenSaveDialogeBox(true)
@@ -1520,7 +1536,7 @@ const KendoDataTables = ({
         </Box>
       )}
 
-      <div className='kendo-data-grid'>
+      <div ref={gridWrapperRef} className='kendo-data-grid'>
         <Tooltip openDelay={50} position='auto' anchorElement='target'>
           <ExcelExport
             data={rows}
