@@ -28,6 +28,7 @@ import { OptimizerDataApiService } from 'services/optimizer-api-service'
 import CrakcerConstantsBestAchieved from './CrakcerConstantsBestAchieved'
 import CrakcerConstants from './CrakcerConstants'
 import { validateFields } from 'utils/validationUtils'
+import CrackerConfiguration from './CrackerConfiguration'
 // Constants
 const MONTHS = [
   'april',
@@ -681,13 +682,7 @@ const NormalOpNormsScreenCracker = () => {
         setLoading(false)
       }
     },
-    [
-      fetchModeData,
-      fetchFinalNorms,
-      selectedTab,
-      PLANT_ID,
-      AOP_YEAR,
-    ],
+    [fetchModeData, fetchFinalNorms, selectedTab, PLANT_ID, AOP_YEAR],
   )
 
   const fetchAllDataNormsSelection = useCallback(
@@ -1188,9 +1183,7 @@ const NormalOpNormsScreenCracker = () => {
           reportTypes={reportTypes}
         />
       )} */}
-      {selectedTab === 0 && (
-          <CrackerConfiguration tabIndex={0} />
-        )}
+      {selectedTab === 0 && <CrackerConfiguration tabIndex={0} />}
       {/* {selectedTab === 1 && (
         <SelectivityData
           rows={productionRowsConstants}

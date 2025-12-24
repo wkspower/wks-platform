@@ -7,7 +7,7 @@ import { NormalOperationNormsApiService } from 'services/normal-operation-norms-
 import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders' 
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import {
   Backdrop,
   CircularProgress,
@@ -68,19 +68,19 @@ const CrackerConfiguration = (props) => {
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
   const [gradeId, setGradeId] = React.useState(null)
 
-  const [remarkDialogOpen, setRemarkDialogOpen] =
-    useState(false)
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
-  const [modifiedCellsConfiguration, setModifiedCellsConfiguration] = React.useState({})
+  const [modifiedCellsConfiguration, setModifiedCellsConfiguration] =
+    React.useState({})
   const [open1, setOpen1] = useState(false)
   const [currentRowId, setCurrentRowId] = useState(null)
   const [rowsConstants, setRowsConstants] = useState()
-  const headerMap = generateHeaderNames(AOP_YEAR) 
+  const headerMap = generateHeaderNames(AOP_YEAR)
   const unsavedChangesRef = React.useRef({
     unsavedRows: {},
     rowsBeforeChange: {},
   })
-  const tabIndex = props.tabIndex ?? 0;
+  const tabIndex = props.tabIndex ?? 0
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -99,160 +99,157 @@ const CrackerConfiguration = (props) => {
     }
   }
 
-
   const colDefsConfiguration = [
-  {
-    field: "Particulars",
-    title: "Type",
-    widthT: 200,
-    editable: false,
-    hidden: true
-  },
-  {
-    field: "normParameterFKId",
-    hidden: true
-  },
-  {
-    field: "productName",
-    title: "Particulars",
-    widthT: 140,
-    editable: false
-  },
-  {
-    field: "UOM",
-    title   : "UOM",
-    editable: false,
-    widthT: 60
-  },
-  {
-    field: "apr",
-    title: headerMap[4],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "may",
-    title: headerMap[5],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "jun",
-    title: headerMap[6],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "jul",
-    title: headerMap[7],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "aug",
-    title: headerMap[8],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "sep",
-    title: headerMap[9],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "oct",
-    title: headerMap[10],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "nov",
-    title: headerMap[11],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "dec",
-    title: headerMap[12],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "jan",
-    title: headerMap[1],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "feb",
-    title: headerMap[2],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "mar",
-    title: headerMap[3],
-    editable: true,
-    width: 120,
-    align: 'right',
-    format: valueFormat,
-    type: 'negativeNumber',
-  },
-  {
-    field: "remarks",
-    title: "Remark",
-    widthT: 130,
-    editable: true
-  },
-  {
-    field: "isEditable",
-    title: "isEditable",
-    hidden: true
-  }
-]
-
+    {
+      field: 'Particulars',
+      title: 'Type',
+      widthT: 200,
+      editable: false,
+      hidden: true,
+    },
+    {
+      field: 'normParameterFKId',
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 140,
+      editable: false,
+    },
+    {
+      field: 'UOM',
+      title: 'UOM',
+      editable: false,
+      widthT: 60,
+    },
+    {
+      field: 'apr',
+      title: headerMap[4],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'may',
+      title: headerMap[5],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'jun',
+      title: headerMap[6],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'jul',
+      title: headerMap[7],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'aug',
+      title: headerMap[8],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'sep',
+      title: headerMap[9],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'oct',
+      title: headerMap[10],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'nov',
+      title: headerMap[11],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'dec',
+      title: headerMap[12],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'jan',
+      title: headerMap[1],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'feb',
+      title: headerMap[2],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'mar',
+      title: headerMap[3],
+      editable: true,
+      width: 120,
+      align: 'right',
+      format: valueFormat,
+      type: 'negativeNumber',
+    },
+    {
+      field: 'remarks',
+      title: 'Remark',
+      widthT: 130,
+      editable: true,
+    },
+    {
+      field: 'isEditable',
+      title: 'isEditable',
+      hidden: true,
+    },
+  ]
 
   useEffect(() => {
     if (!PLANT_ID || !AOP_YEAR) return
     fetchData()
   }, [PLANT_ID, AOP_YEAR])
 
-
-    const fetchData = useCallback(
+  const fetchData = useCallback(
     async (gradeId = null) => {
       setProductionRows([])
       setLoading(true)
@@ -387,44 +384,45 @@ const CrackerConfiguration = (props) => {
     uploadCrackerConfiguration(rawFile)
   }
   const downloadExcelForConfiguration = async () => {
-  setSnackbarOpen(true)
-  setSnackbarData({
-    message: 'Excel download started!',
-    severity: 'success',
-  })
-
-  try {
-    var report_t = []
-
-    if (tabIndex == 0) {
-      report_t = reportTypes.filter(
-        (type) =>
-          type !== 'Report Manual Entry' &&
-          type !== 'Shutdown' &&
-          type !== 'PIO Impact',
-      )
-    }
-  
-    await DataService.getConfigurationExcel(
-      keycloak,
-      report_t,
-      PLANT_ID,
-      AOP_YEAR,
-      EXCEL_EXPORT_TITLE,
-    )
-    setSnackbarData({
-      message: 'Excel download completed successfully!',
-      severity: 'success',
-    })
-  } catch (error) {
-    console.error('Error!', error)
     setSnackbarOpen(true)
     setSnackbarData({
-      message: 'Failed to download Excel.',
-      severity: 'error',
+      message: 'Excel download started!',
+      severity: 'success',
     })
+
+    try {
+      var report_t = []
+
+      if (tabIndex == 0) {
+        report_t = reportTypes.filter(
+          (type) =>
+            type !== 'Report Manual Entry' &&
+            type !== 'Shutdown' &&
+            type !== 'PIO Impact',
+        )
+      }
+
+      await DataService.getConfigurationExcel(
+        keycloak,
+        report_t,
+        PLANT_ID,
+        AOP_YEAR,
+        EXCEL_EXPORT_TITLE,
+        'Configuration',
+      )
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error!', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to download Excel.',
+        severity: 'error',
+      })
+    }
   }
-}
   const adjustedPermissionsConfiguration = getAdjustedPermissions(
     {
       showAction: false,
@@ -441,68 +439,67 @@ const CrackerConfiguration = (props) => {
     isOldYear,
   )
   const saveCatalystData = async (data) => {
-  setLoading(true)
-  try {
-    const payload = data.map((row) => ({
-      apr: row.apr || row.ConstantValue || null,
-      may: row.may || null,
-      jun: row.jun || null,
-      jul: row.jul || null,
-      aug: row.aug || null,
-      sep: row.sep || null,
-      oct: row.oct || null,
-      nov: row.nov || null,
-      dec: row.dec || null,
-      jan: row.jan || null,
-      feb: row.feb || null,
-      mar: row.mar || null,
-      UOM: '',
-      auditYear: AOP_YEAR,
-      normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
-      remarks: row.remarks,
-      id: row.idFromApi || null,
-    }))
+    setLoading(true)
+    try {
+      const payload = data.map((row) => ({
+        apr: row.apr || row.ConstantValue || null,
+        may: row.may || null,
+        jun: row.jun || null,
+        jul: row.jul || null,
+        aug: row.aug || null,
+        sep: row.sep || null,
+        oct: row.oct || null,
+        nov: row.nov || null,
+        dec: row.dec || null,
+        jan: row.jan || null,
+        feb: row.feb || null,
+        mar: row.mar || null,
+        UOM: '',
+        auditYear: AOP_YEAR,
+        normParameterFKId: row.normParameterFKId || row.NormParameter_FK_Id,
+        remarks: row.remarks,
+        id: row.idFromApi || null,
+      }))
 
-    const response = await DataService.saveCatalystData(
-      PLANT_ID,
-      payload,
-      keycloak,
-      AOP_YEAR,
-    )
+      const response = await DataService.saveCatalystData(
+        PLANT_ID,
+        payload,
+        keycloak,
+        AOP_YEAR,
+      )
 
-    if (response) {
+      if (response) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        setModifiedCellsConfiguration({})
+        setLoading(false)
+        fetchData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Saved Successfully!',
-        severity: 'success',
-      })
-      setModifiedCellsConfiguration({})
-      setLoading(false)
-      fetchData()
-    } else {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Data Save Failed!',
+        message: 'Error saving data!',
         severity: 'error',
       })
+      setLoading(false)
+    } finally {
+      setLoading(false)
     }
-    return response
-  } catch (error) {
-    console.error('Error saving data:', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Error saving data!',
-      severity: 'error',
-    })
-    setLoading(false)
   }
-  finally {
-    setLoading(false)
-      }
-}
-    const saveChanges = React.useCallback(async () => {
+  const saveChanges = React.useCallback(async () => {
     try {
-      var data = Object.values(modifiedCellsConfiguration) 
+      var data = Object.values(modifiedCellsConfiguration)
 
       const requiredFields = ['remarks']
       const validationMessage = validateFields(data, requiredFields)
@@ -520,7 +517,7 @@ const CrackerConfiguration = (props) => {
     }
   }, [modifiedCellsConfiguration])
 
-   console.log('productionRows', productionRows)
+  //  console.log('productionRows', productionRows)
   return (
     <div>
       <Backdrop
@@ -554,7 +551,7 @@ const CrackerConfiguration = (props) => {
           currentRemark={currentRemark}
           setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
-          unsavedChangesRef={unsavedChangesRef} 
+          unsavedChangesRef={unsavedChangesRef}
           handleRemarkCellClick={handleRemarkCellClick}
           permissions={adjustedPermissionsConfiguration}
           groupBy='Particulars'

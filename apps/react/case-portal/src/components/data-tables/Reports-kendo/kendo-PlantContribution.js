@@ -61,14 +61,29 @@ export default function PlantContribution() {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [rows, setRows] = useState()
 
-  const FORMAT_VALUES_3_DECIMAL =
-    lowerVertName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
-  const FORMAT_VALUES_2_DECIMAL =
-    lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
-  const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+  const IS_CRACKER = lowerVertName === 'cracker'
+
+  const FORMAT_VALUES_3_DECIMAL = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'elastomer'
+      ? '{0:0.000}'
+      : '{0:0.00}'
+
+  const FORMAT_VALUES_2_DECIMAL = IS_CRACKER ? '{0:0.0000}' : '{0:0.00}'
+
+  const FORMAT_VALUES_COST = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'elastomer'
+      ? '{0:0}'
+      : '{0:0.00}'
+
   const FORMAT_VALUES_PRICE = '{0:0}'
-  const FORMAT_VALUES_NORMS =
-    lowerVertName == 'meg' || lowerVertName == 'elastomer' ? '{0:0.00000}' : '{0:0.00}'
+
+  const FORMAT_VALUES_NORMS = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'meg' || lowerVertName === 'elastomer'
+      ? '{0:0.00000}'
+      : '{0:0.00}'
 
   const loadAll = async () => {
     setLoading(true)
