@@ -149,6 +149,7 @@ const ProposedConsumptionNorms = () => {
 
       const response = await ConsumptionNormsApiService.saveProposedNormsData(
         PLANT_ID,
+        AOP_YEAR,
         payload,
         keycloak,
       )
@@ -280,7 +281,7 @@ const ProposedConsumptionNorms = () => {
       setCalculationObject(response?.data?.aopCalculation)
 
       // const formattedData = response?.data?.aopProposedNormsDTOList?.map((item, index) => {
-      const formattedData = response?.data?.map((item, index) => {
+      const formattedData = response?.data?.aopProposedNormsDTOList?.map((item, index) => {
         return {
           ...item,
           idFromApi: item.id,
@@ -479,6 +480,7 @@ const ProposedConsumptionNorms = () => {
               columns={productionColumns}
               rows={rows}
               setRows={setRows}
+              fetchData={fetchData}
               getRowId={(row) => row.id}
               paginationOptions={[100, 200, 300]}
               saveChanges={saveChanges}

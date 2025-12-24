@@ -157,8 +157,8 @@ async function getProposedNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function saveProposedNormsData(PLANT_ID, payload, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/proposed-consumption`
+async function saveProposedNormsData(PLANT_ID, AOP_YEAR, payload, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/proposed-consumption?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
