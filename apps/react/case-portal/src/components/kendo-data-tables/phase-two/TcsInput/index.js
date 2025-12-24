@@ -9,6 +9,7 @@ import DefaultTcsInput from './DefaultTcsInput'
 import { generateMockData, getColumnsForTab } from './utility'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
+import CrudBlendWindow from './CrudBlendWindow'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -22,8 +23,9 @@ const renderTabComponent = (tabDisplayName, props) => {
     case 'CPP Units SD Plan':
     case 'PCG Outlook':
     case 'ROGC':
-    case 'Crude Blend Window':
       return <DefaultTcsInput {...props} tabDisplayName={tabDisplayName} />
+    case 'Crude Blend Window':
+      return <CrudBlendWindow {...props} />
     default:
       return null
   }

@@ -22,22 +22,18 @@ public class TCSUnitCapacity {
     @Column(name = "Id", nullable = false, updatable = false)
     private UUID id;
 
+    @NotNull(message = "Capacity Type is required")
+    @Size(max = 20)
+    @Column(name = "CapacityType", length = 50, nullable = false)
+    private String capacityType;
+
     @NotNull(message = "UOM is required")
     @Size(max = 50)
     @Column(name = "UOM", length = 50, nullable = false)
     private String uom;
 
-    @Column(name = "KBPSD", precision = 18, scale = 4)
-    private Double kbpsd;
-
-    @Column(name = "KTPD", precision = 18, scale = 4)
-    private Double ktpd;
-
-    @Column(name = "TPD", precision = 18, scale = 4)
-    private Double tpd;
-
-    @Column(name = "TPH", precision = 18, scale = 4)
-    private Double tph;
+    @Column(name = "Value", precision = 18, scale = 4)
+    private Double value;
 
     @Size(max = 1000)
     @Column(name = "Remark", length = 1000)

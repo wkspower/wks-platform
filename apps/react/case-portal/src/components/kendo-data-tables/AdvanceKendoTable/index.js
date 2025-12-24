@@ -225,7 +225,7 @@ const AdvanceKendoTable = ({
   const setWidth = useCallback(
     (minWidth) => {
       if (minWidth === undefined) {
-        minWidth = 80
+        minWidth = 50
       }
 
       const allColumns = extractAllColumns(columns)
@@ -938,7 +938,7 @@ const AdvanceKendoTable = ({
             key={col.field}
             field={col.field}
             title={col.title || col.headerName}
-            width={setWidth(col?.minWidth || 220)}
+            width={setWidth(col?.minWidth || 120)}
             cells={{
               data: (cellProps) => (
                 <RemarkCell

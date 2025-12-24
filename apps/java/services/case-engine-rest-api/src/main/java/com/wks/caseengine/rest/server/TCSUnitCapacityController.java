@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.wks.caseengine.dto.TCSUnitCapacityDTO;
+import com.wks.caseengine.dto.TCSUnitCapacityUOMDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.TCSUnitCapacityService;
 
@@ -20,17 +21,42 @@ public class TCSUnitCapacityController {
     @GetMapping("/tcs-unit-capacity")
     public Map<String, Object> getAllTCSUnitCapacity(
         @RequestParam String plantId,
-        @RequestParam String year) {
+        @RequestParam String year,
+        @RequestParam String capacityType,
+        @RequestParam String uom) {
 
-        return tcsUnitCapacityService.getAll(plantId, year);
+        return tcsUnitCapacityService.getAll(
+            plantId,
+            year,
+            capacityType,
+            uom);
     }
 
     @PostMapping("/tcs-unit-capacity")
     public AOPMessageVM saveOrUpdate(
         @RequestParam String plantId,
         @RequestParam String year,
+        @RequestParam String capacityType,
+        @RequestParam String uom,
         @RequestBody List<TCSUnitCapacityDTO> payload) {
 
-        return tcsUnitCapacityService.saveOrUpdate(plantId, year, payload);
+        return tcsUnitCapacityService.saveOrUpdate(
+            plantId,
+            year,
+            capacityType,
+            uom,
+            payload);
+    }
+
+    @GetMapping("/tcs-unit-capacity/uom")
+    public List<TCSUnitCapacityUOMDTO> getAllUOM(
+        @RequestParam String plantId,
+        @RequestParam String year,
+        @RequestParam String capacityType
+    ) {
+        return tcsUnitCapacityService.getAllUOM(
+            plantId,
+            year,
+            capacityType);
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.TCSUnitCapacityDTO;
+import com.wks.caseengine.dto.TCSUnitCapacityUOMDTO;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.TCSUnitCapacity;
@@ -45,65 +46,14 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 	private VerticalsRepository verticalRepository;
     @Autowired
     private TCSUnitCapacityRepository tcsUnitCapacityRepository;
-
-    private static final Set<String> DTA_KEYS = Set.of(
-        "id",
-        "particulates",
-        "uom",
-        "kbpsd",
-        "remark",
-        "insertedDateTime");
-
-    private static final Set<String> SEZ_KEYS = Set.of(
-        "id",
-        "particulates",
-        "kbpsd",
-        "ktpd",
-        "remark",
-        "insertedDateTime");
-
-    private static final Set<String> C2_KEYS = Set.of(
-        "id",
-        "particulates",
-        "tph",
-        "remark",
-        "insertedDateTime");
-
-    private static final Map<String, Set<String>> SITE_KEYS = Map.of(
-        "DTA", DTA_KEYS,
-        "SEZ", SEZ_KEYS,
-        "C2", C2_KEYS);
-
-    private static final Set<String> DTA_HEADERS = Set.of(
-        "Id",
-        "Particulars",
-        "UOM",
-        "KBPSD",
-        "Remark",
-        "InsertedDateTime");
-
-    private static final Set<String> SEZ_HEADERS = Set.of(
-        "Id",
-        "Particulars",
-        "KBPSD",
-        "KTPD",
-        "Remark",
-        "InsertedDateTime");
-
-    private static final Set<String> C2_HEADERS = Set.of(
-        "Id",
-        "Particulars",
-        "TPH",
-        "Remark",
-        "InsertedDateTime");
-
-    private static final Map<String, Set<String>> SITE_HEADERS = Map.of(
-        "DTA", DTA_HEADERS,
-        "SEZ", SEZ_HEADERS,
-        "C2", C2_HEADERS);
-   
+  
     @Override
-    public Map<String, Object> getAll(String plantId, String aopYear) {
+    public Map<String, Object> getAll(
+        String plantId,
+        String aopYear,
+        String capacityType,
+        String uom) {
+        
         // Validation
         Plants plant = plantsRepository
             .findById(UUID.fromString(plantId))
@@ -122,43 +72,19 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
-                site.getName().toUpperCase());
+                site.getName().toUpperCase(),
+                capacityType,
+                uom);
             List<TCSUnitCapacityDTO> resultsList = new ArrayList<>();
-            // values mapping
-            if (site.getName().equalsIgnoreCase("SEZ")) {
-                for (Object[] row : results) {
-                    TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
-                    dto.setId(row[0] != null ? row[0].toString() : null);
-                    dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                    dto.setUom(null);
-                    dto.setKbpsd(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
-                    dto.setKtpd(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                    dto.setRemark(row[4] != null ? row[4].toString() : null);
-                    dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
-                    resultsList.add(dto);
-                }
-            }
-            else if (site.getName().equalsIgnoreCase("DTA")) {
-                for (Object[] row : results) {
-                    TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
-                    dto.setId(row[0] != null ? row[0].toString() : null);
-                    dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                    dto.setUom(row[2] != null ? row[2].toString() : null);
-                    dto.setKbpsd(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                    dto.setRemark(row[4] != null ? row[4].toString() : null);
-                    dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
-                    resultsList.add(dto);
-                }
-            }
-            else if (site.getName().equalsIgnoreCase("C2")) {
-                for (Object[] row : results) {
-                    TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
-                    dto.setId(row[0] != null ? row[0].toString() : null);
-                    dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                    dto.setTph(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
-                    dto.setRemark(row[3] != null ? row[3].toString() : null);
-                    resultsList.add(dto);
-                }
+            for (Object[] row : results) {
+                TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
+                dto.setId(row[0] != null ? row[0].toString() : null);
+                dto.setParticulates(row[1] != null ? row[1].toString() : null);
+                dto.setUom(row[2] != null ? row[2].toString() : null);
+                dto.setValue(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
+                dto.setRemark(row[4] != null ? row[4].toString() : null);
+                dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
+                resultsList.add(dto);
             }
             map.put("results", resultsList);
 
@@ -167,16 +93,14 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
-                site.getName().toUpperCase());
+                site.getName().toUpperCase(),
+                capacityType,
+                uom);
             map.put("headers", headers);
 
             List<String> keys = new ArrayList<>();
-            // keys mapping
-            var allowedKeys = SITE_KEYS.get(site.getName().toUpperCase());
             for (Field field : TCSUnitCapacityDTO.class.getDeclaredFields()) {
-                String fieldName = field.getName();
-                if (allowedKeys != null && allowedKeys.contains(fieldName))
-                    keys.add(fieldName);
+                keys.add(field.getName());
             }
             map.put("keys", keys);
 
@@ -190,22 +114,26 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         String plantId,
         String aopYear,
         String verticalName,
-        String siteName) {
+        String siteName,
+        String capacityType,
+        String uom) {
             
         try {            
             // Stored Procedure name
             String procedureName = "GetTcsUnitCapacity";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
-                procedureName = verticalName + "_" + siteName + "_GetTcsUnitCapacity";
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
             }
 
             // Prepare native SQL call with parameters
-            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType, @uom = :uom";
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
             query.setParameter("plantId", plantId);
             query.setParameter("aopYear", aopYear);
+            query.setParameter("capacityType", capacityType);
+            query.setParameter("uom", uom);
 
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -219,13 +147,15 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         String plantId,
         String aopYear,
         String verticalName,
-        String siteName) {
+        String siteName,
+        String capacityType,
+        String uom) {
 
         String procedureName = "GetTcsUnitCapacity";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
-            procedureName = verticalName + "_" + siteName + "_GetTcsUnitCapacity";
+            procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
         }
-        String callableSql = "{call " + procedureName + "(?, ?)}";
+        String callableSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
         List<String> headers = new ArrayList<>();
 		try (
@@ -234,6 +164,8 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 
 			stmt.setString(1, plantId);
 			stmt.setString(2, aopYear);
+            stmt.setString(3, capacityType);
+            stmt.setString(4, uom);
 
 			boolean hasResultSet = stmt.execute();
 
@@ -247,13 +179,11 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 				try (ResultSet rs = stmt.getResultSet()) {
 					ResultSetMetaData metaData = rs.getMetaData();
 					int columnCount = metaData.getColumnCount();
-                    var allowedHeaders = SITE_HEADERS.get(siteName.toUpperCase());
 
 					for (int i = 1; i <= columnCount; i++)
                     {
                         String columnLabel = metaData.getColumnLabel(i);
-                        if (allowedHeaders != null && allowedHeaders.contains(columnLabel))
-						    headers.add(columnLabel);
+                        headers.add(columnLabel);
 					}
 				}
 			}
@@ -268,6 +198,8 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
     public AOPMessageVM saveOrUpdate(
         String plantId,
         String year,
+        String capacityType,
+        String uom,
         List<TCSUnitCapacityDTO> dtoList) {
         if (dtoList == null || dtoList.isEmpty()) {
             throw new RestInvalidArgumentException("Payload cannot be empty", null);
@@ -295,11 +227,9 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
                     entity.setInsertedDateTime(dto.getInsertedDateTime());
                     entity.setUpdatedDateTime(new Date());
                 }
+                entity.setCapacityType(capacityType);
                 entity.setUom(dto.getUom());
-                entity.setKbpsd(dto.getKbpsd());
-                entity.setKtpd(dto.getKtpd());
-                entity.setTpd(dto.getTpd());
-                entity.setTph(dto.getTph());
+                entity.setValue(dto.getValue());
                 entity.setRemark(dto.getRemark());
                 entity.setAopYear(year);
                 entity.setPlantFkId(UUID.fromString(plantId));
@@ -325,8 +255,72 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         return TCSUnitCapacityDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
             .uom(entity.getUom())
-            .kbpsd(entity.getKbpsd())
+            .value(entity.getValue())
             .remark(entity.getRemark())
             .build();
+    }
+
+    @Override
+    public List<TCSUnitCapacityUOMDTO> getAllUOM(
+        String plantId,
+        String aopYear,
+        String capacityType) {
+
+            Plants plant = plantsRepository
+                .findById(UUID.fromString(plantId))
+                .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));
+            Verticals vertical = verticalRepository
+                .findById(plant.getVerticalFKId())
+                .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
+
+            try {
+                List<TCSUnitCapacityUOMDTO> results = getAllUOMData(
+                    vertical.getName().toUpperCase(),
+                    plantId,
+                    aopYear,
+                    capacityType);
+                return results;
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to fetch data", e);
+            }
+        }
+
+    private List<TCSUnitCapacityUOMDTO> getAllUOMData(
+        String verticalName,
+        String plantId,
+        String aopYear,
+        String capacityType) {
+        try {            
+            // Stored Procedure name
+            String procedureName = "GetTcsUnitCapacity_UOM";
+            if (!"MEG".equalsIgnoreCase(verticalName)) {
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM";
+            }
+
+            // Prepare native SQL call with parameters
+            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType";
+
+            // Call the stored procedure
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("plantId", plantId);
+            query.setParameter("aopYear", aopYear);
+            query.setParameter("capacityType", capacityType);
+
+            var queryResults = (List<Object[]>)query.getResultList();
+            var results = new ArrayList<TCSUnitCapacityUOMDTO>();
+            for (Object[] row : queryResults)
+            {
+                var dto = new TCSUnitCapacityUOMDTO();
+                dto.setId(row[0] != null ? row[0].toString() : null);
+                dto.setName(row[1] != null ? row[1].toString() : null);
+                results.add(dto);
+            }
+
+            return results;
+        } catch (IllegalArgumentException e) {
+            throw new RestInvalidArgumentException("Invalid UUID format", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch data", e);
+        }
     }
 }

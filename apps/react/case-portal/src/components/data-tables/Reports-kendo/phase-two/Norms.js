@@ -133,7 +133,7 @@ const Norms = () => {
     {
       title: headerMap[4],
       children: [
-        { field: 'apr.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'apr.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'apr.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'apr.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'apr.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -145,7 +145,7 @@ const Norms = () => {
     {
       title: headerMap[5],
       children: [
-        { field: 'may.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'may.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'may.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'may.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'may.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -157,7 +157,7 @@ const Norms = () => {
     {
       title: headerMap[6],
       children: [
-        { field: 'jun.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jun.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'jun.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'jun.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'jun.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -169,7 +169,7 @@ const Norms = () => {
     {
       title: headerMap[7],
       children: [
-        { field: 'jul.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jul.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'jul.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'jul.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'jul.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -181,7 +181,7 @@ const Norms = () => {
     {
       title: headerMap[8],
       children: [
-        { field: 'aug.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'aug.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'aug.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'aug.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'aug.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -193,7 +193,7 @@ const Norms = () => {
     {
       title: headerMap[9],
       children: [
-        { field: 'sep.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'sep.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'sep.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'sep.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'sep.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -205,7 +205,7 @@ const Norms = () => {
     {
       title: headerMap[10],
       children: [
-        { field: 'oct.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'oct.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'oct.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'oct.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'oct.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -217,7 +217,7 @@ const Norms = () => {
     {
       title: headerMap[11],
       children: [
-        { field: 'nov.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'nov.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'nov.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'nov.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'nov.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -229,7 +229,7 @@ const Norms = () => {
     {
       title: headerMap[12],
       children: [
-        { field: 'dec.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'dec.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'dec.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'dec.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat },
         { field: 'dec.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -241,7 +241,7 @@ const Norms = () => {
     {
       title: headerMap[1],
       children: [
-        { field: 'jan.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'jan.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'jan.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'jan.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat, minWidth: 80 },
         { field: 'jan.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -253,7 +253,7 @@ const Norms = () => {
     {
       title: headerMap[2],
       children: [
-        { field: 'feb.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'feb.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'feb.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'feb.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat, minWidth: 80 },
         { field: 'feb.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },
@@ -266,7 +266,7 @@ const Norms = () => {
       title: headerMap[3],
       minWidth: 320,
       children: [
-        { field: 'mar.QTY', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
+        { field: 'mar.qty', title: 'Qty', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'mar.generationUom', title: 'Generation UOM', width: 80, editable: false, type: 'number1', format: valueFormat },
         { field: 'mar.norms', title: 'Norms', width: 80, editable: true, type: 'number1', format: valueFormat, minWidth: 80 },
         { field: 'mar.quantity', title: 'Quantity', width: 80, minWidth: 80, type: 'number', format: valueFormat },

@@ -15,10 +15,7 @@ public class TCSUnitCapacityDTO {
     private String id;          
     private String particulates;
     private String uom;
-    private Double kbpsd;
-    private Double ktpd;
-    private Double tpd;
-    private Double tph;
+    private Double value;
     private String remark;
     private Date insertedDateTime;
 }

@@ -9,6 +9,7 @@ export const TcsApiService = {
   getTcsVisibleTabs,
 
   // TCS Unit Capacity Data APIs
+  getTcsUnitCapacityUOM,
   getTcsUnitCapacityData,
   saveUnitCapacityData,
 
@@ -62,8 +63,8 @@ async function getTcsVisibleTabs(keycloak, VERTICAL_ID, SITE_ID, PLANT_ID) {
 }
 
 // ===================== || TCS Unit Capacity Data APIs || ===================== //
-async function getTcsUnitCapacityData(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${plantId}&year=${year}`;
+async function getTcsUnitCapacityUOM(keycloak, plantId, year, capacityType) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity/uom?plantId=${plantId}&year=${year}&capacityType=${capacityType}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -81,8 +82,27 @@ async function getTcsUnitCapacityData(keycloak, plantId, year) {
   }
 }
 
-async function saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+async function getTcsUnitCapacityData(keycloak, plantId, year, capacityType, selectedUOM) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${plantId}&year=${year}&capacityType=${capacityType}&uom=${selectedUOM}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveUnitCapacityData(keycloak, PLANT_ID, AOP_YEAR, capacityType, uom, payload) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}&capacityType=${capacityType}&uom=${uom}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
