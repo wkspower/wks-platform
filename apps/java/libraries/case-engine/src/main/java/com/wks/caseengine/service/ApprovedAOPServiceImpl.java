@@ -105,4 +105,42 @@ public class ApprovedAOPServiceImpl implements ApprovedAOPService {
 	        throw new RuntimeException("Failed to update proposed norms", ex);
 	    }
 	}
+	
+	@Override
+	public AOPMessageVM getApprovedAOP( String plantId,String year) {
+	    try {
+	    	 	AOPMessageVM aopMessageVM = new AOPMessageVM();
+		        aopMessageVM.setCode(200);
+		        List<ApprovedAOP>  approvedAOPs=approvedAOPRepository.findByYearAndPlant( year,  UUID.fromString(plantId));
+
+	            if (approvedAOPs!=null && approvedAOPs.size()>0) {
+	            	aopMessageVM.setMessage("Data fetched successfully");
+	            	aopMessageVM.setData(approvedAOPs);
+	            }else {
+	            	aopMessageVM.setMessage("No record found");
+	            	aopMessageVM.setData(null);
+	            }
+	        return aopMessageVM;
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to update proposed norms", ex);
+	    }
+	}
+
+	@Override
+	public AOPMessageVM deleteApprovedAOP(String id) {
+		Optional<ApprovedAOP> approvedAOPOPT=approvedAOPRepository.findById(UUID.fromString(id));
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+        aopMessageVM.setCode(200);
+		if(approvedAOPOPT.isPresent()) {
+			ApprovedAOP approvedAOP= approvedAOPOPT.get();
+			approvedAOPRepository.delete(approvedAOP);
+			aopMessageVM.setData(approvedAOP);
+			aopMessageVM.setMessage("Data deleted successfully");
+		}else {
+			aopMessageVM.setData(null);
+			aopMessageVM.setMessage("No record found with Id="+id);
+		}
+		return aopMessageVM;
+	}
+
 }
