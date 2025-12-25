@@ -902,19 +902,32 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	}
 	
 	public String getBasisSummary(String plantId, String year) {
-		AOPMessageVM designBasis= aopMaintenanceDesignBasisService.getMaintenanceDesignBasis(plantId,year);
-        List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs =(List<AOPMaintenanceDesignRemarksDTO>) designBasis.getData();
-        AOPMaintenanceDesignRemarksDTO aopMaintenanceDesignRemarksDTO = aopMaintenanceDesignRemarksDTOs.get(0);
-        return aopMaintenanceDesignRemarksDTO.getSummary();
+	    AOPMessageVM designBasis = aopMaintenanceDesignBasisService.getMaintenanceDesignBasis(plantId, year);
+	    
+	    if (designBasis != null && designBasis.getData() != null) {
+	        List<AOPMaintenanceDesignRemarksDTO> remarksList = (List<AOPMaintenanceDesignRemarksDTO>) designBasis.getData();
+	        
+	        if (!remarksList.isEmpty()) {
+	            AOPMaintenanceDesignRemarksDTO firstRemark = remarksList.get(0);
+	            return firstRemark.getSummary();
+	        }
+	    }
+	    return null;
 	}
 	
 	public String getRemarksSummary(String plantId, String year) {
-		AOPMessageVM designBasis= aopMaintenanceDesignRemarksService.getMaintenanceDesignRemarks(plantId,year);
-        List<AOPMaintenanceDesignRemarksDTO> aopMaintenanceDesignRemarksDTOs =(List<AOPMaintenanceDesignRemarksDTO>) designBasis.getData();
-        AOPMaintenanceDesignRemarksDTO aopMaintenanceDesignRemarksDTO = aopMaintenanceDesignRemarksDTOs.get(0);
-        return aopMaintenanceDesignRemarksDTO.getSummary();
-	}
+	    AOPMessageVM designBasis = aopMaintenanceDesignRemarksService.getMaintenanceDesignRemarks(plantId, year);
 
+	    if (designBasis != null && designBasis.getData() != null) {
+	        List<AOPMaintenanceDesignRemarksDTO> remarksList = (List<AOPMaintenanceDesignRemarksDTO>) designBasis.getData();
+
+	        if (!remarksList.isEmpty()) {
+	            return remarksList.get(0).getSummary();
+	        }
+	    }
+
+	    return null; 
+	}
 	
 	private static String capitalize(String str) {
 		if (str == null || str.isEmpty())
