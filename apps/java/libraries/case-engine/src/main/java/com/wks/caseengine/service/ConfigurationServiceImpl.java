@@ -1462,8 +1462,22 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 							saveData(optionNormParametersHP.get(), i, year, attributeValueHP, configurationDTO,plantFKId);
 						}
 
-					}
+				}
+				if (verticalName.equalsIgnoreCase("Cracker") && optionNormParameters.isPresent()) {
+				    NormParameters params = optionNormParameters.get();
 
+				    if (params.getName().equalsIgnoreCase("Historical Basis")) {
+				        Optional<String> periodFromOpt = getAttributeValue(getStartEndDateNormsId(UUID.fromString(plantFKId), "StartDateNorms"), year);
+				        Optional<String> periodToOpt = getAttributeValue(getStartEndDateNormsId(UUID.fromString(plantFKId), "EndDateNorms"), year);
+
+				        if (periodFromOpt.isPresent() && periodToOpt.isPresent()) {
+				            String periodFrom = periodFromOpt.get();
+				            String periodTo = periodToOpt.get();
+				            
+				            String storedProcedure = verticalName + "_" + site.getName() + "_LoadSteamNorms";
+				            executeUpdateProcedure(storedProcedure, plantFKId, year, periodTo, periodFrom);
+				        }
+				    }
 				}
 			}
 			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("configuration");
@@ -1486,6 +1500,25 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 			ex.printStackTrace();
 			throw new RuntimeException("Failed to save data", ex);
 		}
+	}
+	
+	private Optional<UUID> getStartEndDateNormsId(UUID plantId, String name) {
+	    UUID id = normParametersRepository.findNormParameterIdByNameAndPlant(name, plantId);
+	    return Optional.ofNullable(id);
+	}
+
+	private Optional<String> getAttributeValue(Optional<UUID> idOpt, String year) {
+	    if (!idOpt.isPresent()) {
+	        return Optional.empty();
+	    }
+
+	    List<NormAttributeTransactions> transactions = normAttributeTransactionsRepository.findByNormParameterIdAndAuditYear(idOpt.get(), year);
+
+	    if (transactions != null && !transactions.isEmpty()) {
+	        return Optional.ofNullable(transactions.get(0).getAttributeValue());
+	    }
+
+	    return Optional.empty();
 	}
 
 	private Double getAttributeValueByPythonScriptFromSP(Double attributeValue) {
