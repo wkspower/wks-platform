@@ -1456,16 +1456,12 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
 						commands.add(attributeValue.toString());
 
-						
-						 Double attributeValueHP =
-						 getAttributeValueByPythonScriptFromSP(attributeValue);
-						 
-						 if (optionNormParametersHP.isPresent()) {
-						 saveData(optionNormParametersHP.get(), i, year, attributeValueHP,configurationDTO); 
-						  
-						 }
-						 
-					}
+						Double attributeValueHP = getAttributeValueByPythonScriptFromSP(attributeValue);
+
+						if (optionNormParametersHP.isPresent()) {
+							saveData(optionNormParametersHP.get(), i, year, attributeValueHP, configurationDTO,plantFKId);
+							}
+						}
 
 				}
 				if (verticalName.equalsIgnoreCase("Cracker") && optionNormParameters.isPresent()) {
