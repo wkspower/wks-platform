@@ -94,19 +94,19 @@ const Norms = () => {
       editable: false,
       minWidth: 100,
     },
-    // SAP Code
+    // Material
     {
-      field: 'sapCode',
-      title: 'SAP Code',
+      field: 'materialName',
+      title: 'Material',
       width: 100,
       type: 'text',
       editable: false,
       minWidth: 100,
     },
-    // Material
+       // SAP Code
     {
-      field: 'materialName',
-      title: 'Material',
+      field: 'materialId',
+      title: 'SAP Code',
       width: 100,
       type: 'text',
       editable: false,

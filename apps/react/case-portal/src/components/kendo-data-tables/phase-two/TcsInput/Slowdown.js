@@ -109,28 +109,28 @@ const Slowdown = ({
 
   // Column configuration for Slowdown - dynamically generated from API response
   const columnConfig = {
-    particulates: { editable: false, type: 'text', minWidth: 50, width: 100 },
+    particulates: { editable: false, type: 'text', minWidth: 100, widthT: 100 },
     durationInDays: {
       editable: true,
       type: 'wholeNumber',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      widthT: 100,
     },
     throughputDuringSlowdown: {
       editable: true,
       type: 'wholeNumber',
-      minWidth: 50,
-      width: 50,
+      minWidth: 100,
+      widthT: 100,
     },
     throughputUOM: {
       editable: true,
       type: 'wholeNumber',
       minWidth: 50,
-      width: 50,
+      widthT: 50,
     },
-    startDate: { editable: true, type: 'dateTime', minWidth: 50, width: 100 },
-    endDate: { editable: true, type: 'dateTime', minWidth: 50, width: 100 },
-    purpose: { editable: true, type: 'text', minWidth: 100, width: 100 },
+    startDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },
+    endDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },
+    purpose: { editable: true, type: 'text', minWidth: 200, widthT: 200 },
   }
 
   const columns = useMemo(() => {

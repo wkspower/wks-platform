@@ -161,6 +161,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             dto.setUom(getString(r[i++]));
             dto.setAccountName(getString(r[i++]));
             dto.setMaterialName(getString(r[i++]));
+            dto.setMaterialId(getString(r[i++]));       // modified   
             dto.setIssuingPlantName(getString(r[i++]));
             dto.setIssuingUom(getString(r[i++]));
             // Month columns (each contains JSON)
