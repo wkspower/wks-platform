@@ -554,7 +554,8 @@ const ShutdownNorms = () => {
         lowerVertName == 'aromatics' ||
         lowerVertName == 'pta' ||
         lowerVertName == 'vcm' ||
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL
+        IS_PE_PP_VERTICAL ||
+        IS_PET_VERTICAL
           ? false
           : true,
       showCalculateVisibility:
@@ -568,7 +569,8 @@ const ShutdownNorms = () => {
       marginBottom: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       dropdownLabel: 'Select Grade',
       allAction: true,
-      downloadExcelBtnFromUI: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
+      downloadExcelBtnFromUI:
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
       downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       showTitleNameBusiness: true,
 

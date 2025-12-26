@@ -1,27 +1,22 @@
 import { Chip } from '@progress/kendo-react-buttons'
 import {
   Card,
+  CardBody,
   CardHeader,
   CardTitle,
-  CardBody,
 } from '@progress/kendo-react-layout'
-import React from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
 import '../../dashboard.css'
 
-import { useGridApiRef } from '@mui/x-data-grid'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
-import { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { Box, Grid, Stack, Typography } from '@mui/material'
+import Notification from 'components/Utilities/Notification'
 import { BusinessDemandDataApiService } from 'services/business-demand-data-api-service'
-import { getRoleName } from 'services/role-service'
+import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 
-import { useNavigate } from 'react-router-dom'
-
-/* ---------------- DATA ---------------- */
-
+/* ---------------- DATA (unchanged IDs & data) ---------------- */
 const ID_MAP = {
   PET: '343EE904-E809-4201-92C5-13FEC09CE091',
   CRUDE: '905BEC3F-EBE6-4C43-BC09-1724901BBA86',
@@ -107,94 +102,144 @@ const data = [
   },
 ]
 
-/* ---------------- STATUS → COLOR ---------------- */
-
+/* ---------------- STATUS → STYLE ---------------- */
 const getStatusStyle = (status) => {
-  switch (status) {
-    case 'Development':
-      return { backgroundColor: '#e0e0e0', color: '#000' }
-    case 'Pre UAT':
-      return { backgroundColor: '#ffb74d', color: '#000' }
-    case 'UAT':
-      return { backgroundColor: '#64b5f6', color: '#000' }
-    case 'Go Live':
-      return { backgroundColor: '#2e7d32', color: '#fff' }
-    default:
-      return { backgroundColor: '#e0e0e0', color: '#000' }
+  const styles = {
+    Development: {
+      backgroundColor: '#fed7aa',
+      color: '#92400e',
+      borderColor: '#f97316',
+    },
+    'Pre UAT': {
+      backgroundColor: '#fef08a',
+      color: '#92400e',
+      borderColor: '#eab308',
+    },
+    UAT: {
+      backgroundColor: '#c7d2fe',
+      color: '#3730a3',
+      borderColor: '#6366f1',
+    },
+    'Go Live': {
+      backgroundColor: '#a7f3d0',
+      color: '#065f46',
+      borderColor: '#10b981',
+    },
   }
+  return styles[status] || { backgroundColor: '#e2e8f0', color: '#1e293b' }
+}
+
+/* ---------- Helper: get counts ---------- */
+const statusKeys = ['Go Live', 'Development', 'Pre UAT', 'UAT', 'Other']
+
+function computeStatusCounts(rows = []) {
+  const counts = {
+    'Go Live': 0,
+    Development: 0,
+    'Pre UAT': 0,
+    UAT: 0,
+    Other: 0,
+  }
+  rows.forEach((r) => {
+    if (counts.hasOwnProperty(r.status)) counts[r.status]++
+    else counts.Other++
+  })
+  return counts
 }
 
 /* ---------------- COMPONENT ---------------- */
-
-const AopDashboard = () => {
+export default function AopDashboardCompact() {
   const dispatch = useDispatch()
   const keycloak = useSession()
 
-  const [open1, setOpen1] = useState(false)
-  const [deleteId, setDeleteId] = useState(null)
-  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const dataGridStore = useSelector((state) => state.dataGridStore || {})
   const {
-    verticalChange,
     yearChanged,
     oldYear,
-    plantID,
     plantObject,
     siteObject,
     verticalObject,
     year,
-    screenTitle,
   } = dataGridStore
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = false
-  const IS_OLD_YEAR = oldYear?.oldYear
 
-  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
-
-  const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase()
-
-  const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
-  const IS_PTA_VERTICAL = lowerVertName === 'pta'
-  const IS_PET_VERTICAL = lowerVertName === 'pet'
-
-  const SCREEN_NAME = screenTitle?.title
-  const apiRef = useGridApiRef()
-  const [rows, setRows] = useState()
-  const headerMap = generateHeaderNames(AOP_YEAR)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-  const [currentRemark, setCurrentRemark] = useState('')
-  const [currentRowId, setCurrentRowId] = useState(null)
-  const unsavedChangesRef = React.useRef({
-    unsavedRows: {},
-    rowsBeforeChange: {},
-  })
+  const [fullDetails, setFullDetails] = useState([])
+  const [allowedMap, setAllowedMap] = useState({})
+  const [verticals, setVerticals] = useState([])
 
-  const navigate = useNavigate()
-
+  // Add this animation trigger when a row is clicked:
   const handleChipClick = (id) => {
-    dispatch(
-      setVerticalChangeFromDashboard({
-        id,
-        trigger: Date.now(),
-      }),
-    )
+    const hasAccess = verticals.some((v) => v.id === id)
+
+    if (!hasAccess) {
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Access Denied!', severity: 'error' })
+      return
+    }
+
+    // Add pulse animation feedback
+    const element = event.currentTarget
+    element.style.animation = 'pulse 0.4s ease-out'
+    setTimeout(() => {
+      element.style.animation = 'none'
+    }, 400)
+
+    dispatch(setVerticalChangeFromDashboard({ id, trigger: Date.now() }))
+  }
+  useEffect(() => {
+    if (!fullDetails.length || !Object.keys(allowedMap).length) return
+
+    const avail = fullDetails
+      .filter((v) => allowedMap[v.id])
+      .map((v) => ({ id: v.id, name: v.displayName }))
+
+    setVerticals(avail)
+  }, [fullDetails, allowedMap])
+
+  function parseAllowed(raw) {
+    const map = {}
+    raw.forEach((vObj) => {
+      const vid = Object.keys(vObj)[0]
+      map[vid] = {}
+      vObj[vid].forEach((siteObj) => {
+        const sid = Object.keys(siteObj)[0]
+        map[vid][sid] = siteObj[sid]
+      })
+    })
+    return map
+  }
+
+  const fetchAllSites = async () => {
+    try {
+      let parsed = []
+      try {
+        parsed = JSON.parse(keycloak.idTokenParsed.plants)
+      } catch (e) {
+        console.error('Token parse error', e)
+      }
+      setAllowedMap(parseAllowed(parsed))
+      const data = await DataService.getAllSites(keycloak)
+      setFullDetails(data || [])
+    } catch (error) {
+      console.error('Error fetching data', error)
+      setFullDetails([])
+    }
   }
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
     setLoading(true)
     try {
-      var data = await BusinessDemandDataApiService.getDashboardData(
+      var d = await BusinessDemandDataApiService.getDashboardData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -207,53 +252,94 @@ const AopDashboard = () => {
   }
 
   useEffect(() => {
+    fetchAllSites()
     fetchData()
   }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak])
 
-  const getStatusClass = (status) => {
-    switch (status) {
-      case 'Development':
-        return 'chip-development'
-      case 'Pre UAT':
-        return 'chip-pre-uat'
-      case 'UAT':
-        return 'chip-uat'
-      case 'Go Live':
-        return 'chip-go-live'
-      default:
-        return 'chip-development'
-    }
-  }
-
   return (
-    <div className='dashboard-root'>
-      <h2 className='dashboard-title'>Digital AOP Dashboard</h2>
+    <Box className='dashboard-root'>
+      <Typography className='dashboard-title'>Digital AOP Dashboard</Typography>
 
-      {data.map((section) => (
-        <Card key={section.plant} className='plant-card'>
-          <CardHeader className='plant-card-header'>
-            <CardTitle className='plant-card-title'>{section.plant}</CardTitle>
-          </CardHeader>
+      <Grid container spacing={1}>
+        {data.map((section) => {
+          const total = section.rows.length
+          const counts = computeStatusCounts(section.rows)
 
-          <CardBody className='plant-card-body'>
-            <div className='plant-grid'>
-              {section.rows.map((row) => (
-                <div key={row.id} className='plant-tile'>
-                  <div className='plant-tile-title'>{row.name}</div>
+          return (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={section.plant}>
+              <Card className='plant-card'>
+                <CardHeader className='plant-card-header'>
+                  <CardTitle className='plant-card-title'>
+                    {section.plant}
+                  </CardTitle>
 
-                  <Chip
-                    text={row.status}
-                    onClick={() => handleChipClick(row.id)}
-                    className={`status-chip ${getStatusClass(row.status)}`}
-                  />
-                </div>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-      ))}
-    </div>
+                  {/* DETAILS ROW: total + status breakdown */}
+                  <div className='section-details'>
+                    <div className='detail-pill'>
+                      <strong>{total}</strong>
+                      <span className='detail-label'> Verticals</span>
+                    </div>
+
+                    <div className='status-breakdown'>
+                      {statusKeys.map((key) => {
+                        const c = counts[key] || 0
+                        const style = getStatusStyle(key === 'Other' ? '' : key)
+                        return (
+                          <div
+                            key={key}
+                            className='status-pill'
+                            style={{
+                              background: style.backgroundColor,
+                              color: style.color,
+                            }}
+                            title={`${key}: ${c}`}
+                          >
+                            <span className='status-label'>{key}</span>
+                            <span className='status-count'>{c}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </CardHeader>
+
+                <CardBody className='plant-card-body'>
+                  <Stack spacing={0.5}>
+                    {section.rows.map((row) => (
+                      <Stack
+                        key={row.id}
+                        direction='row'
+                        alignItems='center'
+                        justifyContent='space-between'
+                        className='plant-row'
+                        onClick={() => handleChipClick(row.id)}
+                      >
+                        <Typography className='plant-name'>
+                          {row.name}
+                        </Typography>
+
+                        <Chip
+                          text={row.status}
+                          size='small'
+                          className='small-chip'
+                          style={getStatusStyle(row.status)}
+                        />
+                      </Stack>
+                    ))}
+                  </Stack>
+                </CardBody>
+              </Card>
+            </Grid>
+          )
+        })}
+      </Grid>
+
+      <Notification
+        open={snackbarOpen}
+        message={snackbarData?.message || ''}
+        severity={snackbarData?.severity || 'info'}
+        onClose={() => setSnackbarOpen(false)}
+      />
+    </Box>
   )
 }
-
-export default AopDashboard

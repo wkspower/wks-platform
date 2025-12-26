@@ -315,6 +315,7 @@ const CrackerConfiguration = (props) => {
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        true,
       )
 
       if (response?.code === 200) {
@@ -466,6 +467,7 @@ const CrackerConfiguration = (props) => {
         payload,
         keycloak,
         AOP_YEAR,
+        true,
       )
 
       if (response) {

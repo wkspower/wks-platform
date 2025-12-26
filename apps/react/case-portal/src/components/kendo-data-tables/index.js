@@ -220,15 +220,14 @@ const KendoDataTables = ({
     : []
 
   const MyFooterCustomCell = (props) => {
-    const { tdProps } = props
-    const { dataItem } = props
+    const { tdProps, dataItem, field } = props
     const groupName = dataItem?.value
+
     // Skip footer for non-Production groups
     if (groupName !== 'Production') {
-      return
+      return null
     }
 
-    const field = props.field
     const labelColumn = 'displayName'
     if (field === labelColumn) {
       return (
@@ -237,16 +236,23 @@ const KendoDataTables = ({
         </td>
       )
     }
-    const aggObj = props.dataItem?.aggregates?.[field]
+
+    const aggObj = dataItem?.aggregates?.[field]
     let cellContent = ''
+
     if (aggObj) {
       const aggKey = Object.keys(aggObj)[0]
       const value = aggObj[aggKey]
+      const n = Number(value)
+
       cellContent =
-        value != null ? Math.trunc(Number(value) * 10000) / 10000 : ''
+        value != null && !isNaN(n)
+          ? Number(n.toFixed(4)) // ✅ FIX: round final aggregate
+          : ''
     }
+
     return (
-      <td {...props.tdProps} colSpan={1}>
+      <td {...tdProps} colSpan={1}>
         {cellContent}
       </td>
     )
