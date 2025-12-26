@@ -4,53 +4,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.springframework.transaction.annotation.Transactional;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.jdbc.ReturningWork;
 import org.springframework.stereotype.Service;
+import java.util.LinkedHashMap;
 
-import com.wks.caseengine.dto.AOPDTO;
-import com.wks.caseengine.dto.AOPDashboardDTO;
-import com.wks.caseengine.entity.AOP;
-import com.wks.caseengine.entity.AopCalculation;
-import com.wks.caseengine.entity.NormParameters;
-import com.wks.caseengine.entity.Plants;
-import com.wks.caseengine.entity.ScreenMapping;
-import com.wks.caseengine.entity.Sites;
-import com.wks.caseengine.entity.Verticals;
-import com.wks.caseengine.exception.RestInvalidArgumentException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
+import org.hibernate.Session;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-import com.wks.caseengine.repository.AOPRepository;
-import com.wks.caseengine.repository.AopCalculationRepository;
-import com.wks.caseengine.repository.NormParametersRepository;
-import com.wks.caseengine.repository.PlantsRepository;
-import com.wks.caseengine.repository.ScreenMappingRepository;
-import com.wks.caseengine.repository.SiteRepository;
-import com.wks.caseengine.repository.VerticalsRepository;
-
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import java.util.UUID;
-
-
-import javax.sql.DataSource;
-
-import java.io.ByteArrayOutputStream;
-import java.sql.CallableStatement;
-import java.sql.SQLException;
-import java.sql.Connection;
-import jakarta.persistence.Query;
 
 @Service
 public class AOPDashboardServiceImpl implements AOPDashboardService {
@@ -59,56 +27,115 @@ public class AOPDashboardServiceImpl implements AOPDashboardService {
 	private EntityManager entityManager;
 	
 	@Override
-	public AOPMessageVM getAOPDashboard(String year) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<AOPDashboardDTO> aopDashboardDTOList = new ArrayList<AOPDashboardDTO>();
-		try {
-			List<Object[]> obj=null;
-				String procedureName="sp_GetAOPDashboardUtility";
-				obj = getData(year,procedureName);
-			
-			for (Object[] row : obj) {
-				AOPDashboardDTO aopDashboardDTO = new AOPDashboardDTO();
+	public AOPMessageVM getAOPDashboard(final String year) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        String procedureName = "sp_GetAOPDashboardUtility";
 
-				aopDashboardDTO.setId(row[0] != null ? row[0].toString() : null);
-				aopDashboardDTO.setSiteId(row[1] != null ? row[1].toString() : null);
-				
-				aopDashboardDTO.setVerticalId(row[2] != null ? row[2].toString() : null);
-				aopDashboardDTO.setStatus(row[3] != null ? row[3].toString() : null);
-				aopDashboardDTO.setStatusColor(row[4] != null ? row[4].toString() : null);
-				aopDashboardDTO.setStatusTextColor(row[5] != null ? row[5].toString() : null);
-				aopDashboardDTO.setDisplayOrder(row[6] != null ? Integer.parseInt(row[6].toString()) : null);
-				aopDashboardDTO.setIsActive(row[7] != null ? Boolean.valueOf(row[7].toString()) : null);
-				aopDashboardDTO.setNotes(row[8] != null ? row[8].toString() : null);
-				aopDashboardDTO.setAopYear(row[9] != null ? row[9].toString() : null);
+	        // Fetch both data and column metadata dynamically
+	        Map<String, Object> dynamicResult = getDynamicData(year, procedureName);
 
-				aopDashboardDTOList.add(aopDashboardDTO);
-			}
-			aopMessageVM.setCode(200);
-			aopMessageVM.setData(aopDashboardDTOList);
-			aopMessageVM.setMessage("Data fetched successfully");
-			return aopMessageVM;
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setData(dynamicResult);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch dashboard data", ex);
+	    }
+	}
+
+	public Map<String, Object> getDynamicData(final String aopYear, final String procedureName) {
+	    return entityManager.unwrap(Session.class).doReturningWork(new ReturningWork<Map<String, Object>>() {
+	        @Override
+	        public Map<String, Object> execute(Connection connection) throws SQLException {
+	            Map<String, Object> result = new HashMap<>();
+	            List<Map<String, Object>> dataList = new ArrayList<>();
+	            List<Map<String, Object>> columnMetadata = new ArrayList<>();
+
+	            String sql = "{call " + procedureName + "(?)}"; // Using standard call syntax
+
+	            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	                ps.setString(1, aopYear);
+
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    ResultSetMetaData rsmd = rs.getMetaData();
+	                    int columnCount = rsmd.getColumnCount();
+
+	                    // 1. Generate Column Metadata dynamically
+	                    for (int i = 1; i <= columnCount; i++) {
+	                        Map<String, Object> meta = new HashMap<>();
+	                        String columnName = rsmd.getColumnLabel(i);
+	                        String columnType = rsmd.getColumnTypeName(i);
+
+	                        meta.put("field", columnName);
+	                        meta.put("title", formatTitle(columnName));
+	                        meta.put("type", getFrontendType(columnType));
+	                        columnMetadata.add(meta);
+	                    }
+
+	                    // 2. Generate Data Rows dynamically
+	                    while (rs.next()) {
+	                        Map<String, Object> row = new LinkedHashMap<>();
+	                        for (int i = 1; i <= columnCount; i++) {
+	                            String columnName = rsmd.getColumnLabel(i);
+	                            Object value = rs.getObject(i);
+	                            
+	                            // Null-free check: Use empty string for nulls
+	                            row.put(columnName, value != null ? value : "");
+	                        }
+	                        dataList.add(row);
+	                    }
+	                }
+	            }
+	            result.put("data", dataList);
+	            result.put("columns", columnMetadata);
+	            return result;
+	        }
+	    });
+	}
+	private String formatTitle(String columnName) {
+		return columnName.replace("_", " ");
 	}
 	
-	public List<Object[]> getData(String aopYear, String procedureName) {
-		try {
+	private String getFrontendType(String sqlTypeName) {
+	    if (sqlTypeName == null) {
+	        return "string"; 
+	    }
+	    
+	    switch (sqlTypeName.toUpperCase()) {
+	        case "VARCHAR":
+	        case "NVARCHAR":
+	        case "CHAR":
+	            return "string";
 
-			String sql = "EXEC " + procedureName
-					+ " @aopYear = :aopYear";
+	        case "INT":
+	        case "TINYINT":
+	        case "BIGINT":
+	        case "SMALLINT":
+	        case "DECIMAL":
+	        case "FLOAT":
+	        case "DOUBLE":
+	        case "NUMERIC":
+	        case "REAL": 
+	            return "number";
 
-			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("aopYear", aopYear);
+	        case "DATE":
+	        case "DATETIME":
+	        case "DATETIME2":
+	        case "SMALLDATETIME": 
+	        case "TIME": 
+	            return "date";
 
-			return query.getResultList();
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	        case "BIT": 
+	            return "boolean";
+
+	        case "UNIQUEIDENTIFIER": 
+	            return "string"; 
+	            
+	        default:
+	            return "string"; 
+	    }
 	}
+
 }

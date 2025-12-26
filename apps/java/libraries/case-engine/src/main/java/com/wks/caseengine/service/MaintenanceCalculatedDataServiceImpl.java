@@ -6,7 +6,34 @@ import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+
+import org.hibernate.Session;
+import org.hibernate.jdbc.ReturningWork;
+
+//Spring / Custom Exceptions (Adjust based on your package structure)
+import org.springframework.stereotype.Service;
+//import your.package.path.AOPMessageVM;
+//import your.package.path.Plants;
+//import your.package.path.Verticals;
+//import your.package.path.Sites;
+//import your.package.path.AopCalculation;
+//import your.package.path.RestInvalidArgumentException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
@@ -159,124 +186,173 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	}
 
 	@Override
-	public AOPMessageVM getMaintenanceDataForCracker(String plantId, String year) {
+	public AOPMessageVM getMaintenanceDataForCracker(final String plantId, final String year) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    
+	    try {
+	        UUID plantUUID = UUID.fromString(plantId);
+	        Optional<Plants> plantOpt = plantsRepository.findById(plantUUID);
+	        
+	        if (!plantOpt.isPresent()) {
+	            throw new RuntimeException("Plant not found for ID: " + plantId);
+	        }
 
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, Object>> data = new ArrayList<>();
-		try {
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-			String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
-			List<Object[]> results = getData(plantId, year, procedureName);
-			// Variables to accumulate totals
-			double sumFiveF = 0;
-			double sumFourF = 0;
-			double sumFourFD = 0;
-			double sumCoilReplacement = 0;
-			double sumShutdown = 0;
-			double sumSlowdown = 0;
-			double sumSAD = 0;
-			double sumBBU = 0;
-			double sumBBD = 0;
-			double sumDemoSAD = 0;
-			double sumDemoSD = 0;
-			double sumDemoBBU = 0;
-			double sumMnt = 0;
-			double sumTotal = 0;
-			double sumNumberOfDays = 0;
-			double sumTotalSAD = 0;
-			double sumDemoHHS=0;
+	        Plants plant = plantOpt.get();
+	        Optional<Verticals> verticalOpt = verticalRepository.findById(plant.getVerticalFKId());
+	        Optional<Sites> siteOpt = siteRepository.findById(plant.getSiteFkId());
 
-			for (Object[] row : results) {
-			    Map<String, Object> map = new HashMap<>();
+	        if (verticalOpt.isPresent() && siteOpt.isPresent()) {
+	            String viewName = "vwScrn" + verticalOpt.get().getName() + "_" + siteOpt.get().getName() + "_Decoke_Maintenance";
+	            
+	            Map<String, Object> databaseResults = fetchEverythingFromView(plantId, year, viewName);
 
-			    map.put("id", row[0]);
-			    map.put("monthName", row[1]);
-			    map.put("coilReplacement", row[2]);
-			    map.put("mnt", row[3]);
-			    map.put("shutdown", row[4]);
-			    map.put("slowdown", row[5]);
-			    map.put("sad", row[6]);
-			    map.put("bbd", row[7]);
-			    map.put("bbu", row[8]);
-			    map.put("demoHSS", row[9]);
-			    map.put("demoBBU", row[10]);
-			    map.put("demoSAD", row[11]);
-			    map.put("demoSD", row[12]);
-			    map.put("fourFD", row[13]);
-			    map.put("fourF", row[14]);
-			    map.put("fiveF", row[15]);
-			    map.put("total", row[16]);
-			    map.put("fourFHours", row[17]);
-			    map.put("aopYear", row[18]);
-			    map.put("plantId", row[19]);
-			    String remarks = row[20] == null ? "" : row[20].toString();
-			    map.put("remarks", remarks);
-			    map.put("totalSAD", row[21]);
-			    map.put("numberOfDays", row[22]);
+	            List<Map<String, Object>> rows = (List<Map<String, Object>>) databaseResults.get("data");
+	            List<Map<String, Object>> metadata = (List<Map<String, Object>>) databaseResults.get("metadata");
+	            Set<String> numericColumns = (Set<String>) databaseResults.get("numericColumns");
 
-			    // accumulate totals (check for nulls and cast appropriately)
-			    sumCoilReplacement += (row[2] != null ? ((Number) row[2]).doubleValue() : 0);
-			    sumMnt += (row[3] != null ? ((Number) row[3]).doubleValue() : 0);
-			    sumShutdown += (row[4] != null ? ((Number) row[4]).doubleValue() : 0);
-			    sumSlowdown += (row[5] != null ? ((Number) row[5]).doubleValue() : 0);
-			    sumSAD += (row[6] != null ? ((Number) row[6]).doubleValue() : 0);
-			    sumBBD += (row[7] != null ? ((Number) row[7]).doubleValue() : 0);
-			    sumBBU += (row[8] != null ? ((Number) row[8]).doubleValue() : 0);
-			    sumDemoSAD += (row[11] != null ? ((Number) row[11]).doubleValue() : 0);
-			    sumDemoSD += (row[12] != null ? ((Number) row[12]).doubleValue() : 0);
-			    sumDemoBBU += (row[10] != null ? ((Number) row[10]).doubleValue() : 0);
-			    sumFourFD += (row[13] != null ? ((Number) row[13]).doubleValue() : 0);
-			    sumFourF += (row[14] != null ? ((Number) row[14]).doubleValue() : 0);
-			    sumFiveF += (row[15] != null ? ((Number) row[15]).doubleValue() : 0);
-			    sumTotal += (row[16] != null ? ((Number) row[16]).doubleValue() : 0);
-			    sumNumberOfDays += (row[22] != null ? ((Number) row[22]).doubleValue() : 0);
-			    sumTotalSAD += (row[21] != null ? ((Number) row[21]).doubleValue() : 0);
-			    sumDemoHHS+=(row[9] != null ? ((Number) row[9]).doubleValue() : 0);
-			    data.add(map);
-			}
+	            Map<String, Double> totalsMap = new HashMap<>();
+	            for (Map<String, Object> row : rows) {
+	                for (String colName : numericColumns) {
+	                    Object val = row.get(colName);
+	                    double currentVal = (val instanceof Number) ? ((Number) val).doubleValue() : 0.0;
+	                    double existingTotal = totalsMap.containsKey(colName) ? totalsMap.get(colName) : 0.0;
+	                    totalsMap.put(colName, existingTotal + currentVal);
+	                }
+	            }
 
-			
-			Map<String, Object> sumMap = new HashMap<>();
-			sumMap.put("coilReplacement", sumCoilReplacement);
-			sumMap.put("mnt", sumMnt);
-			sumMap.put("shutdown", sumShutdown);
-			sumMap.put("slowdown", sumSlowdown);
-			sumMap.put("sad", sumSAD);
-			sumMap.put("bbd", sumBBD);
-			sumMap.put("bbu", sumBBU);
-			sumMap.put("demoSAD", sumDemoSAD);
-			sumMap.put("demoSD", sumDemoSD);
-			sumMap.put("demoBBU", sumDemoBBU);
-			sumMap.put("demoHHS", sumDemoHHS);
-			sumMap.put("fourFD", sumFourFD);
-			sumMap.put("fourF", sumFourF);
-			sumMap.put("fiveF", sumFiveF);
-			sumMap.put("total", sumTotal);
-			sumMap.put("numberOfDays", sumNumberOfDays);
-			sumMap.put("totalSAD", sumTotalSAD);
-			
-			sumMap.put("id", null);
-			sumMap.put("monthName", "Total");
-			List<AopCalculation> aopCalculation = aopCalculationRepository
-					.findByPlantIdAndAopYearAndCalculationScreen(
-							UUID.fromString(plantId), year, "Furnace-run-length");	
-			data.add(sumMap);
-			Map<String,Object> map = new HashMap<String,Object>();
-			map.put("data", data);
-			map.put("aopCalculation", aopCalculation);
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(map);
-			return aopMessageVM;
+	            Map<String, Object> totalRow = new LinkedHashMap<>();
+	            for (Map<String, Object> colMeta : metadata) {
+	                String fieldName = (String) colMeta.get("field");
+	                if (fieldName.equalsIgnoreCase("monthName")) {
+	                    totalRow.put(fieldName, "Total");
+	                } else if (numericColumns.contains(fieldName)) {
+	                    totalRow.put(fieldName, totalsMap.get(fieldName));
+	                } else {
+	                    totalRow.put(fieldName, ""); 
+	                }
+	            }
+	            rows.add(totalRow);
 
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	            List<AopCalculation> aopCalculations = aopCalculationRepository
+	                    .findByPlantIdAndAopYearAndCalculationScreen(plantUUID, year, "Furnace-run-length");
+
+	            Map<String, Object> finalData = new HashMap<>();
+	            finalData.put("data", rows);
+	            finalData.put("columns", metadata);
+	            finalData.put("aopCalculation", aopCalculations != null ? aopCalculations : new ArrayList<>());
+
+	            aopMessageVM.setData(finalData);
+	            aopMessageVM.setCode(200);
+	            aopMessageVM.setMessage("Data fetched successfully");
+	        }
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Error processing dynamic maintenance data", ex);
+	    }
 	}
+
+	private Map<String, Object> fetchEverythingFromView(final String plantId, final String year, final String viewName) {
+	    return entityManager.unwrap(Session.class).doReturningWork(new ReturningWork<Map<String, Object>>() {
+	        @Override
+	        public Map<String, Object> execute(Connection connection) throws SQLException {
+	            Map<String, Object> resultMap = new HashMap<>();
+	            List<Map<String, Object>> dataList = new ArrayList<>();
+	            List<Map<String, Object>> metadataList = new ArrayList<>();
+	            Set<String> numericFields = new HashSet<>();
+
+	            String sql = "SELECT * FROM " + viewName + " WHERE PlantId = ? AND AOPYear = ? ORDER BY " +
+	                         "CASE MonthName WHEN 'April' THEN 1 WHEN 'May' THEN 2 WHEN 'June' THEN 3 " +
+	                         "WHEN 'July' THEN 4 WHEN 'August' THEN 5 WHEN 'September' THEN 6 " +
+	                         "WHEN 'October' THEN 7 WHEN 'November' THEN 8 WHEN 'December' THEN 9 " +
+	                         "WHEN 'January' THEN 10 WHEN 'February' THEN 11 WHEN 'March' THEN 12 ELSE 13 END";
+
+	            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	                ps.setString(1, plantId);
+	                ps.setString(2, year);
+	                try (ResultSet rs = ps.executeQuery()) {
+	                    ResultSetMetaData rsmd = rs.getMetaData();
+	                    int columnCount = rsmd.getColumnCount();
+
+	                    for (int i = 1; i <= columnCount; i++) {
+	                        String name = rsmd.getColumnLabel(i);
+	                        int type = rsmd.getColumnType(i);
+
+	                        Map<String, Object> meta = new HashMap<>();
+	                        meta.put("field", name);
+	                        meta.put("title", name); 
+	                        meta.put("type", getFrontendType(rsmd.getColumnTypeName(i)));
+	                        metadataList.add(meta);
+
+	                        if (type == Types.INTEGER || type == Types.DOUBLE || type == Types.DECIMAL || 
+	                            type == Types.FLOAT || type == Types.NUMERIC || type == Types.REAL) {
+	                            numericFields.add(name);
+	                        }
+	                    }
+
+	                    while (rs.next()) {
+	                        Map<String, Object> row = new LinkedHashMap<>();
+	                        for (int i = 1; i <= columnCount; i++) {
+	                            String colName = rsmd.getColumnLabel(i);
+	                            Object value = rs.getObject(i);
+	                            if (value == null) {
+	                                row.put(colName, numericFields.contains(colName) ? 0 : "");
+	                            } else {
+	                                row.put(colName, value);
+	                            }
+	                        }
+	                        dataList.add(row);
+	                    }
+	                }
+	            }
+	            resultMap.put("data", dataList);
+	            resultMap.put("metadata", metadataList);
+	            resultMap.put("numericColumns", numericFields);
+	            return resultMap;
+	        }
+	    });
+	}
+	
+	private String getFrontendType(String sqlTypeName) {
+	    if (sqlTypeName == null) {
+	        return "string"; 
+	    }
+	    
+	    switch (sqlTypeName.toUpperCase()) {
+	        case "VARCHAR":
+	        case "NVARCHAR":
+	        case "CHAR":
+	            return "string";
+
+	        case "INT":
+	        case "TINYINT":
+	        case "BIGINT":
+	        case "SMALLINT":
+	        case "DECIMAL":
+	        case "FLOAT":
+	        case "DOUBLE":
+	        case "NUMERIC":
+	        case "REAL": 
+	            return "number";
+
+	        case "DATE":
+	        case "DATETIME":
+	        case "DATETIME2":
+	        case "SMALLDATETIME": 
+	        case "TIME": 
+	            return "date";
+
+	        case "BIT": 
+	            return "boolean";
+
+	        case "UNIQUEIDENTIFIER": 
+	            return "string"; 
+	            
+	        default:
+	            return "string"; 
+	    }
+	}
+
 	
 	public byte[] maintenanceExport(String year, String plantId, boolean isAfterSave, List<DecokePlanningDTO> dtoList) {
 	    try {
