@@ -1464,7 +1464,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						}
 
 				}
-				if (verticalName.equalsIgnoreCase("Cracker") && optionNormParameters.isPresent()) {
+				if (verticalName.equalsIgnoreCase("Cracker") && calculation != null && calculation && optionNormParameters.isPresent()) {
 				    NormParameters params = optionNormParameters.get();
 
 				    if (params.getName().equalsIgnoreCase("Historical Basis")) {
