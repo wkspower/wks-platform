@@ -57,12 +57,13 @@ const NestedKendoTable = ({
   snackbarOpen = false,
   setModifiedCells = () => {},
   modifiedCells = {},
+  handleCalculate = () => {},
   saveChanges = () => {},
   fetchData = () => {},
   deleteRowData = () => {},
   groupBy = null,
   filterable = false,
-  hoursRows={}
+  hoursRows = {},
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -218,7 +219,7 @@ const NestedKendoTable = ({
   // Get total hours for a month from hoursRows
   const getTotalHoursForMonth = (monthKey) => {
     if (!hoursRows || hoursRows.length === 0) return null
-    
+
     // Map full month names to short month keys used in hoursRows
     const monthMapping = {
       april: 'apr',
@@ -234,10 +235,10 @@ const NestedKendoTable = ({
       february: 'feb',
       march: 'mar',
     }
-    
+
     const shortMonthKey = monthMapping[monthKey?.toLowerCase()] || monthKey
     const firstRow = hoursRows[0]
-    
+
     if (firstRow && firstRow[shortMonthKey] !== undefined) {
       return firstRow[shortMonthKey]
     }
@@ -286,7 +287,10 @@ const NestedKendoTable = ({
               const totalHrsForMonth = getTotalHoursForMonth(monthKey)
               if (totalHrsForMonth !== null && totalHrsForMonth !== undefined) {
                 const shutdownHrs = Math.floor(parseFloat(value)) || 0
-                const netOperationHrs = Math.max(0, totalHrsForMonth - shutdownHrs)
+                const netOperationHrs = Math.max(
+                  0,
+                  totalHrsForMonth - shutdownHrs,
+                )
                 target.netOperationHrs = netOperationHrs
               }
             }
@@ -308,13 +312,23 @@ const NestedKendoTable = ({
           setNestedValue(cloned, field, value)
 
           // Real-time calculation: Auto-calculate netOperationHrs when shutdownHrs is edited
-          if (fieldParts[fieldParts.length - 1] === 'shutdownHrs' && fieldParts.length === 2) {
+          if (
+            fieldParts[fieldParts.length - 1] === 'shutdownHrs' &&
+            fieldParts.length === 2
+          ) {
             const monthKey = fieldParts[0]
             const totalHrsForMonth = getTotalHoursForMonth(monthKey)
             if (totalHrsForMonth !== null && totalHrsForMonth !== undefined) {
               const shutdownHrs = Math.floor(parseFloat(value)) || 0
-              const netOperationHrs = Math.max(0, totalHrsForMonth - shutdownHrs)
-              setNestedValue(cloned, `${monthKey}.netOperationHrs`, netOperationHrs)
+              const netOperationHrs = Math.max(
+                0,
+                totalHrsForMonth - shutdownHrs,
+              )
+              setNestedValue(
+                cloned,
+                `${monthKey}.netOperationHrs`,
+                netOperationHrs,
+              )
             }
           }
 
@@ -329,7 +343,10 @@ const NestedKendoTable = ({
         const base = { ...(prev[itemId] || {}), [field]: value }
 
         // Real-time calculation: Auto-calculate netOperationHrs when shutdownHrs is edited
-        if (fieldParts.length === 2 && fieldParts[fieldParts.length - 1] === 'shutdownHrs') {
+        if (
+          fieldParts.length === 2 &&
+          fieldParts[fieldParts.length - 1] === 'shutdownHrs'
+        ) {
           const monthKey = fieldParts[0]
           const totalHrsForMonth = getTotalHoursForMonth(monthKey)
           if (totalHrsForMonth !== null && totalHrsForMonth !== undefined) {
@@ -367,6 +384,10 @@ const NestedKendoTable = ({
     saveChanges()
     setOpenSaveDialogeBox(false)
     setEdit({})
+  }
+
+   const handleCalculateBtn = async () => {
+    handleCalculate()
   }
 
   const handleDeleteClick = async (params) => {
@@ -582,7 +603,7 @@ const NestedKendoTable = ({
                       maxValue = getTotalHoursForMonth(monthKey)
                     }
                   }
-                  
+
                   return (
                     <NumberCellEditor
                       {...cellProps}
@@ -720,6 +741,16 @@ const NestedKendoTable = ({
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {permissions?.showCalculate && (
+              <Button
+                variant='contained'
+                onClick={handleCalculateBtn}
+                className='btn-save'
+              >
+                Calculate
+              </Button>
+            )}
+
             {permissions?.saveBtn && (
               <Button
                 variant='contained'
