@@ -221,26 +221,33 @@ const AdvanceKendoTable = ({
     return () => window.removeEventListener('resize', handleResize)
   }, [columns, permissions?.deleteButton, extractAllColumns, applyMinWidth])
 
-  // Calculate dynamic width for each column
+  // Calculate dynamic width for each column using proportional distribution
   const setWidth = useCallback(
     (minWidth) => {
       if (minWidth === undefined) {
         minWidth = 50
       }
 
-      const allColumns = extractAllColumns(columns)
-      const totalColumns =
-        allColumns.length + (permissions?.deleteButton ? 1 : 0)
-
-      let width = applyMinWidth
-        ? minWidth
-        : minWidth + (gridCurrent - minGridWidth.current) / totalColumns
-
-      if (width >= COLUMN_MIN) {
-        width -= ADJUST_PADDING
+      if (applyMinWidth) {
+        return minWidth
       }
 
-      return width
+      const allColumns = extractAllColumns(columns)
+      const totalMinWidth = allColumns.reduce((sum, col) => {
+        return sum + (col.minWidth || 50)
+      }, 0) + (permissions?.deleteButton ? 80 : 0)
+
+      // If total minWidth exceeds grid width, just use minWidth
+      if (totalMinWidth >= gridCurrent) {
+        return minWidth
+      }
+
+      // Calculate proportional width based on minWidth ratio
+      const availableSpace = gridCurrent - totalMinWidth
+      const proportionalShare = (minWidth / totalMinWidth) * availableSpace
+      const width = minWidth + proportionalShare
+
+      return Math.max(minWidth, width - ADJUST_PADDING)
     },
     [
       applyMinWidth,
@@ -501,6 +508,7 @@ const AdvanceKendoTable = ({
             'remark',
             'Remark',
             'purpose',
+            'reasons',
           ].filter((key) => key in row)
           keyToUpdate = keysToUpdate[0] || 'remark'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
@@ -929,7 +937,7 @@ const AdvanceKendoTable = ({
       }
 
       if (
-        ['aopRemarks', 'remarks', 'remark', 'Remark', 'purpose'].includes(
+        ['aopRemarks', 'remarks', 'remark', 'Remark', 'purpose','reasons'].includes(
           col.field,
         )
       ) {

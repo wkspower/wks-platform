@@ -60,7 +60,6 @@ const UnitCapacityGrid = ({
 
       const defaultUOM = uomOptions[0].id
       setSelectedDropdown(defaultUOM)
-      fetchUnitCapacityData(defaultUOM)
     } catch (err) {
       console.error(`Error fetching UOM options (${capacityType}):`, err)
       setSnackbarData({

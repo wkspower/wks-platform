@@ -113,12 +113,12 @@ const Shutdown = ({
     durationInDays: {
       editable: true,
       type: 'wholeNumber',
-      minWidth: 50,
+      minWidth: 100,
       width: 100,
     },
-    startDate: { editable: true, type: 'dateTime', minWidth: 100, width: 100 },
-    endDate: { editable: true, type: 'dateTime', minWidth: 100, width: 100 },
-    purpose: { editable: true, type: 'text', minWidth: 100, width: 100 },
+    startDate: { editable: true, type: 'dateTime', minWidth: 100, widthT: 200 },
+    endDate: { editable: true, type: 'dateTime', minWidth: 100, widthT: 200 },
+    purpose: { editable: true, type: 'text', minWidth: 200, widthT: 200 },
   }
 
   const columns = useMemo(() => {

@@ -13,6 +13,10 @@ export const TcsApiService = {
   getTcsUnitCapacityData,
   saveUnitCapacityData,
 
+  // TCS Crude Blend Window Data APIs
+  getCrudBlendWindowData,
+  saveCrudBlendWindowData,
+
   // TCS Shutdown Data APIs
   getTcsShutdownData,
   saveShutdownData,
@@ -192,6 +196,51 @@ async function getTcsSlowdownData(keycloak, plantId, year) {
 
 async function saveSlowdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
   const url = `${Config.CaseEngineUrl}/task/tcs-slowdown?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload);
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// ===================== || TCS Crude Blend Window Data APIs || ===================== //
+async function getCrudBlendWindowData(keycloak, plantId, year, siteId) {
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${plantId}/${siteId}/${year}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveCrudBlendWindowData(keycloak, plantId, year, siteId, tableKey, payload) {
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${plantId}/${siteId}?year=${year}&tableKey=${tableKey}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

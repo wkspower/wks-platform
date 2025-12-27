@@ -29,6 +29,9 @@ public class NormBasedUtilityBudgetResponseDTO {
     @JsonProperty("materialName")
     private String materialName;
 
+    @JsonProperty("materialId")
+    private String materialId;
+
     @JsonProperty("issuingPlantName")
     private String issuingPlantName;
 
