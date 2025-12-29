@@ -607,75 +607,62 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	@Override
 	@Transactional
-	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
-	        List<Map<String, Object>> payloadList) {
-	    
+	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year, List<Map<String, Object>> payloadList) {
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    int totalUpdatedRows = 0;
-	    
-	    final Set<String> EXCLUDE_FIELDS = Set.of("Id", "PlantId", "AOPYear", "MonthName");
+	    final Set<String> EXCLUDE = Set.of("Id", "PlantId", "AOPYear", "MonthName", "saveStatus", "errDescription");
 
 	    try {
 	        for (Map<String, Object> payload : payloadList) {
-	            
 	            String idString = (String) payload.get("Id");
-	            if (idString == null || "Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) {
-	                continue;
-	            }
+	            if (idString == null || "Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) continue;
 
 	            StringBuilder setClause = new StringBuilder();
-	            Map<String, Object> parameters = new java.util.HashMap<>();
+	            Map<String, Object> params = new HashMap<>();
 
 	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
-	                String columnName = entry.getKey();
-	                Object value = entry.getValue();
+	                String col = entry.getKey();
+	                if (EXCLUDE.contains(col)) continue;
 
-	                if (EXCLUDE_FIELDS.contains(columnName) || "saveStatus".equals(columnName)) {
-	                    continue;
-	                }
-
-	                if (setClause.length() > 0) {
-	                    setClause.append(", ");
-	                }
-
-	                setClause.append("[").append(columnName).append("] = :").append(columnName);
-	                parameters.put(columnName, value);
+	                if (setClause.length() > 0) setClause.append(", ");
+	                
+	                // Prefix param names to avoid "No parameter named :5F" error
+	                String safeParam = "p_" + col.replaceAll("[^a-zA-Z0-9]", "");
+	                setClause.append("[").append(col).append("] = :").append(safeParam);
+	                params.put(safeParam, entry.getValue());
 	            }
 
 	            if (setClause.length() == 0) continue;
 
-	            String sql = "UPDATE [dbo].[DecokeMaintenance] SET " + setClause.toString()
-	                       + " WHERE [Id] = :id AND [PlantId] = :plantId AND [AOPYear] = :aopYear";
+	            String sql = "UPDATE [dbo].[DecokeMaintenance] SET " + setClause.toString() +
+	                         " WHERE [Id] = :id AND [PlantId] = :pId AND [AOPYear] = :year";
 
-	            jakarta.persistence.Query nativeQuery = entityManager.createNativeQuery(sql);
+	            Query query = entityManager.createNativeQuery(sql);
+	            params.forEach(query::setParameter);
+	            query.setParameter("id", UUID.fromString(idString));
+	            query.setParameter("pId", UUID.fromString(plantId));
+	            query.setParameter("year", year);
 
-	            parameters.forEach(nativeQuery::setParameter);
-	            
-	            nativeQuery.setParameter("id", UUID.fromString(idString));
-	            nativeQuery.setParameter("plantId", UUID.fromString(plantId));
-	            nativeQuery.setParameter("aopYear", year);
-
-	            totalUpdatedRows += nativeQuery.executeUpdate();
+	            totalUpdatedRows += query.executeUpdate();
 	        }
 
-	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("maintenance-details");
-	        for (ScreenMapping screenMapping : screenMappingList) {
-	            AopCalculation aopCalculation = new AopCalculation();
-	            aopCalculation.setAopYear(year);
-	            aopCalculation.setIsChanged(true);
-	            aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-	            aopCalculation.setPlantId(UUID.fromString(plantId));
-	            aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-	            aopCalculationRepository.save(aopCalculation);
-	        }
+	        // Calculation Triggers
+	        screenMappingRepository.findByDependentScreen("maintenance-details").forEach(sm -> {
+	            AopCalculation calc = new AopCalculation();
+	            calc.setAopYear(year);
+	            calc.setIsChanged(true);
+	            calc.setCalculationScreen(sm.getCalculationScreen());
+	            calc.setPlantId(UUID.fromString(plantId));
+	            calc.setUpdatedScreen(sm.getDependentScreen());
+	            aopCalculationRepository.save(calc);
+	        });
 
 	        aopMessageVM.setCode(200);
-	        aopMessageVM.setMessage("Maintenance data updated successfully. Rows affected: " + totalUpdatedRows);
+	        aopMessageVM.setMessage("Updated rows: " + totalUpdatedRows);
 	        return aopMessageVM;
-
 	    } catch (Exception ex) {
 	        aopMessageVM.setCode(500);
-	        aopMessageVM.setMessage("Failed to update maintenance data: " + ex.getMessage());
+	        aopMessageVM.setMessage(ex.getMessage());
 	        return aopMessageVM;
 	    }
 	}
@@ -762,23 +749,33 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	private static String getStringCellValue(Cell cell) {
 	    if (cell == null) return null;
 	    DataFormatter formatter = new DataFormatter();
-	    return formatter.formatCellValue(cell).trim();
+	    String val = formatter.formatCellValue(cell).trim();
+	    return val.isEmpty() ? null : val;
 	}
 
 	private static Double getNumericCellValue(Cell cell) {
-	    if (cell == null || cell.getCellType() == CellType.BLANK) return 0.0;
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+	    
 	    try {
 	        return cell.getNumericCellValue();
 	    } catch (Exception e) {
-	        // Fallback for numbers stored as strings
 	        String val = getStringCellValue(cell);
-	        return (val == null || val.isEmpty()) ? 0.0 : Double.parseDouble(val);
+	        if (val == null || val.isEmpty()) {
+	            return null;
+	        }
+	        try {
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException nfe) {
+	            return null;
+	        }
 	    }
 	}
 
 	private static Integer getIntegerCellValue(Cell cell) {
 	    Double val = getNumericCellValue(cell);
-	    return val.intValue();
+	    return (val == null) ? null : val.intValue();
 	}
 	
 	@Override
