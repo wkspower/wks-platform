@@ -131,13 +131,17 @@ const CrudBlendWindowGrid = ({
         return
       }
 
+      const payload = {
+        tableKey: tableKey,
+        data: {results: data}
+      };
+
       const response = await TcsApiService.saveCrudBlendWindowData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
         SITE_ID,
-        tableKey,
-        data,
+        payload,
       )
 
       setSnackbarOpen(true)
@@ -164,7 +168,6 @@ const CrudBlendWindowGrid = ({
     PLANT_ID,
     AOP_YEAR,
     SITE_ID,
-    tableKey,
     title,
     setSnackbarData,
     setSnackbarOpen,

@@ -239,14 +239,14 @@ async function getCrudBlendWindowData(keycloak, plantId, year, siteId) {
   }
 }
 
-async function saveCrudBlendWindowData(keycloak, plantId, year, siteId, tableKey, payload) {
-  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${plantId}/${siteId}?year=${year}&tableKey=${tableKey}`;
+async function saveCrudBlendWindowData(keycloak, plantId, year, siteId, payload) {
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${payload.tableKey}/${year}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
-  const body = JSON.stringify(payload);
+  const body = JSON.stringify(payload.data);
   try {
     const resp = await fetch(url, {
       method: 'POST',

@@ -52,7 +52,7 @@ const Inputs = () => {
       { id: 'asset-priority',name:'assetPriority', displayName: 'Asset Priority', displaySequence: 3 },
       { id: 'asset-capacity',name:'assetCapacity', displayName: 'Asset Capacity', displaySequence: 4 },
       { id: 'heat-rate',name:'heatRate', displayName: 'Heat Rate', displaySequence: 5 },
-      { id: 'export-availability',name:'exportAvailability', displayName: 'Export Availability', displaySequence: 6 },
+      // { id: 'export-availability',name:'exportAvailability', displayName: 'Export Availability', displaySequence: 6 },
     ]
     setTabObj(tabs)
   }, [])

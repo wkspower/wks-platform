@@ -29,10 +29,10 @@ public class CrudeBlendWindowController {
         return ResponseEntity.ok(crudeBlendScreenDTO);
     }
     
-    @PostMapping("/crude-blend-window/{table}")
-    public void updateCrudeBlendWindow(@RequestBody CrudeBlendWindowPostRequestDTO<?> payload, @PathVariable String table) {
+    @PostMapping("/crude-blend-window/{table}/{financialYear}")
+    public void updateCrudeBlendWindow(@RequestBody CrudeBlendWindowPostRequestDTO<?> payload, @PathVariable String table, @PathVariable String financialYear) {
       
-       crudeBlendWindowService.updateCrudeBlendWindowData(payload, table, "2023-12");
+       crudeBlendWindowService.updateCrudeBlendWindowData(payload, table, financialYear);
         
     }
 }

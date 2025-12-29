@@ -107,6 +107,7 @@ const HeatRate = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
+      setSelectedPlant(convertedData[0]?.id)
       setDropdownOptions(convertedData)
     } catch (error) {
       console.error('Error fetching plant list:', error)
