@@ -635,13 +635,11 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            if (setClause.length() == 0) continue;
 
 	            String sql = "UPDATE [dbo].[DecokeMaintenance] SET " + setClause.toString() +
-	                         " WHERE [Id] = :id AND [PlantId] = :pId AND [AOPYear] = :year";
+	                         " WHERE [Id] = :id ";
 
 	            Query query = entityManager.createNativeQuery(sql);
 	            params.forEach(query::setParameter);
 	            query.setParameter("id", UUID.fromString(idString));
-	            query.setParameter("pId", UUID.fromString(plantId));
-	            query.setParameter("year", year);
 
 	            totalUpdatedRows += query.executeUpdate();
 	        }
