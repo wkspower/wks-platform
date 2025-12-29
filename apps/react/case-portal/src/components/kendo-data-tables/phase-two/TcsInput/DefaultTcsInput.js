@@ -198,7 +198,7 @@ const DefaultTcsInput = ({
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: true,
+    addButton: false,
     remarksEditable: true,
     showCalculate: false,
     showExport: true,

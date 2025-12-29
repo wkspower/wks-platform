@@ -527,6 +527,15 @@ const AdvanceKendoTable = ({
           ...prev,
           [updatedRow.id]: updatedRow,
         }))
+
+        // Also update customModifiedCells to highlight the remark field
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [updatedRow.id]: {
+            ...(prev[updatedRow.id] || {}),
+            [keyToUpdate]: currentRemark,
+          },
+        }))
       }
 
       return updatedRows
@@ -636,12 +645,21 @@ const AdvanceKendoTable = ({
     const { dataItem, field, onRemarkClick, ...tdProps } = props
     const rawValue = dataItem[field]
     const displayText = String(rawValue ?? '')
+    const rowId = dataItem.id
+
+    // Check if this remark field was edited
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
     return (
       <td
         {...tdProps}
         style={{
           cursor: 'pointer',
-          color: rawValue ? 'inherit' : 'gray',
+          color: isEdited ? 'orange' : rawValue ? 'inherit' : 'gray',
+          fontWeight: isEdited ? 'bold' : undefined,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -939,6 +957,28 @@ const AdvanceKendoTable = ({
           >
             {renderColumns(col.children, filter, sort)}
           </GridColumn>
+        )
+      }
+
+      // Textarea type handler (for dialog-based editing)
+      if (col.type === 'textarea') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            width={setWidth(col?.minWidth || 120)}
+            cells={{
+              data: (cellProps) => (
+                <RemarkCell
+                  {...cellProps}
+                  onRemarkClick={handleRemarkCellClick}
+                />
+              ),
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            headerClassName={isActive ? 'active-column' : ''}
+          />
         )
       }
 
@@ -1357,6 +1397,7 @@ const AdvanceKendoTable = ({
     const value = props.dataItem[props.field]
     const month = monthMap[props.field?.toLowerCase()]
     const normId = props.dataItem.materialFkId
+    const rowId = props.dataItem.id
 
     const isRedFromAllRedCell = allRedCell.some(
       (cell) =>
@@ -1364,7 +1405,13 @@ const AdvanceKendoTable = ({
         cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
     )
 
-    const isRed = isRedFromAllRedCell
+    // Check if this cell was edited
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      props.field,
+    )
+
+    const shouldHighlight = isEdited || isRedFromAllRedCell
 
     // Convert boolean values to Yes/No for display
     const displayValue =
@@ -1377,7 +1424,8 @@ const AdvanceKendoTable = ({
         {...props.tdProps}
         title={displayValue}
         style={{
-          color: isRed ? 'orange' : undefined,
+          color: shouldHighlight ? 'orange' : undefined,
+          fontWeight: shouldHighlight ? 'bold' : undefined,
           textAlign: typeof value === 'boolean' ? 'center' : undefined,
         }}
       >

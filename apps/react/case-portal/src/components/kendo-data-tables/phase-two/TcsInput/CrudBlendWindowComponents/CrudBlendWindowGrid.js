@@ -75,7 +75,7 @@ const CrudBlendWindowGrid = ({
         field: key,
         title: columnMap[key] || key,
         editable: ['minValue', 'maxValue','criticality','remarks','value_345','maxBlendLimit','reasons'].includes(key) ? true : false,
-        type: ['minValue', 'maxValue', 'value_345'].includes(key) ? 'number1' : 'text',
+        type: ['minValue', 'maxValue','criticality', 'value_345'].includes(key) ? 'number1' : 'text',
         minWidth: isRemarkField ? 350 : 150,
         widthT: isRemarkField ? 450 : 250,
         hidden: ['id','type'].includes(key),
