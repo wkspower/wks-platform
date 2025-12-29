@@ -737,7 +737,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                    String columnName = columnNames.get(j);
 	                    Cell cell = row.getCell(j);
 	                    
-	                    if (columnName.equalsIgnoreCase("Id") || columnName.equalsIgnoreCase("MonthName") || columnName.equalsIgnoreCase("Remarks")) {
+	                    if (columnName.equalsIgnoreCase("AOPYear") || columnName.equalsIgnoreCase("PlantId") || columnName.equalsIgnoreCase("Id") || columnName.equalsIgnoreCase("MonthName") || columnName.equalsIgnoreCase("Remarks")) {
 	                        rowData.put(columnName, getStringCellValue(cell));
 	                    } else if (columnName.equalsIgnoreCase("NumberOfDays")) {
 	                        rowData.put(columnName, getIntegerCellValue(cell));
