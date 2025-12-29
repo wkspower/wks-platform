@@ -359,6 +359,12 @@ const AdvanceKendoTable = ({
     (e) => {
       setIsRowEdited(true)
       const { dataItem, field, value } = e
+      
+      // Guard against undefined field
+      if (!field) {
+        return
+      }
+      
       const itemId = dataItem.id
       setRows((prev) =>
         prev.map((r) => {

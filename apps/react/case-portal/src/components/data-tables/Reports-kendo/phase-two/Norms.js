@@ -845,12 +845,11 @@ const Norms = () => {
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
-    showExport: false,
-    showImport: false,
+    showImport: true,
     showTitle: true,
     showCalculate: true,
-    // downloadExcelBtnFromUI:true,
-    // ExcelName:'Norms'
+    downloadExcelBtnFromUI:true,
+    ExcelName:`Norms - ${AOP_YEAR}`
   }
 
   // Calculate Norms data via API
@@ -883,8 +882,6 @@ const Norms = () => {
       setCaculationLoading(false)
     }
   }
-
-
 
   // Save handler with API call
   const saveChanges = async () => {

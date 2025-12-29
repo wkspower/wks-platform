@@ -27,6 +27,8 @@ import SaveConfirmationDialog from '../AdvanceKendoTable/components/SaveConfirma
 import { ExcelExport } from '@progress/kendo-react-excel-export'
 import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
 import { NumberCellEditor } from '../Utilities-Kendo/phase-two/NumberCellEditor'
+import { useSession } from 'SessionStoreContext'
+import { getRoleName } from 'services/role-service'
 
 export const hiddenFields = [
   'maintenanceId',
@@ -59,6 +61,8 @@ const NestedKendoTable = ({
   modifiedCells = {},
   handleCalculate = () => {},
   saveChanges = () => {},
+  handleExport = () => {},
+  handleExcelUpload = () => {},
   fetchData = () => {},
   deleteRowData = () => {},
   groupBy = null,
@@ -80,7 +84,8 @@ const NestedKendoTable = ({
   const [applyMinWidth, setApplyMinWidth] = useState(false)
   const [gridCurrent, setGridCurrent] = useState(0)
   const [customModifiedCells, setCustomModifiedCells] = useState({})
-
+  const keycloak = useSession()
+  const READ_ONLY = getRoleName(keycloak)
   const initialGroup = Array.isArray(groupBy)
     ? groupBy.map((field) => ({ field }))
     : groupBy
@@ -182,6 +187,20 @@ const NestedKendoTable = ({
     }
   }
 
+  const triggerFileUpload = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
+    }
+  }
+
+  const onFileChange = (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    handleExcelUpload(file)
+    event.target.value = ''
+  }
+
   const handleRowClick = (e) => {
     if (!e.dataItem?.isEditable && e.dataItem?.isEditable !== undefined) {
       setEdit({})
@@ -249,10 +268,16 @@ const NestedKendoTable = ({
   const itemChange = useCallback(
     (e) => {
       const { dataItem, field, value } = e
+
+      // Guard against undefined field
+      if (!field) {
+        return
+      }
+
       const itemId = dataItem.id
 
       // Parse field path for nested properties (e.g., "apr.norms" or "apr.details.value")
-      const fieldParts = field.split('.')
+      const fieldParts = field?.split('.') || [];
 
       setRows((prev) =>
         prev.map((r) => {
@@ -386,7 +411,7 @@ const NestedKendoTable = ({
     setEdit({})
   }
 
-   const handleCalculateBtn = async () => {
+  const handleCalculateBtn = async () => {
     handleCalculate()
   }
 
@@ -455,11 +480,17 @@ const NestedKendoTable = ({
       customModifiedCells,
       isFormatByUOM = false,
     } = props
+
+    // Guard against undefined field
+    if (!field) {
+      return <td {...tdProps}>{children}</td>
+    }
+
     const uomType = dataItem?.uom
     const rowId = dataItem.id
 
     // Get value from nested structure at any depth
-    const fieldParts = field.split('.')
+    const fieldParts = field?.split('.') || [];
     let value
 
     if (fieldParts.length > 1) {
@@ -596,8 +627,8 @@ const NestedKendoTable = ({
                 text: (cellProps) => {
                   // For shutdownHrs fields, pass maxValue (total hours for that month)
                   let maxValue = null
-                  if (col.field?.includes('shutdownHrs')) {
-                    const fieldParts = col.field.split('.')
+                  if (col.field && col.field.includes('shutdownHrs')) {
+                    const fieldParts = col.field?.split('.') || [];
                     if (fieldParts.length === 2) {
                       const monthKey = fieldParts[0]
                       maxValue = getTotalHoursForMonth(monthKey)
@@ -673,7 +704,12 @@ const NestedKendoTable = ({
     })
 
   const toolTipRenderer = (props) => {
-    const fieldParts = props.field.split('.')
+    // Guard against undefined field
+    if (!props.field) {
+      return <td {...props.tdProps}>{props.children}</td>
+    }
+
+    const fieldParts = props.field?.split('.') || [];
     let value
 
     if (fieldParts.length > 1) {
@@ -771,6 +807,27 @@ const NestedKendoTable = ({
               >
                 Export
               </Button>
+            )}
+
+            {permissions?.showImport && (
+              <>
+                <Button
+                  variant='contained'
+                  onClick={triggerFileUpload}
+                  disabled={isButtonDisabled || READ_ONLY}
+                  className='btn-save'
+                >
+                  Import
+                </Button>
+
+                <input
+                  type='file'
+                  accept='.xlsx,.xls'
+                  onChange={onFileChange}
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                />
+              </>
             )}
           </Box>
         </Box>

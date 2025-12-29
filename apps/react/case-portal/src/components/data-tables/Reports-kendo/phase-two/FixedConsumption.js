@@ -584,6 +584,9 @@ const FixedConsumption = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
+    downloadExcelBtnFromUI:true,
+    ExcelName:`Fixed Consumption - ${AOP_YEAR}`,
+    showImport:true,
     showTitleNameBusiness: true,
     showTitle:true,
   }
