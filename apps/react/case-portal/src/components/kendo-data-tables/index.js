@@ -567,6 +567,7 @@ const KendoDataTables = ({
               ...updatedRow,
               gridName,
               id: updatedRow.id,
+              [keyToUpdate]: currentRemark,
             },
           }))
         } else {
