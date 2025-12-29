@@ -666,7 +666,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        return aopMessageVM;
 	    }
 	}
-	
+	@Transactional
 	@Override
 	public AOPMessageVM maintenanceImport(String year, UUID plantId, MultipartFile file) {
 	    try {
