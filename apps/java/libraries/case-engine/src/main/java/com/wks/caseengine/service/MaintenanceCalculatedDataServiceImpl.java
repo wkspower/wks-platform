@@ -15,14 +15,18 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-
+import org.hibernate.transform.Transformers;
+import org.hibernate.query.NativeQuery;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 
@@ -53,6 +57,7 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -353,115 +358,64 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    }
 	}
 
-	
-	public byte[] maintenanceExport(String year, String plantId, boolean isAfterSave, List<DecokePlanningDTO> dtoList) {
+	public byte[] maintenanceExport(String year, String plantId, boolean isAfterSave, List<Map<String, Object>> dynamicData) {
 	    try {
-	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-	        String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
-
 	        if (!isAfterSave) {
-	            List<Object[]> results = getData(plantId, year, procedureName);
-	            dtoList = setData(results);
+	            Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	            Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	            Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	            String procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_Maintenance";
+	            
+	            dynamicData = getDynamicData(plantId, year, procedureName);
 	        }
+
+	        if (dynamicData == null || dynamicData.isEmpty()) return null;
 
 	        Workbook workbook = new XSSFWorkbook();
-	        Sheet sheet = workbook.createSheet("Sheet1");
-	        int currentRow = 0;
-
-	        List<List<Object>> rows = new ArrayList<>();
-
-	        for (DecokePlanningDTO dto : dtoList) {
-	            List<Object> list = new ArrayList<>();
-	            list.add(dto.getMonthName());
-	            list.add(dto.getFiveF());
-	            list.add(dto.getFourF());
-	            list.add(dto.getFourFD());
-	            list.add(dto.getCoilReplacement());
-	            list.add(dto.getShutdown());
-	            list.add(dto.getSlowdown());
-	            list.add(dto.getSad());
-	            list.add(dto.getBbu());
-	            list.add(dto.getBbd());
-	            list.add(dto.getDemoSAD());
-	            list.add(dto.getDemoSD());
-	            list.add(dto.getDemoBBU());
-	            list.add(dto.getDemoHSS());
-	            list.add(dto.getMnt());
-	            list.add(dto.getTotal());
-	            list.add(dto.getNumberOfDays());
-	            list.add(dto.getTotalSAD());
-	            list.add(dto.getRemarks());
-	            list.add(dto.getId());
-	            if (isAfterSave) {
-	                list.add(dto.getSaveStatus());
-	                list.add(dto.getErrDescription());
-	            }
-	            rows.add(list);
-	        }
-
-	        List<String> innerHeaders = new ArrayList<>(Arrays.asList(
-	            "Month", "5F", "4F/5F+D", "4F With Demo", "IBR/Coil Replacement", "Shutdown(TA)",
-	            "Slowdown", "SAD", "BBU", "BBD", "Demo SAD", "Demo SD", "Demo BBU/BBD",
-	            "Demo HHS", "MNT", "Total", "No of Days", "No of SADs", "Remarks", "Id"
-	        ));
-	        if (isAfterSave) {
-	            innerHeaders.add("Status");
-	            innerHeaders.add("Error Description");
-	        }
-
-	        // Header style
+	        Sheet sheet = workbook.createSheet("Maintenance Data");
+	        
+	        // Headers are retrieved from the map keys
+	        List<String> headers = new ArrayList<>(dynamicData.get(0).keySet());
+	        
 	        CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
-
-	        // Gray style for the total row
-	        CellStyle grayStyle = workbook.createCellStyle();
-	        grayStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-	        grayStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-	        grayStyle.setBorderTop(BorderStyle.THIN);
-	        grayStyle.setBorderBottom(BorderStyle.THIN);
-	        grayStyle.setBorderLeft(BorderStyle.THIN);
-	        grayStyle.setBorderRight(BorderStyle.THIN);
-
-	        // Create header row
-	        Row headerRow = sheet.createRow(currentRow++);
-	        for (int col = 0; col < innerHeaders.size(); col++) {
-	            Cell cell = headerRow.createCell(col);
-	            cell.setCellValue(innerHeaders.get(col));
+	        
+	        // 1. Create Header Row
+	        Row headerRow = sheet.createRow(0);
+	        for (int i = 0; i < headers.size(); i++) {
+	            Cell cell = headerRow.createCell(i);
+	            cell.setCellValue(headers.get(i));
 	            cell.setCellStyle(headerStyle);
 	        }
 
-	        // Create data rows
-	        int startDataRow = currentRow;
-	        for (List<Object> rowData : rows) {
-	            Row row = sheet.createRow(currentRow++);
-	            for (int col = 0; col < rowData.size(); col++) {
-	                Cell cell = row.createCell(col);
-	                Object value = rowData.get(col);
+	        // 2. Create Data Rows
+	        int rowIdx = 1;
+	        for (Map<String, Object> rowData : dynamicData) {
+	            Row row = sheet.createRow(rowIdx++);
+	            for (int colIdx = 0; colIdx < headers.size(); colIdx++) {
+	                Cell cell = row.createCell(colIdx);
+	                Object value = rowData.get(headers.get(colIdx));
+	                
 	                if (value instanceof Number) {
 	                    cell.setCellValue(((Number) value).doubleValue());
-	                } else if (value instanceof Boolean) {
-	                    cell.setCellValue((Boolean) value);
 	                } else if (value != null) {
 	                    cell.setCellValue(value.toString());
-	                } else {
-	                    cell.setCellValue("");
 	                }
 	            }
 	        }
 
-	        // Apply gray background to the last (total) row
-	        int totalRowIndex = sheet.getLastRowNum();
-	        Row totalRow = sheet.getRow(totalRowIndex);
-	        if (totalRow != null) {
-	            for (int col = 0; col < innerHeaders.size(); col++) {
-	                Cell cell = totalRow.getCell(col);
-	                if (cell == null) cell = totalRow.createCell(col);
-	                cell.setCellStyle(grayStyle);
+	        // 3. Dynamic Hiding and Auto-sizing
+	        // Set of fields to hide (Case-insensitive check is safer)
+	        Set<String> fieldsToHide = Set.of("ID", "PLANTID", "AOPYEAR");
+
+	        for (int i = 0; i < headers.size(); i++) {
+	            String currentHeader = headers.get(i).toUpperCase();
+	            
+	            if (fieldsToHide.contains(currentHeader)) {
+	                sheet.setColumnHidden(i, true);
+	            } else {
+	                sheet.autoSizeColumn(i);
 	            }
 	        }
-
-	        sheet.setColumnHidden(19, true);
 
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
@@ -472,6 +426,42 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        e.printStackTrace();
 	    }
 	    return null;
+	}
+	
+	
+	public List<Map<String, Object>> getDynamicData(String plantId, String aopYear, String viewName) {
+	    try {
+	        String sql = "SELECT * FROM " + viewName +
+	                     " WHERE PlantId = :plantId AND AOPYear = :aopYear " +
+	                     " ORDER BY CASE MonthName " +
+	                     "   WHEN 'April' THEN 1 " +
+	                     "   WHEN 'May' THEN 2 " +
+	                     "   WHEN 'June' THEN 3 " +
+	                     "   WHEN 'July' THEN 4 " +
+	                     "   WHEN 'August' THEN 5 " +
+	                     "   WHEN 'September' THEN 6 " +
+	                     "   WHEN 'October' THEN 7 " +
+	                     "   WHEN 'November' THEN 8 " +
+	                     "   WHEN 'December' THEN 9 " +
+	                     "   WHEN 'January' THEN 10 " +
+	                     "   WHEN 'February' THEN 11 " +
+	                     "   WHEN 'March' THEN 12 " +
+	                     "   ELSE 13 " +
+	                     " END";
+
+	        jakarta.persistence.Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", plantId);
+	        query.setParameter("aopYear", aopYear);
+
+	        NativeQuery<Map<String, Object>> hibernateQuery = query.unwrap(NativeQuery.class);
+	        
+	        hibernateQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+	        return hibernateQuery.getResultList();
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        throw new RuntimeException("Failed to fetch dynamic data from " + viewName + ": " + ex.getMessage());
+	    }
 	}
 	
 	public List<DecokePlanningDTO> setData(List<Object[]> results) {
@@ -616,151 +606,181 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	}
 
 	@Override
+	@Transactional
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year,
-			List<DecokePlanningDTO> decokePlanningDTOList) {
-		List<DecokePlanningDTO> failedList=new ArrayList<>();
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<DecokeMaintenance> decokeMaintenanceList = new ArrayList<>();
-		try {
-			for (DecokePlanningDTO decokePlanningDTO : decokePlanningDTOList) {
-				if (decokePlanningDTO.getSaveStatus() != null
-						&& decokePlanningDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
-					failedList.add(decokePlanningDTO);
-					continue;
-				}
-				Optional<DecokeMaintenance> decokePlanningop = decokeMaintenanceRepository
-						.findById(decokePlanningDTO.getId());
-				if (decokePlanningop.isPresent()) {
-					DecokeMaintenance decokeMaintenance = decokePlanningop.get();
-					decokeMaintenance.setMnt(decokePlanningDTO.getMnt());
-					decokeMaintenance.setRemarks(decokePlanningDTO.getRemarks());
-					decokeMaintenance.setBbd(decokePlanningDTO.getBbd());
-					decokeMaintenance.setBbu(decokePlanningDTO.getBbu());
-					decokeMaintenance.setDemoBbu(decokePlanningDTO.getDemoBBU());
-					decokeMaintenance.setDemoHss(decokePlanningDTO.getDemoHSS());
-					decokeMaintenance.setDemoSad(decokePlanningDTO.getDemoSAD());
-					decokeMaintenance.setDemoSd(decokePlanningDTO.getDemoSD());
-					decokeMaintenance.setFiveF(decokePlanningDTO.getFiveF());
-					decokeMaintenance.setFourF(decokePlanningDTO.getFourF());
-					decokeMaintenance.setFourFd(decokePlanningDTO.getFourFD());
-					decokeMaintenance.setFourFHours(decokePlanningDTO.getFourFHours());
-					decokeMaintenance.setIbr(decokePlanningDTO.getIbr());
-					decokeMaintenance.setShoutdown(decokePlanningDTO.getShutdown());
-					decokeMaintenance.setSad(decokePlanningDTO.getSad());
-					decokeMaintenance.setSlowdown(decokePlanningDTO.getSlowdown());
-					decokeMaintenance.setTotal(decokePlanningDTO.getTotal());
-					decokeMaintenance.setCoilReplacement(decokePlanningDTO.getCoilReplacement());
-					decokeMaintenance.setNumberOfDays(decokePlanningDTO.getNumberOfDays());
-					decokeMaintenance.setTotalSAD(decokePlanningDTO.getTotalSAD());
-					decokeMaintenanceList.add(decokeMaintenanceRepository.save(decokeMaintenance));
-				}
-			}
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to update data", ex);
-		}
-		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("maintenance-details");
-		for (ScreenMapping screenMapping : screenMappingList) {
-			AopCalculation aopCalculation = new AopCalculation();
-			aopCalculation.setAopYear(year);
-			aopCalculation.setIsChanged(true);
-			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-			aopCalculation.setPlantId(UUID.fromString(plantId));
-			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-			aopCalculationRepository.save(aopCalculation);
-		}
-		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("Data updated successfully");
-		aopMessageVM.setData(failedList);
-		return aopMessageVM;
+	        List<Map<String, Object>> payloadList) {
+	    
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    int totalUpdatedRows = 0;
+	    
+	    final Set<String> EXCLUDE_FIELDS = Set.of("Id", "PlantId", "AOPYear", "MonthName");
 
+	    try {
+	        for (Map<String, Object> payload : payloadList) {
+	            
+	            String idString = (String) payload.get("Id");
+	            if (idString == null || "Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) {
+	                continue;
+	            }
+
+	            StringBuilder setClause = new StringBuilder();
+	            Map<String, Object> parameters = new java.util.HashMap<>();
+
+	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+	                String columnName = entry.getKey();
+	                Object value = entry.getValue();
+
+	                if (EXCLUDE_FIELDS.contains(columnName) || "saveStatus".equals(columnName)) {
+	                    continue;
+	                }
+
+	                if (setClause.length() > 0) {
+	                    setClause.append(", ");
+	                }
+
+	                setClause.append("[").append(columnName).append("] = :").append(columnName);
+	                parameters.put(columnName, value);
+	            }
+
+	            if (setClause.length() == 0) continue;
+
+	            String sql = "UPDATE [dbo].[DecokeMaintenance] SET " + setClause.toString()
+	                       + " WHERE [Id] = :id AND [PlantId] = :plantId AND [AOPYear] = :aopYear";
+
+	            jakarta.persistence.Query nativeQuery = entityManager.createNativeQuery(sql);
+
+	            parameters.forEach(nativeQuery::setParameter);
+	            
+	            nativeQuery.setParameter("id", UUID.fromString(idString));
+	            nativeQuery.setParameter("plantId", UUID.fromString(plantId));
+	            nativeQuery.setParameter("aopYear", year);
+
+	            totalUpdatedRows += nativeQuery.executeUpdate();
+	        }
+
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("maintenance-details");
+	        for (ScreenMapping screenMapping : screenMappingList) {
+	            AopCalculation aopCalculation = new AopCalculation();
+	            aopCalculation.setAopYear(year);
+	            aopCalculation.setIsChanged(true);
+	            aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	            aopCalculation.setPlantId(UUID.fromString(plantId));
+	            aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	            aopCalculationRepository.save(aopCalculation);
+	        }
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Maintenance data updated successfully. Rows affected: " + totalUpdatedRows);
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        aopMessageVM.setCode(500);
+	        aopMessageVM.setMessage("Failed to update maintenance data: " + ex.getMessage());
+	        return aopMessageVM;
+	    }
 	}
 	
 	@Override
-	public AOPMessageVM maintenanceImport(String year,UUID plantId,MultipartFile file) {
-		// TODO Auto-generated method stub
-		try {
-			List<DecokePlanningDTO> data = readMaintenance(file.getInputStream(), plantId, year);
-			 AOPMessageVM aopMessageVM = updateMaintenanceDataForCracker( plantId.toString(),  year, data);
-			 List<DecokePlanningDTO> failedList = (List<DecokePlanningDTO>) aopMessageVM.getData();
+	public AOPMessageVM maintenanceImport(String year, UUID plantId, MultipartFile file) {
+	    try {
+	        List<Map<String, Object>> data = readMaintenance(file.getInputStream(), plantId, year);
+	        
+	        AOPMessageVM aopMessageVM = updateMaintenanceDataForCracker(plantId.toString(), year, data);
+	        
+	        List<Map<String, Object>> failedList = data.stream()
+	                .filter(m -> "Failed".equalsIgnoreCase((String) m.get("saveStatus")))
+	                .collect(Collectors.toList());
 
-			if (failedList != null && failedList.size() > 0) {
-				byte[] fileByteArray = maintenanceExport(year, plantId.toString(), true, failedList);
-				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
-				aopMessageVM.setData(base64File);
-				aopMessageVM.setCode(400);
-				aopMessageVM.setMessage("Partial data has been saved");
-			} else {
-				// aopMessageVM.setData();
-				aopMessageVM.setCode(200);
-				aopMessageVM.setMessage("All data has been saved");
-			}
+	        if (!failedList.isEmpty()) {
+	            byte[] fileByteArray = maintenanceExport(year, plantId.toString(), true, failedList);
+	            String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+	            
+	            aopMessageVM.setData(base64File);
+	            aopMessageVM.setCode(400);
+	            aopMessageVM.setMessage("Partial data saved. Please check the downloaded file for errors.");
+	        } else {
+	            aopMessageVM.setCode(200);
+	            aopMessageVM.setMessage("All data has been saved successfully.");
+	        }
 
-			return aopMessageVM;
-			// return ResponseEntity.ok(data);
-		} catch (Exception e) {
-			e.printStackTrace();
-			// return ResponseEntity.internalServerError().build();
-		}
-		return null;
+	        return aopMessageVM;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw new RuntimeException("Import process failed: " + e.getMessage());
+	    }
 	}
 	
-	public List<DecokePlanningDTO> readMaintenance(InputStream inputStream, UUID plantFKId, String year) {
-		List<DecokePlanningDTO> dtoList = new ArrayList<>();
+	public List<Map<String, Object>> readMaintenance(InputStream inputStream, UUID plantFKId, String year) {
+	    List<Map<String, Object>> payloadList = new ArrayList<>();
 
-		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rowIterator = sheet.iterator();
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        int totalRows = sheet.getLastRowNum();
+	        
+	        Row headerRow = sheet.getRow(0);
+	        if (headerRow == null) return payloadList;
 
-			if (rowIterator.hasNext())
-				rowIterator.next(); // Skip header
-			int totalRows = sheet.getLastRowNum(); 
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-				if (row.getRowNum() == totalRows) {
-			        continue;
-			    }
-				DecokePlanningDTO dto = new DecokePlanningDTO();
-				try {
-					dto.setMonthName(getStringCellValue(row.getCell(0), dto));
-					dto.setId(UUID.fromString(getStringCellValue(row.getCell(19), dto)));
-					dto.setFiveF(getNumericCellValue(row.getCell(1), dto));
-					dto.setFourF(getNumericCellValue(row.getCell(2), dto));
-					dto.setFourFD(getNumericCellValue(row.getCell(3), dto));
-					dto.setCoilReplacement(getNumericCellValue(row.getCell(4), dto));
-					dto.setIbr(getNumericCellValue(row.getCell(4), dto));
-					dto.setShutdown(getNumericCellValue(row.getCell(5), dto));
-					dto.setSlowdown(getNumericCellValue(row.getCell(6), dto));
-					dto.setSad(getNumericCellValue(row.getCell(7), dto));
-					dto.setBbu(getNumericCellValue(row.getCell(8), dto));
-					dto.setBbd(getNumericCellValue(row.getCell(9), dto));
-					dto.setDemoSAD(getNumericCellValue(row.getCell(10), dto));
-					dto.setDemoSD(getNumericCellValue(row.getCell(11), dto));
-					dto.setDemoBBU(getNumericCellValue(row.getCell(12), dto));
-					dto.setDemoHSS(getNumericCellValue(row.getCell(13), dto));
-					dto.setMnt(getNumericCellValue(row.getCell(14), dto));
-					dto.setTotal(getNumericCellValue(row.getCell(15), dto));
-					dto.setNumberOfDays(getIntegerCellValue(row.getCell(16), dto));
-					dto.setTotalSAD(getNumericCellValue(row.getCell(17), dto));
-					dto.setRemarks(getStringCellValue(row.getCell(18), dto));
-					
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					dto.setErrDescription(e.getMessage());
-					dto.setSaveStatus("Failed");
-				}
-				dtoList.add(dto);
-			}
+	        List<String> columnNames = new ArrayList<>();
+	        for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+	            String headerValue = getStringCellValue(headerRow.getCell(i));
+	            columnNames.add(headerValue != null ? headerValue.trim() : "Column_" + i);
+	        }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	        for (int i = 1; i <= totalRows; i++) {
+	            Row row = sheet.getRow(i);
+	            
+	            if (row == null || i == totalRows) continue;
 
-		return dtoList;
+	            Map<String, Object> rowData = new HashMap<>();
+	            try {
+	                for (int j = 0; j < columnNames.size(); j++) {
+	                    String columnName = columnNames.get(j);
+	                    Cell cell = row.getCell(j);
+	                    
+	                    if (columnName.equalsIgnoreCase("Id") || columnName.equalsIgnoreCase("MonthName") || columnName.equalsIgnoreCase("Remarks")) {
+	                        rowData.put(columnName, getStringCellValue(cell));
+	                    } else if (columnName.equalsIgnoreCase("NumberOfDays")) {
+	                        rowData.put(columnName, getIntegerCellValue(cell));
+	                    } else {
+	                        rowData.put(columnName, getNumericCellValue(cell));
+	                    }
+	                }
+
+	                rowData.put("saveStatus", "Success");
+	            } catch (Exception e) {
+	                rowData.put("saveStatus", "Failed");
+	                rowData.put("errDescription", "Error at row " + (i + 1) + ": " + e.getMessage());
+	            }
+	            payloadList.add(rowData);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return payloadList;
+	}
+	
+	private static String getStringCellValue(Cell cell) {
+	    if (cell == null) return null;
+	    DataFormatter formatter = new DataFormatter();
+	    return formatter.formatCellValue(cell).trim();
 	}
 
+	private static Double getNumericCellValue(Cell cell) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) return 0.0;
+	    try {
+	        return cell.getNumericCellValue();
+	    } catch (Exception e) {
+	        // Fallback for numbers stored as strings
+	        String val = getStringCellValue(cell);
+	        return (val == null || val.isEmpty()) ? 0.0 : Double.parseDouble(val);
+	    }
+	}
+
+	private static Integer getIntegerCellValue(Cell cell) {
+	    Double val = getNumericCellValue(cell);
+	    return val.intValue();
+	}
+	
 	@Override
 	public AOPMessageVM getBudgetMaintenance(String plantId, String year,String budgetCategory) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
