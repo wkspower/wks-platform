@@ -38,6 +38,11 @@ public class PowerGenerationService {
         List<AssetOperationalResponseDTO> response = new  ArrayList<>();
 
         for (AssetMonthlyOperationalProjection row : data) {
+      System.out.println("Asset Type: " + row.getAssetType());
+            // Skip Steam_Distribution Asset
+            if( row.getAssetType() != null && row.getAssetType().equals("Steam_Dis")) {
+                continue;
+            }
 
             Map<String, MonthlyHoursDTO> monthMap = new LinkedHashMap<>();
 

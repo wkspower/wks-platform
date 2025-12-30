@@ -46,8 +46,15 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
         List<AssetPriorityProjection> projections = assetPriorityRepository
                 .getAssetAvailabilityPriorityByCPP(cppId, financialYear);
 
-        return projections.stream()
+        return projections.stream().
+        filter(projection ->
+            projection.getAssetType() != null &&
+            !projection.getAssetType().isEmpty() &&
+            !"Steam_Dis".equals(projection.getAssetType())
+    )
                 .map(projection -> {
+            
+                  
                     AssetPrioriryDTO dto = new AssetPrioriryDTO();
                     dto.setAssetId(projection.getAssetId());
                     dto.setAssetName(projection.getAssetName());
@@ -143,6 +150,8 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
                 .map(p -> p.getAssetId().toString() + "_" + p.getFymId().toString())
                 .collect(Collectors.toSet());
 
+                System.out.println("existing keys: " + existingKeys);
+
         List<Object[]> updates = new ArrayList<>();
         List<Object[]> inserts = new ArrayList<>();
 
@@ -157,6 +166,7 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
                 if (fymId == null) continue;
 
                 String key = assetId.toString() + "_" + fymId.toString();
+                System.out.println("key for asset " + assetId + ": " + key);
                 if (existingKeys.contains(key)) {
                     updates.add(new Object[] { priority, assetId, fymId });
                 } else {
@@ -167,12 +177,14 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
 
         if (!updates.isEmpty()) {
             String updateSql = "UPDATE AssetAvailability SET Priority = ? WHERE AssetId = ? AND FinancialYearMonthId = ?";
-            jdbcTemplate.batchUpdate(updateSql, updates);
+          //  jdbcTemplate.batchUpdate(updateSql, updates);
+          System.out.println("updates: " + updates);
         }
 
         if (!inserts.isEmpty()) {
             String insertSql = "INSERT INTO AssetAvailability (Id, AssetId, FinancialYearMonthId, IsAssetAvailable, Priority) VALUES (NEWID(), ?, ?, 1, ?)";
-            jdbcTemplate.batchUpdate(insertSql, inserts);
+           //   jdbcTemplate.batchUpdate(insertSql, inserts);
+           System.out.println("inserts: " + inserts.size()  + "comma separated: " + inserts.stream().map(Object::toString).collect(Collectors.joining(", ")));
         }
     }
 

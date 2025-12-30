@@ -5,6 +5,7 @@ import java.util.UUID;
 public interface AssetPriorityProjection {
 
     UUID getAssetId();
+    String getAssetType();
     String getAssetName();
 
     Integer getApril();
