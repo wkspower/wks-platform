@@ -899,17 +899,24 @@ const Norms = () => {
     }
 
     const payload = modifiedData
+    const tempPayload=payload?.map((item)=>{
+      const { normHeaderId, ...rest } = item
+      return {
+        ...rest,
+       normsHeaderFkId:normHeaderId
+      }
+    })
 
     try {
       // Transform modifiedCells into the format expected by the API
 
-      console.log('payload', payload)
+      console.log('payload', tempPayload)
 
       // Call the API to save changes
       // NOTE: Update this API call to expect nested format when ready
       const response = await UtilityPlantApiServiceV2.saveNormsData(
         keycloak,
-        payload, // Now sending nested format: { apr: { norms, quantity, ... } }
+        tempPayload, // Now sending nested format: { apr: { norms, quantity, ... } }
       )
 
       // Update the local state with the saved data
