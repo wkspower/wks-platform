@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.HeatRateDTO;
 import com.wks.caseengine.dto.HeatRateDropDownProjection;
 import com.wks.caseengine.dto.HeatRateProjection;
+import com.wks.caseengine.dto.STGExtractionLookupDTO;
 import com.wks.caseengine.service.HeatRateService;
 
 import java.util.List;
@@ -30,6 +31,11 @@ public class HeatRateController {
     @GetMapping("/heat-rate/{assetId}")
     public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(@PathVariable String assetId) {
         return ResponseEntity.ok(heatRateService.getHeatRateByAssetId(assetId));
+    }
+
+    @GetMapping("/stg-extraction-lookup")
+    public ResponseEntity<List<STGExtractionLookupDTO>> getSTGExtractionLookup() {
+        return ResponseEntity.ok(heatRateService.getSTGExtractionLookup());
     }
 
 }

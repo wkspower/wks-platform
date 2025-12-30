@@ -8,7 +8,10 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.HeatRateDTO;
 import com.wks.caseengine.dto.HeatRateDropDownProjection;
 import com.wks.caseengine.dto.HeatRateProjection;
+import com.wks.caseengine.dto.STGExtractionLookupDTO;
+import com.wks.caseengine.entity.STGExtractionLookup;
 import com.wks.caseengine.repository.HeatRateRepository;
+import com.wks.caseengine.repository.STGExtractionLookupRepository;
 
 
 @Service
@@ -16,6 +19,9 @@ public class HeatRateService {
     
     @Autowired
     private HeatRateRepository heatRateRepository;
+
+    @Autowired
+    private STGExtractionLookupRepository stgExtractionLookupRepository;
 
     public List<Object[]> getAssetNamesByCppIdAndAssetType(String cppId) {
        
@@ -42,5 +48,23 @@ public class HeatRateService {
                     return dto;
                 })
                 .toList();
+    }
+
+    public List<STGExtractionLookupDTO> getSTGExtractionLookup() {
+        return stgExtractionLookupRepository.findAllByOrderByLoadMWAsc().stream()
+                .map(this::mapToSTGExtractionDTO)
+                .toList();
+    }
+
+    private STGExtractionLookupDTO mapToSTGExtractionDTO(STGExtractionLookup entity) {
+        return STGExtractionLookupDTO.builder()
+                .id(entity.getId())
+                .loadMW(entity.getLoadMW())
+                .svhInletTPH(entity.getSvhInletTPH())
+                .smBleedFlowTPH(entity.getSmBleedFlowTPH())
+                .slExtFlowTPH(entity.getSlExtFlowTPH())
+                .condensingLoadM3Hr(entity.getCondensingLoadM3Hr())
+                .heatRateKcalKWH(entity.getHeatRateKcalKWH())
+                .build();
     }
 }
