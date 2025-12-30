@@ -143,19 +143,6 @@ public class AOPProposedNormsServiceImpl implements AOPProposedNormsService {
 				    dto.setGradeId(row[41] != null ? row[41].toString() : null);
 				    dto.setPlantId(row[42] != null ? row[42].toString() : null);
 				    dto.setAopYear(row[43] != null ? row[43].toString() : null);
-				    dto.setModifiedBy(row[44] != null ? row[44].toString() : null);
-				    dto.setModifiedOn(row[45] != null ? (java.util.Date) row[45] : null);
-
-				    if (row[46] != null) {
-				        if (row[46] instanceof Boolean) {
-				            dto.setIsEditable((Boolean) row[46]);
-				        } else if (row[46] instanceof Number) {
-				            dto.setIsEditable(((Number) row[46]).intValue() == 1);
-				        }
-				    } else {
-				        dto.setIsEditable(null);
-				    }
-
 				    aopProposedNormsDTOList.add(dto);
 				}				
 				Map<String, Object> map = new HashMap<>();

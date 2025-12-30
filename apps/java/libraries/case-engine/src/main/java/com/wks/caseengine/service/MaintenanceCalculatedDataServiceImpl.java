@@ -727,7 +727,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        for (int i = 1; i <= totalRows; i++) {
 	            Row row = sheet.getRow(i);
 	            
-	            if (row == null || i == totalRows) continue;
+	            if (row == null) continue;
 
 	            Map<String, Object> rowData = new HashMap<>();
 	            try {
