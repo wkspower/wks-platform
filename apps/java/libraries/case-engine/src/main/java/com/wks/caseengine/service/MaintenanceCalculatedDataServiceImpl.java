@@ -602,12 +602,13 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	    try {
 	        for (Map<String, Object> payload : payloadList) {
+	            if (payload.containsKey("CoilReplacement")) {
+	                payload.put("IBR", payload.get("CoilReplacement"));
+	            }
+
 	            String idString = (String) payload.get("Id");
 	            if (idString == null || "Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) continue;
 	            String selectSql = "SELECT * FROM DecokeMaintenance WHERE [Id] = :id";
-	            Query selectQuery = entityManager.createNativeQuery(selectSql);
-	            selectQuery.setParameter("id", UUID.fromString(idString));
-	            
 	            List<Map<String, Object>> existingDataList = entityManager
 	                .createNativeQuery(selectSql)
 	                .setParameter("id", UUID.fromString(idString))
@@ -620,14 +621,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	            boolean isDataChanged = false;
 	            boolean isRemarkChanged = false;
-
 	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
 	                String col = entry.getKey();
 	                if (EXCLUDE.contains(col)) continue;
 
 	                Object newValue = entry.getValue();
 	                Object oldValue = dbRow.get(col);
-
 	                boolean valuesMatch = (newValue == null && oldValue == null) || 
 	                                     (newValue != null && newValue.equals(oldValue));
 
@@ -645,6 +644,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                payload.put("errDescription", "Please add/update remark since data has changed.");
 	                continue; 
 	            }
+	            if (!isDataChanged && !isRemarkChanged) continue;
 
 	            StringBuilder setClause = new StringBuilder();
 	            Map<String, Object> params = new HashMap<>();
@@ -659,17 +659,15 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                params.put(safeParam, entry.getValue());
 	            }
 
-	            if (setClause.length() == 0) continue;
-
-	            String sql = "UPDATE DecokeMaintenance SET " + setClause.toString() + " WHERE [Id] = :id ";
-	            Query query = entityManager.createNativeQuery(sql);
+	            String updateSql = "UPDATE DecokeMaintenance SET " + setClause.toString() + " WHERE [Id] = :id ";
+	            Query query = entityManager.createNativeQuery(updateSql);
 	            params.forEach(query::setParameter);
 	            query.setParameter("id", UUID.fromString(idString));
 
 	            totalUpdatedRows += query.executeUpdate();
 	        }
 
-	       	aopMessageVM.setCode(200);
+	        aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("Updated rows: " + totalUpdatedRows);
 	        return aopMessageVM;
 	    } catch (Exception ex) {
