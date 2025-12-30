@@ -73,7 +73,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     // if (!row?.isEditable) return
 
     setCurrentRemark(row.Remarks || '')
-    setCurrentRowId(row.Id)
+    setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
   function isLeapYear(yearStr) {

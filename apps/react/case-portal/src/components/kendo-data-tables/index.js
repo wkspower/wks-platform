@@ -368,7 +368,7 @@ const KendoDataTables = ({
 
       setRows((prev) =>
         prev.map((r) => {
-          if (!(r.id === itemId || r.Id === itemId)) return r
+          if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
 
           // percentChange logic: adjust months if enabled and percentChange field changed
@@ -545,11 +545,11 @@ const KendoDataTables = ({
       let keyToUpdate = ''
 
       const updatedRows = prevRows.map((row) => {
-        if ((row.id === currentRowId) || (row.Id === currentRowId)) {
-          const keysToUpdate = ['aopRemarks', 'remarks', 'remark', 'Remarks'].filter(
+        if (row.id === currentRowId) {
+          const keysToUpdate = ['aopRemarks', 'remarks', 'remark','Remarks'].filter(
             (key) => key in row,
           )
-          keyToUpdate = keysToUpdate[0] || 'remark' || 'Remarks'
+          keyToUpdate = keysToUpdate[0] || 'remark'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
           return updatedRow
         }
@@ -567,13 +567,12 @@ const KendoDataTables = ({
               ...updatedRow,
               gridName,
               id: updatedRow.id,
-              [keyToUpdate]: currentRemark,
             },
           }))
         } else {
           setModifiedCells((prev) => ({
             ...prev,
-            [updatedRow.id || updatedRow.Id]: updatedRow,
+            [updatedRow.id]: updatedRow,
           }))
         }
       }
@@ -853,7 +852,7 @@ const KendoDataTables = ({
       allRedCell,
     } = props
 
-    const rowId = dataItem.id || dataItem.Id
+    const rowId = dataItem.id
     const value = dataItem[field]
     if (disableRedHighlight) {
       return (
