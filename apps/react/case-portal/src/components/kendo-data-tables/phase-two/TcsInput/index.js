@@ -10,6 +10,7 @@ import { generateMockData, getColumnsForTab } from './utility'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
 import CrudBlendWindow from './CrudBlendWindow'
+import ROGC from './ROGC'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -22,8 +23,9 @@ const renderTabComponent = (tabDisplayName, props) => {
       return <Slowdown {...props} />
     case 'CPP Units SD Plan':
     case 'PCG Outlook':
-    case 'ROGC':
       return <DefaultTcsInput {...props} tabDisplayName={tabDisplayName} />
+    case 'ROGC':
+      return <ROGC {...props} />
     case 'Crude Blend Window':
       return <CrudBlendWindow {...props} />
     default:
@@ -80,6 +82,8 @@ const TcsInput = () => {
 
       // Second API: Get array of tab IDs to show
       const visibleTabsResponse = await TcsApiService.getTcsVisibleTabs(keycloak, VERTICAL_ID, SITE_ID, PLANT_ID)
+      console.log('visibleTabsResponse', visibleTabsResponse)
+      
       let visibleTabIds = []
       if (visibleTabsResponse?.data) {
         visibleTabIds = typeof visibleTabsResponse.data === 'string'
@@ -88,12 +92,16 @@ const TcsInput = () => {
       }
 
       // Filter tabs to show only visible ones
-      if (allTabsList && visibleTabIds && visibleTabIds.length > 0) {
+      if (allTabsList && Array.isArray(visibleTabIds) && visibleTabIds.length > 0) {
         const visibleTabIdsLower = visibleTabIds.map(id => id.toLowerCase())
         const filteredTabs = allTabsList
           .filter(tab => visibleTabIdsLower.includes(tab.id.toLowerCase()))
           .sort((a, b) => a.displaySequence - b.displaySequence)
         setTabObj(filteredTabs)
+      } else if (allTabsList && (!visibleTabIds || visibleTabIds.length === 0)) {
+        // If no visible tabs are returned, show all tabs
+        console.warn('No visible tabs configured')
+        setTabObj([])
       }
     } catch (err) {
       console.error('Error fetching tabs:', err)
@@ -125,7 +133,7 @@ const TcsInput = () => {
             }
           }}
         >
-          {tabObj.map((tab) => (
+          {tabObj && tabObj?.map((tab) => (
             <Tab
               key={tab.id}
               sx={{

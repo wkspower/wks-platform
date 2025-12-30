@@ -25,6 +25,10 @@ export const TcsApiService = {
   getTcsSlowdownData,
   saveSlowdownData,
 
+  // TCS ROGC Data APIs
+  getTcsRogcData,
+  saveRogcData,
+
   // Excel Import/Export APIs
   downloadTcsExcel,
   uploadTcsExcel,
@@ -247,6 +251,51 @@ async function saveCrudBlendWindowData(keycloak, plantId, year, siteId, payload)
     Authorization: `Bearer ${keycloak.token}`,
   }
   const body = JSON.stringify(payload.data);
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// ===================== || TCS ROGC Data APIs || ===================== //
+async function getTcsRogcData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-rogc?plantId=${plantId}&year=${year}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveRogcData(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-rogc?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload);
   try {
     const resp = await fetch(url, {
       method: 'POST',
