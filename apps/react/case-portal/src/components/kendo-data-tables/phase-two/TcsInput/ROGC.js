@@ -8,6 +8,7 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 
 const ROGC = ({
   PLANT_ID,
+  SITE_ID,
   AOP_YEAR,
   currentTab,
   snackbarData,
@@ -26,69 +27,6 @@ const ROGC = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  // State to store API response metadata (headers and keys)
-  const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
-
-  // Mock API response for ROGC (will be removed once backend is working)
-  const getMockRogcResponse = () => {
-    return {
-      headers: ['Particulars', 'apr', 'may', 'june', 'july', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'march', 'remark'],
-      keys: ['Particulars', 'apr', 'may', 'june', 'july', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'march', 'remark'],
-      results: [
-        {
-          id: 1,
-          Particulars: 'F1',
-          apr: 0.0,
-          may: 2.3,
-          june: 0.0,
-          july: 0.0,
-          aug: 2.3,
-          sep: 0.0,
-          oct: 0.0,
-          nov: 0.0,
-          dec: 2.3,
-          jan: 18,
-          feb: 0.0,
-          march: 0.0,
-          remark: '',
-        },
-        {
-          id: 2,
-          Particulars: 'F2',
-          apr: 0.0,
-          may: 0.0,
-          june: 0.0,
-          july: 2.3,
-          aug: 0.0,
-          sep: 0.0,
-          oct: 2.3,
-          nov: 0.0,
-          dec: 0.0,
-          jan: 2.3,
-          feb: 0.0,
-          march: 0.0,
-          remark: '',
-        },
-        {
-          id: 3,
-          Particulars: 'F3',
-          apr: 2.3,
-          may: 0.0,
-          june: 0.0,
-          july: 2.3,
-          aug: 0.0,
-          sep: 0.0,
-          oct: 2.3,
-          nov: 0.0,
-          dec: 0.0,
-          jan: 0.0,
-          feb: 0.0,
-          march: 0.0,
-          remark: '',
-        },
-      ],
-    }
-  }
 
   // Fetch ROGC Data
   const fetchRogcData = useCallback(async () => {
@@ -98,16 +36,17 @@ const ROGC = ({
       let transformedData = []
 
       // TODO: Replace with actual API call once backend is ready
-      const response = getMockRogcResponse()
-      // const response = await TcsApiService.getTcsRogcData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
+      // const response = getMockRogcResponse()
+      const response = await TcsApiService.getTcsRogcData(
+        keycloak,
+        SITE_ID,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       console.log('TCS ROGC Response:', response)
 
-      if (response?.results && Array.isArray(response.results)) {
-        transformedData = response.results.map((item, index) => ({
+      if (response?.furnaceData && Array.isArray(response.furnaceData)) {
+        transformedData = response.furnaceData.map((item, index) => ({
           id: item.id || `row_${index}`,
           ...item,
           inEdit: false,
@@ -116,29 +55,13 @@ const ROGC = ({
         // Add average row
         const averageRow = {
           id: 'average_row',
-          Particulars: 'Average',
-          apr: 0.75,
-          may: 0.77,
-          june: 0.0,
-          july: 1.53,
-          aug: 0.77,
-          sep: 0.0,
-          oct: 1.53,
-          nov: 0.0,
-          dec: 0.77,
-          jan: 6.0,
-          feb: 0.0,
-          march: 0.0,
-          remark: '',
+          furnace: 'Average of Duty_Furnace_Cracking',
+          ...response.gCalPerHrData,
+          remarks: '-',
           isEditable: false,
           inEdit: false,
         }
         transformedData.push(averageRow)
-      }
-
-      // Store headers and keys from API response
-      if (response?.headers && response?.keys) {
-        setApiMetadata({ headers: response.headers, keys: response.keys })
       }
 
       setRows(transformedData)
@@ -164,68 +87,144 @@ const ROGC = ({
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
+    if (PLANT_ID && AOP_YEAR && SITE_ID) {
       fetchRogcData()
     }
-  }, [PLANT_ID, AOP_YEAR, fetchRogcData])
+  }, [PLANT_ID, AOP_YEAR, SITE_ID, fetchRogcData])
 
   // Generate header names with month-year format
   const headerMap = useMemo(() => generateHeaderNames(AOP_YEAR), [AOP_YEAR])
 
-  // Column configuration for ROGC - uses backend titles except for months which use headerMap
+  // Column configuration for ROGC - hardcoded like FixedConsumption.js
   const columns = useMemo(() => {
-    const { headers, keys } = apiMetadata
-
-    if (!headers || !keys || headers.length === 0) {
-      return []
-    }
-
-    // Map keys to their headers from backend
-    const columnMap = {}
-    headers.forEach((header, index) => {
-      columnMap[keys[index]] = header
-    })
-
-    // Month fields that should use headerMap instead of backend title
-    const monthFields = {
-      apr: headerMap[4],
-      may: headerMap[5],
-      june: headerMap[6],
-      july: headerMap[7],
-      aug: headerMap[8],
-      sep: headerMap[9],
-      oct: headerMap[10],
-      nov: headerMap[11],
-      dec: headerMap[12],
-      jan: headerMap[1],
-      feb: headerMap[2],
-      march: headerMap[3],
-    }
-
-    // Build columns configuration
-    const columnConfig = {
-      Particulars: { editable: false, type: 'text', minWidth: 150, width: 150 },
-      apr: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      may: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      june: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      july: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      aug: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      sep: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      oct: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      nov: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      dec: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      jan: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      feb: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      march: { editable: true, type: 'number1', minWidth: 80, width: 80 },
-      remark: { editable: true, type: 'textarea', minWidth: 150, width: 150 },
-    }
-
-    return Object.entries(columnConfig).map(([key, config]) => ({
-      field: key,
-      title: monthFields[key] || columnMap[key] || key,
-      ...config,
-    }))
-  }, [apiMetadata, headerMap])
+    return [
+      { field: 'id', title: 'ID', hidden: true },
+      {
+        field: 'furnace',
+        title: 'Furnace',
+        width: 150,
+        minWidth: 150,
+        type: 'text',
+        editable: false,
+      },
+      {
+        field: 'apr',
+        title: headerMap[4],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'may',
+        title: headerMap[5],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'jun',
+        title: headerMap[6],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'jul',
+        title: headerMap[7],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'aug',
+        title: headerMap[8],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'sep',
+        title: headerMap[9],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'oct',
+        title: headerMap[10],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'nov',
+        title: headerMap[11],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'dec',
+        title: headerMap[12],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'jan',
+        title: headerMap[1],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'feb',
+        title: headerMap[2],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'mar',
+        title: headerMap[3],
+        editable: true,
+        width: 100,
+        minWidth: 80,
+        type: 'number1',
+        format: valueFormat,
+      },
+      {
+        field: 'remarks',
+        title: 'Remark',
+        editable: true,
+        width: 150,
+        minWidth: 150,
+        type: 'textarea',
+      },
+    ]
+  }, [headerMap])
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
@@ -233,7 +232,7 @@ const ROGC = ({
     if (!row?.isEditable && row?.isEditable !== undefined) {
       return
     }
-    setCurrentRemark(row.Particulars || '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -271,6 +270,7 @@ const ROGC = ({
 
       const response = await TcsApiService.saveRogcData(
         keycloak,
+        SITE_ID,
         PLANT_ID,
         AOP_YEAR,
         data,
