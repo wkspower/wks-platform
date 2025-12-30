@@ -374,12 +374,10 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        Workbook workbook = new XSSFWorkbook();
 	        Sheet sheet = workbook.createSheet("Maintenance Data");
 	        
-	        // Headers are retrieved from the map keys
 	        List<String> headers = new ArrayList<>(dynamicData.get(0).keySet());
 	        
 	        CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
 	        
-	        // 1. Create Header Row
 	        Row headerRow = sheet.createRow(0);
 	        for (int i = 0; i < headers.size(); i++) {
 	            Cell cell = headerRow.createCell(i);
@@ -387,7 +385,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            cell.setCellStyle(headerStyle);
 	        }
 
-	        // 2. Create Data Rows
 	        int rowIdx = 1;
 	        for (Map<String, Object> rowData : dynamicData) {
 	            Row row = sheet.createRow(rowIdx++);
@@ -403,8 +400,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            }
 	        }
 
-	        // 3. Dynamic Hiding and Auto-sizing
-	        // Set of fields to hide (Case-insensitive check is safer)
 	        Set<String> fieldsToHide = Set.of("ID", "PLANTID", "AOPYEAR");
 
 	        for (int i = 0; i < headers.size(); i++) {
@@ -470,7 +465,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        return dtoList;
 	    }
 
-	    // Initialize sum variables
 	    double sumCoilReplacement = 0;
 	    double sumMnt = 0;
 	    double sumShutdown = 0;
@@ -492,14 +486,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    for (Object[] row : results) {
 	        DecokePlanningDTO dto = new DecokePlanningDTO();
 
-	        // String fields
 	        dto.setId(row[0] != null ? UUID.fromString(row[0].toString()) : null);
 	        dto.setMonthName(row[1] != null ? row[1].toString() : null);
 	        dto.setAopYear(row[18] != null ? row[18].toString() : null);
 	        dto.setPlantId(row[19] != null ? UUID.fromString(row[19].toString()) : null);
 	        dto.setRemarks(row[20] != null ? row[20].toString() : "");
 
-	        // Numeric fields
 	        dto.setCoilReplacement(row[2] != null ? Double.parseDouble(row[2].toString()) : 0.0);
 	        dto.setMnt(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
 	        dto.setShutdown(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
@@ -519,7 +511,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        dto.setTotalSAD(row[21] != null ? Double.parseDouble(row[21].toString()) : 0.0);
 	        dto.setNumberOfDays(row[22] != null ? Integer.parseInt(row[22].toString()) : 0);
 
-	        // Accumulate totals
 	        sumCoilReplacement += dto.getCoilReplacement();
 	        sumMnt += dto.getMnt();
 	        sumShutdown += dto.getShutdown();
@@ -541,7 +532,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        dtoList.add(dto);
 	    }
 
-	    // Add summary (Total) DTO
 	    DecokePlanningDTO totalDto = new DecokePlanningDTO();
 	    totalDto.setMonthName("Total");
 	    totalDto.setCoilReplacement(sumCoilReplacement);
@@ -571,7 +561,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	public List<Object[]> getData(String plantId, String aopYear, String viewName) {
 		try {
 
-			// 2. Construct SQL with dynamic view name
 			String sql = "SELECT * FROM " + viewName +
 					" WHERE PlantId = :plantId AND AOPYear = :aopYear " +
 					"ORDER BY CASE MonthName " +
@@ -590,12 +579,10 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 					"    ELSE 13 " +
 					"END";
 
-			// 3. Create and parameterize the native query
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("plantId", plantId);
 			query.setParameter("aopYear", aopYear);
 
-			// 4. Execute
 			return query.getResultList();
 
 		} catch (IllegalArgumentException e) {
@@ -604,6 +591,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 			throw new RuntimeException("Failed to fetch data from view " + viewName, ex);
 		}
 	}
+
 
 	@Override
 	@Transactional
@@ -616,6 +604,47 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        for (Map<String, Object> payload : payloadList) {
 	            String idString = (String) payload.get("Id");
 	            if (idString == null || "Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) continue;
+	            String selectSql = "SELECT * FROM DecokeMaintenance WHERE [Id] = :id";
+	            Query selectQuery = entityManager.createNativeQuery(selectSql);
+	            selectQuery.setParameter("id", UUID.fromString(idString));
+	            
+	            List<Map<String, Object>> existingDataList = entityManager
+	                .createNativeQuery(selectSql)
+	                .setParameter("id", UUID.fromString(idString))
+	                .unwrap(org.hibernate.query.NativeQuery.class)
+	                .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
+	                .getResultList();
+
+	            if (existingDataList.isEmpty()) continue;
+	            Map<String, Object> dbRow = existingDataList.get(0);
+
+	            boolean isDataChanged = false;
+	            boolean isRemarkChanged = false;
+
+	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+	                String col = entry.getKey();
+	                if (EXCLUDE.contains(col)) continue;
+
+	                Object newValue = entry.getValue();
+	                Object oldValue = dbRow.get(col);
+
+	                boolean valuesMatch = (newValue == null && oldValue == null) || 
+	                                     (newValue != null && newValue.equals(oldValue));
+
+	                if (!valuesMatch) {
+	                    if ("Remarks".equalsIgnoreCase(col)) {
+	                        isRemarkChanged = true;
+	                    } else {
+	                        isDataChanged = true;
+	                    }
+	                }
+	            }
+
+	            if (isDataChanged && !isRemarkChanged) {
+	                payload.put("saveStatus", "Failed");
+	                payload.put("errDescription", "Please add/update remark since data has changed.");
+	                continue; 
+	            }
 
 	            StringBuilder setClause = new StringBuilder();
 	            Map<String, Object> params = new HashMap<>();
@@ -625,8 +654,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                if (EXCLUDE.contains(col)) continue;
 
 	                if (setClause.length() > 0) setClause.append(", ");
-	                
-	                // Prefix param names to avoid "No parameter named :5F" error
 	                String safeParam = "p_" + col.replaceAll("[^a-zA-Z0-9]", "");
 	                setClause.append("[").append(col).append("] = :").append(safeParam);
 	                params.put(safeParam, entry.getValue());
@@ -634,9 +661,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 	            if (setClause.length() == 0) continue;
 
-	            String sql = "UPDATE [dbo].[DecokeMaintenance] SET " + setClause.toString() +
-	                         " WHERE [Id] = :id ";
-
+	            String sql = "UPDATE DecokeMaintenance SET " + setClause.toString() + " WHERE [Id] = :id ";
 	            Query query = entityManager.createNativeQuery(sql);
 	            params.forEach(query::setParameter);
 	            query.setParameter("id", UUID.fromString(idString));
@@ -644,18 +669,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            totalUpdatedRows += query.executeUpdate();
 	        }
 
-	        // Calculation Triggers
-	        screenMappingRepository.findByDependentScreen("maintenance-details").forEach(sm -> {
-	            AopCalculation calc = new AopCalculation();
-	            calc.setAopYear(year);
-	            calc.setIsChanged(true);
-	            calc.setCalculationScreen(sm.getCalculationScreen());
-	            calc.setPlantId(UUID.fromString(plantId));
-	            calc.setUpdatedScreen(sm.getDependentScreen());
-	            aopCalculationRepository.save(calc);
-	        });
-
-	        aopMessageVM.setCode(200);
+	       	aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("Updated rows: " + totalUpdatedRows);
 	        return aopMessageVM;
 	    } catch (Exception ex) {
@@ -664,6 +678,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        return aopMessageVM;
 	    }
 	}
+	
 	@Transactional
 	@Override
 	public AOPMessageVM maintenanceImport(String year, UUID plantId, MultipartFile file) {
