@@ -60,6 +60,7 @@ public class PowerGenerationService {
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
              dto.setAssetName(row.getAssetName());
              dto.setAssetId(row.getAssetId());
+             dto.setAssetType(row.getAssetType());
              dto.setApril(monthMap.get("April"));
              dto.setMay(monthMap.get("May"));
              dto.setJune(monthMap.get("June"));

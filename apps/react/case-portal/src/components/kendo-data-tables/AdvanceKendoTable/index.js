@@ -136,6 +136,7 @@ const AdvanceKendoTable = ({
   dropdownConfig = {},
   selectedDropdownValue,
   setSelectedDropdownValue,
+  paginationConfig = {},
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -163,6 +164,37 @@ const AdvanceKendoTable = ({
     : groupBy
       ? [{ field: groupBy }]
       : []
+
+  // Build pagination configuration with defaults
+  const getPaginationConfig = useCallback(() => {
+    const defaults = {
+      threshold: 100,
+      buttonCount: 4,
+      pageSizes: [10, 20, 50, 100],
+      defaultPageSize: 10,
+    }
+    const config = { ...defaults, ...paginationConfig }
+    
+    if (rows?.length > config.threshold) {
+      return {
+        buttonCount: config.buttonCount,
+        pageSizes: config.pageSizes,
+      }
+    }
+    return false
+  }, [rows?.length, paginationConfig])
+
+  // Get the default page size from config
+  const getDefaultTake = () => {
+    const defaults = {
+      threshold: 100,
+      buttonCount: 4,
+      pageSizes: [10, 20, 50, 100],
+      defaultPageSize: 10,
+    }
+    const config = { ...defaults, ...paginationConfig }
+    return config.defaultPageSize
+  }
 
   // Helper function to extract all fields from columns including nested ones
   const extractAllColumns = useCallback((cols) => {
@@ -1621,21 +1653,14 @@ const AdvanceKendoTable = ({
               resizable={true}
               defaultSkip={0}
               defaultGroup={initialGroup}
-              defaultTake={100}
+              defaultTake={getDefaultTake()}
               contextMenu={true}
               filterable={
                 permissions.filterable &&
                 columns.some((col) => dateFields.includes(col.field))
               }
               size='small'
-              pageable={
-                rows?.length > 100
-                  ? {
-                      buttonCount: 4,
-                      pageSizes: [10, 50, 100],
-                    }
-                  : false
-              }
+              pageable={getPaginationConfig()}
               onRowClick={handleRowClick}
             >
               {renderColumns(

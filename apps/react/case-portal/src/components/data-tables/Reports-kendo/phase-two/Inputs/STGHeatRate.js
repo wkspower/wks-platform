@@ -5,10 +5,8 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
-import { Stack } from '../../../../../../node_modules/@mui/material/index'
-import STGHeatRate from './STGHeatRate'
 
-const HeatRate = () => {
+const STGHeatRate = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -33,97 +31,67 @@ const HeatRate = () => {
 
   const columns = [
     {
-      field: 'equipType',
-      title: 'Equipment Type',
-      width: 150,
-      type: 'text',
-      editable: false,
-      locked: true,
-      minWidth: 100,
-    },
-    {
-      field: 'cppUtility',
-      title: 'CPP Utility',
-      width: 120,
-      type: 'text',
-      editable: false,
-      minWidth: 100,
-    },
-    {
-      field: 'gtLoad',
-      title: 'GT Load',
+      field: 'loadMW',
+      title: 'Load (MW)',
       width: 100,
       type: 'number1',
       editable: true,
       minWidth: 80,
     },
     {
-      field: 'heatRate',
-      title: 'Heat Rate',
+      field: 'svhInletTPH',
+      title: 'SVH Inlet (TPH)',
       width: 120,
       type: 'number1',
       editable: true,
       minWidth: 100,
     },
     {
-      field: 'freeSteamFactor',
-      title: 'Free Steam Factor',
+      field: 'smBleedFlowTPH',
+      title: 'SM Bleed Flow (TPH)',
+      width: 140,
+      type: 'number1',
+      editable: true,
+      minWidth: 120,
+    },
+    {
+      field: 'slExtFlowTPH',
+      title: 'SL Ext Flow (TPH)',
       width: 130,
       type: 'number1',
       editable: true,
-      minWidth: 100,
+      minWidth: 110,
+    },
+    {
+      field: 'condensingLoadM3Hr',
+      title: 'Condensing load (m3/hr)',
+      width: 150,
+      type: 'number1',
+      editable: true,
+      minWidth: 130,
+    },
+    {
+      field: 'heatRateKcalKWH',
+      title: 'Heat Rate Calc (Kcal/KWH)',
+      width: 160,
+      type: 'number1',
+      editable: true,
+      minWidth: 140,
     },
   ]
 
   const [rows, setRows] = useState([])
-  const [selectedPlant, setSelectedPlant] = useState('')
-  const [dropdownOptions, setDropdownOptions] = useState([])
+ 
   useEffect(() => {
-    if (selectedPlant) {
-      fetchHeatRateData(selectedPlant)
+    if (PLANT_ID) {
+      fetchHeatRateData()
     }
-  }, [PLANT_ID, AOP_YEAR, selectedPlant])
+  }, [PLANT_ID])
 
-  useEffect(() => {
-    getPlantList()
-  }, [PLANT_ID, AOP_YEAR])
-
-  const getPlantList = async () => {
+  const fetchHeatRateData = async () => {
     setLoading(true)
     try {
-      const res = await InputApiService.getPlantList(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-
-      // Convert to required format
-      const convertedData = res?.map((item) => ({
-        id: item[0],
-        name: item[1],
-      }))
-
-      if (convertedData?.length === 0) {
-        setDropdownOptions([])
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No data found', severity: 'info' })
-        return
-      }
-      setSelectedPlant(convertedData[0]?.id)
-      setDropdownOptions(convertedData)
-    } catch (error) {
-      console.error('Error fetching plant list:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({ message: 'Error fetching data', severity: 'error' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchHeatRateData = async (assetId) => {
-    setLoading(true)
-    try {
-      const res = await InputApiService.getHeatRateData(keycloak, assetId)
+      const res = await InputApiService.getSTGHeatRateData(keycloak, PLANT_ID)
 
       if (res?.length === 0) {
         setRows([])
@@ -134,7 +102,7 @@ const HeatRate = () => {
       console.log('res', res)
       setRows(res)
     } catch (error) {
-      console.error('Error fetching heat rate data:', error)
+      console.error('Error fetching STG heat rate data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -147,22 +115,14 @@ const HeatRate = () => {
     addButton: false,
     deleteButton: false,
     editButton: true,
-    saveBtn: false,
+    saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
     showExport: false,
     showImport: false,
     showTitle: true,
-    showDropdown: true,
-  }
-
-  const dropdownConfig = {
-    options: dropdownOptions,
-    label: 'Select Plant',
-    placeholder: 'Select Plant',
-    valueKey: 'id',
-    labelKey: 'name',
+    showDropdown: false,
   }
 
   const saveChanges = async () => {
@@ -188,7 +148,7 @@ const HeatRate = () => {
 
       console.log('payload', tempPayload)
 
-      const res = await InputApiService.saveHeatRateData(
+      const res = await InputApiService.saveSTGHeatRateData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -230,27 +190,16 @@ const HeatRate = () => {
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        title='GT Heat Rate'
+        title='STG Heat Rate'
         permissions={permissions}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        dropdownConfig={dropdownConfig}
-        selectedDropdownValue={selectedPlant}
-        setSelectedDropdownValue={setSelectedPlant}
-        paginationConfig={{
-          threshold: 20,           // Show pagination if > 50 rows
-          buttonCount: 5,
-          pageSizes: [10, 20, 50, 100],
-          defaultPageSize: 20,
-        }}
       />
-
-      <Stack sx={{mt:2}}><STGHeatRate /></Stack>
     </Box>
   )
 }
 
-export default HeatRate
+export default STGHeatRate

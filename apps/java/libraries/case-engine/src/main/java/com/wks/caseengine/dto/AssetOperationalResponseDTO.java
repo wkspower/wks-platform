@@ -10,6 +10,7 @@ public class AssetOperationalResponseDTO {
 
     private String assetName;
     private UUID assetId;
+    private String assetType;
    // private Map<String, MonthlyHoursDTO> months;
     private MonthlyHoursDTO april;
     private MonthlyHoursDTO may; 

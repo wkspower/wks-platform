@@ -6,43 +6,11 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
-import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
-import STGShutdownAndOperationalHr from './STGShutdownAndOperationalHr'
 
-const generateMonthHours = (aopYear) => {
-  if (!aopYear) return {}
-
-  const [startYear, endYear] = aopYear.split('-').map((y) => parseInt(y))
-  const fullStartYear = startYear < 100 ? 2000 + startYear : startYear
-  const fullEndYear = endYear < 100 ? 2000 + endYear : endYear
-
-  const getDaysInMonth = (month, year) => {
-    return new Date(year, month, 0).getDate()
-  }
-
-  const hourRows = {
-    apr: getDaysInMonth(4, fullStartYear) * 24,
-    may: getDaysInMonth(5, fullStartYear) * 24,
-    jun: getDaysInMonth(6, fullStartYear) * 24,
-    jul: getDaysInMonth(7, fullStartYear) * 24,
-    aug: getDaysInMonth(8, fullStartYear) * 24,
-    sep: getDaysInMonth(9, fullStartYear) * 24,
-    oct: getDaysInMonth(10, fullStartYear) * 24,
-    nov: getDaysInMonth(11, fullStartYear) * 24,
-    dec: getDaysInMonth(12, fullStartYear) * 24,
-    jan: getDaysInMonth(1, fullEndYear) * 24,
-    feb: getDaysInMonth(2, fullEndYear) * 24,
-    mar: getDaysInMonth(3, fullEndYear) * 24,
-  }
-
-  return hourRows
-}
-
-const ShutdownAndOperational = () => {
+const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
   const keycloak = useSession()
   const [modifiedCells, setModifiedCells] = useState({})
-  const [modifiedCellsHours, setModifiedCellsHours] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -57,6 +25,146 @@ const ShutdownAndOperational = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState([])
   const valueFormat = ValueFormatterProduction()
+
+  const dummySTGData = [
+    {
+      id: 2,
+      assetName: 'HRSG1_SHP STEAM',
+      assetType: 'SHP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 0, netOperationHrs: 720 },
+      july: { shutdownHrs: 0, netOperationHrs: 744 },
+      aug: { shutdownHrs: 0, netOperationHrs: 744 },
+      sep: { shutdownHrs: 0, netOperationHrs: 720 },
+      oct: { shutdownHrs: 0, netOperationHrs: 744 },
+      nov: { shutdownHrs: 0, netOperationHrs: 720 },
+      dec: { shutdownHrs: 0, netOperationHrs: 744 },
+      jan: { shutdownHrs: 0, netOperationHrs: 744 },
+      feb: { shutdownHrs: 0, netOperationHrs: 672 },
+      march: { shutdownHrs: 0, netOperationHrs: 744 },
+    },
+    {
+      id: 3,
+      assetName: 'HRSG2_SHP STEAM',
+      assetType: 'SHP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 720, netOperationHrs: 0 },
+      july: { shutdownHrs: 0, netOperationHrs: 744 },
+      aug: { shutdownHrs: 744, netOperationHrs: 0 },
+      sep: { shutdownHrs: 0, netOperationHrs: 720 },
+      oct: { shutdownHrs: 0, netOperationHrs: 744 },
+      nov: { shutdownHrs: 0, netOperationHrs: 720 },
+      dec: { shutdownHrs: 0, netOperationHrs: 744 },
+      jan: { shutdownHrs: 0, netOperationHrs: 744 },
+      feb: { shutdownHrs: 0, netOperationHrs: 672 },
+      march: { shutdownHrs: 0, netOperationHrs: 744 },
+    },
+    {
+      id: 4,
+      assetName: 'HRSG3_SHP STEAM',
+      assetType: 'SHP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 744, netOperationHrs: 0 },
+      june: { shutdownHrs: 0, netOperationHrs: 720 },
+      july: { shutdownHrs: 744, netOperationHrs: 0 },
+      aug: { shutdownHrs: 0, netOperationHrs: 744 },
+      sep: { shutdownHrs: 0, netOperationHrs: 720 },
+      oct: { shutdownHrs: 0, netOperationHrs: 744 },
+      nov: { shutdownHrs: 0, netOperationHrs: 720 },
+      dec: { shutdownHrs: 0, netOperationHrs: 744 },
+      jan: { shutdownHrs: 0, netOperationHrs: 744 },
+      feb: { shutdownHrs: 0, netOperationHrs: 672 },
+      march: { shutdownHrs: 0, netOperationHrs: 744 },
+    },
+    {
+      id: 6,
+      assetName: 'HP Steam PRDS',
+      assetType: 'HP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 0, netOperationHrs: 720 },
+      july: { shutdownHrs: 0, netOperationHrs: 744 },
+      aug: { shutdownHrs: 0, netOperationHrs: 744 },
+      sep: { shutdownHrs: 0, netOperationHrs: 720 },
+      oct: { shutdownHrs: 0, netOperationHrs: 744 },
+      nov: { shutdownHrs: 0, netOperationHrs: 720 },
+      dec: { shutdownHrs: 0, netOperationHrs: 744 },
+      jan: { shutdownHrs: 0, netOperationHrs: 744 },
+      feb: { shutdownHrs: 0, netOperationHrs: 672 },
+      march: { shutdownHrs: 0, netOperationHrs: 744 },
+    },
+  
+    {
+      id: 8,
+      assetName: 'STG1_MP STEAM',
+      assetType: 'MP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 100, netOperationHrs: 620 },
+      july: { shutdownHrs: 100, netOperationHrs: 644 },
+      aug: { shutdownHrs: 120, netOperationHrs: 624 },
+      sep: { shutdownHrs: 120, netOperationHrs: 600 },
+      oct: { shutdownHrs: 120, netOperationHrs: 624 },
+      nov: { shutdownHrs: 100, netOperationHrs: 620 },
+      dec: { shutdownHrs: 120, netOperationHrs: 624 },
+      jan: { shutdownHrs: 120, netOperationHrs: 624 },
+      feb: { shutdownHrs: 120, netOperationHrs: 552 },
+      march: { shutdownHrs: 120, netOperationHrs: 624 },
+    },
+    {
+      id: 9,
+      assetName: 'MP Steam PRDS SHP',
+      assetType: 'MP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 0, netOperationHrs: 720 },
+      july: { shutdownHrs: 0, netOperationHrs: 744 },
+      aug: { shutdownHrs: 0, netOperationHrs: 744 },
+      sep: { shutdownHrs: 0, netOperationHrs: 720 },
+      oct: { shutdownHrs: 0, netOperationHrs: 744 },
+      nov: { shutdownHrs: 0, netOperationHrs: 720 },
+      dec: { shutdownHrs: 0, netOperationHrs: 744 },
+      jan: { shutdownHrs: 0, netOperationHrs: 744 },
+      feb: { shutdownHrs: 0, netOperationHrs: 672 },
+      march: { shutdownHrs: 0, netOperationHrs: 744 },
+    },
+    {
+      id: 11,
+      assetName: 'STG1_LP STEAM',
+      assetType: 'LP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 100, netOperationHrs: 620 },
+      july: { shutdownHrs: 100, netOperationHrs: 644 },
+      aug: { shutdownHrs: 120, netOperationHrs: 624 },
+      sep: { shutdownHrs: 120, netOperationHrs: 600 },
+      oct: { shutdownHrs: 120, netOperationHrs: 624 },
+      nov: { shutdownHrs: 100, netOperationHrs: 620 },
+      dec: { shutdownHrs: 120, netOperationHrs: 624 },
+      jan: { shutdownHrs: 120, netOperationHrs: 624 },
+      feb: { shutdownHrs: 120, netOperationHrs: 552 },
+      march: { shutdownHrs: 120, netOperationHrs: 624 },
+    },
+    {
+      id: 12,
+      assetName: 'LP Steam PRDS',
+      assetType: 'LP Steam_Dis',
+      april: { shutdownHrs: 0, netOperationHrs: 720 },
+      may: { shutdownHrs: 0, netOperationHrs: 744 },
+      june: { shutdownHrs: 0, netOperationHrs: 720 },
+      july: { shutdownHrs: 0, netOperationHrs: 744 },
+      aug: { shutdownHrs: 0, netOperationHrs: 744 },
+      sep: { shutdownHrs: 0, netOperationHrs: 720 },
+      oct: { shutdownHrs: 0, netOperationHrs: 744 },
+      nov: { shutdownHrs: 0, netOperationHrs: 720 },
+      dec: { shutdownHrs: 0, netOperationHrs: 744 },
+      jan: { shutdownHrs: 0, netOperationHrs: 744 },
+      feb: { shutdownHrs: 0, netOperationHrs: 672 },
+      march: { shutdownHrs: 0, netOperationHrs: 744 },
+    },
+  ]
 
   const nestedColumns = [
     {
@@ -332,106 +440,6 @@ const ShutdownAndOperational = () => {
     },
   ]
 
-  const [hoursRows, setHoursRows] = useState([])
-  const hoursColumns = [
-    {
-      field: 'apr',
-      title: headerMap[4] || 'Apr',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'may',
-      title: headerMap[5] || 'May',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'jun',
-      title: headerMap[6] || 'Jun',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'jul',
-      title: headerMap[7] || 'Jul',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'aug',
-      title: headerMap[8] || 'Aug',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'sep',
-      title: headerMap[9] || 'Sep',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'oct',
-      title: headerMap[10] || 'Oct',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'nov',
-      title: headerMap[11] || 'Nov',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'dec',
-      title: headerMap[12] || 'Dec',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'jan',
-      title: headerMap[1] || 'Jan',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'feb',
-      title: headerMap[2] || 'Feb',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-    {
-      field: 'mar',
-      title: headerMap[3] || 'Mar',
-      width: 40,
-      editable: false,
-      type: 'wholeNumber',
-      format: valueFormat,
-    },
-  ]
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchShutdownAndOperationalData()
@@ -439,34 +447,18 @@ const ShutdownAndOperational = () => {
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  useEffect(() => {
-    if (AOP_YEAR) {
-      const hoursData = generateMonthHours(AOP_YEAR)
-      setHoursRows([hoursData])
-    }
-  }, [AOP_YEAR])
-
   const fetchShutdownAndOperationalData = async () => {
     setLoading(true)
     try {
-      const res = await InputApiService.getOperationHoursData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-
-      if (!res || res?.length === 0) {
-        setRows([])
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No data found', severity: 'info' })
-        return
-      }
-      const rowsWithIds = res.map((row, index) => ({
-        ...row,
-        id: row.id || index + 1,
-      }))
-      setRows(rowsWithIds)
-      //   setRows(dummyOperationalHoursData)
+      // TODO: Replace with actual API call
+      // const res = await InputApiService.getOperationHoursData(
+      //   keycloak,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
+      
+      // Using dummy data for now
+      setRows(dummySTGData)
     } catch (error) {
       console.error('Error fetching shutdown and operational data:', error)
       setSnackbarOpen(true)
@@ -484,21 +476,9 @@ const ShutdownAndOperational = () => {
     saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
-    showTitle: true,
-    titleName: screenTitle?.title,
+    showTitle: false,
   }
 
-  const hoursPermissions = {
-    showAction: false,
-    addButton: false,
-    deleteButton: false,
-    editButton: false,
-    saveBtn: false,
-    allAction: true,
-    showTitleNameBusiness: false,
-    showTitle: true,
-    titleName: 'Total available hours',
-  }
 
   const saveChanges = async () => {
     setLoading(true)
@@ -551,17 +531,6 @@ const ShutdownAndOperational = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-      <Stack sx={{ mb: 2 }}>
-        <AdvanceKendoTable
-          columns={hoursColumns}
-          rows={hoursRows}
-          setRows={setHoursRows}
-          title={hoursPermissions?.titleName}
-          permissions={hoursPermissions}
-          modifiedCells={modifiedCellsHours}
-          setModifiedCells={setModifiedCellsHours}
-        />
-      </Stack>
       <Stack>
         <NestedKendoTable
           columns={nestedColumns}
@@ -569,23 +538,18 @@ const ShutdownAndOperational = () => {
           setRows={setRows}
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
-          title='Shutdown and Operational Hours Input'
           permissions={permissions}
           saveChanges={saveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
           setSnackbarData={setSnackbarData}
-          hoursRows={hoursRows}
           groupBy={['assetType']}
+          hoursRows={hoursRows}
         />
-      </Stack>
-
-      <Stack sx={{mt:2}}>
-        <STGShutdownAndOperationalHr hoursRows={hoursRows} />
       </Stack>
     </Box>
   )
 }
 
-export default ShutdownAndOperational
+export default STGShutdownAndOperationalHr
