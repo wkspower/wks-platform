@@ -1003,11 +1003,7 @@ const ConfigurationTable = () => {
                         className='btn-save'
                         sx={{ alignSelf: 'flex-end' }}
                         // disabled={READ_ONLY || !summaryEdited}
-                        disabled={
-                          lowerVertName === 'pe' || lowerVertName === 'pp'
-                            ? READ_ONLY || !dateEdited
-                            : READ_ONLY
-                        }
+                        disabled={READ_ONLY}
                       >
                         Load
                       </Button>
@@ -1115,8 +1111,7 @@ const ConfigurationTable = () => {
   }, [openConfirmDialogRev])
 
   if (
-    (lowerVertName == 'meg' ||
-      lowerVertName == 'pvc') &&
+    (lowerVertName == 'meg' || lowerVertName == 'pvc') &&
     lowerVertName !== 'cracker'
   ) {
     // const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']

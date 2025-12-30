@@ -43,7 +43,9 @@ export default function AopDashboardCompact() {
   const [loading, setLoading] = useState(false)
   const [fullDetails, setFullDetails] = useState([])
   const [allowedMap, setAllowedMap] = useState({})
+  const [allowedMapForSites, setAllowedMapForSites] = useState({})
   const [verticals, setVerticals] = useState([])
+  const [sites, setSites] = useState([])
   const [statusData, setStatusData] = useState([])
   const [siteGroupedRows, setSiteGroupedRows] = useState([])
   const [idMap, setIdMap] = useState({})
@@ -83,11 +85,20 @@ export default function AopDashboardCompact() {
   }
 
   // ------------------ event handlers ------------------
+
   const handleChipClick = useCallback(
-    (event, id) => {
-      // check access
-      const hasAccess = verticals.some((v) => v.id === id)
-      if (!hasAccess) {
+    (event, vid, sid) => {
+      // find vertical
+      const vertical = verticals.find((v) => v.vid === vid)
+
+      // check vertical access
+      if (!vertical) {
+        showSnackbar('Access Denied!', 'error')
+        return
+      }
+
+      // check site access (if site is involved)
+      if (sid && !vertical.sids.includes(sid)) {
         showSnackbar('Access Denied!', 'error')
         return
       }
@@ -95,19 +106,24 @@ export default function AopDashboardCompact() {
       // visual feedback
       pulseElement(event.currentTarget)
 
-      dispatch(setVerticalChangeFromDashboard({ id, trigger: Date.now() }))
+      console.log('sid', sid)
+      console.log('vid', vid)
+
+      dispatch(
+        setVerticalChangeFromDashboard({ vid, trigger: Date.now(), sid }),
+      )
     },
     [dispatch, verticals, showSnackbar],
   )
 
   // ------------------ data fetching ------------------
+
   const fetchAllSites = useCallback(async () => {
     try {
       let parsedPlants = []
       try {
         parsedPlants = JSON.parse(keycloak?.idTokenParsed?.plants || '[]')
       } catch (e) {
-        // token may not contain plants or malformed
         console.warn('Token parse error', e)
       }
 
@@ -140,13 +156,17 @@ export default function AopDashboardCompact() {
 
       setStatusData(apiRows)
 
+      let idx = 0
+
       const grouped = Object.values(
         apiRows.reduce((acc, item) => {
           const site = item.site_name || 'Unknown Site'
           if (!acc[site]) acc[site] = { site, rows: [] }
 
           acc[site].rows.push({
+            idx: idx++,
             id: idMap[item.vertical_name] ?? item.vertical_id,
+            sId: item.site_id,
             verticalName: item.vertical_name,
             status: item.status,
             status_color: item.status_color,
@@ -168,10 +188,19 @@ export default function AopDashboardCompact() {
   // keep verticals list in sync with allowedMap + fullDetails
   useEffect(() => {
     if (!fullDetails.length || !Object.keys(allowedMap).length) return
-    const avail = fullDetails
+
+    const result = fullDetails
+      // keep only allowed verticals
       .filter((v) => allowedMap[v.id])
-      .map((v) => ({ id: v.id, name: v.displayName }))
-    setVerticals(avail)
+      // enrich with siteIds
+      .map((v) => ({
+        vid: v.id,
+        vname: v.displayName,
+        sids: Object.keys(allowedMap[v.id]),
+      }))
+
+    // console.log('finalVerticals', result)
+    setVerticals(result)
   }, [fullDetails, allowedMap])
 
   // initial + reactive fetches
@@ -209,6 +238,24 @@ export default function AopDashboardCompact() {
         {siteGroupedRows.map((section) => {
           const total = section.rows.length
 
+          // --- NEW: build a per-section (local) status summary ---
+          const localStatusSummary = section.rows.reduce((acc, r) => {
+            const key = r.status || 'Other'
+            if (!acc[key]) {
+              acc[key] = {
+                count: 0,
+                backgroundColor: r.status_color || '#e2e8f0',
+                color: r.status_text_color
+                  ? `#${r.status_text_color.replace('#', '')}`
+                  : '#1e293b',
+              }
+            }
+            acc[key].count += 1
+            return acc
+          }, {})
+
+          const localStatusKeys = Object.keys(localStatusSummary)
+
           return (
             <Grid item xs={12} sm={6} md={4} lg={3} key={section.site}>
               <Card className='plant-card'>
@@ -224,9 +271,9 @@ export default function AopDashboardCompact() {
                     </div>
 
                     <div className='status-breakdown'>
-                      {statusKeys.map((key) => {
+                      {localStatusKeys.map((key) => {
                         const { count, backgroundColor, color } =
-                          statusSummary[key]
+                          localStatusSummary[key]
 
                         return (
                           <div
@@ -247,18 +294,44 @@ export default function AopDashboardCompact() {
                 <CardBody className='plant-card-body'>
                   <Stack spacing={0.5}>
                     {section.rows.map((row) => {
-                      const statusStyle = statusSummary[row.status] || {}
+                      // console.log('row', row)
+
+                      const statusStyle = localStatusSummary[row.status] || {}
+
+                      // inline styles for the whole row
+                      const rowInlineStyle = {
+                        background: statusStyle.backgroundColor || undefined,
+                        color: statusStyle.color || undefined,
+                        borderRadius: 6,
+                        padding: '6px 10px',
+                        transition:
+                          'background-color 160ms ease, transform 120ms ease',
+                      }
+
+                      // make the chip visually "transparent" so row color shows through
+                      const chipInlineStyle = {
+                        background: 'transparent',
+                        color: statusStyle.color || undefined,
+                        boxShadow: 'none',
+                        border: '1px solid rgba(0,0,0,0.06)', // optional: subtle boundary
+                      }
+
+                      const chipInlineStyleForVertical = {
+                        background: 'transparent',
+                        color: statusStyle.color || undefined,
+                      }
 
                       return (
                         <Stack
-                          key={row.id}
+                          key={`${row.sId}-${row.id}-${row.idx}`}
                           direction='row'
                           alignItems='center'
                           justifyContent='space-between'
                           className='plant-row'
-                          onClick={(e) => handleChipClick(e, row.id)}
+                          onClick={(e) => handleChipClick(e, row.id, row.sId)}
+                          style={rowInlineStyle}
                         >
-                          <Typography className='plant-name'>
+                          <Typography style={chipInlineStyleForVertical}>
                             {row.verticalName}
                           </Typography>
 
@@ -266,10 +339,7 @@ export default function AopDashboardCompact() {
                             text={row.status}
                             size='small'
                             className='small-chip'
-                            style={{
-                              background: statusStyle.backgroundColor,
-                              color: statusStyle.color,
-                            }}
+                            style={chipInlineStyle}
                           />
                         </Stack>
                       )

@@ -81,14 +81,14 @@ export const MainRoutes = (
     children: [
       {
         path: '/',
-        element: <Navigate to='/home' />,
+        element: <Navigate to='/production-norms-plan/configuration' />,
       },
 
       {
         path: 'home',
         element: (
           <PrivateRoute routeId='home'>
-            <AopDashboard />
+            <DashboardDefault />
           </PrivateRoute>
         ),
       },

@@ -385,11 +385,8 @@ const WorkFlowMerge = () => {
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     try {
-      const { headers, keys, results } = await AOPWorkFlowService.getWorkflowData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      const { headers, keys, results } =
+        await AOPWorkFlowService.getWorkflowData(keycloak, PLANT_ID, AOP_YEAR)
       const numericKeys = getNumericKeysInAllRows(results)
       const formatted = results.map((row, idx) => ({
         id: idx,
@@ -492,7 +489,7 @@ const WorkFlowMerge = () => {
       const result = await AOPWorkFlowService.submitWorkFlow(payload, keycloak)
       // console.log(result)
       if (result) {
-        console.log('Workflow instance created successfully')
+        // console.log('Workflow instance created successfully')
       }
       setSnackbarData({
         message: 'Workflow instance created successfully',
@@ -880,7 +877,9 @@ const WorkFlowMerge = () => {
             {tabIndex === 5 && <AnnualProductionPlan />}
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
-            {(lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') && (
+            {(lowerVertName === 'pe' ||
+              lowerVertName === 'pp' ||
+              lowerVertName === 'pet') && (
               <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
             )}
 
