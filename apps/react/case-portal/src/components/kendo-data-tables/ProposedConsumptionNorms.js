@@ -414,7 +414,7 @@ const ProposedConsumptionNorms = () => {
       saveWithRemark: false,
       saveBtn: false,
       isOldYear: isOldYear,
-      showCalculate: true,
+      showCalculate: false,
     }
   }
 
@@ -428,7 +428,7 @@ const ProposedConsumptionNorms = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: true,
       saveBtn: true,
-      showCalculate: true,
+      showCalculate: false,
       allAction: true,
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,

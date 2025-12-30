@@ -14,6 +14,10 @@ import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
 import '../../dashboard.css'
+import {
+  Backdrop,
+  CircularProgress,
+} from '../../../node_modules/@mui/material/index'
 
 export default function AopDashboardCompact() {
   const dispatch = useDispatch()
@@ -88,18 +92,21 @@ export default function AopDashboardCompact() {
 
   const handleChipClick = useCallback(
     (event, vid, sid) => {
+      setLoading(true)
       // find vertical
       const vertical = verticals.find((v) => v.vid === vid)
 
       // check vertical access
       if (!vertical) {
         showSnackbar('Access Denied!', 'error')
+        setLoading(false)
         return
       }
 
       // check site access (if site is involved)
       if (sid && !vertical.sids.includes(sid)) {
         showSnackbar('Access Denied!', 'error')
+        setLoading(false)
         return
       }
 
@@ -231,133 +238,144 @@ export default function AopDashboardCompact() {
   const statusKeys = Object.keys(statusSummary)
 
   return (
-    <Box className='dashboard-root'>
-      <Typography className='dashboard-title'>Digital AOP Dashboard</Typography>
+    <div>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!!loading}
+      >
+        <CircularProgress color='inherit' />
+      </Backdrop>
 
-      <Grid container spacing={1}>
-        {siteGroupedRows.map((section) => {
-          const total = section.rows.length
+      <Box className='dashboard-root'>
+        <Typography className='dashboard-title'>
+          Digital AOP Dashboard
+        </Typography>
 
-          // --- NEW: build a per-section (local) status summary ---
-          const localStatusSummary = section.rows.reduce((acc, r) => {
-            const key = r.status || 'Other'
-            if (!acc[key]) {
-              acc[key] = {
-                count: 0,
-                backgroundColor: r.status_color || '#e2e8f0',
-                color: r.status_text_color
-                  ? `#${r.status_text_color.replace('#', '')}`
-                  : '#1e293b',
+        <Grid container spacing={1}>
+          {siteGroupedRows.map((section) => {
+            const total = section.rows.length
+
+            // --- NEW: build a per-section (local) status summary ---
+            const localStatusSummary = section.rows.reduce((acc, r) => {
+              const key = r.status || 'Other'
+              if (!acc[key]) {
+                acc[key] = {
+                  count: 0,
+                  backgroundColor: r.status_color || '#e2e8f0',
+                  color: r.status_text_color
+                    ? `#${r.status_text_color.replace('#', '')}`
+                    : '#1e293b',
+                }
               }
-            }
-            acc[key].count += 1
-            return acc
-          }, {})
+              acc[key].count += 1
+              return acc
+            }, {})
 
-          const localStatusKeys = Object.keys(localStatusSummary)
+            const localStatusKeys = Object.keys(localStatusSummary)
 
-          return (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={section.site}>
-              <Card className='plant-card'>
-                <CardHeader className='plant-card-header'>
-                  <CardTitle className='plant-card-title'>
-                    {section.site}
-                  </CardTitle>
+            return (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={section.site}>
+                <Card className='plant-card'>
+                  <CardHeader className='plant-card-header'>
+                    <CardTitle className='plant-card-title'>
+                      {section.site}
+                    </CardTitle>
 
-                  <div className='section-details'>
-                    <div className='detail-pill'>
-                      <strong>{total}</strong>
-                      <span className='detail-label'> Verticals</span>
+                    <div className='section-details'>
+                      <div className='detail-pill'>
+                        <strong>{total}</strong>
+                        <span className='detail-label'> Verticals</span>
+                      </div>
+
+                      <div className='status-breakdown'>
+                        {localStatusKeys.map((key) => {
+                          const { count, backgroundColor, color } =
+                            localStatusSummary[key]
+
+                          return (
+                            <div
+                              key={key}
+                              className='status-pill'
+                              style={{ background: backgroundColor, color }}
+                              title={`${key}: ${count}`}
+                            >
+                              <span className='status-label'>{key}</span>
+                              <span className='status-count'>{count}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
+                  </CardHeader>
 
-                    <div className='status-breakdown'>
-                      {localStatusKeys.map((key) => {
-                        const { count, backgroundColor, color } =
-                          localStatusSummary[key]
+                  <CardBody className='plant-card-body'>
+                    <Stack spacing={0.5}>
+                      {section.rows.map((row) => {
+                        // console.log('row', row)
+
+                        const statusStyle = localStatusSummary[row.status] || {}
+
+                        // inline styles for the whole row
+                        const rowInlineStyle = {
+                          background: statusStyle.backgroundColor || undefined,
+                          color: statusStyle.color || undefined,
+                          borderRadius: 6,
+                          padding: '6px 10px',
+                          transition:
+                            'background-color 160ms ease, transform 120ms ease',
+                        }
+
+                        // make the chip visually "transparent" so row color shows through
+                        const chipInlineStyle = {
+                          background: 'transparent',
+                          color: statusStyle.color || undefined,
+                          boxShadow: 'none',
+                          border: '1px solid rgba(0,0,0,0.06)', // optional: subtle boundary
+                        }
+
+                        const chipInlineStyleForVertical = {
+                          background: 'transparent',
+                          color: statusStyle.color || undefined,
+                        }
 
                         return (
-                          <div
-                            key={key}
-                            className='status-pill'
-                            style={{ background: backgroundColor, color }}
-                            title={`${key}: ${count}`}
+                          <Stack
+                            key={`${row.sId}-${row.id}-${row.idx}`}
+                            direction='row'
+                            alignItems='center'
+                            justifyContent='space-between'
+                            className='plant-row'
+                            onClick={(e) => handleChipClick(e, row.id, row.sId)}
+                            style={rowInlineStyle}
                           >
-                            <span className='status-label'>{key}</span>
-                            <span className='status-count'>{count}</span>
-                          </div>
+                            <Typography style={chipInlineStyleForVertical}>
+                              {row.verticalName}
+                            </Typography>
+
+                            <Chip
+                              text={row.status}
+                              size='small'
+                              className='small-chip'
+                              style={chipInlineStyle}
+                            />
+                          </Stack>
                         )
                       })}
-                    </div>
-                  </div>
-                </CardHeader>
+                    </Stack>
+                  </CardBody>
+                </Card>
+              </Grid>
+            )
+          })}
+        </Grid>
 
-                <CardBody className='plant-card-body'>
-                  <Stack spacing={0.5}>
-                    {section.rows.map((row) => {
-                      // console.log('row', row)
-
-                      const statusStyle = localStatusSummary[row.status] || {}
-
-                      // inline styles for the whole row
-                      const rowInlineStyle = {
-                        background: statusStyle.backgroundColor || undefined,
-                        color: statusStyle.color || undefined,
-                        borderRadius: 6,
-                        padding: '6px 10px',
-                        transition:
-                          'background-color 160ms ease, transform 120ms ease',
-                      }
-
-                      // make the chip visually "transparent" so row color shows through
-                      const chipInlineStyle = {
-                        background: 'transparent',
-                        color: statusStyle.color || undefined,
-                        boxShadow: 'none',
-                        border: '1px solid rgba(0,0,0,0.06)', // optional: subtle boundary
-                      }
-
-                      const chipInlineStyleForVertical = {
-                        background: 'transparent',
-                        color: statusStyle.color || undefined,
-                      }
-
-                      return (
-                        <Stack
-                          key={`${row.sId}-${row.id}-${row.idx}`}
-                          direction='row'
-                          alignItems='center'
-                          justifyContent='space-between'
-                          className='plant-row'
-                          onClick={(e) => handleChipClick(e, row.id, row.sId)}
-                          style={rowInlineStyle}
-                        >
-                          <Typography style={chipInlineStyleForVertical}>
-                            {row.verticalName}
-                          </Typography>
-
-                          <Chip
-                            text={row.status}
-                            size='small'
-                            className='small-chip'
-                            style={chipInlineStyle}
-                          />
-                        </Stack>
-                      )
-                    })}
-                  </Stack>
-                </CardBody>
-              </Card>
-            </Grid>
-          )
-        })}
-      </Grid>
-
-      <Notification
-        open={snackbar.open}
-        message={snackbar.message || ''}
-        severity={snackbar.severity || 'info'}
-        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
-      />
-    </Box>
+        <Notification
+          open={snackbar.open}
+          message={snackbar.message || ''}
+          severity={snackbar.severity || 'info'}
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        />
+      </Box>
+    </div>
   )
 }

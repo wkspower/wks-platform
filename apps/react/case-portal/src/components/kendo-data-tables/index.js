@@ -531,9 +531,12 @@ const KendoDataTables = ({
 
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId) {
-          const keysToUpdate = ['aopRemarks', 'remarks', 'remark','Remarks'].filter(
-            (key) => key in row,
-          )
+          const keysToUpdate = [
+            'aopRemarks',
+            'remarks',
+            'remark',
+            'Remarks',
+          ].filter((key) => key in row)
           keyToUpdate = keysToUpdate[0] || 'remark'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
           return updatedRow
