@@ -289,17 +289,29 @@ const DecokingConfig = () => {
 
             if (data3?.code === 200) {
               setCalculationObject(data3?.data?.aopCalculation)
+              const dynamiccolumnDeckoking = (data3?.data?.columns || []).map((col) => ({
+                ...col,
+                editable: !['Id', 'Date', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(col.field),
+              }))
+              setRunLengthColumns(dynamiccolumnDeckoking)
 
-              const processedData = data3.data?.decokingActivitiesList.map(
-                (item, index) => ({
-                  ...item,
-                  month_: item?.month,
-                  idFromApi: item?.id,
-                  id: index,
-                  remarks: item?.remarks || '',
-                  date: toDateObject(item.date),
-                }),
-              )
+              // Use correct date format from API
+              const toDateObject = (value) =>
+                value ? moment(value, 'MMM D, YYYY').toDate() : null
+
+              const processedData = (data3.data?.data || []).map((item, index) => {
+                const row = { id: index }
+                dynamiccolumnDeckoking.forEach(col => {
+                  // Convert date fields if needed
+                  if (col.type === 'date') {
+                    row[col.field] = toDateObject(item[col.field])
+                  } else {
+                    row[col.field] = item[col.field]
+                  }
+                })
+                row.idFromApi = item.Id
+                return row
+              })
 
               setRowsForTab(currentTab, processedData, 3)
             } else {
@@ -759,23 +771,22 @@ const DecokingConfig = () => {
   const saveCrackerRunLength = async (newRow) => {
     setLoading(true)
     try {
-      var payload = []
-      payload = newRow.map((row) => ({
-        tenProposed: row?.tenProposed || null,
-        elevenProposed: row?.elevenProposed || null,
-        twelveProposed: row?.twelveProposed || null,
-        thirteenProposed: row?.thirteenProposed || null,
-        fourteenProposed: row?.fourteenProposed || null,
-        plantId: PLANT_ID,
-        id: row?.idFromApi || '',
-        demo: row?.demo || '',
-        // Date: row?.date
-        //   ? `${row.date.getFullYear()}/${String(row.date.getMonth() + 1).padStart(2, '0')}/${String(row.date.getDate()).padStart(2, '0')}`
-        //   : null,
-        date: row?.date
-          ? `${row.date.getFullYear()}-${String(row.date.getMonth() + 1).padStart(2, '0')}-${String(row.date.getDate()).padStart(2, '0')}`
-          : null,
-      }))
+      const apiFields = runLengthColumns.map(col => col.field)
+
+    // Build payload using only those fields
+    const payload = newRow.map((row) => {
+      const obj = {}
+      apiFields.forEach((field) => {
+        let value = row[field]
+        // Format date fields if needed
+        const colDef = runLengthColumns.find(col => col.field === field)
+        if (colDef?.type === 'date' && value instanceof Date) {
+          value = `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
+        }
+        obj[field] = value ?? null
+      })
+      return obj
+    })
       const response = await DataService.saveCrackerRunLength(
         PLANT_ID,
         payload,
@@ -1110,7 +1121,7 @@ const DecokingConfig = () => {
       />
 
       <FurnaceRunLengthGrid
-        columns={filteredIbrGridThree}
+        columns={runLengthColumns}
         rows={getRows('IBR Plan')[3]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
         fetchData={fetchData}
