@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +40,24 @@ public class PowerGenerationService {
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
 
-        List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(data.stream().map(AssetMonthlyOperationalProjection::getAssetId).collect(Collectors.toList()));
+        // get all the norm parameters for given asset ids
+        // List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(data.stream().map(AssetMonthlyOperationalProjection::getAssetId).collect(Collectors.toList()));
 
-        Map<UUID, List<PowerGenerationNormParametersProjection>> normParametersMap = normParameters.stream().collect(Collectors.groupingBy(PowerGenerationNormParametersProjection::getAssetId));
+        // Map<UUID, List<PowerGenerationNormParametersProjection>> normParametersMap = normParameters.stream().collect(Collectors.groupingBy(PowerGenerationNormParametersProjection::getAssetId));
 
         List<AssetOperationalResponseDTO> powerResponse = new  ArrayList<>();
         List<AssetOperationalResponseDTO> steamResponse = new  ArrayList<>();
 
         for (AssetMonthlyOperationalProjection row : data) {
+
+            // get the norm parameters for the current asset Id
+            List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(Arrays.asList(row.getAssetId()));
+           
+            List<PowerGenerationNormParametersProjection> utilityGenerated = normParameters.stream().filter(normParameter -> normParameter.getNormType_FK_Id() == 1).collect(Collectors.toList());
+            List<PowerGenerationNormParametersProjection> utilityDistributed = normParameters.stream().filter(normParameter -> normParameter.getNormType_FK_Id() == 2).collect(Collectors.toList());
+            int normparamCount = Math.max(utilityGenerated.size(), utilityDistributed.size());
+
+
       System.out.println("Asset Type: " + row.getAssetType());
             // Skip Steam_Distribution Asset
             // if( row.getAssetType() != null && row.getAssetType().equals("Steam_Dis")) {
@@ -91,43 +102,62 @@ public class PowerGenerationService {
 
             
             
-             if(normParametersMap.containsKey(row.getAssetId())) {  
-                int i = 0;
-                for(PowerGenerationNormParametersProjection normParameter : normParametersMap.get(row.getAssetId())) { 
-                  
-                   // set the first utility distributed and generated to dto and for remaining  create new dtos
-                    if(i == 0) { 
+             if(normParameters.size() > 0) {  
+               
 
-                        if(normParameter.getNormType_FK_Id() == 1) {
-                            dto.setUtilityGenerated(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
-                        } else if(normParameter.getNormType_FK_Id() == 2) {
-                            dto.setUtilityDistributed(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
-                        }
+                for(int j = 0; j < normparamCount; j++) {  
 
-                        if(row.getAssetName().equals("NMD-Utility Plant")) {
-                            steamResponse.add(dto);
-                        } else{
-                            powerResponse.add(dto);
+                  AssetOperationalResponseDTO dto2 = new AssetOperationalResponseDTO(dto);
+                        if(j < utilityGenerated.size()) {  
+                            dto2.setUtilityGenerated(new AssetUtilityDTO(utilityGenerated.get(j).getName(), utilityGenerated.get(j).getSAPMaterialCode()));
                         }
-                        i++;
-                    } else {
-                        // creating new dto for remaining utilities
-                        AssetOperationalResponseDTO dto2 = new AssetOperationalResponseDTO(dto);
-                        if(normParameter.getNormType_FK_Id() == 1) {
-                            dto2.setUtilityGenerated(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
-                        } else if(normParameter.getNormType_FK_Id() == 2) {
-                            dto2.setUtilityDistributed(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
-                        }
-                          
-                        if(row.getAssetName().equals("NMD-Utility Plant")) {
-                            steamResponse.add(dto2);
-                        } else{
-                            powerResponse.add(dto2);
-                        }
+                        if(j < utilityDistributed.size()) {  
+                            dto2.setUtilityDistributed(new AssetUtilityDTO(utilityDistributed.get(j).getName(), utilityDistributed.get(j).getSAPMaterialCode()));
+                        
                     }
+
+                    if(row.getAssetName().equals("NMD-Utility Plant")) {
+                        steamResponse.add(dto2);
+                    } else{
+                        powerResponse.add(dto2);
+                    }
+                } 
+            }
+                // for(PowerGenerationNormParametersProjection normParameter : normParameters) { 
+                  
+                //    // set the first utility distributed and generated to dto and for remaining  create new dtos
+                //     if(i == 0) { 
+
+                //         if(normParameter.getNormType_FK_Id() == 1) {
+                //             dto.setUtilityGenerated(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                //         } else if(normParameter.getNormType_FK_Id() == 2) {
+                //             dto.setUtilityDistributed(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                //         }
+
+                //         if(row.getAssetName().equals("NMD-Utility Plant")) {
+                //             steamResponse.add(dto);
+                //         } else{
+                //             powerResponse.add(dto);
+                //         }
+                //         i++;
+                //     } else {
+                //         // creating new dto for remaining utilities
+                //         AssetOperationalResponseDTO dto2 = new AssetOperationalResponseDTO(dto);
+                //         if(normParameter.getNormType_FK_Id() == 1) {
+                //             dto2.setUtilityGenerated(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                //         } else if(normParameter.getNormType_FK_Id() == 2) {
+                //             dto2.setUtilityDistributed(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                //         }
+                          
+                //         if(row.getAssetName().equals("NMD-Utility Plant")) {
+                //             steamResponse.add(dto2);
+                //         } else{
+                //             powerResponse.add(dto2);
+                //         }
+                //     }
                     
-                }
-             }
+                // }
+             
 
         }
 

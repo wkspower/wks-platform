@@ -564,13 +564,12 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         AOP_YEAR,
       )
       
-      // Using dummy data for now
-      const transformedData = res?.steamResponse?.map(row => ({
+      const rowsWithIds = res?.steamResponse?.map((row, index) => ({
         ...row,
-        // utilityGenerated: row.utilityGenerated?.[0] || {},
-        // utilityDistributed: row.utilityDistributed?.[0] || {},
+        id: row.id || index + 1,
       }))
-      setRows(transformedData)
+   
+      setRows(rowsWithIds)
     } catch (error) {
       console.error('Error fetching shutdown and operational data:', error)
       setSnackbarOpen(true)
