@@ -106,7 +106,6 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	private DataSource dataSource;
 
-	
 	public DecokingActivitiesServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
@@ -776,68 +775,53 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	    
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    List<Map<String, Object>> failedList = new ArrayList<>();
-	    final Set<String> EXCLUDE = Set.of("Id", "PlantFkId", "AopYear", "Date", "saveStatus", "errDescription", "Month");
+	    
+	    final Set<String> EXCLUDE = Set.of("AopYear", "H10 Actual", "H11 Actual", "H12 Actual", 
+	                                       "H13 Actual", "H14 Actual", "Id", "PlantFkId", 
+	                                       "saveStatus", "errDescription", "Month", "Date");
 
 	    try {
 	        for (Map<String, Object> payload : payloadList) {
-	           
+	            
 	            if ("Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) {
 	                failedList.add(payload);
 	                continue;
 	            }
 
 	            String idString = (String) payload.get("Id");
-	            String dateString = (String) payload.get("Date");
 	            
-	            if (dateString == null) continue;
-
-	            
-	            StringBuilder sql = new StringBuilder("UPDATE DecokeRunLength SET ");
-	            Map<String, Object> params = new HashMap<>();
-	            boolean first = true;
-
-	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
-	                String key = entry.getKey();
-	                if (EXCLUDE.contains(key)) continue;
-
+	            if (idString != null && !idString.trim().isEmpty()) {
 	                
-	                String dbColumn = key.replace(" ", "_");
-	                
-	                if (!first) sql.append(", ");
-	                
-	                String paramName = "p_" + dbColumn.replaceAll("[^a-zA-Z0-9]", "");
-	                sql.append("[").append(dbColumn).append("] = :").append(paramName);
-	                params.put(paramName, entry.getValue());
-	                first = false;
-	            }
+	                StringBuilder sql = new StringBuilder("UPDATE DecokeRunLength SET ");
+	                Map<String, Object> params = new HashMap<>();
+	                boolean first = true;
 
-	            
-	            sql.append(", AopYear = :year, PlantFkId = :plantId ");
-	            
-	            
-	            if (idString != null && !idString.isEmpty()) {
-	                sql.append("WHERE Id = :id");
-	                params.put("id", UUID.fromString(idString));
+	                for (Map.Entry<String, Object> entry : payload.entrySet()) {
+	                    String key = entry.getKey();
+	                    if (EXCLUDE.contains(key)) continue;
+
+	                    String dbColumn = key.replace(" ", "_");
+	                    if (!first) sql.append(", ");
+	                    
+	                    String paramName = "p_" + dbColumn.replaceAll("[^a-zA-Z0-9]", "");
+	                    sql.append("[").append(dbColumn).append("] = :").append(paramName);
+	                    params.put(paramName, entry.getValue());
+	                    first = false;
+	                }
+
+	                if (!first) {
+	                    sql.append(" WHERE Id = :id");
+	                    params.put("id", UUID.fromString(idString));
+
+	                    Query query = entityManager.createNativeQuery(sql.toString());
+	                    params.forEach(query::setParameter);
+	                    query.executeUpdate();
+	                }
 	            } else {
-	                sql.append("WHERE PlantFkId = :plantId AND AopYear = :year AND Date = :date");
-	                params.put("date", LocalDate.parse(dateString));
-	            }
-
-	            
-	            Query query = entityManager.createNativeQuery(sql.toString());
-	            params.put("year", year);
-	            params.put("plantId", UUID.fromString(plantId));
-	            
-	            params.forEach(query::setParameter);
-	            int updated = query.executeUpdate();
-
-	            
-	            if (updated == 0) {
 	                insertNewRunLengthRecord(payload, plantId, year, EXCLUDE);
 	            }
 	        }
 
-	        
 	        triggerCalculation(plantId, year, "Furnace-run-length");
 
 	        aopMessageVM.setCode(200);
@@ -846,11 +830,10 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        return aopMessageVM;
 
 	    } catch (Exception ex) {
-	        ex.printStackTrace();
 	        throw new RuntimeException("Failed to update data: " + ex.getMessage());
 	    }
 	}
-
+	
 	
 	private void insertNewRunLengthRecord(Map<String, Object> payload, String plantId, String year, Set<String> exclude) {
 	    StringBuilder columns = new StringBuilder("PlantFkId, AopYear, Date");
