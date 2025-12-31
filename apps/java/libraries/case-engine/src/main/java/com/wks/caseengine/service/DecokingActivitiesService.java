@@ -18,7 +18,7 @@ public interface DecokingActivitiesService {
 	public AOPMessageVM updateDecokingActivitiesData( String year, String plantId, String reportType, List<DecokingActivitiesDTO> decokingActivitiesDTOList);
 	public AOPMessageVM updateDecokingActivitiesIBRData( String year, String plantId, String reportType, List<Map<String, Object>> payloadList);
     public byte[] createExcel(String year, String plantId, String reportType, boolean isAfterSave, List<DecokeRunLengthDTO> decokeRunLengthDTOList);
-	public AOPMessageVM updateDecokingActivitiesRunLengthData( String year, String plantId, String reportType, List<DecokeRunLengthDTO> decokeRunLengthDTOList);
+	public AOPMessageVM updateDecokingActivitiesRunLengthData( String year, String plantId, String reportType,List<Map<String, Object>> payloadList);
     public AOPMessageVM importExcel(String year, UUID fromString, String reportType, MultipartFile file);
 	public AOPMessageVM calculateDecokingActivities(String plantId,String year);
 	public AOPMessageVM getNextYearEntry(String plantId,String year, String H10, String H11, String H12,String H13, String H14,String startDate);

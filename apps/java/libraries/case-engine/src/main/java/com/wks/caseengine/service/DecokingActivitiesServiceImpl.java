@@ -113,129 +113,80 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	@Override
 	public AOPMessageVM getDecokingActivitiesData(String year, String plantId, String reportType) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<Map<String, Object>> decokingActivitiesList = new ArrayList<>();
-		List<DecokeRunLengthDTO> runLengthDTOs = new ArrayList<>();
-		try {
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-			String procedureName = null;
-			List<Object[]> results = null;
-			if (reportType.equalsIgnoreCase("RunningDuration")) {
-				procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
-				results = getData(plantId, procedureName);
-			} else if (reportType.equalsIgnoreCase("ibr")) {
-				procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
-				results = getIBRData(plantId, procedureName);
-			} else if (reportType.equalsIgnoreCase("RunLength")) {
-				procedureName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_RunLength";
-				results = getRunLengthData(plantId, year, procedureName);
-			}
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        
+	        String viewName = "";
+	        String sql = "";
+	        Map<String, Object> params = new HashMap<>();
 
-			for (Object[] row : results) {
-				Map<String, Object> map = new HashMap<>(); // Create a new map for each row
-				if (reportType.equalsIgnoreCase("RunningDuration")) {
-					map.put("normParameterId", row[0]);
-					map.put("name", row[1]);
-					map.put("displayName", row[2]);
-					map.put("isEditable", row[13]);
-					map.put("isMonthAdd", row[16]);
-					Object raw = row[0];
-					UUID id = UUID.fromString(raw.toString());
-					Optional<NormAttributeTransactions> normAttributeTransactionsopt = normAttributeTransactionsRepository
-							.findByNormParameterFKId(id);
-					if (normAttributeTransactionsopt.isPresent()) {
-						NormAttributeTransactions normAttributeTransactions = normAttributeTransactionsopt.get();
-						map.put("attributeValue", normAttributeTransactions.getAttributeValue());
-						map.put("remarks", normAttributeTransactions.getRemarks());
-						map.put("id", normAttributeTransactions.getId());
-						map.put("month", getMonth(normAttributeTransactions.getAopMonth()));
-					} else {
-						map.put("remarks", "");
-						map.put("id", "");
-					}
-				} else if (reportType.equalsIgnoreCase("ibr")) {
-					map.put("furnace", row[0] != null ? row[0] : "");
-					map.put("plantId", row[1] != null ? row[1] : "");
-					map.put("ibrSDId", row[2] != null ? row[2] : "");
-					map.put("ibrEDId", row[3] != null ? row[3] : "");
-					map.put("taSDId", row[4] != null ? row[4] : "");
-					map.put("taEDId", row[5] != null ? row[5] : "");
-					map.put("sdSDId", row[6] != null ? row[6] : "");
-					map.put("sdEDId", row[7] != null ? row[7] : "");
-					map.put("preCoilId", row[8] != null ? row[8] : "");
-					map.put("postCoilId", row[9] != null ? row[9] : "");
-					map.put("isCoilId", row[10] != null ? row[10] : "");
+	        
+	        if (reportType.equalsIgnoreCase("RunningDuration")) {
+	            viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
+	            sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantId";
+	            params.put("plantId", plantId);
+	        } else if (reportType.equalsIgnoreCase("ibr")) {
+	            viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
+	            sql = "SELECT * FROM " + viewName + " WHERE PlantId = :plantId ORDER BY DisplaySeq";
+	            params.put("plantId", plantId);
+	        } else if (reportType.equalsIgnoreCase("RunLength")) {
+	            viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_RunLength";
+	            sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear ORDER BY date";
+	            params.put("plantId", plantId);
+	            params.put("aopYear", year);
+	        }
 
-					map.put("ibrSD", row[11] != null ? row[11] : "");
-					map.put("ibrED", row[12] != null ? row[12] : "");
-					map.put("taSD", row[13] != null ? row[13] : "");
-					map.put("taED", row[14] != null ? row[14] : "");
-					map.put("sdSD", row[15] != null ? row[15] : "");
-					map.put("sdED", row[16] != null ? row[16] : "");
-					map.put("preCoil", row[17] != null ? row[17] : "");
-					map.put("postCoil", row[18] != null ? row[18] : "");
-					map.put("isCoil", row[19] != null ? row[19] : "");
-					map.put("remarks", "");
-				} else if (reportType.equalsIgnoreCase("activity")) {
-					map.put("furnace", row[0]);
-					map.put("startDateIBR", row[1]);
-					map.put("endDateIBR", row[2]);
-					map.put("startDateSD", row[3]);
-					map.put("endDateSD", row[4]);
-					map.put("startDateTA", row[5]);
-					map.put("endDateTA", row[6]);
-					map.put("remarks", row[7]);
-				} else if (reportType.equalsIgnoreCase("RunLength")) {
-					DecokeRunLengthDTO dto = new DecokeRunLengthDTO();
-					dto.setId(row[0] != null ? row[0].toString() : "");
-					dto.setDate(row[1] != null ? row[1].toString() : "");
-					dto.setMonth(row[2] != null ? row[2].toString() : "");
-					dto.setHTenActual(row[3] != null ? row[3].toString() : "");
-					dto.setTenProposed(row[4] != null ? row[4].toString() : "");
-					dto.setElevenProposed(row[6] != null ? row[6].toString() : "");
-					dto.setHElevenActual(row[5] != null ? row[5].toString() : "");
-					dto.setTwelveProposed(row[8] != null ? row[8].toString() : "");
-					dto.setHTwelveActual(row[7] != null ? row[7].toString() : "");
-					dto.setThirteenProposed(row[10] != null ? row[10].toString() : "");
-					dto.setHThirteenActual(row[9] != null ? row[9].toString() : "");
-					dto.setFourteenProposed(row[12] != null ? row[12].toString() : "");
-					dto.setHFourteenActual(row[11] != null ? row[11].toString() : "");
-					dto.setDemo(row[13] != null ? row[13].toString() : "");
-					dto.setAopYear(year);
-					dto.setPlantFkId(row[15] != null ? row[15].toString() : "");
-					dto.setRemarks(row[16] != null ? row[16].toString() : "");
-					runLengthDTOs.add(dto);
-				}
-				decokingActivitiesList.add(map); // Add the map to the list here
-			}
-			Map<String, Object> aopCalculationMap = new HashMap<>();
-			if (reportType.equalsIgnoreCase("RunLength")) {
-				List<AopCalculation> aopCalculation = aopCalculationRepository
-						.findByPlantIdAndAopYearAndCalculationScreen(
-								UUID.fromString(plantId), year, "Furnace-run-length");
+	       
+	        List<Map<String, Object>> resultList = fetchDynamicData(sql, params);
 
-				aopCalculationMap.put("aopCalculation", aopCalculation);
-				aopCalculationMap.put("decokingActivitiesList", runLengthDTOs);
-				aopMessageVM.setCode(200);
-				aopMessageVM.setMessage("Data fetched successfully");
-				aopMessageVM.setData(aopCalculationMap);
-				return aopMessageVM;
-			}
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(decokingActivitiesList);
-			return aopMessageVM;
+	        
+	        for (Map<String, Object> map : resultList) {
+	            
+	            if (map.containsKey("CoilReplacement")) {
+	                map.put("IBR", map.get("CoilReplacement"));
+	            }
 
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	            
+	            if (reportType.equalsIgnoreCase("RunningDuration") && map.containsKey("normParameterId")) {
+	                UUID id = UUID.fromString(map.get("normParameterId").toString());
+	                normAttributeTransactionsRepository.findByNormParameterFKId(id).ifPresent(nat -> {
+	                    map.put("attributeValue", nat.getAttributeValue());
+	                    map.put("remarks", nat.getRemarks());
+	                    map.put("id", nat.getId());
+	                });
+	            }
+	        }
+
+	        
+	        if (reportType.equalsIgnoreCase("RunLength")) {
+	            Map<String, Object> response = new HashMap<>();
+	            response.put("decokingActivitiesList", resultList);
+	            response.put("aopCalculation", aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "Furnace-run-length"));
+	            aopMessageVM.setData(response);
+	        } else {
+	            aopMessageVM.setData(resultList);
+	        }
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch dynamic data", ex);
+	    }
 	}
+	private List<Map<String, Object>> fetchDynamicData(String sql, Map<String, Object> params) {
+	    Query query = entityManager.createNativeQuery(sql);
+	    params.forEach(query::setParameter);
 
+	    return query.unwrap(org.hibernate.query.NativeQuery.class)
+	            .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
+	            .getResultList();
+	}
+	
 	public List<Object[]> getData(String plantId, String aopYear, String reportType, String procedureName) {
 		try {
 
@@ -783,78 +734,123 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	@Override
+	@Transactional
 	public AOPMessageVM updateDecokingActivitiesRunLengthData(String year, String plantId, String reportType,
-			List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
-		List<DecokeRunLengthDTO> failedList = new ArrayList<>();
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		try {
-			for (DecokeRunLengthDTO decokeRunLengthDTO : decokeRunLengthDTOList) {
-						if (decokeRunLengthDTO.getSaveStatus() != null
-								&& decokeRunLengthDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
-							failedList.add(decokeRunLengthDTO);
-							continue;
-						}
-						DecokeRunLength decokeRunLength=null;
-						Optional<DecokeRunLength> decokeRunLengthOpt=null;
-						//String newyear=nextAcademicYear(year);
-						//int deletedRecords=decokeRunLengthRepository.deleteByPlantFkIdAndAopYear(UUID.fromString(plantId),newyear);
-						//System.out.println(deletedRecords);
-						if(decokeRunLengthDTO.getId()!=null) {
-							decokeRunLengthOpt = decokeRunLengthRepository.findById(UUID.fromString(decokeRunLengthDTO.getId()));
-						}else {
-							decokeRunLengthOpt=	decokeRunLengthRepository.findUniqueByPlantAOPYearAndDate(UUID.fromString(plantId),year,LocalDate.parse(decokeRunLengthDTO.getDate()));					}
-						
-						if(decokeRunLengthOpt.isPresent()) {
-							 decokeRunLength=decokeRunLengthOpt.get();
-						}else {
-							 decokeRunLength = new DecokeRunLength();
-							 decokeRunLength.setH10Actual(decokeRunLengthDTO.getHTenActual() != null ? decokeRunLengthDTO.getHTenActual() : "0.0");
-							 decokeRunLength.setH11Actual(decokeRunLengthDTO.getHElevenActual() != null ? decokeRunLengthDTO.getHElevenActual() : "0.0");
-							 decokeRunLength.setH12Actual(decokeRunLengthDTO.getHTwelveActual() != null ? decokeRunLengthDTO.getHTwelveActual() : "0.0");
-							 decokeRunLength.setH13Actual(decokeRunLengthDTO.getHThirteenActual() != null ? decokeRunLengthDTO.getHThirteenActual() : "0.0");
-							 decokeRunLength.setH14Actual(decokeRunLengthDTO.getHFourteenActual() != null ? decokeRunLengthDTO.getHFourteenActual() : "0.0");
-						}
-						
-						decokeRunLength.setH10Proposed(decokeRunLengthDTO.getTenProposed());
-						decokeRunLength.setH11Proposed(decokeRunLengthDTO.getElevenProposed());
-						decokeRunLength.setH12Proposed(decokeRunLengthDTO.getTwelveProposed());
-						decokeRunLength.setH13Proposed(decokeRunLengthDTO.getThirteenProposed());
-						decokeRunLength.setH14Proposed(decokeRunLengthDTO.getFourteenProposed());
-						decokeRunLength.setDemo(decokeRunLengthDTO.getDemo());
-						decokeRunLength.setAopYear(year);
-						decokeRunLength.setPlantFkId(UUID.fromString(plantId));
-						String dateString = decokeRunLengthDTO.getDate();
-						DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-						LocalDate parsedDate;
-						try {
-						   parsedDate = LocalDate.parse(dateString, fmt);
-						} catch (DateTimeParseException ex) {
-						   // handle error: invalid format
-						   throw new IllegalArgumentException("Invalid date: " + dateString, ex);
-						}
-						decokeRunLength.setDate(parsedDate);
-						//decokeRunLength.setPlantFkId(UUID.fromString(plantId));
-						//decokeRunLength.setAopYear(newyear);
-						decokeRunLengthRepository.save(decokeRunLength);
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Failed to update data");
-		}
-		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("Furnace-run-length");
-		for (ScreenMapping screenMapping : screenMappingList) {
-			AopCalculation aopCalculation = new AopCalculation();
-			aopCalculation.setAopYear(year);
-			aopCalculation.setIsChanged(true);
-			aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-			aopCalculation.setPlantId(UUID.fromString(plantId));
-			aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-			aopCalculationRepository.save(aopCalculation);
-		}
-		aopMessageVM.setCode(200);
-		aopMessageVM.setMessage("Data Updated successfully");
-		aopMessageVM.setData(failedList);
-		return aopMessageVM;
+	        List<Map<String, Object>> payloadList) {
+	    
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    List<Map<String, Object>> failedList = new ArrayList<>();
+	    final Set<String> EXCLUDE = Set.of("Id", "PlantFkId", "AopYear", "Date", "saveStatus", "errDescription", "Month");
+
+	    try {
+	        for (Map<String, Object> payload : payloadList) {
+	           
+	            if ("Failed".equalsIgnoreCase((String) payload.get("saveStatus"))) {
+	                failedList.add(payload);
+	                continue;
+	            }
+
+	            String idString = (String) payload.get("Id");
+	            String dateString = (String) payload.get("Date");
+	            
+	            if (dateString == null) continue;
+
+	            
+	            StringBuilder sql = new StringBuilder("UPDATE DecokeRunLength SET ");
+	            Map<String, Object> params = new HashMap<>();
+	            boolean first = true;
+
+	            for (Map.Entry<String, Object> entry : payload.entrySet()) {
+	                String key = entry.getKey();
+	                if (EXCLUDE.contains(key)) continue;
+
+	                
+	                String dbColumn = key.replace(" ", "_");
+	                
+	                if (!first) sql.append(", ");
+	                
+	                String paramName = "p_" + dbColumn.replaceAll("[^a-zA-Z0-9]", "");
+	                sql.append("[").append(dbColumn).append("] = :").append(paramName);
+	                params.put(paramName, entry.getValue());
+	                first = false;
+	            }
+
+	            
+	            sql.append(", AopYear = :year, PlantFkId = :plantId ");
+	            
+	            
+	            if (idString != null && !idString.isEmpty()) {
+	                sql.append("WHERE Id = :id");
+	                params.put("id", UUID.fromString(idString));
+	            } else {
+	                sql.append("WHERE PlantFkId = :plantId AND AopYear = :year AND Date = :date");
+	                params.put("date", LocalDate.parse(dateString));
+	            }
+
+	            
+	            Query query = entityManager.createNativeQuery(sql.toString());
+	            params.put("year", year);
+	            params.put("plantId", UUID.fromString(plantId));
+	            
+	            params.forEach(query::setParameter);
+	            int updated = query.executeUpdate();
+
+	            
+	            if (updated == 0) {
+	                insertNewRunLengthRecord(payload, plantId, year, EXCLUDE);
+	            }
+	        }
+
+	        
+	        triggerCalculation(plantId, year, "Furnace-run-length");
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data Updated successfully");
+	        aopMessageVM.setData(failedList);
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        throw new RuntimeException("Failed to update data: " + ex.getMessage());
+	    }
+	}
+
+	
+	private void insertNewRunLengthRecord(Map<String, Object> payload, String plantId, String year, Set<String> exclude) {
+	    StringBuilder columns = new StringBuilder("PlantFkId, AopYear, Date");
+	    StringBuilder values = new StringBuilder(":plantId, :year, :date");
+	    Map<String, Object> params = new HashMap<>();
+	    
+	    params.put("plantId", UUID.fromString(plantId));
+	    params.put("year", year);
+	    params.put("date", LocalDate.parse((String) payload.get("Date")));
+
+	    for (Map.Entry<String, Object> entry : payload.entrySet()) {
+	        if (exclude.contains(entry.getKey())) continue;
+	        
+	        String dbCol = entry.getKey().replace(" ", "_");
+	        columns.append(", [").append(dbCol).append("]");
+	        values.append(", :p_").append(dbCol);
+	        params.put("p_" + dbCol, entry.getValue());
+	    }
+
+	    String sql = "INSERT INTO DecokeRunLength (" + columns + ") VALUES (" + values + ")";
+	    Query query = entityManager.createNativeQuery(sql);
+	    params.forEach(query::setParameter);
+	    query.executeUpdate();
+	}
+	
+	private void triggerCalculation(String plantId, String year, String screenName) {
+	    List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen(screenName);
+	    for (ScreenMapping screenMapping : screenMappingList) {
+	        AopCalculation aopCalculation = new AopCalculation();
+	        aopCalculation.setAopYear(year);
+	        aopCalculation.setIsChanged(true);
+	        aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	        aopCalculation.setPlantId(UUID.fromString(plantId));
+	        aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	        aopCalculationRepository.save(aopCalculation);
+	    }
 	}
 	
 	public AOPMessageVM updateDecokingActivitiesRunLengthExcel(String year, String plantId, String reportType,
