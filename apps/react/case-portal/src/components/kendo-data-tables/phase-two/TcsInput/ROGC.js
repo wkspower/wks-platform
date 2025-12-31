@@ -45,7 +45,7 @@ const ROGC = ({
       )
       console.log('TCS ROGC Response:', response)
 
-      if (response?.furnaceData && Array.isArray(response.furnaceData)) {
+      if (response?.furnaceData?.length >0 && response?.furnaceData && Array.isArray(response.furnaceData)) {
         transformedData = response.furnaceData.map((item, index) => ({
           id: item.id || `row_${index}`,
           ...item,

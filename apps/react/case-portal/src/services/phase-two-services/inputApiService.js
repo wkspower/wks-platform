@@ -20,6 +20,9 @@ export const InputApiService = {
 
   getSTGHeatRateData,
   saveSTGHeatRateData,
+
+  getHRSGHeatRateData,
+  saveHRSGHeatRateData,
 }
 
 // ===================== ||Shutdown and Operational hrs APIs || ===================== //
@@ -289,6 +292,51 @@ async function getSTGHeatRateData(keycloak, plantId) {
 
 async function saveSTGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
   const url = `${Config.CaseEngineUrl}/task/stg-extraction-lookup/${PLANT_ID}/${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// ========================|| HRSG Heat Rate APIs ||=====================================//
+async function getHRSGHeatRateData(keycloak, plantId) {
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

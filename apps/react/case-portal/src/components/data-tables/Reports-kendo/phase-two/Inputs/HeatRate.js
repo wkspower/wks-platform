@@ -7,6 +7,7 @@ import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/in
 import { InputApiService } from 'services/phase-two-services/inputApiService'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
 import STGHeatRate from './STGHeatRate'
+import HRSGHeatRate from './HRSGHeatRate'
 
 const HeatRate = () => {
   const keycloak = useSession()
@@ -73,6 +74,14 @@ const HeatRate = () => {
       editable: true,
       minWidth: 100,
     },
+    // {
+    //   field: 'remark',
+    //   title: 'Remark',
+    //   width: 130,
+    //   type: 'textarea',
+    //   editable: true,
+    //   minWidth: 150,
+    // },
   ]
 
   const [rows, setRows] = useState([])
@@ -249,6 +258,7 @@ const HeatRate = () => {
       />
 
       <Stack sx={{mt:2}}><STGHeatRate /></Stack>
+      <Stack sx={{mt:2}}><HRSGHeatRate /></Stack>
     </Box>
   )
 }

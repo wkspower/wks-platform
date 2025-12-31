@@ -76,7 +76,43 @@ const ShutdownAndOperational = () => {
       type: 'text',
       editable: false,
       locked: true,
-      hidden:true
+      hidden: true,
+    },
+     {
+      field: 'utilityDistributed.name',
+      title: 'Utility Distributed',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+      locked: true,
+    },
+    {
+      field: 'utilityDistributed.sapCode',
+      title: 'Distributed SAP Code',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+      locked: true,
+    },
+    {
+      field: 'utilityGenerated.name',
+      title: 'Utility Generated',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+      locked: true,
+    },
+    {
+      field: 'utilityGenerated.sapCode',
+      title: 'Generated SAP Code',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+      locked: true,
     },
     {
       title: headerMap[4],
@@ -455,18 +491,37 @@ const ShutdownAndOperational = () => {
         AOP_YEAR,
       )
 
-      if (!res || res?.length === 0) {
+      if (!res || res?.powerResponse?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      const rowsWithIds = res.map((row, index) => ({
+
+      // Merge rows with same assetName
+      // const mergedMap = {}
+      // res?.powerResponse?.forEach((row) => {
+      //   const key = row.assetName
+      //   if (!mergedMap[key]) {
+      //     mergedMap[key] = { ...row }
+      //   } else {
+      //     // Merge utility properties
+      //     if (row.utilityGenerated) {
+      //       mergedMap[key].utilityGenerated = row.utilityGenerated
+      //     }
+      //     if (row.utilityDistributed) {
+      //       mergedMap[key].utilityDistributed = row.utilityDistributed
+      //     }
+      //   }
+      // })
+
+      // const rowsWithIds = Object.values(mergedMap).map((row, index) => ({
+      const rowsWithIds = res?.powerResponse?.map((row, index) => ({
         ...row,
         id: row.id || index + 1,
       }))
+
       setRows(rowsWithIds)
-      //   setRows(dummyOperationalHoursData)
     } catch (error) {
       console.error('Error fetching shutdown and operational data:', error)
       setSnackbarOpen(true)
@@ -515,14 +570,16 @@ const ShutdownAndOperational = () => {
     }
 
     const payload = modifiedData.map(({ id, inEdit, ...rest }) => rest)
-
+    const tempPayload = {
+      powerResponse: payload,
+    }
     try {
       console.log('payload', payload)
 
       const response = await InputApiService.saveOperationHours(
         keycloak,
         AOP_YEAR,
-        payload,
+        tempPayload,
       )
 
       setModifiedCells({})
@@ -531,6 +588,7 @@ const ShutdownAndOperational = () => {
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
+      fetchShutdownAndOperationalData();
     } catch (error) {
       console.error('Error saving operational hours data:', error)
       setSnackbarOpen(true)
@@ -569,7 +627,7 @@ const ShutdownAndOperational = () => {
           setRows={setRows}
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
-          title='Shutdown and Operational Hours Input'
+          title='Shutdown and Operational Input (Hours)'
           permissions={permissions}
           saveChanges={saveChanges}
           snackbarData={snackbarData}
@@ -581,7 +639,7 @@ const ShutdownAndOperational = () => {
         />
       </Stack>
 
-      <Stack sx={{mt:2}}>
+      <Stack sx={{ mt: 2 }}>
         <STGShutdownAndOperationalHr hoursRows={hoursRows} />
       </Stack>
     </Box>

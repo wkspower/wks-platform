@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.AssetOperationalResponseDTO;
+import com.wks.caseengine.dto.MasterAssetOperationalResponseDTO;
 import com.wks.caseengine.service.PowerGenerationService;
 
 @RestController
@@ -24,11 +25,11 @@ public class PowerGenerationController {
 
 
     @GetMapping("/assets/operational-hours/{plantId}/{financialYear}")
-    public ResponseEntity<List<AssetOperationalResponseDTO>> getAssetOperationalHours(
+    public ResponseEntity<MasterAssetOperationalResponseDTO> getAssetOperationalHours(
             @PathVariable UUID plantId,
             @PathVariable String financialYear) {
 
-        List<AssetOperationalResponseDTO> response =
+        MasterAssetOperationalResponseDTO response =
                 powerGenerationService.getAssetOperationalHours(plantId, financialYear);
 
         return ResponseEntity.ok(response);
@@ -37,7 +38,7 @@ public class PowerGenerationController {
     @PostMapping("/assets/operational-hours/{financialYear}")
      public ResponseEntity<Void> saveOperationalHours(
         @PathVariable String financialYear,
-        @RequestBody List<AssetOperationalResponseDTO> payload) {
+        @RequestBody MasterAssetOperationalResponseDTO payload) {
 
     powerGenerationService.setAssetOperationalHours(financialYear, payload);
     return ResponseEntity.ok().build();

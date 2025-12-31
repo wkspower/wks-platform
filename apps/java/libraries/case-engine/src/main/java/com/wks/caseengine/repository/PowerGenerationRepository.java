@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.AssetMonthlyOperationalProjection;
+import com.wks.caseengine.dto.PowerGenerationNormParametersProjection;
 import com.wks.caseengine.entity.DummyEntity;
 
 
@@ -73,24 +74,8 @@ public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Lo
             @Param("hours") Double hours
     );
 
-    // @Modifying
-    // @Transactional
-    // @Query(value = """
-    //     DECLARE @TempData TABLE (Asset_FK_Id UNIQUEIDENTIFIER, FinancialMonthId UNIQUEIDENTIFIER, OperationalHours FLOAT)
-    //     INSERT INTO @TempData VALUES :dataList;
-        
-    //     MERGE OperationalHours AS target
-    //     USING @TempData AS source
-    //     ON target.Asset_FK_Id = source.Asset_FK_Id
-    //        AND target.FinancialMonthId = source.FinancialMonthId
-    //     WHEN MATCHED THEN
-    //         UPDATE SET OperationalHours = source.OperationalHours
-    //     WHEN NOT MATCHED THEN
-    //         INSERT (Id, Asset_FK_Id, FinancialMonthId, OperationalHours)
-    //         VALUES (NEWID(), source.Asset_FK_Id, source.FinancialMonthId, source.OperationalHours);
-    //     """, nativeQuery = true)
-    // int batchUpsertOperationalHours(
-    //         @Param("dataList") List<Object[]> dataList
-    // );
+
+    @Query(value = "select Name, NormType_FK_Id, SAPMaterialCode, AssetId from NormParameters where AssetId in :assetIds", nativeQuery = true)
+    List<PowerGenerationNormParametersProjection> getNormParametersByAssetIds(@Param("assetIds") List<UUID> assetIds);
 
 }

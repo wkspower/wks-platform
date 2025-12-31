@@ -151,11 +151,11 @@ public class FurnaceService {
 
          for (FurnaceDTO furnaceDTO : furnaceDTOs) {  
 
-               // update remark (unique for furnace)
+            
 
             if(furnaceDTO.getApr() != null) {
                 UUID financialYearMonthId = financialYearMonthIds.get(4);
-                updates.add(new Object[] { furnaceDTO.getApr(), furnaceDTO.getFurnace(), financialYearMonthId});
+                updates.add(new Object[] { furnaceDTO.getApr(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
                
          }
          else {
@@ -164,7 +164,7 @@ public class FurnaceService {
 
          if(furnaceDTO.getMay() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(5);
-            updates.add(new Object[] { furnaceDTO.getMay(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getMay(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(5), siteId, plantId});
@@ -172,7 +172,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getJun() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(6);
-            updates.add(new Object[] { furnaceDTO.getJun(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getJun(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(6), siteId, plantId});
@@ -180,7 +180,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getJul() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(7);
-            updates.add(new Object[] { furnaceDTO.getJul(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getJul(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(7), siteId, plantId});
@@ -188,7 +188,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getAug() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(8);
-            updates.add(new Object[] { furnaceDTO.getAug(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getAug(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(8), siteId, plantId});
@@ -196,7 +196,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getSep() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(9);
-            updates.add(new Object[] { furnaceDTO.getSep(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getSep(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(9), siteId, plantId});
@@ -204,7 +204,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getOct() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(10);
-            updates.add(new Object[] { furnaceDTO.getOct(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getOct(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(10), siteId, plantId});
@@ -212,7 +212,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getNov() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(11);
-            updates.add(new Object[] { furnaceDTO.getNov(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getNov(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(11), siteId, plantId});
@@ -220,7 +220,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getDec() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(12);
-            updates.add(new Object[] { furnaceDTO.getDec(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getDec(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(12), siteId, plantId});
@@ -228,7 +228,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getJan() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(1);
-            updates.add(new Object[] { furnaceDTO.getJan(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getJan(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(1), siteId, plantId});
@@ -236,7 +236,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getFeb() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(2);
-            updates.add(new Object[] { furnaceDTO.getFeb(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getFeb(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(2), siteId, plantId});
@@ -244,7 +244,7 @@ public class FurnaceService {
          
          if(furnaceDTO.getMar() != null) {
             UUID financialYearMonthId = financialYearMonthIds.get(3);
-            updates.add(new Object[] { furnaceDTO.getMar(), furnaceDTO.getFurnace(), financialYearMonthId});
+            updates.add(new Object[] { furnaceDTO.getMar(), furnaceDTO.getRemarks(), furnaceDTO.getFurnace(), financialYearMonthId});
          }
          else {
             inserts.add(new Object[] { furnaceDTO.getFurnace(), 0.0, furnaceDTO.getRemarks(), financialYearMonthIds.get(3), siteId, plantId});
@@ -253,7 +253,7 @@ public class FurnaceService {
     }
 
     if(updates.size() > 0) { 
-        String updateQuery = "UPDATE Furnace SET Value = ? WHERE Furnace = ? AND FinancialYearMonthId = ?";
+        String updateQuery = "UPDATE Furnace SET Value = ? , Remarks = ? WHERE Furnace = ? AND FinancialYearMonthId = ?";
         jdbcTemplate.batchUpdate(updateQuery, updates);
     }
 

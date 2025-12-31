@@ -6,13 +6,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AssetMonthlyOperationalProjection;
 import com.wks.caseengine.dto.AssetOperationalResponseDTO;
+import com.wks.caseengine.dto.AssetUtilityDTO;
 import com.wks.caseengine.dto.MonthlyHoursDTO;
+import com.wks.caseengine.dto.PowerGenerationNormParametersProjection;
+import com.wks.caseengine.dto.MasterAssetOperationalResponseDTO;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.repository.PowerGenerationRepository;
 
@@ -25,7 +29,7 @@ public class PowerGenerationService {
     @Autowired
     private FinancialYearMonthRepository financialYearMonthRepo;
 
-    public List<AssetOperationalResponseDTO> getAssetOperationalHours(
+    public MasterAssetOperationalResponseDTO getAssetOperationalHours(
             UUID cppPlantId,
             String financialYear) {
 
@@ -35,14 +39,19 @@ public class PowerGenerationService {
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
 
-        List<AssetOperationalResponseDTO> response = new  ArrayList<>();
+        List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(data.stream().map(AssetMonthlyOperationalProjection::getAssetId).collect(Collectors.toList()));
+
+        Map<UUID, List<PowerGenerationNormParametersProjection>> normParametersMap = normParameters.stream().collect(Collectors.groupingBy(PowerGenerationNormParametersProjection::getAssetId));
+
+        List<AssetOperationalResponseDTO> powerResponse = new  ArrayList<>();
+        List<AssetOperationalResponseDTO> steamResponse = new  ArrayList<>();
 
         for (AssetMonthlyOperationalProjection row : data) {
       System.out.println("Asset Type: " + row.getAssetType());
             // Skip Steam_Distribution Asset
-            if( row.getAssetType() != null && row.getAssetType().equals("Steam_Dis")) {
-                continue;
-            }
+            // if( row.getAssetType() != null && row.getAssetType().equals("Steam_Dis")) {
+            //     continue;
+            // }
 
             Map<String, MonthlyHoursDTO> monthMap = new LinkedHashMap<>();
 
@@ -79,15 +88,73 @@ public class PowerGenerationService {
              dto.setFeb(monthMap.get("February"));
              dto.setMarch(monthMap.get("March"));
 
-            response.add(dto);
+
+            
+            
+             if(normParametersMap.containsKey(row.getAssetId())) {  
+                int i = 0;
+                for(PowerGenerationNormParametersProjection normParameter : normParametersMap.get(row.getAssetId())) { 
+                  
+                   // set the first utility distributed and generated to dto and for remaining  create new dtos
+                    if(i == 0) { 
+
+                        if(normParameter.getNormType_FK_Id() == 1) {
+                            dto.setUtilityGenerated(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                        } else if(normParameter.getNormType_FK_Id() == 2) {
+                            dto.setUtilityDistributed(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                        }
+
+                        if(row.getAssetName().equals("NMD-Utility Plant")) {
+                            steamResponse.add(dto);
+                        } else{
+                            powerResponse.add(dto);
+                        }
+                        i++;
+                    } else {
+                        // creating new dto for remaining utilities
+                        AssetOperationalResponseDTO dto2 = new AssetOperationalResponseDTO(dto);
+                        if(normParameter.getNormType_FK_Id() == 1) {
+                            dto2.setUtilityGenerated(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                        } else if(normParameter.getNormType_FK_Id() == 2) {
+                            dto2.setUtilityDistributed(new AssetUtilityDTO(normParameter.getName(), normParameter.getSAPMaterialCode()));
+                        }
+                          
+                        if(row.getAssetName().equals("NMD-Utility Plant")) {
+                            steamResponse.add(dto2);
+                        } else{
+                            powerResponse.add(dto2);
+                        }
+                    }
+                    
+                }
+             }
+
         }
 
+        MasterAssetOperationalResponseDTO response = new MasterAssetOperationalResponseDTO();
+        response.setPowerResponse(powerResponse);
+        response.setSteamResponse(steamResponse);
         return response;
     }
 
-    public void setAssetOperationalHours(String financialYear, List<AssetOperationalResponseDTO> payload) {
+    public void setAssetOperationalHours(String financialYear, MasterAssetOperationalResponseDTO masterAssetOperationalResponseDTO) {
+
+        List<AssetOperationalResponseDTO> payload = new ArrayList<>();
+
+        if(masterAssetOperationalResponseDTO.getPowerResponse() != null) {  
+            payload.addAll(masterAssetOperationalResponseDTO.getPowerResponse());
+
+        }
+      else { 
+        if(masterAssetOperationalResponseDTO.getSteamResponse() != null) {  
+            payload.addAll(masterAssetOperationalResponseDTO.getSteamResponse());
+        }
+      }
+
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
+
+
         
         // Fetch all financial month IDs in a single query
         Map<Integer, UUID> financialMonthIds = new LinkedHashMap<>();
