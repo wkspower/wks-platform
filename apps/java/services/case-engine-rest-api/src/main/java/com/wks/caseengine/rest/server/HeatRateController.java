@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.wks.caseengine.dto.HeatRateDTO;
 import com.wks.caseengine.dto.HeatRateDropDownProjection;
 import com.wks.caseengine.dto.HeatRateProjection;
+import com.wks.caseengine.dto.HRSGHeatRateLookupDTO;
 import com.wks.caseengine.dto.STGExtractionLookupDTO;
 import com.wks.caseengine.service.HeatRateService;
 
@@ -36,6 +37,25 @@ public class HeatRateController {
     @GetMapping("/stg-extraction-lookup")
     public ResponseEntity<List<STGExtractionLookupDTO>> getSTGExtractionLookup() {
         return ResponseEntity.ok(heatRateService.getSTGExtractionLookup());
+    }
+
+    // ============================================================
+    // HRSG HEAT RATE LOOKUP ENDPOINTS
+    // ============================================================
+
+    @GetMapping("/hrsg-heat-rate-lookup")
+    public ResponseEntity<List<HRSGHeatRateLookupDTO>> getHRSGHeatRateLookup() {
+        return ResponseEntity.ok(heatRateService.getHRSGHeatRateLookup());
+    }
+
+    @GetMapping("/hrsg-heat-rate-lookup/equipment/{equipmentName}")
+    public ResponseEntity<List<HRSGHeatRateLookupDTO>> getHRSGHeatRateByEquipmentName(@PathVariable String equipmentName) {
+        return ResponseEntity.ok(heatRateService.getHRSGHeatRateByEquipmentName(equipmentName));
+    }
+
+    @GetMapping("/hrsg-heat-rate-lookup/cpp-utility/{cppUtility}")
+    public ResponseEntity<List<HRSGHeatRateLookupDTO>> getHRSGHeatRateByCppUtility(@PathVariable String cppUtility) {
+        return ResponseEntity.ok(heatRateService.getHRSGHeatRateByCppUtility(cppUtility));
     }
 
 }

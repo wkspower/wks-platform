@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.HeatRateDTO;
 import com.wks.caseengine.dto.HeatRateDropDownProjection;
 import com.wks.caseengine.dto.HeatRateProjection;
+import com.wks.caseengine.dto.HRSGHeatRateLookupDTO;
 import com.wks.caseengine.dto.STGExtractionLookupDTO;
+import com.wks.caseengine.entity.HRSGHeatRateLookup;
 import com.wks.caseengine.entity.STGExtractionLookup;
 import com.wks.caseengine.repository.HeatRateRepository;
+import com.wks.caseengine.repository.HRSGHeatRateLookupRepository;
 import com.wks.caseengine.repository.STGExtractionLookupRepository;
 
 
@@ -22,6 +25,9 @@ public class HeatRateService {
 
     @Autowired
     private STGExtractionLookupRepository stgExtractionLookupRepository;
+
+    @Autowired
+    private HRSGHeatRateLookupRepository hrsgHeatRateLookupRepository;
 
     public List<Object[]> getAssetNamesByCppIdAndAssetType(String cppId) {
        
@@ -65,6 +71,48 @@ public class HeatRateService {
                 .slExtFlowTPH(entity.getSlExtFlowTPH())
                 .condensingLoadM3Hr(entity.getCondensingLoadM3Hr())
                 .heatRateKcalKWH(entity.getHeatRateKcalKWH())
+                .build();
+    }
+
+    // ============================================================
+    // HRSG HEAT RATE LOOKUP METHODS
+    // ============================================================
+
+    /**
+     * Get all HRSG Heat Rate lookup data ordered by EquipmentName and HRSGLoad
+     */
+    public List<HRSGHeatRateLookupDTO> getHRSGHeatRateLookup() {
+        return hrsgHeatRateLookupRepository.findAllByOrderByEquipmentNameAscHrsgLoadAsc().stream()
+                .map(this::mapToHRSGHeatRateDTO)
+                .toList();
+    }
+
+    /**
+     * Get HRSG Heat Rate lookup data for a specific HRSG by equipment name
+     */
+    public List<HRSGHeatRateLookupDTO> getHRSGHeatRateByEquipmentName(String equipmentName) {
+        return hrsgHeatRateLookupRepository.findByEquipmentNameOrderByHrsgLoadAsc(equipmentName).stream()
+                .map(this::mapToHRSGHeatRateDTO)
+                .toList();
+    }
+
+    /**
+     * Get HRSG Heat Rate lookup data for a specific HRSG by CPPUtility (AssetId)
+     */
+    public List<HRSGHeatRateLookupDTO> getHRSGHeatRateByCppUtility(String cppUtility) {
+        return hrsgHeatRateLookupRepository.findByCppUtilityOrderByHrsgLoadAsc(cppUtility).stream()
+                .map(this::mapToHRSGHeatRateDTO)
+                .toList();
+    }
+
+    private HRSGHeatRateLookupDTO mapToHRSGHeatRateDTO(HRSGHeatRateLookup entity) {
+        return HRSGHeatRateLookupDTO.builder()
+                .id(entity.getId())
+                .equipmentName(entity.getEquipmentName())
+                .cppUtility(entity.getCppUtility())
+                .hrsgLoad(entity.getHrsgLoad())
+                .heatRate(entity.getHeatRate())
+                .remark(entity.getRemark())
                 .build();
     }
 }
