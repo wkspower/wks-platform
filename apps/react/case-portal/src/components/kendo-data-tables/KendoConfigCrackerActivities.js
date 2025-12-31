@@ -80,7 +80,7 @@ const DecokingConfig = () => {
   const [globalTaEndDate, setGlobalTaEndDate] = useState(null)
 
   const [ibrPlanColumns, serIbrPlanColumns] = useState([])
-
+  const [runLengthColumns, setRunLengthColumns] = useState([])
   useEffect(() => {
     if (!globalTaStartDate || !globalTaEndDate || ibrScreen2Rows.length === 0)
       return
