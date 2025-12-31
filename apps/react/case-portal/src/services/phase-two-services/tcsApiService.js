@@ -269,8 +269,8 @@ async function saveCrudBlendWindowData(keycloak, plantId, year, siteId, payload)
 }
 
 // ===================== || TCS ROGC Data APIs || ===================== //
-async function getTcsRogcData(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-rogc?plantId=${plantId}&year=${year}`;
+async function getTcsRogcData(keycloak, siteId, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/furnace/${year}/${siteId}/${plantId}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -288,8 +288,8 @@ async function getTcsRogcData(keycloak, plantId, year) {
   }
 }
 
-async function saveRogcData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-rogc?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+async function saveRogcData(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/furnace/${AOP_YEAR}/${SITE_ID}/${PLANT_ID}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
