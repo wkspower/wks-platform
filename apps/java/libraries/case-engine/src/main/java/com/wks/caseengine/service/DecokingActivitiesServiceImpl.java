@@ -106,7 +106,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	private DataSource dataSource;
 
-	// Inject or set your DataSource (e.g., via constructor or setter)
+	
 	public DecokingActivitiesServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
@@ -119,37 +119,33 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
 	        
-	        String viewName = "";
 	        String sql = "";
-	        Map<String, Object> params = new HashMap<>();
+	        Map<String, Object> params = new LinkedHashMap<>();
 
-	        
+	       
 	        if (reportType.equalsIgnoreCase("RunningDuration")) {
-	            viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokingPlanning";
-	            sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantId";
+	            sql = "SELECT * FROM vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokingPlanning WHERE Plant_FK_Id = :plantId";
 	            params.put("plantId", plantId);
 	        } else if (reportType.equalsIgnoreCase("ibr")) {
-	            viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates";
-	            sql = "SELECT * FROM " + viewName + " WHERE PlantId = :plantId ORDER BY DisplaySeq";
+	            sql = "SELECT * FROM vwScrn" + vertical.getName() + "_" + site.getName() + "_DecokePlanningDates WHERE PlantId = :plantId ORDER BY DisplaySeq";
 	            params.put("plantId", plantId);
 	        } else if (reportType.equalsIgnoreCase("RunLength")) {
-	            viewName = "vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_RunLength";
-	            sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear ORDER BY date";
+	            sql = "SELECT * FROM vwScrn" + vertical.getName() + "_" + site.getName() + "_Decoke_RunLength WHERE Plant_FK_Id = :plantId AND AOPYear = :aopYear ORDER BY date";
 	            params.put("plantId", plantId);
 	            params.put("aopYear", year);
 	        }
 
 	       
-	        List<Map<String, Object>> resultList = fetchDynamicData(sql, params);
+	        Map<String, Object> dynamicResult = fetchDataWithMetadata(sql, params);
+	        List<Map<String, Object>> resultList = (List<Map<String, Object>>) dynamicResult.get("data");
+	        List<Map<String, Object>> columns = (List<Map<String, Object>>) dynamicResult.get("columns");
 
 	        
 	        for (Map<String, Object> map : resultList) {
-	            
 	            if (map.containsKey("CoilReplacement")) {
 	                map.put("IBR", map.get("CoilReplacement"));
 	            }
 
-	            
 	            if (reportType.equalsIgnoreCase("RunningDuration") && map.containsKey("normParameterId")) {
 	                UUID id = UUID.fromString(map.get("normParameterId").toString());
 	                normAttributeTransactionsRepository.findByNormParameterFKId(id).ifPresent(nat -> {
@@ -161,15 +157,15 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        }
 
 	        
+	        Map<String, Object> finalData = new HashMap<>();
+	        finalData.put("data", resultList);
+	        finalData.put("columns", columns);
+
 	        if (reportType.equalsIgnoreCase("RunLength")) {
-	            Map<String, Object> response = new HashMap<>();
-	            response.put("decokingActivitiesList", resultList);
-	            response.put("aopCalculation", aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "Furnace-run-length"));
-	            aopMessageVM.setData(response);
-	        } else {
-	            aopMessageVM.setData(resultList);
+	            finalData.put("aopCalculation", aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "Furnace-run-length"));
 	        }
 
+	        aopMessageVM.setData(finalData);
 	        aopMessageVM.setCode(200);
 	        aopMessageVM.setMessage("Data fetched successfully");
 	        return aopMessageVM;
@@ -178,15 +174,55 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        throw new RuntimeException("Failed to fetch dynamic data", ex);
 	    }
 	}
-	private List<Map<String, Object>> fetchDynamicData(String sql, Map<String, Object> params) {
-	    Query query = entityManager.createNativeQuery(sql);
-	    params.forEach(query::setParameter);
+	private Map<String, Object> fetchDataWithMetadata(String sql, Map<String, Object> params) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<Map<String, Object>> data = new ArrayList<>();
+	        List<Map<String, Object>> columns = new ArrayList<>();
 
-	    return query.unwrap(org.hibernate.query.NativeQuery.class)
-	            .setResultTransformer(org.hibernate.transform.AliasToEntityMapResultTransformer.INSTANCE)
-	            .getResultList();
+	        String jdbcSql = sql;
+	        List<Object> paramValues = new ArrayList<>();
+	        for (Map.Entry<String, Object> entry : params.entrySet()) {
+	            jdbcSql = jdbcSql.replace(":" + entry.getKey(), "?");
+	            paramValues.add(entry.getValue());
+	        }
+
+	        try (PreparedStatement ps = connection.prepareStatement(jdbcSql)) {
+	            for (int i = 0; i < paramValues.size(); i++) {
+	                ps.setObject(i + 1, paramValues.get(i));
+	            }
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData md = rs.getMetaData();
+	                int columnCount = md.getColumnCount();
+
+	               
+	                for (int i = 1; i <= columnCount; i++) {
+	                    Map<String, Object> col = new HashMap<>();
+	                    String colName = md.getColumnLabel(i);
+	                    col.put("field", colName);
+	                    col.put("title", formatTitle(colName)); // Helper to make column names pretty
+	                    col.put("type", getFrontendType(md.getColumnTypeName(i)));
+	                    col.put("editable", false);
+	                    columns.add(col);
+	                }
+
+	                
+	                while (rs.next()) {
+	                    Map<String, Object> row = new LinkedHashMap<>();
+	                    for (int i = 1; i <= columnCount; i++) {
+	                        row.put(md.getColumnLabel(i), rs.getObject(i));
+	                    }
+	                    data.add(row);
+	                }
+	            }
+	        }
+
+	        Map<String, Object> result = new HashMap<>();
+	        result.put("data", data);
+	        result.put("columns", columns);
+	        return result;
+	    });
 	}
-	
 	public List<Object[]> getData(String plantId, String aopYear, String reportType, String procedureName) {
 		try {
 
