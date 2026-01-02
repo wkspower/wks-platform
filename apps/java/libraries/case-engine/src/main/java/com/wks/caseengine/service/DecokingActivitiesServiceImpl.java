@@ -23,6 +23,7 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -490,129 +491,72 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	public byte[] createExcel(String year, String plantId, String reportType, boolean isAfterSave,
-			List<DecokeRunLengthDTO> decokingActivitiesList) {
-		try {
-			System.out.println("Started the createExcel");
+	        List<Map<String, Object>> dynamicDataList) {
+	    try {
+	        if (!isAfterSave || dynamicDataList == null) {
+	            AOPMessageVM dataVM = getDecokingActivitiesData(year, plantId, reportType);
+	            Map<String, Object> aopCalculationMap = (Map<String, Object>) dataVM.getData();
+	            dynamicDataList = (List<Map<String, Object>>) aopCalculationMap.get("data");
+	        }
 
-			if (!isAfterSave) {
-				AOPMessageVM dataVM = getDecokingActivitiesData(year, plantId, reportType);
-				Map<String, Object> aopCalculationMap = (Map<String, Object>) dataVM.getData();
-				decokingActivitiesList = (List<DecokeRunLengthDTO>) aopCalculationMap.get("decokingActivitiesList");
-			}
+	        if (dynamicDataList == null || dynamicDataList.isEmpty()) {
+	            return new byte[0];
+	        }
 
-			Workbook workbook = new XSSFWorkbook();
-			CellStyle borderStyle = Utility.createBorderedStyle(workbook);
-			CellStyle boldStyle = Utility.createBoldStyle(workbook);
-			Sheet sheet = workbook.createSheet("Sheet1");
-			int currentRow = 0;
-			// List<List<Object>> rows = new ArrayList<>();
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Report");
+	        CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+	        CellStyle borderStyle = Utility.createBorderedStyle(workbook);
 
-			List<List<Object>> rows = new ArrayList<>();
-			// Data rows
+	        List<String> allColumns = new ArrayList<>(dynamicDataList.get(0).keySet());
+	        Set<String> fieldsToHide = Set.of("AopYear", "Id", "Plant_FK_Id", "PlantId", "AOPYear");
 
-			for (DecokeRunLengthDTO dto : decokingActivitiesList) {
-				List<Object> list = new ArrayList<>();
-				list.add(dto.getId());
-				list.add(dto.getMonth());
-				list.add(dto.getDate());
-				list.add(dto.getHTenActual());
-				list.add(dto.getTenProposed());
-				list.add(dto.getHElevenActual());
-				list.add(dto.getElevenProposed());
-				list.add(dto.getHTwelveActual());
-				list.add(dto.getTwelveProposed());
-				list.add(dto.getHThirteenActual());
-				list.add(dto.getThirteenProposed());
-				list.add(dto.getHFourteenActual());
-				list.add(dto.getFourteenProposed());
-				list.add(dto.getDemo());
-				// map.get("aopYear");
-				// map.get("plantId");
-				// map.get("remark");
-				// list.add(map.get("remark"));
-				if (isAfterSave) {
-					list.add(dto.getSaveStatus());
-					list.add(dto.getErrDescription());
-				}
-				rows.add(list);
-			}
+	        int currentRowNum = 0;
+	        Row headerRow = sheet.createRow(currentRowNum++);
+	        for (int i = 0; i < allColumns.size(); i++) {
+	            Cell cell = headerRow.createCell(i);
+	            cell.setCellValue(allColumns.get(i)); 
+	            cell.setCellStyle(headerStyle);
+	        }
+	        for (Map<String, Object> dataMap : dynamicDataList) {
+	            Row row = sheet.createRow(currentRowNum++);
+	            for (int i = 0; i < allColumns.size(); i++) {
+	                Cell cell = row.createCell(i);
+	                Object value = dataMap.get(allColumns.get(i));
 
-			List<String> innerHeaders = new ArrayList<>();
-			innerHeaders.add("Id");
-			innerHeaders.add("Month");
-			innerHeaders.add("Date");
-			innerHeaders.add("H10 - Actual run length");
-			innerHeaders.add("H10 - Proposed AOP");
-			innerHeaders.add("H11 - Actual run length");
-			innerHeaders.add("H11 - Proposed AOP");
-			innerHeaders.add("H12 - Actual run length");
-			innerHeaders.add("H12 - Proposed AOP");
-			innerHeaders.add("H13 - Actual run length");
-			innerHeaders.add("H13 - Proposed AOP");
-			innerHeaders.add("H14 - Actual run length");
-			innerHeaders.add("H14 - Proposed AOP");
-			innerHeaders.add("DEMO");
-			if (isAfterSave) {
-				innerHeaders.add("Status");
-				innerHeaders.add("Error Description");
-			}
-			CellStyle lockedStyle = workbook.createCellStyle();
-			lockedStyle.setLocked(true);
-			lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-			lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }
+	                cell.setCellStyle(borderStyle);
+	            }
+	        }
+	        for (int i = 0; i < allColumns.size(); i++) {
+	            String columnName = allColumns.get(i);
+	            
+	            if (fieldsToHide.contains(columnName)) {
+	                sheet.setColumnHidden(i, true);
+	            } else {
+	                sheet.autoSizeColumn(i);
+	            }
+	        }
 
-			List<List<String>> headers = new ArrayList<>();
-			headers.add(innerHeaders);
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
 
-			for (List<String> headerRowData : headers) {
-				Row headerRow = sheet.createRow(currentRow++);
-				for (int col = 0; col < headerRowData.size(); col++) {
-					Cell cell = headerRow.createCell(col);
-					cell.setCellValue(headerRowData.get(col));
-					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
-				}
-			}
-			for (List<Object> rowData : rows) {
-				Row row = sheet.createRow(currentRow++);
-				for (int col = 0; col < rowData.size(); col++) {
-					Cell cell = row.createCell(col);
-					Object value = rowData.get(col);
-
-					if (value instanceof Number) {
-						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
-					} else if (value instanceof Boolean) {
-						cell.setCellValue((Boolean) value);
-					} else if (value != null) {
-						cell.setCellValue(value.toString());
-					} else {
-						cell.setCellValue("");
-					}
-					if (col == 3 || col == 5 || col == 7 || col == 9 || col == 11) {
-						cell.setCellStyle(lockedStyle);
-					}
-
-				}
-			}
-			sheet.setColumnHidden(0, true);
-
-			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
-
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				workbook.write(outputStream);
-				workbook.close();
-				return outputStream.toByteArray();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		System.out.println("Ended the createExcel");
-		return null;
-
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
 	}
-
+	
 	private static String formatMonthYear(int month, int year) {
 		LocalDate date = LocalDate.of(year, month, 1);
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
@@ -641,102 +585,139 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 
 	
 	@Override
+	@Transactional
 	public AOPMessageVM importExcel(String year, UUID plantFKId, String reportType, MultipartFile file) {
-		// TODO Auto-generated method stub
-		if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
-			throw new IllegalArgumentException("Invalid or empty Excel file.");
-		}
+	    if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
+	        throw new IllegalArgumentException("Invalid or empty Excel file.");
+	    }
 
-		try {
+	    try {
+	        List<Map<String, Object>> data = readExcel(file.getInputStream(), plantFKId, year);
+	        	        AOPMessageVM vm = updateDecokingActivitiesRunLengthData(year, plantFKId.toString(), reportType, data);
+	        
+	        @SuppressWarnings("unchecked")
+	        List<Map<String, Object>> failedRecords = (List<Map<String, Object>>) vm.getData();
+	        
+	        AOPMessageVM aopMessageVM = new AOPMessageVM();
 
-			System.out.println("started Read run length in importExcel");
-			List<DecokeRunLengthDTO> data = readExcel(file.getInputStream(), plantFKId, year);
-			System.out.println("Ended Read run length in importExcel");
-			System.out.println("Started Save run length in importExcel");
-			AOPMessageVM vm = updateDecokingActivitiesRunLengthExcel(year, plantFKId.toString(), reportType, data);
-			List<DecokeRunLengthDTO> failedRecords = (List<DecokeRunLengthDTO>) vm.getData();
-			System.out.println("Ended Save run length in importExcel");
-			AOPMessageVM aopMessageVM = new AOPMessageVM();
+	        if (failedRecords != null && !failedRecords.isEmpty()) {
+	            byte[] fileByteArray = createExcel(year, plantFKId.toString(), reportType, true, failedRecords);
+	            
+	            String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+	            aopMessageVM.setData(base64File);
+	            aopMessageVM.setCode(400); 
+	            aopMessageVM.setMessage("Partial data has been saved. Please check the downloaded file for errors.");
+	        } else {
+	            aopMessageVM.setCode(200);
+	            aopMessageVM.setMessage("All data has been saved successfully.");
+	        }
 
-			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId.toString(), reportType, true, failedRecords);
-				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
-				aopMessageVM.setData(base64File);
-				aopMessageVM.setCode(400);
-				aopMessageVM.setMessage("Partial data has been saved");
-			} else {
-				// aopMessageVM.setData();
-				aopMessageVM.setCode(200);
-				aopMessageVM.setMessage("All data has been saved");
-			}
+	        return aopMessageVM;
 
-			return aopMessageVM;
-			// return ResponseEntity.ok(data);
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format ", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid file or data format: " + e.getMessage(), e);
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        throw new RuntimeException("Failed to process Excel import: " + ex.getMessage(), ex);
+	    }
+	}
+	
+	public List<Map<String, Object>> readExcel(InputStream inputStream, UUID plantFKId, String year) {
+	    List<Map<String, Object>> payloadList = new ArrayList<>();
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        int totalRows = sheet.getLastRowNum();
+	        
+	        Row headerRow = sheet.getRow(0);
+	        if (headerRow == null) return payloadList;
+
+	        List<String> columnNames = new ArrayList<>();
+	        for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+	            String headerValue = getStringCellValue(headerRow.getCell(i));
+	            columnNames.add(headerValue != null ? headerValue.trim() : "Column_" + i);
+	        }
+
+	        for (int i = 1; i <= totalRows; i++) {
+	            Row row = sheet.getRow(i);
+	            if (row == null) continue;
+
+	            Map<String, Object> rowData = new LinkedHashMap<>(); 
+	            try {
+	                for (int j = 0; j < columnNames.size(); j++) {
+	                    String columnName = columnNames.get(j);
+	                    Cell cell = row.getCell(j);
+	                    
+	                    if (isStringField(columnName)) {
+	                        rowData.put(columnName, getStringCellValue(cell));
+	                    } else if (isIntegerField(columnName)) {
+	                        rowData.put(columnName, getIntegerCellValue(cell));
+	                    } else {
+	                        rowData.put(columnName, getNumericCellValue(cell));
+	                    }
+	                }
+
+	                rowData.put("saveStatus", "Success");
+	            } catch (Exception e) {
+	                rowData.put("saveStatus", "Failed");
+	                rowData.put("errDescription", "Error at row " + (i + 1) + ": " + e.getMessage());
+	            }
+	            payloadList.add(rowData);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return payloadList;
 	}
 
-	public List<DecokeRunLengthDTO> readExcel(InputStream inputStream, UUID plantFKId, String year) {
-		List<DecokeRunLengthDTO> runLengthList = new ArrayList<>();
-
-		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rowIterator = sheet.iterator();
-			int firstRow = sheet.getFirstRowNum();
-			int lastRow = sheet.getLastRowNum();
-
-			System.out.println("firstRow" + firstRow);
-			System.out.println("lastRow" + lastRow);
-
-			if (rowIterator.hasNext())
-				rowIterator.next(); // Skip header
-
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-
-				DecokeRunLengthDTO dto = new DecokeRunLengthDTO();
-
-				try {
-
-					dto.setId(getStringCellValue(row.getCell(0), dto));
-
-					dto.setMonth(getStringCellValue(row.getCell(1), dto));
-					dto.setDate(getStringCellValue(row.getCell(2), dto));
-					// dto.setDate( null);
-
-					dto.setHTenActual(getStringCellValue(row.getCell(3), dto));
-					dto.setTenProposed(getStringCellValue(row.getCell(4), dto));
-					dto.setHElevenActual(getStringCellValue(row.getCell(5), dto));
-					dto.setElevenProposed(getStringCellValue(row.getCell(6), dto));
-					dto.setHTwelveActual(getStringCellValue(row.getCell(7), dto));
-					dto.setTwelveProposed(getStringCellValue(row.getCell(8), dto));
-
-					dto.setHThirteenActual(getStringCellValue(row.getCell(9), dto));
-					dto.setThirteenProposed(getStringCellValue(row.getCell(10), dto));
-					dto.setHFourteenActual(getStringCellValue(row.getCell(11), dto));
-					dto.setFourteenProposed(getStringCellValue(row.getCell(12), dto));
-
-					dto.setDemo(getStringCellValue(row.getCell(13), dto));
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					dto.setErrDescription(e.getMessage());
-					dto.setSaveStatus("Failed");
-				}
-
-				runLengthList.add(dto);
-			}
-
-		} catch (Exception e) {
-			throw new RuntimeException("Failed to read Data", e);
-		}
-
-		return runLengthList;
+	
+	private boolean isStringField(String columnName) {
+	    return columnName.equalsIgnoreCase("Id") || 
+	           columnName.equalsIgnoreCase("AopYear") || 
+	           columnName.equalsIgnoreCase("AOPYear") || 
+	           columnName.equalsIgnoreCase("PlantId") || 
+	           columnName.equalsIgnoreCase("Plant_FK_Id") || 
+	           columnName.equalsIgnoreCase("Month") || 
+	           columnName.equalsIgnoreCase("Date") ||
+	           columnName.equalsIgnoreCase("Remark") ||
+	           columnName.equalsIgnoreCase("Remarks") ||
+	           columnName.equalsIgnoreCase("DEMO");
+	}
+	
+	private boolean isIntegerField(String columnName) {
+	    return columnName.equalsIgnoreCase("NumberOfDays") || 
+	           columnName.equalsIgnoreCase("DisplaySeq");
 	}
 
+	private static String getStringCellValue(Cell cell) {
+	    if (cell == null) return null;
+	    DataFormatter formatter = new DataFormatter();
+	    String val = formatter.formatCellValue(cell).trim();
+	    return val.isEmpty() ? null : val;
+	}
+
+	private static Double getNumericCellValue(Cell cell) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+	    try {
+	        return cell.getNumericCellValue();
+	    } catch (Exception e) {
+	        String val = getStringCellValue(cell);
+	        if (val == null || val.isEmpty()) return null;
+	        try {
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException nfe) {
+	            return null;
+	        }
+	    }
+	}
+
+	private static Integer getIntegerCellValue(Cell cell) {
+	    Double val = getNumericCellValue(cell);
+	    return (val == null) ? null : val.intValue();
+	}
+	
 	private static String getStringCellValue(Cell cell, DecokeRunLengthDTO dto) {
 		try {
 			if (cell == null)
@@ -776,8 +757,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    List<Map<String, Object>> failedList = new ArrayList<>();
 	    
-	    final Set<String> EXCLUDE = Set.of("AopYear", "H10 Actual", "H11 Actual", "H12 Actual", 
-	                                       "H13 Actual", "H14 Actual", "Id", "PlantFkId", 
+	    final Set<String> EXCLUDE = Set.of("AOPYear", "H10 Actual", "H11 Actual", "H12 Actual", 
+	                                       "H13 Actual", "H14 Actual", "Id", "Plant_Fk_Id", 
 	                                       "saveStatus", "errDescription", "Month", "Date");
 
 	    try {
@@ -830,6 +811,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	        return aopMessageVM;
 
 	    } catch (Exception ex) {
+	    	ex.printStackTrace();
 	        throw new RuntimeException("Failed to update data: " + ex.getMessage());
 	    }
 	}
