@@ -31,6 +31,7 @@ public class AssetOperationalResponseDTO {
         this.jan = dto.getJan();
         this.feb = dto.getFeb();
         this.march = dto.getMarch();
+        this.remarks = dto.getRemarks();
     }
 
     private String assetName;
@@ -51,6 +52,7 @@ public class AssetOperationalResponseDTO {
     private MonthlyHoursDTO jan;
     private MonthlyHoursDTO feb;
     private MonthlyHoursDTO march;
+    private String remarks;
 
     // public AssetOperationalResponseDTO(String assetName,
     //                                    Map<String, MonthlyHoursDTO> months) {

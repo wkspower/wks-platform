@@ -8,11 +8,15 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.HeatRateDTO;
 import com.wks.caseengine.dto.HeatRateDropDownProjection;
 import com.wks.caseengine.dto.HeatRateProjection;
+import com.wks.caseengine.repository.HeatRateRepository;
+
 import com.wks.caseengine.dto.HRSGHeatRateLookupDTO;
 import com.wks.caseengine.dto.STGExtractionLookupDTO;
+
+
 import com.wks.caseengine.entity.HRSGHeatRateLookup;
 import com.wks.caseengine.entity.STGExtractionLookup;
-import com.wks.caseengine.repository.HeatRateRepository;
+
 import com.wks.caseengine.repository.HRSGHeatRateLookupRepository;
 import com.wks.caseengine.repository.STGExtractionLookupRepository;
 
@@ -29,6 +33,7 @@ public class HeatRateService {
     @Autowired
     private HRSGHeatRateLookupRepository hrsgHeatRateLookupRepository;
 
+    // original
     public List<Object[]> getAssetNamesByCppIdAndAssetType(String cppId) {
        
         //harcoding asset type for HeatRate drop down list
@@ -39,7 +44,7 @@ public class HeatRateService {
                 .toList();
 
     }
-
+   // original
     public List<HeatRateDTO> getHeatRateByAssetId(String assetId) {
         
         return heatRateRepository.findHeatRateByAssetId(UUID.fromString(assetId)).stream()
@@ -51,6 +56,7 @@ public class HeatRateService {
                     dto.setGtLoad(projection.getGTLoad());
                     dto.setHeatRate(projection.getHeatRate());
                     dto.setFreeSteamFactor(projection.getFreeSteamFactor());
+                    dto.setRemarks(projection.getRemarks());
                     return dto;
                 })
                 .toList();
@@ -71,6 +77,7 @@ public class HeatRateService {
                 .slExtFlowTPH(entity.getSlExtFlowTPH())
                 .condensingLoadM3Hr(entity.getCondensingLoadM3Hr())
                 .heatRateKcalKWH(entity.getHeatRateKcalKWH())
+                .remarks(entity.getRemarks())
                 .build();
     }
 
@@ -112,7 +119,7 @@ public class HeatRateService {
                 .cppUtility(entity.getCppUtility())
                 .hrsgLoad(entity.getHrsgLoad())
                 .heatRate(entity.getHeatRate())
-                .remark(entity.getRemark())
+                .remarks(entity.getRemarks())
                 .build();
     }
 }

@@ -70,4 +70,6 @@ public interface AssetCapacityProjection {
     Double getMarMinCapacity();
     Double getMarMaxCapacity();
 
+    String getRemarks();
+
 }

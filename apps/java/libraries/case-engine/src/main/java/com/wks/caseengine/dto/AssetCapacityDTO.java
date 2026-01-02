@@ -32,5 +32,6 @@ public class AssetCapacityDTO {
     private MonthCapacityDto jan;
     private MonthCapacityDto feb;
     private MonthCapacityDto march;
+    private String remarks;
  
 }

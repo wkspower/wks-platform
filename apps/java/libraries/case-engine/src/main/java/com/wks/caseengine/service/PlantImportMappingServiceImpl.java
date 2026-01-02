@@ -110,6 +110,8 @@ public class PlantImportMappingServiceImpl {
 
             List<PlantImportMapping> records = plantRepo.findByFinancialMonthIdInAndAssetIdIn(fmIds, plantIds);
 
+   
+
             System.out.println("records: " + records);
 
             // Group records by assetId (plant) to consolidate multiple months into one row
@@ -126,7 +128,7 @@ public class PlantImportMappingServiceImpl {
                 dto.setPlant(plantIdNameMap.get(assetId));
                 dto.setAssetId(assetId);
                 dto.setUom(pim.getUom());
-                
+                dto.setRemarks(pim.getRemarks());
                 // Set month values based on financial month
                 UUID fmId = pim.getFinancialMonthId();
                 FinancialYearMonth fm = fyMonths.stream()
@@ -286,6 +288,7 @@ public class PlantImportMappingServiceImpl {
 
                 if (match != null) {
                     match.setValue(valueToSet);
+                    match.setRemarks(dto.getRemarks() == null ? "" : dto.getRemarks());
                     if (dto.getUom() != null) match.setUom(dto.getUom());
                     plantRepo.save(match);
                 } else {
@@ -294,6 +297,7 @@ public class PlantImportMappingServiceImpl {
                     newRec.setFinancialMonthId(fmId);
                     newRec.setValue(valueToSet);
                     newRec.setUom(dto.getUom() == null ? "" : dto.getUom());
+                    newRec.setRemarks(dto.getRemarks() == null ? "" : dto.getRemarks());
                     plantRepo.save(newRec);
                 }
             }

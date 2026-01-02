@@ -33,4 +33,5 @@ public class PlantRequirementDTO {
     private Double feb;
     private Double march;
     private Double grandTotal;
+    private String remarks;
 }

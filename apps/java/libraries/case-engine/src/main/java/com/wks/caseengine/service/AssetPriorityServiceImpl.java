@@ -70,6 +70,7 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
                     dto.setJan(projection.getJanuary());
                     dto.setFeb(projection.getFebruary());
                     dto.setMar(projection.getMarch());
+                    dto.setRemarks(projection.getRemarks());
 
                     return dto;
                 })
@@ -107,9 +108,12 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
         Map<UUID, Map<Integer, Integer>> assetToMonthPriority = new HashMap<>();
         Set<UUID> fymIdsToCheck = new HashSet<>();
 
+        List<Object[]> updatesRemarks = new ArrayList<>();
+
         for (AssetPrioriryDTO item : dto) {
             UUID assetId = item.getAssetId();
             if (assetId == null) continue;
+            updatesRemarks.add(new Object[] { item.getRemarks(), assetId });
 
             Map<Integer, Integer> monthPriorityMap = new HashMap<>();
             monthPriorityMap.put(4, item.getApril());
@@ -185,6 +189,11 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
             String insertSql = "INSERT INTO AssetAvailability (Id, AssetId, FinancialYearMonthId, IsAssetAvailable, Priority) VALUES (NEWID(), ?, ?, 1, ?)";
            //   jdbcTemplate.batchUpdate(insertSql, inserts);
            System.out.println("inserts: " + inserts.size()  + "comma separated: " + inserts.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        }
+
+        if(!updatesRemarks.isEmpty()) {
+            String updateSql = "UPDATE PowerGenerationAssets SET Remarks = ? WHERE AssetId = ?";
+            jdbcTemplate.batchUpdate(updateSql, updatesRemarks);
         }
     }
 

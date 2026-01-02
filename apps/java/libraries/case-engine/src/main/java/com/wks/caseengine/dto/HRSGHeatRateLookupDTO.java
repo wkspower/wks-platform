@@ -19,6 +19,6 @@ public class HRSGHeatRateLookupDTO {
     private String cppUtility;
     private BigDecimal hrsgLoad;
     private BigDecimal heatRate;
-    private String remark;
+    private String remarks;
 
 }

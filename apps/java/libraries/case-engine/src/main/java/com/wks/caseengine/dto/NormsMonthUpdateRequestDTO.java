@@ -35,4 +35,5 @@ public class NormsMonthUpdateRequestDTO {
     private String issuingPlantName;
     private String issuingUom;
     private Boolean inEdit;
+    private String remarks;
 }

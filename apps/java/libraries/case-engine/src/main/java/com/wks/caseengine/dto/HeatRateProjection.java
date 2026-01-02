@@ -10,4 +10,5 @@ public interface HeatRateProjection {
     Double getGTLoad();
     Double getHeatRate();
     Double getFreeSteamFactor();
+    String getRemarks();
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -38,6 +39,9 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
     @Autowired
     private NormsMonthDetailRepository normsMonthDetailRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public NormBasedUtilityBudgetServiceImpl() {
         this.objectMapper = new ObjectMapper();
@@ -144,9 +148,9 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             }
 
             // Expected columns: id, generatingPlantName, utilityName, utilityId, uom, accountName, 
-            // materialName, issuingPlantName, issuingUom, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
-            if (r.length < 21) {
-                log.warn("Row {} has less than 21 columns ({}), returning empty DTO", rowIndex, r.length);
+            // materialName, materialId, issuingPlantName, issuingUom, remarks, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
+            if (r.length < 23) {
+                log.warn("Row {} has less than 22 columns ({}), returning empty DTO", rowIndex, r.length);
                 return dto;
             }
             
@@ -164,6 +168,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             dto.setMaterialId(getString(r[i++]));       // modified   
             dto.setIssuingPlantName(getString(r[i++]));
             dto.setIssuingUom(getString(r[i++]));
+            dto.setRemarks(getString(r[i++]));
             // Month columns (each contains JSON)
             dto.setApr(parseMonthJson(getString(r[i++]), "apr", rowIndex));
             dto.setMay(parseMonthJson(getString(r[i++]), "may", rowIndex));
@@ -274,6 +279,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
     @Override
     @jakarta.transaction.Transactional
     public AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto) {
+
 
         if (dto == null) {
             throw new RestInvalidArgumentException("Request body cannot be null", null);
@@ -449,6 +455,19 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
         for (NormsMonthUpdateRequestDTO dto : dtoList) {
             saveOrUpdate(dto); 
+        }
+    // update remarks for the table NormsHeader
+         List<Object[]> updateRemarksList = new ArrayList<>();
+        for (NormsMonthUpdateRequestDTO dto : dtoList) { 
+            Object[] updateRemarks = new Object[] { dto.getRemarks(), dto.getNormsHeaderFkId() };
+            updateRemarksList.add(updateRemarks);
+
+        }
+
+        if(!updateRemarksList.isEmpty()) { 
+
+            String sql = "UPDATE NormsHeader SET Remarks = ? WHERE Id = ?";
+            jdbcTemplate.update(sql, updateRemarksList);
         }
 
         AOPMessageVM vm = new AOPMessageVM();

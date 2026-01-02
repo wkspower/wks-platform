@@ -22,4 +22,5 @@ public class PlantImportMappingDto {
     private double jan;
     private double feb;
     private double mar;
+    private String remarks;
 }

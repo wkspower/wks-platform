@@ -21,4 +21,6 @@ public interface AssetPriorityProjection {
     Integer getJanuary();
     Integer getFebruary();
     Integer getMarch();
+
+    String getRemarks();
 }

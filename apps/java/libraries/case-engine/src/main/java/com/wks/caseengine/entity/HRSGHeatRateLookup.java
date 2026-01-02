@@ -46,4 +46,7 @@ public class HRSGHeatRateLookup {
 
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
+
+    @Column(name = "Remarks", length = 8000)
+    private String remarks;
 }
