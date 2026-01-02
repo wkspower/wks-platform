@@ -1121,7 +1121,9 @@ const DecokingConfig = () => {
       />
 
       <FurnaceRunLengthGrid
-        columns={runLengthColumns}
+        columns={runLengthColumns.filter(
+          col => !['Id', 'Plant_FK_Id', 'AOPYear'].includes(col.field)
+        )}
         rows={getRows('IBR Plan')[3]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
         fetchData={fetchData}
