@@ -29,6 +29,10 @@ export const TcsApiService = {
   getTcsRogcData,
   saveRogcData,
 
+  // TCS PCG Outlook Data APIs
+  getPcgOutlookData,
+  savePcgOutlookData,
+
   // Excel Import/Export APIs
   downloadTcsExcel,
   uploadTcsExcel,
@@ -290,6 +294,51 @@ async function getTcsRogcData(keycloak, siteId, plantId, year) {
 
 async function saveRogcData(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, payload) {
   const url = `${Config.CaseEngineUrl}/task/furnace/${AOP_YEAR}/${SITE_ID}/${PLANT_ID}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload);
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// ===================== || TCS PCG Outlook Data APIs || ===================== //
+async function getPcgOutlookData(keycloak, siteId, financialYear) {
+  const url = `${Config.CaseEngineUrl}/task/pcg-outlook/${siteId}/${financialYear}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function savePcgOutlookData(keycloak, siteId, financialYear, payload) {
+  const url = `${Config.CaseEngineUrl}/task/pcg-outlook/${siteId}/${financialYear}`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

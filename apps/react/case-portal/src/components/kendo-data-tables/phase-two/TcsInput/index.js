@@ -11,6 +11,7 @@ import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
 import CrudBlendWindow from './CrudBlendWindow'
 import ROGC from './ROGC'
+import PCGOutlook from './PCGOutlook'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -22,8 +23,9 @@ const renderTabComponent = (tabDisplayName, props) => {
     case 'Slowdown':
       return <Slowdown {...props} />
     case 'CPP Units SD Plan':
-    case 'PCG Outlook':
       return <DefaultTcsInput {...props} tabDisplayName={tabDisplayName} />
+    case 'PCG Outlook':
+      return <PCGOutlook {...props} />
     case 'ROGC':
       return <ROGC {...props} />
     case 'Crude Blend Window':
@@ -114,15 +116,27 @@ const TcsInput = () => {
   }
 
   return (
-    <Box>
+    <Box
+      sx={{
+        p: 2,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        borderRadius: '4px',
+        backgroundColor: '#fff',
+      }}
+    >
       {/* Tabs */}
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs
           sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 0px 0px',
-            minHeight: '28px',
+            '& .MuiTabs-indicator': {
+              background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            },
+            '& .MuiTab-root.Mui-selected': {
+              background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            },
           }}
           textColor='primary'
           indicatorColor='primary'
@@ -136,13 +150,13 @@ const TcsInput = () => {
           {tabObj && tabObj?.map((tab) => (
             <Tab
               key={tab.id}
-              sx={{
-                border: '1px solid #ADD8E6',
-                borderBottom: '1px solid #ADD8E6',
-                fontSize: '0.75rem',
-                padding: '9px',
-                minHeight: '12px',
-              }}
+              // sx={{
+              //   border: '1px solid #ADD8E6',
+              //   borderBottom: '1px solid #ADD8E6',
+              //   fontSize: '0.75rem',
+              //   padding: '9px',
+              //   minHeight: '12px',
+              // }}
               label={tab.displayName || tab.name}
             />
           ))}
