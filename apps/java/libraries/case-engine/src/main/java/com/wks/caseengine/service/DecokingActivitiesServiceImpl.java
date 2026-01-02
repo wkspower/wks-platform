@@ -669,7 +669,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	    }
 	    return payloadList;
 	}
-
+	
 	
 	private boolean isStringField(String columnName) {
 	    return columnName.equalsIgnoreCase("Id") || 
@@ -681,6 +681,11 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	           columnName.equalsIgnoreCase("Date") ||
 	           columnName.equalsIgnoreCase("Remark") ||
 	           columnName.equalsIgnoreCase("Remarks") ||
+	           columnName.equalsIgnoreCase("H10_Proposed") ||
+	           columnName.equalsIgnoreCase("H11_Proposed") ||
+	           columnName.equalsIgnoreCase("H12_Proposed") ||
+	           columnName.equalsIgnoreCase("H13_Proposed") ||
+	           columnName.equalsIgnoreCase("H14_Proposed") ||
 	           columnName.equalsIgnoreCase("DEMO");
 	}
 	
