@@ -681,11 +681,11 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	           columnName.equalsIgnoreCase("Date") ||
 	           columnName.equalsIgnoreCase("Remark") ||
 	           columnName.equalsIgnoreCase("Remarks") ||
-	           columnName.equalsIgnoreCase("H10_Proposed") ||
-	           columnName.equalsIgnoreCase("H11_Proposed") ||
-	           columnName.equalsIgnoreCase("H12_Proposed") ||
-	           columnName.equalsIgnoreCase("H13_Proposed") ||
-	           columnName.equalsIgnoreCase("H14_Proposed") ||
+	           columnName.equalsIgnoreCase("H10 Proposed") ||
+	           columnName.equalsIgnoreCase("H11 Proposed") ||
+	           columnName.equalsIgnoreCase("H12 Proposed") ||
+	           columnName.equalsIgnoreCase("H13 Proposed") ||
+	           columnName.equalsIgnoreCase("H14 Proposed") ||
 	           columnName.equalsIgnoreCase("DEMO");
 	}
 	
