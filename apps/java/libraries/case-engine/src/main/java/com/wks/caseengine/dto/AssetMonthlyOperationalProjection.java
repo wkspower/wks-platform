@@ -20,4 +20,5 @@ public interface AssetMonthlyOperationalProjection {
     Double getJanuary();
     Double getFebruary();
     Double getMarch();
+    String getRemarks();
 }

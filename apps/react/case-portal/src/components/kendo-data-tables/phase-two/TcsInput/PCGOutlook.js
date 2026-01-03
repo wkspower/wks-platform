@@ -6,7 +6,7 @@ import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/in
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 
-const ROGC = ({
+const PCGOutlook = ({
   PLANT_ID,
   SITE_ID,
   AOP_YEAR,
@@ -28,80 +28,34 @@ const ROGC = ({
   const [currentRowId, setCurrentRowId] = useState(null)
 
 
-  // Fetch ROGC Data
-  const fetchRogcData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+  // Fetch PCG Outlook Data
+  const fetchPcgOutlookData = useCallback(async () => {
+    if (!SITE_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       let transformedData = []
 
-      // TODO: Replace with actual API call once backend is ready
-      // const response = getMockRogcResponse()
-      const response = await TcsApiService.getTcsRogcData(
+      const response = await TcsApiService.getPcgOutlookData(
         keycloak,
         SITE_ID,
-        PLANT_ID,
         AOP_YEAR,
       )
-      console.log('TCS ROGC Response:', response)
+      console.log('PCG Outlook Response:', response)
 
-      if (response?.furnaceData?.length >0 && response?.furnaceData && Array.isArray(response.furnaceData)) {
-        // Calculate days dynamically based on financial year
-        const getDaysInMonth = (year, month) => {
-          return new Date(year, month, 0).getDate()
-        }
-
-        // Extract the start year from AOP_YEAR (e.g., "2025-26" -> 2025)
-        const startYear = parseInt(AOP_YEAR?.split('-')[0])
-        const endYear = startYear + 1
-
-        // Add days row at the beginning
-        const daysRow = {
-          id: 'days_row',
-          furnace: 'Days',
-          apr: getDaysInMonth(startYear, 4),
-          may: getDaysInMonth(startYear, 5),
-          jun: getDaysInMonth(startYear, 6),
-          jul: getDaysInMonth(startYear, 7),
-          aug: getDaysInMonth(startYear, 8),
-          sep: getDaysInMonth(startYear, 9),
-          oct: getDaysInMonth(startYear, 10),
-          nov: getDaysInMonth(startYear, 11),
-          dec: getDaysInMonth(startYear, 12),
-          jan: getDaysInMonth(endYear, 1),
-          feb: getDaysInMonth(endYear, 2),
-          mar: getDaysInMonth(endYear, 3),
-          remarks: '-',
-          isEditable: false,
-          inEdit: false,
-        }
-        transformedData = [daysRow]
-
-        // Add furnace data
-        const furnaceRows = response.furnaceData.map((item, index) => ({
+      if (response?.length > 0 && Array.isArray(response)) {
+        transformedData = response.map((item, index) => ({
           id: item.id || `row_${index}`,
           ...item,
+          remarks: item.remarks || '',
           inEdit: false,
         }))
-        transformedData.push(...furnaceRows)
-
-        // Add average row
-        const averageRow = {
-          id: 'average_row',
-          furnace: 'Average of Duty_Furnace_Cracking',
-          ...response.gCalPerHrData,
-          remarks: '-',
-          isEditable: false,
-          inEdit: false,
-        }
-        transformedData.push(averageRow)
       }
 
       setRows(transformedData)
     } catch (err) {
-      console.error('Error fetching ROGC data:', err)
+      console.error('Error fetching PCG Outlook data:', err)
       setSnackbarData({
-        message: `Failed to load ROGC data. Please try again.`,
+        message: `Failed to load PCG Outlook data. Please try again.`,
         severity: 'error',
       })
       setSnackbarOpen(true)
@@ -111,8 +65,8 @@ const ROGC = ({
     }
   }, [
     keycloak,
-    PLANT_ID,
     AOP_YEAR,
+    SITE_ID,
     currentTab.id,
     setSnackbarData,
     setSnackbarOpen,
@@ -120,21 +74,21 @@ const ROGC = ({
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR && SITE_ID) {
-      fetchRogcData()
+    if (SITE_ID && AOP_YEAR) {
+      fetchPcgOutlookData()
     }
-  }, [PLANT_ID, AOP_YEAR, SITE_ID, fetchRogcData])
+  }, [SITE_ID, AOP_YEAR, fetchPcgOutlookData])
 
   // Generate header names with month-year format
   const headerMap = useMemo(() => generateHeaderNames(AOP_YEAR), [AOP_YEAR])
 
-  // Column configuration for ROGC - hardcoded like FixedConsumption.js
+  // Column configuration for PCG Outlook
   const columns = useMemo(() => {
     return [
       { field: 'id', title: 'ID', hidden: true },
       {
-        field: 'furnace',
-        title: 'Furnace',
+        field: 'product',
+        title: 'Product',
         width: 150,
         minWidth: 150,
         type: 'text',
@@ -252,7 +206,7 @@ const ROGC = ({
         field: 'remarks',
         title: 'Remark',
         editable: true,
-        width: 150,
+        width: 250,
         minWidth: 150,
         type: 'textarea',
       },
@@ -293,7 +247,7 @@ const ROGC = ({
 
       const rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
-      console.log('ROGC data to save:', data)
+      console.log('PCG Outlook data to save:', data)
 
       if (data.length === 0) {
         setSnackbarOpen(true)
@@ -301,38 +255,40 @@ const ROGC = ({
         return
       }
 
-      const response = await TcsApiService.saveRogcData(
+      // Remove id and inEdit fields from payload, keep remarks
+      const cleanedData = data.map(({ id, inEdit, ...rest }) => rest)
+
+      const response = await TcsApiService.savePcgOutlookData(
         keycloak,
         SITE_ID,
-        PLANT_ID,
         AOP_YEAR,
-        data,
+        cleanedData,
       )
-      console.log('Save ROGC response:', response)
+      console.log('Save PCG Outlook response:', response)
 
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'ROGC data saved successfully!',
+        message: 'PCG Outlook data saved successfully!',
         severity: 'success',
       })
       setModifiedCells({})
-      fetchRogcData()
+      fetchPcgOutlookData()
     } catch (error) {
-      console.error('Error saving ROGC data:', error)
+      console.error('Error saving PCG Outlook data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Error saving ROGC data!',
+        message: 'Error saving PCG Outlook data!',
         severity: 'error',
       })
     }
   }, [
     modifiedCells,
     keycloak,
-    PLANT_ID,
+    SITE_ID,
     AOP_YEAR,
     setSnackbarData,
     setSnackbarOpen,
-    fetchRogcData,
+    fetchPcgOutlookData,
   ])
 
   const permissions = {
@@ -363,8 +319,8 @@ const ROGC = ({
       <AdvanceKendoTable
         rows={rows}
         setRows={setRows}
-        fetchData={fetchRogcData}
-        configType='tcs_rogc'
+        fetchData={fetchPcgOutlookData}
+        configType='tcs_pcg_outlook'
         handleRemarkCellClick={handleRemarkCellClick}
         columns={columns}
         remarkDialogOpen={remarkDialogOpen}
@@ -386,4 +342,4 @@ const ROGC = ({
   )
 }
 
-export default ROGC
+export default PCGOutlook

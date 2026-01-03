@@ -343,6 +343,7 @@ public class AssetImportMappingServiceImpl implements AssetImportMappingService 
                     row.setFinancialMonthId(fm.getId());
                     row.setUom(uom);
                     row.setValue(value);
+                    row.setRemarks(record.getRemarks());
 
                     saveList.add(row);
                 }

@@ -50,6 +50,6 @@ public class STGExtractionLookup {
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
 
-    @Column(name = "Remarks")
+    @Column(name = "Remarks", length = 8000)
     private String remarks;
 }

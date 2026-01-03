@@ -152,9 +152,9 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             }
 
             // Expected columns: id, generatingPlantName, utilityName, utilityId, uom, accountName, 
-            // materialName, issuingPlantName, issuingUom, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
-            if (r.length < 21) {
-                log.warn("Row {} has less than 21 columns ({}), returning empty DTO", rowIndex, r.length);
+            // materialName, materialId, issuingPlantName, issuingUom, remarks, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
+            if (r.length < 23) {
+                log.warn("Row {} has less than 22 columns ({}), returning empty DTO", rowIndex, r.length);
                 return dto;
             }
             
@@ -313,6 +313,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
+
 
         if (dto == null) {
             throw new RestInvalidArgumentException("Request body cannot be null", null);
@@ -518,6 +519,19 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                 WHERE FinancialYearMonth_FK_Id = ? AND NormsHeader_FK_Id = ?
             """;
             jdbcTemplate.batchUpdate(sql, remarkUpdates);
+        }
+    // update remarks for the table NormsHeader
+         List<Object[]> updateRemarksList = new ArrayList<>();
+        for (NormsMonthUpdateRequestDTO dto : dtoList) { 
+            Object[] updateRemarks = new Object[] { dto.getRemarks(), dto.getNormsHeaderFkId() };
+            updateRemarksList.add(updateRemarks);
+
+        }
+
+        if(!updateRemarksList.isEmpty()) { 
+
+            String sql = "UPDATE NormsHeader SET Remarks = ? WHERE Id = ?";
+            jdbcTemplate.update(sql, updateRemarksList);
         }
 
         AOPMessageVM vm = new AOPMessageVM();

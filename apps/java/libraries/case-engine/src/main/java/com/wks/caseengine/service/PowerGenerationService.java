@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.AssetMonthlyOperationalProjection;
@@ -29,6 +30,9 @@ public class PowerGenerationService {
 
     @Autowired
     private FinancialYearMonthRepository financialYearMonthRepo;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public MasterAssetOperationalResponseDTO getAssetOperationalHours(
             UUID cppPlantId,
@@ -52,10 +56,14 @@ public class PowerGenerationService {
 
             // get the norm parameters for the current asset Id
             List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(Arrays.asList(row.getAssetId()));
+
+           
            
             List<PowerGenerationNormParametersProjection> utilityGenerated = normParameters.stream().filter(normParameter -> normParameter.getNormType_FK_Id() == 1).collect(Collectors.toList());
             List<PowerGenerationNormParametersProjection> utilityDistributed = normParameters.stream().filter(normParameter -> normParameter.getNormType_FK_Id() == 2).collect(Collectors.toList());
             int normparamCount = Math.max(utilityGenerated.size(), utilityDistributed.size());
+
+            
 
 
       System.out.println("Asset Type: " + row.getAssetType());
@@ -83,6 +91,7 @@ public class PowerGenerationService {
           
            
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
+            dto.setRemarks(row.getRemarks());
              dto.setAssetName(row.getAssetName());
              dto.setAssetId(row.getAssetId());
              dto.setAssetType(row.getAssetType());
@@ -122,6 +131,14 @@ public class PowerGenerationService {
                         powerResponse.add(dto2);
                     }
                 } 
+            }
+          /// add the asset to response even if there are no norm parameters for the asset
+            else {
+                if(row.getAssetName().equals("NMD-Utility Plant")) {
+                    steamResponse.add(dto);
+                } else{
+                    powerResponse.add(dto);
+                }
             }
                 // for(PowerGenerationNormParametersProjection normParameter : normParameters) { 
                   
@@ -169,6 +186,8 @@ public class PowerGenerationService {
 
     public void setAssetOperationalHours(String financialYear, MasterAssetOperationalResponseDTO masterAssetOperationalResponseDTO) {
 
+        List<Object[]> updates = new ArrayList<>();
+
         List<AssetOperationalResponseDTO> payload = new ArrayList<>();
 
         if(masterAssetOperationalResponseDTO.getPowerResponse() != null) {  
@@ -213,6 +232,9 @@ public class PowerGenerationService {
         // This uses MERGE statement (single operation per record - no check-then-act)
         for (AssetOperationalResponseDTO asset : payload) {
             Map<Integer, MonthlyHoursDTO> monthlyData = buildAssetMonthlyData(asset);
+
+           
+            updates.add(new Object[] { asset.getRemarks(), asset.getAssetId() });
             
             for (Map.Entry<Integer, MonthlyHoursDTO> entry : monthlyData.entrySet()) {
                 Integer month = entry.getKey();
@@ -235,6 +257,11 @@ public class PowerGenerationService {
                     );
                 }
             }
+        }
+
+        if(updates.size() > 0) {  
+            String sql = "UPDATE PowerGenerationAssets SET Remarks = ? WHERE AssetId = ?";
+            jdbcTemplate.batchUpdate(sql, updates);
         }
     }
 

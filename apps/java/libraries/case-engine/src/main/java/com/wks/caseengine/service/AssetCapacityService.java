@@ -57,6 +57,8 @@ public class AssetCapacityService {
             utilityGenerated.setSapCode(proj.getUtilityGeneratedSAP());
             dto.setUtilityGenerated(utilityGenerated);
 
+            dto.setRemarks(proj.getRemarks());
+
             System.out.println("april min: " + proj.getAprMinCapacity() + ", april max: " + proj.getAprMaxCapacity());
 
             dto.setApril(new MonthCapacityDto(proj.getAprMinCapacity(), proj.getAprMaxCapacity()));
@@ -137,7 +139,8 @@ public class AssetCapacityService {
                 double fixedMin = asset.getFixedMin() != null ? asset.getFixedMin() : 0.0;
 
                 if (assetId == null) continue;
-                
+              
+                updatesRemarks.add(new Object[] { asset.getRemarks(), assetId });
               
                 if(asset.getApril() != null) {
                   

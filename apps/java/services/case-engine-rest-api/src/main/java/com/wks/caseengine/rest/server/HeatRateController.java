@@ -29,11 +29,15 @@ public class HeatRateController {
         return   ResponseEntity.ok(heatRateService.getAssetNamesByCppIdAndAssetType(cppId));
     }
 
+
+
     @GetMapping("/heat-rate/{assetId}")
     public ResponseEntity<List<HeatRateDTO>> getHeatRateByAssetId(@PathVariable String assetId) {
         return ResponseEntity.ok(heatRateService.getHeatRateByAssetId(assetId));
     }
 
+         // *****************
+         
     @GetMapping("/stg-extraction-lookup")
     public ResponseEntity<List<STGExtractionLookupDTO>> getSTGExtractionLookup() {
         return ResponseEntity.ok(heatRateService.getSTGExtractionLookup());

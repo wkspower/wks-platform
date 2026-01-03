@@ -8,11 +8,15 @@ import org.springframework.stereotype.Service;
 import com.wks.caseengine.dto.HeatRateDTO;
 import com.wks.caseengine.dto.HeatRateDropDownProjection;
 import com.wks.caseengine.dto.HeatRateProjection;
+import com.wks.caseengine.repository.HeatRateRepository;
+
 import com.wks.caseengine.dto.HRSGHeatRateLookupDTO;
 import com.wks.caseengine.dto.STGExtractionLookupDTO;
+
+
 import com.wks.caseengine.entity.HRSGHeatRateLookup;
 import com.wks.caseengine.entity.STGExtractionLookup;
-import com.wks.caseengine.repository.HeatRateRepository;
+
 import com.wks.caseengine.repository.HRSGHeatRateLookupRepository;
 import com.wks.caseengine.repository.STGExtractionLookupRepository;
 
@@ -29,6 +33,7 @@ public class HeatRateService {
     @Autowired
     private HRSGHeatRateLookupRepository hrsgHeatRateLookupRepository;
 
+    // original
     public List<Object[]> getAssetNamesByCppIdAndAssetType(String cppId) {
        
         //harcoding asset type for HeatRate drop down list
@@ -39,7 +44,7 @@ public class HeatRateService {
                 .toList();
 
     }
-
+   // original
     public List<HeatRateDTO> getHeatRateByAssetId(String assetId) {
         
         return heatRateRepository.findHeatRateByAssetId(UUID.fromString(assetId)).stream()
