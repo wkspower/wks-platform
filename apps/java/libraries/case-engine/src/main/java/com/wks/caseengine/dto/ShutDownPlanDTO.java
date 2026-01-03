@@ -45,4 +45,5 @@ public class ShutDownPlanDTO {
 	private String type;
 	private String saveStatus;
 	private String errDescription;
+	private String month;
 }
