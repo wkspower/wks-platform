@@ -96,7 +96,7 @@ public class CrudeBlendWindowService {
             return dto;
         }).toList();
 
-        List<String> csHeaders = List.of("Id", "Crude", "Max Blend Limit", "Reasons");
+        List<String> csHeaders = List.of("Id", "Crude", "Max Blend Limit (%)", "Reasons");
         List<String> csKeys = List.of("id", "crude", "maxBlendLimit", "reasons");
 
         MasterCrudeBlendDTO<CrudeSpecificConstraintsDTO> masterCrudeSpecificConstraintsDTO = new MasterCrudeBlendDTO<>();
