@@ -76,4 +76,7 @@ public class NormBasedUtilityBudgetResponseDTO {
 
     @JsonProperty("mar")
     private NormBasedUtilityBudgetMonthDTO mar;
+
+    @JsonProperty("remarks")
+    private String remarks;
 }

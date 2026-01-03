@@ -1,5 +1,7 @@
 package com.wks.caseengine.dto;
 
+import java.util.UUID;
+
 public interface FixedConsumptionProjection {
 
     String getPlantName();
@@ -12,7 +14,10 @@ public interface FixedConsumptionProjection {
     String getUtilityPlantCode();
     String getUom();
     String getNormParameterId();
-
+    String getRemarks();
+    UUID getRemarkId();
+    UUID getCostCenter_FK_Id();
+    UUID getNormParameter_FK_Id();
     Double getApr();
 	Double getMay();
 	Double getJun();

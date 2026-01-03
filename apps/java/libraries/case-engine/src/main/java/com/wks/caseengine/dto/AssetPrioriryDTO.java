@@ -23,5 +23,6 @@ public class AssetPrioriryDTO {
     private Integer jan;
     private Integer feb;
     private Integer mar;
+    private String remarks;
     
 }

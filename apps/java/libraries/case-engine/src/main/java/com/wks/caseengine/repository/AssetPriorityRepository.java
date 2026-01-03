@@ -1,5 +1,6 @@
 package com.wks.caseengine.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,6 +90,21 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
     List<ExistingAssetAvailabilityProjection> findExistingByAssetIdsAndFymIds(
         @Param("assetIds") List<UUID> assetIds,
         @Param("fymIds") List<UUID> fymIds
+    );
+
+    
+    @Query(
+        value = """
+            SELECT AssetId, FinancialYearMonthId
+            FROM AssetAvailability
+            WHERE AssetId IN (:assetIds)
+              AND FinancialYearMonthId IN (:financialYearMonthIds)
+            """,
+        nativeQuery = true
+    )
+    List<Object[]> getAssetCapacitiesByAssetsAndFYMonths(
+            @Param("assetIds") Collection<UUID> assetIds,
+            @Param("financialYearMonthIds") Collection<UUID> financialYearMonthIds
     );
 
 }

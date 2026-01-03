@@ -38,4 +38,7 @@ public class PlantImportMapping {
     @NotNull
     @Column(name = "UOM", length = 50, nullable = false)
     private String uom;
+
+    @Column(name = "Remarks", length = 8000, nullable = true)
+    private String remarks;
 }

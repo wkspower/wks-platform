@@ -14,4 +14,5 @@ public class HeatRateDTO {
     private Double gtLoad;
     private Double heatRate;
     private Double freeSteamFactor;
+    private String remarks;
 }

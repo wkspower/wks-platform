@@ -51,6 +51,7 @@ public class HeatRateService {
                     dto.setGtLoad(projection.getGTLoad());
                     dto.setHeatRate(projection.getHeatRate());
                     dto.setFreeSteamFactor(projection.getFreeSteamFactor());
+                    dto.setRemarks(projection.getRemarks());
                     return dto;
                 })
                 .toList();
@@ -71,6 +72,7 @@ public class HeatRateService {
                 .slExtFlowTPH(entity.getSlExtFlowTPH())
                 .condensingLoadM3Hr(entity.getCondensingLoadM3Hr())
                 .heatRateKcalKWH(entity.getHeatRateKcalKWH())
+                .remarks(entity.getRemarks())
                 .build();
     }
 
@@ -112,7 +114,7 @@ public class HeatRateService {
                 .cppUtility(entity.getCppUtility())
                 .hrsgLoad(entity.getHrsgLoad())
                 .heatRate(entity.getHeatRate())
-                .remark(entity.getRemark())
+                .remarks(entity.getRemarks())
                 .build();
     }
 }

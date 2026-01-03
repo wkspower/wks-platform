@@ -1,5 +1,7 @@
 package com.wks.caseengine.dto;
 
+import java.util.UUID;
+
 import lombok.Data;
 
 @Data
@@ -28,6 +30,10 @@ public class FixedConsumptionDto {
     private Double feb;     // feb
     private Double mar;     // mar
     private Double grandTotal;     // grandTotal
+    private String remarks;
+    private UUID remarkId;
+    private UUID costCenter_FK_Id;
+    private UUID normParameter_FK_Id;
 
 }
 

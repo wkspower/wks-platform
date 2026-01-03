@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,6 +18,7 @@ import com.wks.caseengine.dto.NormsMonthValueDTO;
 import com.wks.caseengine.entity.NormsMonthDetail;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.repository.NormsMonthDetailRepository;
 
 import jakarta.persistence.EntityManager;
@@ -38,6 +40,12 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
     @Autowired
     private NormsMonthDetailRepository normsMonthDetailRepository;
+
+    @Autowired
+    private  FinancialYearMonthRepository fyRepo;
+    
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public NormBasedUtilityBudgetServiceImpl() {
         this.objectMapper = new ObjectMapper();
@@ -164,6 +172,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             dto.setMaterialId(getString(r[i++]));       // modified   
             dto.setIssuingPlantName(getString(r[i++]));
             dto.setIssuingUom(getString(r[i++]));
+            
             // Month columns (each contains JSON)
             dto.setApr(parseMonthJson(getString(r[i++]), "apr", rowIndex));
             dto.setMay(parseMonthJson(getString(r[i++]), "may", rowIndex));
@@ -177,6 +186,33 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             dto.setJan(parseMonthJson(getString(r[i++]), "jan", rowIndex));
             dto.setFeb(parseMonthJson(getString(r[i++]), "feb", rowIndex));
             dto.setMar(parseMonthJson(getString(r[i++]), "mar", rowIndex));
+
+            // set remarks
+            if (dto.getApr() != null && dto.getApr().getRemarks() != null) {
+                dto.setRemarks(dto.getApr().getRemarks());
+            } else if (dto.getMay() != null && dto.getMay().getRemarks() != null) {
+                dto.setRemarks(dto.getMay().getRemarks());
+            } else if (dto.getJun() != null && dto.getJun().getRemarks() != null) {
+                dto.setRemarks(dto.getJun().getRemarks());
+            } else if (dto.getJul() != null && dto.getJul().getRemarks() != null) {
+                dto.setRemarks(dto.getJul().getRemarks());
+            } else if (dto.getAug() != null && dto.getAug().getRemarks() != null) {
+                dto.setRemarks(dto.getAug().getRemarks());
+            } else if (dto.getSep() != null && dto.getSep().getRemarks() != null) {
+                dto.setRemarks(dto.getSep().getRemarks());
+            } else if (dto.getOct() != null && dto.getOct().getRemarks() != null) {
+                dto.setRemarks(dto.getOct().getRemarks());
+            } else if (dto.getNov() != null && dto.getNov().getRemarks() != null) {
+                dto.setRemarks(dto.getNov().getRemarks());
+            } else if (dto.getDec() != null && dto.getDec().getRemarks() != null) {
+                dto.setRemarks(dto.getDec().getRemarks());
+            } else if (dto.getJan() != null && dto.getJan().getRemarks() != null) {
+                dto.setRemarks(dto.getJan().getRemarks());
+            } else if (dto.getFeb() != null && dto.getFeb().getRemarks() != null) {
+                dto.setRemarks(dto.getFeb().getRemarks());
+            } else if (dto.getMar() != null && dto.getMar().getRemarks() != null) {
+                dto.setRemarks(dto.getMar().getRemarks());
+            }
 
             return dto;
 
@@ -273,7 +309,10 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
     @Override
     @jakarta.transaction.Transactional
-    public AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto) {
+    public AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto, String financialYear, List<Object[]> remarkUpdates) {
+
+        int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        int endYear = startYear + 1;
 
         if (dto == null) {
             throw new RestInvalidArgumentException("Request body cannot be null", null);
@@ -282,11 +321,29 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         if (dto.getNormsHeaderFkId() == null) {
             throw new RestInvalidArgumentException("normsHeaderFkId is mandatory", null);
         }
+        
+        List<Object[]> AllfinancialYearMonths = fyRepo.findFinancialYearMonths(startYear, endYear);
 
+        List<UUID> AllfinancialYearMonthIds = new ArrayList<>();
+
+        for (Object[] financialYearMonth : AllfinancialYearMonths) {
+            AllfinancialYearMonthIds.add((UUID) financialYearMonth[1]);
+        }
+
+        for(UUID financialYearMonthId : AllfinancialYearMonthIds) { 
+
+            remarkUpdates.add(new Object[]{ dto.getRemarks(), financialYearMonthId, dto.getNormsHeaderFkId()});
+
+        }
+
+       
         UUID headerId = dto.getNormsHeaderFkId();
         List<String> updatedMonths = new ArrayList<>();
         List<String> skippedMonths = new ArrayList<>();
         List<String> errors = new ArrayList<>();
+
+
+     
 
         processMonth(dto.getApr(), headerId, "APR", updatedMonths, skippedMonths, errors);
         processMonth(dto.getMay(), headerId, "MAY", updatedMonths, skippedMonths, errors);
@@ -441,14 +498,26 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
     @Override
     @jakarta.transaction.Transactional
-    public AOPMessageVM saveOrUpdateBulk(List<NormsMonthUpdateRequestDTO> dtoList) {
+    public AOPMessageVM saveOrUpdateBulk(List<NormsMonthUpdateRequestDTO> dtoList, String financialYear) {
 
         if (dtoList == null || dtoList.isEmpty()) {
             throw new RestInvalidArgumentException("Request body cannot be empty", null);
         }
 
+        List<Object[]> remarkUpdates = new ArrayList<>();
+
         for (NormsMonthUpdateRequestDTO dto : dtoList) {
-            saveOrUpdate(dto); 
+            saveOrUpdate(dto, financialYear, remarkUpdates); 
+        }
+
+        if(!remarkUpdates.isEmpty()) {
+
+            String sql = """
+                UPDATE NormsMonthDetail
+                SET Remarks = ?
+                WHERE FinancialYearMonth_FK_Id = ? AND NormsHeader_FK_Id = ?
+            """;
+            jdbcTemplate.batchUpdate(sql, remarkUpdates);
         }
 
         AOPMessageVM vm = new AOPMessageVM();

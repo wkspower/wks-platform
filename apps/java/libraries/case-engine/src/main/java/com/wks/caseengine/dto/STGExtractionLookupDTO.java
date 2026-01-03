@@ -21,5 +21,5 @@ public class STGExtractionLookupDTO {
     private BigDecimal slExtFlowTPH;
     private BigDecimal condensingLoadM3Hr;
     private BigDecimal heatRateKcalKWH;
-
+    private String remarks;
 }

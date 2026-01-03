@@ -43,6 +43,7 @@ public class AssetCapacityService {
             dto.setAssetName(proj.getAssetName());
             dto.setPlantCode(proj.getPlantCode());
             dto.setUom(proj.getUOM());
+            dto.setRemarks(proj.getRemarks());
             dto.setFixedMin(proj.getFixedMin());
             dto.setFixedMax(proj.getFixedMax());
             // Set utility details
@@ -105,13 +106,32 @@ public class AssetCapacityService {
            Set<String> existingKeys = existingCapacities.stream()
                 .map(row -> row[0].toString() + "-" + row[1].toString()) // AssetId-FinancialYearMonthId
                 .collect(Collectors.toSet());
+
+
+
+
                 
 
           List<Object[]> updates = new ArrayList<>();
           List<Object[]> inserts = new ArrayList<>();
+          List<Object[]> updatesRemarks = new ArrayList<>();
 
             for (AssetCapacityDTO asset : assetCapacities) {
                 UUID assetId = UUID.fromString(asset.getAssetId());
+                
+                // update remarks logic
+                List<Object[]> existingCapacitiesForAsset =  assetCapacityRepo.getAssetCapacitiesByAssetsAndFYMonths( List.of(assetId), financialMonthIds.values());
+
+                Set<UUID> existingFinancialYearMonthIds = existingCapacitiesForAsset.stream()
+                .map(row -> UUID.fromString((String) row[1]))
+                .collect(Collectors.toSet());
+
+              //  updatesRemarks.add(new Object[] { asset.getRemarks(), assetId, existingFinancialYearMonthIds });
+              for(UUID fymId : existingFinancialYearMonthIds) {
+                updatesRemarks.add(new Object[] { asset.getRemarks(), assetId, fymId });
+              }
+                
+
 
                 double fixedMax = asset.getFixedMax() != null ? asset.getFixedMax() : 0.0;
                 double fixedMin = asset.getFixedMin() != null ? asset.getFixedMin() : 0.0;
@@ -259,6 +279,11 @@ public class AssetCapacityService {
         if(!inserts.isEmpty()) {
             String insertSql = "INSERT INTO AssetAvailability ( Id, AssetId, FinancialYearMonthId, MinOperatingCapacity, MaxOperatingCapacity, FixedMin, FixedMax) VALUES (NEWID(), ?, ?, ?, ?, ?, ?)";
             jdbcTemplate.batchUpdate(insertSql, inserts);
+        }
+
+        if(!updatesRemarks.isEmpty()) {
+            String updateRemarksSql = "UPDATE AssetAvailability SET Remarks = ? WHERE AssetId = ? AND FinancialYearMonthId = ?";
+            jdbcTemplate.batchUpdate(updateRemarksSql, updatesRemarks);
         }
 
 }

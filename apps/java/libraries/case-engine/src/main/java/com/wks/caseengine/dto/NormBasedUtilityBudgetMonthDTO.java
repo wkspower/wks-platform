@@ -30,4 +30,7 @@ public class NormBasedUtilityBudgetMonthDTO {
 
     @JsonProperty("generationUom")
     private String generationUom;
+
+    @JsonProperty("remarks")
+    private String remarks;
 }

@@ -38,12 +38,12 @@ public class HRSGHeatRateLookup {
     @Column(name = "HeatRate", precision = 18, scale = 2, nullable = false)
     private BigDecimal heatRate;
 
-    @Column(name = "Remark", length = 500)
-    private String remark;
-
     @Column(name = "CreatedAt")
     private LocalDateTime createdAt;
 
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
+
+    @Column(name = "Remarks")
+    private String remarks;
 }

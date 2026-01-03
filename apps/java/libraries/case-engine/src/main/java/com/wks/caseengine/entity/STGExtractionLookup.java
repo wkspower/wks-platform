@@ -49,4 +49,7 @@ public class STGExtractionLookup {
 
     @Column(name = "UpdatedAt")
     private LocalDateTime updatedAt;
+
+    @Column(name = "Remarks")
+    private String remarks;
 }

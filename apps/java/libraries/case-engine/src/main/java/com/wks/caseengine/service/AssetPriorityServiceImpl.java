@@ -3,6 +3,7 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,7 +71,7 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
                     dto.setJan(projection.getJanuary());
                     dto.setFeb(projection.getFebruary());
                     dto.setMar(projection.getMarch());
-
+                    dto.setRemarks(projection.getRemarks());
                     return dto;
                 })
                 .toList();
@@ -97,6 +98,8 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
         for (FinancialYearMonth f : endFyms) {
             yearMonthToFymId.put(f.getYear() + "-" + f.getMonth(), f.getId());
         }
+
+         
 
         // Collect assetIds and the exact fymIds that will be touched
         Set<UUID> assetIds = dto.stream()
@@ -152,11 +155,50 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
 
                 System.out.println("existing keys: " + existingKeys);
 
+
+                  // **************************  Logic for Remarks Update **************************
+           Map<Integer, UUID> financialMonthIdsForFinancialYear = new LinkedHashMap<>();
+           List<Object[]> fyMonths = fyRepo.findFinancialYearMonths(startYear, endYear);
+         for (Object[] row : fyMonths) {
+           Integer month = (Integer) row[0];
+           UUID id = UUID.fromString((String) row[1]);
+           financialMonthIdsForFinancialYear.put(month, id);
+       }
+
+       List<Object[]> updatesRemarks = new ArrayList<>();
+
+       for (AssetPrioriryDTO item : dto)  {
+
+           UUID assetId = item.getAssetId();
+
+          List<Object[]> existingPriorityForAsset = assetPriorityRepository.getAssetCapacitiesByAssetsAndFYMonths(List.of(assetId), financialMonthIdsForFinancialYear.values());
+
+          Set<UUID> existingFinancialYearMonthIds = existingPriorityForAsset.stream()
+                .map(row -> UUID.fromString((String) row[1]))
+                .collect(Collectors.toSet());
+
+            for(UUID fymId : existingFinancialYearMonthIds) {
+                updatesRemarks.add(new Object[] { item.getRemarks(), assetId, fymId });
+            }
+       }
+
+       if(!updatesRemarks.isEmpty()) {
+        String updateRemarksSql = "UPDATE AssetAvailability SET Priority_Remarks = ? WHERE AssetId = ? AND FinancialYearMonthId = ?";
+        jdbcTemplate.batchUpdate(updateRemarksSql, updatesRemarks);
+       }
+
+
+        // **************************  End of Remarks Update Logic **************************
+
         List<Object[]> updates = new ArrayList<>();
         List<Object[]> inserts = new ArrayList<>();
+      
 
         for (Map.Entry<UUID, Map<Integer, Integer>> assetEntry : assetToMonthPriority.entrySet()) {
+
             UUID assetId = assetEntry.getKey();
+
+          
             for (Map.Entry<Integer, Integer> monthEntry : assetEntry.getValue().entrySet()) {
                 Integer priority = monthEntry.getValue();
                 if (priority == null) continue;

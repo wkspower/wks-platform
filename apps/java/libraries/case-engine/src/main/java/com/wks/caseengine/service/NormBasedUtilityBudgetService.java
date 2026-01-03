@@ -10,9 +10,9 @@ public interface NormBasedUtilityBudgetService {
 
     AOPMessageVM getNormBasedUtilityBudget(UUID cppPlantId, String financialYear);
 
-    AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto);
+    AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto, String financialYear, List<Object[]> remarkUpdates);
 
-    AOPMessageVM saveOrUpdateBulk(List<NormsMonthUpdateRequestDTO> dtoList);
+    AOPMessageVM saveOrUpdateBulk(List<NormsMonthUpdateRequestDTO> dtoList, String financialYear);
 
     
 }

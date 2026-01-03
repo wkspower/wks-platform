@@ -76,9 +76,11 @@ public class NormBasedUtilityBudgetController {
 
 
 
-    @PostMapping("/saveOrUpdateNormsMonths")
+    @PostMapping("/saveOrUpdateNormsMonths/{financialYear}")
     public ResponseEntity<?> saveOrUpdateNormsMonth(
-            @RequestBody List<NormsMonthUpdateRequestDTO> dtoList) {
+            @RequestBody List<NormsMonthUpdateRequestDTO> dtoList,
+            @PathVariable String financialYear
+    ) {
 
         try {
             log.info("=== saveOrUpdateNormsMonth BULK Request Received ===");
@@ -92,7 +94,7 @@ public class NormBasedUtilityBudgetController {
 
             log.info("Total records received from frontend: {}", dtoList.size());
 
-            AOPMessageVM response = normBasedUtilityBudgetService.saveOrUpdateBulk(dtoList);
+            AOPMessageVM response = normBasedUtilityBudgetService.saveOrUpdateBulk(dtoList, financialYear);
 
             return ResponseEntity.ok(response);
 

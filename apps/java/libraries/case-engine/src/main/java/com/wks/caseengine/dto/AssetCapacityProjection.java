@@ -18,6 +18,7 @@ public interface AssetCapacityProjection {
     String getUtilityGeneratedSAP();
 
     String getUOM();
+    String getRemarks();
 
     Double getFixedMin();
     Double getFixedMax();

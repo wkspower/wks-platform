@@ -1,5 +1,6 @@
 package com.wks.caseengine.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -7,6 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.FinancialYearMonthProjection;
@@ -19,6 +21,9 @@ public class FixedConsumptionService {
 
     @Autowired
     private FixedConsumptionRepository repository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public List<FixedConsumptionDto> getData(UUID plantId, String financialYear) {
 
@@ -48,8 +53,21 @@ public class FixedConsumptionService {
     //    List<String> normParameterIds = repository.getNormParameterIds(costCenterIds);
 
     //    List<String> utilityFixedConsumptionIds = repository.getUtilityFixedConsumptionIds(costCenterIds, normParameterIds);
+         List<Object[]> remarkUpdates = new ArrayList<>();
+         List<Object[]> remarkInserts = new ArrayList<>();
+         List<UUID> existingRemarkIds =  repository.getExistingRemarkIds(fixedConsumptionDtoList.stream()
+         .map(FixedConsumptionDto::getRemarkId)
+         .collect(Collectors.toList()));
 
-        for(FixedConsumptionDto fixedConsumptionDto : fixedConsumptionDtoList) { 
+        for(FixedConsumptionDto fixedConsumptionDto : fixedConsumptionDtoList) {
+
+            if(existingRemarkIds.contains(fixedConsumptionDto.getRemarkId())) {  
+
+                remarkUpdates.add(new Object[]{ fixedConsumptionDto.getRemarks(), financialYear, fixedConsumptionDto.getRemarkId()});
+            } else {
+                remarkInserts.add(new Object[]{ fixedConsumptionDto.getRemarks(), fixedConsumptionDto.getCostCenter_FK_Id(), fixedConsumptionDto.getNormParameter_FK_Id(), financialYear});
+            }
+
              
            List<String> costCenterIds = repository.getCostCenterIds(Arrays.asList(fixedConsumptionDto.getCostCenterId()));  // fixedConsumptionDto.getCostCenterId returns costCenterCode
 
@@ -206,6 +224,18 @@ public class FixedConsumptionService {
             }
             }
 
+  
+            if(!remarkUpdates.isEmpty()) { 
+
+                String sql = "Update UtilityFixedConsumption_Remarks set Remarks = ?, FinancialYear = ? where Id = ?";
+                jdbcTemplate.batchUpdate(sql, remarkUpdates);
+            }
+
+            if(!remarkInserts.isEmpty()) { 
+                String sql = "Insert into UtilityFixedConsumption_Remarks (Id, Remarks, CostCenter_FK_Id, NormParameter_FK_Id, FinancialYear) values (NEWID(), ?, ?, ?, ?)";
+                jdbcTemplate.batchUpdate(sql, remarkInserts);
+            }
+
     }
 
     private FixedConsumptionDto toDto(FixedConsumptionProjection p) {
@@ -221,6 +251,11 @@ public class FixedConsumptionService {
         dto.setCppPlantId(p.getUtilityPlantCode());
         dto.setUom(p.getUom());
         dto.setNormParameterId(p.getNormParameterId());
+        dto.setCostCenter_FK_Id(p.getCostCenter_FK_Id());
+        dto.setNormParameter_FK_Id(p.getNormParameter_FK_Id());
+        dto.setRemarkId(p.getRemarkId());
+        dto.setRemarks(p.getRemarks());
+        System.out.println("*** remarks  for Id: " + p.getRemarkId() + " is " + p.getRemarks());
 
         dto.setApril(p.getApr());
         dto.setMay(p.getMay());

@@ -79,6 +79,8 @@ String insertUtilityFixedConsumption(
         @Param("consumptionValue") Double consumptionValue);
 
 
+      @Query(value = "SELECT Id FROM UtilityFixedConsumption_Remarks where Id  In (:remarkIds)", nativeQuery = true)
+      List<UUID> getExistingRemarkIds(@Param("remarkIds") List<UUID> remarkIds);
      
     
 }

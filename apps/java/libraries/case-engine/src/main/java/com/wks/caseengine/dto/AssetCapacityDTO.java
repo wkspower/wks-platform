@@ -18,6 +18,7 @@ public class AssetCapacityDTO {
     // private String utilityGeneratedName;
     // private String utilityGeneratedSAP;
     private String uom;
+    private String remarks;
     private Double fixedMin;
     private Double fixedMax;
     private MonthCapacityDto april;
