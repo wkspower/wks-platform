@@ -8,7 +8,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-
+import java.time.*;
+import java.time.format.TextStyle;
+import java.util.Date;
+import java.util.Locale;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +41,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
@@ -1758,9 +1762,15 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                                        - Math.floor(shutDownPlanDTO.getDurationInHrs())) * 60); // Rounding should be to the minute (60) not 100
 	            }
 	            plantMaintenanceTransaction.setDurationInMins(durationMins);
-
+	            if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
+	            	if(shutDownPlanDTO.getMonth()!=null) {
+	            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
+	            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
+	            	}
+	            }
 	            plantMaintenanceTransaction.setMaintEndDateTime(shutDownPlanDTO.getMaintEndDateTime());
 	            plantMaintenanceTransaction.setMaintStartDateTime(shutDownPlanDTO.getMaintStartDateTime());
+	            
 	            plantMaintenanceTransaction.setPlantMaintenanceFkId(plantMaintenanceId);
 	            
 	            if (shutDownPlanDTO.getMaintStartDateTime() != null) {
@@ -1862,6 +1872,37 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        throw new RuntimeException("Failed to save data", ex);
 	    }
 	}
+	
+	public Date getStartOfMonthDate(String monthName, String financialYear) {
+	    String[] parts = financialYear.split("-");
+	    int startYear = Integer.parseInt(parts[0]); 
+	    Month month = Month.valueOf(monthName.toUpperCase());
+	    int targetYear = startYear;
+	    if (month == Month.JANUARY || month == Month.FEBRUARY || month == Month.MARCH) {
+	        targetYear = startYear + 1;
+	    }
+	    
+	    ZonedDateTime zdt = ZonedDateTime.of(targetYear, month.getValue(), 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+	    return Date.from(zdt.toInstant());
+	}
+	
+	public static Date getEndOfMonthDate(String monthName, String yearRange) {
+        String[] years = yearRange.split("-");
+        int startYear = Integer.parseInt(years[0]);
+        int endYear = Integer.parseInt(years[0].substring(0, 2) + years[1]);
+        Month month = Month.valueOf(monthName.toUpperCase(Locale.ENGLISH));
+        int targetYear;
+        if (month.getValue() >= 1 && month.getValue() <= 3) {
+            targetYear = endYear;
+        } else {
+            targetYear = startYear;
+        }
+        YearMonth yearMonth = YearMonth.of(targetYear, month);
+        LocalDate lastDay = yearMonth.atEndOfMonth();
+        ZonedDateTime zdt = lastDay.atStartOfDay(ZoneId.of("UTC"));
+        
+        return Date.from(zdt.toInstant());
+    }
 	
 	public void setMonth(int month,SlowdownNormsValue slowdownNormsValue) {
 		switch (month) {
