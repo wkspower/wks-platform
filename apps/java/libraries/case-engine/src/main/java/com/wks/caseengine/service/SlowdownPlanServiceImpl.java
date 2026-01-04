@@ -825,7 +825,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			
 			List<ShutDownPlanDTO> failedList = saveShutdownData(plantId, data);
 			if (failedList != null && failedList.size() > 0) {
-				byte[] fileByteArray = slowdownExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
+				byte[] fileByteArray=null;
+				if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+					fileByteArray= slowdownExportPE(year, plantId.toString(),maintenanceTypeName, true, failedList);
+				}else {
+					fileByteArray = slowdownExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
+				}
+				
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
