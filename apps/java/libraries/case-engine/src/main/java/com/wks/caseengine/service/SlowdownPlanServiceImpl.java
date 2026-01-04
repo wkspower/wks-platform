@@ -1724,6 +1724,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 	                plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 	                plantMaintenanceTransaction.setId(UUID.randomUUID());
+	                if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
+		            	if(shutDownPlanDTO.getMonth()!=null) {
+		            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
+		            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
+		            	}
+		            }
 	                
 	            } else {
 	                plantMaintenanceTransaction = slowdownPlanRepository
