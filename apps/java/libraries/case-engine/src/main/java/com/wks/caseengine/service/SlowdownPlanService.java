@@ -14,6 +14,8 @@ public interface SlowdownPlanService {
 	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName,String year);
 	byte[] slowdownExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
 			List<ShutDownPlanDTO> mapForExcel);
+	byte[] slowdownExportPE(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
+			List<ShutDownPlanDTO> mapForExcel);
 	byte[] slowdownRateExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
 			List<ShutDownPlanDTO> mapForExcel);
 	byte[] nonProductSlowdownExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
