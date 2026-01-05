@@ -232,10 +232,10 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
            System.out.println("inserts: " + inserts.size()  + "comma separated: " + inserts.stream().map(Object::toString).collect(Collectors.joining(", ")));
         }
 
-        if(!updatesRemarks.isEmpty()) {
-            String updateSql = "UPDATE PowerGenerationAssets SET Remarks = ? WHERE AssetId = ?";
-            jdbcTemplate.batchUpdate(updateSql, updatesRemarks);
-        }
+        // if(!updatesRemarks.isEmpty()) {
+        //     String updateSql = "UPDATE PowerGenerationAssets SET Remarks = ? WHERE AssetId = ?";
+        //     jdbcTemplate.batchUpdate(updateSql, updatesRemarks);
+        // }
     }
 
 
