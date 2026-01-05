@@ -13,11 +13,12 @@ import { BusinessDemandDataApiService } from 'services/business-demand-data-api-
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
-import '../../dashboard.css'
+import '../../dashboard-v2.css'
 import {
   Backdrop,
   CircularProgress,
 } from '../../../node_modules/@mui/material/index'
+import LoaderBackdrop from 'components/Utilities/LoaderBackdrop'
 
 export default function AopDashboardCompact() {
   const dispatch = useDispatch()
@@ -81,7 +82,7 @@ export default function AopDashboardCompact() {
     }, {})
   }, [])
 
-  // pulse animation utility (relies on .pulse CSS class in dashboard.css)
+  // pulse animation utility
   const pulseElement = (el) => {
     if (!el) return
     el.classList.add('pulse')
@@ -197,16 +198,13 @@ export default function AopDashboardCompact() {
     if (!fullDetails.length || !Object.keys(allowedMap).length) return
 
     const result = fullDetails
-      // keep only allowed verticals
       .filter((v) => allowedMap[v.id])
-      // enrich with siteIds
       .map((v) => ({
         vid: v.id,
         vname: v.displayName,
         sids: Object.keys(allowedMap[v.id]),
       }))
 
-    // console.log('finalVerticals', result)
     setVerticals(result)
   }, [fullDetails, allowedMap])
 
@@ -239,23 +237,18 @@ export default function AopDashboardCompact() {
 
   return (
     <div>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
+      <LoaderBackdrop open={!!loading} />
 
-      <Box className='dashboard-root'>
-        <Typography className='dashboard-title'>
+      <Box className='dashboard-root-v2'>
+        <Typography className='dashboard-title-v2'>
           Digital AOP Dashboard
         </Typography>
 
-        <Grid container spacing={1}>
+        <Grid container spacing={0.8}>
           {siteGroupedRows.map((section) => {
             const total = section.rows.length
 
-            // --- NEW: build a per-section (local) status summary ---
+            // build per-section status summary
             const localStatusSummary = section.rows.reduce((acc, r) => {
               const key = r.status || 'Other'
               if (!acc[key]) {
@@ -274,20 +267,19 @@ export default function AopDashboardCompact() {
             const localStatusKeys = Object.keys(localStatusSummary)
 
             return (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={section.site}>
-                <Card className='plant-card'>
-                  <CardHeader className='plant-card-header'>
-                    <CardTitle className='plant-card-title'>
+              <Grid item xs={12} sm={6} md={4} lg={2} key={section.site}>
+                <Card className='plant-card-v2'>
+                  <CardHeader className='plant-card-header-v2'>
+                    <CardTitle className='plant-card-title-v2'>
                       {section.site}
                     </CardTitle>
 
-                    <div className='section-details'>
-                      <div className='detail-pill'>
+                    <div className='section-details-v2'>
+                      <div className='detail-pill-v2'>
                         <strong>{total}</strong>
-                        <span className='detail-label'> Verticals</span>
                       </div>
 
-                      <div className='status-breakdown'>
+                      <div className='status-breakdown-v2'>
                         {localStatusKeys.map((key) => {
                           const { count, backgroundColor, color } =
                             localStatusSummary[key]
@@ -295,12 +287,11 @@ export default function AopDashboardCompact() {
                           return (
                             <div
                               key={key}
-                              className='status-pill'
+                              className='status-pill-v2'
                               style={{ background: backgroundColor, color }}
                               title={`${key}: ${count}`}
                             >
-                              <span className='status-label'>{key}</span>
-                              <span className='status-count'>{count}</span>
+                              <span className='status-count-v2'>{count}</span>
                             </div>
                           )
                         })}
@@ -308,35 +299,10 @@ export default function AopDashboardCompact() {
                     </div>
                   </CardHeader>
 
-                  <CardBody className='plant-card-body'>
-                    <Stack spacing={0.5}>
+                  <CardBody className='plant-card-body-v2'>
+                    <Stack spacing={0.2}>
                       {section.rows.map((row) => {
-                        // console.log('row', row)
-
                         const statusStyle = localStatusSummary[row.status] || {}
-
-                        // inline styles for the whole row
-                        const rowInlineStyle = {
-                          background: statusStyle.backgroundColor || undefined,
-                          color: statusStyle.color || undefined,
-                          borderRadius: 6,
-                          padding: '6px 10px',
-                          transition:
-                            'background-color 160ms ease, transform 120ms ease',
-                        }
-
-                        // make the chip visually "transparent" so row color shows through
-                        const chipInlineStyle = {
-                          background: 'transparent',
-                          color: statusStyle.color || undefined,
-                          boxShadow: 'none',
-                          border: '1px solid rgba(0,0,0,0.06)', // optional: subtle boundary
-                        }
-
-                        const chipInlineStyleForVertical = {
-                          background: 'transparent',
-                          color: statusStyle.color || undefined,
-                        }
 
                         return (
                           <Stack
@@ -344,19 +310,21 @@ export default function AopDashboardCompact() {
                             direction='row'
                             alignItems='center'
                             justifyContent='space-between'
-                            className='plant-row'
+                            className='plant-row-v2'
                             onClick={(e) => handleChipClick(e, row.id, row.sId)}
-                            style={rowInlineStyle}
                           >
-                            <Typography style={chipInlineStyleForVertical}>
+                            <Typography className='vertical-name-v2'>
                               {row.verticalName}
                             </Typography>
 
                             <Chip
                               text={row.status}
                               size='small'
-                              className='small-chip'
-                              style={chipInlineStyle}
+                              className='status-chip-v2'
+                              style={{
+                                background: statusStyle.backgroundColor,
+                                color: statusStyle.color,
+                              }}
                             />
                           </Stack>
                         )

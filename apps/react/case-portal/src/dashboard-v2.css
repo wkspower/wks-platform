@@ -1,11 +1,11 @@
 /* =========================================================
-   DIGITAL AOP DASHBOARD — DESIGN 5: CORPORATE BLUE (ULTRA COMPACT)
+   DIGITAL AOP DASHBOARD â€” DESIGN 5: ULTRA COMPACT
    ========================================================= */
 
 /* ---------- ROOT CONTAINER ---------- */
 .dashboard-root-v2 {
   background: #e0f2fe;
-  padding: 10px;
+  padding: 8px;
   min-height: 100vh;
   max-height: 100vh;
   overflow: hidden;
@@ -13,10 +13,10 @@
 
 /* ---------- TITLE ---------- */
 .dashboard-title-v2 {
-  font-size: 16px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
   color: #0c4a6e !important;
-  margin-bottom: 10px !important;
+  margin-bottom: 8px !important;
   letter-spacing: -0.2px;
 }
 
@@ -24,16 +24,16 @@
 .plant-card-v2 {
   height: 100%;
   background: #ffffff !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   border: 1px solid #bae6fd !important;
-  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08) !important;
   overflow: hidden !important;
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .plant-card-v2:hover {
-  transform: translateY(-3px) scale(1.01) !important;
-  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.18) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15) !important;
   border-color: #0284c7 !important;
 }
 
@@ -48,9 +48,9 @@
   background: #0284c7 !important;
   color: #ffffff !important;
   font-weight: 700 !important;
-  font-size: 11px !important;
+  font-size: 10px !important;
   letter-spacing: 0.1px !important;
-  padding: 5px 8px !important;
+  padding: 4px 6px !important;
   margin: 0 !important;
   border-bottom: 1px solid #0369a1 !important;
   transition: background 0.3s ease !important;
@@ -63,10 +63,10 @@
 /* ---------- SECTION DETAILS ---------- */
 .section-details-v2 {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   align-items: center;
   flex-wrap: wrap;
-  padding: 4px 8px;
+  padding: 3px 6px;
   background: #f0f9ff;
   border-bottom: 1px solid #e0f2fe;
 }
@@ -75,9 +75,9 @@
   display: inline-flex;
   align-items: center;
   background: #ffffff;
-  padding: 2px 6px;
+  padding: 2px 5px;
   border-radius: 3px;
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 600;
   color: #0c4a6e;
   border: 1px solid #bae6fd;
@@ -90,14 +90,14 @@
 }
 
 .detail-pill-v2 strong {
-  font-size: 11px;
+  font-size: 10px;
   color: #0284c7;
 }
 
 /* ---------- STATUS BREAKDOWN ---------- */
 .status-breakdown-v2 {
   display: inline-flex;
-  gap: 3px;
+  gap: 2px;
   align-items: center;
   flex-wrap: wrap;
 }
@@ -106,11 +106,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2px 5px;
+  padding: 2px 4px;
   border-radius: 3px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  min-width: 20px;
+  min-width: 18px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
@@ -127,23 +127,23 @@
 
 /* ---------- CARD BODY ---------- */
 .plant-card-body-v2 {
-  padding: 4px !important;
+  padding: 3px !important;
   overflow-y: auto;
-  max-height: calc(100vh - 240px);
+  max-height: calc(100vh - 220px);
 }
 
 .plant-card-body-v2::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .plant-card-body-v2::-webkit-scrollbar-track {
   background: #f0f9ff;
-  border-radius: 3px;
+  border-radius: 2px;
 }
 
 .plant-card-body-v2::-webkit-scrollbar-thumb {
   background: #bae6fd;
-  border-radius: 3px;
+  border-radius: 2px;
   transition: background 0.2s ease;
 }
 
@@ -151,9 +151,9 @@
   background: #7dd3fc;
 }
 
-/* ---------- ROWS ---------- */
+/* ---------- ROWS (NO COLOR - ONLY WHITE/TRANSPARENT) ---------- */
 .plant-row-v2 {
-  padding: 4px 6px !important;
+  padding: 3px 5px !important;
   border-radius: 4px !important;
   cursor: pointer !important;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
@@ -191,7 +191,7 @@
 
 /* ---------- VERTICAL NAME ---------- */
 .vertical-name-v2 {
-  font-size: 10px !important;
+  font-size: 9px !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
   flex: 1 !important;
@@ -203,10 +203,10 @@
   color: #0284c7 !important;
 }
 
-/* ---------- STATUS CHIP ---------- */
+/* ---------- STATUS CHIP (ONLY THIS IS COLORED) ---------- */
 .dashboard-root-v2 .k-chip.status-chip-v2 {
-  font-size: 8px !important;
-  padding: 2px 6px !important;
+  font-size: 7px !important;
+  padding: 2px 5px !important;
   height: auto !important;
   line-height: 1.1 !important;
   font-weight: 700 !important;
@@ -214,13 +214,13 @@
   text-transform: uppercase !important;
   letter-spacing: 0.2px !important;
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
   border-radius: 3px !important;
 }
 
 .plant-row-v2:hover .k-chip.status-chip-v2 {
-  transform: scale(1.08) translateY(-1px) !important;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: scale(1.1) translateY(-1px) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ---------- PULSE ANIMATION ---------- */
@@ -244,7 +244,7 @@
 @keyframes fadeInUp-v2 {
   from {
     opacity: 0;
-    transform: translateY(15px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -253,44 +253,44 @@
 }
 
 .plant-card-v2 {
-  animation: fadeInUp-v2 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: fadeInUp-v2 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .plant-card-v2:nth-child(1) {
-  animation-delay: 0.03s;
+  animation-delay: 0.02s;
 }
 .plant-card-v2:nth-child(2) {
-  animation-delay: 0.06s;
+  animation-delay: 0.04s;
 }
 .plant-card-v2:nth-child(3) {
-  animation-delay: 0.09s;
+  animation-delay: 0.06s;
 }
 .plant-card-v2:nth-child(4) {
-  animation-delay: 0.12s;
+  animation-delay: 0.08s;
 }
 .plant-card-v2:nth-child(5) {
-  animation-delay: 0.15s;
+  animation-delay: 0.1s;
 }
 .plant-card-v2:nth-child(6) {
-  animation-delay: 0.18s;
+  animation-delay: 0.12s;
 }
 .plant-card-v2:nth-child(7) {
-  animation-delay: 0.21s;
+  animation-delay: 0.14s;
 }
 .plant-card-v2:nth-child(8) {
-  animation-delay: 0.24s;
+  animation-delay: 0.16s;
 }
 .plant-card-v2:nth-child(9) {
-  animation-delay: 0.27s;
+  animation-delay: 0.18s;
 }
 .plant-card-v2:nth-child(10) {
-  animation-delay: 0.3s;
+  animation-delay: 0.2s;
 }
 .plant-card-v2:nth-child(11) {
-  animation-delay: 0.33s;
+  animation-delay: 0.22s;
 }
 .plant-card-v2:nth-child(12) {
-  animation-delay: 0.36s;
+  animation-delay: 0.24s;
 }
 
 /* ---------- RESPONSIVE ---------- */
@@ -298,7 +298,47 @@
 /* Large Desktop (1920px+) - 6 cards per row */
 @media (min-width: 1920px) {
   .dashboard-root-v2 {
-    padding: 12px;
+    padding: 10px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 15px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 200px);
+  }
+}
+
+/* Desktop (1440px - 1919px) - 6 cards per row */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .dashboard-root-v2 {
+    padding: 8px;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 210px);
+  }
+}
+
+/* Medium Desktop (1200px - 1439px) - 5-6 cards per row */
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .dashboard-title-v2 {
+    font-size: 13px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 9px !important;
+    padding: 3px 5px !important;
+  }
+
+  .vertical-name-v2 {
+    font-size: 8px !important;
+  }
+
+  .dashboard-root-v2 .k-chip.status-chip-v2 {
+    font-size: 6px !important;
+    padding: 2px 4px !important;
   }
 
   .plant-card-body-v2 {
@@ -306,19 +346,94 @@
   }
 }
 
-/* Desktop (1440px - 1919px) - 6 cards per row */
-@media (min-width: 1440px) and (max-width: 1919px) {
+/* Tablet Landscape (900px - 1199px) - 4 cards per row */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .dashboard-root-v2 {
+    padding: 6px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 12px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 9px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 240px);
+  }
+}
+
+/* Tablet Portrait (600px - 899px) - 3 cards per row */
+@media (min-width: 600px) and (max-width: 899px) {
+  .dashboard-root-v2 {
+    padding: 6px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 11px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 260px);
+  }
+}
+
+/* Mobile (< 600px) - 1-2 cards per row */
+@media (max-width: 599px) {
+  .dashboard-root-v2 {
+    padding: 4px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 10px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 8px !important;
+    padding: 3px 5px !important;
+  }
+
+  .section-details-v2 {
+    padding: 2px 4px;
+  }
+
+  .detail-pill-v2 {
+    padding: 1px 3px;
+    font-size: 7px;
+  }
+
+  .detail-pill-v2 strong {
+    font-size: 9px;
+  }
+
+  .status-pill-v2 {
+    padding: 1px 3px;
+    font-size: 8px;
+  }
+
+  .vertical-name-v2 {
+    font-size: 8px !important;
+  }
+
+  .dashboard-root-v2 .k-chip.status-chip-v2 {
+    font-size: 6px !important;
+    padding: 1px 4px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 280px);
+  }
+}
+
+/* 80% Zoom Optimization (1600px+) */
+@media (min-width: 1600px) {
   .dashboard-root-v2 {
     padding: 10px;
   }
 
-  .plant-card-body-v2 {
-    max-height: calc(100vh - 230px);
-  }
-}
-
-/* Medium Desktop (1200px - 1439px) - 5-6 cards per row */
-@media (min-width: 1200px) and (max-width: 1439px) {
   .dashboard-title-v2 {
     font-size: 15px !important;
   }
@@ -334,120 +449,9 @@
 
   .dashboard-root-v2 .k-chip.status-chip-v2 {
     font-size: 7px !important;
-    padding: 2px 5px !important;
   }
 
   .plant-card-body-v2 {
-    max-height: calc(100vh - 240px);
-  }
-}
-
-/* Tablet Landscape (900px - 1199px) - 4 cards per row */
-@media (min-width: 900px) and (max-width: 1199px) {
-  .dashboard-root-v2 {
-    padding: 8px;
-  }
-
-  .dashboard-title-v2 {
-    font-size: 14px !important;
-  }
-
-  .plant-card-title-v2 {
-    font-size: 10px !important;
-  }
-
-  .plant-card-body-v2 {
-    max-height: calc(100vh - 260px);
-  }
-}
-
-/* Tablet Portrait (600px - 899px) - 3 cards per row */
-@media (min-width: 600px) and (max-width: 899px) {
-  .dashboard-root-v2 {
-    padding: 8px;
-  }
-
-  .dashboard-title-v2 {
-    font-size: 13px !important;
-  }
-
-  .plant-card-body-v2 {
-    max-height: calc(100vh - 280px);
-  }
-}
-
-/* Mobile (< 600px) - 1-2 cards per row */
-@media (max-width: 599px) {
-  .dashboard-root-v2 {
-    padding: 6px;
-  }
-
-  .dashboard-title-v2 {
-    font-size: 12px !important;
-    margin-bottom: 8px !important;
-  }
-
-  .plant-card-title-v2 {
-    font-size: 9px !important;
-    padding: 4px 6px !important;
-  }
-
-  .section-details-v2 {
-    padding: 3px 6px;
-  }
-
-  .detail-pill-v2 {
-    padding: 1px 4px;
-    font-size: 8px;
-  }
-
-  .detail-pill-v2 strong {
-    font-size: 10px;
-  }
-
-  .status-pill-v2 {
-    padding: 1px 4px;
-    font-size: 9px;
-  }
-
-  .vertical-name-v2 {
-    font-size: 9px !important;
-  }
-
-  .dashboard-root-v2 .k-chip.status-chip-v2 {
-    font-size: 7px !important;
-    padding: 2px 5px !important;
-  }
-
-  .plant-card-body-v2 {
-    max-height: calc(100vh - 300px);
-  }
-}
-
-/* 80% Zoom Optimization */
-@media (min-width: 1600px) {
-  .dashboard-root-v2 {
-    padding: 12px;
-  }
-
-  .dashboard-title-v2 {
-    font-size: 17px !important;
-  }
-
-  .plant-card-title-v2 {
-    font-size: 11px !important;
-    padding: 5px 9px !important;
-  }
-
-  .vertical-name-v2 {
-    font-size: 10px !important;
-  }
-
-  .dashboard-root-v2 .k-chip.status-chip-v2 {
-    font-size: 8px !important;
-  }
-
-  .plant-card-body-v2 {
-    max-height: calc(100vh - 210px);
+    max-height: calc(100vh - 190px);
   }
 }
