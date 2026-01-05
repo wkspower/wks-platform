@@ -66,7 +66,9 @@ async function saveFixedConsumptionData(keycloak, PLANT_ID, payload,AOP_YEAR) {
 
 // ===================== || Plant Requirement APIs || ===================== //
 async function getPlantRequirementData(keycloak, PLANT_ID,AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/plant-requirement/${PLANT_ID}/${AOP_YEAR}`
+
+  const url = `${Config.CaseEngineUrl}/task/plant-requirement/${AOP_YEAR}`
+  // const url = `${Config.CaseEngineUrl}/task/plant-requirement/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
