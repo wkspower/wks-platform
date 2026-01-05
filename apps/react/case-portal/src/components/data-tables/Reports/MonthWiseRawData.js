@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
+import { OptimizerDataApiService } from 'services/optimizer-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -15,7 +16,7 @@ import {
 } from 'utils/CustomAccrodian'
 
 const MONTH_GRID_NAME = 'Final Norms'
-const MODE_GRADES = ['4F', '5F', '4F+D']
+// const MODE_GRADES = ['4F', '5F', '4F+D']
 const MODE_TYPES = ['Best Achieved']
 
 export default function MonthWiseRawData() {
@@ -139,6 +140,18 @@ export default function MonthWiseRawData() {
 
   const fetchModeWiseGrids = useCallback(async () => {
     const modeMap = {}
+
+    const responseForModes = await OptimizerDataApiService.fetchModes(
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      '1',
+    )
+
+    // Dynamic MODE_GRADES (no hard coding)
+    const MODE_GRADES =
+      responseForModes?.data?.map((mode) => mode?.name).filter(Boolean) || []
+
     for (const grade of MODE_GRADES) {
       for (const mode of MODE_TYPES) {
         try {

@@ -1111,7 +1111,8 @@ const ConfigurationTable = () => {
   }, [openConfirmDialogRev])
 
   if (
-    (lowerVertName == 'meg' || lowerVertName == 'pvc') &&
+    (lowerVertName == 'meg' ||
+      lowerVertName == 'pvc') &&
     lowerVertName !== 'cracker'
   ) {
     // const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']

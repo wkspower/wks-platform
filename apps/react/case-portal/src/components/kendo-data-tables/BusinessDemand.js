@@ -165,7 +165,7 @@ const BusinessDemand = ({ permissions }) => {
             'march',
           ]
 
-          const SCALE = 100
+          const SCALE = 100000
 
           const toPreciseInt = (num) => {
             if (num === null || num === undefined || num === '') return 0
@@ -333,10 +333,9 @@ const BusinessDemand = ({ permissions }) => {
     }
   }
 
-  const percentageTitle =
-    IS_PE_PP_VERTICAL || IS_PET_VERTICAL
-      ? `${SCREEN_NAME} (%)`
-      : `${SCREEN_NAME}`
+  const percentageTitle = IS_PE_PP_VERTICAL || IS_PET_VERTICAL
+    ? `${SCREEN_NAME} (%)`
+    : `${SCREEN_NAME}`
 
   const adjustedPermissions = getAdjustedPermissions(
     {
@@ -353,22 +352,15 @@ const BusinessDemand = ({ permissions }) => {
       titleName: percentageTitle,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
-      isTotalFooterActive:
-        IS_PE_PP_VERTICAL || IS_PTA_VERTICAL || IS_PET_VERTICAL ? true : false,
+      isTotalFooterActive: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
-          ? true
-          : false,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
-          ? true
-          : false,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       downloadExcelBtnFromUI:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
-          ? false
-          : true,
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
     },
     isOldYear,
   )

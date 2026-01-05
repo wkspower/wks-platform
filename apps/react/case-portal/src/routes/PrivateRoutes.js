@@ -4,28 +4,16 @@ import { Navigate } from 'react-router-dom'
 
 const findFirstUrlFromMenu = (menu) => {
   for (const group of menu.items) {
-    if (group.type === 'item' && group.url && group.url !== '/dashboard') {
-      return group.url
-    }
-
     if (!group.children) continue
-
     for (const child of group.children) {
-      if (child.type === 'item' && child.url && child.url !== '/dashboard') {
+      if (child.type === 'item' && child.url) {
         return child.url
-      }
-
-      if (child.children) {
-        const firstItem = child.children.find(
-          (c) => c.type === 'item' && c.url && c.url !== '/dashboard',
-        )
-        if (firstItem) {
-          return firstItem.url
-        }
+      } else if (child.children) {
+        const firstItem = child.children.find((c) => c.type === 'item' && c.url)
+        if (firstItem) return firstItem.url
       }
     }
   }
-
   return '/not-found'
 }
 
@@ -41,7 +29,6 @@ const findFirstUrlFromMenu = (menu) => {
 // }
 
 const isRouteIdAllowed = (menu, routeId) => {
-  // console.log(12)
   for (const group of menu.items) {
     if (!group.children) continue
     const search = (items) => {
@@ -58,16 +45,11 @@ const isRouteIdAllowed = (menu, routeId) => {
 }
 
 const PrivateRoute = ({ children, routeId }) => {
-  // console.log(13)
   const filteredMenu = useFilteredMenu()
   if (isRouteIdAllowed(filteredMenu, routeId)) {
     return children
   }
   const fallbackUrl = findFirstUrlFromMenu(filteredMenu)
-  // const fallbackUrl = '/dashboard'
-
-  // console.log('fallbackUrl', fallbackUrl)
-
   return <Navigate to={fallbackUrl} replace />
 }
 

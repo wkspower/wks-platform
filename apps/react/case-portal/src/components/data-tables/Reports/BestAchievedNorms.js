@@ -313,23 +313,35 @@ export default function BestAchievedNorms() {
         AOP_YEAR,
       )
 
+      const responseForModes = await OptimizerDataApiService.fetchModes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '1',
+      )
+
+      const modes = responseForModes?.data
+
+      // '5F','4F','4F+D',
+      // Removed hard-coded modes; modes are now passed from API response
+
       const code1 = NormalOperationNormsApiService.BestAchivedColorCodes(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        '4F',
+        modes[0]?.name || '5F',
       )
       const code2 = NormalOperationNormsApiService.BestAchivedColorCodes(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        '5F',
+        modes[1]?.name || '4F',
       )
       const code3 = NormalOperationNormsApiService.BestAchivedColorCodes(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        '4F+D',
+        modes[2]?.name || '4F+D',
       )
 
       const [res1, res2, res3] = await Promise.all([code1, code2, code3])

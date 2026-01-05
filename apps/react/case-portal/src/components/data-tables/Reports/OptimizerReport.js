@@ -16,6 +16,7 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 import { getRoleName } from 'services/role-service.js'
+import { OptimizerDataApiService } from 'services/optimizer-api-service'
 const CALL_DELAY_MS = 20
 const MONTH_GRID_NAME = 'Month wise Quantity, Tonnes / Month'
 
@@ -301,12 +302,30 @@ const OptimizerReport = () => {
       })
       const orderedTypes = [...inputFirst, ...outputLater]
 
-      // modes to call
-      const modes = [
-        { key: '4F', label: '4F' },
-        { key: '5F', label: '5F' },
-        { key: '4F+D', label: '4F+D' },
-      ]
+      const responseForModes = await OptimizerDataApiService.fetchModes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '1',
+      )
+
+      const MODE_GRADES =
+        responseForModes?.data?.map((mode) => mode?.name).filter(Boolean) || []
+
+      // STATIC
+
+      // const modes = [
+      //   { key: '4F', label: '4F' },
+      //   { key: '5F', label: '5F' },
+      //   { key: '4F+D', label: '4F+D' },
+      // ]
+
+      //DYANAMIC
+
+      const modes = MODE_GRADES.map((grade) => ({
+        key: grade,
+        label: grade,
+      }))
 
       // build grid name list: "<TYPE> - <MODE_LABEL>"
       const expandedGridNames = []
