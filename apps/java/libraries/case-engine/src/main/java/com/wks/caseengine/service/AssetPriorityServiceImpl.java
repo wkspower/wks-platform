@@ -222,13 +222,13 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
 
         if (!updates.isEmpty()) {
             String updateSql = "UPDATE AssetAvailability SET Priority = ? WHERE AssetId = ? AND FinancialYearMonthId = ?";
-          //  jdbcTemplate.batchUpdate(updateSql, updates);
+            jdbcTemplate.batchUpdate(updateSql, updates);
           System.out.println("updates: " + updates);
         }
 
         if (!inserts.isEmpty()) {
             String insertSql = "INSERT INTO AssetAvailability (Id, AssetId, FinancialYearMonthId, IsAssetAvailable, Priority) VALUES (NEWID(), ?, ?, 1, ?)";
-           //   jdbcTemplate.batchUpdate(insertSql, inserts);
+              jdbcTemplate.batchUpdate(insertSql, inserts);
            System.out.println("inserts: " + inserts.size()  + "comma separated: " + inserts.stream().map(Object::toString).collect(Collectors.joining(", ")));
         }
 
