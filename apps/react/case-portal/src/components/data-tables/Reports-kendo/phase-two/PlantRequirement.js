@@ -46,7 +46,7 @@ const PlantRequirement = () => {
   // Column definitions
   const columns = [
     {
-      field: 'plantName',
+      field: 'processPlant',
       title: 'Process Plant',
       width: 150,
       minWidth:150,
@@ -55,7 +55,7 @@ const PlantRequirement = () => {
       hidden: false,
     },
     {
-      field: 'plantCode',
+      field: 'processPlantId',
       title: 'Plant Code',
       width: 120,
       minWidth:120,
@@ -64,7 +64,7 @@ const PlantRequirement = () => {
       hidden: true,
     },
     {
-      field: 'cppUtilities',
+      field: 'cppUtility',
       title: 'CPP Utilities',
       widthT: 120,
       minWidth:80,
@@ -72,7 +72,7 @@ const PlantRequirement = () => {
       editable: false,
     },
     {
-      field: 'cppUtiltiyIds',
+      field: 'cppUtilityId',
       title: 'CPP Utility ID',
       widthT: 120,
       minWidth:80,
@@ -98,7 +98,7 @@ const PlantRequirement = () => {
     },
     { field: 'uom', title: 'UOM', widthT: 60,minWidth:60, type: 'text', editable: false },
     {
-      field: 'april',
+      field: 'apr',
       title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
       editable: false,
       widthT: 100,
@@ -120,7 +120,7 @@ const PlantRequirement = () => {
       format: valueFormat
     },
     {
-      field: 'june',
+      field: 'jun',
       title: headerMap[6],
       editable: false,
       widthT: 100,
@@ -131,7 +131,7 @@ const PlantRequirement = () => {
       format: valueFormat
     },
     {
-      field: 'july',
+      field: 'jul',
       title: headerMap[7],
       editable: false,
       widthT: 100,
@@ -219,7 +219,7 @@ const PlantRequirement = () => {
       format: valueFormat
     },
     {
-      field: 'march',
+      field: 'mar',
       title: headerMap[3],
       editable: false,
       widthT: 100,
@@ -229,13 +229,7 @@ const PlantRequirement = () => {
       type: 'number1',
       format: valueFormat
     },
-    {
-      field: 'grandTotal',
-      title: 'Grand Total',
-      widthT: 120,
-      type: 'number',
-      format: valueFormat
-    },
+  
     // {
     //   field: 'remarks',
     //   title: 'Remarks',
@@ -246,6 +240,8 @@ const PlantRequirement = () => {
     // },
 
   ]
+
+
 
   useEffect(() => {
     if(PLANT_ID && AOP_YEAR){
@@ -267,6 +263,8 @@ const PlantRequirement = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
+
+      console.log('res',res)
      const formattedData = res?.map((item, index) => ({
         ...item,
         remarks:item.remarks || '',
@@ -354,7 +352,6 @@ const PlantRequirement = () => {
     setRemarkDialogOpen(true)
   }
 
-
   return (
     <Box>
       <Backdrop
@@ -384,7 +381,13 @@ const PlantRequirement = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        groupBy={['plantName']}
+        paginationConfig={{
+          threshold: 100,           // Show pagination if > 50 rows
+          buttonCount: 5,
+          pageSizes: [10, 20, 50, 100],
+          defaultPageSize: 100,
+        }}
+        groupBy={['processPlant']}
       />
     </Box>
   )

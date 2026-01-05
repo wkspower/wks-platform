@@ -3,14 +3,20 @@ package com.wks.caseengine.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
 import com.wks.caseengine.dto.PlantConsumpProjection;
 import com.wks.caseengine.dto.PlantRequirementDTO;
+import com.wks.caseengine.entity.CalculatedProcessDemand;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.repository.CalculatedProcessDemandRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 
 import jakarta.persistence.EntityManager;
@@ -19,6 +25,11 @@ import jakarta.persistence.Query;
 
 @Service
 public class ConsumptionServiceImpl implements ConsumptionService {
+
+	private static final Logger logger = LoggerFactory.getLogger(ConsumptionServiceImpl.class);
+
+	@Autowired
+	private CalculatedProcessDemandRepository calculatedProcessDemandRepository;
 
 	@PersistenceContext(unitName = "db1")
 	private EntityManager entityManager;
@@ -115,5 +126,46 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+
+	@Override
+	public List<CalculatedProcessDemandDTO> getProcessDemand(String financialYear) {
+		logger.info("Fetching process demand for financial year: {}", financialYear);
+		
+		List<CalculatedProcessDemand> entities = 
+		calculatedProcessDemandRepository.findByFinancialYearOrderByProcessPlant(financialYear);
+		logger.info("Found {} records for financial year: {}", entities.size(), financialYear);
+		
+		List<CalculatedProcessDemandDTO> result = entities.stream()
+				.map(this::mapToDTO)
+				.collect(Collectors.toList());
+		
+		return result;
+	}
+
+	private CalculatedProcessDemandDTO mapToDTO(CalculatedProcessDemand entity) {
+		return CalculatedProcessDemandDTO.builder()
+				.id(entity.getId())
+				.financialYear(entity.getFinancialYear())
+				.processPlant(entity.getProcessPlant())
+				.processPlantId(entity.getProcessPlantId())
+				.cppUtility(entity.getCppUtility())
+				.cppUtilityId(entity.getCppUtilityId())
+				.cppPlant(entity.getCppPlant())
+				.cppPlantId(entity.getCppPlantId())
+				.uom(entity.getUom())
+				.apr(entity.getApr())
+				.may(entity.getMay())
+				.jun(entity.getJun())
+				.jul(entity.getJul())
+				.aug(entity.getAug())
+				.sep(entity.getSep())
+				.oct(entity.getOct())
+				.nov(entity.getNov())
+				.dec(entity.getDec())
+				.jan(entity.getJan())
+				.feb(entity.getFeb())
+				.mar(entity.getMar())
+				.build();
 	}
 }
