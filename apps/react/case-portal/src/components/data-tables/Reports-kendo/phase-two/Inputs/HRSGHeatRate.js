@@ -78,7 +78,7 @@ const HRSGHeatRate = () => {
       minWidth: 100,
     },
     {
-      field: 'remark',
+      field: 'remarks',
       title: 'Remark',
       width: 250,
       type: 'textarea',
@@ -106,8 +106,16 @@ const HRSGHeatRate = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
+       let tempRes = res.map((item, index) => {
+        const transformed = {
+          id: item?.id || index + 1,
+          remarks: item?.remarks || '',
+          ...item,
+        }
+        return transformed
+      })
       console.log('res', res)
-      setRows(res)
+      setRows(tempRes)
     } catch (error) {
       console.error('Error fetching HRSG heat rate data:', error)
       setSnackbarOpen(true)
@@ -183,7 +191,7 @@ const HRSGHeatRate = () => {
   }
     // Handle remark cell click
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }

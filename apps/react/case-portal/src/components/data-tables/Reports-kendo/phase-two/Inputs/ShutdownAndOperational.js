@@ -58,6 +58,11 @@ const ShutdownAndOperational = () => {
   const [rows, setRows] = useState([])
   const valueFormat = ValueFormatterProduction()
 
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   const nestedColumns = [
     {
       field: 'assetName',
@@ -366,6 +371,14 @@ const ShutdownAndOperational = () => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   const [hoursRows, setHoursRows] = useState([])
@@ -601,6 +614,13 @@ const ShutdownAndOperational = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -629,6 +649,13 @@ const ShutdownAndOperational = () => {
           setModifiedCells={setModifiedCells}
           title='Shutdown and Operational Input (Hours)'
           permissions={permissions}
+          handleRemarkCellClick={handleRemarkCellClick}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
           saveChanges={saveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}

@@ -47,6 +47,10 @@ const Norms = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
 
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   // Column definitions
   const nestedColumns = [
     //Generating Plant
@@ -796,6 +800,14 @@ const Norms = () => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   const [rows, setRows] = useState([])
@@ -823,9 +835,12 @@ const Norms = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      console.log('res', res)
+      let tempRes = res?.data?.map((item, index) => {
+        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
+      })
+
       // setRows(flattenMonthObject(res?.data))
-      setRows(res?.data)
+      setRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -900,7 +915,7 @@ const Norms = () => {
 
     const payload = modifiedData
     const tempPayload=payload?.map((item)=>{
-      const { normHeaderId, ...rest } = item
+      const { normHeaderId,id,inEdit, ...rest } = item
       return {
         ...rest,
        normsHeaderFkId:normHeaderId
@@ -917,6 +932,7 @@ const Norms = () => {
       const response = await UtilityPlantApiServiceV2.saveNormsData(
         keycloak,
         tempPayload, // Now sending nested format: { apr: { norms, quantity, ... } }
+        AOP_YEAR,
       )
 
       // Update the local state with the saved data
@@ -939,6 +955,13 @@ const Norms = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -959,6 +982,13 @@ const Norms = () => {
         setModifiedCells={setModifiedCells}
         title='Norms'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

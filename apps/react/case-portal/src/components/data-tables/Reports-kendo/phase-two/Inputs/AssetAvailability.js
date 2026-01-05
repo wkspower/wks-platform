@@ -41,6 +41,10 @@ const AssetAvailability = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
 
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   // Column definitions
   const columns = [
     //Generating Plant
@@ -162,6 +166,14 @@ const AssetAvailability = () => {
       editable: true,
       wholeNumberOnly: true,
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   const [rows, setRows] = useState([])
@@ -191,7 +203,8 @@ const AssetAvailability = () => {
       }
       const rowsWithEditableFlag = res?.map((row, index) => ({
         ...row,
-        id: index + 1,
+        id: row.id ||index + 1,
+        remarks: row.remarks || '',
       }))
       setRows(rowsWithEditableFlag)
     } catch (error) {
@@ -267,6 +280,13 @@ const AssetAvailability = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -283,6 +303,13 @@ const AssetAvailability = () => {
         setModifiedCells={setModifiedCells}
         title='Asset Priority'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

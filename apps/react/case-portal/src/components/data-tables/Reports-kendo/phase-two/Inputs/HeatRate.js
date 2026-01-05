@@ -74,15 +74,19 @@ const HeatRate = () => {
       editable: true,
       minWidth: 100,
     },
-    // {
-    //   field: 'remark',
-    //   title: 'Remark',
-    //   width: 130,
-    //   type: 'textarea',
-    //   editable: true,
-    //   minWidth: 150,
-    // },
+    {
+      field: 'remarks',
+      title: 'Remark',
+      widthT: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   const [rows, setRows] = useState([])
   const [selectedPlant, setSelectedPlant] = useState('')
@@ -140,8 +144,10 @@ const HeatRate = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      console.log('res', res)
-      setRows(res)
+      let tempRes = res?.map((item, index) => {
+        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
+      })
+      setRows(tempRes)
     } catch (error) {
       console.error('Error fetching heat rate data:', error)
       setSnackbarOpen(true)
@@ -223,6 +229,12 @@ const HeatRate = () => {
       setLoading(false)
     }
   }
+     // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
 
   return (
     <Box>
@@ -241,6 +253,13 @@ const HeatRate = () => {
         setModifiedCells={setModifiedCells}
         title='GT Heat Rate'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

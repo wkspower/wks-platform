@@ -65,6 +65,10 @@ const AssetCapacity = () => {
   const [rows, setRows] = useState([])
   const valueFormat = ValueFormatterProduction()
 
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
     {
@@ -397,6 +401,14 @@ const AssetCapacity = () => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   useEffect(() => {
@@ -421,7 +433,7 @@ const AssetCapacity = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
-        return { ...item, id: index + 1 }
+        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
       })
       setRows(tempRes)
     } catch (error) {
@@ -489,6 +501,13 @@ const AssetCapacity = () => {
     }
   }
 
+  // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -505,6 +524,13 @@ const AssetCapacity = () => {
         setModifiedCells={setModifiedCells}
         title='Asset Capacity Input'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

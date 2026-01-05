@@ -29,6 +29,7 @@ import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
 import { NumberCellEditor } from '../Utilities-Kendo/phase-two/NumberCellEditor'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
+import RemarkDialog from '../AdvanceKendoTable/components/RemarkDialog'
 
 export const hiddenFields = [
   'maintenanceId',
@@ -62,6 +63,12 @@ const NestedKendoTable = ({
   handleCalculate = () => {},
   saveChanges = () => {},
   handleExport = () => {},
+  handleRemarkCellClick = () => {},
+  remarkDialogOpen = false,
+  setRemarkDialogOpen = () => {},
+  currentRemark = '',
+  currentRowId = null,
+  setCurrentRemark = () => {},
   handleExcelUpload = () => {},
   fetchData = () => {},
   deleteRowData = () => {},
@@ -390,6 +397,48 @@ const NestedKendoTable = ({
     [setRows, setModifiedCells, hoursRows],
   )
 
+    const handleRemarkSave = () => {
+    setRows((prevRows) => {
+      let updatedRow = null
+      let keyToUpdate = ''
+      const updatedRows = prevRows.map((row) => {
+        if (row.id === currentRowId) {
+          const keysToUpdate = [
+            'aopRemarks',
+            'remarks',
+            'remark',
+            'Remark',
+            'purpose',
+            'reasons',
+          ].filter((key) => key in row)
+          keyToUpdate = keysToUpdate[0] || 'remark'
+          updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
+          return updatedRow
+        }
+        return row
+      })
+      if (updatedRow) {
+        setModifiedCells((prev) => ({
+          ...prev,
+          [updatedRow.id]: updatedRow,
+        }))
+
+        // Also update customModifiedCells to highlight the remark field
+        setCustomModifiedCells((prev) => ({
+          ...prev,
+          [updatedRow.id]: {
+            ...(prev[updatedRow.id] || {}),
+            [keyToUpdate]: currentRemark,
+          },
+        }))
+      }
+
+      return updatedRows
+    })
+
+    setRemarkDialogOpen(false)
+  }
+
   useEffect(() => {
     const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
 
@@ -519,6 +568,45 @@ const NestedKendoTable = ({
         }}
       >
         {isFormatByUOM ? formattedValue : children}
+      </td>
+    )
+  }
+
+   const RemarkCell = (props) => {
+    const { dataItem, field, onRemarkClick, ...tdProps } = props
+    const rawValue = dataItem[field]
+    const displayText = String(rawValue ?? '')
+    const rowId = dataItem.id
+
+    // Check if this remark field was edited
+    const isEdited = Object.prototype.hasOwnProperty.call(
+      customModifiedCells?.[rowId] || {},
+      field,
+    )
+
+    return (
+      <td
+        {...tdProps}
+        style={{
+          cursor: 'pointer',
+          color: isEdited ? 'orange' : rawValue ? 'inherit' : 'gray',
+          fontWeight: isEdited ? 'bold' : undefined,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+        }}
+        onDoubleClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onRemarkClick(dataItem)
+          setEdit?.({})
+        }}
+      >
+        {displayText || 'Add remark'}
       </td>
     )
   }
@@ -681,6 +769,27 @@ const NestedKendoTable = ({
           />
         )
       }
+        // Textarea type handler (for dialog-based editing)
+      if (col.type === 'textarea') {
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            width={setWidth(col?.minWidth || 120)}
+            cells={{
+              data: (cellProps) => (
+                <RemarkCell
+                  {...cellProps}
+                  onRemarkClick={handleRemarkCellClick}
+                />
+              ),
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            headerClassName={isActive ? 'active-column' : ''}
+          />
+        )
+      }
 
       // Default column
       return (
@@ -782,6 +891,7 @@ const NestedKendoTable = ({
                 variant='contained'
                 onClick={handleCalculateBtn}
                 className='btn-save'
+                // className='custom-btn-calculate'
               >
                 Calculate
               </Button>
@@ -790,9 +900,10 @@ const NestedKendoTable = ({
             {permissions?.saveBtn && (
               <Button
                 variant='contained'
-                className='btn-save'
                 onClick={saveModalOpen}
                 disabled={isButtonDisabled}
+                className='btn-save'
+                // className='custom-btn-save'
               >
                 Save
               </Button>
@@ -801,9 +912,10 @@ const NestedKendoTable = ({
             {permissions?.downloadExcelBtnFromUI && (
               <Button
                 variant='contained'
-                className='btn-save'
                 onClick={excelExport}
                 disabled={rows?.length === 0}
+                className='btn-save'
+                // className='custom-btn-export'
               >
                 Export
               </Button>
@@ -816,6 +928,7 @@ const NestedKendoTable = ({
                   onClick={triggerFileUpload}
                   disabled={isButtonDisabled || READ_ONLY}
                   className='btn-save'
+                  // className='custom-btn-import'
                 >
                   Import
                 </Button>
@@ -903,6 +1016,15 @@ const NestedKendoTable = ({
         message={snackbarData?.message || ''}
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
+      />
+
+       {/* Remark Dialog */}
+      <RemarkDialog
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        handleRemarkSave={handleRemarkSave}
       />
 
       <DeleteDialog

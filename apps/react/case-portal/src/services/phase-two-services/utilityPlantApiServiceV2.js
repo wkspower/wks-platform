@@ -195,8 +195,8 @@ async function calculateNormsData(keycloak, PLANT_ID, financialYear) {
   }
 }
 
-async function saveNormsData(keycloak, payload) {
-  const url = `${Config.CaseEngineUrl}/task/saveOrUpdateNormsMonths`
+async function saveNormsData(keycloak, payload, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/saveOrUpdateNormsMonths/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

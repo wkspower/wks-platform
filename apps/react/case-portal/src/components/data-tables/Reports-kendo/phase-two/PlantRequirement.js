@@ -7,239 +7,6 @@ import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPla
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-const dummyRows = [
-  {
-    id: 1,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-   // cppUtilities: 'COMPRESSED AIR',
-   ccpUtility: 'DEMO',
-    cppUtilityId: '310027904', 
-    cppPlant: 'NMD - Utility Plant',
-    cppPlantId: '40NF',
-    uom: 'NM3',
-    april: 531520,
-    may: 561720,
-    june: 543600,
-    july: 561720,
-    aug: 561720,
-    sep: 543600,
-    oct: 561720,
-    nov: 545336,
-    dec: 561720,
-    jan: 561720,
-    feb: 507360,
-    march: 561720,
-    grandTotal: 6602057,
-  },
-  {
-    id: 2,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'Cooling Water 2',
-    cppUtilityId: '310028004',
-    cppPlant: 'NMD - Utility Plant',
-    cppPlantId: '40NF',
-    uom: 'KM3',
-    april: 3779,
-    may: 3587,
-    june: 3779,
-    july: 3779,
-    aug: 3779,
-    sep: 3588,
-    oct: 3779,
-    nov: 3391,
-    dec: 3779,
-    jan: 3779,
-    feb: 3414,
-    march: 3779,
-    grandTotal: 42751,
-  },
-  {
-    id: 3,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'DM Water',
-    cppUtilityId: '310027866',
-    cppPlant: 'NMD - Utility Plant',
-    cppPlantId: '40NF',
-    uom: 'M3',
-    april: 1267,
-    may: 1333,
-    june: 1286,
-    july: 1333,
-    aug: 1333,
-    sep: 1286,
-    oct: 1333,
-    nov: 6291,
-    dec: 1333,
-    jan: 1333,
-    feb: 1210,
-    march: 1333,
-    grandTotal: 20733,
-  },
-  {
-    id: 4,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'HP Steam_Dis',
-    cppUtilityId: '310027939',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'MT',
-    april: 350,
-    may: 2600,
-    june: 4500,
-    july: 350,
-    aug: 2600,
-    sep: 4500,
-    oct: 1040,
-    nov: 2800,
-    dec: 350,
-    jan: 2600,
-    feb: 2800,
-    march: 350,
-    grandTotal: 11290,
-  },
-  {
-    id: 5,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'LP Steam_Dis',
-    cppUtilityId: '310027965',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'MT',
-    april: 3781,
-    may: 3181,
-    june: 3653,
-    july: 3823,
-    aug: 3181,
-    sep: 3653,
-    oct: 2487,
-    nov: 3781,
-    dec: 3781,
-    jan: 3653,
-    feb: 3781,
-    march: 3653,
-    grandTotal: 43371,
-  },
-  {
-    id: 6,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'MP Steam_Dis',
-    cppUtilityId: '310027940',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'MT',
-    april: 12072,
-    may: 11382,
-    june: 11448,
-    july: 13712,
-    aug: 14372,
-    sep: 11076,
-    oct: 11086,
-    nov: 16590,
-    dec: 17003,
-    jan: 16551,
-    feb: 17240,
-    march: 16408,
-    grandTotal: 164408,
-  },
-  {
-    id: 7,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'Nitrogen Gas',
-    cppUtilityId: 'NITROGENG',
-    cppPlant: 'NMD - Utility Plant',
-    cppPlantId: '40NF',
-    uom: 'NM3',
-    april: 295135,
-    may: 302086,
-    june: 312135,
-    july: 312135,
-    aug: 312135,
-    sep: 302066,
-    oct: 312135,
-    nov: 235000,
-    dec: 312135,
-    jan: 312135,
-    feb: 218929,
-    march: 312135,
-    grandTotal: 3600131,
-  },
-  {
-    id: 8,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'Oxygen',
-    cppUtilityId: 'OXYGEN',
-    cppPlant: 'NMD - Utility Plant',
-    cppPlantId: '40NF',
-    uom: 'MT',
-    april: 5787,
-    may: 6023,
-    june: 2620,
-    july: 5856,
-    aug: 5464,
-    sep: 6023,
-    oct: 6152,
-    nov: 2641,
-    dec: 5543,
-    jan: 5503,
-    feb: 4500,
-    march: 5543,
-    grandTotal: 8581,
-  },
-  {
-    id: 9,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'Power_Dis',
-    cppUtilityId: '310027910',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'KVH',
-    april: 2061312,
-    may: 2178432,
-    june: 2108160,
-    july: 2178432,
-    aug: 2178432,
-    sep: 2108160,
-    oct: 2178432,
-    nov: 1344362,
-    dec: 2178432,
-    jan: 2178432,
-    feb: 1967616,
-    march: 2178432,
-    grandTotal: 24883631,
-  },
-  {
-    id: 10,
-    // processPlant: 'NMD - EG',
-    // processPlantId: '40N3',
-    cppUtility: 'Water',
-    cppUtilityId: 'RAW WATER',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'M3',
-    april: 518,
-    may: 518,
-    june: 518,
-    july: 518,
-    aug: 518,
-    sep: 518,
-    oct: 518,
-    nov: 518,
-    dec: 518,
-    jan: 518,
-    feb: 518,
-    march: 518,
-    grandTotal: 518,
-  },
-]
 
 const PlantRequirement = () => {
   const keycloak = useSession()
@@ -272,6 +39,10 @@ const PlantRequirement = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
   const [rows, setRows] = useState([])
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+
   // Column definitions
   const columns = [
     {
@@ -465,6 +236,15 @@ const PlantRequirement = () => {
       type: 'number',
       format: valueFormat
     },
+    // {
+    //   field: 'remarks',
+    //   title: 'Remarks',
+    //   width: 250,
+    //   type: 'textarea',
+    //   editable: false,
+    //   minWidth: 250,
+    // },
+
   ]
 
   useEffect(() => {
@@ -487,14 +267,13 @@ const PlantRequirement = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      console.log('res', res)
-      // Process and set the fetched data to rows
-      setRows(res)
-      // setSnackbarOpen(true)
-      // setSnackbarData({
-      //   message: 'Data fetched successfully!',
-      //   severity: 'success',
-      // })
+     const formattedData = res?.map((item, index) => ({
+        ...item,
+        remarks:item.remarks || '',
+        id: item?.id || index + 1,
+      }))
+      setRows(formattedData)
+
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -567,6 +346,15 @@ const PlantRequirement = () => {
     }
   }
 
+
+ // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
+
   return (
     <Box>
       <Backdrop
@@ -584,6 +372,13 @@ const PlantRequirement = () => {
         setModifiedCells={setModifiedCells}
         title={permissions.showTitle ? permissions.titleName : ''}
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

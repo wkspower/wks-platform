@@ -29,6 +29,10 @@ const STGHeatRate = () => {
   const AOP_YEAR = year?.selectedYear
   const valueFormat = ValueFormatterProduction()
 
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  
   const columns = [
     {
       field: 'loadMW',
@@ -78,14 +82,14 @@ const STGHeatRate = () => {
       editable: true,
       minWidth: 140,
     },
-  //   {
-  //   field: 'remark',
-  //   title: 'Remark',
-  //   width: 130,
-  //   type: 'textarea',
-  //   editable: true,
-  //   minWidth: 150,
-  // },
+    {
+    field: 'remarks',
+    title: 'Remark',
+    width: 230,
+    type: 'textarea',
+    editable: true,
+    minWidth: 150,
+  },
   ]
 
   const [rows, setRows] = useState([])
@@ -183,6 +187,13 @@ const STGHeatRate = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -200,6 +211,13 @@ const STGHeatRate = () => {
         setModifiedCells={setModifiedCells}
         title='STG Heat Rate'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

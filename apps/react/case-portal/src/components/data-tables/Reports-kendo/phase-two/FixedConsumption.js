@@ -344,6 +344,10 @@ const FixedConsumption = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState(dummyRowsData)
   const valueFormat= ValueFormatterProduction()
+  
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
   // Column definitions
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
@@ -535,6 +539,14 @@ const FixedConsumption = () => {
       type: 'number',
       format: valueFormat,
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   useEffect(() => {
@@ -561,7 +573,8 @@ const FixedConsumption = () => {
 
       const formattedData = res.map((item, index) => ({
         ...item,
-        id: index,
+        remarks:item.remarks || '',
+        id: item.id || index + 1,
       }))
       // Process and set the fetched data to rows
       console.log('*** fixed consumption data', formattedData)
@@ -644,6 +657,14 @@ const FixedConsumption = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
+
   return (
     <Box>
       <Backdrop
@@ -663,6 +684,13 @@ const FixedConsumption = () => {
         // title='Fixed Consumption'
         title={screenTitle?.title}
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
