@@ -328,7 +328,8 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         List<UUID> AllfinancialYearMonthIds = new ArrayList<>();
 
         for (Object[] financialYearMonth : AllfinancialYearMonths) {
-            AllfinancialYearMonthIds.add((UUID) financialYearMonth[1]);
+          //  AllfinancialYearMonthIds.add((UUID) financialYearMonth[1]);
+          AllfinancialYearMonthIds.add(UUID.fromString(financialYearMonth[1].toString()));
         }
 
         for(UUID financialYearMonthId : AllfinancialYearMonthIds) { 
@@ -521,18 +522,18 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             jdbcTemplate.batchUpdate(sql, remarkUpdates);
         }
     // update remarks for the table NormsHeader
-         List<Object[]> updateRemarksList = new ArrayList<>();
-        for (NormsMonthUpdateRequestDTO dto : dtoList) { 
-            Object[] updateRemarks = new Object[] { dto.getRemarks(), dto.getNormsHeaderFkId() };
-            updateRemarksList.add(updateRemarks);
+        //  List<Object[]> updateRemarksList = new ArrayList<>();
+        // for (NormsMonthUpdateRequestDTO dto : dtoList) { 
+        //     Object[] updateRemarks = new Object[] { dto.getRemarks(), dto.getNormsHeaderFkId() };
+        //     updateRemarksList.add(updateRemarks);
 
-        }
+        // }
 
-        if(!updateRemarksList.isEmpty()) { 
+        // if(!updateRemarksList.isEmpty()) { 
 
-            String sql = "UPDATE NormsHeader SET Remarks = ? WHERE Id = ?";
-            jdbcTemplate.update(sql, updateRemarksList);
-        }
+        //     String sql = "UPDATE NormsHeader SET Remarks = ? WHERE Id = ?";
+        //     jdbcTemplate.update(sql, updateRemarksList);
+        // }
 
         AOPMessageVM vm = new AOPMessageVM();
         vm.setCode(200);
