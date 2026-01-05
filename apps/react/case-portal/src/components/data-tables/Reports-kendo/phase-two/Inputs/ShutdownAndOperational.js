@@ -529,7 +529,7 @@ const ShutdownAndOperational = () => {
       // })
 
       // const rowsWithIds = Object.values(mergedMap).map((row, index) => ({
-      const rowsWithIds = res?.powerResponse?.map((row, index) => ({
+      const rowsWithIds = res?.powerResponse?.filter((row) => row.assetType !== 'Power_Dis')?.map((row, index) => ({
         ...row,
         id: row.id || index + 1,
       }))
