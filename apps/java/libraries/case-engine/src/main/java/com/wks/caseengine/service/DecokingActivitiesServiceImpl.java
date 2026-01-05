@@ -210,7 +210,8 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	                while (rs.next()) {
 	                    Map<String, Object> row = new LinkedHashMap<>();
 	                    for (int i = 1; i <= columnCount; i++) {
-	                        row.put(md.getColumnLabel(i), rs.getObject(i));
+	                        Object value = rs.getObject(i);
+	                        row.put(md.getColumnLabel(i), value != null ? value : "");
 	                    }
 	                    data.add(row);
 	                }
