@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const HRSGHeatRate = () => {
   const keycloak = useSession()
@@ -87,6 +88,7 @@ const HRSGHeatRate = () => {
     },
   ]
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
  
   useEffect(() => {
     if (PLANT_ID) {
@@ -116,6 +118,7 @@ const HRSGHeatRate = () => {
       })
       console.log('res', res)
       setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching HRSG heat rate data:', error)
       setSnackbarOpen(true)
@@ -142,13 +145,38 @@ const HRSGHeatRate = () => {
 
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['hrsgLoad', 'heatRate']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck,'equipmentName')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return
@@ -161,16 +189,12 @@ const HRSGHeatRate = () => {
       })
       const tempPayload = JSON.stringify(payload)
 
-      console.log('payload', tempPayload)
-
       const res = await InputApiService.saveHRSGHeatRateData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
         payload,
       )
-
-      console.log('res', res)
 
       setModifiedCells({})
       setSnackbarOpen(true)

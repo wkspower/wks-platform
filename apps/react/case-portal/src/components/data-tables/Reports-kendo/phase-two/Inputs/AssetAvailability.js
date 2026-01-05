@@ -9,6 +9,7 @@ import { dummyDataForAssetAvailability } from '../nestedDummyData'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
 import { TcsApiService } from 'services/phase-two-services/tcsApiService'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const AssetAvailability = () => {
   const keycloak = useSession()
@@ -177,6 +178,7 @@ const AssetAvailability = () => {
   ]
 
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
 
   const nonEditableRows = ['HRSG1', 'HRSG2', 'HRSG3', 'PRDS']
 
@@ -207,6 +209,7 @@ const AssetAvailability = () => {
         remarks: row.remarks || '',
       }))
       setRows(rowsWithEditableFlag)
+      setOriginalRows(rowsWithEditableFlag)
     } catch (error) {
       console.error('Error fetching asset priority data:', error)
       setSnackbarOpen(true)
@@ -241,6 +244,32 @@ const AssetAvailability = () => {
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['april', 'may', 'june', 'july', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'march']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'assetName')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return

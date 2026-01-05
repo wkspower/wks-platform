@@ -1,3 +1,78 @@
+// Helper function to get nested field value using dot notation
+const getNestedValue = (obj, path) => {
+  return path.split('.').reduce((current, prop) => current?.[prop], obj)
+}
+
+// Validation function: Check if any row data is updated, then remarks must be filled and different from original
+export const validateRowDataWithRemarks = (data, originalRows, fieldsToCheck = ['april', 'may', 'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar'], displayFieldName) => {
+  const invalidRows = data.filter((row) => {
+    // Get original row from originalRows
+    const originalRow = originalRows.find((orig) => orig.id === row.id)
+    
+    if (!originalRow) return false
+    
+    // Check if any data field was updated
+    const dataWasUpdated = fieldsToCheck.some((field) => {
+      return row[field] !== originalRow[field]
+    })
+
+    // If data was updated, check if remarks is filled and different from original
+    if (dataWasUpdated) {
+      const currentRemarks = row.remarks || ''
+      const originalRemarks = originalRow.remarks || ''
+
+      const remarksIsEmpty = currentRemarks.trim() === ''
+      const remarksNotChanged = currentRemarks.trim() === originalRemarks.trim()
+
+      return remarksIsEmpty || remarksNotChanged
+    }
+
+    return false
+  })
+
+  if (invalidRows.length > 0) {
+    const displayNames = invalidRows.map((row,) => row[displayFieldName] || `Row ${row.id}`).join(', ')
+    return `Remarks is required and must be different from previous for: ${displayNames}`
+  }
+
+  return ''
+}
+
+// Validation function for nested fields: Check if any nested field is updated, remarks must be filled and different from original
+export const validateNestedRowDataWithRemarks = (data, originalRows, fieldsToCheck = [], displayFieldName = 'assetName') => {
+  const invalidRows = data.filter((row) => {
+    // Get original row from originalRows
+    const originalRow = originalRows.find((orig) => orig.id === row.id)
+    
+    if (!originalRow) return false
+    
+    // Check if any data field was updated (supports nested paths like 'april.shutdownHrs')
+    const dataWasUpdated = fieldsToCheck.some((field) => {
+      return getNestedValue(row, field) !== getNestedValue(originalRow, field)
+    })
+
+    // If data was updated, check if remarks is filled and different from original
+    if (dataWasUpdated) {
+      const currentRemarks = row.remarks || ''
+      const originalRemarks = originalRow.remarks || ''
+
+      const remarksIsEmpty = currentRemarks.trim() === ''
+      const remarksNotChanged = currentRemarks.trim() === originalRemarks.trim()
+
+      return remarksIsEmpty || remarksNotChanged
+    }
+
+    return false
+  })
+
+  if (invalidRows.length > 0) {
+    const displayNames = invalidRows.map((row) => row[displayFieldName] || `Row ${row.id}`).join(', ')
+    return `Remarks is required and must be different from previous for: ${displayNames}`
+  }
+
+  return ''
+}
+
 export function flattenMonthObject(data = []) {
   // If data is not an array, wrap it in an array
   const dataArray = Array.isArray(data) ? data : [data];

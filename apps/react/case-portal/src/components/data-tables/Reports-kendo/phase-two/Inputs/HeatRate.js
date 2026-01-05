@@ -8,6 +8,7 @@ import { InputApiService } from 'services/phase-two-services/inputApiService'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
 import STGHeatRate from './STGHeatRate'
 import HRSGHeatRate from './HRSGHeatRate'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const HeatRate = () => {
   const keycloak = useSession()
@@ -89,6 +90,7 @@ const HeatRate = () => {
   const [currentRowId, setCurrentRowId] = useState(null)
 
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [selectedPlant, setSelectedPlant] = useState('')
   const [dropdownOptions, setDropdownOptions] = useState([])
   useEffect(() => {
@@ -148,6 +150,7 @@ const HeatRate = () => {
         return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
       })
       setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching heat rate data:', error)
       setSnackbarOpen(true)
@@ -162,7 +165,7 @@ const HeatRate = () => {
     addButton: false,
     deleteButton: false,
     editButton: true,
-    saveBtn: false,
+    saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
@@ -182,13 +185,38 @@ const HeatRate = () => {
 
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['gtLoad', 'heatRate', 'freeSteamFactor']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'equipType')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return
@@ -201,16 +229,12 @@ const HeatRate = () => {
       })
       const tempPayload = JSON.stringify(payload)
 
-      console.log('payload', tempPayload)
-
       const res = await InputApiService.saveHeatRateData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
         payload,
       )
-
-      console.log('res', res)
 
       setModifiedCells({})
       setSnackbarOpen(true)

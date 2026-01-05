@@ -589,8 +589,8 @@ const NestedKendoTable = ({
         {...tdProps}
         style={{
           cursor: 'pointer',
-          color: isEdited ? 'orange' : rawValue ? 'inherit' : 'gray',
-          fontWeight: isEdited ? 'bold' : undefined,
+          color: isEdited && displayText ? 'orange' : rawValue ? 'inherit' : 'gray',
+          fontWeight: isEdited && displayText ? 'bold' : undefined,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
