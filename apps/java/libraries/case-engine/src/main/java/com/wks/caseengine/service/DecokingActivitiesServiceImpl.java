@@ -1317,53 +1317,117 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	@Override
-	public AOPMessageVM getNextYearConfiguration(String plantId, String year,String startDate) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<NextYearConfigurationDTO> nextYearConfigurationDTOList = new ArrayList<>();
-		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-		String viewName =  "vwScrn"+vertical.getName()+"ConfigurationNextYear";
-		try {
-			List<Object[]> nextYearConfiurationList = findNextYearConfiguration(year, UUID.fromString(plantId),  viewName,startDate);
-			for (Object[] row : nextYearConfiurationList) {
-				NextYearConfigurationDTO dto = new NextYearConfigurationDTO();
-				dto.setStartDate(row[0] != null ? row[0].toString() : null);
-				dto.setHTen(row[1] != null ? row[1].toString() : null);
-				dto.setHEleven(row[2] != null ? row[2].toString() : null);
-				dto.setHTwelve(row[3] != null ? row[3].toString() : null);
-				dto.setHThirteen(row[4] != null ? row[4].toString() : null);
-				dto.setHFourteen(row[5] != null ? row[5].toString() : null);
-				dto.setDemo(row[6] != null ? row[6].toString() : null);
-				dto.setAopYear(row[7] != null ? row[7].toString() : null);
-				dto.setPlantId(row[8] != null ? row[8].toString() : null);
-				nextYearConfigurationDTOList.add(dto);
-			}
+	public AOPMessageVM getNextYearConfiguration(String plantId, String year, String startDate) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        // 1. Fetch data and columns using the dynamic helpers
+	        List<Map<String, Object>> resultList = getNextYearConfigurationData(plantId, year, startDate);
+	        List<Map<String, Object>> columnMetadata = getNextYearConfigurationColumnMetadata(plantId, year, startDate);
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(nextYearConfigurationDTOList);
-			return aopMessageVM;
+	        Map<String, Object> finalData = new HashMap<>();
+	        finalData.put("data", resultList);
+	        finalData.put("columns", columnMetadata);
 
-		} catch (IllegalArgumentException iae) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to update data", ex);
-		}
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(finalData);
+	        return aopMessageVM;
 
+	    } catch (IllegalArgumentException iae) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch dynamic configuration data", ex);
+	    }
 	}
-	
-	public List<Object[]> findNextYearConfiguration(String aopYear, UUID plantId, String viewName,String StartDate) {
+	public List<Map<String, Object>> getNextYearConfigurationData(String plantId, String year, String startDate) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<Map<String, Object>> dataList = new ArrayList<>();
+	        
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        String viewName = "vwScrn" + vertical.getName() + "ConfigurationNextYear";
+
+	        // Dynamic SQL for the view
+	        String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = ? AND aopYear = ? AND Date = ?";
+
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setObject(1, UUID.fromString(plantId));
+	            ps.setString(2, year);
+	            
+	            // Safe Date handling
+	            if (startDate != null && !startDate.trim().isEmpty()) {
+	                ps.setDate(3, java.sql.Date.valueOf(startDate));
+	            } else {
+	                ps.setNull(3, java.sql.Types.DATE);
+	            }
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData md = rs.getMetaData();
+	                int columnCount = md.getColumnCount();
+
+	                while (rs.next()) {
+	                    Map<String, Object> row = new LinkedHashMap<>();
+	                    for (int i = 1; i <= columnCount; i++) {
+	                        Object value = rs.getObject(i);
+	                        // Consistent with your logic: Convert null to blank string
+	                        row.put(md.getColumnLabel(i), value != null ? value.toString() : "");
+	                    }
+	                    dataList.add(row);
+	                }
+	            }
+	        }
+	        return dataList;
+	    });
+	}
+	public List<Map<String, Object>> getNextYearConfigurationColumnMetadata(String plantId, String year, String startDate) {
+	    return entityManager.unwrap(Session.class).doReturningWork(connection -> {
+	        List<Map<String, Object>> columnMetadata = new ArrayList<>();
+	        
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        String viewName = "vwScrn" + vertical.getName() + "ConfigurationNextYear";
+
+	        String sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = ? AND aopYear = ? AND Date = ?";
+
+	        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+	            ps.setObject(1, UUID.fromString(plantId));
+	            ps.setString(2, year);
+	            
+	            if (startDate != null && !startDate.trim().isEmpty()) {
+	                ps.setDate(3, java.sql.Date.valueOf(startDate));
+	            } else {
+	                ps.setNull(3, java.sql.Types.DATE);
+	            }
+
+	            try (ResultSet rs = ps.executeQuery()) {
+	                ResultSetMetaData md = rs.getMetaData();
+	                for (int i = 1; i <= md.getColumnCount(); i++) {
+	                    Map<String, Object> columnInfo = new HashMap<>();
+	                    String columnName = md.getColumnLabel(i);
+	                    String columnType = md.getColumnTypeName(i);
+
+	                    columnInfo.put("field", columnName);
+	                    columnInfo.put("title", formatTitle(columnName)); // Uses your existing title formatter
+	                    columnInfo.put("editable", false);
+	                    columnInfo.put("type", getFrontendType(columnType)); // Uses your existing type mapper
+	                    columnMetadata.add(columnInfo);
+	                }
+	            }
+	        }
+	        return columnMetadata;
+	    });
+	}
+	public List<Object[]> findNextYearConfiguration(String aopYear, UUID plantId, String viewName,String Date) {
 		try {
 			// 2. Construct SQL with dynamic view name
 						String sql = "SELECT * FROM " + viewName +
-								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear and StartDate = :StartDate";
+								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear and Date = :Date";
 
 						// 3. Create and parameterize the native query
 						Query query = entityManager.createNativeQuery(sql);
 						query.setParameter("plantId", plantId);
 						query.setParameter("aopYear", aopYear);
-						query.setParameter("StartDate", StartDate);
+						query.setParameter("Date", Date);
 
 						// 4. Execute
 						return query.getResultList();
