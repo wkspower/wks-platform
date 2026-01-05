@@ -1183,42 +1183,77 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	}
 
 	@Override
-	public AOPMessageVM getNextYearEntry(String plantId, String year, String H10, String H11, String H12,String H13, String H14,String startDate) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		List<NextYearEntryDTO> nextYearEntryDTOList = new ArrayList<>();
-		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
-		String procedureName =  vertical.getName() + "_" + site.getName() + "_DecokingPlanning_NextYearEntry";
-		try {
-			List<Object[]> nextYearEntryList = findNextYearEntry(year, UUID.fromString(plantId),  H10,  H11,  H12, H13,  H14,  procedureName,startDate);
-			for (Object[] row : nextYearEntryList) {
-				NextYearEntryDTO dto = new NextYearEntryDTO();
-				dto.setDate(row[0] != null ? row[0].toString() : null);
-				dto.setHTenProposed(row[1] != null ? row[1].toString() : null);
-				dto.setHElevenProposed(row[2] != null ? row[2].toString() : null);
-				dto.setHTwelveProposed(row[3] != null ? row[3].toString() : null);
-				dto.setHThirteenProposed(row[4] != null ? row[4].toString() : null);
-				dto.setHFourteenProposed(row[5] != null ? row[5].toString() : null);
-				dto.setDemo(row[6] != null ? row[6].toString() : null);
-				dto.setAopYear(row[7] != null ? row[7].toString() : null);
-				dto.setPlantId(row[8] != null ? row[8].toString() : null);
-				dto.setMonth(row[9] != null ? row[9].toString() : null);
-				nextYearEntryDTOList.add(dto);
-			}
+	public AOPMessageVM getNextYearEntry(String plantId, String year, String H10, String H11, String H12, String H13, String H14, String startDate) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+	        
+	        String procedureName = vertical.getName() + "_" + site.getName() + "_DecokingPlanning_NextYearEntry";
 
-			aopMessageVM.setCode(200);
-			aopMessageVM.setMessage("Data fetched successfully");
-			aopMessageVM.setData(nextYearEntryDTOList);
-			return aopMessageVM;
+	        // 1. Execute using Native Query (This preserves your working date logic)
+	        String sql = "EXEC " + procedureName + 
+	                     " @plantId = :plantId, @aopYear = :aopYear, @H10 = :H10, @H11 = :H11, " +
+	                     "@H12 = :H12, @H13 = :H13, @H14 = :H14, @StartDate = :StartDate";
 
-		} catch (IllegalArgumentException iae) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", iae);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to update data", ex);
-		}		
+	        Query query = entityManager.createNativeQuery(sql);
+	        query.setParameter("plantId", UUID.fromString(plantId));
+	        query.setParameter("aopYear", year);
+	        query.setParameter("H10", H10);
+	        query.setParameter("H11", H11);
+	        query.setParameter("H12", H12);
+	        query.setParameter("H13", H13);
+	        query.setParameter("H14", H14);
+	        query.setParameter("StartDate", startDate);
+
+	        // 2. Fetch results as List<Object[]>
+	        List<Object[]> results = query.getResultList();
+	        
+	        // 3. Convert to Dynamic Format (Data + Columns)
+	        Map<String, Object> dynamicData = transformToDynamicMap(results);
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        aopMessageVM.setData(dynamicData);
+	        return aopMessageVM;
+
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
 	}
-	
+	private Map<String, Object> transformToDynamicMap(List<Object[]> results) {
+	    List<Map<String, Object>> data = new ArrayList<>();
+	    
+	    // Define your field names in the order they come from the Procedure
+	    String[] fieldNames = {"date", "hTenProposed", "hElevenProposed", "hTwelveProposed", 
+	                           "hThirteenProposed", "hFourteenProposed", "demo", "aopYear", 
+	                           "plantId", "month"};
+
+	    for (Object[] row : results) {
+	        Map<String, Object> map = new LinkedHashMap<>();
+	        for (int i = 0; i < fieldNames.length; i++) {
+	            // Logic: If index exists in row, use it; otherwise blank string
+	            Object value = (i < row.length) ? row[i] : "";
+	            map.put(fieldNames[i], value != null ? value.toString() : "");
+	        }
+	        data.add(map);
+	    }
+
+	    // Generate column metadata for the frontend
+	    List<Map<String, String>> columns = new ArrayList<>();
+	    for (String field : fieldNames) {
+	        Map<String, String> col = new HashMap<>();
+	        col.put("field", field);
+	        col.put("title", field.replaceAll("([A-Z])", " $1").trim()); // Simple "hTen" -> "h Ten"
+	        columns.add(col);
+	    }
+
+	    Map<String, Object> finalResult = new HashMap<>();
+	    finalResult.put("data", data);
+	    finalResult.put("columns", columns);
+	    return finalResult;
+	}
 	public List<Object[]> findNextYearEntry(String year, UUID plantFkId, String H10, String H11, String H12,String H13, String H14, String procedureName,String StartDate) {
 		try {
 			Plants plant = plantsRepository.findById(plantFkId).orElseThrow();
