@@ -24,4 +24,5 @@ public class PCGOutlookDTO {
     private Double jan;
     private Double feb;
     private Double mar;
+    private String remarks;
 }

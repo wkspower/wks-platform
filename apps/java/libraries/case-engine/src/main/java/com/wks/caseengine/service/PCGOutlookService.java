@@ -30,7 +30,7 @@ public class PCGOutlookService {
 
     public List<PCGOutlookDTO> getData(UUID siteId, String financialYear) {
        
-        List<PCGOutlookDTO> projections = repository.getPcgOutlookBySiteAndFY(siteId, financialYear).stream().map(p -> new PCGOutlookDTO(p.getProduct(), p.getApr(), p.getMay(), p.getJun(), p.getJul(), p.getAug(), p.getSep(), p.getOct(), p.getNov(), p.getDec(), p.getJan(), p.getFeb(), p.getMar())).collect(Collectors.toList());
+        List<PCGOutlookDTO> projections = repository.getPcgOutlookBySiteAndFY(siteId, financialYear).stream().map(p -> new PCGOutlookDTO(p.getProduct(), p.getApr(), p.getMay(), p.getJun(), p.getJul(), p.getAug(), p.getSep(), p.getOct(), p.getNov(), p.getDec(), p.getJan(), p.getFeb(), p.getMar(), p.getRemarks())).collect(Collectors.toList());
         return projections;
     }
 
@@ -54,7 +54,20 @@ public class PCGOutlookService {
         List<Object[]> SynGasProductionupdates = new ArrayList<>();
         List<Object[]> gasifierAvailabilityInserts = new ArrayList<>();
         List<Object[]> SynGasProductionInserts = new ArrayList<>();
+        List<Object[]> updatesGasifierAvailabilityRemarks = new ArrayList<>();
+        List<Object[]> updatesSynGasProductionRemarks = new ArrayList<>();
         for (PCGOutlookDTO dto : data) { 
+
+            // updates remarks
+            if ("GasifierAvailability".equals(dto.getProduct())) {
+              for (UUID fymId : existingIds) {
+                updatesGasifierAvailabilityRemarks.add(new Object[]{ dto.getRemarks(), siteId, fymId });
+              }
+            } else if ("SynGasProduction".equals(dto.getProduct())) {
+                for (UUID fymId : existingIds) {
+                    updatesSynGasProductionRemarks.add(new Object[]{ dto.getRemarks(), siteId, fymId });
+                }
+            }
 
              if(dto.getApr() != null) {  
 
@@ -217,6 +230,9 @@ public class PCGOutlookService {
             }
         }
 
+        // updates remarks
+
+
    
         }
 
@@ -239,6 +255,13 @@ public class PCGOutlookService {
                 jdbcTemplate.batchUpdate(sql, SynGasProductionInserts);
             }
 
-
+        if(!updatesGasifierAvailabilityRemarks.isEmpty()) {  
+            String sql = "Update TCS_PCGOutlook set GasifierAvailability_Remarks = ? where Site_FK_Id = ? and FinancialYearMonthId = ?";
+            jdbcTemplate.batchUpdate(sql, updatesGasifierAvailabilityRemarks);
+        }
+        if(!updatesSynGasProductionRemarks.isEmpty()) {  
+            String sql = "Update TCS_PCGOutlook set SynGasProduction_Remarks = ? where Site_FK_Id = ? and FinancialYearMonthId = ?";
+            jdbcTemplate.batchUpdate(sql, updatesSynGasProductionRemarks);
+        }
     }
 }

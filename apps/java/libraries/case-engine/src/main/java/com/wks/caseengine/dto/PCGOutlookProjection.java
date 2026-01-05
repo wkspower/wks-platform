@@ -16,4 +16,5 @@ public interface PCGOutlookProjection {
     Double getJan();
     Double getFeb();
     Double getMar();
+    String getRemarks();
 }
