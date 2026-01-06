@@ -824,29 +824,42 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	
 	
 	private void insertNewRunLengthRecord(Map<String, Object> payload, String plantId, String year, Set<String> exclude) {
-	    StringBuilder columns = new StringBuilder("PlantFkId, AopYear, Date");
+	    StringBuilder columns = new StringBuilder("Plant_Fk_Id, AOPYear, Date");
 	    StringBuilder values = new StringBuilder(":plantId, :year, :date");
-	    Map<String, Object> params = new HashMap<>();
 	    
+	    Map<String, Object> params = new HashMap<>();
 	    params.put("plantId", UUID.fromString(plantId));
 	    params.put("year", year);
-	    params.put("date", LocalDate.parse((String) payload.get("Date")));
+	    
+	    Object dateVal = payload.get("Date");
+	    params.put("date", dateVal != null ? LocalDate.parse(dateVal.toString()) : null);
 
 	    for (Map.Entry<String, Object> entry : payload.entrySet()) {
-	        if (exclude.contains(entry.getKey())) continue;
+	        String key = entry.getKey();
+	        if (exclude.contains(key) || 
+	            key.equalsIgnoreCase("Date") || 
+	            key.equalsIgnoreCase("plantId") || 
+	            key.equalsIgnoreCase("id") || 
+	            key.equalsIgnoreCase("Month")) {
+	            continue;
+	        }
 	        
-	        String dbCol = entry.getKey().replace(" ", "_");
+	        String dbCol = key.replace(" ", "_");
 	        columns.append(", [").append(dbCol).append("]");
 	        values.append(", :p_").append(dbCol);
+	        
 	        params.put("p_" + dbCol, entry.getValue());
 	    }
-
 	    String sql = "INSERT INTO DecokeRunLength (" + columns + ") VALUES (" + values + ")";
-	    Query query = entityManager.createNativeQuery(sql);
-	    params.forEach(query::setParameter);
-	    query.executeUpdate();
-	}
-	
+	    
+	    try {
+	        Query query = entityManager.createNativeQuery(sql);
+	        params.forEach(query::setParameter);
+	        query.executeUpdate();
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to insert record: " + ex.getMessage(), ex);
+	    }
+	}	
 	private void triggerCalculation(String plantId, String year, String screenName) {
 	    List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen(screenName);
 	    for (ScreenMapping screenMapping : screenMappingList) {
