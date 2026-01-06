@@ -90,4 +90,7 @@ public class CalculatedProcessDemand {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "remarks", length = 500)
+    private String remarks;
 }
