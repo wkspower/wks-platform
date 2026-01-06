@@ -291,7 +291,7 @@ async function getSTGHeatRateData(keycloak, plantId) {
 }
 
 async function saveSTGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/stg-extraction-lookup/${PLANT_ID}/${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/stg-extraction-lookup/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -336,7 +336,7 @@ async function getHRSGHeatRateData(keycloak, plantId) {
 }
 
 async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/${PLANT_ID}/${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

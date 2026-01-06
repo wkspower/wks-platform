@@ -12,7 +12,6 @@ import { Stack } from '../../../../../../node_modules/@mui/material/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
 import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
-
 const ImportPower = () => {
   const keycloak = useSession()
   // State management
@@ -207,7 +206,7 @@ const ImportPower = () => {
       type: 'textarea',
       editable: true,
       minWidth: 250,
-   },
+    },
   ]
 
   useEffect(() => {
@@ -260,6 +259,9 @@ const ImportPower = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `Import Power - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: screenTitle?.title,
@@ -280,7 +282,7 @@ const ImportPower = () => {
       return
     }
     var rawData = Object.values(modifiedCells)
-    console.log('rawData',rawData)
+    console.log('rawData', rawData)
     const data = rawData.filter((row) => row.inEdit)
     if (data.length == 0) {
       setSnackbarOpen(true)
@@ -292,8 +294,26 @@ const ImportPower = () => {
       return
     }
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['april', 'may', 'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
-    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'plant')
+    const fieldsToCheck = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sept',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'mar',
+    ]
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'plant',
+    )
 
     if (validationError) {
       setSnackbarOpen(true)
@@ -335,7 +355,6 @@ const ImportPower = () => {
       setLoading(false)
     }
   }
-
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {

@@ -102,7 +102,7 @@ const PlantRequirement = () => {
     {
       field: 'apr',
       title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -113,7 +113,7 @@ const PlantRequirement = () => {
     {
       field: 'may',
       title: headerMap[5],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -124,7 +124,7 @@ const PlantRequirement = () => {
     {
       field: 'jun',
       title: headerMap[6],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -135,7 +135,7 @@ const PlantRequirement = () => {
     {
       field: 'jul',
       title: headerMap[7],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -146,7 +146,7 @@ const PlantRequirement = () => {
     {
       field: 'aug',
       title: headerMap[8],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -157,7 +157,7 @@ const PlantRequirement = () => {
     {
       field: 'sep',
       title: headerMap[9],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -168,7 +168,7 @@ const PlantRequirement = () => {
     {
       field: 'oct',
       title: headerMap[10],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -179,7 +179,7 @@ const PlantRequirement = () => {
     {
       field: 'nov',
       title: headerMap[11],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -190,7 +190,7 @@ const PlantRequirement = () => {
     {
       field: 'dec',
       title: headerMap[12],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -201,7 +201,7 @@ const PlantRequirement = () => {
     {
       field: 'jan',
       title: headerMap[1],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -212,7 +212,7 @@ const PlantRequirement = () => {
     {
       field: 'feb',
       title: headerMap[2],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -223,7 +223,7 @@ const PlantRequirement = () => {
     {
       field: 'mar',
       title: headerMap[3],
-      editable: false,
+      editable: true,
       widthT: 100,
       minWidth:80,
       align: 'left',
@@ -232,14 +232,14 @@ const PlantRequirement = () => {
       format: valueFormat
     },
   
-    // {
-    //   field: 'remarks',
-    //   title: 'Remarks',
-    //   width: 250,
-    //   type: 'textarea',
-    //   editable: false,
-    //   minWidth: 250,
-    // },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
 
   ]
 
@@ -290,7 +290,7 @@ const PlantRequirement = () => {
     addButton: false,
     deleteButton: false,
     editButton: true,
-    saveBtn: false,
+    saveBtn: true,
     allAction: true,
     downloadExcelBtnFromUI:true,
     ExcelName:`Plant Requirement - ${AOP_YEAR}`,
@@ -348,11 +348,11 @@ const PlantRequirement = () => {
       console.log('payload', payload)
 
       // Call the API to save changes
-      // const response = await UtilityPlantApiServiceV2.savePlantRequirementData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   payload
-      // )
+      const response = await UtilityPlantApiServiceV2.savePlantRequirementData(
+        keycloak,
+        AOP_YEAR,
+        payload
+      )
 
       // Update the local state with the saved data
       // setRows(updatedRows)

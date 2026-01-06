@@ -85,10 +85,11 @@ async function getPlantRequirementData(keycloak, PLANT_ID,AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function savePlantRequirementData(keycloak, PLANT_ID,AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/consumption/plant-requirement-import?plantId=${PLANT_ID}&aopYear=${AOP_YEAR}`
+async function savePlantRequirementData(keycloak,AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/plant-requirement/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
+    'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
   const body = JSON.stringify(payload)

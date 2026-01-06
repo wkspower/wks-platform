@@ -226,8 +226,9 @@ const AssetAvailability = () => {
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
-    showExport: false,
-    showImport: false,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `Asset Priority - ${AOP_YEAR}`,
     showTitle: true,
   }
 

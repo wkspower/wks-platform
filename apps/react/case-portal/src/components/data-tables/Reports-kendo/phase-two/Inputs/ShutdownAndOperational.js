@@ -85,7 +85,7 @@ const ShutdownAndOperational = () => {
       locked: true,
       hidden: true,
     },
-     {
+    {
       field: 'utilityDistributed.name',
       title: 'Utility Distributed',
       width: 150,
@@ -513,10 +513,12 @@ const ShutdownAndOperational = () => {
         return
       }
 
-      const rowsWithIds = res?.powerResponse?.filter((row) => row.assetType !== 'Power_Dis')?.map((row, index) => ({
-        ...row,
-        id: row.id || index + 1,
-      }))
+      const rowsWithIds = res?.powerResponse
+        ?.filter((row) => row.assetType !== 'Power_Dis')
+        ?.map((row, index) => ({
+          ...row,
+          id: row.id || index + 1,
+        }))
 
       setRows(rowsWithIds)
       setOriginalRows(rowsWithIds)
@@ -536,6 +538,9 @@ const ShutdownAndOperational = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `Shutdown and Operational - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: screenTitle?.title,
@@ -580,8 +585,26 @@ const ShutdownAndOperational = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['april.shutdownHrs', 'may.shutdownHrs', 'june.shutdownHrs', 'july.shutdownHrs', 'aug.shutdownHrs', 'sep.shutdownHrs', 'oct.shutdownHrs', 'nov.shutdownHrs', 'dec.shutdownHrs', 'jan.shutdownHrs', 'feb.shutdownHrs', 'march.shutdownHrs']
-    const validationError = validateNestedRowDataWithRemarks(data, originalRows, fieldsToCheck, 'assetName')
+    const fieldsToCheck = [
+      'april.shutdownHrs',
+      'may.shutdownHrs',
+      'june.shutdownHrs',
+      'july.shutdownHrs',
+      'aug.shutdownHrs',
+      'sep.shutdownHrs',
+      'oct.shutdownHrs',
+      'nov.shutdownHrs',
+      'dec.shutdownHrs',
+      'jan.shutdownHrs',
+      'feb.shutdownHrs',
+      'march.shutdownHrs',
+    ]
+    const validationError = validateNestedRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'assetName',
+    )
 
     if (validationError) {
       setSnackbarOpen(true)
@@ -612,7 +635,7 @@ const ShutdownAndOperational = () => {
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
-      fetchShutdownAndOperationalData();
+      fetchShutdownAndOperationalData()
     } catch (error) {
       console.error('Error saving operational hours data:', error)
       setSnackbarOpen(true)
@@ -625,7 +648,7 @@ const ShutdownAndOperational = () => {
     }
   }
 
-   // Handle remark cell click
+  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)

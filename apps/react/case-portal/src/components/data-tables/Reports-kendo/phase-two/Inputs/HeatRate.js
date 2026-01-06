@@ -147,7 +147,11 @@ const HeatRate = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
-        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
+        return {
+          ...item,
+          id: item.id || index + 1,
+          remarks: item.remarks || '',
+        }
       })
       setRows(tempRes)
       setOriginalRows(tempRes)
@@ -169,8 +173,9 @@ const HeatRate = () => {
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
-    showExport: false,
-    showImport: false,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `GT Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
     showDropdown: true,
   }
@@ -210,7 +215,12 @@ const HeatRate = () => {
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = ['gtLoad', 'heatRate', 'freeSteamFactor']
-    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'equipType')
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'equipType',
+    )
 
     if (validationError) {
       setSnackbarOpen(true)
@@ -221,13 +231,14 @@ const HeatRate = () => {
       setLoading(false)
       return
     }
-
+console.log('modifiedData',modifiedData)
     try {
       const payload = modifiedData.map((item) => {
         const { inEdit, ...rest } = item
         return rest
       })
       const tempPayload = JSON.stringify(payload)
+      console.log('Payload being sent:', tempPayload)
 
       const res = await InputApiService.saveHeatRateData(
         keycloak,
@@ -236,6 +247,7 @@ const HeatRate = () => {
         payload,
       )
 
+      console.log('Save response:', res)
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
@@ -244,16 +256,19 @@ const HeatRate = () => {
       })
     } catch (error) {
       console.error('Error saving heat rate data:', error)
+      console.error('Error message:', error?.message)
+      console.error('Error status:', error?.status)
+      console.error('Error response:', error?.response)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Failed to save changes. Please try again.',
+        message: `Failed to save changes. Error: ${error?.message || 'Unknown error'}`,
         severity: 'error',
       })
     } finally {
       setLoading(false)
     }
   }
-     // Handle remark cell click
+  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
@@ -293,15 +308,19 @@ const HeatRate = () => {
         selectedDropdownValue={selectedPlant}
         setSelectedDropdownValue={setSelectedPlant}
         paginationConfig={{
-          threshold: 20,           // Show pagination if > 50 rows
+          threshold: 20, // Show pagination if > 50 rows
           buttonCount: 5,
           pageSizes: [10, 20, 50, 100],
           defaultPageSize: 20,
         }}
       />
 
-      <Stack sx={{mt:2}}><STGHeatRate /></Stack>
-      <Stack sx={{mt:2}}><HRSGHeatRate /></Stack>
+      <Stack sx={{ mt: 2 }}>
+        <STGHeatRate />
+      </Stack>
+      <Stack sx={{ mt: 2 }}>
+        <HRSGHeatRate />
+      </Stack>
     </Box>
   )
 }

@@ -127,16 +127,22 @@ const TcsInput = () => {
       {/* Tabs */}
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs
+          // sx={{
+          //   '& .MuiTabs-indicator': {
+          //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+          //   },
+          //   '& .MuiTab-root.Mui-selected': {
+          //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+          //     backgroundClip: 'text',
+          //     WebkitBackgroundClip: 'text',
+          //     WebkitTextFillColor: 'transparent',
+          //   },
+          // }}
           sx={{
-            '& .MuiTabs-indicator': {
-              background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
-            },
-            '& .MuiTab-root.Mui-selected': {
-              background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
-              backgroundClip: 'text',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            },
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '0px 0px 0px 0px',
+            minHeight: '28px',
           }}
           textColor='primary'
           indicatorColor='primary'
@@ -150,13 +156,13 @@ const TcsInput = () => {
           {tabObj && tabObj?.map((tab) => (
             <Tab
               key={tab.id}
-              // sx={{
-              //   border: '1px solid #ADD8E6',
-              //   borderBottom: '1px solid #ADD8E6',
-              //   fontSize: '0.75rem',
-              //   padding: '9px',
-              //   minHeight: '12px',
-              // }}
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                fontSize: '0.75rem',
+                padding: '9px',
+                minHeight: '12px',
+              }}
               label={tab.displayName || tab.name}
             />
           ))}

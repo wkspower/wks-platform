@@ -415,7 +415,7 @@ const AssetCapacity = () => {
 
   useEffect(() => {
     if (AOP_YEAR) {
-        fetchAssetCapacityData(keycloak, AOP_YEAR)
+      fetchAssetCapacityData(keycloak, AOP_YEAR)
       // setRows(dummyRowsData)
     }
   }, [AOP_YEAR])
@@ -435,7 +435,11 @@ const AssetCapacity = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
-        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
+        return {
+          ...item,
+          id: item.id || index + 1,
+          remarks: item.remarks || '',
+        }
       })
       setRows(tempRes)
       setOriginalRows(tempRes)
@@ -455,6 +459,9 @@ const AssetCapacity = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `Asset Capacity - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: screenTitle?.title,
@@ -487,8 +494,40 @@ const AssetCapacity = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['april.min', 'april.max', 'may.min', 'may.max', 'june.min', 'june.max', 'july.min', 'july.max', 'aug.min', 'aug.max', 'sep.min', 'sep.max', 'oct.min', 'oct.max', 'nov.min', 'nov.max', 'dec.min', 'dec.max', 'jan.min', 'jan.max', 'feb.min', 'feb.max', 'march.min', 'march.max', 'fixedMin', 'fixedMax']
-    const validationError = validateNestedRowDataWithRemarks(data, originalRows, fieldsToCheck, 'assetName')
+    const fieldsToCheck = [
+      'april.min',
+      'april.max',
+      'may.min',
+      'may.max',
+      'june.min',
+      'june.max',
+      'july.min',
+      'july.max',
+      'aug.min',
+      'aug.max',
+      'sep.min',
+      'sep.max',
+      'oct.min',
+      'oct.max',
+      'nov.min',
+      'nov.max',
+      'dec.min',
+      'dec.max',
+      'jan.min',
+      'jan.max',
+      'feb.min',
+      'feb.max',
+      'march.min',
+      'march.max',
+      'fixedMin',
+      'fixedMax',
+    ]
+    const validationError = validateNestedRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'assetName',
+    )
 
     if (validationError) {
       setSnackbarOpen(true)

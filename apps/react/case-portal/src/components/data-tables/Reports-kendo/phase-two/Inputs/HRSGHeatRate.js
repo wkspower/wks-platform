@@ -34,7 +34,7 @@ const HRSGHeatRate = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
- const columns = [
+  const columns = [
     {
       field: 'id',
       title: 'Id',
@@ -43,7 +43,7 @@ const HRSGHeatRate = () => {
       editable: false,
       locked: true,
       minWidth: 100,
-      hidden:true
+      hidden: true,
     },
     {
       field: 'equipmentName',
@@ -89,7 +89,7 @@ const HRSGHeatRate = () => {
   ]
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
- 
+
   useEffect(() => {
     if (PLANT_ID) {
       fetchHeatRateData()
@@ -101,14 +101,14 @@ const HRSGHeatRate = () => {
     try {
       // TODO: Replace with actual API call once backend is ready
       const res = await InputApiService.getHRSGHeatRateData(keycloak, PLANT_ID)
-      
+
       if (res?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-       let tempRes = res.map((item, index) => {
+      let tempRes = res.map((item, index) => {
         const transformed = {
           id: item?.id || index + 1,
           remarks: item?.remarks || '',
@@ -137,8 +137,9 @@ const HRSGHeatRate = () => {
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
-    showExport: false,
-    showImport: false,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `HRSG Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
     showDropdown: false,
   }
@@ -170,7 +171,12 @@ const HRSGHeatRate = () => {
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = ['hrsgLoad', 'heatRate']
-    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck,'equipmentName')
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'equipmentName',
+    )
 
     if (validationError) {
       setSnackbarOpen(true)
@@ -213,7 +219,7 @@ const HRSGHeatRate = () => {
       setLoading(false)
     }
   }
-    // Handle remark cell click
+  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)

@@ -688,6 +688,7 @@ const AdvanceKendoTable = ({
     return (
       <td
         {...tdProps}
+        title={displayText}
         style={{
           cursor: 'pointer',
           color: isEdited && displayText ? 'orange' : rawValue ? 'inherit' : 'gray',

@@ -33,7 +33,7 @@ const STGHeatRate = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  
+
   const columns = [
     {
       field: 'loadMW',
@@ -84,18 +84,18 @@ const STGHeatRate = () => {
       minWidth: 140,
     },
     {
-    field: 'remarks',
-    title: 'Remark',
-    width: 230,
-    type: 'textarea',
-    editable: true,
-    minWidth: 150,
-  },
+      field: 'remarks',
+      title: 'Remark',
+      width: 230,
+      type: 'textarea',
+      editable: true,
+      minWidth: 150,
+    },
   ]
 
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
- 
+
   useEffect(() => {
     if (PLANT_ID) {
       fetchHeatRateData()
@@ -134,8 +134,9 @@ const STGHeatRate = () => {
     allAction: true,
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
-    showExport: false,
-    showImport: false,
+    showImport: true,
+    downloadExcelBtnFromUI: true,
+    ExcelName: `STG Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
     showDropdown: false,
   }
@@ -166,8 +167,19 @@ const STGHeatRate = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['loadMW', 'svhInletTPH', 'smBleedFlowTPH', 'slExtFlowTPH', 'condensingLoadM3Hr', 'heatRateKcalKWH']
-    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck)
+    const fieldsToCheck = [
+      'loadMW',
+      'svhInletTPH',
+      'smBleedFlowTPH',
+      'slExtFlowTPH',
+      'condensingLoadM3Hr',
+      'heatRateKcalKWH',
+    ]
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+    )
 
     if (validationError) {
       setSnackbarOpen(true)
@@ -211,7 +223,7 @@ const STGHeatRate = () => {
     }
   }
 
-   // Handle remark cell click
+  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
