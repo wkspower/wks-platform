@@ -132,9 +132,10 @@ const UnitCapacityGrid = ({
 
   // Column configuration for Unit Capacity
   const columnConfig = {
-    particulates: { editable: false, type: 'text', minWidth: 50, widthT: 100 },
-    value: { editable: true, type: 'number1', minWidth: 50, widthT: 100 },
-    remark: { editable: true, type: 'text', minWidth: 100, widthT: 100 },
+    id: { editable: false, type: 'text', minWidth: 50, widthT: 100,hidden:true },
+    particulates: { editable: false, type: 'text', minWidth: 50, widthT: 150 },
+    value: { editable: true, type: 'number1', minWidth: 50, widthT: 200 },
+    remark: { editable: true, type: 'text', minWidth: 100, widthT: 250 },
   }
 
   const columns = useMemo(() => {
@@ -144,93 +145,42 @@ const UnitCapacityGrid = ({
       return []
     }
 
+    // Map keys to their headers from backend
     const columnMap = {}
     headers.forEach((header, index) => {
       columnMap[keys[index]] = header
     })
 
-    const firstColumn = {
-      field: 'particulates',
-      title: columnMap['particulates'] || 'Particulars',
-      widthT: 120,
-      locked: true,
-      ...columnConfig.particulates,
-      disable: false,
-    }
+    // Build columns using columnConfig for type/formatting
+    const cols = Object.entries(columnConfig).map(([key, config]) => ({
+      field: key,
+      title: columnMap[key] || key,
+      ...config,
+    }))
 
-    const capacityChildren = []
-    const capacityKeys = ['value']
+    // Group 'value' column under 'Capacity' parent at position 2
+    const capacityCol = cols.find((col) => col.field === 'value')
+    const otherCols = cols.filter((col) => col.field !== 'value')
 
-    capacityKeys.forEach((key) => {
-      if (columnMap[key]) {
-        const config = columnConfig[key] || {
-          editable: true,
-          type: 'text',
-          minWidth: 80,
-        }
-        capacityChildren.push({
-          field: key,
-          title: columnMap[key],
-          ...config,
-        })
-      }
-    })
-
-    const columns = [firstColumn]
-
-    if (capacityChildren.length > 0) {
-      columns.push({
+    if (capacityCol) {
+      const result = []
+      // Position 0: id
+      result.push(otherCols[0]) // id
+      // Position 1: particulates
+      result.push(otherCols[1]) // particulates
+      // Position 2: Capacity (with value)
+      result.push({
         title: 'Capacity',
-        children: capacityChildren,
+        children: [capacityCol],
       })
+      // Position 3: remark and others
+      result.push(...otherCols.slice(2))
+      return result
     }
 
-    if (columnMap['remark']) {
-      const config = columnConfig['remark'] || {
-        editable: true,
-        type: 'text',
-        minWidth: 100,
-      }
-      columns.push({
-        field: 'remark',
-        title: columnMap['remark'],
-        ...config,
-      })
-    }
-
-    return columns
+    return otherCols
   }, [apiMetadata])
 
-  // Apply numeric formatting to detected numeric fields
-  const numericKeys = ['kbpsd', 'ktpd', 'tph']
-
-  const columnsWithFormatting = useMemo(() => {
-    return columns.map((col) => {
-      if (col.children) {
-        return {
-          ...col,
-          children: col.children.map((child) => {
-            if (numericKeys.includes(child.field)) {
-              return {
-                ...child,
-                type: 'number1',
-                format: valueFormat,
-              }
-            }
-            return child
-          }),
-        }
-      }
-      if (numericKeys.includes(col.field)) {
-        return {
-          ...col,
-          type: 'number1',
-          format: valueFormat,
-        }
-      }
-      return col
-    })
-  }, [columns, numericKeys, valueFormat])
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
@@ -329,7 +279,7 @@ const UnitCapacityGrid = ({
           fetchData={() => fetchUnitCapacityData(selectedDropdown)}
           title={title}
           handleRemarkCellClick={handleRemarkCellClick}
-          columns={columnsWithFormatting}
+          columns={columns}
           remarkDialogOpen={remarkDialogOpen}
           setRemarkDialogOpen={setRemarkDialogOpen}
           currentRemark={currentRemark}

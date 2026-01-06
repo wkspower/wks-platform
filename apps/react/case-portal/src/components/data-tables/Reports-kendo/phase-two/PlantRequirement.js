@@ -294,7 +294,7 @@ const PlantRequirement = () => {
     allAction: true,
     downloadExcelBtnFromUI:true,
     ExcelName:`Plant Requirement - ${AOP_YEAR}`,
-    // showImport:true,
+    showImport:true,
     showTitleNameBusiness: true,
     showTitle:true,
     titleName: screenTitle?.title,

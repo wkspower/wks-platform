@@ -15,6 +15,7 @@ import { trashIcon } from '@progress/kendo-svg-icons'
 import '../../../kendo-data-grid.css'
 import { Tooltip } from '@progress/kendo-react-tooltip'
 import { NoSpinnerNumericEditor } from '../Utilities-Kendo/numbericColumns'
+import { NumericEditorWithMinMax } from '../Utilities-Kendo/phase-two/NumericEditorWithMinMax'
 import {
   Backdrop,
   Box,
@@ -578,6 +579,11 @@ const NestedKendoTable = ({
     const displayText = String(rawValue ?? '')
     const rowId = dataItem.id
 
+    // Check if row is editable
+    const isRowEditable = !(
+      !dataItem.isEditable && dataItem?.isEditable !== undefined
+    )
+
     // Check if this remark field was edited
     const isEdited = Object.prototype.hasOwnProperty.call(
       customModifiedCells?.[rowId] || {},
@@ -589,12 +595,13 @@ const NestedKendoTable = ({
         {...tdProps}
         title={displayText}
         style={{
-          cursor: 'pointer',
+          cursor: isRowEditable ? 'pointer' : 'not-allowed',
           color: isEdited && displayText ? 'orange' : rawValue ? 'inherit' : 'gray',
           fontWeight: isEdited && displayText ? 'bold' : undefined,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          opacity: isRowEditable ? 1 : 0.6,
         }}
         onClick={(e) => {
           e.preventDefault()
@@ -603,6 +610,9 @@ const NestedKendoTable = ({
         onDoubleClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
+          if (!isRowEditable) {
+            return
+          }
           onRemarkClick(dataItem)
           setEdit?.({})
         }}
@@ -671,6 +681,9 @@ const NestedKendoTable = ({
 
       // Handle leaf columns based on type
       if (col.type === 'number' || col.type === 'number1') {
+        // Determine which numeric editor to use based on min/max constraints
+        const hasMinMaxConstraints = col.minValue !== undefined || col.maxValue !== undefined
+        
         return (
           <GridColumn
             key={col.field}
@@ -683,7 +696,15 @@ const NestedKendoTable = ({
             editable={col?.editable ? true : false}
             headerClassName={isActive ? 'active-column' : ''}
             cells={{
-              edit: { text: NoSpinnerNumericEditor },
+              edit: hasMinMaxConstraints ? {
+                text: (cellProps) => (
+                  <NumericEditorWithMinMax
+                    {...cellProps}
+                    min={col.minValue}
+                    max={col.maxValue}
+                  />
+                ),
+              } : { text: NoSpinnerNumericEditor },
               data: (props) => (
                 <NestedHighlightCell
                   {...props}

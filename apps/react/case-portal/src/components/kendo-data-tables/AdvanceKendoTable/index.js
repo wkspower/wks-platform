@@ -34,6 +34,7 @@ import { MultiselectCellEditor } from '../Utilities-Kendo/phase-two/MultiselectC
 import { BooleanCellEditor } from '../Utilities-Kendo/phase-two/BooleanCellEditor'
 import RemarkDialog from './components/RemarkDialog'
 import { NoSpinnerNumericEditor } from '../Utilities-Kendo/numbericColumns'
+import { NumericEditorWithMinMax } from '../Utilities-Kendo/phase-two/NumericEditorWithMinMax'
 import {
   Backdrop,
   Box,
@@ -679,6 +680,11 @@ const AdvanceKendoTable = ({
     const displayText = String(rawValue ?? '')
     const rowId = dataItem.id
 
+    // Check if row is editable
+    const isRowEditable = !(
+      !dataItem.isEditable && dataItem?.isEditable !== undefined
+    )
+
     // Check if this remark field was edited
     const isEdited = Object.prototype.hasOwnProperty.call(
       customModifiedCells?.[rowId] || {},
@@ -690,12 +696,13 @@ const AdvanceKendoTable = ({
         {...tdProps}
         title={displayText}
         style={{
-          cursor: 'pointer',
+          cursor: isRowEditable ? 'pointer' : 'not-allowed',
           color: isEdited && displayText ? 'orange' : rawValue ? 'inherit' : 'gray',
           fontWeight: isEdited && displayText ? 'bold' : undefined,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          opacity: isRowEditable ? 1 : 0.6,
         }}
         onClick={(e) => {
           e.preventDefault()
@@ -704,6 +711,9 @@ const AdvanceKendoTable = ({
         onDoubleClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
+          if (!isRowEditable) {
+            return
+          }
           onRemarkClick(dataItem)
           setEdit?.({})
         }}
@@ -1179,6 +1189,10 @@ const AdvanceKendoTable = ({
       }
 
       if (col.type === 'number1') {
+        // Determine which numeric editor to use based on min/max constraints
+        const hasMinMaxConstraints = col.minValue !== undefined || col.maxValue !== undefined
+        const NumericEditorComponent = hasMinMaxConstraints ? NumericEditorWithMinMax : NoSpinnerNumericEditor
+        
         return (
           <GridColumn
             key={col.field}
@@ -1189,7 +1203,15 @@ const AdvanceKendoTable = ({
             className={!col?.editable ? 'k-right-disabled' : undefined}
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
-              edit: { text: NoSpinnerNumericEditor },
+              edit: hasMinMaxConstraints ? {
+                text: (cellProps) => (
+                  <NumericEditorWithMinMax
+                    {...cellProps}
+                    min={col.minValue}
+                    max={col.maxValue}
+                  />
+                ),
+              } : { text: NoSpinnerNumericEditor },
               data: (props) =>
                 showThreeColors ? (
                   <RedHighlightCell2

@@ -40,7 +40,7 @@ const STGHeatRate = () => {
       title: 'Load (MW)',
       width: 100,
       type: 'number1',
-      editable: true,
+      editable: false,
       minWidth: 80,
     },
     {

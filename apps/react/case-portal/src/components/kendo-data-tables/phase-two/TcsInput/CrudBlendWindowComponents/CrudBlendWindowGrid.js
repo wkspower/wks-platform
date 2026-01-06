@@ -71,16 +71,24 @@ const CrudBlendWindowGrid = ({
     // Build columns with editable configuration
     return keys.map((key) => {
       const isRemarkField = key === 'remarks' || key === 'reasons'
-      return {
+      const col = {
         field: key,
         title: columnMap[key] || key,
         editable: ['minValue', 'maxValue','criticality','remarks','value_345','maxBlendLimit','reasons'].includes(key) ? true : false,
-        type: ['minValue', 'maxValue','criticality', 'value_345'].includes(key) ? 'number1' : 'text',
+        type: ['minValue', 'maxValue','criticality','maxBlendLimit', 'value_345'].includes(key) ? 'number1' : 'text',
         minWidth: isRemarkField ? 350 : 150,
         widthT: isRemarkField ? 450 : 250,
         hidden: ['id','type'].includes(key),
         locked: ['property','stream','unit','crude'].includes(key),
       }
+      
+      // Add min/max validation for maxBlendLimit
+      if (key === 'maxBlendLimit') {
+        col.minValue = 0
+        col.maxValue = 100
+      }
+      
+      return col
     })
   }, [apiMetadata])
 
