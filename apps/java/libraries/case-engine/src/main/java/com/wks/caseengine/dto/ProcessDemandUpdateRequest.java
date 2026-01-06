@@ -1,27 +1,20 @@
 package com.wks.caseengine.dto;
 
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Data
-public class CalculatedProcessDemandDTO {
-
-    private UUID id;
-    private String financialYear;
-    private String processPlant;
-    private String processPlantId;
-    private String cppUtility;
-    private String cppUtilityId;
-    private String cppPlant;
-    private String cppPlantId;
-    private String uom;
+public class ProcessDemandUpdateRequest {
+    
+    private String processPlantId;  // Required - composite key part
+    private String cppUtilityId;    // Required - composite key part
+    
+    // Optional month fields - only send months being updated
     private Double apr;
     private Double may;
     private Double jun;
@@ -34,7 +27,6 @@ public class CalculatedProcessDemandDTO {
     private Double jan;
     private Double feb;
     private Double mar;
-    private Boolean isCalculated;
-    private String remarks;
-
+    
+    private String remarks;  // Required for audit trail
 }

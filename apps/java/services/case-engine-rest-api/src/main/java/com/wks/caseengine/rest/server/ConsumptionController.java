@@ -7,12 +7,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
 import com.wks.caseengine.dto.PlantRequirementDTO;
+import com.wks.caseengine.dto.ProcessDemandUpdateRequest;
+import com.wks.caseengine.dto.ProcessDemandUpdateResponse;
 import com.wks.caseengine.service.ConsumptionService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +38,14 @@ public class ConsumptionController {
 	public ResponseEntity<List<CalculatedProcessDemandDTO>> getProcessDemand(@PathVariable String financialYear) {
 		List<CalculatedProcessDemandDTO> listOfCppConsumptions = consumptionService.getProcessDemand(financialYear);
 	    return ResponseEntity.ok(listOfCppConsumptions);
+	}
+
+	@PostMapping(value = "/plant-requirement/{financialYear}")
+	public ResponseEntity<ProcessDemandUpdateResponse> updateProcessDemand(
+			@PathVariable String financialYear,
+			@RequestBody List<ProcessDemandUpdateRequest> requests) {
+		ProcessDemandUpdateResponse response = consumptionService.updateProcessDemand(financialYear, requests);
+		return ResponseEntity.ok(response);
 	}
 
 }

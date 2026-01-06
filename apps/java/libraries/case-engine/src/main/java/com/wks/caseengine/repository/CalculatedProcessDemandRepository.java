@@ -1,6 +1,7 @@
 package com.wks.caseengine.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,5 +18,11 @@ public interface CalculatedProcessDemandRepository extends JpaRepository<Calcula
 
     @Query(value = "EXEC dbo.GetProcessDemandByYear @FinancialYear = :financialYear", nativeQuery = true)
     List<Object[]> getProcessDemandByYear(@Param("financialYear") String financialYear);
+
+    /**
+     * Find existing record by composite key for upsert operation
+     */
+    Optional<CalculatedProcessDemand> findByFinancialYearAndProcessPlantIdAndCppUtilityId(
+            String financialYear, String processPlantId, String cppUtilityId);
 
 }

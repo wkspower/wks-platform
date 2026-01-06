@@ -1,23 +1,29 @@
 package com.wks.caseengine.service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
 import com.wks.caseengine.dto.PlantConsumpProjection;
 import com.wks.caseengine.dto.PlantRequirementDTO;
+import com.wks.caseengine.dto.ProcessDemandUpdateRequest;
+import com.wks.caseengine.dto.ProcessDemandUpdateResponse;
 import com.wks.caseengine.entity.CalculatedProcessDemand;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.ProcessDemandMaster;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.repository.CalculatedProcessDemandRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.ProcessDemandMasterRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -36,6 +42,9 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
 	@Autowired
 	private CalculatedProcessDemandRepository calculatedProcessDemandRepository;
+
+	@Autowired
+	private ProcessDemandMasterRepository processDemandMasterRepository;
 
 	@Override
 	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId, String year) {
@@ -173,6 +182,117 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 				.feb(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0)
 				.mar(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0)
 				.isCalculated(row[21] != null && Integer.parseInt(row[21].toString()) == 1)
+				.remarks(row[22] != null ? row[22].toString() : null)
+				.build();
+	}
+
+	@Override
+	@Transactional
+	public ProcessDemandUpdateResponse updateProcessDemand(String financialYear, List<ProcessDemandUpdateRequest> requests) {
+		logger.info("Updating process demand for financial year: {}, items: {}", financialYear, requests.size());
+		
+		int successCount = 0;
+		List<String> errors = new ArrayList<>();
+		
+		for (ProcessDemandUpdateRequest request : requests) {
+			try {
+				// Validate required fields
+				if (request.getProcessPlantId() == null || request.getProcessPlantId().isBlank()) {
+					errors.add("Missing processPlantId for request");
+					continue;
+				}
+				if (request.getCppUtilityId() == null || request.getCppUtilityId().isBlank()) {
+					errors.add("Missing cppUtilityId for processPlantId: " + request.getProcessPlantId());
+					continue;
+				}
+				
+				// Validate against master table
+				Optional<ProcessDemandMaster> masterOpt = processDemandMasterRepository
+						.findByProcessPlantIdAndCppUtilityIdAndIsActiveTrue(
+								request.getProcessPlantId(), request.getCppUtilityId());
+				
+				if (masterOpt.isEmpty()) {
+					errors.add("Invalid plant-utility combination: processPlantId=" + request.getProcessPlantId() 
+							+ ", cppUtilityId=" + request.getCppUtilityId());
+					continue;
+				}
+				
+				ProcessDemandMaster master = masterOpt.get();
+				
+				// Find existing record or create new
+				Optional<CalculatedProcessDemand> existingOpt = calculatedProcessDemandRepository
+						.findByFinancialYearAndProcessPlantIdAndCppUtilityId(
+								financialYear, request.getProcessPlantId(), request.getCppUtilityId());
+				
+				CalculatedProcessDemand entity;
+				if (existingOpt.isPresent()) {
+					// Update existing record
+					entity = existingOpt.get();
+					logger.debug("Updating existing record: {}", entity.getId());
+				} else {
+					// Create new record from master data
+					entity = new CalculatedProcessDemand();
+					entity.setFinancialYear(financialYear);
+					entity.setProcessPlant(master.getProcessPlant());
+					entity.setProcessPlantId(master.getProcessPlantId());
+					entity.setCppUtility(master.getCppUtility());
+					entity.setCppUtilityId(master.getCppUtilityId());
+					entity.setCppPlant(master.getCppPlant());
+					entity.setCppPlantId(master.getCppPlantId());
+					entity.setUom(master.getUom());
+					entity.setCreatedAt(LocalDateTime.now());
+					// Initialize all months to 0
+					entity.setApr(0.0);
+					entity.setMay(0.0);
+					entity.setJun(0.0);
+					entity.setJul(0.0);
+					entity.setAug(0.0);
+					entity.setSep(0.0);
+					entity.setOct(0.0);
+					entity.setNov(0.0);
+					entity.setDec(0.0);
+					entity.setJan(0.0);
+					entity.setFeb(0.0);
+					entity.setMar(0.0);
+					logger.debug("Creating new record for: {} - {}", request.getProcessPlantId(), request.getCppUtilityId());
+				}
+				
+				// Update only non-null month values (partial update)
+				if (request.getApr() != null) entity.setApr(request.getApr());
+				if (request.getMay() != null) entity.setMay(request.getMay());
+				if (request.getJun() != null) entity.setJun(request.getJun());
+				if (request.getJul() != null) entity.setJul(request.getJul());
+				if (request.getAug() != null) entity.setAug(request.getAug());
+				if (request.getSep() != null) entity.setSep(request.getSep());
+				if (request.getOct() != null) entity.setOct(request.getOct());
+				if (request.getNov() != null) entity.setNov(request.getNov());
+				if (request.getDec() != null) entity.setDec(request.getDec());
+				if (request.getJan() != null) entity.setJan(request.getJan());
+				if (request.getFeb() != null) entity.setFeb(request.getFeb());
+				if (request.getMar() != null) entity.setMar(request.getMar());
+				
+				// Update audit fields
+				entity.setRemarks(request.getRemarks());
+				entity.setUpdatedAt(LocalDateTime.now());
+				
+				calculatedProcessDemandRepository.save(entity);
+				successCount++;
+				
+			} catch (Exception e) {
+				logger.error("Error processing request for processPlantId={}, cppUtilityId={}: {}", 
+						request.getProcessPlantId(), request.getCppUtilityId(), e.getMessage());
+				errors.add("Error processing processPlantId=" + request.getProcessPlantId() 
+						+ ", cppUtilityId=" + request.getCppUtilityId() + ": " + e.getMessage());
+			}
+		}
+		
+		logger.info("Update complete. Success: {}, Failures: {}", successCount, errors.size());
+		
+		return ProcessDemandUpdateResponse.builder()
+				.totalReceived(requests.size())
+				.successCount(successCount)
+				.failureCount(errors.size())
+				.errors(errors)
 				.build();
 	}
 }
