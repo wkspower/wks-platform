@@ -116,6 +116,7 @@ public class PowerGenerationService {
              dto.setJan(monthMap.get("January"));
              dto.setFeb(monthMap.get("February"));
              dto.setMarch(monthMap.get("March"));
+             dto.setIsEditable(true);
 
 
             
@@ -252,6 +253,7 @@ public class PowerGenerationService {
             dto.setUtilityPlantAssetId(utilityPlantAsset.getUtilityPlantAssetId());    // for post api
             dto.setAssetType(utilityPlantAsset.getType());
             dto.setRemarks(utilityPlantAsset.getRemarks());
+            dto.setIsEditable(true);
             dto.setApril(buildMonth(utilityPlantAsset.getApr(), startYear, 4));
             dto.setMay(buildMonth(utilityPlantAsset.getMay(), startYear, 5));
             dto.setJune(buildMonth(utilityPlantAsset.getJun(), startYear, 6));
@@ -279,6 +281,7 @@ public class PowerGenerationService {
             dto.setAssetName(operationalHour.getAssetName());
             dto.setAssetId(operationalHour.getAssetId());         // for post api
             dto.setAssetType(operationalHour.getAssetType());
+            dto.setIsEditable(false);
             dto.setApril(buildMonth(operationalHour.getApril(), startYear, 4));
             dto.setMay(buildMonth(operationalHour.getMay(), startYear, 5));
             dto.setJune(buildMonth(operationalHour.getJune(), startYear, 6));

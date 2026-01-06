@@ -32,6 +32,7 @@ public class AssetOperationalResponseDTO {
         this.feb = dto.getFeb();
         this.march = dto.getMarch();
         this.remarks = dto.getRemarks();
+        this.isEditable = dto.isEditable();
     }
 
     private String assetName;   // Name of the PowerGenerationAsset
@@ -55,6 +56,7 @@ public class AssetOperationalResponseDTO {
     private MonthlyHoursDTO feb;
     private MonthlyHoursDTO march;
     private String remarks;
+    private boolean isEditable;
 
     // public AssetOperationalResponseDTO(String assetName,
     //                                    Map<String, MonthlyHoursDTO> months) {
@@ -69,4 +71,12 @@ public class AssetOperationalResponseDTO {
     // public Map<String, MonthlyHoursDTO> getMonths() {
     //     return months;
     // }
+
+    public boolean isEditable() {
+        return isEditable;
+    }
+
+    public void setIsEditable(boolean isEditable) {
+        this.isEditable = isEditable;
+    }
 }
