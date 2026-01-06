@@ -50,6 +50,7 @@ import {
 import LimitCellEditor from './Utilities-Kendo/LimitCellEditor'
 import MonthCell from './Utilities-Kendo/MonthCell'
 import MonthDropdownEditor from './Utilities-Kendo/MonthDropdownEditor'
+import MonthDropdownPEPP from './Utilities-Kendo/MonthDropdownPEPP'
 import { NoSpinnerNumericEditorNegative } from './Utilities-Kendo/negativeNumbericColumns'
 import { NoSpinnerNumericEditor } from './Utilities-Kendo/numbericColumns'
 import { DurationEditor } from './Utilities-Kendo/numericViewCells'
@@ -690,6 +691,13 @@ const KendoDataTables = ({
       </td>
     )
   }
+  const MonthDropdownPEPPDisplayCell = ({ dataItem, field, tdProps }) => {
+  return (
+    <td {...tdProps} title={dataItem[field]}>
+      {dataItem[field]}
+    </td>
+  )
+}
 
   const ElastomerMonthDisplayCell = (props) => {
     const { dataItem, field, tdProps } = props
@@ -1973,6 +1981,53 @@ const KendoDataTables = ({
                     />
                   )
                 }
+                // ...existing code...
+                if (col.type === 'monthDropdownPEPP') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.width}
+                      hidden={col.hidden}
+                      editable={col?.editable ? true : false}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        edit: { text: MonthDropdownPEPP },
+                        data: (props) => {
+                          if (permissions?.MonthDropdownPEPPHighlight) {
+                            // Show orange highlight when edited
+                            const { dataItem, field, tdProps, children } = props
+                            const rowId = dataItem.id
+                            const value = dataItem[field]
+                            const isEdited = Object.prototype.hasOwnProperty.call(
+                              customModifiedCells?.[rowId] || {},
+                              field,
+                            )
+                            return (
+                              <td
+                                {...tdProps}
+                                title={value}
+                                style={{
+                                  color: isEdited ? 'orange' : undefined,
+                                  fontWeight: isEdited ? 'bold' : undefined,
+                                }}
+                              >
+                                {children}
+                              </td>
+                            )
+                          } else {
+                            // Original behavior for other screens
+                            return MonthDropdownPEPPDisplayCell(props)
+                          }
+                        },
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                    />
+                  )
+                }
+// ...existing code...
 
                 if (col.type === 'monthDropdown') {
                   return (

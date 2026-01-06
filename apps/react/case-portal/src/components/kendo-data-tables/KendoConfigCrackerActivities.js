@@ -87,8 +87,8 @@ const DecokingConfig = () => {
 
     const updatedRows = ibrScreen2Rows.map((row) => ({
       ...row,
-      taStartDate: globalTaStartDate,
-      taEndDate: globalTaEndDate,
+      TA_SD: globalTaStartDate,
+      TA_ED: globalTaEndDate,
     }))
 
     setIbrScreen2Rows(updatedRows)
@@ -99,19 +99,25 @@ const DecokingConfig = () => {
       newModifiedCells[row.id] = {
         ...newModifiedCells[row.id],
         ...row,
-        taStartDate: globalTaStartDate,
-        taEndDate: globalTaEndDate,
+        TA_SD: globalTaStartDate,
+        TA_ED: globalTaEndDate,
       }
     })
     setModifiedCellsSdTa(newModifiedCells)
   }, [globalTaStartDate, globalTaEndDate])
-
+ 
   const handleRemarkCellClick2 = (dataItem) => {
-    if (READ_ONLY) return
-    setCurrentRemarkSdTa(dataItem.remarks || '')
-    setCurrentRowId2(dataItem.id)
-    setRemarkDialogOpenSdTa(true)
+  if (READ_ONLY) return 
+  setCurrentRemarkSdTa(dataItem.Remarks )   
+  setCurrentRowId2(dataItem.Id)
+  setRemarkDialogOpenSdTa(true)
   }
+
+
+//WE WILL DO IT LATER 
+
+
+
   const handleRemarkCellClickRunLength = (dataItem) => {
     if (READ_ONLY) return
     setCurrentRemarkRunLength(dataItem.remarks || '')
@@ -222,25 +228,6 @@ const DecokingConfig = () => {
                   ?.filter((col) => col.type === 'date')
                   ?.map((col) => col.field) || []
 
-              const processedData1 = data2.data?.data.map((item, index) => ({
-                ...item,
-                idFromApi: item.id,
-                id: index,
-                // originalRemark: item?.remarks || '',
-                // ibrStartDate: toDateObject(item.ibrStartDate),
-                // ibrEndDate: toDateObject(item.ibrEndDate),
-                // taStartDate: toDateObject(item.taStartDate),
-                // taEndDate: toDateObject(item.taEndDate),
-                // shutDownStartDate: toDateObject(item.shutDownStartDate),
-                // shutDownEndDate: toDateObject(item.shutDownEndDate),
-                // actualRunLength: item.actualRunLength || null,
-                // reduction: item.reduction || null,
-                // preCrDays: calcPreCoilReplacementRunLength(
-                //   item.actualRunLength,
-                //   item.reduction,
-                // ),
-              }))
-
               const processedData = data2.data?.data.map((item, index) => {
                 const converted = {}
 
@@ -251,23 +238,41 @@ const DecokingConfig = () => {
                 return {
                   ...item,
                   ...converted,
-                  idFromApi: item.Id,
+                  Id: item.Id,
                   id: index,
+                  DisplayName: item.DisplayName || item.displayName || item.Name,
+                  originalRemark: item?.Remarks?.trim(),
+                  Remarks: item?.Remarks?.trim(),
+                  isEditable: true,
                 }
               })
 
               serIbrPlanColumns(
-                data2?.data?.columns?.map((col) => ({
+              (data2?.data?.columns || [])
+                .filter(
+                  (col) =>
+                    ![
+                      'DisplaySeq',
+                      'AOPYear',
+                      'Plant_FK_Id',
+                      'Name',
+                      'Id',
+                      'isEditable',
+                      //'TA_SD',
+                      //'TA_ED',
+                    ].includes(col.field)
+                )
+                .map((col) => ({
                   ...col,
-                  editable: true,
-                })),
-              )
+                  editable: !['Pre_CR_Days', 'TA_Duration_Days', 'DisplayName'].includes(col.field),
+                }))
+            )
 
               setRowsForTab(currentTab, processedData, 2)
 
               if (processedData && processedData.length > 0) {
-                const taStart = processedData[0]?.taStartDate
-                const taEnd = processedData[0]?.taEndDate
+                const taStart = processedData[0]?.TA_SD
+                const taEnd = processedData[0]?.TA_ED
 
                 setGlobalTaStartDate(taStart ? toDateObject(taStart) : null)
                 setGlobalTaEndDate(taEnd ? toDateObject(taEnd) : null)
@@ -289,9 +294,15 @@ const DecokingConfig = () => {
 
             if (data3?.code === 200) {
               setCalculationObject(data3?.data?.aopCalculation)
+              const hiddenKeys = ['Id', 'Plant_FK_Id', 'AOPYear'];
               const dynamiccolumnDeckoking = (data3?.data?.columns || []).map((col) => ({
                 ...col,
-                editable: !['Id', 'Date', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(col.field),
+                editable: !(
+                  ['Id', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(col.field) ||
+                  col.field === 'Date' ||
+                  col.field.toLowerCase().includes('actual')
+                ),
+                hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
               }))
               setRunLengthColumns(dynamiccolumnDeckoking)
 
@@ -304,7 +315,11 @@ const DecokingConfig = () => {
                 dynamiccolumnDeckoking.forEach(col => {
                   // Convert date fields if needed
                   if (col.type === 'date') {
-                    row[col.field] = toDateObject(item[col.field])
+                    const dateObj = toDateObject(item[col.field])
+                  row[`${col.field}Obj`] = dateObj
+                  row[col.field] = dateObj
+                    ? moment(dateObj).format('YYYY-MM-DD')
+                    : ''
                   } else {
                     row[col.field] = item[col.field]
                   }
@@ -369,7 +384,7 @@ const DecokingConfig = () => {
               rows[i].isError = true
               rows[j].isError = true
               foundOverlap = true
-              overlapMessage = `Furnace ${rows[i].displayName} ${labelA} overlaps Furnace ${rows[j].displayName} ${labelB}.`
+              overlapMessage = `Furnace ${rows[i].DisplayName} ${labelA} overlaps Furnace ${rows[j].DisplayName} ${labelB}.`
               break
             }
           }
@@ -399,7 +414,7 @@ const DecokingConfig = () => {
             ) {
               rows[i].isError = true
               foundOverlap = true
-              overlapMessage = `Furnace ${rows[i].displayName} ${ranges[m].label} overlaps Furnace ${rows[i].displayName} ${ranges[n].label}.`
+              overlapMessage = `Furnace ${rows[i].DisplayName} ${ranges[m].label} overlaps Furnace ${rows[i].DisplayName} ${ranges[n].label}.`
               break
             }
           }
@@ -428,17 +443,19 @@ const DecokingConfig = () => {
       // const maintEnd = row.shutDownEndDate ? new Date(row.shutDownEndDate) : null
 
       if (rangesOverlap(taStart, taEnd, ibrStart, ibrEnd)) {
-        return `TA dates overlap with IBR dates for Furnace ${row.displayName || row.id + 1}.`
+        return `TA dates overlap with IBR dates for Furnace ${row.DisplayName || row.id + 1}.`
       }
     }
     return null
   }
 
   const saveChangesSdTa = async () => {
-    if (globalTaStartDate && globalTaEndDate) {
-      saveChangesSdTa1()
-    } else saveChangesSdTa2()
+  if (globalTaStartDate && globalTaEndDate) {
+    await saveChangesSdTa1()
+  } else {
+    await saveChangesSdTa2()
   }
+}
 
   const saveChangesSdTa2 = React.useCallback(async () => {
     try {
@@ -474,7 +491,7 @@ const DecokingConfig = () => {
         }
       }
 
-      const requiredFields = ['idFromApi']
+      //const requiredFields = ['idFromApi']
 
       var rawData1 = getRows('IBR Plan')[2]
       // Overlap validation
@@ -489,16 +506,16 @@ const DecokingConfig = () => {
         return
       }
 
-      const validationMessage = validateFields(rawData, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
+      // const validationMessage = validateFields(rawData, requiredFields)
+      // if (validationMessage) {
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({
+      //     message: validationMessage,
+      //     severity: 'error',
+      //   })
+      //   setLoading(false)
+      //   return
+      // }
 
       postIbr2(rawData)
     } catch (error) {
@@ -590,7 +607,7 @@ const DecokingConfig = () => {
         }
       }
 
-      const requiredFields = ['idFromApi']
+    
 
       var rawData1 = getRows('IBR Plan')[2]
       // Overlap validation
@@ -599,17 +616,6 @@ const DecokingConfig = () => {
         setSnackbarOpen(true)
         setSnackbarData({
           message: result.message,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
-
-      const validationMessage = validateFields(rawData, requiredFields)
-      if (validationMessage) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationMessage,
           severity: 'error',
         })
         setLoading(false)
@@ -630,43 +636,57 @@ const DecokingConfig = () => {
   }, [modifiedCellsRunLength])
 
   const postIbr = async (newRow) => {
-    setLoading(true)
-    try {
-      const formatIfDate = (value) => {
-        if (!value) return ''
-        const parsed = moment.utc(
-          value,
-          ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A'],
-          true,
-        )
-        return parsed.isValid()
-          ? new Date(parsed.add(1, 'day').format('YYYY-MM-DD'))
-          : value
-      }
+  setLoading(true)
+  try {
+    if (!ibrPlanColumns || ibrPlanColumns.length === 0) {
+      throw new Error('ibrPlanColumns not loaded')
+    }
 
-      const payload = newRow.map((row) => ({
-        id: row?.idFromApi || null,
-        ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
-        ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
-        taStartDate: formatIfDate(row?.taStartDate) || null,
-        taEndDate: formatIfDate(row?.taEndDate) || null,
-        shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
-        shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
-        preCrDays:
-          row?.actualRunLength != null && row?.reduction != null
-            ? Math.ceil(
-                Number(row.actualRunLength) -
-                  (Number(row.actualRunLength) * Number(row.reduction)) / 100,
-              )
-            : null,
-        postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
-        remarks: row.remarks || '',
-        isCr: row?.isCr ? true : false,
-        actualRunLength: row?.actualRunLength
-          ? Number(row.actualRunLength)
-          : null,
-        reduction: row?.reduction ? Number(row.reduction) : null,
-      }))
+    const formatIfDate = (value) => {
+      if (!value) return null
+      const parsed = moment.utc(
+        value,
+        ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A', 'DD-MM-YYYY'],
+        true,
+      )
+      return parsed.isValid()
+        ? parsed.add(1, 'day').format('YYYY-MM-DD')
+        : value
+    }
+
+    const buildDynamicPayload = (rows, columns) => {
+      return rows.map((row) => {
+        const obj = {
+          Id: row.Id,
+          Plant_FK_Id: PLANT_ID,
+          AOPYear: AOP_YEAR,
+        }
+
+        columns.forEach((col) => {
+          let value = row[col.field]
+
+          if (col.type === 'date') value = formatIfDate(value)
+          if (col.type === 'number' && value != null) value = Number(value)
+
+          obj[col.field] = value
+        })
+
+        if (row.ActualRunLength != null && row.Reduction != null) {
+          obj.Pre_CR_Days = Math.ceil(
+            Number(row.ActualRunLength) -
+              (Number(row.ActualRunLength) * Number(row.Reduction)) / 100
+          )
+        }
+
+        return obj
+      })
+    }
+
+    const payload = buildDynamicPayload(newRow, ibrPlanColumns)
+
+    if (!payload || payload.length === 0) {
+      throw new Error('Payload empty')
+    }
 
       const response = await DataService.postIbr(
         PLANT_ID,
@@ -699,50 +719,63 @@ const DecokingConfig = () => {
     }
   }
   const postIbr2 = async (newRow) => {
-    setLoading(true)
-    try {
-      const formatIfDate = (value) => {
-        if (!value) return ''
-        const parsed = moment.utc(
-          value,
-          ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A'],
-          true,
-        )
-        return parsed.isValid()
-          ? new Date(parsed.add(1, 'day').format('YYYY-MM-DD'))
-          : value
-      }
+  setLoading(true)
+  try {
+    if (!ibrPlanColumns || ibrPlanColumns.length === 0) {
+      throw new Error('ibrPlanColumns not loaded')
+    }
 
-      // const payload = newRow.map((row) => ({
-      //   id: row?.idFromApi || null,
-      //   ibrStartDate: formatIfDate(row?.ibrStartDate) || null,
-      //   ibrEndDate: formatIfDate(row?.ibrEndDate) || null,
-      //   taStartDate: null,
-      //   taEndDate: null,
-      //   shutDownStartDate: formatIfDate(row?.shutDownStartDate) || null,
-      //   shutDownEndDate: formatIfDate(row?.shutDownEndDate) || null,
-      //   preCrDays:
-      //     row?.actualRunLength != null && row?.reduction != null
-      //       ? Math.ceil(
-      //           Number(row.actualRunLength) -
-      //             (Number(row.actualRunLength) * Number(row.reduction)) / 100,
-      //         )
-      //       : null,
-      //   postCrDays: row?.postCrDays ? Number(row.postCrDays) : null,
-      //   remarks: row.remarks || '',
-      //   isCr: row?.isCr ? true : false,
-      //   actualRunLength: row?.actualRunLength
-      //     ? Number(row.actualRunLength)
-      //     : null,
-      //   reduction: row?.reduction ? Number(row.reduction) : null,
-      // }))
+    if (!newRow || newRow.length === 0) {
+      throw new Error('No rows to save')
+    }
 
-      const response = await DataService.postIbr(
-        PLANT_ID,
-        newRow,
-        keycloak,
-        AOP_YEAR,
+    const formatIfDate = (value) => {
+      if (!value) return null
+      const parsed = moment.utc(
+        value,
+        ['MMM D, YYYY', 'MMM D, YYYY, h:mm:ss A', 'DD-MM-YYYY'],
+        true,
       )
+      return parsed.isValid()
+        ? parsed.add(1, 'day').format('YYYY-MM-DD')
+        : value
+    }
+
+    const buildDynamicPayload = (rows, columns) =>
+      rows.map((row) => {
+        const obj = {
+          Id: row.Id,
+          Plant_FK_Id: PLANT_ID,
+          AOPYear: AOP_YEAR,
+        }
+
+        columns.forEach((col) => {
+          let value = row[col.field]
+
+          if (col.type === 'date') value = formatIfDate(value)
+          if (col.type === 'number' && value != null) value = Number(value)
+
+           obj[col.field] = value
+        })
+
+        if (row.ActualRunLength != null && row.Reduction != null) {
+          obj.Pre_CR_Days = Math.ceil(
+            Number(row.ActualRunLength) -
+              (Number(row.ActualRunLength) * Number(row.Reduction)) / 100
+          )
+        }
+
+        return obj
+      })
+
+    const payload = buildDynamicPayload(newRow, ibrPlanColumns)
+
+    const response = await DataService.postIbr(
+      PLANT_ID,
+      payload,
+      keycloak,
+      AOP_YEAR,
+    )
 
       if (response?.code == 200) {
         setSnackbarOpen(true)
@@ -775,18 +808,19 @@ const DecokingConfig = () => {
 
     // Build payload using only those fields
     const payload = newRow.map((row) => {
-      const obj = {}
-      apiFields.forEach((field) => {
-        let value = row[field]
-        // Format date fields if needed
-        const colDef = runLengthColumns.find(col => col.field === field)
-        if (colDef?.type === 'date' && value instanceof Date) {
-          value = `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
-        }
+    const obj = {}
+    apiFields.forEach((field) => {
+      let value = row[field]
+      const colDef = runLengthColumns.find(col => col.field === field)
+      if (colDef?.type === 'date' && value instanceof Date) {
+        // Pass the Date object directly
+        obj[field] = value
+      } else {
         obj[field] = value ?? null
-      })
-      return obj
+      }
     })
+    return obj
+  })
       const response = await DataService.saveCrackerRunLength(
         PLANT_ID,
         payload,
@@ -1097,7 +1131,7 @@ const DecokingConfig = () => {
       </LocalizationProvider>
 
       <SDTAActivitiesGrid
-        columns={ibrPlanColumns}
+        columns={ibrPlanColumns.filter(col => col.field !== 'TA_SD' && col.field !== 'TA_ED')}
         rows={getRows('IBR Plan')[2]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
         fetchData={fetchData}
@@ -1121,9 +1155,7 @@ const DecokingConfig = () => {
       />
 
       <FurnaceRunLengthGrid
-        columns={runLengthColumns.filter(
-          col => !['Id', 'Plant_FK_Id', 'AOPYear'].includes(col.field)
-        )}
+        columns={runLengthColumns}
         rows={getRows('IBR Plan')[3]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
         fetchData={fetchData}

@@ -9,7 +9,7 @@ export const PostCrDaysEditor = ({ dataItem, field, onChange }) => {
   //   : dataItem.isCr;
   
  // const isEditable = wasOriginallyIsCr === true;
-  const isEditable = dataItem.isCr === true;
+  const isEditable = dataItem.IsCR === true;
   const initialValue = dataItem[field] ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
   const isFirstRender = useRef(true)

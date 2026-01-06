@@ -241,11 +241,11 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data?.data
       setCalculationObject(resp?.data?.aopCalculation)
-
+      const hiddenKeys = ['Id', 'AOPYear', 'PlantId'];
       const dynamicColumns = (resp.data?.columns || columns).map(col => ({
         ...col,
         editable: col.type === 'number' || col.field === 'Remarks',
-        hidden: ['Id', 'AOPYear', 'PlantId'].includes(col.field) ? true : col.hidden,
+       hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
       }));
       setColumns(dynamicColumns);
 

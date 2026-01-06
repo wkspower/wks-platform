@@ -164,18 +164,25 @@ export const SlowDownPpColumns = [
     widthT: 130,
   },
 
-  {
-    field: 'maintStartDateTime',
-    title: 'SD- From',
-    type: 'dateTime',
-    editable: true,
-  },
+  // {
+  //   field: 'maintStartDateTime',
+  //   title: 'SD- From',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
 
+  // {
+  //   field: 'maintEndDateTime',
+  //   title: 'SD- To',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
   {
-    field: 'maintEndDateTime',
-    title: 'SD- To',
-    type: 'dateTime',
+    field: 'monthly',
+    title: 'Month',
+    type: 'monthDropdownPEPP',
     editable: true,
+    width: 200,
   },
 
   {

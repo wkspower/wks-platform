@@ -881,8 +881,10 @@ const ProductionvolumeData = ({ permissions }) => {
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
       titleName:
-        VERTICAL_NAME === 'cracker'
-          ? 'Design Capacity (Ethylene)'
+      VERTICAL_NAME === 'cracker'
+        ? 'Design Capacity (Ethylene)'
+        : VERTICAL_NAME === 'pp' && SITE_NAME === 'nmd'
+          ? 'Design Capacity (MCU from MCU Portal)'
           : 'Design Capacity',
     },
     isOldYear,
@@ -908,9 +910,7 @@ const ProductionvolumeData = ({ permissions }) => {
           : false,
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       uploadExcelBtn:
-        VERTICAL_NAME === 'vcm'
-          ? false
-          : permissions?.hideUploadExcel
+         permissions?.hideUploadExcel
             ? false
             : true,
 

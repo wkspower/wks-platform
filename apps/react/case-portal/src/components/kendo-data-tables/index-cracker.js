@@ -80,12 +80,12 @@ export const dateFields = [
   'toDate',
 ]
 export const dateFieldsCracker = [
-  'ibrStartDate',
-  'ibrEndDate',
-  'taStartDate',
-  'taEndDate',
-  'shutDownStartDate',
-  'shutDownEndDate',
+  'IBR_SD',
+  'IBR_ED',
+  'TA_SD',
+  'TA_ED',
+  'ShutDown_SD',
+  'ShutDown_ED',
   'date',
 ]
 export const hiddenFields = []
@@ -182,7 +182,7 @@ const KendoDataTablesCracker = ({
     rows.forEach((row) => {
       // Only set if not already set (preserve original state)
       if (!(row.id in originalIsCrRef.current)) {
-        originalIsCrRef.current[row.id] = row.isCr === true
+        originalIsCrRef.current[row.id] = row.IsCR === true
       }
     })
   }, [rows])
@@ -202,39 +202,40 @@ const KendoDataTablesCracker = ({
         ...r,
         originalIsCr: originalIsCrRef.current[r.id],
         inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
+        inEdit: r.Id === e.dataItem.Id, // only that row goes into edit mode
       })),
     )
   }
-  function calcPreCoilReplacementRunLength(actualRunLength, reduction) {
+  function calcPreCoilReplacementRunLength(ActualRunLength, Reduction) {
     if (
-      actualRunLength === null ||
-      actualRunLength === undefined ||
-      reduction === null ||
-      reduction === undefined
+      ActualRunLength === null ||
+      ActualRunLength === undefined ||
+      Reduction === null ||
+      Reduction === undefined
     )
       return null
     const val =
-      Number(actualRunLength) -
-      (Number(actualRunLength) * Number(reduction)) / 100
+      Number(ActualRunLength) -
+      (Number(ActualRunLength) * Number(Reduction)) / 100
     return isNaN(val) ? null : Number(val.toFixed(2))
   }
   const itemChange = useCallback(
     (e) => {
       setIsRowEdited(true)
       const { dataItem, field, value } = e
-      const itemId = dataItem.id
+      const itemId = dataItem.id || dataItem.Id
       setRows((prev) =>
         prev.map((r) => {
-          if (r.id !== itemId) return r
+          if (r.id !== itemId && r.Id !== itemId) return r
           const updated = { ...r, [field]: value }
-          if (field === 'postCrDays' || field === 'isCr') {
+          if (field === 'Post_CR_Days' || field === 'IsCR') {
             updated.originalIsCr = originalIsCrRef.current[itemId]
           }
           // Auto-calculate preCrDays
-          if (field === 'actualRunLength' || field === 'reduction') {
-            updated.preCrDays = calcPreCoilReplacementRunLength(
-              field === 'actualRunLength' ? value : updated.actualRunLength,
-              field === 'reduction' ? value : updated.reduction,
+          if (field === 'ActualRunLength' || field === 'Reduction') {
+            updated.Pre_CR_Days = calcPreCoilReplacementRunLength(
+              field === 'ActualRunLength' ? value : updated.ActualRunLength,
+              field === 'Reduction' ? value : updated.Reduction,
             )
           }
           return updated
@@ -243,10 +244,10 @@ const KendoDataTablesCracker = ({
       setModifiedCells((prev) => {
         const base = { ...dataItem, [field]: value }
         // Auto-calculate preCrDays in modified cells too
-        if (field === 'actualRunLength' || field === 'reduction') {
-          base.preCrDays = calcPreCoilReplacementRunLength(
-            field === 'actualRunLength' ? value : base.actualRunLength,
-            field === 'reduction' ? value : base.reduction,
+        if (field === 'ActualRunLength' || field === 'Reduction') {
+          base.Pre_CR_Days = calcPreCoilReplacementRunLength(
+            field === 'ActualRunLength' ? value : base.ActualRunLength,
+            field === 'Reduction' ? value : base.Reduction,
           )
         }
         return { ...prev, [itemId]: base }
@@ -259,11 +260,11 @@ const KendoDataTablesCracker = ({
       let updatedRow = null
       let keyToUpdate = ''
       const updatedRows = prevRows.map((row) => {
-        if (row.id === currentRowId) {
-          const keysToUpdate = ['aopRemarks', 'remarks', 'remark'].filter(
+        if (row.id === currentRowId || row.Id === currentRowId) {
+          const keysToUpdate = ['aopRemarks', 'remarks', 'remark', 'Remarks'].filter(
             (key) => key in row,
           )
-          keyToUpdate = keysToUpdate[0] || 'remark'
+          keyToUpdate = keysToUpdate[0] || 'remark' || 'Remarks'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
           return updatedRow
         }
@@ -272,7 +273,7 @@ const KendoDataTablesCracker = ({
       if (updatedRow) {
         setModifiedCells((prev) => ({
           ...prev,
-          [updatedRow.id]: updatedRow,
+          [updatedRow.id || updatedRow.Id]: updatedRow,
         }))
       }
       return updatedRows
@@ -282,7 +283,7 @@ const KendoDataTablesCracker = ({
   const saveConfirmation = async () => {
     saveChanges()
     rows.forEach((row) => {
-      originalIsCrRef.current[row.id] = row.isCr === true
+      originalIsCrRef.current[row.Id] = row.IsCR === true
     })
     setOpenSaveDialogeBox(false)
     setEdit({})
@@ -475,7 +476,7 @@ const KendoDataTablesCracker = ({
             />
           )
         }
-        if (col.field === 'postCrDays') {
+        if (col.field === 'Post_CR_Days') {
           return (
             <GridColumn
               key={col.field}
@@ -627,7 +628,7 @@ const KendoDataTablesCracker = ({
         }
         //--
 
-        if (col.type === 'switch') {
+        if (col.field === 'IsCR') {
           const handleSwitchChange = (props, value) => {
             itemChange({
               dataItem: props.dataItem,
