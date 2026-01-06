@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
@@ -60,6 +62,28 @@ public class HeatRateController {
     @GetMapping("/hrsg-heat-rate-lookup/cpp-utility/{cppUtility}")
     public ResponseEntity<List<HRSGHeatRateLookupDTO>> getHRSGHeatRateByCppUtility(@PathVariable String cppUtility) {
         return ResponseEntity.ok(heatRateService.getHRSGHeatRateByCppUtility(cppUtility));
+    }
+
+
+    // ============== Update Methods ====================
+
+    @PostMapping("/heat-rate/{financialYear}")
+    public ResponseEntity<Void> updateHeatRate(@RequestBody List<HeatRateDTO> heatRateDTOs, @PathVariable String financialYear) {
+        heatRateService.updateHeatRate(heatRateDTOs);
+        return ResponseEntity.ok().build();
+    }
+
+    // update stg extraction
+    @PostMapping("/stg-extraction-lookup/{financialYear}")
+    public ResponseEntity<Void> updateSTGExtraction(@RequestBody List<STGExtractionLookupDTO> stgExtractionLookupDTOs, @PathVariable String financialYear) {
+        heatRateService.updateSTGExtraction(stgExtractionLookupDTOs);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/hrsg-heat-rate-lookup/{financialYear}")
+    public ResponseEntity<Void> updateHRSGHeatRate(@RequestBody List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs, @PathVariable String financialYear) {
+        heatRateService.updateHRSGHeatRate(hrsgHeatRateLookupDTOs);
+        return ResponseEntity.ok().build();
     }
 
 }

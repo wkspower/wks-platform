@@ -1,8 +1,10 @@
 package com.wks.caseengine.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.wks.caseengine.dto.HeatRateDTO;
@@ -32,6 +34,9 @@ public class HeatRateService {
 
     @Autowired
     private HRSGHeatRateLookupRepository hrsgHeatRateLookupRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     // original
     public List<Object[]> getAssetNamesByCppIdAndAssetType(String cppId) {
@@ -122,4 +127,42 @@ public class HeatRateService {
                 .remarks(entity.getRemarks())
                 .build();
     }
+
+
+    // ============== Update Methods ====================
+
+    public void updateHeatRate(List<HeatRateDTO> heatRateDTOs) {
+       
+        List<Object[]> updates = new ArrayList<>();
+        for(HeatRateDTO heatRateDTO : heatRateDTOs) {
+            updates.add(new Object[] { heatRateDTO.getGtLoad(), heatRateDTO.getHeatRate(), heatRateDTO.getFreeSteamFactor(), heatRateDTO.getRemarks(), heatRateDTO.getId() });
+        }
+        if(updates.size() > 0) {
+            String sql = "update HeatRateLookup set  GTLoad = ?, HeatRate = ?, FreeSteamFactor = ?, Remarks = ?  WHERE Id = ?";
+            jdbcTemplate.batchUpdate(sql, updates);
+    }
+}
+
+public void updateHRSGHeatRate(List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs) {
+    List<Object[]> updates = new ArrayList<>();
+    for(HRSGHeatRateLookupDTO hrsgHeatRateLookupDTO : hrsgHeatRateLookupDTOs) {
+        updates.add(new Object[] { hrsgHeatRateLookupDTO.getHrsgLoad(), hrsgHeatRateLookupDTO.getHeatRate(), hrsgHeatRateLookupDTO.getRemarks(), hrsgHeatRateLookupDTO.getId() });
+    }
+    if(updates.size() > 0) {
+        String sql = "update HRSGHeatRateLookup set  HRSGLoad = ?, HeatRate = ?, Remarks = ? where Id = ?";
+        jdbcTemplate.batchUpdate(sql, updates);
+    }
+}
+
+
+public void updateSTGExtraction(List<STGExtractionLookupDTO> stgExtractionLookupDTOs) {
+    List<Object[]> updates = new ArrayList<>();
+    for(STGExtractionLookupDTO stgExtractionLookupDTO : stgExtractionLookupDTOs) {
+        updates.add(new Object[] { stgExtractionLookupDTO.getLoadMW(), stgExtractionLookupDTO.getSvhInletTPH(), stgExtractionLookupDTO.getSmBleedFlowTPH(), stgExtractionLookupDTO.getSlExtFlowTPH(), stgExtractionLookupDTO.getCondensingLoadM3Hr(), stgExtractionLookupDTO.getHeatRateKcalKWH(), stgExtractionLookupDTO.getRemarks(), stgExtractionLookupDTO.getId() });
+    }
+    if(updates.size() > 0) {
+        String sql = "update STGExtractionLookup set LoadMW = ?, SVHInletTPH = ?, SMBleedFlowTPH = ?, SLExtFlowTPH = ?, CondensingLoadM3Hr = ?, HeatRateKcalKWH = ?, Remarks = ? where Id = ?";
+        jdbcTemplate.batchUpdate(sql, updates);
+    }
+}
 }
