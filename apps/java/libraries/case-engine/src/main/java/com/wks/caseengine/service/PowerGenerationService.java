@@ -416,7 +416,7 @@ public class PowerGenerationService {
 
     public void updateLinkedOperationalHours(List<AssetOperationalResponseDTO> payload) {  
  
-        List<Object[]> updates = new ArrayList<>();
+        List<Object[]> Updates = new ArrayList<>();
            for(AssetOperationalResponseDTO asset : payload) {   
 
             UUID utilityPlantAssetId = asset.getUtilityPlantAssetId();
@@ -426,13 +426,13 @@ public class PowerGenerationService {
             }
             String remarks = asset.getRemarks();
 
-              updates.add(new Object[] { remarks, utilityPlantAssetId });
+              Updates.add(new Object[] { asset.getApril().getNetOperationHrs(), asset.getMay().getNetOperationHrs(), asset.getJune().getNetOperationHrs(), asset.getJuly().getNetOperationHrs(), asset.getAug().getNetOperationHrs(), asset.getSep().getNetOperationHrs(), asset.getOct().getNetOperationHrs(), asset.getNov().getNetOperationHrs(), asset.getDec().getNetOperationHrs(), asset.getJan().getNetOperationHrs(), asset.getFeb().getNetOperationHrs(), asset.getMarch().getNetOperationHrs(), asset.getRemarks(), utilityPlantAssetId });
             
            }
 
-           if(updates.size() > 0) {  
-            String sql = "UPDATE UtilityPlantAssets SET Remarks = ? WHERE Id = ?";
-            jdbcTemplate.batchUpdate(sql, updates);
+           if(Updates.size() > 0) {  
+            String sql = "UPDATE UtilityPlantAssets SET Apr = ?, May = ?, Jun = ?, Jul = ?, Aug = ?, Sep = ?, Oct = ?, Nov = ?, Dec = ?, Jan = ?, Feb = ?, Mar = ?, Remarks = ? WHERE Id = ?";
+            jdbcTemplate.batchUpdate(sql, Updates);
            }
 
     }
