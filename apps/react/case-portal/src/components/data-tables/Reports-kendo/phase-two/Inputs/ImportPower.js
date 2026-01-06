@@ -10,6 +10,8 @@ import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/in
 import AssetAvailability from './AssetAvailability'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
+
 
 const ImportPower = () => {
   const keycloak = useSession()
@@ -40,7 +42,12 @@ const ImportPower = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const valueFormat = ValueFormatterProduction()
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   // Column definitions
   const columns = [
@@ -193,6 +200,14 @@ const ImportPower = () => {
       type: 'number1',
       format: valueFormat,
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+   },
   ]
 
   useEffect(() => {
@@ -212,6 +227,7 @@ const ImportPower = () => {
       )
       if (res?.length === 0) {
         setRows([])
+        setOriginalRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
@@ -226,6 +242,7 @@ const ImportPower = () => {
       })
       console.log('tempRes', tempRes)
       setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching import consumption data:', error)
       setSnackbarOpen(true)
@@ -262,6 +279,31 @@ const ImportPower = () => {
       setLoading(false)
       return
     }
+    var rawData = Object.values(modifiedCells)
+    console.log('rawData',rawData)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['april', 'may', 'june', 'july', 'aug', 'sept', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'plant')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
 
     const payload = modifiedData?.map(({ id, inEdit, ...rest }) => rest)
 
@@ -281,6 +323,7 @@ const ImportPower = () => {
         message: `Successfully saved ${modifiedData.length} rows changes!`,
         severity: 'success',
       })
+      fetchImportConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
     } catch (error) {
       console.error('Error saving import consumption data:', error)
       setSnackbarOpen(true)
@@ -291,6 +334,14 @@ const ImportPower = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+
+  // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
   }
 
   return (
@@ -309,6 +360,13 @@ const ImportPower = () => {
         setModifiedCells={setModifiedCells}
         title='Purchase Power Input'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

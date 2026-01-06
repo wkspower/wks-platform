@@ -9,6 +9,7 @@ import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
+import { validateNestedRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const dummyRowsData = [
   {
@@ -63,7 +64,12 @@ const AssetCapacity = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const valueFormat = ValueFormatterProduction()
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
@@ -397,6 +403,14 @@ const AssetCapacity = () => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   useEffect(() => {
@@ -421,9 +435,10 @@ const AssetCapacity = () => {
         return
       }
       let tempRes = res?.map((item, index) => {
-        return { ...item, id: index + 1 }
+        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
       })
       setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching asset capacity data:', error)
       setSnackbarOpen(true)
@@ -459,6 +474,32 @@ const AssetCapacity = () => {
       return
     }
 
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['april.min', 'april.max', 'may.min', 'may.max', 'june.min', 'june.max', 'july.min', 'july.max', 'aug.min', 'aug.max', 'sep.min', 'sep.max', 'oct.min', 'oct.max', 'nov.min', 'nov.max', 'dec.min', 'dec.max', 'jan.min', 'jan.max', 'feb.min', 'feb.max', 'march.min', 'march.max', 'fixedMin', 'fixedMax']
+    const validationError = validateNestedRowDataWithRemarks(data, originalRows, fieldsToCheck, 'assetName')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
     const payload = modifiedData
 
     try {
@@ -489,6 +530,13 @@ const AssetCapacity = () => {
     }
   }
 
+  // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -505,6 +553,13 @@ const AssetCapacity = () => {
         setModifiedCells={setModifiedCells}
         title='Asset Capacity Input'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

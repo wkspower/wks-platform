@@ -9,6 +9,7 @@ import { InputApiService } from 'services/phase-two-services/inputApiService'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { Stack } from '../../../../../../node_modules/@mui/material/index'
 import STGShutdownAndOperationalHr from './STGShutdownAndOperationalHr'
+import { validateNestedRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const generateMonthHours = (aopYear) => {
   if (!aopYear) return {}
@@ -56,7 +57,13 @@ const ShutdownAndOperational = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const valueFormat = ValueFormatterProduction()
+
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   const nestedColumns = [
     {
@@ -366,6 +373,14 @@ const ShutdownAndOperational = () => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   const [hoursRows, setHoursRows] = useState([])
@@ -498,30 +513,13 @@ const ShutdownAndOperational = () => {
         return
       }
 
-      // Merge rows with same assetName
-      // const mergedMap = {}
-      // res?.powerResponse?.forEach((row) => {
-      //   const key = row.assetName
-      //   if (!mergedMap[key]) {
-      //     mergedMap[key] = { ...row }
-      //   } else {
-      //     // Merge utility properties
-      //     if (row.utilityGenerated) {
-      //       mergedMap[key].utilityGenerated = row.utilityGenerated
-      //     }
-      //     if (row.utilityDistributed) {
-      //       mergedMap[key].utilityDistributed = row.utilityDistributed
-      //     }
-      //   }
-      // })
-
-      // const rowsWithIds = Object.values(mergedMap).map((row, index) => ({
-      const rowsWithIds = res?.powerResponse?.map((row, index) => ({
+      const rowsWithIds = res?.powerResponse?.filter((row) => row.assetType !== 'Power_Dis')?.map((row, index) => ({
         ...row,
         id: row.id || index + 1,
       }))
 
       setRows(rowsWithIds)
+      setOriginalRows(rowsWithIds)
     } catch (error) {
       console.error('Error fetching shutdown and operational data:', error)
       setSnackbarOpen(true)
@@ -569,6 +567,32 @@ const ShutdownAndOperational = () => {
       return
     }
 
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['april.shutdownHrs', 'may.shutdownHrs', 'june.shutdownHrs', 'july.shutdownHrs', 'aug.shutdownHrs', 'sep.shutdownHrs', 'oct.shutdownHrs', 'nov.shutdownHrs', 'dec.shutdownHrs', 'jan.shutdownHrs', 'feb.shutdownHrs', 'march.shutdownHrs']
+    const validationError = validateNestedRowDataWithRemarks(data, originalRows, fieldsToCheck, 'assetName')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
     const payload = modifiedData.map(({ id, inEdit, ...rest }) => rest)
     const tempPayload = {
       powerResponse: payload,
@@ -601,6 +625,13 @@ const ShutdownAndOperational = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -629,6 +660,13 @@ const ShutdownAndOperational = () => {
           setModifiedCells={setModifiedCells}
           title='Shutdown and Operational Input (Hours)'
           permissions={permissions}
+          handleRemarkCellClick={handleRemarkCellClick}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
           saveChanges={saveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}

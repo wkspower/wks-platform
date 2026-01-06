@@ -690,8 +690,8 @@ const AdvanceKendoTable = ({
         {...tdProps}
         style={{
           cursor: 'pointer',
-          color: isEdited ? 'orange' : rawValue ? 'inherit' : 'gray',
-          fontWeight: isEdited ? 'bold' : undefined,
+          color: isEdited && displayText ? 'orange' : rawValue ? 'inherit' : 'gray',
+          fontWeight: isEdited && displayText ? 'bold' : undefined,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -1499,6 +1499,7 @@ const AdvanceKendoTable = ({
             alignItems: 'center',
             justifyContent: 'space-between',
             width: '100%',
+            mb: 1,
           }}
         >
           <Box
@@ -1526,6 +1527,7 @@ const AdvanceKendoTable = ({
               ![1, 2, 3, 4, 5].includes(permissions?.tabIndex) && (
                 <Button
                   variant='contained'
+                  // className='custom-btn-additem'
                   className='btn-save'
                   onClick={handleAddRow}
                   disabled={false}
@@ -1536,12 +1538,10 @@ const AdvanceKendoTable = ({
             {permissions?.saveBtn && (
               <Button
                 variant='contained'
-                className='btn-save'
                 onClick={saveModalOpen}
                 disabled={isButtonDisabled}
-                // loading={loading}
-                // loadingposition='start'
-                {...(loading ? {} : {})}
+                className='btn-save'
+                // className='custom-btn-save'
               >
                 Save
               </Button>
@@ -1553,6 +1553,7 @@ const AdvanceKendoTable = ({
                 onClick={handleCalculateBtn}
                 disabled={isButtonDisabled}
                 className='btn-save'
+                // className='custom-btn-calculate'
               >
                 Calculate
               </Button>
@@ -1564,6 +1565,7 @@ const AdvanceKendoTable = ({
                 onClick={handleExport}
                 disabled={isButtonDisabled}
                 className='btn-save'
+                // className='custom-btn-export'
               >
                 Export
               </Button>
@@ -1575,6 +1577,7 @@ const AdvanceKendoTable = ({
                 className='btn-save'
                 onClick={excelExport}
                 disabled={READ_ONLY || rows?.length === 0}
+                // className='custom-btn-export'
               >
                 Export
               </Button>
@@ -1587,6 +1590,7 @@ const AdvanceKendoTable = ({
                   onClick={triggerFileUpload}
                   disabled={isButtonDisabled || READ_ONLY}
                   className='btn-save'
+                  // className='custom-btn-import'
                 >
                   Import
                 </Button>
@@ -1604,8 +1608,7 @@ const AdvanceKendoTable = ({
             {permissions?.showFinalSubmit && (
               <Button
                 variant='contained'
-                // onClick={handleExport}
-                // disabled={isButtonDisabled}
+                // className='custom-btn-submit'
                 className='btn-save'
               >
                 Submit
@@ -1627,6 +1630,19 @@ const AdvanceKendoTable = ({
         </Box>
       )}
 
+      {/* <Box
+        sx={{
+          mt:0.5,
+          borderRadius: '6px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+          overflow: 'hidden',
+          backgroundColor: '#fff',
+          transition: 'boxShadow 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.12)',
+          },
+        }}
+      > */}
       <div className='kendo-data-grid'>
         <Tooltip openDelay={50} position='auto' anchorElement='target'>
           <ExcelExport
@@ -1687,6 +1703,7 @@ const AdvanceKendoTable = ({
           </ExcelExport>
         </Tooltip>
       </div>
+    {/* </Box> */}
 
       {/* snackbar toaster */}
       <Notification

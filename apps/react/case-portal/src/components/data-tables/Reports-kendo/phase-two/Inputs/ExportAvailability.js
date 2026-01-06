@@ -5,9 +5,78 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import { dummyDataForExportAvailability } from '../nestedDummyData'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 
+const dummyDataForExportAvailability = [
+  {
+    id: 1,
+    assetName: 'GT1',
+    uom: 'MW',
+    april: true,
+    may: true,
+    june: false,
+    july: false,
+    aug: false,
+    sep: false,
+    oct: false,
+    nov: false,
+    dec: false,
+    jan: false,
+    feb: false,
+    march: false,
+  },
+  {
+    id: 2,
+    assetName: 'GT2',
+    uom: 'MW',
+    april: true,
+    may: true,
+    june: false,
+    july: true,
+    aug: true,
+    sep: false,
+    oct: false,
+    nov: true,
+    dec: true,
+    jan: false,
+    feb: false,
+    march: false,
+  },
+  {
+    id: 3,
+    assetName: 'GT3',
+    uom: 'MW',
+    april: true,
+    may: false,
+    june: true,
+    july: false,
+    aug: true,
+    sep: false,
+    oct: true,
+    nov: false,
+    dec: true,
+    jan: false,
+    feb: true,
+    march: false,
+  },
+  {
+    id: 4,
+    assetName: 'STG',
+    uom: 'MW',
+    april: false,
+    may: true,
+    june: false,
+    july: true,
+    aug: false,
+    sep: true,
+    oct: false,
+    nov: true,
+    dec: false,
+    jan: true,
+    feb: false,
+    march: true,
+  },
+]
 const ExportAvailability = () => {
   const keycloak = useSession()
   // State management

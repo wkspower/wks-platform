@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const STGHeatRate = () => {
   const keycloak = useSession()
@@ -29,6 +30,10 @@ const STGHeatRate = () => {
   const AOP_YEAR = year?.selectedYear
   const valueFormat = ValueFormatterProduction()
 
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
+  
   const columns = [
     {
       field: 'loadMW',
@@ -78,17 +83,18 @@ const STGHeatRate = () => {
       editable: true,
       minWidth: 140,
     },
-  //   {
-  //   field: 'remark',
-  //   title: 'Remark',
-  //   width: 130,
-  //   type: 'textarea',
-  //   editable: true,
-  //   minWidth: 150,
-  // },
+    {
+    field: 'remarks',
+    title: 'Remark',
+    width: 230,
+    type: 'textarea',
+    editable: true,
+    minWidth: 150,
+  },
   ]
 
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
  
   useEffect(() => {
     if (PLANT_ID) {
@@ -109,6 +115,7 @@ const STGHeatRate = () => {
       }
       console.log('res', res)
       setRows(res)
+      setOriginalRows(res)
     } catch (error) {
       console.error('Error fetching STG heat rate data:', error)
       setSnackbarOpen(true)
@@ -135,13 +142,38 @@ const STGHeatRate = () => {
 
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['loadMW', 'svhInletTPH', 'smBleedFlowTPH', 'slExtFlowTPH', 'condensingLoadM3Hr', 'heatRateKcalKWH']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck)
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return
@@ -154,16 +186,12 @@ const STGHeatRate = () => {
       })
       const tempPayload = JSON.stringify(payload)
 
-      console.log('payload', tempPayload)
-
       const res = await InputApiService.saveSTGHeatRateData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
         payload,
       )
-
-      console.log('res', res)
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -183,6 +211,13 @@ const STGHeatRate = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -200,6 +235,13 @@ const STGHeatRate = () => {
         setModifiedCells={setModifiedCells}
         title='STG Heat Rate'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

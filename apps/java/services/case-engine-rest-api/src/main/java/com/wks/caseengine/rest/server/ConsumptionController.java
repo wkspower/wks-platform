@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
 import com.wks.caseengine.dto.PlantRequirementDTO;
 import com.wks.caseengine.service.ConsumptionService;
 
@@ -27,6 +28,12 @@ public class ConsumptionController {
 	@GetMapping(value = "/plant-requirement/{plantId}/{financialYear}")
 	public ResponseEntity<List<PlantRequirementDTO>> getAllSites(@PathVariable UUID plantId, @PathVariable String financialYear) {
 		List<PlantRequirementDTO> listOfCppConsumptions = consumptionService.getCppConsumptions(plantId, financialYear);
+	    return ResponseEntity.ok(listOfCppConsumptions);
+	}
+
+	@GetMapping(value = "/plant-requirement/{financialYear}")
+	public ResponseEntity<List<CalculatedProcessDemandDTO>> getProcessDemand(@PathVariable String financialYear) {
+		List<CalculatedProcessDemandDTO> listOfCppConsumptions = consumptionService.getProcessDemand(financialYear);
 	    return ResponseEntity.ok(listOfCppConsumptions);
 	}
 

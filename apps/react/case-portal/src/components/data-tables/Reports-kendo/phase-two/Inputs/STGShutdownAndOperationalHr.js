@@ -26,213 +26,192 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
   const [rows, setRows] = useState([])
   const valueFormat = ValueFormatterProduction()
 
-  // const dummySTGData = [
-  //   {
-  //     id: 2,
-  //     assetName: 'HRSG1_SHP STEAM',
-  //     assetType: 'SHP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     july: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     aug: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     sep: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     oct: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     nov: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     dec: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     jan: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     feb: { shutdownHrs: 0, netOperationHrs: 672 },
-  //     march: { shutdownHrs: 0, netOperationHrs: 744 },
-  //   },
-  //   {
-  //     id: 3,
-  //     assetName: 'HRSG2_SHP STEAM',
-  //     assetType: 'SHP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 720, netOperationHrs: 0 },
-  //     july: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     aug: { shutdownHrs: 744, netOperationHrs: 0 },
-  //     sep: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     oct: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     nov: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     dec: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     jan: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     feb: { shutdownHrs: 0, netOperationHrs: 672 },
-  //     march: { shutdownHrs: 0, netOperationHrs: 744 },
-  //   },
-  //   {
-  //     id: 4,
-  //     assetName: 'HRSG3_SHP STEAM',
-  //     assetType: 'SHP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 744, netOperationHrs: 0 },
-  //     june: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     july: { shutdownHrs: 744, netOperationHrs: 0 },
-  //     aug: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     sep: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     oct: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     nov: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     dec: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     jan: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     feb: { shutdownHrs: 0, netOperationHrs: 672 },
-  //     march: { shutdownHrs: 0, netOperationHrs: 744 },
-  //   },
-  //   {
-  //     id: 6,
-  //     assetName: 'HP Steam PRDS',
-  //     assetType: 'HP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     july: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     aug: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     sep: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     oct: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     nov: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     dec: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     jan: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     feb: { shutdownHrs: 0, netOperationHrs: 672 },
-  //     march: { shutdownHrs: 0, netOperationHrs: 744 },
-  //   },
-  
-  //   {
-  //     id: 8,
-  //     assetName: 'STG1_MP STEAM',
-  //     assetType: 'MP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 100, netOperationHrs: 620 },
-  //     july: { shutdownHrs: 100, netOperationHrs: 644 },
-  //     aug: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     sep: { shutdownHrs: 120, netOperationHrs: 600 },
-  //     oct: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     nov: { shutdownHrs: 100, netOperationHrs: 620 },
-  //     dec: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     jan: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     feb: { shutdownHrs: 120, netOperationHrs: 552 },
-  //     march: { shutdownHrs: 120, netOperationHrs: 624 },
-  //   },
-  //   {
-  //     id: 9,
-  //     assetName: 'MP Steam PRDS SHP',
-  //     assetType: 'MP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     july: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     aug: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     sep: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     oct: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     nov: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     dec: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     jan: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     feb: { shutdownHrs: 0, netOperationHrs: 672 },
-  //     march: { shutdownHrs: 0, netOperationHrs: 744 },
-  //   },
-  //   {
-  //     id: 11,
-  //     assetName: 'STG1_LP STEAM',
-  //     assetType: 'LP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 100, netOperationHrs: 620 },
-  //     july: { shutdownHrs: 100, netOperationHrs: 644 },
-  //     aug: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     sep: { shutdownHrs: 120, netOperationHrs: 600 },
-  //     oct: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     nov: { shutdownHrs: 100, netOperationHrs: 620 },
-  //     dec: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     jan: { shutdownHrs: 120, netOperationHrs: 624 },
-  //     feb: { shutdownHrs: 120, netOperationHrs: 552 },
-  //     march: { shutdownHrs: 120, netOperationHrs: 624 },
-  //   },
-  //   {
-  //     id: 12,
-  //     assetName: 'LP Steam PRDS',
-  //     assetType: 'LP Steam_Dis',
-  //     april: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     may: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     june: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     july: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     aug: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     sep: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     oct: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     nov: { shutdownHrs: 0, netOperationHrs: 720 },
-  //     dec: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     jan: { shutdownHrs: 0, netOperationHrs: 744 },
-  //     feb: { shutdownHrs: 0, netOperationHrs: 672 },
-  //     march: { shutdownHrs: 0, netOperationHrs: 744 },
-  //   },
-  // ]
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
-  const dummySTGData =[
-    {
-        "assetName": "NMD-Power Plant-1",
-        "assetId": "6e83b022-8950-434a-a80c-2db532ff6526",
-        "assetType": "GT",
-        "utilityDistributed": [
-            {
-                "name": "Power_Dis",
-                "sapCode": "310027910"
-            }
-        ],
-        "utilityGenerated": [
-            {
-                "name": "POWERGEN",
-                "sapCode": "310027907"
-            }
-        ],
-        "april": {
-            "netOperationHrs": 0.0,
-            "shutdownHrs": 720.0
-        },
-        "may": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        },
-        "june": {
-            "netOperationHrs": 720.0,
-            "shutdownHrs": 0.0
-        },
-        "july": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        },
-        "aug": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        },
-        "sep": {
-            "netOperationHrs": 720.0,
-            "shutdownHrs": 0.0
-        },
-        "oct": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        },
-        "nov": {
-            "netOperationHrs": 710.0,
-            "shutdownHrs": 10.0
-        },
-        "dec": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        },
-        "jan": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        },
-        "feb": {
-            "netOperationHrs": 672.0,
-            "shutdownHrs": 0.0
-        },
-        "march": {
-            "netOperationHrs": 744.0,
-            "shutdownHrs": 0.0
-        }
-    },
-  ]
+  const dummySTGData = [
+  // ===================== SHP Steam =====================
+  {
+    id: 1,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'SHP Steam_Dis', sapCode: '310027924' },
+    utilityGenerated: { name: 'HRSG1_SHP STEAM', sapCode: '310027926' },
+    assetType: 'HRSG',
+    april: { shutdownHrs: 720, netOperationHrs: null },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: 720, netOperationHrs: null },
+    july: { shutdownHrs: null, netOperationHrs: 744 },
+    aug: { shutdownHrs: null, netOperationHrs: 744 },
+    sep: { shutdownHrs: 720, netOperationHrs: null },
+    oct: { shutdownHrs: null, netOperationHrs: 744 },
+    nov: { shutdownHrs: 720, netOperationHrs: null },
+    dec: { shutdownHrs: null, netOperationHrs: 744 },
+    jan: { shutdownHrs: null, netOperationHrs: 744 },
+    feb: { shutdownHrs: 672, netOperationHrs: null },
+    march: { shutdownHrs: null, netOperationHrs: 744 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  {
+    id: 2,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'SHP Steam_Dis', sapCode: '310027924' },
+    utilityGenerated: { name: 'HRSG2_SHP STEAM', sapCode: '310027929' },
+    assetType: 'HRSG',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: 720, netOperationHrs: null },
+    july: { shutdownHrs: null, netOperationHrs: 744 },
+    aug: { shutdownHrs: null, netOperationHrs: 744 },
+    sep: { shutdownHrs: 720, netOperationHrs: null },
+    oct: { shutdownHrs: null, netOperationHrs: 744 },
+    nov: { shutdownHrs: 720, netOperationHrs: null },
+    dec: { shutdownHrs: null, netOperationHrs: 744 },
+    jan: { shutdownHrs: null, netOperationHrs: 744 },
+    feb: { shutdownHrs: 672, netOperationHrs: null },
+    march: { shutdownHrs: null, netOperationHrs: 744 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  {
+    id: 3,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'SHP Steam_Dis', sapCode: '310027924' },
+    utilityGenerated: { name: 'HRSG3_SHP STEAM', sapCode: '310027930' },
+    assetType: 'HRSG',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: 744, netOperationHrs: null },
+    june: { shutdownHrs: null, netOperationHrs: 720 },
+    july: { shutdownHrs: 744, netOperationHrs: null },
+    aug: { shutdownHrs: null, netOperationHrs: 744 },
+    sep: { shutdownHrs: null, netOperationHrs: 720 },
+    oct: { shutdownHrs: null, netOperationHrs: 744 },
+    nov: { shutdownHrs: 720, netOperationHrs: null },
+    dec: { shutdownHrs: null, netOperationHrs: 744 },
+    jan: { shutdownHrs: null, netOperationHrs: 744 },
+    feb: { shutdownHrs: 672, netOperationHrs: null },
+    march: { shutdownHrs: null, netOperationHrs: 744 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  // ===================== HP Steam =====================
+  {
+    id: 4,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'HP Steam_Dis', sapCode: '310027939' },
+    utilityGenerated: { name: 'HP Steam PRDS', sapCode: '310028161' },
+    assetType: 'PRDS',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: null, netOperationHrs: 720 },
+    july: { shutdownHrs: null, netOperationHrs: 744 },
+    aug: { shutdownHrs: null, netOperationHrs: 744 },
+    sep: { shutdownHrs: null, netOperationHrs: 720 },
+    oct: { shutdownHrs: null, netOperationHrs: 744 },
+    nov: { shutdownHrs: null, netOperationHrs: 720 },
+    dec: { shutdownHrs: null, netOperationHrs: 744 },
+    jan: { shutdownHrs: null, netOperationHrs: 744 },
+    feb: { shutdownHrs: null, netOperationHrs: 672 },
+    march: { shutdownHrs: null, netOperationHrs: 744 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  // ===================== MP Steam =====================
+  {
+    id: 5,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'MP Steam_Dis', sapCode: '310027940' },
+    utilityGenerated: { name: 'STG1_MP STEAM', sapCode: '310027952' },
+    assetType: 'Steam Turbine Generator',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: 100, netOperationHrs: 620 },
+    july: { shutdownHrs: 100, netOperationHrs: 644 },
+    aug: { shutdownHrs: 120, netOperationHrs: 624 },
+    sep: { shutdownHrs: 120, netOperationHrs: 600 },
+    oct: { shutdownHrs: 120, netOperationHrs: 624 },
+    nov: { shutdownHrs: 100, netOperationHrs: 620 },
+    dec: { shutdownHrs: 120, netOperationHrs: 624 },
+    jan: { shutdownHrs: 120, netOperationHrs: 624 },
+    feb: { shutdownHrs: 120, netOperationHrs: 552 },
+    march: { shutdownHrs: 120, netOperationHrs: 624 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  {
+    id: 6,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'MP Steam_Dis', sapCode: '310027940' },
+    utilityGenerated: { name: 'MP Steam PRDS SHP', sapCode: '310028012' },
+    assetType: 'PRDS',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: null, netOperationHrs: 720 },
+    july: { shutdownHrs: null, netOperationHrs: 744 },
+    aug: { shutdownHrs: null, netOperationHrs: 744 },
+    sep: { shutdownHrs: null, netOperationHrs: 720 },
+    oct: { shutdownHrs: null, netOperationHrs: 744 },
+    nov: { shutdownHrs: null, netOperationHrs: 720 },
+    dec: { shutdownHrs: null, netOperationHrs: 744 },
+    jan: { shutdownHrs: null, netOperationHrs: 744 },
+    feb: { shutdownHrs: null, netOperationHrs: 672 },
+    march: { shutdownHrs: null, netOperationHrs: 744 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  // ===================== LP Steam =====================
+  {
+    id: 7,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'LP Steam_Dis', sapCode: '310027965' },
+    utilityGenerated: { name: 'STG1_LP STEAM', sapCode: '310028010' },
+    assetType: 'Steam Turbine Generator',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: 100, netOperationHrs: 620 },
+    july: { shutdownHrs: 100, netOperationHrs: 644 },
+    aug: { shutdownHrs: 120, netOperationHrs: 624 },
+    sep: { shutdownHrs: 120, netOperationHrs: 600 },
+    oct: { shutdownHrs: 120, netOperationHrs: 624 },
+    nov: { shutdownHrs: 100, netOperationHrs: 620 },
+    dec: { shutdownHrs: 120, netOperationHrs: 624 },
+    jan: { shutdownHrs: 120, netOperationHrs: 624 },
+    feb: { shutdownHrs: 120, netOperationHrs: 552 },
+    march: { shutdownHrs: 120, netOperationHrs: 624 },
+    remarks: '',
+    inEdit: false,
+  },
+
+  {
+    id: 8,
+    assetName: 'NMD - Utility Plant',
+    utilityDistributed: { name: 'LP Steam_Dis', sapCode: '310027965' },
+    utilityGenerated: { name: 'LP Steam PRDS', sapCode: '310028013' },
+    assetType: 'PRDS',
+    april: { shutdownHrs: null, netOperationHrs: 720 },
+    may: { shutdownHrs: null, netOperationHrs: 744 },
+    june: { shutdownHrs: null, netOperationHrs: 720 },
+    july: { shutdownHrs: null, netOperationHrs: 744 },
+    aug: { shutdownHrs: null, netOperationHrs: 744 },
+    sep: { shutdownHrs: null, netOperationHrs: 720 },
+    oct: { shutdownHrs: null, netOperationHrs: 744 },
+    nov: { shutdownHrs: null, netOperationHrs: 720 },
+    dec: { shutdownHrs: null, netOperationHrs: 744 },
+    jan: { shutdownHrs: null, netOperationHrs: 744 },
+    feb: { shutdownHrs: null, netOperationHrs: 672 },
+    march: { shutdownHrs: null, netOperationHrs: 744 },
+    remarks: '',
+    inEdit: false,
+  },
+];
+
 
   const nestedColumns = [
     {
@@ -281,7 +260,6 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
       editable: false,
       locked: true,
     },
-    
 
     {
       field: 'assetType',
@@ -291,7 +269,7 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
       type: 'text',
       editable: false,
       locked: true,
-      hidden:true
+      hidden: true,
     },
     {
       title: headerMap[4],
@@ -545,6 +523,14 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   useEffect(() => {
@@ -563,13 +549,13 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         PLANT_ID,
         AOP_YEAR,
       )
-      
+
       const rowsWithIds = res?.steamResponse?.map((row, index) => ({
         ...row,
         id: row.id || index + 1,
       }))
-   
-      setRows(rowsWithIds)
+
+      setRows(dummySTGData)
     } catch (error) {
       console.error('Error fetching shutdown and operational data:', error)
       setSnackbarOpen(true)
@@ -610,7 +596,7 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
       const transformed = { ...rest }
       return transformed
     })
-     const tempPayload = {
+    const tempPayload = {
       steamResponse: payload,
     }
 
@@ -640,6 +626,13 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
       setLoading(false)
     }
   }
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
 
   return (
     <Box>
@@ -657,6 +650,13 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
           permissions={permissions}
+          handleRemarkCellClick={handleRemarkCellClick}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
           saveChanges={saveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}

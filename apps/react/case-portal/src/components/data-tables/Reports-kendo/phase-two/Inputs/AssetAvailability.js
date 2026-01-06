@@ -5,10 +5,8 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import { dummyDataForAssetAvailability } from '../nestedDummyData'
-import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
-import { TcsApiService } from 'services/phase-two-services/tcsApiService'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const AssetAvailability = () => {
   const keycloak = useSession()
@@ -40,6 +38,10 @@ const AssetAvailability = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   // Column definitions
   const columns = [
@@ -162,9 +164,18 @@ const AssetAvailability = () => {
       editable: true,
       wholeNumberOnly: true,
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
 
   const nonEditableRows = ['HRSG1', 'HRSG2', 'HRSG3', 'PRDS']
 
@@ -191,9 +202,11 @@ const AssetAvailability = () => {
       }
       const rowsWithEditableFlag = res?.map((row, index) => ({
         ...row,
-        id: index + 1,
+        id: row.id || index + 1,
+        remarks: row.remarks || '',
       }))
       setRows(rowsWithEditableFlag)
+      setOriginalRows(rowsWithEditableFlag)
     } catch (error) {
       console.error('Error fetching asset priority data:', error)
       setSnackbarOpen(true)
@@ -233,6 +246,50 @@ const AssetAvailability = () => {
       return
     }
 
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'march',
+    ]
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'assetName',
+    )
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
     try {
       const payload = modifiedData.map((item) => {
         const { id, inEdit, ...rest } = item
@@ -267,6 +324,13 @@ const AssetAvailability = () => {
     }
   }
 
+  // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -283,6 +347,13 @@ const AssetAvailability = () => {
         setModifiedCells={setModifiedCells}
         title='Asset Priority'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

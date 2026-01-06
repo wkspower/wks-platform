@@ -4,13 +4,8 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import KendoDataTables from 'components/kendo-data-tables/index'
-import { min } from 'lodash'
-import { nestedDummyRows } from './nestedDummyData'
 import {
-  flattenMonthObject,
-  unflattenMonthObject,
+  validateNestedRowDataWithRemarks,
 } from 'components/Utilities/commonUtilityFunctions'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
@@ -46,6 +41,10 @@ const Norms = () => {
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
+
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   // Column definitions
   const nestedColumns = [
@@ -796,9 +795,18 @@ const Norms = () => {
         },
       ],
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [calculationLoading, setCaculationLoading] = useState(false)
 
   useEffect(() => {
@@ -823,9 +831,12 @@ const Norms = () => {
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      console.log('res', res)
-      // setRows(flattenMonthObject(res?.data))
-      setRows(res?.data)
+      let tempRes = res?.data?.map((item, index) => {
+        return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
+      })
+
+      setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -886,7 +897,6 @@ const Norms = () => {
   // Save handler with API call
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
@@ -898,9 +908,35 @@ const Norms = () => {
       return
     }
 
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['apr.norms', 'apr.price', 'may.norms', 'may.price', 'jun.norms', 'jun.price', 'jul.norms', 'jul.price', 'aug.norms', 'aug.price', 'sep.norms', 'sep.price', 'oct.norms', 'oct.price', 'nov.norms', 'nov.price', 'dec.norms', 'dec.price', 'jan.norms', 'jan.price', 'feb.norms', 'feb.price', 'mar.norms', 'mar.price']
+    const validationError = validateNestedRowDataWithRemarks(data, originalRows, fieldsToCheck, 'generatingPlantName')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
     const payload = modifiedData
     const tempPayload=payload?.map((item)=>{
-      const { normHeaderId, ...rest } = item
+      const { normHeaderId,id,inEdit, ...rest } = item
       return {
         ...rest,
        normsHeaderFkId:normHeaderId
@@ -917,6 +953,7 @@ const Norms = () => {
       const response = await UtilityPlantApiServiceV2.saveNormsData(
         keycloak,
         tempPayload, // Now sending nested format: { apr: { norms, quantity, ... } }
+        AOP_YEAR,
       )
 
       // Update the local state with the saved data
@@ -939,6 +976,13 @@ const Norms = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
   return (
     <Box>
       <Backdrop
@@ -959,6 +1003,13 @@ const Norms = () => {
         setModifiedCells={setModifiedCells}
         title='Norms'
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}

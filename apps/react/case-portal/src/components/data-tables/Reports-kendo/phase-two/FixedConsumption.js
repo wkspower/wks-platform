@@ -7,312 +7,7 @@ import { useSession } from 'SessionStoreContext'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-const dummyRowsData = [
-  {
-    id: 1,
-    plant: 'NMD - Power Plant 1',
- 
-    plantId: '40NB',
-   
-    //costCenter: 'NG-GT1-Process',    
-    costCenter: 'Demo',
-   
-    costCenterId: 'RIL_10709000',
-    cppUtility: 'LP Steam_Dis',
-    cppUtilityId: '310027965',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'MT',
-    april: 502,
-    may: 486,
-    june: 502,
-    july: 486,
-    aug: 502,
-    sep: 486,
-    oct: 502,
-    nov: 454,
-    dec: 502,
-    jan: 454,
-    feb: 502,
-    march: 454,
-    grandTotal: 5427,
-  },
-  {
-    id: 2,
-    plant: 'NMD - Power Plant 2',
-    plantId: '40NC',
-    costCenter: 'NG-GT2-Process',
-    costCenterId: 'RIL_10710000',
-    cppUtility: 'Water',
-    cppUtilityId: 'RAW WATER',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'M3',
-    april: 18,
-    may: 19,
-    june: 18,
-    july: 19,
-    aug: 18,
-    sep: 19,
-    oct: 18,
-    nov: 17,
-    dec: 19,
-    jan: 17,
-    feb: 19,
-    march: 17,
-    grandTotal: 201,
-  },
-  {
-    id: 3,
-    plant: 'NMD - Power Plant 3',
-    plantId: '40ND',
-    costCenter: 'NG-GT3-Process',
-    costCenterId: 'RIL_10711000',
-    cppUtility: 'LP Steam_Dis',
-    cppUtilityId: '310027965',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'MT',
-    april: 486,
-    may: 502,
-    june: 486,
-    july: 502,
-    aug: 486,
-    sep: 502,
-    oct: 486,
-    nov: 454,
-    dec: 486,
-    jan: 454,
-    feb: 486,
-    march: 454,
-    grandTotal: 1490,
-  },
-  {
-    id: 4,
-    plant: 'NMD - STG Power Plant',
-    plantId: '40NE',
-    costCenter: 'NG-STG 1-Process',
-    costCenterId: 'RIL_10712000',
-    cppUtility: 'Water',
-    cppUtilityId: 'RAW WATER',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'M3',
-    april: 19,
-    may: 19,
-    june: 19,
-    july: 19,
-    aug: 19,
-    sep: 19,
-    oct: 19,
-    nov: 19,
-    dec: 19,
-    jan: 19,
-    feb: 19,
-    march: 19,
-    grandTotal: 55,
-  },
-  {
-    id: 5,
-    plant: 'NMD - Utility Plant',
-    plantId: '40NF',
-    costCenter: 'NG-Compressed Air',
-    costCenterId: 'RIL_10708018',
-    cppUtility: 'RAW WATER',
-    cppUtilityId: 'RAW WATER',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'M3',
-    april: 250,
-    may: 250,
-    june: 250,
-    july: 250,
-    aug: 250,
-    sep: 250,
-    oct: 250,
-    nov: 250,
-    dec: 250,
-    jan: 250,
-    feb: 250,
-    march: 250,
-    grandTotal: 3000,
-  },
-  {
-    id: 6,
-    plant: 'NMD - Utility Plant',
-    plantId: '40NF',
-    costCenter: 'NG-ETP',
-    costCenterId: 'RIL_10708019',
-    cppUtility: 'Power_Dis',
-    cppUtilityId: '310027910',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40N0',
-    uom: 'KWH',
-    april: 4794000,
-    may: null,
-    june: null,
-    july: null,
-    aug: null,
-    sep: null,
-    oct: null,
-    nov: null,
-    dec: null,
-    jan: null,
-    feb: null,
-    march: null,
-    grandTotal: 5144620,
-  },
-  {
-    id: 7,
-    plant: 'NMD - Utility Plant',
-    plantId: '40NF',
-    costCenter: 'NG-HRSG 1-Steam',
-    costCenterId: 'RIL_10708005',
-    cppUtility: 'LP Steam_Dis',
-    cppUtilityId: '310027965',
-    cppPlant: 'NMD - Utility/Power Dist',
-    cppPlantId: '40NG',
-    uom: 'MT',
-    april: 614,
-    may: 594,
-    june: 614,
-    july: 594,
-    aug: 614,
-    sep: 594,
-    oct: 614,
-    nov: 554,
-    dec: 614,
-    jan: 554,
-    feb: 614,
-    march: 554,
-    grandTotal: 1800,
-  },
-  {
-    id: 8,
-    plant: 'NMD - Utility/Power Dist',
-    plantId: '40NG',
-    costCenter: 'NG-Power Sale',
-    costCenterId: 'RIL_10713001',
-    cppUtility: 'Power_Dis',
-    cppUtilityId: '310027910',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'KWH',
-    april: 89084,
-    may: 91931,
-    june: 93844,
-    july: 93193,
-    aug: 91808,
-    sep: 88284,
-    oct: 94243,
-    nov: 85125,
-    dec: 91268,
-    jan: 109093,
-    feb: 0,
-    march: 0,
-    grandTotal: 109093,
-  },
-  {
-    id: 9,
-    plant: 'NMD - Rev Proc',
-    plantId: '40N0',
-    costCenter: 'NG-Corporate Social Responsibilities',
-    costCenterId: 'RIL_10799029',
-    cppUtility: 'Water',
-    cppUtilityId: 'RAW WATER',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'M3',
-    april: 29837,
-    may: 30331,
-    june: 30831,
-    july: 30831,
-    aug: 30831,
-    sep: 30831,
-    oct: 30831,
-    nov: 30831,
-    dec: 30831,
-    jan: 30831,
-    feb: 30831,
-    march: 30831,
-    grandTotal: 393303,
-  },
-  {
-    id: 10,
-    plant: 'NMD - Rev Proc',
-    plantId: '40N0',
-    costCenter: 'NG-Environment',
-    costCenterId: 'RIL_10799005',
-    cppUtility: 'COMPRESSED AIR',
-    cppUtilityId: '310027904',
-    cppPlant: 'NMD - Utility Plant',
-    cppPlantId: '40NF',
-    uom: 'NM3',
-    april: 26860,
-    may: 27858,
-    june: 26860,
-    july: 27858,
-    aug: 26860,
-    sep: 27858,
-    oct: 26860,
-    nov: 25812,
-    dec: 26860,
-    jan: 25812,
-    feb: 26860,
-    march: 25812,
-    grandTotal: 328303,
-  },
-  {
-    id: 11,
-    plant: 'NMD - Rev Proc',
-    plantId: '40N0',
-    costCenter: 'NG-Fire',
-    costCenterId: 'RIL_10799003',
-    cppUtility: 'Power_Dis',
-    cppUtilityId: '310027910',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'KWH',
-    april: 30600,
-    may: 32100,
-    june: 32400,
-    july: 32400,
-    aug: 31620,
-    sep: 31620,
-    oct: 31620,
-    nov: 31620,
-    dec: 31620,
-    jan: 31620,
-    feb: 31620,
-    march: 31620,
-    grandTotal: 381620,
-  },
-  {
-    id: 12,
-    plant: 'NMD - Rev Proc',
-    plantId: '40N0',
-    costCenter: 'NG-Site Common',
-    costCenterId: 'RIL_10799000',
-    cppUtility: 'Power_Dis',
-    cppUtilityId: '310027910',
-    cppPlant: 'NMD-Rev Proc',
-    cppPlantId: '40N0',
-    uom: 'KWH',
-    april: 86400,
-    may: 89400,
-    june: 89280,
-    july: 89280,
-    aug: 89280,
-    sep: 89280,
-    oct: 89280,
-    nov: 89280,
-    dec: 89280,
-    jan: 89280,
-    feb: 89280,
-    march: 89280,
-    grandTotal: 109280,
-  },
-]
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const FixedConsumption = () => {
   const keycloak = useSession()
@@ -342,8 +37,13 @@ const FixedConsumption = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const [rows, setRows] = useState(dummyRowsData)
+  const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const valueFormat= ValueFormatterProduction()
+  
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
   // Column definitions
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
@@ -535,6 +235,14 @@ const FixedConsumption = () => {
       type: 'number',
       format: valueFormat,
     },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      width: 250,
+      type: 'textarea',
+      editable: true,
+      minWidth: 250,
+    },
   ]
 
   useEffect(() => {
@@ -561,12 +269,14 @@ const FixedConsumption = () => {
 
       const formattedData = res.map((item, index) => ({
         ...item,
-        id: index,
+        remarks:item.remarks || '',
+        id: item.id || index + 1,
       }))
       // Process and set the fetched data to rows
       console.log('*** fixed consumption data', formattedData)
     
       setRows(formattedData)
+      setOriginalRows(formattedData)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -602,6 +312,32 @@ const FixedConsumption = () => {
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['april', 'may', 'june', 'july', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'plant')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return
@@ -644,6 +380,14 @@ const FixedConsumption = () => {
     }
   }
 
+   // Handle remark cell click
+  const handleRemarkCellClick = (row) => {
+    setCurrentRemark(row.remarks || '')
+    setCurrentRowId(row.id)
+    setRemarkDialogOpen(true)
+  }
+
+
   return (
     <Box>
       <Backdrop
@@ -663,6 +407,13 @@ const FixedConsumption = () => {
         // title='Fixed Consumption'
         title={screenTitle?.title}
         permissions={permissions}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
