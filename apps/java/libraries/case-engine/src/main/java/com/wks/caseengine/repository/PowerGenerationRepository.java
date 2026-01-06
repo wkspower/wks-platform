@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.AssetMonthlyOperationalProjection;
 import com.wks.caseengine.dto.PowerGenerationNormParametersProjection;
+import com.wks.caseengine.dto.PowerGenerationSteamResposeProject;
 import com.wks.caseengine.entity.DummyEntity;
 
 
@@ -77,5 +78,26 @@ public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Lo
 
     @Query(value = "select Name, NormType_FK_Id, SAPMaterialCode, AssetId from NormParameters where AssetId in :assetIds", nativeQuery = true)
     List<PowerGenerationNormParametersProjection> getNormParametersByAssetIds(@Param("assetIds") List<UUID> assetIds);
+
+
+    @Query(value = "select * from UtilityPlantAssets where PowerGenerationAsset_FK_Id = :powerGenerationAssetId", nativeQuery = true)
+    List<PowerGenerationSteamResposeProject> getPowerGenerationSteamResposeProject(@Param("powerGenerationAssetId") UUID powerGenerationAssetId);
+
+    @Query(value = """
+            EXEC Get_UtilityPlantAssets :cppPlantId, :financialYear
+            """, nativeQuery = true)
+    List<PowerGenerationSteamResposeProject> getUtilityPlantAssets(@Param("cppPlantId") UUID cppPlantId, @Param("financialYear") String financialYear);
+
+
+    @Query(
+        value = "EXEC Get_UtilityPlant_OperationalHours :cppPlantId, :financialYear",
+        nativeQuery = true
+    )
+    List<AssetMonthlyOperationalProjection> getLinkedOperationalHoursforUtilityPlant(
+        @Param("cppPlantId") UUID cppPlantId,
+        @Param("financialYear") String financialYear
+    );
+
+
 
 }

@@ -34,8 +34,10 @@ public class AssetOperationalResponseDTO {
         this.remarks = dto.getRemarks();
     }
 
-    private String assetName;
-    private UUID assetId;
+    private String assetName;   // Name of the PowerGenerationAsset
+    private UUID assetId;       // Id of the PowerGenerationAsset
+    private UUID utilityPlantAssetId; // Id of the UtilityPlantAsset
+    private String utilityPlantAsset; // Name of the UtilityPlantAsset
     private String assetType;
    // private Map<String, MonthlyHoursDTO> months;
     private AssetUtilityDTO utilityDistributed;

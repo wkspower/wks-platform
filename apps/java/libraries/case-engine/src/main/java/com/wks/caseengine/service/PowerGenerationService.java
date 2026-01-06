@@ -3,9 +3,11 @@ package com.wks.caseengine.service;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ import com.wks.caseengine.dto.AssetOperationalResponseDTO;
 import com.wks.caseengine.dto.AssetUtilityDTO;
 import com.wks.caseengine.dto.MonthlyHoursDTO;
 import com.wks.caseengine.dto.PowerGenerationNormParametersProjection;
+import com.wks.caseengine.dto.PowerGenerationSteamResposeProject;
 import com.wks.caseengine.dto.MasterAssetOperationalResponseDTO;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.repository.PowerGenerationRepository;
@@ -52,7 +55,13 @@ public class PowerGenerationService {
         List<AssetOperationalResponseDTO> powerResponse = new  ArrayList<>();
         List<AssetOperationalResponseDTO> steamResponse = new  ArrayList<>();
 
+        steamResponse = ProcessNMDUtilityPlant1(cppPlantId, financialYear);
+
         for (AssetMonthlyOperationalProjection row : data) {
+
+            if(row.getAssetName().equals("NMD-Utility Plant")) {
+                continue;
+            }
 
             // get the norm parameters for the current asset Id
             List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(Arrays.asList(row.getAssetId()));
@@ -126,7 +135,7 @@ public class PowerGenerationService {
                     }
 
                     if(row.getAssetName().equals("NMD-Utility Plant")) {
-                        steamResponse.add(dto2);
+                     //   steamResponse.add(dto2);
                     } else{
                         powerResponse.add(dto2);
                     }
@@ -135,7 +144,7 @@ public class PowerGenerationService {
           /// add the asset to response even if there are no norm parameters for the asset
             else {
                 if(row.getAssetName().equals("NMD-Utility Plant")) {
-                    steamResponse.add(dto);
+                //    steamResponse.add(dto);
                 } else{
                     powerResponse.add(dto);
                 }
@@ -183,6 +192,114 @@ public class PowerGenerationService {
         response.setSteamResponse(steamResponse);
         return response;
     }
+
+    public List<AssetOperationalResponseDTO> ProcessNMDUtilityPlant(UUID cppPlantId, String financialYear) {  
+      
+        int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        int endYear = startYear + 1;
+        List<PowerGenerationSteamResposeProject> utilityPlantAssets = repository.getUtilityPlantAssets(cppPlantId, financialYear);
+     
+        List<AssetOperationalResponseDTO> steamResponse = new ArrayList<>();
+        for(PowerGenerationSteamResposeProject utilityPlantAsset : utilityPlantAssets) {
+            AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
+            dto.setAssetName(utilityPlantAsset.getAssetName());
+            dto.setUtilityPlantAssetId(utilityPlantAsset.getUtilityPlantAssetId());      // for post api
+            dto.setAssetType(utilityPlantAsset.getType());
+            dto.setApril(buildMonth(utilityPlantAsset.getApr(), startYear, 4));
+            dto.setMay(buildMonth(utilityPlantAsset.getMay(), startYear, 5));
+            dto.setJune(buildMonth(utilityPlantAsset.getJun(), startYear, 6));
+            dto.setJuly(buildMonth(utilityPlantAsset.getJul(), startYear, 7));
+            dto.setAug(buildMonth(utilityPlantAsset.getAug(), startYear, 8));
+            dto.setSep(buildMonth(utilityPlantAsset.getSep(), startYear, 9));
+            dto.setOct(buildMonth(utilityPlantAsset.getOct(), startYear, 10));
+            dto.setNov(buildMonth(utilityPlantAsset.getNov(), startYear, 11));
+            dto.setDec(buildMonth(utilityPlantAsset.getDec(), startYear, 12));
+            dto.setJan(buildMonth(utilityPlantAsset.getJan(), endYear, 1));
+            dto.setFeb(buildMonth(utilityPlantAsset.getFeb(), endYear, 2));
+            dto.setMarch(buildMonth(utilityPlantAsset.getMar(), endYear, 3));
+            dto.setRemarks(utilityPlantAsset.getRemarks());
+
+            dto.setUtilityGenerated(new AssetUtilityDTO(utilityPlantAsset.getUtilityGenerated(), utilityPlantAsset.getUtilityGeneratedSAPCode()));
+            dto.setUtilityDistributed(new AssetUtilityDTO(utilityPlantAsset.getUtilityDistributed(), utilityPlantAsset.getUtilityDistributedSAPCode()));
+
+            steamResponse.add(dto);
+        }
+             return steamResponse;
+
+    }
+
+     public List<AssetOperationalResponseDTO> ProcessNMDUtilityPlant1(UUID cppPlantId, String financialYear) {  
+
+            // get operational hours of editable fields from the  UtilityPlantAssets table [PRDS : HP Steam_PRDS   | STG-Extraction : MP Steam PRDS SHP  | STG-Extraction : LP Steam PRDS ]
+          int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        int endYear = startYear + 1;
+
+        List<AssetOperationalResponseDTO> steamResponse = new ArrayList<>();
+
+        Set<String> UtilityGeneratedToEdit = new HashSet<>(Arrays.asList("HP Steam_PRDS", "MP Steam PRDS SHP", "LP Steam PRDS"));
+        List<PowerGenerationSteamResposeProject> utilityPlantAssets = repository.getUtilityPlantAssets(cppPlantId, financialYear);
+
+         List<PowerGenerationSteamResposeProject> filteredUtilityPlantAssets = utilityPlantAssets.stream().filter(utilityPlantAsset -> utilityPlantAsset.getUtilityGenerated() != null && UtilityGeneratedToEdit.contains(utilityPlantAsset.getUtilityGenerated())).collect(Collectors.toList());
+         
+         List<AssetOperationalResponseDTO> editableFields = new ArrayList<>();
+         for(PowerGenerationSteamResposeProject utilityPlantAsset : filteredUtilityPlantAssets) {
+            AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
+            dto.setAssetName(utilityPlantAsset.getAssetName());
+            dto.setUtilityPlantAssetId(utilityPlantAsset.getUtilityPlantAssetId());    // for post api
+            dto.setAssetType(utilityPlantAsset.getType());
+            dto.setRemarks(utilityPlantAsset.getRemarks());
+            dto.setApril(buildMonth(utilityPlantAsset.getApr(), startYear, 4));
+            dto.setMay(buildMonth(utilityPlantAsset.getMay(), startYear, 5));
+            dto.setJune(buildMonth(utilityPlantAsset.getJun(), startYear, 6));
+            dto.setJuly(buildMonth(utilityPlantAsset.getJul(), startYear, 7));
+            dto.setAug(buildMonth(utilityPlantAsset.getAug(), startYear, 8));
+            dto.setSep(buildMonth(utilityPlantAsset.getSep(), startYear, 9));
+            dto.setOct(buildMonth(utilityPlantAsset.getOct(), startYear, 10));
+            dto.setNov(buildMonth(utilityPlantAsset.getNov(), startYear, 11));
+            dto.setDec(buildMonth(utilityPlantAsset.getDec(), startYear, 12));
+            dto.setJan(buildMonth(utilityPlantAsset.getJan(), endYear, 1));
+            dto.setFeb(buildMonth(utilityPlantAsset.getFeb(), endYear, 2));
+            dto.setMarch(buildMonth(utilityPlantAsset.getMar(), endYear, 3));
+            dto.setUtilityGenerated(new AssetUtilityDTO(utilityPlantAsset.getUtilityGenerated(), utilityPlantAsset.getUtilityGeneratedSAPCode()));
+            dto.setUtilityDistributed(new AssetUtilityDTO(utilityPlantAsset.getUtilityDistributed(), utilityPlantAsset.getUtilityDistributedSAPCode()));
+            editableFields.add(dto);
+         }
+
+     // get the rest of non editable fields from OperationalHours table (No remarks)   
+     List<AssetMonthlyOperationalProjection> operationalHours = repository.getLinkedOperationalHoursforUtilityPlant(cppPlantId, financialYear);
+
+     List<AssetOperationalResponseDTO> nonEditableFields = new ArrayList<>();
+
+           for(AssetMonthlyOperationalProjection operationalHour : operationalHours) {
+            AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
+            dto.setAssetName(operationalHour.getAssetName());
+            dto.setAssetId(operationalHour.getAssetId());         // for post api
+            dto.setAssetType(operationalHour.getAssetType());
+            dto.setApril(buildMonth(operationalHour.getApril(), startYear, 4));
+            dto.setMay(buildMonth(operationalHour.getMay(), startYear, 5));
+            dto.setJune(buildMonth(operationalHour.getJune(), startYear, 6));
+            dto.setJuly(buildMonth(operationalHour.getJuly(), startYear, 7));
+            dto.setAug(buildMonth(operationalHour.getAugust(), startYear, 8));
+            dto.setSep(buildMonth(operationalHour.getSeptember(), startYear, 9));
+            dto.setOct(buildMonth(operationalHour.getOctober(), startYear, 10));
+            dto.setNov(buildMonth(operationalHour.getNovember(), startYear, 11));
+            dto.setDec(buildMonth(operationalHour.getDecember(), startYear, 12));
+            dto.setJan(buildMonth(operationalHour.getJanuary(), endYear, 1));
+            dto.setFeb(buildMonth(operationalHour.getFebruary(), endYear, 2));
+            dto.setMarch(buildMonth(operationalHour.getMarch(), endYear, 3));
+          //  dto.setRemarks(operationalHour.getRemarks());
+            dto.setUtilityGenerated(new AssetUtilityDTO(operationalHour.getUtilityGenerated(), operationalHour.getUtilityGeneratedSAPCode()));
+            dto.setUtilityDistributed(new AssetUtilityDTO(operationalHour.getUtilityDistributed(), operationalHour.getUtilityDistributedSAPCode()));
+            nonEditableFields.add(dto);
+           }
+    
+      // return editableFields and nonEditableFields
+      steamResponse.addAll(editableFields);
+      steamResponse.addAll(nonEditableFields);
+      return steamResponse;
+
+     }
+      
 
     public void setAssetOperationalHours(String financialYear, MasterAssetOperationalResponseDTO masterAssetOperationalResponseDTO) {
 

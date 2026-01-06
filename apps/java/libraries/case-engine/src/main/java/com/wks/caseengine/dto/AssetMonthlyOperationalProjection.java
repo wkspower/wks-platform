@@ -7,6 +7,10 @@ public interface AssetMonthlyOperationalProjection {
     String getAssetName();
     UUID getAssetId();
     String getAssetType();
+    String getUtilityGenerated();
+    String getUtilityGeneratedSAPCode();
+    String getUtilityDistributed();
+    String getUtilityDistributedSAPCode();
     Double getApril();
     Double getMay();
     Double getJune();
