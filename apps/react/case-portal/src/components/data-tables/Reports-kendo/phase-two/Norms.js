@@ -4,13 +4,8 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
-import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import KendoDataTables from 'components/kendo-data-tables/index'
-import { min } from 'lodash'
-import { nestedDummyRows } from './nestedDummyData'
 import {
-  flattenMonthObject,
-  unflattenMonthObject,
+  validateNestedRowDataWithRemarks,
 } from 'components/Utilities/commonUtilityFunctions'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import NestedKendoTable from 'components/kendo-data-tables/NestedKendoTable/index'
@@ -811,6 +806,7 @@ const Norms = () => {
   ]
 
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [calculationLoading, setCaculationLoading] = useState(false)
 
   useEffect(() => {
@@ -839,8 +835,8 @@ const Norms = () => {
         return { ...item, id: item.id || index + 1,remarks: item.remarks || '' }
       })
 
-      // setRows(flattenMonthObject(res?.data))
       setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -901,13 +897,38 @@ const Norms = () => {
   // Save handler with API call
   const saveChanges = async () => {
     setLoading(true)
-    console.log('modifiedCells', modifiedCells)
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'No Records to Save!',
         severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['apr.norms', 'apr.price', 'may.norms', 'may.price', 'jun.norms', 'jun.price', 'jul.norms', 'jul.price', 'aug.norms', 'aug.price', 'sep.norms', 'sep.price', 'oct.norms', 'oct.price', 'nov.norms', 'nov.price', 'dec.norms', 'dec.price', 'jan.norms', 'jan.price', 'feb.norms', 'feb.price', 'mar.norms', 'mar.price']
+    const validationError = validateNestedRowDataWithRemarks(data, originalRows, fieldsToCheck, 'generatingPlantName')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
       })
       setLoading(false)
       return

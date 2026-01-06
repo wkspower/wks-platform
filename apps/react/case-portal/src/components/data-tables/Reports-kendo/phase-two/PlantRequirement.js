@@ -7,6 +7,7 @@ import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPla
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
+import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const PlantRequirement = () => {
   const keycloak = useSession()
@@ -39,6 +40,7 @@ const PlantRequirement = () => {
   const headerMap = generateHeaderNames(AOP_YEAR)
   const valueFormat = ValueFormatterProduction()
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
@@ -271,6 +273,7 @@ const PlantRequirement = () => {
         id: item?.id || index + 1,
       }))
       setRows(formattedData)
+      setOriginalRows(formattedData)
 
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
@@ -312,6 +315,33 @@ const PlantRequirement = () => {
       setLoading(false)
       return
     }
+
+    var rawData = Object.values(modifiedCells)
+    const data = rawData.filter((row) => row.inEdit)
+    if (data.length == 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'No Records to Save!',
+        severity: 'info',
+      })
+      setLoading(false)
+      return
+    }
+
+    // Custom validation: If any row data is updated, remarks must be filled and different from original
+    const fieldsToCheck = ['apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
+    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'processPlant')
+
+    if (validationError) {
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: validationError,
+        severity: 'error',
+      })
+      setLoading(false)
+      return
+    }
+
     const payload = modifiedData;
     try {
       // Transform modifiedCells into the format expected by the API

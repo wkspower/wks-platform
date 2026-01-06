@@ -5,10 +5,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import AdvanceKendoTable from 'components/kendo-data-tables/AdvanceKendoTable/index'
-import { dummyDataForAssetAvailability } from '../nestedDummyData'
-import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/utilityPlantApiServiceV2'
 import { InputApiService } from 'services/phase-two-services/inputApiService'
-import { TcsApiService } from 'services/phase-two-services/tcsApiService'
 import { validateRowDataWithRemarks } from 'components/Utilities/commonUtilityFunctions'
 
 const AssetAvailability = () => {
@@ -205,7 +202,7 @@ const AssetAvailability = () => {
       }
       const rowsWithEditableFlag = res?.map((row, index) => ({
         ...row,
-        id: row.id ||index + 1,
+        id: row.id || index + 1,
         remarks: row.remarks || '',
       }))
       setRows(rowsWithEditableFlag)
@@ -262,8 +259,26 @@ const AssetAvailability = () => {
     }
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
-    const fieldsToCheck = ['april', 'may', 'june', 'july', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'march']
-    const validationError = validateRowDataWithRemarks(data, originalRows, fieldsToCheck, 'assetName')
+    const fieldsToCheck = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'march',
+    ]
+    const validationError = validateRowDataWithRemarks(
+      data,
+      originalRows,
+      fieldsToCheck,
+      'assetName',
+    )
 
     if (validationError) {
       setSnackbarOpen(true)
@@ -309,7 +324,7 @@ const AssetAvailability = () => {
     }
   }
 
-   // Handle remark cell click
+  // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
