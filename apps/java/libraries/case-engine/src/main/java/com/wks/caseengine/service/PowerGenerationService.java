@@ -237,12 +237,13 @@ public class PowerGenerationService {
 
         List<AssetOperationalResponseDTO> steamResponse = new ArrayList<>();
 
-        Set<String> UtilityGeneratedToEdit = new HashSet<>(Arrays.asList("HP Steam_PRDS", "MP Steam PRDS SHP", "LP Steam PRDS"));
+        Set<String> UtilityGeneratedToEdit = new HashSet<>(Arrays.asList("HP Steam PRDS", "MP Steam PRDS SHP", "LP Steam PRDS"));
+        // UtilityPlantOperationalHours
         List<PowerGenerationSteamResposeProject> utilityPlantAssets = repository.getUtilityPlantAssets(cppPlantId, financialYear);
 
          List<PowerGenerationSteamResposeProject> filteredUtilityPlantAssets = utilityPlantAssets.stream().filter(utilityPlantAsset -> utilityPlantAsset.getUtilityGenerated() != null && UtilityGeneratedToEdit.contains(utilityPlantAsset.getUtilityGenerated())).collect(Collectors.toList());
 
-        
+      
 
          List<AssetOperationalResponseDTO> editableFields = new ArrayList<>();
          for(PowerGenerationSteamResposeProject utilityPlantAsset : filteredUtilityPlantAssets) {
@@ -268,6 +269,8 @@ public class PowerGenerationService {
             dto.setMarch(buildMonth(utilityPlantAsset.getMar(), endYear, 3));
             dto.setUtilityGenerated(new AssetUtilityDTO(utilityPlantAsset.getUtilityGenerated(), utilityPlantAsset.getUtilityGeneratedSAPCode()));
             dto.setUtilityDistributed(new AssetUtilityDTO(utilityPlantAsset.getUtilityDistributed(), utilityPlantAsset.getUtilityDistributedSAPCode()));
+
+            
             editableFields.add(dto);
          }
 
