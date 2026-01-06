@@ -763,7 +763,7 @@ public class DecokingActivitiesServiceImpl implements DecokingActivitiesService 
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    List<Map<String, Object>> failedList = new ArrayList<>();
 	    
-	    final Set<String> EXCLUDE = Set.of("AOPYear", "H10 Actual", "H11 Actual", "H12 Actual", 
+	    final Set<String> EXCLUDE = Set.of("AOPYear","aopYear", "H10 Actual", "H11 Actual", "H12 Actual", 
 	                                       "H13 Actual", "H14 Actual", "Id", "Plant_Fk_Id", 
 	                                       "saveStatus", "errDescription", "Month", "Date");
 
