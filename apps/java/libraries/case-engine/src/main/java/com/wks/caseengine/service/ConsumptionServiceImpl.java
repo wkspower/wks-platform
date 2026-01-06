@@ -28,14 +28,14 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
 	private static final Logger logger = LoggerFactory.getLogger(ConsumptionServiceImpl.class);
 
-	@Autowired
-	private CalculatedProcessDemandRepository calculatedProcessDemandRepository;
-
 	@PersistenceContext(unitName = "db1")
 	private EntityManager entityManager;
 
 	@Autowired
 	private PlantsRepository plantsRepository;
+
+	@Autowired
+	private CalculatedProcessDemandRepository calculatedProcessDemandRepository;
 
 	@Override
 	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId, String year) {
@@ -132,40 +132,47 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 	public List<CalculatedProcessDemandDTO> getProcessDemand(String financialYear) {
 		logger.info("Fetching process demand for financial year: {}", financialYear);
 		
-		List<CalculatedProcessDemand> entities = 
-		calculatedProcessDemandRepository.findByFinancialYearOrderByProcessPlant(financialYear);
-		logger.info("Found {} records for financial year: {}", entities.size(), financialYear);
+		List<Object[]> results = calculatedProcessDemandRepository.getProcessDemandByYear(financialYear);
+		logger.info("Found {} records for financial year: {}", results.size(), financialYear);
 		
-		List<CalculatedProcessDemandDTO> result = entities.stream()
-				.map(this::mapToDTO)
-				.collect(Collectors.toList());
+		List<CalculatedProcessDemandDTO> dtoList = new ArrayList<>();
+		for (Object[] row : results) {
+			CalculatedProcessDemandDTO dto = mapRowToDTO(row);
+			dtoList.add(dto);
+		}
 		
-		return result;
+		return dtoList;
 	}
 
-	private CalculatedProcessDemandDTO mapToDTO(CalculatedProcessDemand entity) {
+	/**
+	 * Maps SP result row to DTO.
+	 * SP columns: id, financial_year, process_plant, process_plant_id, cpp_utility, cpp_utility_id,
+	 *             cpp_plant, cpp_plant_id, uom, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar, is_calculated
+	 */
+	private CalculatedProcessDemandDTO mapRowToDTO(Object[] row) {
 		return CalculatedProcessDemandDTO.builder()
-				.id(entity.getId())
-				.financialYear(entity.getFinancialYear())
-				.processPlant(entity.getProcessPlant())
-				.processPlantId(entity.getProcessPlantId())
-				.cppUtility(entity.getCppUtility())
-				.cppUtilityId(entity.getCppUtilityId())
-				.cppPlant(entity.getCppPlant())
-				.cppPlantId(entity.getCppPlantId())
-				.uom(entity.getUom())
-				.apr(entity.getApr())
-				.may(entity.getMay())
-				.jun(entity.getJun())
-				.jul(entity.getJul())
-				.aug(entity.getAug())
-				.sep(entity.getSep())
-				.oct(entity.getOct())
-				.nov(entity.getNov())
-				.dec(entity.getDec())
-				.jan(entity.getJan())
-				.feb(entity.getFeb())
-				.mar(entity.getMar())
+				.id(row[0] != null ? UUID.fromString(row[0].toString()) : null)
+				.financialYear(row[1] != null ? row[1].toString() : null)
+				.processPlant(row[2] != null ? row[2].toString() : null)
+				.processPlantId(row[3] != null ? row[3].toString() : null)
+				.cppUtility(row[4] != null ? row[4].toString() : null)
+				.cppUtilityId(row[5] != null ? row[5].toString() : null)
+				.cppPlant(row[6] != null ? row[6].toString() : null)
+				.cppPlantId(row[7] != null ? row[7].toString() : null)
+				.uom(row[8] != null ? row[8].toString() : null)
+				.apr(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0)
+				.may(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0)
+				.jun(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0)
+				.jul(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0)
+				.aug(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0)
+				.sep(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0)
+				.oct(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0)
+				.nov(row[16] != null ? Double.parseDouble(row[16].toString()) : 0.0)
+				.dec(row[17] != null ? Double.parseDouble(row[17].toString()) : 0.0)
+				.jan(row[18] != null ? Double.parseDouble(row[18].toString()) : 0.0)
+				.feb(row[19] != null ? Double.parseDouble(row[19].toString()) : 0.0)
+				.mar(row[20] != null ? Double.parseDouble(row[20].toString()) : 0.0)
+				.isCalculated(row[21] != null && Integer.parseInt(row[21].toString()) == 1)
 				.build();
 	}
 }
