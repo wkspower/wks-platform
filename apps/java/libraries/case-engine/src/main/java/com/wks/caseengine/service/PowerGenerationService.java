@@ -240,9 +240,13 @@ public class PowerGenerationService {
         List<PowerGenerationSteamResposeProject> utilityPlantAssets = repository.getUtilityPlantAssets(cppPlantId, financialYear);
 
          List<PowerGenerationSteamResposeProject> filteredUtilityPlantAssets = utilityPlantAssets.stream().filter(utilityPlantAsset -> utilityPlantAsset.getUtilityGenerated() != null && UtilityGeneratedToEdit.contains(utilityPlantAsset.getUtilityGenerated())).collect(Collectors.toList());
-         
+
+        
+
          List<AssetOperationalResponseDTO> editableFields = new ArrayList<>();
          for(PowerGenerationSteamResposeProject utilityPlantAsset : filteredUtilityPlantAssets) {
+          
+            System.out.println(" Geerated / Utility type : " + utilityPlantAsset.getUtilityGenerated() + " / " + utilityPlantAsset.getType());
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
             dto.setAssetName(utilityPlantAsset.getAssetName());
             dto.setUtilityPlantAssetId(utilityPlantAsset.getUtilityPlantAssetId());    // for post api
@@ -314,6 +318,8 @@ public class PowerGenerationService {
       else { 
         if(masterAssetOperationalResponseDTO.getSteamResponse() != null) {  
             payload.addAll(masterAssetOperationalResponseDTO.getSteamResponse());
+            updateLinkedOperationalHours(payload);
+            return;
         }
       }
 
@@ -322,7 +328,7 @@ public class PowerGenerationService {
 
 
         
-        // Fetch all financial month IDs in a single query
+        // Fetch all financial month IDs in for a given financial year
         Map<Integer, UUID> financialMonthIds = new LinkedHashMap<>();
         List<Object[]> fyMonths = financialYearMonthRepo.findFinancialYearMonths(startYear, endYear);
         for (Object[] row : fyMonths) {
@@ -330,6 +336,29 @@ public class PowerGenerationService {
             UUID id = UUID.fromString((String) row[1]);
             financialMonthIds.put(month, id);
         }
+
+        // *** Logic to Update Remarks ***
+        List<Object[]> remarksUpdates = new ArrayList<>();
+        for (AssetOperationalResponseDTO asset : payload) {  
+           UUID assetId = asset.getAssetId();
+           String remarks = asset.getRemarks();
+             if(asset.getRemarks() != null) {   
+               
+                for(UUID financialMonthId : financialMonthIds.values()) {
+
+                    remarksUpdates.add(new Object[] { remarks, assetId, financialMonthId });
+             }
+
+        }
+    }
+
+      if(remarksUpdates.size() > 0) {  
+        String sql = "UPDATE OperationalHours SET Remarks = ? WHERE Asset_FK_Id = ? AND FinancialMonthId = ?";
+        jdbcTemplate.batchUpdate(sql, remarksUpdates);
+      }
+           // *** End of Remarks Update Logic ***
+
+
 
         // Validate all data first before any database operations (fail-fast)
         for (AssetOperationalResponseDTO asset : payload) {
@@ -380,6 +409,29 @@ public class PowerGenerationService {
             String sql = "UPDATE PowerGenerationAssets SET Remarks = ? WHERE AssetId = ?";
             jdbcTemplate.batchUpdate(sql, updates);
         }
+    }
+
+    public void updateLinkedOperationalHours(List<AssetOperationalResponseDTO> payload) {  
+ 
+        List<Object[]> updates = new ArrayList<>();
+           for(AssetOperationalResponseDTO asset : payload) {   
+
+            UUID utilityPlantAssetId = asset.getUtilityPlantAssetId();
+
+            if(utilityPlantAssetId == null) {  
+                throw new IllegalArgumentException("UtilityPlantAssetId is required");
+            }
+            String remarks = asset.getRemarks();
+
+              updates.add(new Object[] { remarks, utilityPlantAssetId });
+            
+           }
+
+           if(updates.size() > 0) {  
+            String sql = "UPDATE UtilityPlantAssets SET Remarks = ? WHERE Id = ?";
+            jdbcTemplate.batchUpdate(sql, updates);
+           }
+
     }
 
     /**
