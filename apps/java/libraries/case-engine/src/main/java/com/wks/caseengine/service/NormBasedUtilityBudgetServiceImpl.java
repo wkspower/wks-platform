@@ -74,14 +74,14 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
             // ✅ Call stored procedure with positional parameters (safer)
             StoredProcedureQuery sp = entityManager
-                    .createStoredProcedureQuery("dbo.Testing3")
+                    .createStoredProcedureQuery("dbo.CPP_NMD_GetNormBasedUtilityBudget")
                     .registerStoredProcedureParameter(1, String.class, ParameterMode.IN)
                     .registerStoredProcedureParameter(2, String.class, ParameterMode.IN);
 
             sp.setParameter(1, cppPlantId.toString());
             sp.setParameter(2, financialYear);
 
-            log.info("Executing stored procedure dbo.Testing3 ...");
+            log.info("Executing stored procedure dbo.CPP_NMD_GetNormBasedUtilityBudget ...");
             sp.execute();
 
             @SuppressWarnings("unchecked")

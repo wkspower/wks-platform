@@ -16,7 +16,7 @@ public interface CalculatedProcessDemandRepository extends JpaRepository<Calcula
 
     List<CalculatedProcessDemand> findByFinancialYearOrderByProcessPlant(String financialYear);
 
-    @Query(value = "EXEC dbo.GetProcessDemandByYear @FinancialYear = :financialYear", nativeQuery = true)
+    @Query(value = "EXEC dbo.CPP_NMD_GetProcessDemandByYear @FinancialYear = :financialYear", nativeQuery = true)
     List<Object[]> getProcessDemandByYear(@Param("financialYear") String financialYear);
 
     /**

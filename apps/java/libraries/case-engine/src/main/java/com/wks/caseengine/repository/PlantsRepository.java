@@ -26,7 +26,7 @@ public interface PlantsRepository extends JpaRepository<Plants, UUID>{
    	List getShutdownMonthsWithGrades(@Param("plantId") UUID plantId, @Param("maintenanceName") String maintenanceName,@Param("AuditYear") String AuditYear,@Param("gradeId") UUID gradeId);
 
 
-      @Query(value = "Exec GetPlantConsumptionByMaterial @CPPPlantId = :plantId, @AOPYear = :year", nativeQuery = true)
+      @Query(value = "Exec dbo.CPP_NMD_GetPlantConsumptionByMaterial @CPPPlantId = :plantId, @AOPYear = :year", nativeQuery = true)
       List<PlantConsumpProjection> findPlantConsumptionByMaterial(@Param("plantId") UUID plantId, @Param("year") String year);
 	
 
