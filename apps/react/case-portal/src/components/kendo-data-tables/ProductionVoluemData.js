@@ -22,6 +22,7 @@ import {
   getColDefsMaxAchievedCapacityPEPP,
   getColDefsNonEditable,
   getColDefsPercentageSummary,
+  getColDefsPercentageSummaryPEPP,
 } from './Utilities-Kendo/productionTargetColDefs'
 import ProductionTarget from './ProductionTarget'
 import AromaticsProductionGrids from './AromaticsProductionGrids'
@@ -571,10 +572,10 @@ const ProductionvolumeData = ({ permissions }) => {
     })
   }
 
-  const colDefs_percentage_summary = getColDefsPercentageSummary(
-    headerMap,
-    valueFormat,
-  )
+  const colDefs_percentage_summary = IS_PE_PP
+  ? getColDefsPercentageSummaryPEPP(headerMap, valueFormat)
+  : getColDefsPercentageSummary(headerMap, valueFormat)
+
   const colDefs_design_capacity = IS_PE_PP || IS_PET
     ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
     : getColDefsDesignCapacity(headerMap, valueFormat)

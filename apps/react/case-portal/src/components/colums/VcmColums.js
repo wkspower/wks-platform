@@ -33,12 +33,12 @@ export const SlowDownVcmColumns = [
     editable: true,
   },
 
-  {
-    field: 'rate',
-    title: 'Rate (TPH)',
-    editable: true,
-    type: 'number',
-  },
+  // {
+  //   field: 'rate',
+  //   title: 'Rate (TPH)',
+  //   editable: true,
+  //   type: 'number',
+  // },
 
   {
     field: 'remark',

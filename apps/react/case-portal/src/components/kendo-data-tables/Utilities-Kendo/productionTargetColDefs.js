@@ -22,6 +22,30 @@ export function getColDefsPercentageSummary(headerMap = {}, valueFormat) {
   ]
 }
 
+export function getColDefsPercentageSummaryPEPP(headerMap = {}, valueFormat) {
+  return [
+    { field: 'idFromApi', title: 'ID', hidden: true },
+    { field: 'aopCaseId', title: 'Case ID', editable: false, hidden: true },
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
+    ...generateMonthColumnsPercentageSummaryPPE(headerMap, false, valueFormat),
+    { field: 'avgTph', title: 'AVG', editable: false, hidden: true },
+    { field: 'isEditable', title: 'isEditable', hidden: true },
+    //add here
+  ]
+}
+
 export function getColDefsDesignCapacity(headerMap = {}, valueFormat) {
   return [
     {
@@ -306,7 +330,8 @@ function generateMonthColumnsForPEPP(
       align: 'left',
       headerAlign: 'left',
       type: 'number',
-      widthT: fullMonthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
+      widthT:112,
+     // widthT: fullMonthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
     }
   })
 }
@@ -354,7 +379,32 @@ function generateMonthColumnsFixedWidthPEPP(
       align: 'left',
       headerAlign: 'left',
       type: 'number',
-      widthT: monthName === 'March' ? 200 : undefined,
+      widthT: 112,
+      //widthT: monthName === 'March' ? 200 : undefined,
+    }
+  })
+}
+
+function generateMonthColumnsPercentageSummaryPPE(
+  headerMap = {},
+  editable = true,
+  valueFormat,
+) {
+  const monthOrder = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
+
+  return monthOrder.map((month) => {
+    const monthName = getMonthName(month)
+
+    return {
+      field: monthName.toLowerCase(),
+      title: headerMap[month],
+      format: valueFormat,
+      editable,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+      widthT: 112,
+      //widthT: monthName === 'March' ? 200 : undefined,
     }
   })
 }

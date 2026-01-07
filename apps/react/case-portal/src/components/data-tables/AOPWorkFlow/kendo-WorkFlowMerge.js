@@ -660,6 +660,16 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary (T-22)',
   ]
+  const vcmTabs = [
+  'Annual AOP Cost',
+  'Plant Production Summary',
+  'Month Wise Production Plan',
+  'Month Wise Raw Data', // Changed for VCM
+  'Turnaround Report',
+  'Annual Production Plan',
+  'Plant Contribution',
+  'Plant Contribution Summary (T-22)',
+]
 
   // Pick tabs based on vertical
   // Pick tabs based on vertical
@@ -667,11 +677,12 @@ const WorkFlowMerge = () => {
   let activeTabs = defaultTabs
   if (lowerVertName === 'cracker') {
     activeTabs = crackerTabs
-  } else if (
+  } else if (lowerVertName === 'vcm') {
+  activeTabs = vcmTabs
+  }else if (
     lowerVertName === 'elastomer' ||
     lowerVertName === 'aromatics' ||
-    lowerVertName === 'pta' ||
-    lowerVertName === 'vcm'
+    lowerVertName === 'pta'
   ) {
     activeTabs = elastomerTabs
   } else if (lowerVertName === 'pe' || lowerVertName === 'pet') {

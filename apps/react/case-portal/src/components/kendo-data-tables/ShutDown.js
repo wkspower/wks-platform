@@ -361,8 +361,7 @@ const ShutDown = ({ permissions }) => {
 
         if (
           lowerVertName != 'elastomer' &&
-          // VCM logic change
-          // lowerVertName != 'vcm' &&
+          lowerVertName != 'vcm' &&
           lowerVertName != 'pvc'
         ) {
           for (let i = 0; i < rows.length; i++) {
