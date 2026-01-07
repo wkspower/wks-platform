@@ -6,14 +6,11 @@ import {
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import { getColumnMenuCheckboxFilter } from 'components/data-tables/Reports/ColumnMenu1'
-import Notification from 'components/Utilities/Notification'
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { SvgIcon } from '@progress/kendo-react-common'
 import { trashIcon } from '@progress/kendo-svg-icons'
 import '../../../../../src/kendo-data-grid.css'
 import { Tooltip } from '@progress/kendo-react-tooltip'
-
 import {
   Backdrop,
   Box,
@@ -24,13 +21,15 @@ import {
 import DeleteDialog from '../AdvanceKendoTable/components/DeleteDialog'
 import SaveConfirmationDialog from '../AdvanceKendoTable/components/SaveConfirmationDialog'
 import { ExcelExport } from '@progress/kendo-react-excel-export'
-import valueFormatterByUOM from 'utils/ValueFormatterByUOM'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import RemarkDialog from '../AdvanceKendoTable/components/RemarkDialog'
 import { NumericEditorWithMinMax } from '../utilities/NumericEditorWithMinMax'
 import { NumberCellEditor } from '../utilities/NumberCellEditor'
-import { NoSpinnerNumericEditor } from 'components/kendo-data-tables/Utilities-Kendo/numbericColumns'
+import Notification from '../utilities/Notification'
+import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
+import valueFormatterByUOM from '../commonUtilityFunctions'
+import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 
 export const hiddenFields = [
   'maintenanceId',
