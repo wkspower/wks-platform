@@ -20,7 +20,7 @@ import com.wks.caseengine.entity.DummyEntity;
 public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Long> {
 
     @Query(
-        value = "EXEC GetPowerGenerationOperationalHours :cppPlantId, :financialYear",
+        value = "EXEC dbo.CPP_NMD_GetPowerGenerationOperationalHours :cppPlantId, :financialYear",
         nativeQuery = true
     )
     List<AssetMonthlyOperationalProjection> getOperationalHours(
@@ -84,13 +84,13 @@ public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Lo
     List<PowerGenerationSteamResposeProject> getPowerGenerationSteamResposeProject(@Param("powerGenerationAssetId") UUID powerGenerationAssetId);
 
     @Query(value = """
-            EXEC Get_UtilityPlantAssets :cppPlantId, :financialYear
+            EXEC dbo.CPP_NMD_Get_UtilityPlantAssets :cppPlantId, :financialYear
             """, nativeQuery = true)
     List<PowerGenerationSteamResposeProject> getUtilityPlantAssets(@Param("cppPlantId") UUID cppPlantId, @Param("financialYear") String financialYear);
 
 
     @Query(
-        value = "EXEC Get_UtilityPlant_OperationalHours :cppPlantId, :financialYear",
+        value = "EXEC dbo.CPP_NMD_Get_UtilityPlant_OperationalHours :cppPlantId, :financialYear",
         nativeQuery = true
     )
     List<AssetMonthlyOperationalProjection> getLinkedOperationalHoursforUtilityPlant(

@@ -27,7 +27,7 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
 
     @Query(
         value = """
-            EXEC GetAssetPriority
+            EXEC dbo.CPP_NMD_GetAssetPriority
                  @CppId = :cppId,
                  @FinancialYear = :financialYear
         """,
