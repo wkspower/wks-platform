@@ -48,8 +48,6 @@ import PlantSafetyPerformanceTarget from 'components/kendo-data-tables/PlantSafe
 import IntermediateValuesDataSet from 'components/data-tables/Reports/IntermediateValuesDataSet'
 import RawDataSet from 'components/data-tables/Reports/RawDataSet'
 import UtilitiesNormsBasis from 'components/data-tables/Reports/UtilitiesNormsBasis'
-import PlantRequirement from 'components/data-tables/Reports-kendo/phase-two/PlantRequirement'
-import FixedConsumption from 'components/data-tables/Reports-kendo/phase-two/FixedConsumption'
 import SteadyStateNormsHistorianBasis from 'components/data-tables/Reports/SteadyStateNormsHistorianBasis'
 import ConsumptionNormsHistorianBasis from 'components/data-tables/Reports/ConsumptionNormsHistorianBasis'
 import BestAchievedIndividualNorms from 'components/data-tables/Reports/BestAchievedIndividualNorms'
@@ -63,11 +61,17 @@ import SiteMaintenanceSummary from 'components/kendo-data-tables/SiteMaintenance
 import FeedStockAvailability from 'components/kendo-data-tables/FeedStockavailability'
 import TurnaroundPlanTable from 'components/kendo-data-tables/TurnaroundPlanTable'
 import NormComparisonReport from 'components/kendo-data-tables/NormComparisonReport'
-import TcsOutput from 'components/kendo-data-tables/TcsOutput'
-import PimsOutput from 'components/kendo-data-tables/PimsOutput'
-import Norms from 'components/data-tables/Reports-kendo/phase-two/Norms'
-import TcsInput from 'components/kendo-data-tables/phase-two/TcsInput'
-import Inputs from 'components/data-tables/Reports-kendo/phase-two/Inputs/index'
+//CPP
+import Inputs from 'components/phase-two/CPP/Inputs/index'
+import PlantRequirement from 'components/phase-two/CPP/PlantRequirement'
+import FixedConsumption from 'components/phase-two/CPP/FixedConsumption'
+import Norms from 'components/phase-two/CPP/Norms'
+
+// TCS
+
+import TcsOutput from 'components/phase-two/TCS/TcsOutput/TcsOutput'
+import PimsOutput from 'components/phase-two/TCS/PimsOutput/PimsOutput'
+import TcsInput from 'components/phase-two/TCS/TcsInput/index'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
