@@ -17,8 +17,7 @@ import com.wks.caseengine.entity.DummyEntity;
 public interface AssetCapacityRepository extends JpaRepository<DummyEntity, Long> {
 
     @Query(
-        value = "EXEC GetAssetCapacity " +
-
+        value = "EXEC dbo.CPP_NMD_GetAssetCapacity " +
                 "@CppId = :cppId, " +
                 "@FinancialYear = :financialYear",
         nativeQuery = true
