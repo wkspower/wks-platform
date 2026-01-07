@@ -146,7 +146,7 @@ export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
       return [
         {
           field: 'Particulars',
-          title: 'JMD-CPP',
+          title: 'Machine',
           width: 120,
           minWidth: 80,
           editable: true,
@@ -161,15 +161,10 @@ export const getColumnsForTab = (tabName, headerMap, valueFormat) => {
         },
         {
           title: 'GT maintenance',
-          children: [
-            {
-              field: 'gtMaintenance',
-              title: 'MI/HGPI/CI/Mods',
-              widthT: 240,
-              minWidth: 80,
-              editable: true,
-            },
-          ],
+          field: 'gtMaintenance',
+          widthT: 240,
+          minWidth: 80,
+          editable: true,
         },
         {
           field: 'noOfDays',
