@@ -763,6 +763,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
 								: 0.0);
 				configurationDTO.setRemarks((row[13] != null ? row[13].toString() : ""));
+				configurationDTO.setUOM((row[16] != null ? row[16].toString() : ""));
 					configurationDTO.setConfigTypeDisplayName(row[17] != null ? row[17].toString() : "");
 					configurationDTO.setTypeDisplayName(row[18] != null ? row[18].toString() : "");
 					configurationDTO.setConfigTypeName(row[19] != null ? row[19].toString() : "");
