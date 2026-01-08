@@ -330,7 +330,6 @@ function generateMonthColumnsForPEPP(
       align: 'left',
       headerAlign: 'left',
       type: 'number',
-      widthT:112,
      // widthT: fullMonthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
     }
   })
@@ -379,7 +378,6 @@ function generateMonthColumnsFixedWidthPEPP(
       align: 'left',
       headerAlign: 'left',
       type: 'number',
-      widthT: 112,
       //widthT: monthName === 'March' ? 200 : undefined,
     }
   })
@@ -403,7 +401,6 @@ function generateMonthColumnsPercentageSummaryPPE(
       align: 'left',
       headerAlign: 'left',
       type: 'number',
-      widthT: 112,
       //widthT: monthName === 'March' ? 200 : undefined,
     }
   })

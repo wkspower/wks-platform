@@ -16,7 +16,9 @@ export const validateFields = (data, requiredFields) => {
     rateEO: 'EO Rate',
     rateEOE: 'EOE Rate',
     productName1: 'Particular',
+    productName: 'Particulars',
     discriptionDrpdwn: 'Description',
+    monthly: 'Month',
   }
 
   const invalidRows = data.filter((row) => {

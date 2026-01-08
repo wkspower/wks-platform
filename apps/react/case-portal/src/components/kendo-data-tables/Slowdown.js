@@ -245,14 +245,6 @@ const SlowDown = ({ permissions }) => {
             const [h = '00', m = '00'] = String(v).split('.')
             return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
           })(),
-        // durationInHrs: (() => {
-        //   const v = findDuration('1', row)
-        //   if (!v) return null
-        //   const [h = '00', m = '00'] = String(v).split('.')
-        //   return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
-        // })(),
-        //maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-       // maintStartDateTime: addTimeOffset(row.maintStartDateTime),
         month: row.monthly,
         remark: row.remark,
         rate: row.rate,
@@ -428,6 +420,8 @@ const SlowDown = ({ permissions }) => {
         'remark',
         'rate',
         'productName1',
+        'durationInHrs',
+        'monthly',
       ]
       const requiredFieldsForMeg = [
         'discription',
@@ -454,10 +448,13 @@ const SlowDown = ({ permissions }) => {
             value === undefined ||
             (typeof value === 'string' && value.trim() === '')
           ) {
+            let displayField = field
+            if (field === 'productName1') displayField = 'Particulars'
+            else if (field === 'monthly') displayField = 'Month'
             record.isError = true
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `Required field "${field}" is missing for "${record.discription || 'this record'}".`,
+              message: `Required field "${displayField}" is missing for "${record.discription || 'this record'}".`,
               severity: 'error',
             })
             return

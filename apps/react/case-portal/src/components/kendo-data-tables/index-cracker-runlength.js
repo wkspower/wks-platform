@@ -762,7 +762,24 @@ const KendoDataTablesCrackerRunLength = ({
             />
           )
         }
-
+         if (col.type === 'date') {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              filter="date"
+              filterable={true}
+              columnMenu={ColumnMenuCheckboxFilter}
+              format="{0:dd-MM-yyyy}"
+              hidden={col.hidden}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                headerCell: SimpleHeaderWithTooltip,
+              }}
+            />
+          );
+        }
         if (!col.editable) {
           return (
             <GridColumn
@@ -1197,7 +1214,7 @@ const KendoDataTablesCrackerRunLength = ({
         .filter(col => col.field && col.field.trim() !== '')
         .map(col => ({
           ...col,
-          editable: true,
+          editable: col.field === 'Date' || col.field === 'Month' ? false : true,
           hidden: ['aopYear', 'plantId'].includes(col.field), 
         }));
       
@@ -1277,8 +1294,8 @@ const KendoDataTablesCrackerRunLength = ({
           }
         });
         
-
-        setRowsPopUp(processedData);
+        const processedDataWithNewRow = [...processedData, newRow];
+        setRowsPopUp(processedDataWithNewRow);
         setSingleRow([newRow]);
       } else {
         setRowsPopUp([]);
@@ -1302,6 +1319,8 @@ const KendoDataTablesCrackerRunLength = ({
     setSingleRow([])
     setOpen(false)
     setStartDate(null)
+    setDynamicColumns([]);
+    setDynamicColumnsConfig([]);
   }
 
   const handleClose = () => {

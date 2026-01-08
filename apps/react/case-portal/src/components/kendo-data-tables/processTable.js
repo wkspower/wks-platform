@@ -246,6 +246,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         ...col,
         editable: col.type === 'number' || col.field === 'Remarks',
        hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
+       widthT: 120,
       }));
       setColumns(dynamicColumns);
 
