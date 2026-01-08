@@ -1,7 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
-
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
@@ -19,7 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.AOPMCCalculatedDataService;
 
 @RestController
@@ -28,6 +32,12 @@ public class AOPMCCalculatedDataController {
 
 	@Autowired
 	private AOPMCCalculatedDataService aOPMCCalculatedDataService;
+	
+	@Autowired
+	private PlantsRepository plantsRepository;
+
+	@Autowired
+	private VerticalsRepository verticalRepository;
 
 	@GetMapping(value = "/production-target")
 	public AOPMessageVM getAOPMCCalculatedData(@RequestParam String plantId, @RequestParam String year) {
@@ -115,7 +125,16 @@ public class AOPMCCalculatedDataController {
 	@PostMapping(value = "/production-target-import", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(@RequestParam("plantId") String plantId,
 			@RequestParam("year") String year, @RequestParam("file") MultipartFile file) {
-		return aOPMCCalculatedDataService.importExcel(year, plantId, file);
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+        if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+        	return aOPMCCalculatedDataService.importExcelPE(year, plantId, file);
+        }else {
+        	return aOPMCCalculatedDataService.importExcel(year, plantId, file);
+        }
+		
 
 	}
 

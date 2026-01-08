@@ -22,5 +22,6 @@ public interface AOPMCCalculatedDataService {
 	public  AOPMessageVM getAOPMCCalculatedDataSP(String plantId, String year);
 	public byte[] createExcel(String year, String plantFKId, boolean isAfterSave,List<AOPMCCalculatedDataDTO> dtoList);
 	public AOPMessageVM importExcel(String year, String plantId, MultipartFile file);
+	public AOPMessageVM importExcelPE(String year, String plantFKId, MultipartFile file);
 
 }

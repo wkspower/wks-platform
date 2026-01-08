@@ -791,9 +791,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	}
 
 	@Override
-	public AOPMessageVM importExcel(String year, String plantFKId, MultipartFile file) {
+	public AOPMessageVM importExcelPE(String year, String plantFKId, MultipartFile file) {
 	    try {
-	        Map<String, List<AOPMCCalculatedDataDTO>> map = readData(file.getInputStream(), UUID.fromString(plantFKId), year);
+	        Map<String, List<AOPMCCalculatedDataDTO>> map = readDataPE(file.getInputStream(), UUID.fromString(plantFKId), year);
 	        
 	        List<AOPMCCalculatedDataDTO> allFailedRecords = new ArrayList<>();
 	        Map<String, List<AOPMCCalculatedDataDTO>> mapForExcel = new HashMap<>();
@@ -830,6 +830,38 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	    }
 	}
 	
+	@Override
+	public AOPMessageVM importExcel(String year, String plantFKId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+
+			List<AOPMCCalculatedDataDTO> data = readData(file.getInputStream(), UUID.fromString(plantFKId), year);
+
+			List<AOPMCCalculatedDataDTO> failedRecords = editAOPMCCalculatedData(data, true, year, plantFKId);
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (failedRecords != null && failedRecords.size() > 0) {
+				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+	
 	public static List<String> getAcademicYearMonths(String year) {
 		List<String> months = new ArrayList<>();
 		int startYear = Integer.parseInt(year.substring(0, 4));
@@ -856,7 +888,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		return date.format(formatter);
 	}
 	
-	public Map<String, List<AOPMCCalculatedDataDTO>> readData(InputStream inputStream, UUID plantFKId, String year) {
+	public Map<String, List<AOPMCCalculatedDataDTO>> readDataPE(InputStream inputStream, UUID plantFKId, String year) {
 
 		Map<String, List<AOPMCCalculatedDataDTO>> map = new HashMap<>();
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
@@ -913,6 +945,56 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 		return map;
 	}
+	
+	public List<AOPMCCalculatedDataDTO> readData(InputStream inputStream, UUID plantFKId, String year) {
+		List<AOPMCCalculatedDataDTO> prodList = new ArrayList<>();
+
+		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+			Sheet sheet = workbook.getSheetAt(0);
+			Iterator<Row> rowIterator = sheet.iterator();
+
+			if (rowIterator.hasNext())
+				rowIterator.next(); // Skip header
+
+			while (rowIterator.hasNext()) {
+				Row row = rowIterator.next();
+				AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+				try {
+					dto.setProductName(getStringCellValue(row.getCell(0), dto));
+					dto.setApril(getNumericCellValue(row.getCell(1), dto));
+					dto.setMay(getNumericCellValue(row.getCell(2), dto));
+					dto.setJune(getNumericCellValue(row.getCell(3), dto));
+					dto.setJuly(getNumericCellValue(row.getCell(4), dto));
+					dto.setAugust(getNumericCellValue(row.getCell(5), dto));
+					dto.setSeptember(getNumericCellValue(row.getCell(6), dto));
+					dto.setOctober(getNumericCellValue(row.getCell(7), dto));
+					dto.setNovember(getNumericCellValue(row.getCell(8), dto));
+					dto.setDecember(getNumericCellValue(row.getCell(9), dto));
+					dto.setJanuary(getNumericCellValue(row.getCell(10), dto));
+					dto.setFebruary(getNumericCellValue(row.getCell(11), dto));
+					dto.setMarch(getNumericCellValue(row.getCell(12), dto));
+					dto.setRemarks(getStringCellValue(row.getCell(13), dto));
+					dto.setId(getStringCellValue(row.getCell(14), dto));
+					// dto.setSiteFKId(getStringCellValue(row.getCell(15), dto));
+					// dto.setPlantFKId(getStringCellValue(row.getCell(16), dto));
+					// dto.setMaterialFKId(getStringCellValue(row.getCell(17), dto));
+					// dto.setFinancialYear(getStringCellValue(row.getCell(18), dto));
+					// dto.setVerticalFKId(getStringCellValue(row.getCell(19), dto));
+				} catch (Exception e) {
+					e.printStackTrace();
+					dto.setErrDescription(e.getMessage());
+					dto.setSaveStatus("Failed");
+				}
+				prodList.add(dto);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return prodList;
+	}
+
 
 	private static String getStringCellValue(Cell cell, AOPMCCalculatedDataDTO dto) {
 	    try {
