@@ -96,13 +96,13 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
         //  System.out.println("startUpDate: " + startUpDate);
              updates.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs(), dto.getId() });
      
+    }
 
-        if(updates.size() > 0) {
-            String sql = "UPDATE TCS_CPPUnitsSD_Plan SET Machine = ?, IBRDueDate = ?, GTMaintenance = ?, NoOfDays = ?, ShutDownDate = ?, StartUpDate = ?, MajorJobs = ? WHERE Id = ?";
+    if(updates.size() > 0) {
+        String sql = "UPDATE TCS_CPPUnitsSD_Plan SET Machine = ?, IBRDueDate = ?, GTMaintenance = ?, NoOfDays = ?, ShutDownDate = ?, StartUpDate = ?, MajorJobs = ? WHERE Id = ?";
 
-            jdbcTemplate.batchUpdate(sql, updates);
+        jdbcTemplate.batchUpdate(sql, updates);
 
-        }
     }
 }
 }
