@@ -105,7 +105,7 @@ public class BusinessDemandDataServiceImpl implements BusinessDemandDataService 
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			String viewName = "vwScrn" + verticalName + "BusinessDemand";
 			List<Object[]> obj=null;
-			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || verticalName.equalsIgnoreCase("Elastomer")) {
 				String procedureName=verticalName+"_GetBusinessDemand";
 				obj=findByYearAndPlantId(year,UUID.fromString(plantId),procedureName);
 				return getBusinessDemand(obj);
