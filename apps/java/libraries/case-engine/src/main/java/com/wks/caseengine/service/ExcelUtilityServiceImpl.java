@@ -133,7 +133,7 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                             Cell cell = headerRow.createCell(col);
                             cell.setCellValue(headerRowData.get(col));
                             if (isSpecialTable) {
-                                if (col < headerRowData.size() - 5) {
+                                if (col < headerRowData.size() - 3) {
                                     cell.setCellStyle(boldBorderStyle);
                                 } else {
                                     cell.setCellStyle(boldStyle); 
