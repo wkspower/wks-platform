@@ -12,6 +12,7 @@ import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
+import com.wks.caseengine.utility.ExcelConstants;
 import com.wks.caseengine.utility.Utility;
 import jakarta.persistence.Query;
 import jakarta.persistence.EntityManager;
@@ -35,10 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wks.caseengine.dto.AOPMCCalculatedDataDTO;
 
 import com.wks.caseengine.entity.AOPMCCalculatedData;
 import com.wks.caseengine.entity.AopCalculation;
+import com.wks.caseengine.entity.ExcelConfigurations;
 import com.wks.caseengine.entity.MCUDesignCapacity;
 import com.wks.caseengine.entity.MCUMaxCapacity;
 import com.wks.caseengine.entity.NormAttributeTransactions;
@@ -51,12 +54,14 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AOPMCCalculatedDataRepository;
 import com.wks.caseengine.repository.AopCalculationRepository;
+import com.wks.caseengine.repository.ExcelConfigurationsRepository;
 import com.wks.caseengine.repository.MCUValueCapacityRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -100,6 +105,12 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	
 	@Autowired
 	private MCUMaxCapacityRepository mcuMaxCapacityRepository;
+	
+	@Autowired
+	private ExcelConfigurationsRepository  excelConfigurationsRepository;
+	
+	@Autowired
+	private ExcelUtilityService excelUtilityService;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public AOPMCCalculatedDataServiceImpl(DataSource dataSource) {
@@ -108,63 +119,154 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	@Override
 	public AOPMessageVM getAOPMCCalculatedData(String plantId, String year) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		try {
-			String view = "";
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
-					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-			Sites site = siteRepository.findById(plant.getSiteFkId())
-					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
-			if(vertical.getName().equalsIgnoreCase("PTA")) {
-				view="vw"+vertical.getName()+"_"+site.getName()+"_AOPMCValues";
-			}else {
-				view="vwAOPMCValues";
-			}
-			List<Object[]> obj = getDataMCUValuesAllData(year, plantId,view);
-			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        String view = "";
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	        Sites site = siteRepository.findById(plant.getSiteFkId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+	        
+	        if (vertical.getName().equalsIgnoreCase("PTA")) {
+	            view = "vw" + vertical.getName() + "_" + site.getName() + "_AOPMCValues";
+	        } else {
+	            view = "vwAOPMCValues";
+	        }
 
-			for (Object[] row : obj) {
-				AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
-				aOPMCCalculatedDataDTO.setId(row[0] != null ? row[0].toString() : null);
-				aOPMCCalculatedDataDTO.setSiteFKId(row[1] != null ? row[1].toString() : null);
-				aOPMCCalculatedDataDTO.setPlantFKId(row[2] != null ? row[2].toString() : null);
-				aOPMCCalculatedDataDTO.setMaterialFKId(row[3] != null ? row[3].toString() : null);
-				aOPMCCalculatedDataDTO.setApril(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
-				aOPMCCalculatedDataDTO.setMay(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
-				aOPMCCalculatedDataDTO.setJune(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
-				aOPMCCalculatedDataDTO.setJuly(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
-				aOPMCCalculatedDataDTO.setAugust(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
-				aOPMCCalculatedDataDTO.setSeptember(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
-				aOPMCCalculatedDataDTO.setOctober(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
-				aOPMCCalculatedDataDTO.setNovember(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
-				aOPMCCalculatedDataDTO.setDecember(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
-				aOPMCCalculatedDataDTO.setJanuary(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
-				aOPMCCalculatedDataDTO.setFebruary(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
-				aOPMCCalculatedDataDTO.setMarch(row[15] != null ? Double.parseDouble(row[15].toString()) : null);
-				aOPMCCalculatedDataDTO.setFinancialYear(row[16] != null ? row[16].toString() : null);
-				aOPMCCalculatedDataDTO.setRemarks(row[17] != null ? row[17].toString() : " ");
-				aOPMCCalculatedDataDTO.setVerticalFKId(row[22] != null ? row[22].toString() : null);
-				aOPMCCalculatedDataDTO.setProductName(row[24] != null ? row[24].toString() : null);
-				aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
-			}
-			Map<String, Object> map = new HashMap<>();
+	        List<Object[]> obj = getDataMCUValuesAllData(year, plantId, view);
+	        List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
 
-			List<AopCalculation> aopCalculation = aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(
-					UUID.fromString(plantId), year, "production-volume-data");
-			map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
-			map.put("aopCalculation", aopCalculation);
-			aopMessageVM.setCode(200);
-			aopMessageVM.setData(map);
-			aopMessageVM.setMessage("Data fetched successfully");
-			return aopMessageVM;
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
+	        for (Object[] row : obj) {
+	            AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+	            dto.setId(row[0] != null ? row[0].toString() : null);
+	            dto.setSiteFKId(row[1] != null ? row[1].toString() : null);
+	            dto.setPlantFKId(row[2] != null ? row[2].toString() : null);
+	            dto.setMaterialFKId(row[3] != null ? row[3].toString() : null);
+	            dto.setApril(roundToTwoDecimals(row[4]));
+	            dto.setMay(roundToTwoDecimals(row[5]));
+	            dto.setJune(roundToTwoDecimals(row[6]));
+	            dto.setJuly(roundToTwoDecimals(row[7]));
+	            dto.setAugust(roundToTwoDecimals(row[8]));
+	            dto.setSeptember(roundToTwoDecimals(row[9]));
+	            dto.setOctober(roundToTwoDecimals(row[10]));
+	            dto.setNovember(roundToTwoDecimals(row[11]));
+	            dto.setDecember(roundToTwoDecimals(row[12]));
+	            dto.setJanuary(roundToTwoDecimals(row[13]));
+	            dto.setFebruary(roundToTwoDecimals(row[14]));
+	            dto.setMarch(roundToTwoDecimals(row[15]));
+
+	            dto.setFinancialYear(row[16] != null ? row[16].toString() : null);
+	            dto.setRemarks(row[17] != null ? row[17].toString() : " ");
+	            dto.setVerticalFKId(row[22] != null ? row[22].toString() : null);
+	            dto.setProductName(row[24] != null ? row[24].toString() : null);
+	            dto.setMaterialDisplayName(row[24] != null ? row[24].toString() : null);
+	            
+	            aOPMCCalculatedDataDTOList.add(dto);
+	        }
+
+	        Map<String, Object> map = new HashMap<>();
+	        List<AopCalculation> aopCalculation = aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(
+	                UUID.fromString(plantId), year, "production-volume-data");
+	        
+	        map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
+	        map.put("aopCalculation", aopCalculation);
+	        
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setData(map);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        return aopMessageVM;
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
 	}
+	
+	@Override
+	public AOPMessageVM getSummaryOfProposedOperating(String plantId, String year) {
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    try {
+	        String view = "";
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	        Sites site = siteRepository.findById(plant.getSiteFkId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+
+	        if (vertical.getName().equalsIgnoreCase("PTA")) {
+	            view = "vw" + vertical.getName() + "_" + site.getName() + "_AOPMCValues";
+	        } else {
+	            view = "vwAOPMCValues";
+	        }
+
+	        List<Object[]> obj = getDataMCUValuesAllData(year, plantId, view);
+	        List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
+
+	        for (Object[] row : obj) {
+	            AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+	            dto.setId(row[0] != null ? row[0].toString() : null);
+	            dto.setSiteFKId(row[1] != null ? row[1].toString() : null);
+	            dto.setPlantFKId(row[2] != null ? row[2].toString() : null);
+	            dto.setMaterialFKId(row[3] != null ? row[3].toString() : null);
+	            double[] months = new double[12];
+	            for (int i = 0; i < 12; i++) {
+	                months[i] = (row[4 + i] != null) ? Double.parseDouble(row[4 + i].toString()) : 0.0;
+	            }
+	            double maxVal = 0.0;
+	            for (double val : months) {
+	                if (val > maxVal) maxVal = val;
+	            }
+	            dto.setApril(calculatePercentage(months[0], maxVal));
+	            dto.setMay(calculatePercentage(months[1], maxVal));
+	            dto.setJune(calculatePercentage(months[2], maxVal));
+	            dto.setJuly(calculatePercentage(months[3], maxVal));
+	            dto.setAugust(calculatePercentage(months[4], maxVal));
+	            dto.setSeptember(calculatePercentage(months[5], maxVal));
+	            dto.setOctober(calculatePercentage(months[6], maxVal));
+	            dto.setNovember(calculatePercentage(months[7], maxVal));
+	            dto.setDecember(calculatePercentage(months[8], maxVal));
+	            dto.setJanuary(calculatePercentage(months[9], maxVal));
+	            dto.setFebruary(calculatePercentage(months[10], maxVal));
+	            dto.setMarch(calculatePercentage(months[11], maxVal));
+
+	            dto.setFinancialYear(row[16] != null ? row[16].toString() : null);
+	            dto.setRemarks(row[17] != null ? row[17].toString() : " ");
+	            dto.setVerticalFKId(row[22] != null ? row[22].toString() : null);
+	            dto.setProductName(row[24] != null ? row[24].toString() : null);
+	            dto.setMaterialDisplayName(row[24] != null ? row[24].toString() : null);
+	            
+	            aOPMCCalculatedDataDTOList.add(dto);
+	        }
+
+	        Map<String, Object> map = new HashMap<>();
+	        List<AopCalculation> aopCalculation = aopCalculationRepository.findByPlantIdAndAopYearAndCalculationScreen(
+	                UUID.fromString(plantId), year, "production-volume-data");
+	        
+	        map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
+	        map.put("aopCalculation", aopCalculation);
+	        
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setData(map);
+	        aopMessageVM.setMessage("Data fetched successfully");
+	        return aopMessageVM;
+
+	    } catch (IllegalArgumentException e) {
+	        throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+	    } catch (Exception ex) {
+	        throw new RuntimeException("Failed to fetch data", ex);
+	    }
+	}
+
+	private Double calculatePercentage(double value, double max) {
+	    if (max <= 0) return 0.0;
+	    double result = (value / max) * 100;
+	    return Math.round(result * 100.0) / 100.0;
+	}
+	
 	
     public List<Object[]> getDataMCUValuesAllData(String year, String plantId, String viewName) {
         String sql = "SELECT TOP (1000) "
@@ -185,59 +287,74 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
         return query.getResultList();
     }
 
-	@Override
-	public AOPMessageVM getMaxAchievedCapacity(String plantId, String year) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		try {
-			String view = "";
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId))
-					.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
-					.orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
-			Sites site = siteRepository.findById(plant.getSiteFkId())
-					.orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
-			if(vertical.getName().equalsIgnoreCase("PTA")) {
-				view="vw"+vertical.getName()+"_"+site.getName()+"_AOPMCValuesMaxAchivedCapacity";
-			}else {
-				view="vwAOPMCValuesMaxAchivedCapacity";
-			}
-			List<Object[]> obj = getMaxAchievedCapacityData(year, plantId,view);
-			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
+    @Override
+    public AOPMessageVM getMaxAchievedCapacity(String plantId, String year) {
+        AOPMessageVM aopMessageVM = new AOPMessageVM();
+        try {
+            String view = "";
+            Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+            Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+            Sites site = siteRepository.findById(plant.getSiteFkId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
 
-			for (Object[] row : obj) {
-				AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
-				aOPMCCalculatedDataDTO.setId(row[0] != null ? row[0].toString() : null);
-				aOPMCCalculatedDataDTO.setMaterialFKId(row[1] != null ? row[1].toString() : null);
-				aOPMCCalculatedDataDTO.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
-				aOPMCCalculatedDataDTO.setApril(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-				aOPMCCalculatedDataDTO.setMay(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
-				aOPMCCalculatedDataDTO.setJune(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
-				aOPMCCalculatedDataDTO.setJuly(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
-				aOPMCCalculatedDataDTO.setAugust(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
-				aOPMCCalculatedDataDTO.setSeptember(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
-				aOPMCCalculatedDataDTO.setOctober(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
-				aOPMCCalculatedDataDTO.setNovember(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
-				aOPMCCalculatedDataDTO.setDecember(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
-				aOPMCCalculatedDataDTO.setJanuary(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
-				aOPMCCalculatedDataDTO.setFebruary(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
-				aOPMCCalculatedDataDTO.setMarch(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
-				aOPMCCalculatedDataDTO.setRemarks(row[16] != null ? row[16].toString() : " ");
-				aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
-			}
-			Map<String, Object> map = new HashMap<>();
+            if (vertical.getName().equalsIgnoreCase("PTA")) {
+                view = "vw" + vertical.getName() + "_" + site.getName() + "_AOPMCValuesMaxAchivedCapacity";
+            } else {
+                view = "vwAOPMCValuesMaxAchivedCapacity";
+            }
 
-			map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
-			aopMessageVM.setCode(200);
-			aopMessageVM.setData(map);
-			aopMessageVM.setMessage("Data fetched successfully");
-			return aopMessageVM;
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
-	}
-	
+            List<Object[]> obj = getMaxAchievedCapacityData(year, plantId, view);
+            List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
+
+            for (Object[] row : obj) {
+                AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+                dto.setId(row[0] != null ? row[0].toString() : null);
+                dto.setMaterialFKId(row[1] != null ? row[1].toString() : null);
+                dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
+                dto.setApril(roundValue(row[3]));
+                dto.setMay(roundValue(row[4]));
+                dto.setJune(roundValue(row[5]));
+                dto.setJuly(roundValue(row[6]));
+                dto.setAugust(roundValue(row[7]));
+                dto.setSeptember(roundValue(row[8]));
+                dto.setOctober(roundValue(row[9]));
+                dto.setNovember(roundValue(row[10]));
+                dto.setDecember(roundValue(row[11]));
+                dto.setJanuary(roundValue(row[12]));
+                dto.setFebruary(roundValue(row[13]));
+                dto.setMarch(roundValue(row[14]));
+
+                dto.setRemarks(row[16] != null ? row[16].toString() : " ");
+                aOPMCCalculatedDataDTOList.add(dto);
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
+            
+            aopMessageVM.setCode(200);
+            aopMessageVM.setData(map);
+            aopMessageVM.setMessage("Data fetched successfully");
+            return aopMessageVM;
+
+        } catch (IllegalArgumentException e) {
+            throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to fetch data", ex);
+        }
+    }
+
+    private Double roundValue(Object val) {
+        if (val == null) return null;
+        try {
+            double d = Double.parseDouble(val.toString());
+            return Math.round(d * 100.0) / 100.0;
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+    
     public List<Object[]> getMaxAchievedCapacityData(String year, String plantId, String viewName) {
         String sql = "SELECT TOP (1000) "
                    + "Id, Material_FK_Id, MaterialDisplayName, "
@@ -255,47 +372,61 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
         return query.getResultList();
     }
 
-	@Override
-	public AOPMessageVM getDesignCapacity(String plantId, String year) {
-		AOPMessageVM aopMessageVM = new AOPMessageVM();
-		try {
-			List<Object[]> obj = aOPMCCalculatedDataRepository.getDesignCapacityData(year, plantId);
-			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
+    @Override
+    public AOPMessageVM getDesignCapacity(String plantId, String year) {
+        AOPMessageVM aopMessageVM = new AOPMessageVM();
+        try {
+            List<Object[]> obj = aOPMCCalculatedDataRepository.getDesignCapacityData(year, plantId);
+            List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList = new ArrayList<>();
 
-			for (Object[] row : obj) {
-				AOPMCCalculatedDataDTO aOPMCCalculatedDataDTO = new AOPMCCalculatedDataDTO();
-				aOPMCCalculatedDataDTO.setId(row[0] != null ? row[0].toString() : null);
-				aOPMCCalculatedDataDTO.setMaterialFKId(row[1] != null ? row[1].toString() : null);
-				aOPMCCalculatedDataDTO.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
-				aOPMCCalculatedDataDTO.setApril(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-				aOPMCCalculatedDataDTO.setMay(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
-				aOPMCCalculatedDataDTO.setJune(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
-				aOPMCCalculatedDataDTO.setJuly(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
-				aOPMCCalculatedDataDTO.setAugust(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
-				aOPMCCalculatedDataDTO.setSeptember(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
-				aOPMCCalculatedDataDTO.setOctober(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
-				aOPMCCalculatedDataDTO.setNovember(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
-				aOPMCCalculatedDataDTO.setDecember(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
-				aOPMCCalculatedDataDTO.setJanuary(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
-				aOPMCCalculatedDataDTO.setFebruary(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
-				aOPMCCalculatedDataDTO.setMarch(row[14] != null ? Double.parseDouble(row[14].toString()) : null);
-				aOPMCCalculatedDataDTO.setRemarks(row[16] != null ? row[16].toString() : " ");
-				aOPMCCalculatedDataDTOList.add(aOPMCCalculatedDataDTO);
-			}
-			Map<String, Object> map = new HashMap<>();
+            for (Object[] row : obj) {
+                AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+                dto.setId(row[0] != null ? row[0].toString() : null);
+                dto.setMaterialFKId(row[1] != null ? row[1].toString() : null);
+                dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
+                dto.setApril(roundToTwoDecimals(row[3]));
+                dto.setMay(roundToTwoDecimals(row[4]));
+                dto.setJune(roundToTwoDecimals(row[5]));
+                dto.setJuly(roundToTwoDecimals(row[6]));
+                dto.setAugust(roundToTwoDecimals(row[7]));
+                dto.setSeptember(roundToTwoDecimals(row[8]));
+                dto.setOctober(roundToTwoDecimals(row[9]));
+                dto.setNovember(roundToTwoDecimals(row[10]));
+                dto.setDecember(roundToTwoDecimals(row[11]));
+                dto.setJanuary(roundToTwoDecimals(row[12]));
+                dto.setFebruary(roundToTwoDecimals(row[13]));
+                dto.setMarch(roundToTwoDecimals(row[14]));
+                
+                dto.setRemarks(row[16] != null ? row[16].toString() : " ");
+                aOPMCCalculatedDataDTOList.add(dto);
+            }
 
-			map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
-			aopMessageVM.setCode(200);
-			aopMessageVM.setData(map);
-			aopMessageVM.setMessage("Data fetched successfully");
-			return aopMessageVM;
-		} catch (IllegalArgumentException e) {
-			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
-		} catch (Exception ex) {
-			throw new RuntimeException("Failed to fetch data", ex);
-		}
-	}
+            Map<String, Object> map = new HashMap<>();
+            map.put("aopMCCalculatedDataDTOList", aOPMCCalculatedDataDTOList);
+            
+            aopMessageVM.setCode(200);
+            aopMessageVM.setData(map);
+            aopMessageVM.setMessage("Data fetched successfully");
+            return aopMessageVM;
 
+        } catch (IllegalArgumentException e) {
+            throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to fetch data", ex);
+        }
+    }
+
+    private Double roundToTwoDecimals(Object value) {
+        if (value == null) {
+            return null;
+        }
+        try {
+            double dVal = Double.parseDouble(value.toString());
+            return Math.round(dVal * 100.0) / 100.0;
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
 			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantId) {
@@ -659,39 +790,46 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	}
 
-	
 	@Override
 	public AOPMessageVM importExcel(String year, String plantFKId, MultipartFile file) {
-		// TODO Auto-generated method stub
-		try {
+	    try {
+	        Map<String, List<AOPMCCalculatedDataDTO>> map = readData(file.getInputStream(), UUID.fromString(plantFKId), year);
+	        
+	        List<AOPMCCalculatedDataDTO> allFailedRecords = new ArrayList<>();
+	        Map<String, List<AOPMCCalculatedDataDTO>> mapForExcel = new HashMap<>();
+	        for (String key : map.keySet()) {
+	            List<AOPMCCalculatedDataDTO> failedList = editAOPMCCalculatedData(map.get(key), true, year, plantFKId);
+	            
+	            if (failedList != null && !failedList.isEmpty()) {
+	                allFailedRecords.addAll(failedList);
+	                mapForExcel.put(key, failedList);
+	            }
+	        }
+	        AOPMessageVM aopMessageVM = new AOPMessageVM();
+	        
+	        if (!allFailedRecords.isEmpty()) {
+	            byte[] fileByteArray = createExcel(year, plantFKId, true, allFailedRecords);
+	            String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+	            
+	            aopMessageVM.setData(base64File);
+	            aopMessageVM.setCode(400);
+	            aopMessageVM.setMessage("Partial data has been saved. Please check the downloaded file for errors.");
+	        } else {
+	            aopMessageVM.setCode(200);
+	            aopMessageVM.setMessage("All data has been saved successfully");
+	        }
 
-			List<AOPMCCalculatedDataDTO> data = readData(file.getInputStream(), UUID.fromString(plantFKId), year);
+	        return aopMessageVM;
 
-			List<AOPMCCalculatedDataDTO> failedRecords = editAOPMCCalculatedData(data, true, year, plantFKId);
-
-			AOPMessageVM aopMessageVM = new AOPMessageVM();
-			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray = createExcel(year, plantFKId, true, failedRecords);
-				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
-				aopMessageVM.setData(base64File);
-				aopMessageVM.setCode(400);
-				aopMessageVM.setMessage("Partial data has been saved");
-			} else {
-				// aopMessageVM.setData();
-				aopMessageVM.setCode(200);
-				aopMessageVM.setMessage("All data has been saved");
-			}
-
-			return aopMessageVM;
-
-			// return ResponseEntity.ok(data);
-		} catch (Exception e) {
-			e.printStackTrace();
-			// return ResponseEntity.internalServerError().build();
-		}
-		return null;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        AOPMessageVM errorVM = new AOPMessageVM();
+	        errorVM.setCode(500);
+	        errorVM.setMessage("Error processing file: " + e.getMessage());
+	        return errorVM;
+	    }
 	}
-
+	
 	public static List<String> getAcademicYearMonths(String year) {
 		List<String> months = new ArrayList<>();
 		int startYear = Integer.parseInt(year.substring(0, 4));
@@ -717,21 +855,32 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
 		return date.format(formatter);
 	}
+	
+	public Map<String, List<AOPMCCalculatedDataDTO>> readData(InputStream inputStream, UUID plantFKId, String year) {
 
-	public List<AOPMCCalculatedDataDTO> readData(InputStream inputStream, UUID plantFKId, String year) {
-		List<AOPMCCalculatedDataDTO> prodList = new ArrayList<>();
-
+		Map<String, List<AOPMCCalculatedDataDTO>> map = new HashMap<>();
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+
 			Sheet sheet = workbook.getSheetAt(0);
 			Iterator<Row> rowIterator = sheet.iterator();
-
+			List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOs = new ArrayList<>();
 			if (rowIterator.hasNext())
 				rowIterator.next(); // Skip header
 
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
+				Cell tableIdCell = row.getCell(16, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+				if (tableIdCell == null || tableIdCell.getCellType() != CellType.STRING) {
+					continue;
+				}
+				if(!tableIdCell.toString().equalsIgnoreCase("ProposedOperatingCapacity")) {
+					continue;
+				}
+
 				AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
+
 				try {
+
 					dto.setProductName(getStringCellValue(row.getCell(0), dto));
 					dto.setApril(getNumericCellValue(row.getCell(1), dto));
 					dto.setMay(getNumericCellValue(row.getCell(2), dto));
@@ -747,24 +896,22 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					dto.setMarch(getNumericCellValue(row.getCell(12), dto));
 					dto.setRemarks(getStringCellValue(row.getCell(13), dto));
 					dto.setId(getStringCellValue(row.getCell(14), dto));
-					// dto.setSiteFKId(getStringCellValue(row.getCell(15), dto));
-					// dto.setPlantFKId(getStringCellValue(row.getCell(16), dto));
-					// dto.setMaterialFKId(getStringCellValue(row.getCell(17), dto));
-					// dto.setFinancialYear(getStringCellValue(row.getCell(18), dto));
-					// dto.setVerticalFKId(getStringCellValue(row.getCell(19), dto));
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 					dto.setErrDescription(e.getMessage());
 					dto.setSaveStatus("Failed");
 				}
-				prodList.add(dto);
+				map.putIfAbsent(dto.getTableId(), new ArrayList<>());
+
+				map.get(dto.getTableId()).add(dto);
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw new RuntimeException("Failed to read Data", e);
 		}
 
-		return prodList;
+		return map;
 	}
 
 	private static String getStringCellValue(Cell cell, AOPMCCalculatedDataDTO dto) {
@@ -878,6 +1025,126 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 		aopMessageVM.setData(mcuMaxCapacities);
 		aopMessageVM.setMessage("Data updated successfully");
 		return aopMessageVM;
+	}
+	
+	public byte[] exportProductionTarget(String year, String plantId, boolean isAfterSave,
+	        Map<String, List<AOPMCCalculatedDataDTO>> mapForExcel) {
+	    try {
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	                .orElseThrow(() -> new RuntimeException("Plant not found"));
+	        
+	        Optional<ExcelConfigurations> optExcelConfiguration = excelConfigurationsRepository
+	                .findByExcelIdAndVerticalFkIdAndSiteFkId("production_target", plant.getVerticalFKId(), plant.getSiteFkId());
+
+	        if (optExcelConfiguration.isPresent()) {
+	            String structureJson = optExcelConfiguration.get().getJsonValue();
+	            ObjectMapper mapper = new ObjectMapper();
+	            Map<String, List<List<Object>>> data = new HashMap<>();
+	            Map<String, Object> structure = mapper.readValue(structureJson, Map.class);
+
+	            for (String sheetName : structure.keySet()) {
+	                Map<String, Object> sheetData = (Map<String, Object>) structure.get(sheetName);
+	                List<Map<String, Object>> tables = (List<Map<String, Object>>) sheetData.get(ExcelConstants.TABLES);
+
+	                for (Map<String, Object> table : tables) {
+	                    String tableId = (String) table.get(ExcelConstants.TABLEID);
+	                    String dataInput = (String) table.get(ExcelConstants.DATA_INPUT); // Logic identifier
+	                    List<String> headers = (List<String>) table.get(ExcelConstants.HEADERS);
+	                    List<List<String>> headersOuterTitles = (List<List<String>>) table.get(ExcelConstants.HEADERSTITLES);
+	                    Integer startingIndexofMonths = (Integer) table.get(ExcelConstants.STARTING_INDEX_OF_MONTHS);
+	                    if (startingIndexofMonths != null) {
+	                    	if ("DesignCapacity".equalsIgnoreCase(dataInput) || "MaxAchievedCapacity".equalsIgnoreCase(dataInput)) {
+	                    	     headersOuterTitles.get(0).addAll(startingIndexofMonths, excelUtilityService.getMonths(year));
+	                        } else {
+	                            headersOuterTitles.get(0).addAll(startingIndexofMonths, excelUtilityService.getAcademicYearMonths(year));  
+	                        }
+	                    }
+	                    
+	                    List<List<Object>> dataList = new ArrayList<>();
+
+	                    if (isAfterSave) {
+	                        if (!mapForExcel.containsKey(tableId)) {
+	                            table.put("hideTable", true);
+	                            continue;
+	                        }
+	                        
+	                        headers.add("saveStatus");
+	                        headers.add("errDescription");
+	                        headersOuterTitles.get(0).add("SaveStatus");
+	                        headersOuterTitles.get(0).add("ErrDescription");
+
+	                        populateRowsFromDTOs(mapForExcel.get(tableId), headers, tableId, dataList);
+
+	                    } else {
+	                        List<AOPMCCalculatedDataDTO> sourceDTOs = new ArrayList<>();
+	                        AOPMessageVM vm = null;
+
+	                        if ("DesignCapacity".equalsIgnoreCase(dataInput)) {
+	                            vm = getDesignCapacity(plantId, year);
+	                        } else if ("MaxAchievedCapacity".equalsIgnoreCase(dataInput)) {
+	                            vm = getMaxAchievedCapacity(plantId, year);
+	                        } else if ("ProposedOperatingCapacity".equalsIgnoreCase(dataInput)) {
+	                            vm = getAOPMCCalculatedData(plantId, year);
+	                        }else if ("SummaryProposedOperatingCapacity".equalsIgnoreCase(dataInput)) {
+	                            vm = getSummaryOfProposedOperating(plantId, year);
+	                        }
+	                        
+	                        if (vm != null && vm.getData() != null) {
+	                            Map<String, Object> dataMap = (Map<String, Object>) vm.getData();
+	                            sourceDTOs = (List<AOPMCCalculatedDataDTO>) dataMap.get("aopMCCalculatedDataDTOList");
+	                        }
+
+	                        if (sourceDTOs == null || sourceDTOs.isEmpty()) {
+	                            table.put("hideTable", true);
+	                            continue;
+	                        }
+
+	                        populateRowsFromDTOs(sourceDTOs, headers, tableId, dataList);
+	                    }
+
+	                    data.put(tableId, dataList);
+	                }
+	            }
+	            return excelUtilityService.generateFlexibleExcel(structure, data);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
+	/**
+	 * Helper method to convert DTO objects into Excel row lists using reflection
+	 */
+	private void populateRowsFromDTOs(List<AOPMCCalculatedDataDTO> dtos, List<String> headers, String tableId, List<List<Object>> dataList) {
+	    for (AOPMCCalculatedDataDTO dto : dtos) {
+	        List<Object> row = new ArrayList<>();
+	        for (String fieldName : headers) {
+	            try {
+	                // Skips reflection for custom status fields if they aren't in DTO
+	                if(fieldName.equals("saveStatus")) { row.add(dto.getSaveStatus()); continue; }
+	                if(fieldName.equals("errDescription")) { row.add(dto.getErrDescription()); continue; }
+
+	                String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+	                Method method = dto.getClass().getMethod(methodName);
+	                row.add(method.invoke(dto));
+	            } catch (Exception e) {
+	                row.add(""); // Add empty cell if field/getter is missing
+	            }
+	        }
+	        // Metadata columns often used by the utility for styling or logic
+	        row.add(tableId);
+	        
+	        // Add editable flag from repository if needed, or default to true
+	        row.add(true); 
+	        
+	        dataList.add(row);
+	    }
+	}
+	private static String capitalize(String str) {
+		if (str == null || str.isEmpty())
+			return str;
+		return str.substring(0, 1).toUpperCase() + str.substring(1);
 	}
 
 }

@@ -1,8 +1,7 @@
 package com.wks.caseengine.service;
 
 import java.util.List;
-
-
+import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +14,9 @@ public interface AOPMCCalculatedDataService {
 	public  AOPMessageVM getMaxAchievedCapacity(String plantId, String year);
 	public  AOPMessageVM updateMaxAchievedCapacity(String plantId, String year,List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOs);
 	public  AOPMessageVM getDesignCapacity(String plantId, String year);
+	byte[] exportProductionTarget(String year, String plantId, boolean isAfterSave,
+			Map<String, List<AOPMCCalculatedDataDTO>> mapForExcel);
+	public AOPMessageVM getSummaryOfProposedOperating(String plantId, String year);
 	public  AOPMessageVM updateDesignCapacity(String plantId, String year,List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTO);
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantFKId);
 	public  AOPMessageVM getAOPMCCalculatedDataSP(String plantId, String year);

@@ -1002,6 +1002,27 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
         return months;
     }
     
+    public List<String> getMonths(String year) {
+        List<String> months = new ArrayList<>();
+        int startYear = Integer.parseInt(year.substring(0, 4));
+        int nextYear = startYear + 1;
+
+        for (int month = 4; month <= 12; month++) {
+            months.add(formatMonthOnly(month, startYear));
+        }
+        for (int month = 1; month <= 3; month++) {
+            months.add(formatMonthOnly(month, nextYear));
+        }
+
+        return months;
+    }
+
+    private String formatMonthOnly(int month, int year) {
+        LocalDate date = LocalDate.of(year, month, 1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH);
+        return date.format(formatter);
+    }
+    
     public List<String> getFinancialYear(String year) {
         List<String> months = new ArrayList<>();
         int startYear = Integer.parseInt(year.substring(2, 4));
