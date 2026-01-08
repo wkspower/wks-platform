@@ -525,6 +525,9 @@ const ShutdownNorms = () => {
     }
   }
 
+  const isVCMWithVMD =
+    lowerVertName === 'vcm' && SITE_NAME?.toLowerCase() === 'vmd'
+
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -548,16 +551,19 @@ const ShutdownNorms = () => {
         : false,
 
       saveBtn: IS_PE_PP_VERTICAL_NMD_LLDPE ? false : true,
+
+      //VCM(VMD) && elastomer we required to show calculate btn
       showCalculate:
-        lowerVertName == 'meg' ||
-        lowerVertName == 'elastomer' ||
-        lowerVertName == 'aromatics' ||
-        lowerVertName == 'pta' ||
-        lowerVertName == 'vcm' ||
-        IS_PE_PP_VERTICAL ||
-        IS_PET_VERTICAL
-          ? false
-          : true,
+        isVCMWithVMD || lowerVertName == 'elastomer'
+          ? true
+          : lowerVertName == 'meg' ||
+              lowerVertName == 'aromatics' ||
+              lowerVertName == 'pta' ||
+              IS_PE_PP_VERTICAL ||
+              IS_PET_VERTICAL
+            ? false
+            : true,
+
       showCalculateVisibility:
         lowerVertName != 'meg' &&
         lowerVertName != 'pta' &&

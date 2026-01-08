@@ -432,9 +432,13 @@ const SelectivityData = (props) => {
 
     if (
       verticalChange?.selectedVertical === 'PE' ||
-      verticalChange?.selectedVertical === 'PP'
-    )
+      verticalChange?.selectedVertical === 'PP' ||
+      verticalChange?.selectedVertical?.toLowerCase() === 'elastomer'
+    ) {
+      console.log('getAllGrades .. calling')
+
       getAllGrades()
+    }
 
     if (props?.configType !== 'grades') {
       // Fix: Check if it's PIO Impact and call without gradeId
