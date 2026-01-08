@@ -915,36 +915,43 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	}
 
 	private static String getStringCellValue(Cell cell, AOPMCCalculatedDataDTO dto) {
-		try {
-			if (cell == null)
-				return null;
-			cell.setCellType(CellType.STRING);
-			return cell.getStringCellValue().trim();
-		} catch (Exception e) {
-			dto.setSaveStatus("Failed");
-			dto.setErrDescription("Please enter correct values");
-			e.printStackTrace();
-		}
-		return null;
-
+	    try {
+	        if (cell == null || cell.getCellType() == CellType.BLANK)
+	            return null;
+	        
+	        cell.setCellType(CellType.STRING);
+	        String val = cell.getStringCellValue().trim();
+	        return val.isEmpty() ? null : val;
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
 
 	private static Double getNumericCellValue(Cell cell, AOPMCCalculatedDataDTO dto) {
-		if (cell == null)
-			return null;
-		if (cell.getCellType() == CellType.NUMERIC) {
-			return cell.getNumericCellValue();
-		} else if (cell.getCellType() == CellType.STRING) {
-			try {
-				return Double.parseDouble(cell.getStringCellValue().trim());
-			} catch (NumberFormatException e) {
-				dto.setSaveStatus("Failed");
-				dto.setErrDescription("Please enter numeric values");
-			}
-		}
-		return null;
-	}
+	    if (cell == null || cell.getCellType() == CellType.BLANK)
+	        return null;
 
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } else if (cell.getCellType() == CellType.STRING) {
+	        try {
+	            String val = cell.getStringCellValue().trim();
+	           
+	            if (val.isEmpty()) {
+	                return null;
+	            }
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    return null;
+	}
+	
 	@Override
 	public AOPMessageVM updateDesignCapacity(String plantId, String year,
 			List<AOPMCCalculatedDataDTO> aopMCCalculatedDataDTOList) {
