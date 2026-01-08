@@ -19,6 +19,6 @@ public interface HeatRateRepository extends JpaRepository<DummyEntity, Long> {
     @Query(value = "select AssetId, AssetName from PowerGenerationAssets where CPPPLANT_FK_Id = :cppId and AssetType = :assetType", nativeQuery = true)
     List<HeatRateDropDownProjection> findAssetNamesByCppIdAndAssetType(@Param("cppId") UUID cppId, @Param("assetType") String assetType);
 
-    @Query(value = "select Id, EquipType, CPPUtility, GTLoad, HeatRate, FreeSteamFactor, Remarks from HeatRateLookup where AssetId = :assetId", nativeQuery = true)
+    @Query(value = "select Id, EquipType, CPPUtility, GTLoad, HeatRate, FreeSteamFactor, Remarks from HeatRateLookup where AssetId = :assetId order by GTLoad asc", nativeQuery = true)
     List<HeatRateProjection> findHeatRateByAssetId(@Param("assetId") UUID assetId);
 }

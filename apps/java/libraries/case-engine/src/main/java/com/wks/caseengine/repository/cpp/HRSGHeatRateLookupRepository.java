@@ -16,7 +16,7 @@ import com.wks.caseengine.entity.cpp.HRSGHeatRateLookup;
 public interface HRSGHeatRateLookupRepository extends JpaRepository<HRSGHeatRateLookup, UUID> {
 
     // Find all records ordered by EquipmentName and HRSGLoad
-    List<HRSGHeatRateLookup> findAllByOrderByEquipmentNameAscHrsgLoadAsc();
+    List<HRSGHeatRateLookup> findAllByOrderByHrsgLoadAsc();
 
     // Find all records for a specific HRSG by equipment name
     List<HRSGHeatRateLookup> findByEquipmentNameOrderByHrsgLoadAsc(String equipmentName);
