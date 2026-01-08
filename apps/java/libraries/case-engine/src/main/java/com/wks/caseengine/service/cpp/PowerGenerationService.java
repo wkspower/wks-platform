@@ -270,6 +270,20 @@ public class PowerGenerationService {
             dto.setUtilityGenerated(new AssetUtilityDTO(utilityPlantAsset.getUtilityGenerated(), utilityPlantAsset.getUtilityGeneratedSAPCode()));
             dto.setUtilityDistributed(new AssetUtilityDTO(utilityPlantAsset.getUtilityDistributed(), utilityPlantAsset.getUtilityDistributedSAPCode()));
 
+            // hardcode the index for display order as per excel sheet
+            if(utilityPlantAsset.getUtilityGenerated().equals("HP Steam PRDS")) {  
+                dto.setIndex(4);
+            }
+
+            else if(utilityPlantAsset.getUtilityGenerated().equals("MP Steam PRDS SHP")) {  
+
+                dto.setIndex(6);
+            }
+
+            else if(utilityPlantAsset.getUtilityGenerated().equals("LP Steam PRDS")) {  
+                dto.setIndex(8);
+            }
+
             
             editableFields.add(dto);
          }
@@ -300,6 +314,32 @@ public class PowerGenerationService {
           //  dto.setRemarks(operationalHour.getRemarks());
             dto.setUtilityGenerated(new AssetUtilityDTO(operationalHour.getUtilityGenerated(), operationalHour.getUtilityGeneratedSAPCode()));
             dto.setUtilityDistributed(new AssetUtilityDTO(operationalHour.getUtilityDistributed(), operationalHour.getUtilityDistributedSAPCode()));
+
+            // hardcode the index for display order as per excel sheet
+            if(operationalHour.getUtilityGenerated().equals("HRSG1_SHP STEAM")) {  
+                   
+                    dto.setIndex(1);
+            }
+
+            else if(operationalHour.getUtilityGenerated().equals("HRSG2_SHP STEAM")) {  
+
+                dto.setIndex(2);
+            }
+
+            else if(operationalHour.getUtilityGenerated().equals("HRSG3_SHP STEAM")) {  
+
+                dto.setIndex(3);
+            }
+
+            else if(operationalHour.getUtilityGenerated().equals("STG1_MP STEAM")) {  
+
+                dto.setIndex(5);
+            }
+
+            else if(operationalHour.getUtilityGenerated().equals("STG1_LP STEAM")) {  
+
+                dto.setIndex(7);
+            }
             nonEditableFields.add(dto);
            }
     

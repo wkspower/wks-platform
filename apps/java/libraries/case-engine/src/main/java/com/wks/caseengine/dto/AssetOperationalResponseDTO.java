@@ -16,6 +16,7 @@ public class AssetOperationalResponseDTO {
 
 
     public AssetOperationalResponseDTO(AssetOperationalResponseDTO dto) {
+        this.index = dto.getIndex();
         this.assetName = dto.getAssetName();
         this.assetId = dto.getAssetId();
         this.assetType = dto.getAssetType();
@@ -34,7 +35,7 @@ public class AssetOperationalResponseDTO {
         this.remarks = dto.getRemarks();
         this.isEditable = dto.isEditable();
     }
-
+    private Integer index;
     private String assetName;   // Name of the PowerGenerationAsset
     private UUID assetId;       // Id of the PowerGenerationAsset
     private UUID utilityPlantAssetId; // Id of the UtilityPlantAsset

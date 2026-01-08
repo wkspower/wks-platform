@@ -90,7 +90,7 @@ public class HeatRateService {
      * Get all HRSG Heat Rate lookup data ordered by EquipmentName and HRSGLoad
      */
     public List<HRSGHeatRateLookupDTO> getHRSGHeatRateLookup() {
-        return hrsgHeatRateLookupRepository.findAllByOrderByEquipmentNameAscHrsgLoadAsc().stream()
+        return hrsgHeatRateLookupRepository.findAllByOrderByHrsgLoadAsc().stream()
                 .map(this::mapToHRSGHeatRateDTO)
                 .toList();
     }
