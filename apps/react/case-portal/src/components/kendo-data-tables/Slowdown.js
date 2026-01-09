@@ -237,14 +237,17 @@ const SlowDown = ({ permissions }) => {
         })(),
         productName: row.productName1,
         discription: row.discription,
-        durationInHrs: row.durationInHrs !== undefined && row.durationInHrs !== null && row.durationInHrs !== ''
-        ? row.durationInHrs
-        : (() => {
-            const v = findDuration('1', row)
-            if (!v) return null
-            const [h = '00', m = '00'] = String(v).split('.')
-            return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
-          })(),
+        durationInHrs:
+          row.durationInHrs !== undefined &&
+          row.durationInHrs !== null &&
+          row.durationInHrs !== ''
+            ? row.durationInHrs
+            : (() => {
+                const v = findDuration('1', row)
+                if (!v) return null
+                const [h = '00', m = '00'] = String(v).split('.')
+                return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+              })(),
         month: row.monthly,
         remark: row.remark,
         rate: row.rate,
@@ -258,8 +261,8 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'elastomer'
           ? slowDownDetailsElastomer
           : lowerVertName === 'pe' || lowerVertName === 'pp'
-          ? slowDownDetailsPEPP
-          : slowDownDetailsMEG,
+            ? slowDownDetailsPEPP
+            : slowDownDetailsMEG,
         keycloak,
       )
 
@@ -372,40 +375,40 @@ const SlowDown = ({ permissions }) => {
         const y = date.getFullYear()
         return `${d}/${m}/${y}`
       }
-      if(lowerVertName !='pe' && lowerVertName !=='pp'){
-      for (const record of data) {
-        const startDate =
-          record.maintStartDateTime instanceof Date
-            ? record.maintStartDateTime
-            : new Date(record.maintStartDateTime)
-        const endDate =
-          record.maintEndDateTime instanceof Date
-            ? record.maintEndDateTime
-            : new Date(record.maintEndDateTime)
+      if (lowerVertName != 'pe' && lowerVertName !== 'pp') {
+        for (const record of data) {
+          const startDate =
+            record.maintStartDateTime instanceof Date
+              ? record.maintStartDateTime
+              : new Date(record.maintStartDateTime)
+          const endDate =
+            record.maintEndDateTime instanceof Date
+              ? record.maintEndDateTime
+              : new Date(record.maintEndDateTime)
 
-        // Validate date format: dd/mm/yyyy (by parsing and checking)
-        if (
-          startLimit &&
-          endLimit &&
-          (!startDate ||
-            !endDate ||
-            isNaN(startDate) ||
-            isNaN(endDate) ||
-            startDate < startLimit ||
-            startDate > endLimit ||
-            endDate < startLimit ||
-            endDate > endLimit)
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-            severity: 'error',
-          })
-          return
+          // Validate date format: dd/mm/yyyy (by parsing and checking)
+          if (
+            startLimit &&
+            endLimit &&
+            (!startDate ||
+              !endDate ||
+              isNaN(startDate) ||
+              isNaN(endDate) ||
+              startDate < startLimit ||
+              startDate > endLimit ||
+              endDate < startLimit ||
+              endDate > endLimit)
+          ) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
+              severity: 'error',
+            })
+            return
+          }
         }
       }
-    }
 
       // Select required fields based on vertical
       const requiredFields = ['discription', 'remark']
@@ -496,38 +499,42 @@ const SlowDown = ({ permissions }) => {
       }
 
       // Date required + Start < End check
-      if(lowerVertName !='pe' && lowerVertName !=='pp'){
-      for (const record of data) {
-        const startMissing = !record.maintStartDateTime
-        const endMissing = !record.maintEndDateTime
-        if (startMissing || endMissing) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Start Date and End Date are required for all records.',
-            severity: 'error',
-          })
-          return
-        }
-        const startDate =
-          record.maintStartDateTime instanceof Date
-            ? record.maintStartDateTime
-            : new Date(record.maintStartDateTime)
-        const endDate =
-          record.maintEndDateTime instanceof Date
-            ? record.maintEndDateTime
-            : new Date(record.maintEndDateTime)
-        if (startDate && endDate && startDate.getTime() >= endDate.getTime()) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
-            severity: 'error',
-          })
-          return
+      if (lowerVertName != 'pe' && lowerVertName !== 'pp') {
+        for (const record of data) {
+          const startMissing = !record.maintStartDateTime
+          const endMissing = !record.maintEndDateTime
+          if (startMissing || endMissing) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'Start Date and End Date are required for all records.',
+              severity: 'error',
+            })
+            return
+          }
+          const startDate =
+            record.maintStartDateTime instanceof Date
+              ? record.maintStartDateTime
+              : new Date(record.maintStartDateTime)
+          const endDate =
+            record.maintEndDateTime instanceof Date
+              ? record.maintEndDateTime
+              : new Date(record.maintEndDateTime)
+          if (
+            startDate &&
+            endDate &&
+            startDate.getTime() >= endDate.getTime()
+          ) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `Start time must be before end time for "${record.discription || 'this record'}".`,
+              severity: 'error',
+            })
+            return
+          }
         }
       }
-    }
       if (lowerVertName === 'vcm') {
         for (const row of rows) {
           if (
@@ -781,9 +788,19 @@ const SlowDown = ({ permissions }) => {
       }))
       setRowsShutdown(formattedDataShutDown)
       const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-      ];
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ]
 
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -794,11 +811,12 @@ const SlowDown = ({ permissions }) => {
         originalRemark: item.remark,
         maintStartDateTime: new Date(item?.maintStartDateTime),
         maintEndDateTime: new Date(item?.maintEndDateTime),
-        monthly: item?.monthly || item?.month || (
-          item?.maintStartDateTime
+        monthly:
+          item?.monthly ||
+          item?.month ||
+          (item?.maintStartDateTime
             ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
-            : ''
-        ),
+            : ''),
         //month: item?.month || '',
       }))
 
@@ -1001,7 +1019,7 @@ const SlowDown = ({ permissions }) => {
       case verticalEnums.VCM:
         return SlowDownVcmColumns
       case verticalEnums.PET:
-        return SlowDownPeColumns 
+        return SlowDownPeColumns
       default:
         return SlowDownMegColumns
     }

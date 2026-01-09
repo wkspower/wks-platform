@@ -8,7 +8,6 @@ export const ShutdownNormsApiService = {
   shutdownConsumptionHistoryData,
 }
 async function getShutdownMonths(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
-
   let url
   if (gradeId) {
     url = `${Config.CaseEngineUrl}/task/shutdown-months?plantId=${PLANT_ID}&maintenanceName=Shutdown&year=${AOP_YEAR}&gradeId=${gradeId}`
@@ -50,7 +49,6 @@ async function handleCalculateShutdownNorms(PLANT_ID, AOP_YEAR, keycloak) {
   }
 }
 async function getShutdownNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
-  
   let url
   if (gradeId) {
     url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}&gradeId=${gradeId}`
@@ -71,8 +69,12 @@ async function getShutdownNormsData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function shutdownConsumptionHistoryData(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
-
+async function shutdownConsumptionHistoryData(
+  keycloak,
+  gradeId,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   const url = `${Config.CaseEngineUrl}/task/shutdown-consumption?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {

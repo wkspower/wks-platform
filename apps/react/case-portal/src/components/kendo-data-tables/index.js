@@ -692,12 +692,12 @@ const KendoDataTables = ({
     )
   }
   const MonthDropdownPEPPDisplayCell = ({ dataItem, field, tdProps }) => {
-  return (
-    <td {...tdProps} title={dataItem[field]}>
-      {dataItem[field]}
-    </td>
-  )
-}
+    return (
+      <td {...tdProps} title={dataItem[field]}>
+        {dataItem[field]}
+      </td>
+    )
+  }
 
   const ElastomerMonthDisplayCell = (props) => {
     const { dataItem, field, tdProps } = props
@@ -2000,10 +2000,11 @@ const KendoDataTables = ({
                             const { dataItem, field, tdProps, children } = props
                             const rowId = dataItem.id
                             const value = dataItem[field]
-                            const isEdited = Object.prototype.hasOwnProperty.call(
-                              customModifiedCells?.[rowId] || {},
-                              field,
-                            )
+                            const isEdited =
+                              Object.prototype.hasOwnProperty.call(
+                                customModifiedCells?.[rowId] || {},
+                                field,
+                              )
                             return (
                               <td
                                 {...tdProps}
@@ -2027,7 +2028,7 @@ const KendoDataTables = ({
                     />
                   )
                 }
-// ...existing code...
+                // ...existing code...
 
                 if (col.type === 'monthDropdown') {
                   return (

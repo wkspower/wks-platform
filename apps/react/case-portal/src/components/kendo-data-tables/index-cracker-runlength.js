@@ -157,9 +157,9 @@ const KendoDataTablesCrackerRunLength = ({
   const [loading1, setLoading1] = useState(false)
   const [open, setOpen] = useState(false)
   const [startDate, setStartDate] = useState(null)
-  const [dynamicColumns, setDynamicColumns] = useState([]);
-  const [dynamicColumnsConfig, setDynamicColumnsConfig] = useState([]);
-  
+  const [dynamicColumns, setDynamicColumns] = useState([])
+  const [dynamicColumnsConfig, setDynamicColumnsConfig] = useState([])
+
   const [hValues, setHValues] = useState({})
   const [snackbarOpen1, setSnackbarOpen1] = useState(false)
   const [snackbarData1, setSnackbarData1] = useState({
@@ -762,23 +762,23 @@ const KendoDataTablesCrackerRunLength = ({
             />
           )
         }
-         if (col.type === 'date') {
+        if (col.type === 'date') {
           return (
             <GridColumn
               key={col.field}
               field={col.field}
               title={col.title || col.headerName}
-              filter="date"
+              filter='date'
               filterable={true}
               columnMenu={ColumnMenuCheckboxFilter}
-              format="{0:dd-MM-yyyy}"
+              format='{0:dd-MM-yyyy}'
               hidden={col.hidden}
               headerClassName={isActive ? 'active-column' : ''}
               cells={{
                 headerCell: SimpleHeaderWithTooltip,
               }}
             />
-          );
+          )
         }
         if (!col.editable) {
           return (
@@ -971,7 +971,7 @@ const KendoDataTablesCrackerRunLength = ({
       autoProcessData={true}
     >
       {dynamicColumnsConfig
-        .filter(col => col.field && col.field.trim() !== '')
+        .filter((col) => col.field && col.field.trim() !== '')
         .map((col) => {
           if (
             dateFields1.includes(col.field) ||
@@ -998,40 +998,40 @@ const KendoDataTablesCrackerRunLength = ({
             )
           }
 
-        if (!col.editable) {
+          if (!col.editable) {
+            return (
+              <GridColumn
+                key={col.field}
+                field={col.field}
+                title={col.title || col.headerName}
+                hidden={col.hidden}
+                sortable={!!col.filter}
+                className={col.isDisabled ? 'k-right-disabled' : ''}
+                cells={{
+                  headerCell: SimpleHeaderWithTooltip,
+                }}
+              />
+            )
+          }
+
           return (
             <GridColumn
               key={col.field}
               field={col.field}
               title={col.title || col.headerName}
+              // width={col.widthT}
               hidden={col.hidden}
+              columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               sortable={!!col.filter}
               className={col.isDisabled ? 'k-right-disabled' : ''}
-              cells={{
-                headerCell: SimpleHeaderWithTooltip,
-              }}
+              cells={
+                col.editable
+                  ? { data: CellWithState, headerCell: SimpleHeaderWithTooltip }
+                  : { headerCell: SimpleHeaderWithTooltip }
+              }
             />
           )
-        }
-
-        return (
-          <GridColumn
-            key={col.field}
-            field={col.field}
-            title={col.title || col.headerName}
-            // width={col.widthT}
-            hidden={col.hidden}
-            columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
-            sortable={!!col.filter}
-            className={col.isDisabled ? 'k-right-disabled' : ''}
-            cells={
-              col.editable
-                ? { data: CellWithState, headerCell: SimpleHeaderWithTooltip }
-                : { headerCell: SimpleHeaderWithTooltip }
-            }
-          />
-        )
-      })}
+        })}
 
       {permissions?.deleteButton && (
         <GridColumn
@@ -1070,248 +1070,268 @@ const KendoDataTablesCrackerRunLength = ({
   const NEXT_AOP_YEAR = getNextAopYear(AOP_YEAR)
 
   const saveCrackerRunLength = async (singleRow) => {
-  setLoading1(true);
-  try {
-    // Helper function to transform field names: "H10_Proposed" -> "H10 Proposed"
-    const transformFieldName = (fieldName) => {
-      // Replace underscores with spaces
-      return fieldName;
-    };
+    setLoading1(true)
+    try {
+      // Helper function to transform field names: "H10_Proposed" -> "H10 Proposed"
+      const transformFieldName = (fieldName) => {
+        // Replace underscores with spaces
+        return fieldName
+      }
 
-    const payload = singleRow.map(row => {
-      const payloadItem = {
-        plantId: PLANT_ID,
-        id: null,
-      };
-
-      // Fields to exclude from payload
-      const excludeFields = ['id', 'idFromApi'];
-
-      // Iterate through all fields in the row
-      Object.keys(row).forEach(frontendField => {
-        // Skip excluded fields
-        if (excludeFields.includes(frontendField)) return;
-        
-        // Transform the field name (remove underscores, add spaces)
-        const backendField = transformFieldName(frontendField);
-        
-        // Handle date fields
-        if (frontendField.toLowerCase().includes('date')) {
-          payloadItem[backendField] = row[frontendField] 
-            ? moment(row[frontendField]).format('YYYY-MM-DD') 
-            : null;
-        } else {
-          // Add all other fields with transformed names
-          payloadItem[backendField] = row[frontendField] ?? null;
+      const payload = singleRow.map((row) => {
+        const payloadItem = {
+          plantId: PLANT_ID,
+          id: null,
         }
-      });
 
-      return payloadItem;
-    });
+        // Fields to exclude from payload
+        const excludeFields = ['id', 'idFromApi']
 
-    console.log('Dynamic Payload:', payload); // Debug log
+        // Iterate through all fields in the row
+        Object.keys(row).forEach((frontendField) => {
+          // Skip excluded fields
+          if (excludeFields.includes(frontendField)) return
 
-    const response = await DataService.saveCrackerRunLength(
-      PLANT_ID,
-      payload,
-      keycloak,
-      NEXT_AOP_YEAR,
-    );
+          // Transform the field name (remove underscores, add spaces)
+          const backendField = transformFieldName(frontendField)
 
-    if (response?.code == 200) {
-      setSnackbarOpen1(true);
-      setSnackbarData1({
-        message: 'Data Saved Successfully!',
-        severity: 'success',
-      });
-    } else {
-      setSnackbarOpen1(true);
+          // Handle date fields
+          if (frontendField.toLowerCase().includes('date')) {
+            payloadItem[backendField] = row[frontendField]
+              ? moment(row[frontendField]).format('YYYY-MM-DD')
+              : null
+          } else {
+            // Add all other fields with transformed names
+            payloadItem[backendField] = row[frontendField] ?? null
+          }
+        })
+
+        return payloadItem
+      })
+
+      console.log('Dynamic Payload:', payload) // Debug log
+
+      const response = await DataService.saveCrackerRunLength(
+        PLANT_ID,
+        payload,
+        keycloak,
+        NEXT_AOP_YEAR,
+      )
+
+      if (response?.code == 200) {
+        setSnackbarOpen1(true)
+        setSnackbarData1({
+          message: 'Data Saved Successfully!',
+          severity: 'success',
+        })
+      } else {
+        setSnackbarOpen1(true)
+        setSnackbarData1({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
+      setSnackbarOpen1(true)
       setSnackbarData1({
         message: 'Data Save Failed!',
         severity: 'error',
-      });
-    }
-    return response;
-  } catch (error) {
-    console.error('Error saving data:', error);
-    setSnackbarOpen1(true);
-    setSnackbarData1({
-      message: 'Data Save Failed!',
-      severity: 'error',
-    });
-  } finally {
-    setLoading1(false);
-  }
-};
-
-  const fetchDataNextYearParameters = useCallback(
-  async (date) => {
-    setLoading1(true)
-    try {
-      const res = await DataService.getCrackerNextYearParameters(
-        keycloak,
-        moment(date).format('YYYY-MM-DD'),
-        PLANT_ID,
-        AOP_YEAR,
-      )
-
-      if (res?.code === 200 && res.data && Array.isArray(res.data.columns)) {
-        const HIDDEN_FIELDS = ['Plant_FK_Id', 'AOPYear', 'Demo', 'Date'];
-        const columnsFromApi = res.data.columns
-          .filter(col => col.field && col.field.trim() !== '')
-          .map(col => ({
-            ...col,
-            hidden: HIDDEN_FIELDS.includes(col.field),
-            editable: true,
-          }));
-        setDynamicColumns(columnsFromApi);
-
-        // Dynamically set hValues based on columns
-        const item = (Array.isArray(res.data.data) && res.data.data.length > 0)
-          ? res.data.data[0]
-          : {};
-        const hVals = {};
-        columnsFromApi.forEach(col => {
-          if (!HIDDEN_FIELDS.includes(col.field)) {
-            hVals[col.field] = item?.[col.field] ?? '0';
-          }
-        });
-        setHValues(hVals);
-        // Optionally set start date if needed
-        // setStartDate(item.Date ? new Date(item.Date) : null)
-      }
-    } catch (err) {
-      console.error('Error loading data:', err)
+      })
     } finally {
       setLoading1(false)
     }
-  },
-  [keycloak, AOP_YEAR, PLANT_ID],
-)
+  }
+
+  const fetchDataNextYearParameters = useCallback(
+    async (date) => {
+      setLoading1(true)
+      try {
+        const res = await DataService.getCrackerNextYearParameters(
+          keycloak,
+          moment(date).format('YYYY-MM-DD'),
+          PLANT_ID,
+          AOP_YEAR,
+        )
+
+        if (res?.code === 200 && res.data && Array.isArray(res.data.columns)) {
+          const HIDDEN_FIELDS = ['Plant_FK_Id', 'AOPYear', 'Demo', 'Date']
+          const columnsFromApi = res.data.columns
+            .filter((col) => col.field && col.field.trim() !== '')
+            .map((col) => ({
+              ...col,
+              hidden: HIDDEN_FIELDS.includes(col.field),
+              editable: true,
+            }))
+          setDynamicColumns(columnsFromApi)
+
+          // Dynamically set hValues based on columns
+          const item =
+            Array.isArray(res.data.data) && res.data.data.length > 0
+              ? res.data.data[0]
+              : {}
+          const hVals = {}
+          columnsFromApi.forEach((col) => {
+            if (!HIDDEN_FIELDS.includes(col.field)) {
+              hVals[col.field] = item?.[col.field] ?? '0'
+            }
+          })
+          setHValues(hVals)
+          // Optionally set start date if needed
+          // setStartDate(item.Date ? new Date(item.Date) : null)
+        }
+      } catch (err) {
+        console.error('Error loading data:', err)
+      } finally {
+        setLoading1(false)
+      }
+    },
+    [keycloak, AOP_YEAR, PLANT_ID],
+  )
 
   const fetchDataNextYearCalculate = useCallback(
-  async (hValuesParam, startDateParam) => {
-    setLoading1(true)
-    try {
-      // Build query params dynamically
-      const queryParams = {};
-      Object.keys(hValuesParam).forEach((key) => {
-        queryParams[key] = hValuesParam[key];
-      });
-      queryParams.startDate = moment(startDateParam).format('YYYY-MM-DD');
+    async (hValuesParam, startDateParam) => {
+      setLoading1(true)
+      try {
+        // Build query params dynamically
+        const queryParams = {}
+        Object.keys(hValuesParam).forEach((key) => {
+          queryParams[key] = hValuesParam[key]
+        })
+        queryParams.startDate = moment(startDateParam).format('YYYY-MM-DD')
 
-      // Fetch data from API
-      const res = await DataService.getCrackerNextYearData(
-        keycloak,
-        queryParams,
-        PLANT_ID,
-        AOP_YEAR,
-      );
+        // Fetch data from API
+        const res = await DataService.getCrackerNextYearData(
+          keycloak,
+          queryParams,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
-      // Get columns and data from API response
-      // Filter and map columns to handle empty field names
-      const columnsFromApi = (res?.data?.columns || [])
-        .filter(col => col.field && col.field.trim() !== '')
-        .map(col => ({
-          ...col,
-          editable: col.field === 'Date' || col.field === 'Month' ? false : true,
-          hidden: ['aopYear', 'plantId'].includes(col.field), 
-        }));
-      
-      setDynamicColumnsConfig(columnsFromApi);
-      const dataArr = res?.data?.data || [];
+        // Get columns and data from API response
+        // Filter and map columns to handle empty field names
+        const columnsFromApi = (res?.data?.columns || [])
+          .filter((col) => col.field && col.field.trim() !== '')
+          .map((col) => ({
+            ...col,
+            editable:
+              col.field === 'Date' || col.field === 'Month' ? false : true,
+            hidden: ['aopYear', 'plantId'].includes(col.field),
+          }))
 
-      if (Array.isArray(dataArr) && dataArr.length > 0) {
-        // Helper to convert date fields
-        const toDateObject = (value) =>
-          value ? moment(value, 'YYYY-MM-DD').toDate() : null;
+        setDynamicColumnsConfig(columnsFromApi)
+        const dataArr = res?.data?.data || []
 
-        // Map data using backend column field names
-        const processedData = dataArr.map((item, index) => {
-          const row = { id: index };
-          columnsFromApi.forEach(col => {
-            let val = item[col.field];
-            
-            // Handle the rowId field (previously empty string field)
-            if (col.field === 'rowId' && item[''] !== undefined) {
-              val = item[''];
+        if (Array.isArray(dataArr) && dataArr.length > 0) {
+          // Helper to convert date fields
+          const toDateObject = (value) =>
+            value ? moment(value, 'YYYY-MM-DD').toDate() : null
+
+          // Map data using backend column field names
+          const processedData = dataArr.map((item, index) => {
+            const row = { id: index }
+            columnsFromApi.forEach((col) => {
+              let val = item[col.field]
+
+              // Handle the rowId field (previously empty string field)
+              if (col.field === 'rowId' && item[''] !== undefined) {
+                val = item['']
+              }
+
+              // Convert any field with type 'date' to JS Date object
+              if (
+                col.type &&
+                col.type.toLowerCase() === 'date' &&
+                val &&
+                typeof val === 'string'
+              ) {
+                val = moment(val, [
+                  'YYYY-MM-DD',
+                  'DD-MM-YYYY',
+                  moment.ISO_8601,
+                ]).format('YYYY-MM-DD')
+              }
+              row[col.field] = val ?? ''
+            })
+            return row
+          })
+
+          const lastRow = processedData[processedData.length - 1]
+          const secondLastRow = processedData[processedData.length - 2]
+
+          // Add exactly 1 day (regardless of month/year)
+          // Find the correct field name for date and month from columns
+          const dateField =
+            columnsFromApi.find((col) =>
+              col.field.toLowerCase().includes('date'),
+            )?.field || 'date'
+          const monthField =
+            columnsFromApi.find((col) => col.field.toLowerCase() === 'month')
+              ?.field || 'month'
+
+          // const nextDate = toDateObject(moment(lastRow[dateField]).add(1, 'day'));
+          // const nextMonthName = moment(nextDate).format('MMMM');
+          const nextDate = moment(lastRow[dateField])
+            .add(1, 'day')
+            .format('YYYY-MM-DD') // <-- format as string
+          const nextMonthName = moment(nextDate, 'YYYY-MM-DD').format('MMMM')
+
+          // Generate unique ID
+          const generateRandomId = () =>
+            `${Date.now()}-${Math.floor(Math.random() * 100000)}`
+
+          // Build new row using backend field names
+          const newRow = { ...lastRow }
+          newRow.id = lastRow.id + 1
+          newRow[dateField] = nextDate
+          newRow[monthField] = nextMonthName
+          newRow.idFromApi = generateRandomId()
+
+          columnsFromApi.forEach((col) => {
+            const field = col.field
+            if (field === dateField) {
+              newRow[field] = nextDate
+            } else if (field === monthField) {
+              newRow[field] = nextMonthName
+            } else if (field === 'rowId') {
+              // Generate new ID for the rowId field
+              newRow[field] = generateRandomId()
+            } else if (
+              typeof lastRow[field] === 'string' &&
+              !isNaN(lastRow[field])
+            ) {
+              newRow[field] =
+                lastRow[field] === 'SAD' && secondLastRow?.[field] === 'SAD'
+                  ? '0'
+                  : (parseInt(lastRow[field], 10) + 1).toString()
+            } else if (
+              lastRow[field] === 'SAD' &&
+              secondLastRow?.[field] === 'SAD'
+            ) {
+              newRow[field] = '0'
+            } else {
+              newRow[field] = lastRow[field]
             }
-            
-            // Convert any field with type 'date' to JS Date object
-            if (col.type && col.type.toLowerCase() === 'date' && val && typeof val === 'string') {
-              val = moment(val, ['YYYY-MM-DD', 'DD-MM-YYYY', moment.ISO_8601]).format('YYYY-MM-DD');
-            }
-            row[col.field] = val ?? '';
-          });
-          return row;
-        });
+          })
 
-        const lastRow = processedData[processedData.length - 1];
-        const secondLastRow = processedData[processedData.length - 2];
-
-        // Add exactly 1 day (regardless of month/year)
-        // Find the correct field name for date and month from columns
-        const dateField = columnsFromApi.find(col => col.field.toLowerCase().includes('date'))?.field || 'date';
-        const monthField = columnsFromApi.find(col => col.field.toLowerCase() === 'month')?.field || 'month';
-
-        // const nextDate = toDateObject(moment(lastRow[dateField]).add(1, 'day'));
-        // const nextMonthName = moment(nextDate).format('MMMM');
-        const nextDate = moment(lastRow[dateField]).add(1, 'day').format('YYYY-MM-DD'); // <-- format as string
-        const nextMonthName = moment(nextDate, 'YYYY-MM-DD').format('MMMM');
-
-        // Generate unique ID
-        const generateRandomId = () =>
-          `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
-
-        // Build new row using backend field names
-        const newRow = { ...lastRow };
-        newRow.id = lastRow.id + 1;
-        newRow[dateField] = nextDate;
-        newRow[monthField] = nextMonthName;
-        newRow.idFromApi = generateRandomId();
-
-        columnsFromApi.forEach((col) => {
-          const field = col.field;
-          if (field === dateField) {
-            newRow[field] = nextDate;
-          } else if (field === monthField) {
-            newRow[field] = nextMonthName;
-          } else if (field === 'rowId') {
-            // Generate new ID for the rowId field
-            newRow[field] = generateRandomId();
-          } else if (
-            typeof lastRow[field] === 'string' &&
-            !isNaN(lastRow[field])
-          ) {
-            newRow[field] =
-              lastRow[field] === 'SAD' && secondLastRow?.[field] === 'SAD'
-                ? '0'
-                : (parseInt(lastRow[field], 10) + 1).toString();
-          } else if (lastRow[field] === 'SAD' && secondLastRow?.[field] === 'SAD') {
-            newRow[field] = '0';
-          } else {
-            newRow[field] = lastRow[field];
-          }
-        });
-        
-        const processedDataWithNewRow = [...processedData, newRow];
-        setRowsPopUp(processedDataWithNewRow);
-        setSingleRow([newRow]);
-      } else {
-        setRowsPopUp([]);
-        setSingleRow([]);
+          const processedDataWithNewRow = [...processedData, newRow]
+          setRowsPopUp(processedDataWithNewRow)
+          setSingleRow([newRow])
+        } else {
+          setRowsPopUp([])
+          setSingleRow([])
+        }
+      } catch (err) {
+        setRowsPopUp([])
+        setSingleRow([])
+        console.error('Error loading data:', err)
+      } finally {
+        setLoading1(false)
       }
-    } catch (err) {
-      setRowsPopUp([]);
-      setSingleRow([]);
-      console.error('Error loading data:', err);
-    } finally {
-      setLoading1(false);
-    }
-  },
-  [keycloak, AOP_YEAR, PLANT_ID]
-);
-
+    },
+    [keycloak, AOP_YEAR, PLANT_ID],
+  )
 
   const handleCancelClick = () => {
     setHValues({})
@@ -1319,8 +1339,8 @@ const KendoDataTablesCrackerRunLength = ({
     setSingleRow([])
     setOpen(false)
     setStartDate(null)
-    setDynamicColumns([]);
-    setDynamicColumnsConfig([]);
+    setDynamicColumns([])
+    setDynamicColumnsConfig([])
   }
 
   const handleClose = () => {
@@ -1683,7 +1703,13 @@ const KendoDataTablesCrackerRunLength = ({
 
             {/* H Inputs */}
             {dynamicColumns
-              .filter(col => col.field && !['Plant_FK_Id', 'AOPYear', 'Demo', 'Date'].includes(col.field))
+              .filter(
+                (col) =>
+                  col.field &&
+                  !['Plant_FK_Id', 'AOPYear', 'Demo', 'Date'].includes(
+                    col.field,
+                  ),
+              )
               .map((col) => (
                 <div
                   key={col.field}
@@ -1707,8 +1733,7 @@ const KendoDataTablesCrackerRunLength = ({
                     }}
                   />
                 </div>
-            ))}
-
+              ))}
 
             {/* Calculate Button */}
             <div

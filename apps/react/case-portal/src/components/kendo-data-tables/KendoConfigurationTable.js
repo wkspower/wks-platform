@@ -577,10 +577,7 @@ const ConfigurationTable = () => {
     getAopSummary()
 
     setTimeout(() => {
-      if (
-        lowerVertName != 'cracker' &&
-        lowerVertName != 'meg' 
-      ) {
+      if (lowerVertName != 'cracker' && lowerVertName != 'meg') {
         if (lowerVertName === 'aromatics') {
           getRevision()
         }
@@ -1111,8 +1108,7 @@ const ConfigurationTable = () => {
   }, [openConfirmDialogRev])
 
   if (
-    (lowerVertName == 'meg' ||
-      lowerVertName == 'pvc') &&
+    (lowerVertName == 'meg' || lowerVertName == 'pvc') &&
     lowerVertName !== 'cracker'
   ) {
     // const megTabs = ['Configuration', 'Constants', 'Report Manual Entry']

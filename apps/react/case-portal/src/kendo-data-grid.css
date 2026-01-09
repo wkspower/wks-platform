@@ -139,7 +139,7 @@
 
 /* 1. Input box styling */
 .k-custom-dtp .k-picker-wrap {
-  /* Mimic MUI’s readOnly input: disable typing, just open calendar on click */
+  /* Mimic MUI?s readOnly input: disable typing, just open calendar on click */
   background-color: #f9f9f9;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -166,7 +166,7 @@
   font-size: 1rem;
 }
 
-/* 4. If you need to style the “Now” / “Today” / “Time” buttons at the bottom */
+/* 4. If you need to style the ?Now? / ?Today? / ?Time? buttons at the bottom */
 .k-custom-dtp-popup .k-footer .k-button {
   font-size: 1rem;
 }

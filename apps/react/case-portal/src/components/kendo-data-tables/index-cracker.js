@@ -261,9 +261,12 @@ const KendoDataTablesCracker = ({
       let keyToUpdate = ''
       const updatedRows = prevRows.map((row) => {
         if (row.id === currentRowId || row.Id === currentRowId) {
-          const keysToUpdate = ['aopRemarks', 'remarks', 'remark', 'Remarks'].filter(
-            (key) => key in row,
-          )
+          const keysToUpdate = [
+            'aopRemarks',
+            'remarks',
+            'remark',
+            'Remarks',
+          ].filter((key) => key in row)
           keyToUpdate = keysToUpdate[0] || 'remark' || 'Remarks'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
           return updatedRow
