@@ -330,7 +330,7 @@ function generateMonthColumnsForPEPP(
       align: 'left',
       headerAlign: 'left',
       type: 'number',
-     // widthT: fullMonthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
+      // widthT: fullMonthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
     }
   })
 }

@@ -18,7 +18,7 @@ const initialState = {
   plantObject: null,
   siteObject: null,
   verticalObject: null,
-  verticalChangeFromDashboard: null, 
+  verticalChangeFromDashboard: null,
 }
 
 const dataGridStore = createSlice({
@@ -96,5 +96,5 @@ export const {
   setPlantObject,
   setSiteObject,
   setVerticalObject,
-  setVerticalChangeFromDashboard, 
+  setVerticalChangeFromDashboard,
 } = dataGridStore.actions

@@ -197,7 +197,6 @@ const KendoDataTables = ({
   const lowerVertName = vertName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
 
- 
   // const initialGroup = groupBy
   //   ? [
   //       {
@@ -207,10 +206,10 @@ const KendoDataTables = ({
   //     ]
   //   : []
   const initialGroup = Array.isArray(groupBy)
-  ? groupBy.map((field) => ({ field }))
-  : groupBy
-    ? [{ field: groupBy }]
-    : [];
+    ? groupBy.map((field) => ({ field }))
+    : groupBy
+      ? [{ field: groupBy }]
+      : []
 
   const MyFooterCustomCell = (props) => {
     const { tdProps } = props
@@ -699,12 +698,12 @@ const KendoDataTables = ({
     )
   }
   const MonthDropdownPEPPDisplayCell = ({ dataItem, field, tdProps }) => {
-  return (
-    <td {...tdProps} title={dataItem[field]}>
-      {dataItem[field]}
-    </td>
-  )
-}
+    return (
+      <td {...tdProps} title={dataItem[field]}>
+        {dataItem[field]}
+      </td>
+    )
+  }
 
   const ElastomerMonthDisplayCell = (props) => {
     const { dataItem, field, tdProps } = props
@@ -849,13 +848,13 @@ const KendoDataTables = ({
       allRedCell,
       isFormatByUOM = false,
     } = props
-    const uomType= dataItem?.UOM;
+    const uomType = dataItem?.UOM
     const rowId = dataItem.id
-    let value =  valueFormatterByUOM(dataItem[field] , uomType);
+    let value = valueFormatterByUOM(dataItem[field], uomType)
     if (disableRedHighlight) {
       return (
         <td {...tdProps} title={value}>
-          {isFormatByUOM ?  value : children}
+          {isFormatByUOM ? value : children}
         </td>
       )
     }
@@ -885,7 +884,7 @@ const KendoDataTables = ({
           fontWeight: shouldHighlight ? 'bold' : undefined,
         }}
       >
-        {isFormatByUOM ?  value : children}
+        {isFormatByUOM ? value : children}
       </td>
     )
   }
@@ -901,13 +900,13 @@ const KendoDataTables = ({
       allRedCell2,
       isFormatByUOM = false,
     } = props
-    const uomType= dataItem?.UOM;
+    const uomType = dataItem?.UOM
     const rowId = dataItem.id
-    let value = valueFormatterByUOM(dataItem[field] , uomType);
+    let value = valueFormatterByUOM(dataItem[field], uomType)
     if (disableRedHighlight) {
       return (
         <td {...tdProps} title={value}>
-           {isFormatByUOM ?  value : children}
+          {isFormatByUOM ? value : children}
         </td>
       )
     }
@@ -982,7 +981,7 @@ const KendoDataTables = ({
           // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
         }}
       >
-      {isFormatByUOM ?  value : children}
+        {isFormatByUOM ? value : children}
       </td>
     )
   }
@@ -2008,10 +2007,11 @@ const KendoDataTables = ({
                             const { dataItem, field, tdProps, children } = props
                             const rowId = dataItem.id
                             const value = dataItem[field]
-                            const isEdited = Object.prototype.hasOwnProperty.call(
-                              customModifiedCells?.[rowId] || {},
-                              field,
-                            )
+                            const isEdited =
+                              Object.prototype.hasOwnProperty.call(
+                                customModifiedCells?.[rowId] || {},
+                                field,
+                              )
                             return (
                               <td
                                 {...tdProps}
@@ -2035,7 +2035,7 @@ const KendoDataTables = ({
                     />
                   )
                 }
-// ...existing code...
+                // ...existing code...
 
                 if (col.type === 'monthDropdown') {
                   return (

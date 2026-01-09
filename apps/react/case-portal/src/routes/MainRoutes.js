@@ -573,7 +573,7 @@ export const MainRoutes = (
                 <FixedConsumption />
               </PrivateRoute>
             ),
-          }, 
+          },
           {
             path: 'inputs',
             element: (
@@ -581,9 +581,9 @@ export const MainRoutes = (
                 <Inputs />
               </PrivateRoute>
             ),
-          }, 
+          },
           // ...other utilityPlant routes...
-        ]
+        ],
       },
 
       {

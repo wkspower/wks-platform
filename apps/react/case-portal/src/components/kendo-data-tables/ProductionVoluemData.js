@@ -573,16 +573,18 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   const colDefs_percentage_summary = IS_PE_PP
-  ? getColDefsPercentageSummaryPEPP(headerMap, valueFormat)
-  : getColDefsPercentageSummary(headerMap, valueFormat)
+    ? getColDefsPercentageSummaryPEPP(headerMap, valueFormat)
+    : getColDefsPercentageSummary(headerMap, valueFormat)
 
-  const colDefs_design_capacity = IS_PE_PP || IS_PET
-    ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
-    : getColDefsDesignCapacity(headerMap, valueFormat)
+  const colDefs_design_capacity =
+    IS_PE_PP || IS_PET
+      ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
+      : getColDefsDesignCapacity(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = IS_PE_PP || IS_PET
-    ? getColDefsMaxAchievedCapacityPEPP(headerMap, valueFormat)
-    : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
+  const colDefs_max_achieved_capacity =
+    IS_PE_PP || IS_PET
+      ? getColDefsMaxAchievedCapacityPEPP(headerMap, valueFormat)
+      : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
 
   const colDefs_non_editable = getColDefsNonEditable(headerMap, valueFormat)
 
@@ -825,12 +827,13 @@ const ProductionvolumeData = ({ permissions }) => {
   }
 
   //POINT-1 Current MCU to be rename as Max Achieved capacity.
-  const percentageTitle = IS_PE_PP || IS_PET
-    ? // ? 'Current MCU'
-      'Max Achieved Capacity'
-    : VERTICAL_NAME === 'cracker'
-      ? 'Max Achieved Capacity (Ethylene)'
-      : 'Max Achieved Capacity'
+  const percentageTitle =
+    IS_PE_PP || IS_PET
+      ? // ? 'Current MCU'
+        'Max Achieved Capacity'
+      : VERTICAL_NAME === 'cracker'
+        ? 'Max Achieved Capacity (Ethylene)'
+        : 'Max Achieved Capacity'
   const adjustedPermissionsGrid1 = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -852,7 +855,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
-      downloadExcelBtnFromUI: VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
+      downloadExcelBtnFromUI:
+        VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Max Achieved Capacity`,
     },
     isOldYear,
@@ -872,14 +876,14 @@ const ProductionvolumeData = ({ permissions }) => {
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      downloadExcelBtnFromUI: VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
-      downloadExcelBtn: VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'  ? true : false,
+      downloadExcelBtnFromUI:
+        VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
+      downloadExcelBtn:
+        VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? true : false,
       uploadExcelBtn:
-         VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'
-            ? true
-            : false,
+        VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? true : false,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Design Capacity`,
-      
+
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
         'Design plant capacity for different furnace mode of operation as per licensor provided data.',
@@ -887,11 +891,11 @@ const ProductionvolumeData = ({ permissions }) => {
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
       titleName:
-      VERTICAL_NAME === 'cracker'
-        ? 'Design Capacity (Ethylene)'
-        : VERTICAL_NAME === 'pp' && SITE_NAME === 'nmd'
-          ? 'Design Capacity (MCU from MCU Portal)'
-          : 'Design Capacity',
+        VERTICAL_NAME === 'cracker'
+          ? 'Design Capacity (Ethylene)'
+          : VERTICAL_NAME === 'pp' && SITE_NAME === 'nmd'
+            ? 'Design Capacity (MCU from MCU Portal)'
+            : 'Design Capacity',
     },
     isOldYear,
   )
@@ -914,11 +918,10 @@ const ProductionvolumeData = ({ permissions }) => {
         Object.keys(calculationObject || {}).length > 0
           ? true
           : false,
-      downloadExcelBtn: VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp' ? false : true,
+      downloadExcelBtn:
+        VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
       uploadExcelBtn:
-         VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'
-            ? false
-            : true,
+        VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
 
@@ -970,38 +973,37 @@ const ProductionvolumeData = ({ permissions }) => {
     })
 
     try {
-      if(VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'){
-      await ProductionVolumeDataApiService.getProductionVolExcelCommon(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        EXCEL_EXPORT_TITLE,
-      )
-
-      }else{ 
-      if (gridType === 'design') {
-        await ProductionVolumeDataApiService.getDesignCapacityExcel(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          EXCEL_EXPORT_TITLE,
-        )
-      } else if (gridType === 'max') {
-        await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
+      if (VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp') {
+        await ProductionVolumeDataApiService.getProductionVolExcelCommon(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
           EXCEL_EXPORT_TITLE,
         )
       } else {
-        await ProductionVolumeDataApiService.getProductionVolExcel(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          EXCEL_EXPORT_TITLE,
-        )
+        if (gridType === 'design') {
+          await ProductionVolumeDataApiService.getDesignCapacityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        } else if (gridType === 'max') {
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        } else {
+          await ProductionVolumeDataApiService.getProductionVolExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        }
       }
-    }
 
       setSnackbarData({
         message: 'Excel download completed successfully!',

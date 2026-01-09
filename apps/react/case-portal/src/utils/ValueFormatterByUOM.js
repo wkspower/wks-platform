@@ -5,12 +5,12 @@ export default function valueFormatterByUOM(value, unit = null) {
   }
 
   const unitsConfig = {
-   oneDigitUnits : [],
-   twoDigitUnits : [],
-   threeDigitUnits : ['MT'],
-   fourDigitUnits : [],
-   fiveDigitUnits : ['KG'],
-  };
+    oneDigitUnits: [],
+    twoDigitUnits: [],
+    threeDigitUnits: ['MT'],
+    fourDigitUnits: [],
+    fiveDigitUnits: ['KG'],
+  }
   // Convert to number safely
   const numValue = Number(value)
   if (Number.isNaN(numValue)) {

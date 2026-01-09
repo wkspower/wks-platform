@@ -54,7 +54,7 @@ const NormsHistorianBasis1 = () => {
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase() || 'meg'
 
   const [loading, setLoading] = useState(false)
   const fetchData = async (reportType, setState) => {

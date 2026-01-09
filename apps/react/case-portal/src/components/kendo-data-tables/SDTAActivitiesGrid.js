@@ -30,7 +30,7 @@ const SDTAActivitiesGrid = ({
   permissions,
   saveChanges,
   setRemarkDialogOpen,
-  handleCalculate,  
+  handleCalculate,
 }) => {
   return (
     <Box sx={{ mt: 1 }}>
@@ -39,7 +39,7 @@ const SDTAActivitiesGrid = ({
         rows={rows}
         setRows={setRows}
         editable={true}
-        editField="inEdit"
+        editField='inEdit'
         fetchData={fetchData}
         handleRemarkCellClick={handleRemarkCellClick}
         remarkDialogOpen={remarkDialogOpen}

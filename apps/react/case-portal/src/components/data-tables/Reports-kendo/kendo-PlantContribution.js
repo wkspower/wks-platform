@@ -251,7 +251,10 @@ export default function PlantContribution() {
 
       {/* Main Categories Except 'OtherVariableCost' and 'ProductionCostCalculations' */}
       {categories()
-        .filter(({ key }) => key !== 'OtherVariableCost' && key !== 'ProductionCostCalculations')
+        .filter(
+          ({ key }) =>
+            key !== 'OtherVariableCost' && key !== 'ProductionCostCalculations',
+        )
         .map(({ key, title }, idx) => {
           const rpt = reports[key] || {}
           return (

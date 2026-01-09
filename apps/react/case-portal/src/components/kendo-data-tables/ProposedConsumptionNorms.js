@@ -281,16 +281,18 @@ const ProposedConsumptionNorms = () => {
       setCalculationObject(response?.data?.aopCalculation)
 
       // const formattedData = response?.data?.aopProposedNormsDTOList?.map((item, index) => {
-      const formattedData = response?.data?.aopProposedNormsDTOList?.map((item, index) => {
-        return {
-          ...item,
-          idFromApi: item.id,
-          originalRemark: item.remarks?.trim() || null,
-          id: index,
-          Particulars: item.normParameterTypeDisplayName || 'Type',
-          isEditable: true,
-        }
-      })
+      const formattedData = response?.data?.aopProposedNormsDTOList?.map(
+        (item, index) => {
+          return {
+            ...item,
+            idFromApi: item.id,
+            originalRemark: item.remarks?.trim() || null,
+            id: index,
+            Particulars: item.normParameterTypeDisplayName || 'Type',
+            isEditable: true,
+          }
+        },
+      )
 
       setRows(formattedData)
       setLoading(false)

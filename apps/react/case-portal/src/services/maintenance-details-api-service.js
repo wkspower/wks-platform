@@ -164,7 +164,7 @@ async function CrackerMaintenanceExport(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function deleteSlowdownConfig(id, keycloak, PLANT_ID, AOP_YEAR) {
- const url = `${Config.CaseEngineUrl}/task/shutdown-history?id=${encodeURIComponent(id)}`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-history?id=${encodeURIComponent(id)}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
@@ -185,12 +185,7 @@ async function deleteSlowdownConfig(id, keycloak, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-async function saveSlowdownConfig(
-  PLANT_ID,
-  AOP_YEAR,
-  dataList,
-  keycloak,
-) {
+async function saveSlowdownConfig(PLANT_ID, AOP_YEAR, dataList, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/shutdown-history?plantFKId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
   const headers = {
     Accept: 'application/json',

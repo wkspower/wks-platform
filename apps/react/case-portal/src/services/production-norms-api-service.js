@@ -58,7 +58,6 @@ async function handleCalculate(PLANT_ID, AOP_YEAR, keycloak) {
   }
 }
 async function getAOPData(keycloak, type, PLANT_ID, AOP_YEAR) {
-
   const url = `${Config.CaseEngineUrl}/task/monthly-production?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}`
   const headers = {
     Accept: 'application/json',

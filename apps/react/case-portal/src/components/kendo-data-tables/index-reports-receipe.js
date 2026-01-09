@@ -234,15 +234,15 @@ const KendoDataTablesReciepe = ({
 
       const { dataItem, field, value } = e
       const itemId = dataItem.id
-    // Track which cell was edited
-    setEditedCells((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...(prev[itemId] || {}),
-        [field]: true
-      }
-    }))
-    
+      // Track which cell was edited
+      setEditedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          [field]: true,
+        },
+      }))
+
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
@@ -341,7 +341,7 @@ const KendoDataTablesReciepe = ({
   const saveConfirmation = async () => {
     saveChanges()
     setModifiedCells({})
-    setEditedCells({}) 
+    setEditedCells({})
     setOpenSaveDialogeBox(false)
     setEdit({})
   }
@@ -507,10 +507,10 @@ const KendoDataTablesReciepe = ({
         cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
     )
 
-  // Check if THIS SPECIFIC FIELD was edited
-  const isRedFromEdit = editedCells[rowId]?.[field] === true
+    // Check if THIS SPECIFIC FIELD was edited
+    const isRedFromEdit = editedCells[rowId]?.[field] === true
 
-  const isRed = isRedFromAllRedCell || isRedFromEdit
+    const isRed = isRedFromAllRedCell || isRedFromEdit
 
     return (
       <td

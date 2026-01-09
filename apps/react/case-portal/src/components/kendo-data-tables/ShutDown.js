@@ -210,8 +210,8 @@ const ShutDown = ({ permissions }) => {
       if (validationMessage) {
         let message = validationMessage
         if (IS_PE_PP_VERTICAL && validationMessage.includes('Remark')) {
-        message = 'Please update the field: Shutdown Basis'
-      }
+          message = 'Please update the field: Shutdown Basis'
+        }
         setSnackbarOpen(true)
         setSnackbarData({
           message: message,
@@ -606,7 +606,11 @@ const ShutDown = ({ permissions }) => {
         let data = []
         if (lowerVertName === 'meg') {
           data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
+        } else if (
+          lowerVertName === 'pe' ||
+          lowerVertName === 'pp' ||
+          lowerVertName === 'pet'
+        ) {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(
@@ -624,7 +628,11 @@ const ShutDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp' || lowerVertName === 'pet') {
+        } else if (
+          lowerVertName === 'pe' ||
+          lowerVertName === 'pp' ||
+          lowerVertName === 'pet'
+        ) {
           productList = data?.data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
@@ -914,8 +922,8 @@ const ShutDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
-      showNoteWhileDeleting: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
-
+      showNoteWhileDeleting:
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       showTitleNameBusiness: true,
       titleName: `${SCREEN_NAME}`,
@@ -927,7 +935,7 @@ const ShutDown = ({ permissions }) => {
         lowerVertName === 'pvc' ||
         lowerVertName === 'vcm' ||
         lowerVertName === 'pta' ||
-        lowerVertName === 'pet' 
+        lowerVertName === 'pet'
           ? true
           : false,
     },
