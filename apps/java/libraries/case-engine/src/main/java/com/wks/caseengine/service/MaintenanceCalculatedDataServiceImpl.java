@@ -376,20 +376,14 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        
 	        List<String> headers = new ArrayList<>(dynamicData.get(0).keySet());
 	        CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
-	        
-	        // --- 1. Create Header Row ---
 	        Row headerRow = sheet.createRow(0);
 	        for (int i = 0; i < headers.size(); i++) {
 	            Cell cell = headerRow.createCell(i);
 	            cell.setCellValue(headers.get(i));
 	            cell.setCellStyle(headerStyle);
 	        }
-
-	        // --- 2. Initialize Totals Tracker ---
 	        Map<String, Double> totalsMap = new HashMap<>();
 	        int rowIdx = 1;
-
-	        // --- 3. Populate Data Rows and Calculate Totals ---
 	        for (Map<String, Object> rowData : dynamicData) {
 	            Row row = sheet.createRow(rowIdx++);
 	            for (int colIdx = 0; colIdx < headers.size(); colIdx++) {
@@ -400,15 +394,12 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                if (value instanceof Number) {
 	                    double val = ((Number) value).doubleValue();
 	                    cell.setCellValue(val);
-	                    // Accumulate totals
 	                    totalsMap.put(key, totalsMap.getOrDefault(key, 0.0) + val);
 	                } else if (value != null) {
 	                    cell.setCellValue(value.toString());
 	                }
 	            }
 	        }
-
-	        // --- 4. Create the Total Row at the Bottom ---
 	        Row totalRow = sheet.createRow(rowIdx);
 	        CellStyle totalStyle = Utility.createBoldBorderedStyle(workbook); // Reuse bold style
 	        
@@ -425,8 +416,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	                cell.setCellValue("");
 	            }
 	        }
-
-	        // --- 5. Formatting (Hide Columns & Auto-size) ---
 	        Set<String> fieldsToHide = Set.of("ID", "PLANTID", "AOPYEAR");
 	        for (int i = 0; i < headers.size(); i++) {
 	            if (fieldsToHide.contains(headers.get(i).toUpperCase())) {
