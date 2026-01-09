@@ -60,7 +60,6 @@ const defs = {
     norms:'Norms',
     inputs:'Inputs',
     importPower:'Import Power',
-    productionVolumeDataBasis: 'Production Volume Data',
     productionVolumeDataBasis: 'Production Target Data',
     normsHistorianBasis: 'Norms Historian',
     steadyStateNormsHistorianBasis: 'Steady State Norm Basis',
