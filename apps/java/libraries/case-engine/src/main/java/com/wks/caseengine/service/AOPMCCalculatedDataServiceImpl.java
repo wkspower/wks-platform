@@ -428,9 +428,10 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
         }
     }
 	@Override
-	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(
-			List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList, boolean isFromExcel, String year, String plantId) {
+	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList,
+			boolean isFromExcel, String year, String plantId) {
 		try {
+			boolean outerChanged = false;
 			// String finYear = "";
 			// UUID plantId = null;
 			List<AOPMCCalculatedDataDTO> failedList = new ArrayList<>();
@@ -480,30 +481,87 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					aOPMCCalculatedData.setMaterialFKId(UUID.fromString(aOPMCCalculatedDataDTO.getMaterialFKId()));
 					aOPMCCalculatedData.setFinancialYear(aOPMCCalculatedDataDTO.getFinancialYear());
 				}
+				boolean changed = false;
+				AOPMCCalculatedData saved = null;
+				if (!aOPMCCalculatedData.getJanuary().equals(aOPMCCalculatedDataDTO.getJanuary())) {
+					aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
+					changed = true;
+				}
 
-				aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
-				aOPMCCalculatedData.setFebruary(aOPMCCalculatedDataDTO.getFebruary());
-				aOPMCCalculatedData.setMarch(aOPMCCalculatedDataDTO.getMarch());
-				aOPMCCalculatedData.setApril(aOPMCCalculatedDataDTO.getApril());
-				aOPMCCalculatedData.setMay(aOPMCCalculatedDataDTO.getMay());
-				aOPMCCalculatedData.setJune(aOPMCCalculatedDataDTO.getJune());
-				aOPMCCalculatedData.setJuly(aOPMCCalculatedDataDTO.getJuly());
-				aOPMCCalculatedData.setAugust(aOPMCCalculatedDataDTO.getAugust());
-				aOPMCCalculatedData.setSeptember(aOPMCCalculatedDataDTO.getSeptember());
-				aOPMCCalculatedData.setOctober(aOPMCCalculatedDataDTO.getOctober());
-				aOPMCCalculatedData.setNovember(aOPMCCalculatedDataDTO.getNovember());
-				aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
-				aOPMCCalculatedData.setJanuary(aOPMCCalculatedDataDTO.getJanuary());
+				if (!aOPMCCalculatedData.getFebruary().equals(aOPMCCalculatedDataDTO.getFebruary())) {
+					aOPMCCalculatedData.setFebruary(aOPMCCalculatedDataDTO.getFebruary());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getMarch().equals(aOPMCCalculatedDataDTO.getMarch())) {
+					aOPMCCalculatedData.setMarch(aOPMCCalculatedDataDTO.getMarch());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getApril().equals(aOPMCCalculatedDataDTO.getApril())) {
+					aOPMCCalculatedData.setApril(aOPMCCalculatedDataDTO.getApril());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getMay().equals(aOPMCCalculatedDataDTO.getMay())) {
+					aOPMCCalculatedData.setMay(aOPMCCalculatedDataDTO.getMay());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getJune().equals(aOPMCCalculatedDataDTO.getJune())) {
+					aOPMCCalculatedData.setJune(aOPMCCalculatedDataDTO.getJune());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getJuly().equals(aOPMCCalculatedDataDTO.getJuly())) {
+					aOPMCCalculatedData.setJuly(aOPMCCalculatedDataDTO.getJuly());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getAugust().equals(aOPMCCalculatedDataDTO.getAugust())) {
+					aOPMCCalculatedData.setAugust(aOPMCCalculatedDataDTO.getAugust());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getSeptember().equals(aOPMCCalculatedDataDTO.getSeptember())) {
+					aOPMCCalculatedData.setSeptember(aOPMCCalculatedDataDTO.getSeptember());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getOctober().equals(aOPMCCalculatedDataDTO.getOctober())) {
+					aOPMCCalculatedData.setOctober(aOPMCCalculatedDataDTO.getOctober());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getNovember().equals(aOPMCCalculatedDataDTO.getNovember())) {
+					aOPMCCalculatedData.setNovember(aOPMCCalculatedDataDTO.getNovember());
+					changed = true;
+				}
+
+				if (!aOPMCCalculatedData.getDecember().equals(aOPMCCalculatedDataDTO.getDecember())) {
+					aOPMCCalculatedData.setDecember(aOPMCCalculatedDataDTO.getDecember());
+					changed = true;
+				}
 				aOPMCCalculatedData.setUpdatedBy(Utility.getUserName());
+				if (!aOPMCCalculatedData.getRemarks().equalsIgnoreCase(aOPMCCalculatedDataDTO.getRemarks())
+						&& changed) {
 
-				aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
+					outerChanged = true;
+					aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
+					saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
+				}
+				else if (aOPMCCalculatedData.getRemarks().equalsIgnoreCase(aOPMCCalculatedDataDTO.getRemarks()) && changed) {
+					aOPMCCalculatedDataDTO.setErrDescription("Please add/update remark");
+					aOPMCCalculatedDataDTO.setSaveStatus("Failed");
+					failedList.add(aOPMCCalculatedDataDTO);
+				}
 
-				AOPMCCalculatedData saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
-				if (saved.getId() == null) {
+				if (saved != null && saved.getId() == null) {
 					aOPMCCalculatedDataDTO
 							.setErrDescription("No record found with this id" + aOPMCCalculatedDataDTO.getId());
 					aOPMCCalculatedDataDTO.setSaveStatus("Failed");
 				}
+
 			}
 
 			List<ScreenMapping> screenMappingList = screenMappingRepository
@@ -515,7 +573,10 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
 				aopCalculation.setPlantId(UUID.fromString(plantId));
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-				aopCalculationRepository.save(aopCalculation);
+				if (outerChanged) {
+					aopCalculationRepository.save(aopCalculation);
+				}
+
 			}
 
 			// TODO Auto-generated method stub
