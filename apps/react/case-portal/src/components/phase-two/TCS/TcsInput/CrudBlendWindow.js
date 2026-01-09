@@ -32,7 +32,11 @@ const CrudBlendWindow = ({
     }
     try {
       setLoading(true)
-      console.log('Fetching Crude Blend Window data with:', { PLANT_ID, AOP_YEAR, SITE_ID })
+      console.log('Fetching Crude Blend Window data with:', {
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+      })
 
       const response = await TcsApiService.getCrudBlendWindowData(
         keycloak,

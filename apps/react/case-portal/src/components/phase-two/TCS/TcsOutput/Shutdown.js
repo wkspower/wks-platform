@@ -141,7 +141,6 @@ const Shutdown = ({
     }
   }, [modifiedCells])
 
- 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',

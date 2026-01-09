@@ -34,7 +34,10 @@ import {
 import Notification from '../utilities/Notification'
 import DateOnlyPicker from '../utilities/DatePicker'
 import { recalcDuration, recalcEndDate } from '../commonUtilityFunctions'
-import { DurationEditor, DurationDisplayWithTooltipCell } from '../utilities/numericViewCells'
+import {
+  DurationEditor,
+  DurationDisplayWithTooltipCell,
+} from '../utilities/numericViewCells'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 import { getColumnMenuDateFilter } from '../utilities/ColumnMenuDateFilter'
 import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
@@ -153,7 +156,7 @@ const AdvanceKendoTable = ({
   const initialGroup = Array.isArray(groupBy)
     ? groupBy.map((field) => ({ field }))
     : groupBy
-      ? [{ field: groupBy, dir:undefined}]
+      ? [{ field: groupBy, dir: undefined }]
       : []
 
   // Build pagination configuration with defaults
@@ -398,7 +401,11 @@ const AdvanceKendoTable = ({
           if (dateCalculationConfig) {
             const { dateField1, dateField2, daysField, requiredInHr } =
               dateCalculationConfig
-            if (dateField1 in updated && dateField2 in updated && daysField in updated) {
+            if (
+              dateField1 in updated &&
+              dateField2 in updated &&
+              daysField in updated
+            ) {
               if (field === dateField1 || field === dateField2) {
                 updated[daysField] = recalcDuration(
                   updated[dateField1],
@@ -456,7 +463,11 @@ const AdvanceKendoTable = ({
         if (dateCalculationConfig) {
           const { dateField1, dateField2, daysField, requiredInHr } =
             dateCalculationConfig
-          if (dateField1 in dataItem && dateField2 in dataItem && daysField in dataItem) {
+          if (
+            dateField1 in dataItem &&
+            dateField2 in dataItem &&
+            daysField in dataItem
+          ) {
             if (field === dateField1 || field === dateField2) {
               // When dates change, also highlight the calculated duration field
               const calculatedDuration = recalcDuration(
@@ -1390,7 +1401,7 @@ const AdvanceKendoTable = ({
                   //   placeholder='Select multiple...'
                   //   tagLimit={3} // Optional: limit display tags
                   // />
-                    <SelectCellEditor
+                  <SelectCellEditor
                     {...cellProps}
                     options={allOptions}
                     textField='displayName'
