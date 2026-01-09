@@ -21,6 +21,16 @@ from services.budget_service import (
     print_detailed_results
 )
 from services.save_service import save_model_quantities
+from services.process_demand_service import (
+    get_process_demand_for_month,
+    get_default_process_demands,
+    print_process_demands,
+)
+from services.fixed_consumption_service import (
+    get_fixed_consumption_for_month,
+    get_default_fixed_consumption,
+    print_fixed_consumption,
+)
 
 # ============================================================
 # LOG OUTPUT CONFIGURATION
@@ -81,60 +91,136 @@ if __name__ == "__main__":
     month = int(input("Enter Month (1-12): "))
     year = int(input("Enter Year: "))
     
-    print("\n--- INPUT: Steam Demands (MT) ---")
-    print("(Press Enter for default test values)")
+    # -----------------------------------------------------------
+    # STEP 1.5: CHOOSE DATA SOURCE
+    # -----------------------------------------------------------
+    print("\n--- DATA SOURCE ---")
+    print("1. Fetch demands from DATABASE (recommended)")
+    print("2. Enter demands MANUALLY (use default/custom values)")
+    data_source_input = input("Select data source [1]: ").strip()
+    use_db_demands = data_source_input != '2'
     
-    # LP Steam (Excel-matched: 30043.15 MT)
-    lp_process_input = input("LP Process Demand [30043.15]: ").strip()
-    lp_process = float(lp_process_input) if lp_process_input else 30043.15
+    if use_db_demands:
+        # Fetch from database
+        print("\n--- FETCHING DEMANDS FROM DATABASE ---")
+        process_demands = get_process_demand_for_month(month, year)
+        fixed_demands = get_fixed_consumption_for_month(month, year)
+        
+        # Extract values
+        lp_process = process_demands.get('lp_process', 30043.15)
+        mp_process = process_demands.get('mp_process', 14030.65)
+        hp_process = process_demands.get('hp_process', 4971.91)
+        shp_process = process_demands.get('shp_process', 20975.34)
+        air_process = process_demands.get('air_process', 6095102.0)
+        cw1_process = process_demands.get('cw1_process', 15194.0)
+        cw2_process = process_demands.get('cw2_process', 9016.0)
+        dm_process = process_demands.get('dm_process', 54779.0)
+        
+        lp_fixed = fixed_demands.get('lp_fixed', 5169.51)
+        mp_fixed = fixed_demands.get('mp_fixed', 518.00)
+        hp_fixed = fixed_demands.get('hp_fixed', 0.00)
+        shp_fixed = fixed_demands.get('shp_fixed', 0.00)
+        
+        # Display fetched values
+        print("\n--- PROCESS DEMANDS (from DB) ---")
+        print(f"  LP Process:  {lp_process:>12,.2f} MT")
+        print(f"  MP Process:  {mp_process:>12,.2f} MT")
+        print(f"  HP Process:  {hp_process:>12,.2f} MT")
+        print(f"  SHP Process: {shp_process:>12,.2f} MT")
+        print(f"  Compressed Air: {air_process:>12,.0f} NM3")
+        print(f"  Cooling Water 1: {cw1_process:>12,.0f} KM3")
+        print(f"  Cooling Water 2: {cw2_process:>12,.0f} KM3")
+        print(f"  DM Water:    {dm_process:>12,.0f} M3")
+        
+        print("\n--- FIXED DEMANDS (from DB) ---")
+        print(f"  LP Fixed:  {lp_fixed:>12,.2f} MT")
+        print(f"  MP Fixed:  {mp_fixed:>12,.2f} MT")
+        print(f"  HP Fixed:  {hp_fixed:>12,.2f} MT")
+        print(f"  SHP Fixed: {shp_fixed:>12,.2f} MT")
+        
+        # Allow override if needed
+        override_input = input("\nOverride any values? (y/n) [n]: ").strip().lower()
+        if override_input == 'y':
+            print("\n--- OVERRIDE VALUES (press Enter to keep DB value) ---")
+            
+            lp_process_input = input(f"LP Process [{lp_process:.2f}]: ").strip()
+            if lp_process_input: lp_process = float(lp_process_input)
+            
+            mp_process_input = input(f"MP Process [{mp_process:.2f}]: ").strip()
+            if mp_process_input: mp_process = float(mp_process_input)
+            
+            hp_process_input = input(f"HP Process [{hp_process:.2f}]: ").strip()
+            if hp_process_input: hp_process = float(hp_process_input)
+            
+            shp_process_input = input(f"SHP Process [{shp_process:.2f}]: ").strip()
+            if shp_process_input: shp_process = float(shp_process_input)
+            
+            lp_fixed_input = input(f"LP Fixed [{lp_fixed:.2f}]: ").strip()
+            if lp_fixed_input: lp_fixed = float(lp_fixed_input)
+            
+            mp_fixed_input = input(f"MP Fixed [{mp_fixed:.2f}]: ").strip()
+            if mp_fixed_input: mp_fixed = float(mp_fixed_input)
+            
+            hp_fixed_input = input(f"HP Fixed [{hp_fixed:.2f}]: ").strip()
+            if hp_fixed_input: hp_fixed = float(hp_fixed_input)
+            
+            shp_fixed_input = input(f"SHP Fixed [{shp_fixed:.2f}]: ").strip()
+            if shp_fixed_input: shp_fixed = float(shp_fixed_input)
+    else:
+        # Manual entry mode (original behavior)
+        print("\n--- INPUT: Steam Demands (MT) ---")
+        print("(Press Enter for default test values)")
+        
+        # LP Steam (Excel-matched: 30043.15 MT)
+        lp_process_input = input("LP Process Demand [30043.15]: ").strip()
+        lp_process = float(lp_process_input) if lp_process_input else 30043.15
+        
+        lp_fixed_input = input("LP Fixed Demand [5169.51]: ").strip()
+        lp_fixed = float(lp_fixed_input) if lp_fixed_input else 5169.51
+        
+        # MP Steam (Excel-matched: 14030.65 MT)
+        mp_process_input = input("MP Process Demand [14030.65]: ").strip()
+        mp_process = float(mp_process_input) if mp_process_input else 14030.65
+        
+        mp_fixed_input = input("MP Fixed Demand [518.00]: ").strip()
+        mp_fixed = float(mp_fixed_input) if mp_fixed_input else 518.00
+        
+        # HP Steam (Excel-matched: 4971.91 MT)
+        hp_process_input = input("HP Process Demand [4971.91]: ").strip()
+        hp_process = float(hp_process_input) if hp_process_input else 4971.91
+        
+        hp_fixed_input = input("HP Fixed Demand [0.00]: ").strip()
+        hp_fixed = float(hp_fixed_input) if hp_fixed_input else 0.00
+        
+        # SHP Steam (Excel-matched: 20975.34 MT)
+        shp_process_input = input("SHP Process Demand [20975.34]: ").strip()
+        shp_process = float(shp_process_input) if shp_process_input else 20975.34
+        
+        shp_fixed_input = input("SHP Fixed Demand [0.00]: ").strip()
+        shp_fixed = float(shp_fixed_input) if shp_fixed_input else 0.00
+        
+        # Process Utility Consumption (Excel-matched values)
+        print("\n--- INPUT: Process Utility Consumption ---")
+        print("(These are utilities consumed by PROCESS PLANTS, not utility plants)")
+        
+        # Compressed Air Process (Excel-matched: 6,095,102 NM3)
+        air_process_input = input("Compressed Air Process (NM3) [6095102]: ").strip()
+        air_process = float(air_process_input) if air_process_input else 6095102.0
+        
+        # Cooling Water 1 Process (Fixed + Process: 15,194 KM3)
+        cw1_process_input = input("Cooling Water 1 (KM3) [15194]: ").strip()
+        cw1_process = float(cw1_process_input) if cw1_process_input else 15194.0
+        
+        # Cooling Water 2 Process (Fixed + Process: 9,016 KM3)
+        cw2_process_input = input("Cooling Water 2 (KM3) [9016]: ").strip()
+        cw2_process = float(cw2_process_input) if cw2_process_input else 9016.0
+        
+        # DM Water Process (Excel-matched: 54,779 M3)
+        dm_process_input = input("DM Water Process (M3) [54779]: ").strip()
+        dm_process = float(dm_process_input) if dm_process_input else 54779.0
     
-    lp_fixed_input = input("LP Fixed Demand [5169.51]: ").strip()
-    lp_fixed = float(lp_fixed_input) if lp_fixed_input else 5169.51
-    
-    # MP Steam (Excel-matched: 14030.65 MT)
-    mp_process_input = input("MP Process Demand [14030.65]: ").strip()
-    mp_process = float(mp_process_input) if mp_process_input else 14030.65
-    
-    mp_fixed_input = input("MP Fixed Demand [518.00]: ").strip()
-    mp_fixed = float(mp_fixed_input) if mp_fixed_input else 518.00
-    
-    # HP Steam (Excel-matched: 4971.91 MT)
-    hp_process_input = input("HP Process Demand [4971.91]: ").strip()
-    hp_process = float(hp_process_input) if hp_process_input else 4971.91
-    
-    hp_fixed_input = input("HP Fixed Demand [0.00]: ").strip()
-    hp_fixed = float(hp_fixed_input) if hp_fixed_input else 0.00
-    
-    # SHP Steam (Excel-matched: 20975.34 MT)
-    shp_process_input = input("SHP Process Demand [20975.34]: ").strip()
-    shp_process = float(shp_process_input) if shp_process_input else 20975.34
-    
-    shp_fixed_input = input("SHP Fixed Demand [0.00]: ").strip()
-    shp_fixed = float(shp_fixed_input) if shp_fixed_input else 0.00
-    
-    # BFW for UFU
-    # bfw_ufu_input = input("BFW for UFU (M3) [300.00]: ").strip()
+    # BFW for UFU (common for both modes)
     bfw_ufu = 0
-    
-    # Process Utility Consumption (Excel-matched values)
-    print("\n--- INPUT: Process Utility Consumption ---")
-    print("(These are utilities consumed by PROCESS PLANTS, not utility plants)")
-    
-    # Compressed Air Process (Excel-matched: 6,095,102 NM3)
-    air_process_input = input("Compressed Air Process (NM3) [6095102]: ").strip()
-    air_process = float(air_process_input) if air_process_input else 6095102.0
-    
-    # Cooling Water 1 Process (Fixed + Process: 15,194 KM3)
-    cw1_process_input = input("Cooling Water 1 (KM3) [15194]: ").strip()
-    cw1_process = float(cw1_process_input) if cw1_process_input else 15194.0
-    
-    # Cooling Water 2 Process (Fixed + Process: 9,016 KM3)
-    cw2_process_input = input("Cooling Water 2 (KM3) [9016]: ").strip()
-    cw2_process = float(cw2_process_input) if cw2_process_input else 9016.0
-    
-    # DM Water Process (Excel-matched: 54,779 M3)
-    dm_process_input = input("DM Water Process (M3) [54779]: ").strip()
-    dm_process = float(dm_process_input) if dm_process_input else 54779.0
     
     # Export Power Flag
     print("\n--- INPUT: Export Power ---")
