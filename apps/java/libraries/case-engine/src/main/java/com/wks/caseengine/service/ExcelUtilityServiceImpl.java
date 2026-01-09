@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +42,9 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
 
     public byte[] generateFlexibleExcel(Map<String, Object> structure, Map<String, List<List<Object>>> data) {
         try {
+        	
             Workbook workbook = new XSSFWorkbook();
+            CellStyle boldBorderStyle = Utility.createBoldBorderedStyle(workbook);
             CellStyle borderStyle = Utility.createBorderedStyle(workbook);
             CellStyle boldStyle = Utility.createBoldStyle(workbook);
             CellStyle lockedStyle = workbook.createCellStyle();
@@ -82,6 +85,8 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     String textBeforeTitle = (String) table.get(ExcelConstants.TEXT_BEFORE_TITLE);
                     String tableId = (String) table.get(ExcelConstants.TABLEID);
                     rows = data.get(tableId);
+                    List<String> specialTableIds = Arrays.asList("DesignCapacity", "MaxAchievedCapacity", "SummaryProposedOperatingCapacity");
+                    boolean isSpecialTable = specialTableIds.contains(tableId);
                     System.out.println("rows " + rows);
                     Boolean isColumnMergeRequired = (Boolean) table.get(ExcelConstants.IS_COLUMN_MERGE_REQUIRED);
                     Boolean isRowMergeRequired = (Boolean) table.get(ExcelConstants.IS_ROW_MERGE_REQUIRED);
@@ -123,10 +128,19 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
                     int headerStartRow = currentRow;
                     for (List<String> headerRowData : headers) {
                         Row headerRow = sheet.createRow(currentRow++);
+                       
                         for (int col = 0; col < headerRowData.size(); col++) {
                             Cell cell = headerRow.createCell(col);
                             cell.setCellValue(headerRowData.get(col));
-                            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+                            if (isSpecialTable) {
+                                if (col < headerRowData.size() - 3) {
+                                    cell.setCellStyle(boldBorderStyle);
+                                } else {
+                                    cell.setCellStyle(boldStyle); 
+                                }
+                            } else {
+                                cell.setCellStyle(boldBorderStyle);
+                            }
                         }
                     }
                     mergeHeaderCells(sheet, headers, headerStartRow);
@@ -157,8 +171,15 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
 
                                 if (boldCols.contains(col))
                                     cell.setCellStyle(boldStyle);
-                                if (borders)
-                                    cell.setCellStyle(borderStyle);
+                                if (borders) {
+                                    if (isSpecialTable) {
+                                        if (col < rowData.size() - 5) {
+                                            cell.setCellStyle(borderStyle);
+                                        }
+                                    } else {
+                                        cell.setCellStyle(borderStyle);
+                                    }
+                                }
                                 if(greyOut){
                                 	cell.setCellStyle(lockedStyle);
                                 }
@@ -1000,6 +1021,27 @@ public class ExcelUtilityServiceImpl implements ExcelUtilityService {
         }
 
         return months;
+    }
+    
+    public List<String> getMonths(String year) {
+        List<String> months = new ArrayList<>();
+        int startYear = Integer.parseInt(year.substring(0, 4));
+        int nextYear = startYear + 1;
+
+        for (int month = 4; month <= 12; month++) {
+            months.add(formatMonthOnly(month, startYear));
+        }
+        for (int month = 1; month <= 3; month++) {
+            months.add(formatMonthOnly(month, nextYear));
+        }
+
+        return months;
+    }
+
+    private String formatMonthOnly(int month, int year) {
+        LocalDate date = LocalDate.of(year, month, 1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH);
+        return date.format(formatter);
     }
     
     public List<String> getFinancialYear(String year) {

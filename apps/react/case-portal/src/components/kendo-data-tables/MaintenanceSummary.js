@@ -20,7 +20,7 @@
 //   const SITE_ID = siteObject?.id
 //   const VERTICAL_ID = verticalObject?.id
 //   const AOP_YEAR = year?.selectedYear
-//   const isOldYear = oldYear?.oldYear
+
 //   const vertName = verticalChange?.selectedVertical
 
 //   async function handleOpenPdfTempSSRS() {
@@ -65,17 +65,27 @@ export default function MaintenanceSummary() {
   const { plantObject, siteObject, verticalObject, year } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME_LOWERCASE = verticalObject?.name.toLowerCase()
   const AOP_YEAR = year?.selectedYear
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
+    let REPORT_CODE = ''
+    if (VERTICAL_NAME_LOWERCASE == 'pe' || VERTICAL_NAME_LOWERCASE == 'pp') {
+      REPORT_CODE = 'maintenance-summary'
+    } else {
+      REPORT_CODE = 'maintenance-summary'
+    }
     try {
       var data = await BusinessDemandDataApiService.ssrsMaintenanceSummary(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        REPORT_CODE,
       )
 
       setBase(data?.data[0]?.reportURL)
@@ -86,6 +96,7 @@ export default function MaintenanceSummary() {
   }
 
   useEffect(() => {
+    setLoading(true)
     fetchData()
   }, [PLANT_ID, AOP_YEAR, keycloak])
 

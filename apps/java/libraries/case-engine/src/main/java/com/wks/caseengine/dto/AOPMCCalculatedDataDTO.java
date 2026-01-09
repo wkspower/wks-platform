@@ -43,4 +43,5 @@ public class AOPMCCalculatedDataDTO {
     private String saveStatus;
     private String errDescription;
     private String materialDisplayName;
+    private String tableId;
 }

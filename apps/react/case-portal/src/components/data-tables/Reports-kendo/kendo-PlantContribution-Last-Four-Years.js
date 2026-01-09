@@ -26,27 +26,30 @@ const categories = () => {
 
 export default function PlantContributionLastFourYears() {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)
   const [reports, setReports] = useState({})
   const [snackbarData, setSnackbarData] = useState({
@@ -60,12 +63,30 @@ export default function PlantContributionLastFourYears() {
   const [currentRowId, setCurrentRowId] = useState(null)
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [otherVariableRows, setOtherVariableRows] = useState([])
-  const FORMAT_VALUES_3_DECIMAL =
-    lowerVertName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
-  const FORMAT_VALUES_2_DECIMAL =
-    lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
-  const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+
+  const IS_CRACKER = lowerVertName === 'cracker'
+
+  const FORMAT_VALUES_3_DECIMAL = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'elastomer'
+      ? '{0:0.000}'
+      : '{0:0.00}'
+
+  const FORMAT_VALUES_2_DECIMAL = IS_CRACKER ? '{0:0.0000}' : '{0:0.00}'
+
+  const FORMAT_VALUES_COST = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'elastomer'
+      ? '{0:0}'
+      : '{0:0.00}'
+
   const FORMAT_VALUES_PRICE = '{0:0}'
+
+  const FORMAT_VALUES_NORMS = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'meg' || lowerVertName === 'elastomer'
+      ? '{0:0.00000}'
+      : '{0:0.00}'
 
   const loadAll = async () => {
     setLoading(true)
@@ -82,6 +103,7 @@ export default function PlantContributionLastFourYears() {
             FORMAT_VALUES_2_DECIMAL,
             FORMAT_VALUES_COST,
             FORMAT_VALUES_PRICE,
+            FORMAT_VALUES_NORMS,
           })
 
         const apiResp = await DataService.plantContributionPlanLastFourYears(
@@ -150,7 +172,7 @@ export default function PlantContributionLastFourYears() {
               id: index,
               actualId: item?.id,
               isEditable:
-               key === 'OtherVariableCost' && index >= arr.length - 2
+                key === 'OtherVariableCost' && index >= arr.length - 2
                   ? false
                   : true,
               isdisable:

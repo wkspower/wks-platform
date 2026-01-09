@@ -787,6 +787,7 @@ const UserForm = ({ keycloak }) => {
                     multiple
                     value={selectedVerticals}
                     onChange={handleVerticalChange}
+                    MenuProps={{ disableScrollLock: true }}
                     renderValue={(selected) =>
                       selected
                         .map((id) => getVerticalById(id)?.displayName || '')
@@ -889,6 +890,7 @@ const UserForm = ({ keycloak }) => {
                                   <Select
                                     value={siteEntry.site}
                                     sx={{ height: '40px' }}
+                                    MenuProps={{ disableScrollLock: true }}
                                     onChange={(e) =>
                                       handleSiteChange(
                                         verticalId,
@@ -960,6 +962,9 @@ const UserForm = ({ keycloak }) => {
                                         <FormControl fullWidth size='small'>
                                           <Select
                                             value={plantEntry.plantId}
+                                            MenuProps={{
+                                              disableScrollLock: true,
+                                            }}
                                             sx={{ height: '40px' }}
                                             onChange={(e) =>
                                               handlePlantChange(
@@ -1038,6 +1043,9 @@ const UserForm = ({ keycloak }) => {
                                             multiple
                                             sx={{ height: '40px' }}
                                             value={plantEntry.screens || []}
+                                            MenuProps={{
+                                              disableScrollLock: true,
+                                            }}
                                             onChange={(e) => {
                                               const allScreens =
                                                 getAvailableScreens(
@@ -1185,6 +1193,10 @@ const UserForm = ({ keycloak }) => {
             onClose={closeSaveDialogeBox}
             aria-labelledby='alert-dialog-title'
             aria-describedby='alert-dialog-description'
+            disableScrollLock
+            slotProps={{
+              backdrop: { disableScrollLock: true },
+            }}
           >
             <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
             <DialogContent>

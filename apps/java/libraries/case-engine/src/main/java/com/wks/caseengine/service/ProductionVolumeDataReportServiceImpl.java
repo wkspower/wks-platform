@@ -899,7 +899,9 @@ public class ProductionVolumeDataReportServiceImpl implements ProductionVolumeDa
 					annualProductionPlanReport.setActivity(dto.getActivity());
 					annualProductionPlanReport.setAopYear(year);
 					annualProductionPlanReport.setPlantFkId(UUID.fromString(plantId));
-					annualProductionPlanReport.setRowNo((annualProductionPlanReportRepository.findLatestRowNo(year,plantId)+1));
+					Integer latestRow = annualProductionPlanReportRepository.findLatestRowNo(year, plantId);
+					int nextRowNo = (latestRow == null) ? 1 : latestRow + 1;
+					annualProductionPlanReport.setRowNo(nextRowNo);
 					annualProductionPlanReport.setReportType("assumptions");
 					annualProductionPlanReportRepository.save(annualProductionPlanReport);
 				}

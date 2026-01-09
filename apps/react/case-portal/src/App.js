@@ -81,23 +81,23 @@ const App = () => {
     keycloak &&
     authenticated && (
       <ThemeCustomization>
-        <Layout>
-          <Suspense fallback={<div>Loading...</div>}>
-            <ScrollTop>
-              <SessionStoreProvider value={{ keycloak }}>
-                <MenuProvider>
-                  <ThemeRoutes
-                    keycloak={keycloak}
-                    authenticated={authenticated}
+        {/* <Layout> */}
+        <Suspense fallback={<div>Loading...</div>}>
+          <ScrollTop>
+            <SessionStoreProvider value={{ keycloak }}>
+              <MenuProvider>
+                <ThemeRoutes
+                  keycloak={keycloak}
+                  authenticated={authenticated}
 
-                    // recordsTypes={recordsTypes}
-                    // casesDefinitions={casesDefinitions}
-                  />
-                </MenuProvider>
-              </SessionStoreProvider>
-            </ScrollTop>
-          </Suspense>
-        </Layout>
+                  // recordsTypes={recordsTypes}
+                  // casesDefinitions={casesDefinitions}
+                />
+              </MenuProvider>
+            </SessionStoreProvider>
+          </ScrollTop>
+        </Suspense>
+        {/* </Layout> */}
       </ThemeCustomization>
     )
   )

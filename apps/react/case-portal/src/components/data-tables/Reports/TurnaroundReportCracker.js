@@ -17,7 +17,8 @@ const TurnaroundReportCracker = () => {
   const menu = useSelector((state) => state.dataGridStore)
   const [shutdownMonths, setShutdownMonths] = useState([])
   const { yearChanged, oldYear, plantID } = menu
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState([])
@@ -101,7 +102,7 @@ const TurnaroundReportCracker = () => {
         field: monthField,
 
         type: 'number',
-        format: '{0:0.000}',
+        format: '{0:0.0000}',
         editable: false,
         isDisabled: true,
         monthNumber: monthIndex,

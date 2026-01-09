@@ -20,8 +20,6 @@ export const DataService = {
   getAopSummary,
   getAllCatalyst,
   saveShutdownData,
-  saveAnnualWorkFlowData,
-  savePlantProductionData,
   saveMonthwiseProduction,
   saveTurnaroundReport,
   saveTurnaroundReportWhole,
@@ -41,24 +39,11 @@ export const DataService = {
   createCase,
   getTasksByBusinessKey,
   getProcessInstanceVariables,
-  completeTask,
   getSpyroInputData,
   deleteSlowdownData,
   deleteShutdownData,
-  deleteAnnualProduction,
   deleteTurnAroundData,
   handleRefresh,
-
-  handleCalculateProductionVolData2,
-  handleCalculateAnnualAopCostMiisContribution,
-
-  handleCalculatePlantProductionData,
-  handleCalculateMonthwiseProduction,
-  handleCalculatePlantConsumptionData,
-  calculateTurnAroundPlanReportData,
-  calculateAnnualProductionPlanData,
-  calculatePlantContributionReportData,
-
   getSlowdownNormsData,
 
   handleCalculateSlowdownNorms,
@@ -75,22 +60,14 @@ export const DataService = {
   getUserBySearch,
   getUserScreen,
   getScreenbyPlant,
-  getWorkflowData,
-  getWorkflowDataProduction,
   getAnnualCostAopReport,
   getProductionVolDataBasis,
   getNormsHistorianBasis,
-  getAnnualProductionPlanReportData,
-  getPlantProductionSummary,
+  //getAnnualProductionPlanReportData,
   getPlantContributionYearWisePlan,
-  getMonthwiseRawData,
-  postMonthwiseRawData,
   getMonthWiseSummary,
   updateUserPlants,
-  getCaseId,
   saveworkflow,
-  submitWorkFlow,
-  getExcel,
   saveConfigurationExcel,
   saveConfigurationExcelConstants,
   importSpyroOutputExcel,
@@ -111,7 +88,7 @@ export const DataService = {
   saveSlowdownConfigData,
   deleteTurnArondReportItem,
   getIbr,
-  saveAnnualProduction,
+  //saveAnnualProduction,
   getIbrSdTa,
   getIbrScreen3,
   saveCrackerRunLength,
@@ -128,7 +105,6 @@ export const DataService = {
   calculateNormsHistorianValues,
 
   plantContributionPlanLastFourYears,
-  calculatePlantContributionSummaryYearly,
   getRecipeExcel,
   saveRecipeExcel,
   getShutdownRateExcel,
@@ -136,10 +112,10 @@ export const DataService = {
   getConfigurationExecutionDetailsNorms,
   executeConfigurationNorms,
   getProductionTargetBasis,
-  ImportShutdownDetails,
-  ImportShutdownElastomerDetails,
-  shutdownDetailsExport,
-  shutdownDetailsElastomerExport,
+  ImportShutdownProductWise,
+  ImportShutdownNonProduct,
+  exportShutdownNonProductWise,
+  exportShutdownNonProduct,
   slowdownDetailsExport,
   ExportSlowdownDetailsEOE,
   slowdownDetailsElastomerExport,
@@ -153,9 +129,10 @@ export const DataService = {
   carryForwardRecords,
   getSpecificConsumption,
   getConsumptionNorms,
-  calculatePlantContributionBusinessDemand,
   dropdownValues,
   slowdownconsumptionExport,
+  getRevision,
+  updateRevision,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -226,197 +203,6 @@ async function handleCalculateSlowdownNormsPP(plantId, year, keycloak) {
     return Promise.reject(e)
   }
 }
-
-async function handleCalculateProductionVolData2(PLANT_ID, AOP_YEAR, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/work-flow?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-async function handleCalculateAnnualAopCostMiisContribution(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/miis-contribution?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-
-async function handleCalculatePlantProductionData(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/plant-production-summary?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-async function handleCalculateMonthwiseProduction(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/monthwise-production-data?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-async function handleCalculatePlantConsumptionData(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/plant-consumption-data?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-async function calculateTurnAroundPlanReportData(PLANT_ID, AOP_YEAR, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/turnaround-plan-data?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-async function calculateAnnualProductionPlanData(PLANT_ID, AOP_YEAR, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/annual-production-data?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-async function calculatePlantContributionReportData(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/handle/calculate/plan-contribution-data?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-
 async function deleteSlowdownData(maintenanceId, keycloak, PLANT_ID) {
   const url = `${Config.CaseEngineUrl}/task/slowdown/${maintenanceId}/${PLANT_ID}`
   const headers = {
@@ -440,28 +226,6 @@ async function deleteSlowdownData(maintenanceId, keycloak, PLANT_ID) {
   }
 }
 
-async function deleteAnnualProduction(id, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan?id=${encodeURIComponent(id)}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'DELETE',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(
-        `Failed to delete data: ${resp.status} ${resp.statusText}`,
-      )
-    }
-    return await resp.json()
-  } catch (e) {
-    console.error('Error deleting slowdown data:', e)
-    return Promise.reject(e)
-  }
-}
 async function deleteShutdownData(maintenanceId, keycloak, PLANT_ID) {
   const url = `${Config.CaseEngineUrl}/task/shutdown/${maintenanceId}/${PLANT_ID}`
   const headers = {
@@ -524,36 +288,6 @@ async function updatePeConfigData(keycloak, payload, PLANT_ID, AOP_YEAR) {
       throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
     }
     return await resp.text() // Handle text response from the backend
-  } catch (e) {
-    console.error('Error Editing Config data:', e)
-    return Promise.reject(e)
-  }
-}
-async function getExcel(keycloak, payload, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=Production`
-  const headers = {
-    'Content-Type': 'application/json',
-    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-    })
-    if (!resp.ok) {
-      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
-    }
-    const blob = await resp.blob()
-    const urlBlob = window.URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = urlBlob
-    a.download = 'plant_production_plan.xlsx' // Filename to save
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
     console.error('Error Editing Config data:', e)
     return Promise.reject(e)
@@ -655,21 +389,6 @@ async function getScreenbyPlant(keycloak, verticalId, plantId, userId) {
   if (userId) {
     url += `&userId=${userId}`
   }
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-async function getWorkflowData(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/work-flow?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -848,26 +567,26 @@ async function getNormsHistorianBasis(
     return await Promise.reject(e)
   }
 }
-async function getAnnualProductionPlanReportData(
-  keycloak,
-  type,
-  PLANT_ID,
-  AOP_YEAR,
-) {
-  const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${type}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
+// async function getAnnualProductionPlanReportData(
+//   keycloak,
+//   type,
+//   PLANT_ID,
+//   AOP_YEAR,
+// ) {
+//   const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${type}`
+//   const headers = {
+//     Accept: 'application/json',
+//     'Content-Type': 'application/json',
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
+//   try {
+//     const resp = await fetch(url, { method: 'GET', headers })
+//     return json(keycloak, resp)
+//   } catch (e) {
+//     console.log(e)
+//     return await Promise.reject(e)
+//   }
+// }
 async function getPlantContributionYearWisePlan(
   keycloak,
   type,
@@ -889,57 +608,6 @@ async function getPlantContributionYearWisePlan(
   }
 }
 
-async function getPlantProductionSummary(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/report/production-summary?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-async function getMonthwiseRawData(keycloak, reportType, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${reportType}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-async function postMonthwiseRawData(keycloak, dataList, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/report/month-wise/consumption-summary?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    // ?? Log payload before sending to backend
-    console.log('Sending payload:', dataList)
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(dataList),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.error('Error posting data:', e)
-    return await Promise.reject(e)
-  }
-}
 async function getMonthWiseSummary(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/report/month-wise/production?plantId=${PLANT_ID}&year=${AOP_YEAR}&typeOne=${'month'}&typeSecond=${'year'}`
   const headers = {
@@ -955,36 +623,6 @@ async function getMonthWiseSummary(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function getWorkflowDataProduction(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/production-aop/work-flow?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-// async function getUserBySearch(keycloak, searchKey) {
-//   const url = `${Config.CaseEngineUrl}/task/users/search?search=${searchKey}`
-//   const headers = {
-//     Accept: 'application/json',
-//     'Content-Type': 'application/json',
-//     Authorization: `Bearer ${keycloak.token}`,
-//   }
-//   try {
-//     const resp = await fetch(url, { method: 'GET', headers })
-//     return json(keycloak, resp)
-//   } catch (e) {
-//     console.log(e)
-//     return await Promise.reject(e)
-//   }
-// }
 async function getUserBySearch(keycloak, searchKey) {
   const url = `${Config.CaseEngineUrl}/task/users/search?search=${encodeURIComponent(searchKey)}`
   const headers = {
@@ -1160,45 +798,7 @@ async function saveShutdownData(plantId, shutdownDetails, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function saveAnnualWorkFlowData(keycloak, workFlowData, PLANT_ID) {
-  const url = `${Config.CaseEngineUrl}/task/annual-aop-data?plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(workFlowData),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
 
-async function savePlantProductionData(keycloak, dataList, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/plant-production-data?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(dataList),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
 async function savePlantContributionData(
   keycloak,
   dataList,
@@ -1343,44 +943,6 @@ async function saveworkflow(data, keycloak) {
     return await Promise.reject(e)
   }
 }
-async function submitWorkFlow(data, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/submitWorkflow`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(data),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-async function getCaseId(keycloak, PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID) {
-  const url = `${Config.CaseEngineUrl}/task/getCaseId?plantId=${PLANT_ID}&year=${AOP_YEAR}&siteId=${SITE_ID}&verticalId=${VERTICAL_ID}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
 async function saveSummaryAOPConsumptionNorm(
   PLANT_ID,
   AOP_YEAR,
@@ -1593,8 +1155,13 @@ async function saveCatalystData(
   turnAroundDetails,
   keycloak,
   AOP_YEAR,
+  isCalculationParam,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/production-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
+  var url = `${Config.CaseEngineUrl}/task/production-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
+
+  if (isCalculationParam) {
+    url = `${Config.CaseEngineUrl}/task/production-norms?year=${AOP_YEAR}&plantFKId=${PLANT_ID}&calculation=true`
+  }
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -1983,49 +1550,6 @@ async function getProcessInstanceVariables(keycloak, processInstanceId) {
     return await Promise.reject(e)
   }
 }
-// async function completeTask(keycloak, taskId, payload) {
-//   const url = `${Config.CaseEngineUrl}/task/${taskId}/complete`
-//   const headers = {
-//     Accept: 'application/json',
-//     'Content-Type': 'application/json',
-//     Authorization: `Bearer ${keycloak.token}`,
-//   }
-//   try {
-//     const resp = await fetch(url, {
-//       method: 'POST',
-//       headers,
-//       body: JSON.stringify(payload),
-//     })
-//     return json(keycloak, resp)
-//   } catch (e) {
-//     console.log(e)
-//     return await Promise.reject(e)
-//   }
-// }
-async function completeTask(keycloak, payload) {
-  const url = `${Config.CaseEngineUrl}/task/completetask`
-  // 1. Ensure token is fresh before every request
-  await keycloak.updateToken(30)
-  // 2. Execute the POST
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${keycloak.token}`,
-    },
-    body: JSON.stringify(payload),
-  })
-  // 3. 204 = success (no JSON body)
-  if (resp.status === 204) return true
-  // 4. Any other non-OK status ? read text & throw
-  if (!resp.ok) {
-    const text = await resp.text().catch(() => '')
-    throw new Error(`Server error ${resp.status}: ${text}`.trim())
-  }
-  // 5. If 2xx with a body, parse it
-  const data = await resp.json()
-  return Boolean(data)
-}
 async function getTurnaroundReportData(keycloak, type, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/report/turn-around?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=${type}`
   const headers = {
@@ -2042,8 +1566,18 @@ async function getTurnaroundReportData(keycloak, type, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function saveConfigurationExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+async function saveConfigurationExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  isCalculationParam,
+) {
+  var url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  if (isCalculationParam) {
+    url = `${Config.CaseEngineUrl}/task/configuration-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}&calculation=true`
+  }
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -2275,7 +1809,14 @@ async function exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
 }
 
 //--
-async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
+async function getConfigurationExcel(
+  keycloak,
+  reportType,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+  EXCEL_EXPORT_TITLE_II,
+) {
   const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
@@ -2286,9 +1827,13 @@ async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
 
   const body = JSON.stringify(reportType)
 
+  const fileName = EXCEL_EXPORT_TITLE_II
+    ? `${EXCEL_EXPORT_TITLE}_${EXCEL_EXPORT_TITLE_II}.xlsx`
+    : `${EXCEL_EXPORT_TITLE}_Production & Norms Basis.xlsx`
+
   try {
     const resp = await fetch(url, {
-      method: 'POST', // changed from GET to POST since weâ€™re sending a body
+      method: 'POST', // changed from GET to POST since we’re sending a body
       headers,
       body,
     })
@@ -2303,7 +1848,8 @@ async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis.xlsx'
+
+    a.download = fileName
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -2314,7 +1860,12 @@ async function getConfigurationExcel(keycloak, reportType, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function getConfigurationExcelConstants(keycloak, PLANT_ID, AOP_YEAR) {
+async function getConfigurationExcelConstants(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  FILE_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/configuration-constants-export-excel?year=${AOP_YEAR}&plantFKId=${PLANT_ID}`
 
   const headers = {
@@ -2334,7 +1885,7 @@ async function getConfigurationExcelConstants(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis - Constants.xlsx'
+    a.download = FILE_NAME || 'Production & Norms Basis - Constants.xlsx'
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -2471,35 +2022,35 @@ async function getIbr(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function saveAnnualProduction(
-  PLANT_ID,
-  AOP_YEAR,
-  reportType,
-  dataList,
-  keycloak,
-) {
-  let queryParams = `?plantId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
-  if (reportType) {
-    queryParams += `&reportType=${encodeURIComponent(reportType)}`
-  }
-  const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan${queryParams}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(dataList),
-    })
-    return json(keycloak, resp)
-  } catch (e) {
-    console.error('Error in saveAnnualProduction:', e)
-    return await Promise.reject(e)
-  }
-}
+// async function saveAnnualProduction(
+//   PLANT_ID,
+//   AOP_YEAR,
+//   reportType,
+//   dataList,
+//   keycloak,
+// ) {
+//   let queryParams = `?plantId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
+//   if (reportType) {
+//     queryParams += `&reportType=${encodeURIComponent(reportType)}`
+//   }
+//   const url = `${Config.CaseEngineUrl}/task/report/plant/production/plan${queryParams}`
+//   const headers = {
+//     Accept: 'application/json',
+//     'Content-Type': 'application/json',
+//     Authorization: `Bearer ${keycloak.token}`,
+//   }
+//   try {
+//     const resp = await fetch(url, {
+//       method: 'POST',
+//       headers,
+//       body: JSON.stringify(dataList),
+//     })
+//     return json(keycloak, resp)
+//   } catch (e) {
+//     console.error('Error in saveAnnualProduction:', e)
+//     return await Promise.reject(e)
+//   }
+// }
 async function getIbrSdTa(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
@@ -2785,7 +2336,12 @@ async function getCrackerNextYearData(keycloak, qParams, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-async function getRecipeExcel(keycloak, PLANT_ID, AOP_YEAR) {
+async function getRecipeExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+) {
   const url = `${Config.CaseEngineUrl}/task/recipe-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
@@ -2807,7 +2363,7 @@ async function getRecipeExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Production & Norms Basis Recipe.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Production & Norms Basis Recipe.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -2838,12 +2394,18 @@ async function saveRecipeExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-async function getShutdownRateExcel(keycloak, type, PLANT_ID, AOP_YEAR) {
+async function getShutdownRateExcel(
+  keycloak,
+  type,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+) {
   const url = `${Config.CaseEngineUrl}/task/shutdown-rate-export?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${type}`
 
   const EXCEL_NAME = type
-    ? `Production & Norms Basis ${type}.xlsx`
-    : `Production & Norms Basis.xlsx`
+    ? `${EXCEL_EXPORT_TITLE}_Production & Norms Basis ${type}.xlsx`
+    : `${EXCEL_EXPORT_TITLE}_Production & Norms Basis.xlsx`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -2916,31 +2478,6 @@ async function plantContributionPlanLastFourYears(
   }
 }
 
-async function calculatePlantContributionSummaryYearly(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/calculate-plant-contribution-summary-yearly?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
 async function calculateLoadPlantContribution(PLANT_ID, AOP_YEAR, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/load-plant-contribution?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
@@ -2999,7 +2536,7 @@ async function getProductionTargetBasis(keycloak, PLANT_ID, AOP_YEAR) {
     return Promise.reject(e)
   }
 }
-export async function ImportShutdownDetails(file, keycloak, plantId, year) {
+export async function ImportShutdownProductWise(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const formData = new FormData()
@@ -3020,12 +2557,7 @@ export async function ImportShutdownDetails(file, keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
-export async function ImportShutdownElastomerDetails(
-  file,
-  keycloak,
-  plantId,
-  year,
-) {
+export async function ImportShutdownNonProduct(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-import-non-product?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const formData = new FormData()
@@ -3046,7 +2578,12 @@ export async function ImportShutdownElastomerDetails(
     return Promise.reject(e)
   }
 }
-export async function shutdownDetailsExport(keycloak, plantId, year) {
+export async function exportShutdownNonProductWise(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3066,7 +2603,7 @@ export async function shutdownDetailsExport(keycloak, plantId, year) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'shutdown.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Shutdown Activities.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3077,7 +2614,12 @@ export async function shutdownDetailsExport(keycloak, plantId, year) {
   }
 }
 
-export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
+export async function exportShutdownNonProduct(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
   const maintenanceTypeName = 'Shutdown'
   const url = `${Config.CaseEngineUrl}/task/shutdown-export-non-product?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3097,7 +2639,7 @@ export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'shutdown.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Shutdown Activities.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3107,6 +2649,7 @@ export async function shutdownDetailsElastomerExport(keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
+
 export async function ImportSlowdownDetails(file, keycloak, plantId, year) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
@@ -3150,6 +2693,7 @@ export async function ImportSlowdownDetailsEOE(file, keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
+
 export async function ImportSlowdownElastomerDetails(
   file,
   keycloak,
@@ -3176,7 +2720,13 @@ export async function ImportSlowdownElastomerDetails(
     return Promise.reject(e)
   }
 }
-export async function slowdownDetailsExport(keycloak, plantId, year) {
+
+export async function slowdownDetailsExport(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3196,7 +2746,7 @@ export async function slowdownDetailsExport(keycloak, plantId, year) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'slowdown.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Slowdown_Activities.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3207,7 +2757,12 @@ export async function slowdownDetailsExport(keycloak, plantId, year) {
   }
 }
 
-export async function ExportSlowdownDetailsEOE(keycloak, plantId, year) {
+export async function ExportSlowdownDetailsEOE(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-rate-export?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3227,7 +2782,7 @@ export async function ExportSlowdownDetailsEOE(keycloak, plantId, year) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'slowdown.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Slowdown_Activities.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3237,7 +2792,12 @@ export async function ExportSlowdownDetailsEOE(keycloak, plantId, year) {
     return Promise.reject(e)
   }
 }
-export async function slowdownDetailsElastomerExport(keycloak, plantId, year) {
+export async function slowdownDetailsElastomerExport(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
   const maintenanceTypeName = 'Slowdown'
   const url = `${Config.CaseEngineUrl}/task/slowdown-export-non-product?year=${encodeURIComponent(year)}&plantId=${encodeURIComponent(plantId)}&maintenanceTypeName=${encodeURIComponent(maintenanceTypeName)}`
   const headers = {
@@ -3257,7 +2817,7 @@ export async function slowdownDetailsElastomerExport(keycloak, plantId, year) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'slowdown.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_Slowdown_Activities.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3272,6 +2832,7 @@ async function getConfigurationExcelType(
   PLANT_ID,
   AOP_YEAR,
   reportType,
+  EXCEL_EXPORT_TITLE,
 ) {
   const url = `${Config.CaseEngineUrl}/task/configuration-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}`
   const headers = {
@@ -3282,8 +2843,8 @@ async function getConfigurationExcelType(
 
   const body = JSON.stringify(reportType)
   const EXCEL_NAME = reportType
-    ? `Production & Norms Basis ${reportType}.xlsx`
-    : `Production & Norms Basis.xlsx`
+    ? `${EXCEL_EXPORT_TITLE}_Production & Norms Basis ${reportType}.xlsx`
+    : `${EXCEL_EXPORT_TITLE}_Production & Norms Basis.xlsx`
 
   try {
     const resp = await fetch(url, {
@@ -3403,32 +2964,6 @@ export async function getConsumptionNorms(
     return Promise.reject(e)
   }
 }
-async function calculatePlantContributionBusinessDemand(
-  PLANT_ID,
-  AOP_YEAR,
-  keycloak,
-) {
-  const url = `${Config.CaseEngineUrl}/task/load-plant-contribution?year=${AOP_YEAR}&plantId=${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const data = await resp.json() // Parse JSON response
-    return data
-  } catch (e) {
-    console.error('Error fetching calculation data:', e)
-    return Promise.reject(e)
-  }
-}
-
 //PTA SHUTDOWN ACTIVITIES DROPDOWNS
 //AOP_DEPLOYMENT_PROD
 async function dropdownValues(keycloak, PLANT_ID, AOP_YEAR) {
@@ -3474,5 +3009,41 @@ export async function slowdownconsumptionExport(keycloak, plantId, year) {
   } catch (e) {
     console.error('Error exporting Shutdown Excel:', e)
     return Promise.reject(e)
+  }
+}
+
+async function getRevision(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-version?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function updateRevision(keycloak, payload, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/configuration-version?year=${AOP_YEAR}&plantId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

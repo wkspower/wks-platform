@@ -21,18 +21,18 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "fourF",
-    "title": "4F",
+    "title": "4F/5F+D",
     "editable": true,
     "type": "number",
     "format": "{0:#.##}",
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -78,7 +78,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -90,7 +90,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "bbu",
@@ -101,7 +101,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "bbd",
@@ -112,7 +112,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -124,7 +124,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -136,7 +136,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -160,7 +160,7 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -172,20 +172,20 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
     "field": "total",
     "title": "Total",
-    "editable": false,
+    "editable": true,
 
     "type": "number",
     "format": "{0:#.##}",
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "numberOfDays",
@@ -197,19 +197,19 @@
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
   {
     "field": "totalSAD",
     "title": "No of SADs",
-    "editable": false,
+    "editable": true,
 
     "type": "number",
     "format": "{0:#.##}",
     "hidden": false,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 100
+    "widthT": 70
   },
 
   {
@@ -221,12 +221,12 @@
     "hidden": true,
     "hideFilter": true,
     "hideSort": true,
-    "widthT": 120
+    "widthT": 70
   },
 
   {
     "field": "remarks",
     "title": "Remarks",
-    "widthT": 120
+    "widthT": 80
   }
 ]

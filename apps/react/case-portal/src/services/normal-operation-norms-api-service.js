@@ -504,7 +504,14 @@ async function calculateFinalNorms(PLANT_ID, AOP_YEAR, keycloak) {
     return Promise.reject(e)
   }
 }
-async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
+async function getNormalOpsNormsExcel(
+  keycloak,
+  gradeId,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+  SCREEN_NAME,
+) {
   var url = `${Config.CaseEngineUrl}/task/steady-state-norms-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   if (gradeId) {
@@ -528,7 +535,7 @@ async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Steady State Norms.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -539,7 +546,13 @@ async function getNormalOpsNormsExcel(keycloak, gradeId, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function getNormalOpsNormsExcelpe(keycloak, PLANT_ID, AOP_YEAR) {
+async function getNormalOpsNormsExcelpe(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_EXPORT_TITLE,
+  SCREEN_NAME,
+) {
   var url = `${Config.CaseEngineUrl}/task/steady-state-norms-all-grades-export?year=${AOP_YEAR}&plantId=${PLANT_ID}`
 
   const headers = {
@@ -559,7 +572,7 @@ async function getNormalOpsNormsExcelpe(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Steady State Norms.xlsx'
+    a.download = `${EXCEL_EXPORT_TITLE}_${SCREEN_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

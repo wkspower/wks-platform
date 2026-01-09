@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExecutionDetailDto;
 import com.wks.caseengine.dto.NormAttributeTransactionReceipeRequestDTO;
 import com.wks.caseengine.entity.NormAttributeTransactionReceipe;
@@ -23,7 +24,7 @@ public interface ConfigurationService {
 	AOPMessageVM carryForward(String year, String plantId);
 	public AOPMessageVM getConfigurationConstants(String year,String plantFKId);
 	public AOPMessageVM getConfigurationIntermediateValues(String year, UUID plantFKId);
-    public List<ConfigurationDTO> saveConfigurationData( String year, String plantFKId,String version, List<ConfigurationDTO> configurationDTOList);
+    public List<ConfigurationDTO> saveConfigurationData( String year, String plantFKId,String version, List<ConfigurationDTO> configurationDTOList,Boolean calculation);
     public   List<Map<String, Object>>  getNormAttributeTransactionReceipe(String year, String plantId);
     public List<NormAttributeTransactionReceipeRequestDTO> updateCalculatedConsumptionNorms( String year, String plantId,  List<NormAttributeTransactionReceipeRequestDTO> normAttributeTransactionReceipeDTOLists);
     public AOPMessageVM getConfigurationIntermediateValuesData(String year, String plantId);
@@ -32,13 +33,14 @@ public interface ConfigurationService {
     public byte[] createConfigurationConstantsExcel(String year, UUID plantFKId);
     public byte[] exportConfigurationConstantsNorms(String year, String plantId);
     public byte[] exportConfigData(String year, UUID plantFKId, boolean isAfterSave, List<NormAttributeTransactionReceipeRequestDTO> dtoList);
-    public AOPMessageVM importExcel(String year, UUID fromString,List<String> reportTypes,String version, MultipartFile file);
-    public AOPMessageVM importShutdownRateExcel(String year, UUID fromString,String type,String version, MultipartFile file);
+    public AOPMessageVM importExcel(String year, UUID fromString,List<String> reportTypes,String version, MultipartFile file,Boolean calculation);
+    public AOPMessageVM importShutdownRateExcel(String year, UUID fromString,String type,String version, MultipartFile file,Boolean calculation);
     public AOPMessageVM importRecipe(String year, UUID fromString, MultipartFile file);
-    public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId,String version, MultipartFile file);
+    public AOPMessageVM importConfigurationConstantsExcel(String year, UUID plantId,String version, MultipartFile file,Boolean calculation);
 	public AOPMessageVM getConfigurationExecution( String year, String plantId);
 	public AOPMessageVM getConfigurationExecutionNorms( String year, String plantId);
-	public AOPMessageVM getConfigurationVersion( String year, String plantId);
+	public AOPMessageVM getConfigurationVersion(String year, String plantId);
+	public AOPMessageVM updateConfigurationVersion(List<ConfigurationVersionDTO> configurationVersionDTOs);
     public AOPMessageVM saveConfigurationExecution( List<ExecutionDetailDto> executionDetailDtoList);
     public AOPMessageVM saveConfigurationExecutionNorms( List<ExecutionDetailDto> executionDetailDtoList);
     byte[] createConfigurationConstantsExcelResponse(String year, UUID plantFKId, List<ConfigurationDTO> list);

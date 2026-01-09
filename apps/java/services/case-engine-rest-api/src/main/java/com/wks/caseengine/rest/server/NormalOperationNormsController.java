@@ -79,6 +79,10 @@ public class NormalOperationNormsController {
 		return normalOperationNormsService.calculateExpressionConsumptionNorms(year, plantId);
 	}
 	
+	@GetMapping(value = "/load-grade-wise-consumption-norms")
+	public AOPMessageVM loadGradeWiseConsumptionNorms(@RequestParam String year, @RequestParam String plantId) {
+		return normalOperationNormsService.loadGradeWiseConsumptionNorms(year, plantId);
+	}
 	
 	@GetMapping(value = "/steady-state-norms-export")
 	public ResponseEntity<byte[]> exportPlantProductionPlanReport(

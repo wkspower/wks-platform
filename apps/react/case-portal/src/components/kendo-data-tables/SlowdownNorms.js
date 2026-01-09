@@ -21,6 +21,7 @@ import { NormalOperationNormsApiService } from 'services/normal-operation-norms-
 import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
+import { SlowdownNormForMegServices } from 'services/SlowdownNormForMegServices'
 const SlowdownNorms = () => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
@@ -39,14 +40,30 @@ const SlowdownNorms = () => {
     siteObject,
     verticalObject,
     year,
+    screenTitle,
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
-  //const isOldYear = oldYear?.oldYear
-  const isOldYear = oldYear?.oldYear
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const isOldYear = false
+
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
+  const VERTICAL_NAME_LOWERCASE = verticalObject?.name?.toLowerCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+  const IS_PE_PP_VERTICAL_NMD_LLDPE =
+    ['pe'].includes(VERTICAL_NAME_LOWERCASE) &&
+    ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+    ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
 
   const [open1, setOpen1] = useState(false)
   // const [deleteId, setDeleteId] = useState(null)
@@ -60,20 +77,17 @@ const SlowdownNorms = () => {
   })
 
   const headerMap = generateHeaderNames(AOP_YEAR)
-
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
   const [rowModesModel, setRowModesModel] = useState({}) // Track row edit state
-
   const vertName = verticalChange?.selectedVertical
+  const SCREEN_NAME = screenTitle?.title
   const lowerVertName = vertName?.toLowerCase()
   const plantName = plantObject?.name.toLowerCase()
   const siteName = siteObject?.name.toLowerCase()
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [selectedUnit, setSelectedUnit] = useState('TPH')
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-
   const [gradeId, setGradeId] = useState(null)
-
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const unsavedChangesRef = React.useRef({
@@ -81,17 +95,10 @@ const SlowdownNorms = () => {
     rowsBeforeChange: {},
   })
 
-  // const getProductDisplayName = (id) => {
-  //   if (!id) return
-  //   const product = allProducts.find((p) => p.id === id)
-  //   return product ? product.displayName : ''
-  // }
-
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
-
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
-
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -190,15 +197,13 @@ const SlowdownNorms = () => {
     }
   }, [oldYear, yearChanged, keycloak, selectedUnit, PLANT_ID])
 
-  // const formatValueToFiveDecimals = (params) =>
-  //   params ? parseFloat(params).toFixed(5) : ''
-
   const isCellEditable = (params) => {
     return params.row.isEditable
   }
 
   // const months = slowdownMonths
   const valueFormat = ValueFormatterConsumption()
+
   const colDefs = getSlowdownNormsColDef({
     headerMap,
     slowdownMonths,
@@ -211,40 +216,6 @@ const SlowdownNorms = () => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-
-  const processRowUpdate = React.useCallback((newRow, oldRow) => {
-    const rowId = newRow.id
-    const updatedFields = []
-    for (const key in newRow) {
-      if (
-        Object.prototype.hasOwnProperty.call(newRow, key) &&
-        newRow[key] !== oldRow[key]
-      ) {
-        updatedFields.push(key)
-      }
-    }
-
-    unsavedChangesRef.current.unsavedRows[rowId || 0] = newRow
-
-    if (!unsavedChangesRef.current.rowsBeforeChange[rowId]) {
-      unsavedChangesRef.current.rowsBeforeChange[rowId] = oldRow
-    }
-
-    setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.id === newRow.id ? { ...newRow, isNew: false } : row,
-      ),
-    )
-
-    if (updatedFields.length > 0) {
-      setModifiedCells((prevModifiedCells) => ({
-        ...prevModifiedCells,
-        [rowId]: [...(prevModifiedCells[rowId] || []), ...updatedFields],
-      }))
-    }
-
-    return newRow
-  }, [])
 
   const saveSlowdownNormsData = async (newRows) => {
     setLoading(true)
@@ -378,10 +349,6 @@ const SlowdownNorms = () => {
     setSelectedUnit(unit)
   }
 
-  const onProcessRowUpdateError = React.useCallback((error) => {
-    console.log(error)
-  }, [])
-
   const handleCalculate = () => {
     handleCalculateData()
   }
@@ -456,6 +423,13 @@ const SlowdownNorms = () => {
           AOP_YEAR,
           keycloak,
         )
+      } else if (lowerVertName == 'vcm') {
+        response =
+          await SlowdownNormForMegServices.getSlowdownNormsCalculateForMeg({
+            keycloak,
+            PLANT_ID,
+            year: AOP_YEAR,
+          })
       } else {
         response = await DataService.handleCalculateSlowdownNorms(
           PLANT_ID,
@@ -561,12 +535,17 @@ const SlowdownNorms = () => {
       showG: IS_PE_PP ? true : false,
       marginBottom: IS_PE_PP ? true : false,
 
-      ExcelName: `${lowerVertName}-Slowdown Consumption (Norms/Quantity)`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown Consumption`,
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
 
-      showTitleNameBusiness: lowerVertName === 'elastomer' ? true : false,
-      titleName: `Slowdown Consumption (Norms/Quantity)`,
+      showTitleNameBusiness: true,
+      titleName:
+        lowerVertName === 'elastomer'
+          ? `Slowdown Consumption (Norms/Quantity)`
+          : IS_PE_PP_VERTICAL_NMD_LLDPE
+            ? 'Total Loss'
+            : `${SCREEN_NAME}`,
     },
     isOldYear,
   )
@@ -603,16 +582,10 @@ const SlowdownNorms = () => {
     setGradeId(gradeId)
   }
 
-  const NormParameterIdCell = (props) => {
-    const productId = props.dataItem.materialFkId
-    const product = allProducts.find((p) => p.id === productId)
-    const displayName = product?.displayName || ''
-    return <td>{displayName}</td>
-  }
-
   if (lowerVertName === 'pp' && siteName === 'nmd' && plantName === 'pp') {
     return null // Or: return <div>Screen hidden for this configuration.</div>
   }
+
   return (
     <div>
       <Backdrop
@@ -626,7 +599,6 @@ const SlowdownNorms = () => {
       ) : (
         <KendoDataTables
           modifiedCells={modifiedCells}
-          NormParameterIdCell={NormParameterIdCell}
           setModifiedCells={setModifiedCells}
           isCellEditable={isCellEditable}
           title='Shutdown Norms'
@@ -637,7 +609,6 @@ const SlowdownNorms = () => {
           onDeleteRow={(id) => console.log('Row Deleted:', id)}
           onRowUpdate={(updatedRow) => console.log('Row Updated:', updatedRow)}
           paginationOptions={[100, 200, 300]}
-          processRowUpdate={processRowUpdate}
           handleUnitChange={handleUnitChange}
           onRowModesModelChange={onRowModesModelChange}
           saveChanges={saveChanges}

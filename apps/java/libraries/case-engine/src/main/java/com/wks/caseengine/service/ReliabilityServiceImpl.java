@@ -65,9 +65,9 @@ public class ReliabilityServiceImpl implements ReliabilityService{
 	     List<ReliabilityPerformanceDto> reliabilityPerformanceDtos = new ArrayList<>();
 	     try {
 	         String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
-	         String viewName = "vwScrn" + verticalName + "ReliabilityPerformance";
+	         String procedure = "spGetReliabilityPerformance";
 
-	         List<Object[]> rows = findByViewNameAopYearPlantId(viewName, year, UUID.fromString(plantId), type);
+	         List<Object[]> rows = getData(year, plantId,type,  procedure);
 	         for (Object[] row : rows) {
 	             ReliabilityPerformanceDto dto = new ReliabilityPerformanceDto();
 
@@ -936,6 +936,25 @@ public class ReliabilityServiceImpl implements ReliabilityService{
         List<Object[]> resultList = q.getResultList();
         return resultList;
     }
+	
+	public List<Object[]> getData(String aopYear, String plantId,String reportType, String procedureName) {
+		try {
+
+			String sql = "EXEC " + procedureName
+					+ " @PlantId = :plantId, @AOPYear = :aopYear, @ReportType = :reportType";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+			query.setParameter("reportType", reportType);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 	
 	public List<Object[]> findByAopYearPlantId(
             String viewName, String aopYear, UUID plantId, String reportType) {

@@ -21,7 +21,7 @@ const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's
 
 const UtilitiesNormsBasis = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
@@ -44,6 +44,9 @@ const UtilitiesNormsBasis = () => {
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'

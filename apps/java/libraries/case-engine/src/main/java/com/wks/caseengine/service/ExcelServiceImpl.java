@@ -84,7 +84,7 @@ public class ExcelServiceImpl implements ExcelService {
                 ObjectMapper mapper = new ObjectMapper();
                 Map<String, Object> data = mapper.readValue(dataStr, Map.class);
                 LocalDate today = LocalDate.now();
-                String formattedDate = today.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                String formattedDate = today.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
 
                 for (String sheetName : data.keySet()) {
                     Map<String, Object> sheetData = (Map<String, Object>) data.get(sheetName);
@@ -518,21 +518,26 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     public static String getPrevious2Year(String year) {
+       
         int start = Integer.parseInt(year.substring(0, 4));
-        int end = Integer.parseInt(year.substring(5));
-        return String.format("%d-%02d", start - 2, start - 1 % 100);
+        int year1 = start - 2; 
+        int year2 = start - 1; 
+        int year2_short = year2 % 100; 
+        return String.format("%d-%02d", year1, year2_short);
     }
 
     public static String getPrevious3Year(String year) {
         int start = Integer.parseInt(year.substring(0, 4));
-        int end = Integer.parseInt(year.substring(5));
-        return String.format("%d-%02d", start - 3, start - 2 % 100);
+        int year1 = start - 3; 
+        int year2_short = (start - 2) % 100; 
+        return String.format("%d-%02d", year1, year2_short); 
     }
 
     public static String getPrevious4Year(String year) {
         int start = Integer.parseInt(year.substring(0, 4));
-        int end = Integer.parseInt(year.substring(5));
-        return String.format("%d-%02d", start - 4, start - 3 % 100);
+        int year1 = start - 4; 
+        int year2_short = (start - 3) % 100; 
+        return String.format("%d-%02d", year1, year2_short); 
     }
 
     public static String getNextYear(String year) {

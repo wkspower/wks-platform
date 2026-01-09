@@ -22,7 +22,6 @@ import { getRoleName } from 'services/role-service'
 const BusinessDemand = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
 
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
@@ -43,9 +42,19 @@ const BusinessDemand = ({ permissions }) => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
+
+  const IS_ELASTOMER_VERTICAL = lowerVertName === 'elastomer'
+  const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
+  const IS_PTA_VERTICAL = lowerVertName === 'pta'
+  const IS_PET_VERTICAL = lowerVertName === 'pet'
+
   const SCREEN_NAME = screenTitle?.title
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
@@ -88,14 +97,14 @@ const BusinessDemand = ({ permissions }) => {
 
       setLoading(false)
     } catch (error) {
-      console.error('Error fetching Business Demand data:', error)
+      console.error('Error fetching data:', error)
       setLoading(false)
     }
   }
 
   useEffect(() => {
     fetchData()
-  }, [PLANT_ID, oldYear, yearChanged, keycloak])
+  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak])
 
   const handleRemarkCellClick = (dataItem) => {
     // if (!dataItem?.isEditable) return
@@ -134,10 +143,14 @@ const BusinessDemand = ({ permissions }) => {
         setLoading(false)
         return
       }
-      const isPPorPE_NMD = lowerVertName === 'pp' || lowerVertName === 'pe'
       //
 
-      if (isPPorPE_NMD) {
+      if (
+        IS_PE_PP_VERTICAL ||
+        IS_PTA_VERTICAL ||
+        IS_PET_VERTICAL ||
+        IS_ELASTOMER_VERTICAL
+      ) {
         const productionRows = (rows || []).filter(
           (row) => row.Particulars?.toLowerCase() === 'production',
         )
@@ -158,7 +171,7 @@ const BusinessDemand = ({ permissions }) => {
             'march',
           ]
 
-          const SCALE = 100000
+          const SCALE = 100
 
           const toPreciseInt = (num) => {
             if (num === null || num === undefined || num === '') return 0
@@ -325,8 +338,9 @@ const BusinessDemand = ({ permissions }) => {
       // showStepper:false,
     }
   }
+
   const percentageTitle =
-    lowerVertName === 'pp' || lowerVertName === 'pe'
+    IS_PE_PP_VERTICAL || IS_PET_VERTICAL
       ? `${SCREEN_NAME} (%)`
       : `${SCREEN_NAME}`
 
@@ -345,24 +359,25 @@ const BusinessDemand = ({ permissions }) => {
       titleName: percentageTitle,
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
+      isTotalFooterActive:
+        IS_PE_PP_VERTICAL ||
+        IS_PTA_VERTICAL ||
+        IS_PET_VERTICAL ||
+        IS_ELASTOMER_VERTICAL
+          ? true
+          : false,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? true
           : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? true
           : false,
 
       downloadExcelBtnFromUI:
-        lowerVertName == 'cracker' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp'
+        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? false
           : true,
     },

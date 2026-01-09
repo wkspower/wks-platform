@@ -135,6 +135,9 @@ public class AOPServiceImpl implements AOPService {
 			if(vertical.getName().equalsIgnoreCase("AROMATICS")) {
 				String procedureName=vertical.getName()+"_"+site.getName()+"_"+"GetAOP";
 				obj = getData(year,plant.getId(),site.getId(),vertical.getId(),procedureName);
+			}else if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")){
+				String view="vwScrn"+vertical.getName()+"AOP";
+				obj= findByAOPYearAndPlantFkId(year, UUID.fromString(plantId), type,view);
 			}else {
 				 obj = aopRepository.findByAOPYearAndPlantFkId(year, UUID.fromString(plantId), type);
 			}
@@ -185,6 +188,34 @@ public class AOPServiceImpl implements AOPService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	
+    public List<Object[]> findByAOPYearAndPlantFkId(
+            String AOPYear, 
+            UUID Plant_FK_Id, 
+            String NormParameterName, 
+            String viewName) {
+
+        String sql = "SELECT Id, NormParameterName, NormParameterDisplayName, NormParameterType_FK_Id, "
+                   + "Material_FK_Id, DisplayName, April, May, June, "
+                   + "July, Aug, Sep, Oct, Nov, Dec, Jan, Feb, March, AvgTPH, AOPRemarks, DisplayOrder, "
+                   + "IsEditable, IsVisible "
+                   + "FROM " + viewName + " " 
+                   + "WHERE AOPYear = :AOPYear "
+                   + "AND Plant_FK_Id = :Plant_FK_Id "
+                   + "AND NormParameterName = :NormParameterName AND IsVisible = 1 "
+                   + "ORDER BY DisplayOrder";
+
+        Query query = entityManager.createNativeQuery(sql);
+        
+        // Bind the parameters securely
+        query.setParameter("AOPYear", AOPYear);
+        query.setParameter("Plant_FK_Id", Plant_FK_Id);
+        query.setParameter("NormParameterName", NormParameterName);
+
+        return query.getResultList();
+    }
+    
 	private Double safeParseDouble(Object obj) {
         if (obj == null) {
             return null;

@@ -149,6 +149,14 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	Optional<NormAttributeTransactions> findByNormParameterFKIdAndAOPMonthAndAuditYear(
 			@Param("normParameterFKId") UUID normParameterFKId,
 			@Param("month") Integer month, @Param("auditYear") String auditYear);
+	
+	@Query(value = """
+			SELECT * FROM NormAttributeTransactions d WHERE d.NormParameter_FK_Id = :normParameterFKId  AND d.AOPMonth = :month 
+			AND d.AuditYear = :auditYear AND d.AttributeValueVersion= :version AND PlantMaintenanceTransaction_FK_Id IS NULL
+		""", nativeQuery = true)
+Optional<NormAttributeTransactions> findByNormParameterFKIdAndAOPMonthAndAuditYearAndVersion(
+		@Param("normParameterFKId") UUID normParameterFKId,
+		@Param("month") Integer month, @Param("auditYear") String auditYear, @Param("version") String version);
 
 	@Query(value = """
 				SELECT Params FROM [dbo].[vwConfigurationUpdate]
@@ -212,6 +220,7 @@ public interface NormAttributeTransactionsRepository extends JpaRepository<NormA
 	List<NormAttributeTransactions> findByNormParameterIdAndAuditYear(
 	     @Param("normParameterFKId") UUID normParameterFKId,
 	     @Param("auditYear") String auditYear	    
-);
+	);
+	
 
 }

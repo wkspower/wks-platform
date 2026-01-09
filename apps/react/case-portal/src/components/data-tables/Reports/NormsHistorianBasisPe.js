@@ -43,7 +43,8 @@ const NormsHistorianBasisPe = () => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
@@ -454,7 +455,7 @@ const NormsHistorianBasisPe = () => {
         })}
       </div>
 
-      {activeTabs?.length > 1 && (
+      {/* {activeTabs?.length > 1 && (
         <Tabs
           value={tabIndex}
           onChange={(e, newIndex) => setTabIndex(newIndex)}
@@ -483,7 +484,7 @@ const NormsHistorianBasisPe = () => {
             />
           ))}
         </Tabs>
-      )}
+      )} */}
 
       {tabIndex === 0 && (
         <Box display='flex' justifyContent='flex-end' mb='2px'>
@@ -546,7 +547,7 @@ const NormsHistorianBasisPe = () => {
             })}
           </>
         )}
-
+        {/* THIS TAB IS NOT LONGER REQUIRED */}
         {tabIndex === 1 && <ConsumptionNormsHistorianBasis />}
       </Box>
     </div>

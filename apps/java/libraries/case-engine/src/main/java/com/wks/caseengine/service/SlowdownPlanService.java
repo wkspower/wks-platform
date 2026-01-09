@@ -12,7 +12,10 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 public interface SlowdownPlanService {
 	
 	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId,String maintenanceTypeName,String year);
+	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndTypePE(UUID plantId,String maintenanceTypeName,String year);
 	byte[] slowdownExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
+			List<ShutDownPlanDTO> mapForExcel);
+	byte[] slowdownExportPE(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
 			List<ShutDownPlanDTO> mapForExcel);
 	byte[] slowdownRateExport(String year, String plantId,String maintenanceTypeName, boolean isAfterSave,
 			List<ShutDownPlanDTO> mapForExcel);
@@ -22,6 +25,7 @@ public interface SlowdownPlanService {
 	public AOPMessageVM importSlowdownRateExcel(String year,UUID plantId, String maintenanceTypeName,MultipartFile file);
 	public AOPMessageVM importNonProductSlowdown(String year,UUID plantId, String maintenanceTypeName,MultipartFile file);
 	public List<ShutDownPlanDTO> saveShutdownData( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
+	public List<ShutDownPlanDTO> saveShutdownDataPE( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList); 
 	public AOPMessageVM saveSlowdownConfigurationData( String plantId, String year,  List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList);
 	public AOPMessageVM getSlowdownConfigurationData(String plantId,String year);

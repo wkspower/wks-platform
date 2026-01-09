@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import {
   Backdrop,
@@ -38,9 +38,10 @@ const MonthwiseRawMaterial = () => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -348,14 +349,20 @@ const MonthwiseRawMaterial = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      var res = await DataService.getMonthwiseRawData(keycloak, 'NormQuantity', PLANT_ID, AOP_YEAR)
+      var res = await AOPWorkFlowService.getMonthwiseRawData(
+        keycloak,
+        'NormQuantity',
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (
         lowerVertName != 'pe' &&
         lowerVertName != 'pp' &&
-        lowerVertName != 'elastomer'
+        lowerVertName != 'elastomer' &&
+        lowerVertName !== 'pet'
       ) {
-        var res2 = await DataService.getMonthwiseRawData(
+        var res2 = await AOPWorkFlowService.getMonthwiseRawData(
           keycloak,
           'Selectivity',
           PLANT_ID,
@@ -467,7 +474,7 @@ const MonthwiseRawMaterial = () => {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-      const res = await DataService.handleCalculatePlantConsumptionData(
+      const res = await AOPWorkFlowService.handleCalculatePlantConsumptionData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,
@@ -551,7 +558,7 @@ const MonthwiseRawMaterial = () => {
         setLoading(false)
         return
       }
-      const res = await DataService.postMonthwiseRawData(
+      const res = await AOPWorkFlowService.postMonthwiseRawData(
         keycloak,
         rowsToUpdate,
         PLANT_ID,
@@ -591,7 +598,10 @@ const MonthwiseRawMaterial = () => {
 
       {lowerVertName !== 'pe' &&
         lowerVertName !== 'pp' &&
-        lowerVertName !== 'elastomer' && (
+        lowerVertName !== 'pet' &&
+        lowerVertName !== 'vcm' &&
+        lowerVertName !== 'elastomer' &&
+        lowerVertName !== 'pta' && (
           <KendoDataTablesReports
             rows={row2}
             columns={columns}
@@ -620,13 +630,16 @@ const MonthwiseRawMaterial = () => {
           />
         )}
 
-      {lowerVertName == 'pe' ||
-        lowerVertName == 'pp' ||
-        (lowerVertName == 'elastomer' && (
-          <Typography component='div' className='grid-title' sx={{ mb: 1 }}>
-            {'Monthwise Consumption (T-18)'}
-          </Typography>
-        ))}
+      {(lowerVertName === 'pe' ||
+        lowerVertName === 'pet' ||
+        lowerVertName === 'pta' ||
+        lowerVertName === 'pp' ||
+        lowerVertName === 'vcm' ||
+        lowerVertName === 'elastomer') && (
+        <Typography component='div' className='grid-title' sx={{ mb: 1 }}>
+          {'Monthwise Consumption (T-18)'}
+        </Typography>
+      )}
 
       {Object.entries(normRows).map(([normName, rows]) => (
         <div key={normName}>

@@ -16,7 +16,14 @@ import { setScreenTitle } from 'store/reducers/dataGridStore'
 import Chip from '@mui/material/Chip'
 import Stack from '@mui/material/Stack'
 import StepperNav from 'components/Utilities/StepperNav'
-import { Box, Skeleton } from '../../../node_modules/@mui/material/index'
+import { useNavigate } from 'react-router-dom'
+
+import {
+  Box,
+  Button,
+  Skeleton,
+} from '../../../node_modules/@mui/material/index'
+import { setVerticalChangeFromDashboard } from 'store/reducers/dataGridStore'
 
 const Breadcrumbs = ({ navigation, title, ...others }) => {
   const keycloak = useSession()
@@ -25,6 +32,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     dataGridStore
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
 
   const PLANT_ID = plantObject?.id
@@ -81,12 +89,18 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
   async function handleOpenPdfTemp(title) {
     // console.log('titletitle', title)
+    // console.log('SITE_NAME', SITE_NAME?.toLowerCase())
     var url = ''
-    if (title != 'production-aop')
-      url = `${window.location.origin}/files/DTC.xlsx`
-    else {
-      url = `${window.location.origin}/files/Blue Print.docx`
-    }
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'nmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for NMD EOEG_Rev02.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'c2')
+      url = `${window.location.origin}/files/Digital AOP Automation for C2 MEG_Rev2.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'dmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for DMD EOEG.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'hmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for HMD MEG.pdf`
+    if (title == 'configuration' && SITE_NAME?.toLowerCase() == 'vmd')
+      url = `${window.location.origin}/files/Digital AOP Automation for VMD EOEG_Rev2.pdf`
 
     try {
       const resp = await fetch(url, {
@@ -185,18 +199,18 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
   let itemTitle = ''
 
   // collapse item
-  if (main && main.type === 'collapse') {
-    mainContent = (
-      // <Typography component={Link} to={document.location.pathname} variant="h6" sx={{ textDecoration: 'none' }} color="textSecondary">
-      <Typography
-        variant='h6'
-        sx={{ textDecoration: 'none' }}
-        color='textSecondary'
-      >
-        {main.title}
-      </Typography>
-    )
-  }
+  // if (main && main.type === 'collapse') {
+  //   mainContent = (
+  //     // <Typography component={Link} to={document.location.pathname} variant="h6" sx={{ textDecoration: 'none' }} color="textSecondary">
+  //     <Typography
+  //       variant='h6'
+  //       sx={{ textDecoration: 'none' }}
+  //       color='textSecondary'
+  //     >
+  //       {main.title}
+  //     </Typography>
+  //   )
+  // }
 
   // items
   if (item && item.type === 'item') {
@@ -220,8 +234,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     // if (['productionaop', 'consumptionaop'].includes(normalizedTitle)) {
     if (
       [
-        'monthwiseproductionplan',
-        'overallaopconsumption(norm/quantity)',
+        'production&normsbasis',
+        // 'overallaopconsumption(norm/quantity)',
       ].includes(normalizedTitle) &&
       VERTICAL_NAME?.toLowerCase() == 'meg'
     ) {
@@ -234,9 +248,10 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
         >
           {/* HIDE THE TITLE NAME  */}
           {/* {title1} */}
-          <Tooltip title={`Basis for ${itemTitle}`}>
+          <Tooltip title={`Basis`}>
             <IconButton
-              size='medium'
+              size='small'
+              disableRipple
               sx={{
                 backgroundColor: 'transparent',
                 '&:hover': {
@@ -246,15 +261,14 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
               }}
               onClick={() => handleOpenPdfTemp(item?.id)}
             >
-              <InfoIcon fontSize='medium' sx={{ color: '#0100cb' }} />
+              <InfoIcon fontSize='small' sx={{ color: '#0100cb' }} />
             </IconButton>
           </Tooltip>
         </Typography>
       )
     } else if (
-      (['aopapprovalflow'].includes(normalizedTitle) &&
-        VERTICAL_NAME?.toLowerCase() === 'pe') ||
-      VERTICAL_NAME?.toLowerCase() === 'pp'
+      ['aopapprovalflow'].includes(normalizedTitle) &&
+      ['pe', 'pp'].includes(VERTICAL_NAME?.toLowerCase())
     ) {
       itemContent = (
         <Typography
@@ -293,7 +307,8 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
     if (
       item.breadcrumbs !== false &&
       location?.pathname !== '/user-management' &&
-      location?.pathname !== '/user-form'
+      location?.pathname !== '/user-form' &&
+      location?.pathname !== '/dashboard'
     ) {
       breadcrumbContent = (
         <MainCard
@@ -348,7 +363,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
 
             <Grid
               container
-              sx={{ mt: 1, mb: 1, ml: 1 }}
+              sx={{ mt: 1, ml: 1 }}
               justifyContent='space-between'
               alignItems='center'
             >
@@ -376,7 +391,7 @@ const Breadcrumbs = ({ navigation, title, ...others }) => {
                     {VERTICAL_NAME} / {SITE_NAME} / {PLANT_NAME}{' '}
                     {/* {getRoleName(verticalId, item?.id)} */}
                     {/* {keycloak?.realmAccess?.roles[0]} */}
-                  {itemContent}
+                    {itemContent}
                   </Typography>
                 )}
               </Grid>

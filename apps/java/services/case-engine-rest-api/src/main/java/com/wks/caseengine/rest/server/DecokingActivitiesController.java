@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,8 @@ public class DecokingActivitiesController {
 	}
 	
 	@PostMapping(value="/decoking-activities/ibr")
-	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<CrackerConfigurationDTO> crackerConfigurationDTOList) {
-		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,crackerConfigurationDTOList);
+	public AOPMessageVM updateDecokingActivitiesIBRData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<Map<String, Object>> payloadList) {
+		return decokingActivitiesService.updateDecokingActivitiesIBRData(year,plantId,reportType,payloadList);
 	}
 
 	@GetMapping(value = "/run-length-export-excel")
@@ -83,8 +84,8 @@ public class DecokingActivitiesController {
 	}
 	
 	@PostMapping(value="/decoking-activities/run-length")
-	public AOPMessageVM updateDecokingActivitiesRunLengthData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType, @RequestBody List<DecokeRunLengthDTO> decokeRunLengthDTOList) {
-		return decokingActivitiesService.updateDecokingActivitiesRunLengthData(year,plantId,reportType,decokeRunLengthDTOList);
+	public AOPMessageVM updateDecokingActivitiesRunLengthData(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType,  @RequestBody List<Map<String, Object>> payloadList) {
+		return decokingActivitiesService.updateDecokingActivitiesRunLengthData(year,plantId,reportType,payloadList);
 	}
 	@GetMapping(value="/calculate/decoking-activities")
 	public AOPMessageVM calculateDecokingActivities(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "reportType", required = false) String reportType) {
@@ -92,8 +93,13 @@ public class DecokingActivitiesController {
 	}
 	
 	@GetMapping(value="/next-year/entry")
-	public AOPMessageVM getNextYearEntry(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "startDate", required = false) String startDate,@RequestParam(value = "h10", required = false) String h10,@RequestParam(value = "h11", required = false) String h11,@RequestParam(value = "h12", required = false) String h12,@RequestParam(value = "h13", required = false) String h13,@RequestParam(value = "h14", required = false) String h14) {
-		return decokingActivitiesService.getNextYearEntry(plantId,year,h10,h11,h12,h13,h14,startDate);
+	public AOPMessageVM getNextYearEntry(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "startDate", required = false) String startDate,@RequestParam(required = false) String H10_Actual,@RequestParam(required = false) String H11_Actual,@RequestParam(required = false) String H12_Actual,@RequestParam(required = false) String H13_Actual,@RequestParam( required = false) String H14_Actual) {
+		System.out.println("H10_Actual ="+H10_Actual);
+		System.out.println("H11_Actual ="+H11_Actual);
+		System.out.println("H12_Actual ="+H12_Actual);
+		System.out.println("H13_Actual = "+H13_Actual);
+		System.out.println("H14_Actual ="+H14_Actual);
+		return decokingActivitiesService.getNextYearEntry(plantId,year,H10_Actual,H11_Actual,H12_Actual,H13_Actual,H14_Actual,startDate);
 	}
 	@GetMapping(value="/next-year/configuration")
 	public AOPMessageVM getNextYearConfiguration(@RequestParam(value = "year", required = false) String year,@RequestParam String plantId,@RequestParam(value = "startDate", required = false) String startDate) {

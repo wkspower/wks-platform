@@ -228,6 +228,7 @@ main.MuiBox-root.css-vognfw {
   font-weight: bold;
   white-space: nowrap;
   font-size: 0.7rem;
+  /* margin-top: 16px; */
 }
 
 .text-header {
@@ -487,4 +488,22 @@ main.MuiBox-root.css-vognfw {
 .custom-data-grid .MuiTablePagination-select {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
+}
+
+.rev-btn--active {
+  background: rgba(25, 118, 210, 0.08);
+}
+
+html {
+  overflow-y: scroll;
+}
+
+body {
+  background: transparent;
+}
+
+.custom-toggle-btn {
+  color: #ffffff !important;
+  font-size: 1.5rem !important;
+  margin-left: -22 !important;
 }

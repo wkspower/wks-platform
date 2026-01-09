@@ -270,7 +270,6 @@ const UserManagementTable = ({ keycloak }) => {
       sx={{
         //  height: 600,
         width: '100%',
-        p: 2,
       }}
     >
       {/* Autocomplete for selecting multiple users */}

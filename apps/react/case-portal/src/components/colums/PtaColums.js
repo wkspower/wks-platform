@@ -380,7 +380,7 @@ export const ShutdownConsumptionPtaColumns = [
     width: 180,
     editable: false,
   },
-  { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
+  { field: 'UOM', headerName: 'UOM/MT', width: 150, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12

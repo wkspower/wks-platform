@@ -1191,11 +1191,11 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		String viewName = "vw" + verticalName + "Modes";
 		List<Map<String, Object>> modes = new ArrayList<>();
 		try {
-			List<Object[]> obj = findByYearAndPlantId(year, UUID.fromString(plantId),type, viewName);
+			List<Object[]> obj = findByYearAndPlantId( UUID.fromString(plantId),type, viewName);
 			for(Object[] row:obj) {
 				Map<String, Object> map = new HashMap<>();
-				map.put("name", (row[7] != null ? row[7].toString() : ""));
-				map.put("displayName", (row[8] != null ? row[8].toString() : ""));
+				map.put("name", (row[6] != null ? row[6].toString() : ""));
+				map.put("displayName", (row[7] != null ? row[7].toString() : ""));
 				modes.add(map);
 			}
 			
@@ -1212,15 +1212,14 @@ public class SpyroInputServiceImpl implements SpyroInputService {
 		return aopMessageVM;
 	}
 	
-	public List<Object[]> findByYearAndPlantId(String year, UUID plantId,String type, String viewName) {
+	public List<Object[]> findByYearAndPlantId( UUID plantId,String type, String viewName) {
 		try {
-			String sql = "SELECT " + "Id,VerticalId, SiteId, PlantId, AOPYear, DisplayOrder, Type, ModeName, DisplayName "
+			String sql = "SELECT " + "Id,VerticalId, SiteId, PlantId, DisplayOrder, Type, ModeName, DisplayName "
 					 + "FROM " + viewName + " "
-					+ " WHERE (AOPYear = :year AND AOPYear IS NOT NULL) " + "AND PlantId = :plantId AND Type = :type "
+					+ " WHERE  PlantId = :plantId AND Type = :type " 
 					+ " ORDER BY DisplayOrder";
 
 			Query query = entityManager.createNativeQuery(sql);
-			query.setParameter("year", year);
 			query.setParameter("plantId", plantId);
 			query.setParameter("type", type);
 

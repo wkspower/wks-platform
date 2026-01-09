@@ -1,0 +1,37 @@
+[
+  {
+    "field": "productName",
+    "title": "Particular",
+    "editable": false,
+    "widthT": 220
+  },
+
+  {
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "widthT": 90
+  },
+
+  {
+    "field": "apr",
+    "title": "Actual",
+    "editable": true,
+    "type": "number",
+    "widthT": 150
+  },
+
+  {
+    "field": "may",
+    "title": "Proposed",
+    "editable": true,
+    "type": "number",
+    "widthT": 150
+  },
+
+  {
+    "field": "remarks",
+    "title": "Remarks",
+    "widthT": 150
+  }
+]

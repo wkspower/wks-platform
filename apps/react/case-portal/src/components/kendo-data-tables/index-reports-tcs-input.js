@@ -347,22 +347,25 @@ const KendoDataTablesReportsTcs = ({
     )
   }
 
-  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = [
-      className,
-      isDisabled ? 'custom-disabled-row' : '',
-      dataItem.isBold ? 'custom-bold-row' : '',
-    ]
-      .filter(Boolean)
-      .join(' ')
-    return (
-      <tr {...rest?.trProps} className={rowClassName}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
+  const CustomRow = useCallback(
+    ({ dataItem, className, ...rest }) => {
+      const isDisabled =
+        !dataItem.isEditable && dataItem?.isEditable !== undefined
+      const rowClassName = [
+        className,
+        isDisabled ? 'custom-disabled-row' : '',
+        dataItem.isBold ? 'custom-bold-row' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+      return (
+        <tr {...rest?.trProps} className={rowClassName}>
+          {rest.children}
+        </tr>
+      )
+    },
+    [IS_OLD_YEAR],
+  )
 
   const SimpleHeaderWithTooltip = (props) => {
     const { ariaSort, ...restThProps } = props.thProps || {}
@@ -819,6 +822,10 @@ const KendoDataTablesReportsTcs = ({
         onClose={closeSaveDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
@@ -837,6 +844,10 @@ const KendoDataTablesReportsTcs = ({
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>

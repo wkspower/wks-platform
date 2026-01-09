@@ -1,6 +1,7 @@
 package com.wks.caseengine.rest.server;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,8 +69,8 @@ public class MaintenanceCalculatedDataController {
 
 	
 	@PostMapping(value="/maintenance")
-	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year,@RequestBody List<DecokePlanningDTO> decokePlanningDTOList){
-		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,decokePlanningDTOList);		
+	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year, @RequestBody List<Map<String, Object>> payloadList){
+		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,payloadList);		
 	}
 	
 	@PostMapping(value = "/maintenance-import", consumes = "multipart/form-data")

@@ -1,0 +1,29 @@
+[
+  {
+    "field": "productName",
+    "title": "Quality Type",
+    "editable": false,
+    "widthT": 220
+  },
+
+  {
+    "field": "UOM",
+    "title": "UOM",
+    "editable": false,
+    "widthT": 90
+  },
+
+  {
+    "field": "apr",
+    "title": "Value (%)",
+    "editable": true,
+    "type": "number",
+    "widthT": 150
+  },
+
+  {
+    "field": "remarks",
+    "title": "Remarks",
+    "widthT": 150
+  }
+]

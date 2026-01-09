@@ -13,10 +13,10 @@ public interface WorkflowService {
     public WorkflowPageDTO getCaseId(String year, String plantId, String siteId, String verticalId);
     public WorkflowDTO saveWorkFlow(WorkflowDTO workflowDTO);
     public Map<String, Object> getWorkFlow(String plantId,String year);
-  	public Map<String, Object> getProductionAOPWorkflowData(String plantId,String year);
+  	public AOPMessageVM getProductionAOPWorkflowData(String plantId,String year);
     public WorkflowDTO submitWorkflow(WorkflowSubmitDTO workflowSubmitDTO);
 
-public AOPMessageVM calculateExpressionWorkFlow(String year,String plantId);
+    public AOPMessageVM calculateExpressionWorkFlow(String year,String plantId);
     public void completeTaskWithComment(WorkflowSubmitDTO workflowSubmitDTO);
 	 public AOPMessageVM saveAnnualAOPData( String plantId, List<WorkflowYearDTO> workflowYearDTOList);
 }

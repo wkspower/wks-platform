@@ -4,7 +4,7 @@ import { useGridApiRef } from '@mui/x-data-grid'
 import { useSession } from 'SessionStoreContext'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import getShutdownConsumptionColDef from 'components/data-tables/CommonHeader/getShutdownConsumptionColDef'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
@@ -16,12 +16,14 @@ import { getRoleName } from 'services/role-service'
 
 const ShutdownNorms = () => {
   const [gradeId, setGradeId] = useState(null)
+  const [gradeName, setGradeName] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [loading, setLoading] = useState(false)
   const menu = useSelector((state) => state.dataGridStore)
   const [shutdownMonths, setShutdownMonths] = useState([])
   const { yearChanged, oldYear, plantID } = menu
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const [open1, setOpen1] = useState(false)
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState([])
@@ -58,11 +60,26 @@ const ShutdownNorms = () => {
 
   const PLANT_NAME = plantObject?.name
   const SITE_NAME = siteObject?.name
+  const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
+  const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
   const headerMap = generateHeaderNames(AOP_YEAR)
+
   const IS_PE_PP_VERTICAL = ['pe', 'pp'].includes(lowerVertName)
+  const IS_PET_VERTICAL = ['pet'].includes(lowerVertName)
+
+  // const IS_PE_PP_VERTICAL_NMD_LLDPE =
+  //   ['pe'].includes(lowerVertName) &&
+  //   ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+  //   ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
+
+  const IS_PE_PP_VERTICAL_NMD_LLDPE =
+    ['pe'].includes(lowerVertName) &&
+    ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+    ['lldpe1', 'lldpe2'].includes(PLANT_NAME_LOWERCASE)
+
   const textNote = IS_PE_PP_VERTICAL
     ? '*Adding shutdown consumption to all grades will replace any existing individual grade consumption entries.'
     : '*Quantities are per day basis'
@@ -70,7 +87,9 @@ const ShutdownNorms = () => {
     'Warning : Adding shutdown consumption to all grades will replace any existing individual grade consumption entries.'
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -312,7 +331,11 @@ const ShutdownNorms = () => {
             originalRemark: item?.remarks?.trim(),
             materialFkId: item?.materialFkId?.toLowerCase(),
             Particulars: item.normParameterTypeDisplayName || 'Particulars',
-            isEditable: isElastomer ? item?.isEditable : true,
+            isEditable: isElastomer
+              ? item?.isEditable
+              : IS_PE_PP_VERTICAL_NMD_LLDPE
+                ? false
+                : true,
           }
 
           return baseItem
@@ -502,6 +525,9 @@ const ShutdownNorms = () => {
     }
   }
 
+  const isVCMWithVMD =
+    lowerVertName === 'vcm' && SITE_NAME?.toLowerCase() === 'vmd'
+
   const adjustedPermissions = getAdjustedPermissions(
     {
       showAction: false,
@@ -512,19 +538,32 @@ const ShutdownNorms = () => {
       units: ['TPH', 'TPD'],
       saveWithRemark: false,
 
-      showNote: lowerVertName === 'meg' || IS_PE_PP_VERTICAL ? true : false,
-      showNoteWhileSaving: IS_PE_PP_VERTICAL ? true : false,
+      showNote:
+        lowerVertName === 'meg' || IS_PE_PP_VERTICAL
+          ? gradeName == 'All Grade'
+            ? true
+            : false
+          : false,
+      showNoteWhileSaving: IS_PE_PP_VERTICAL
+        ? gradeName == 'All Grade'
+          ? true
+          : false
+        : false,
 
-      saveBtn: true,
+      saveBtn: IS_PE_PP_VERTICAL_NMD_LLDPE ? false : true,
+
+      //VCM(VMD) && elastomer we required to show calculate btn
       showCalculate:
-        lowerVertName == 'meg' ||
-        lowerVertName == 'elastomer' ||
-        lowerVertName == 'aromatics' ||
-        lowerVertName == 'pta' ||
-        lowerVertName == 'vcm' ||
-        IS_PE_PP_VERTICAL
-          ? false
-          : true,
+        isVCMWithVMD || lowerVertName == 'elastomer'
+          ? true
+          : lowerVertName == 'meg' ||
+              lowerVertName == 'aromatics' ||
+              lowerVertName == 'pta' ||
+              IS_PE_PP_VERTICAL ||
+              IS_PET_VERTICAL
+            ? false
+            : true,
+
       showCalculateVisibility:
         lowerVertName != 'meg' &&
         lowerVertName != 'pta' &&
@@ -532,16 +571,19 @@ const ShutdownNorms = () => {
           ? true
           : false,
 
-      showG: IS_PE_PP_VERTICAL ? true : false,
-      marginBottom: IS_PE_PP_VERTICAL ? true : false,
+      showG: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
+      marginBottom: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       dropdownLabel: 'Select Grade',
       allAction: true,
-      downloadExcelBtnFromUI: IS_PE_PP_VERTICAL ? false : true,
-      downloadExcelBtn: IS_PE_PP_VERTICAL ? true : false,
+      downloadExcelBtnFromUI:
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
+      downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
       showTitleNameBusiness: true,
 
       titleName:
-        lowerVertName === 'elastomer'
+        lowerVertName === 'elastomer' ||
+        lowerVertName === 'pta' ||
+        lowerVertName === 'vcm'
           ? `Shutdown Consumption (Norms/Quantity)`
           : SCREEN_NAME,
       ExcelName: `${VERTICAL_NAME}-${SCREEN_NAME}`,
@@ -549,7 +591,8 @@ const ShutdownNorms = () => {
     isOldYear,
   )
 
-  const handleGradeChange = (gradeId) => {
+  const handleGradeChange = (gradeId, gradeDisplayName, gradeName) => {
+    setGradeName(gradeName)
     setGradeId(gradeId)
   }
 

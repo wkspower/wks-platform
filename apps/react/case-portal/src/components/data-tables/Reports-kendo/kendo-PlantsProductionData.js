@@ -3,7 +3,7 @@ import { useSession } from 'SessionStoreContext'
 import Notification from 'components/Utilities/Notification'
 import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
 import React, { useEffect, useState } from 'react'
-import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSelector } from 'react-redux'
 import {
   Backdrop,
@@ -14,26 +14,30 @@ import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
 const PlantsProductionSummary = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      oldYear,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const thisYear = AOP_YEAR
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -49,7 +53,7 @@ const PlantsProductionSummary = () => {
   const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
   const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
   const handleRemarkCellClick = (row) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -199,10 +203,14 @@ const PlantsProductionSummary = () => {
   ]
 
   const fetchData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return 
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
-      var res = await DataService.getPlantProductionSummary(keycloak, PLANT_ID, AOP_YEAR)
+      var res = await AOPWorkFlowService.getPlantProductionSummary(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (res?.code == 200) {
         res = res?.data.map((Particulates, index) => ({
           ...Particulates,
@@ -251,7 +259,7 @@ const PlantsProductionSummary = () => {
         remark: row.Remark,
         ActualPrevYear: row.ActualPrevYear,
       }))
-      const res = await DataService.savePlantProductionData(
+      const res = await AOPWorkFlowService.savePlantProductionData(
         keycloak,
         rowsToUpdate,
         PLANT_ID,
@@ -291,7 +299,7 @@ const PlantsProductionSummary = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.handleCalculatePlantProductionData(
+      const res = await AOPWorkFlowService.handleCalculatePlantProductionData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,

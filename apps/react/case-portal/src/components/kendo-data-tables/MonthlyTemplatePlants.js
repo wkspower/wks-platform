@@ -8,23 +8,23 @@ import { useSelector } from 'react-redux'
 export default function MonthlyTemplatePlants() {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-      const {
-        verticalChange,
-        yearChanged,
-        plantID,
-        plantObject,
-        siteObject,
-        verticalObject,
-        year,
-        screenTitle,
-      } = dataGridStore
-      const PLANT_ID = plantObject?.id
-      const SITE_ID = siteObject?.id
-      const VERTICAL_ID = verticalObject?.id
-      const VERTICAL_NAME = verticalObject?.name
-      const AOP_YEAR = year?.selectedYear
-      const vertName = verticalChange?.selectedVertical
-      const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
   const thisYear = AOP_YEAR
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
@@ -116,12 +116,15 @@ export default function MonthlyTemplatePlants() {
     [lowerVertName],
   )
 
- 
   const fetchData = useCallback(async () => {
-    if(!PLANT_ID || !AOP_YEAR) return;
+    if (!PLANT_ID || !AOP_YEAR) return
     setLoading(true)
     try {
-      var res = await DataService.getMonthWiseSummary(keycloak, PLANT_ID, AOP_YEAR)
+      var res = await DataService.getMonthWiseSummary(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       res = {
         code: 200,
         data: {

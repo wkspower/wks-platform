@@ -13,6 +13,7 @@ export const BusinessDemandDataApiService = {
   ssrsMaintenanceSummary,
   ssrsSiteMaintenanceSummary,
   SSRS_NormComparisonReport,
+  getDashboardData,
 }
 async function getBDData(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/business-demand?year=${AOP_YEAR}&plantId=${PLANT_ID}`
@@ -29,8 +30,8 @@ async function getBDData(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function ssrsBudgetSummary(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=plant-budget-summary`
+async function ssrsBudgetSummary(keycloak, PLANT_ID, AOP_YEAR, REPORT_CODE) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${REPORT_CODE}`
 
   const headers = {
     Accept: 'application/json',
@@ -46,8 +47,13 @@ async function ssrsBudgetSummary(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function ssrsMaintenanceSummary(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=maintenance-summary`
+async function ssrsMaintenanceSummary(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  REPORT_CODE,
+) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${REPORT_CODE}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -62,8 +68,13 @@ async function ssrsMaintenanceSummary(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function ssrsSiteMaintenanceSummary(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=site-maintenance-summary`
+async function ssrsSiteMaintenanceSummary(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  REPORT_CODE,
+) {
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${REPORT_CODE}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -234,9 +245,30 @@ async function savepropanebusiness(
   }
 }
 
-async function SSRS_NormComparisonReport(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=norm-comparison-report`
+async function SSRS_NormComparisonReport(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  REPORT_CODE,
+) {
+  // const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=norm-comparison-report`
+  const url = `${Config.CaseEngineUrl}/task/maintenance-report-urls?year=${AOP_YEAR}&plantId=${PLANT_ID}&type=${REPORT_CODE}`
 
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getDashboardData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/aop-dashboard?year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

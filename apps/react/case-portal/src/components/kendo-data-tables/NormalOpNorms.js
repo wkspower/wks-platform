@@ -51,7 +51,8 @@ const NormalOpNormsScreen = () => {
     screenTitle,
     year,
   } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
 
   const [_plantID, set_PlantID] = useState('')
 
@@ -60,6 +61,12 @@ const NormalOpNormsScreen = () => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
+
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
@@ -71,12 +78,15 @@ const NormalOpNormsScreen = () => {
   })
 
   const isPEPP = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const isPET = lowerVertName === 'pet'
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const fetchData = async (gradeId) => {
     if (!PLANT_ID || !AOP_YEAR) return
-    if (isPEPP && !gradeId) return
+    if ((isPEPP || isPET) && !gradeId) return
     setLoading(true)
     let response
 
@@ -195,7 +205,7 @@ const NormalOpNormsScreen = () => {
       if (lowerVertName === 'meg') {
         promises.push(fetchDataIntermediateValues())
       }
-      if (isPEPP) {
+      if (isPEPP || isPET) {
         promises.push(fetchGradeDropdowns())
       }
 
@@ -493,7 +503,7 @@ const NormalOpNormsScreen = () => {
     try {
       var data = null
 
-      if (lowerVertName == 'pe' || lowerVertName == 'pp') {
+      if (isPEPP || isPET) {
         data =
           await NormalOperationNormsApiService.handleCalculateNormalOperationNormsPe(
             PLANT_ID,
@@ -519,8 +529,7 @@ const NormalOpNormsScreen = () => {
           severity: 'success',
         })
 
-        if (lowerVertName == 'pe' || lowerVertName == 'pp')
-          fetchGradeDropdowns()
+        if (isPEPP || isPET) fetchGradeDropdowns()
         fetchData(gradeId)
         if (lowerVertName == 'meg') fetchDataIntermediateValues()
         getNormTransactions()
@@ -573,16 +582,14 @@ const NormalOpNormsScreen = () => {
       showCalculate: true,
       downloadExcelBtnFromUI: false,
       showCheckbox: false,
-      showG: isPEPP ? true : false,
-      marginBottom: isPEPP ? true : false,
-
-      dropdownLabel: isPEPP ? 'Select Grade' : 'Select Mode',
+      showG: isPEPP || isPET ? true : false,
+      marginBottom: isPEPP || isPET ? true : false,
+      dropdownLabel: isPEPP || isPET ? 'Select Grade' : 'Select Mode',
       showCalculateVisibility:
         Object.keys(calculationObject || {}).length > 0 ? true : false,
-
       showTitleNameBusiness: true,
-      titleName: SCREEN_NAME,
-
+      titleName:
+        !isPEPP || !isPET ? SCREEN_NAME : 'Steady State Consumption (Norm)',
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
@@ -620,11 +627,13 @@ const NormalOpNormsScreen = () => {
     })
 
     try {
-      if (isPEPP) {
+      if (isPEPP || isPET) {
         await NormalOperationNormsApiService.getNormalOpsNormsExcelpe(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+          SCREEN_NAME,
         )
       } else {
         await NormalOperationNormsApiService.getNormalOpsNormsExcel(
@@ -632,6 +641,8 @@ const NormalOpNormsScreen = () => {
           gradeId,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+          SCREEN_NAME,
         )
       }
 
