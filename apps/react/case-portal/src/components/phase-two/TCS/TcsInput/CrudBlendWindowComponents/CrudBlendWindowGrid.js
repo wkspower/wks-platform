@@ -77,40 +77,61 @@ const CrudBlendWindowGrid = ({
       const col = {
         field: key,
         title: columnMap[key] || key,
-        editable: ['minValue', 'maxValue','criticality','remarks','value_345','maxBlendLimit','reasons'].includes(key) ? true : false,
-        type: ['minValue', 'maxValue','criticality','maxBlendLimit', 'value_345'].includes(key) ? 'number1' : 'text',
+        editable: [
+          'minValue',
+          'maxValue',
+          'criticality',
+          'remarks',
+          'value_345',
+          'maxBlendLimit',
+          'reasons',
+        ].includes(key)
+          ? true
+          : false,
+        type: [
+          'minValue',
+          'maxValue',
+          'criticality',
+          'maxBlendLimit',
+          'value_345',
+        ].includes(key)
+          ? 'number1'
+          : 'text',
         minWidth: isRemarkField ? 350 : 150,
         widthT: isRemarkField ? 450 : 250,
-        hidden: ['id','type'].includes(key),
-        locked: ['property','stream','unit','crude'].includes(key),
+        hidden: ['id', 'type'].includes(key),
+        locked: ['property', 'stream', 'unit', 'crude'].includes(key),
       }
-      
+
       // Add min/max validation for maxBlendLimit
       if (key === 'maxBlendLimit') {
         col.minValue = 0
         col.maxValue = 100
       }
-      
+
       return col
     })
   }, [apiMetadata])
 
-  console.log('columns',columns)
+  console.log('columns', columns)
 
   // Handle remark cell click
-  const handleRemarkCellClick = useCallback((row) => {
-    // Open dialog for both 'remarks' and 'reasons' fields
-    const remarkField = columns.find((col) => 
-      col.field === 'remarks' || col.field === 'reasons'
-    )
-    
-    if (remarkField) {
-      const fieldName = remarkField.field
-      setCurrentRemark(row[fieldName] || '')
-      setCurrentRowId(row.id)
-      setRemarkDialogOpen(true)
-    } 
-  }, [columns, tableKey])
+  const handleRemarkCellClick = useCallback(
+    (row) => {
+      // Open dialog for both 'remarks' and 'reasons' fields
+      const remarkField = columns.find(
+        (col) => col.field === 'remarks' || col.field === 'reasons',
+      )
+
+      if (remarkField) {
+        const fieldName = remarkField.field
+        setCurrentRemark(row[fieldName] || '')
+        setCurrentRowId(row.id)
+        setRemarkDialogOpen(true)
+      }
+    },
+    [columns, tableKey],
+  )
 
   // Reset inEdit flags when modifiedCells is cleared
   useEffect(() => {
@@ -143,10 +164,23 @@ const CrudBlendWindowGrid = ({
       }
 
       // Custom validation: If any row data is updated, remarks/reasons must be filled and different from original
-      const fieldsToCheck = ['minValue', 'maxValue', 'criticality', 'maxBlendLimit', 'value_345']
-      const remarksFieldName = apiMetadata.keys.includes('remarks') ? 'remarks' : 'reasons'
-      const displayFieldName = tableKey === 'CrudeBlendWindow' ? 'property' : tableKey === 'CrudeSpecificConstraints' ? 'crude' : 'kbpsd'
-      
+      const fieldsToCheck = [
+        'minValue',
+        'maxValue',
+        'criticality',
+        'maxBlendLimit',
+        'value_345',
+      ]
+      const remarksFieldName = apiMetadata.keys.includes('remarks')
+        ? 'remarks'
+        : 'reasons'
+      const displayFieldName =
+        tableKey === 'CrudeBlendWindow'
+          ? 'property'
+          : tableKey === 'CrudeSpecificConstraints'
+            ? 'crude'
+            : 'kbpsd'
+
       const validationError = validateRowDataWithRemarks(
         data,
         originalRows,
@@ -166,8 +200,8 @@ const CrudBlendWindowGrid = ({
 
       const payload = {
         tableKey: tableKey,
-        data: {results: data}
-      };
+        data: { results: data },
+      }
 
       const response = await TcsApiService.saveCrudBlendWindowData(
         keycloak,
@@ -249,7 +283,11 @@ const CrudBlendWindowGrid = ({
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
           permissions={permissions}
-          paginationConfig={{ threshold: 100, defaultPageSize: 50, pageSizes: [10, 20, 50, 100] }}
+          paginationConfig={{
+            threshold: 100,
+            defaultPageSize: 50,
+            pageSizes: [10, 20, 50, 100],
+          }}
           {...(tableKey === 'CrudeBlendWindow' && { groupBy: 'type' })}
         />
       </Stack>

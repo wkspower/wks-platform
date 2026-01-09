@@ -249,7 +249,9 @@ async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
       body: formData,
     })
     if (!resp.ok) {
-      throw new Error(`Failed to import data: ${resp.status} ${resp.statusText}`)
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
     }
     return json(keycloak, resp)
   } catch (e) {
@@ -262,12 +264,24 @@ async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
 
 // Fixed Consumption Excel Import
 async function saveFixedConsumptionExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(file, keycloak, 'fixed-consumption/import', PLANT_ID, AOP_YEAR)
+  return saveExcelData(
+    file,
+    keycloak,
+    'fixed-consumption/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
 }
 
 // Plant Requirement Excel Import
 async function savePlantRequirementExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(file, keycloak, 'plant-requirement/import', PLANT_ID, AOP_YEAR)
+  return saveExcelData(
+    file,
+    keycloak,
+    'plant-requirement/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
 }
 
 // Norms Excel Import

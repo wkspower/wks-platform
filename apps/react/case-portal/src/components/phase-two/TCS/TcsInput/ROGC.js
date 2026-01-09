@@ -29,7 +29,6 @@ const ROGC = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-
   // Fetch ROGC Data
   const fetchRogcData = useCallback(async () => {
     if (!PLANT_ID || !AOP_YEAR) return
@@ -47,7 +46,11 @@ const ROGC = ({
       )
       console.log('TCS ROGC Response:', response)
 
-      if (response?.furnaceData?.length >0 && response?.furnaceData && Array.isArray(response.furnaceData)) {
+      if (
+        response?.furnaceData?.length > 0 &&
+        response?.furnaceData &&
+        Array.isArray(response.furnaceData)
+      ) {
         // Calculate days dynamically based on financial year
         const getDaysInMonth = (year, month) => {
           return new Date(year, month, 0).getDate()
@@ -305,7 +308,20 @@ const ROGC = ({
       }
 
       // Custom validation: If any row data is updated, remarks must be filled and different from original
-      const fieldsToCheck = ['apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
+      const fieldsToCheck = [
+        'apr',
+        'may',
+        'jun',
+        'jul',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+        'jan',
+        'feb',
+        'mar',
+      ]
       const validationError = validateRowDataWithRemarks(
         data,
         originalRows,

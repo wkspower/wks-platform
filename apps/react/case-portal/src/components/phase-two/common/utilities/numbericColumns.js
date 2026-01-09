@@ -9,7 +9,7 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
     const keys = path.split('.')
     return keys.reduce((acc, key) => acc?.[key], obj)
   }
-  
+
   const initialValue = getNestedValue(dataItem, field) ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
   const isFirstRender = useRef(true)
