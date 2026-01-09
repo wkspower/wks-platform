@@ -3,7 +3,7 @@ import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import { validateNestedRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/CPP/utilityPlantApiServiceV2'
 import NestedKendoTable from '../common/NestedKendoTable/index'
@@ -38,7 +38,7 @@ const Norms = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -1008,6 +1008,38 @@ const Norms = () => {
     }
   }
 
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await UtilityPlantApiServiceV2.saveNormsExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel file imported successfully!',
+        severity: 'success',
+      })
+
+      // Refresh data after import
+      await fetchNormsData()
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -1053,6 +1085,7 @@ const Norms = () => {
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
+        handleExcelUpload={handleExcelUpload}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

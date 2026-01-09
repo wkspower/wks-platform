@@ -2,10 +2,9 @@ import { Box, Tab, Tabs } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
+import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import UnitCapacity from './UnitCapacity'
-import DefaultTcsInput from './DefaultTcsInput'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
 import CPPUnitsSdPlan from './CPPUnitsSdPlan'
@@ -35,7 +34,7 @@ const renderTabComponent = (tabDisplayName, props) => {
   }
 }
 
-const TcsInput = () => {
+const TcsOutput= () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -78,12 +77,12 @@ const TcsInput = () => {
       if (!PLANT_ID || !SITE_ID || !VERTICAL_ID) return
 
       // First API: Get list of all tabs
-      const allTabsResponse = await TcsApiService.getTcsAllTabs(keycloak)
+      const allTabsResponse = await TcsOutputApiService.getTcsAllTabs(keycloak)
       const allTabsList = allTabsResponse?.data?.configurationTypeList || []
       setTabObj(allTabsList)
 
       // Second API: Get array of tab IDs to show
-      const visibleTabsResponse = await TcsApiService.getTcsVisibleTabs(
+      const visibleTabsResponse = await TcsOutputApiService.getTcsVisibleTabs(
         keycloak,
         VERTICAL_ID,
         SITE_ID,
@@ -118,6 +117,7 @@ const TcsInput = () => {
         console.warn('No visible tabs configured')
         setTabObj([])
       }
+      console.log('tabObj', tabObj)
     } catch (err) {
       console.error('Error fetching tabs:', err)
       setSnackbarData({
@@ -207,4 +207,4 @@ const TcsInput = () => {
   )
 }
 
-export default TcsInput
+export default TcsOutput

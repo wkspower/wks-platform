@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
+import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 
 const ROGC = ({
   PLANT_ID,
@@ -22,6 +23,7 @@ const ROGC = ({
   // State management
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -98,6 +100,7 @@ const ROGC = ({
       }
 
       setRows(transformedData)
+      setOriginalRows(transformedData)
     } catch (err) {
       console.error('Error fetching ROGC data:', err)
       setSnackbarData({
@@ -301,6 +304,25 @@ const ROGC = ({
         return
       }
 
+      // Custom validation: If any row data is updated, remarks must be filled and different from original
+      const fieldsToCheck = ['apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
+      const validationError = validateRowDataWithRemarks(
+        data,
+        originalRows,
+        fieldsToCheck,
+        'furnace',
+        'remarks',
+      )
+
+      if (validationError) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationError,
+          severity: 'error',
+        })
+        return
+      }
+
       const response = await TcsApiService.saveRogcData(
         keycloak,
         SITE_ID,
@@ -327,6 +349,7 @@ const ROGC = ({
     }
   }, [
     modifiedCells,
+    originalRows,
     keycloak,
     PLANT_ID,
     AOP_YEAR,

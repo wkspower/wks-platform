@@ -4,7 +4,7 @@ import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/CPP/utilityPlantApiServiceV2'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../common/AdvanceKendoTable/index'
 
@@ -37,7 +37,7 @@ const PlantRequirement = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -393,6 +393,38 @@ const PlantRequirement = () => {
     }
   }
 
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      await UtilityPlantApiServiceV2.savePlantRequirementExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel file imported successfully!',
+        severity: 'success',
+      })
+
+      // Refresh data after import
+      await fetchPlantRequirementData()
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -424,6 +456,7 @@ const PlantRequirement = () => {
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
+        handleExcelUpload={handleExcelUpload}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
@@ -434,7 +467,7 @@ const PlantRequirement = () => {
           pageSizes: [10, 20, 50, 100],
           defaultPageSize: 100,
         }}
-        groupBy={['processPlant']}
+        groupBy={'processPlant'}
       />
     </Box>
   )

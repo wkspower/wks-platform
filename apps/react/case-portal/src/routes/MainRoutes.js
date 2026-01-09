@@ -69,7 +69,7 @@ import Norms from 'components/phase-two/CPP/Norms'
 
 // TCS
 
-import TcsOutput from 'components/phase-two/TCS/TcsOutput/TcsOutput'
+import TcsOutput from 'components/phase-two/TCS/TcsOutput/index'
 import PimsOutput from 'components/phase-two/TCS/PimsOutput/PimsOutput'
 import TcsInput from 'components/phase-two/TCS/TcsInput/index'
 

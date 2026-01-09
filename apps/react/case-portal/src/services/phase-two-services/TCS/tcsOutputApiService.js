@@ -1,7 +1,7 @@
 import Config from 'consts/index'
 import { json } from '../../request'
 
-export const TcsApiService = {
+export const TcsOutputApiService = {
   // Tab Configuration APIs
   getTcsAllTabs,
   getTcsVisibleTabs,

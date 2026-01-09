@@ -3,7 +3,7 @@ import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import { UtilityPlantApiServiceV2 } from 'services/phase-two-services/CPP/utilityPlantApiServiceV2'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
 
@@ -106,7 +106,7 @@ const ExportAvailability = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // Column definitions
   const columns = [

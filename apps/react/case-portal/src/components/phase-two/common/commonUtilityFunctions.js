@@ -22,6 +22,7 @@ export const validateRowDataWithRemarks = (
     'mar',
   ],
   displayFieldName,
+  remarksFieldName = 'remarks',
 ) => {
   const invalidRows = data.filter((row) => {
     // Get original row from originalRows
@@ -34,10 +35,10 @@ export const validateRowDataWithRemarks = (
       return row[field] !== originalRow[field]
     })
 
-    // If data was updated, check if remarks is filled and different from original
+    // If data was updated, check if remarks field is filled and different from original
     if (dataWasUpdated) {
-      const currentRemarks = row.remarks || ''
-      const originalRemarks = originalRow.remarks || ''
+      const currentRemarks = row[remarksFieldName] || ''
+      const originalRemarks = originalRow[remarksFieldName] || ''
 
       const remarksIsEmpty = currentRemarks.trim() === ''
       const remarksNotChanged = currentRemarks.trim() === originalRemarks.trim()
@@ -64,6 +65,7 @@ export const validateNestedRowDataWithRemarks = (
   originalRows,
   fieldsToCheck = [],
   displayFieldName = 'assetName',
+  remarksFieldName = 'remarks',
 ) => {
   const invalidRows = data.filter((row) => {
     // Get original row from originalRows
@@ -76,10 +78,10 @@ export const validateNestedRowDataWithRemarks = (
       return getNestedValue(row, field) !== getNestedValue(originalRow, field)
     })
 
-    // If data was updated, check if remarks is filled and different from original
+    // If data was updated, check if remarks field is filled and different from original
     if (dataWasUpdated) {
-      const currentRemarks = row.remarks || ''
-      const originalRemarks = originalRow.remarks || ''
+      const currentRemarks = row[remarksFieldName] || ''
+      const originalRemarks = originalRow[remarksFieldName] || ''
 
       const remarksIsEmpty = currentRemarks.trim() === ''
       const remarksNotChanged = currentRemarks.trim() === originalRemarks.trim()

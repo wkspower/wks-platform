@@ -2,9 +2,9 @@ import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
+import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -17,7 +17,7 @@ const UnitCapacityGrid = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   const defaultDropdownConfig = {
     options: [],
@@ -45,7 +45,7 @@ const UnitCapacityGrid = ({
     if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoadingUOM(true)
-      const response = await TcsApiService.getTcsUnitCapacityUOM(
+      const response = await TcsOutputApiService.getTcsUnitCapacityUOM(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -81,7 +81,7 @@ const UnitCapacityGrid = ({
       try {
         setLoading(true)
 
-        const response = await TcsApiService.getTcsUnitCapacityData(
+        const response = await TcsOutputApiService.getTcsUnitCapacityData(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
@@ -192,96 +192,12 @@ const UnitCapacityGrid = ({
     setRemarkDialogOpen(true)
   }
 
-  // Save changes for this capacity type
-  const saveChanges = useCallback(async () => {
-    try {
-      if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-
-      const rawData = Object.values(modifiedCells)
-      const data = rawData.filter((row) => row.inEdit)
-
-      if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-
-      if (!selectedDropdown) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'Please select a UOM before saving!', severity: 'warning' })
-        return
-      }
-
-      // Custom validation: If any row data is updated, remarks must be filled and different from original
-      const fieldsToCheck = ['value']
-      const validationError = validateRowDataWithRemarks(
-        data,
-        originalRows,
-        fieldsToCheck,
-        'particulates',
-        'remark',
-      )
-
-      if (validationError) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationError,
-          severity: 'error',
-        })
-        return
-      }
-
-      const response = await TcsApiService.saveUnitCapacityData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        capacityType,
-        selectedDropdown,
-        data,
-      )
-
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Unit Capacity data saved successfully!',
-        severity: 'success',
-      })
-      setModifiedCells({})
-    } catch (error) {
-      console.error('Error saving Unit Capacity data:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Error saving Unit Capacity data!',
-        severity: 'error',
-      })
-    }
-  }, [
-    modifiedCells,
-    originalRows,
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    capacityType,
-    selectedDropdown,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: false,
-    remarksEditable: true,
-    showCalculate: false,
-    showExport: false,
-    showImport: false,
-    saveBtnForRemark: true,
-    saveBtn: true,
-    showWorkFlowBtns: false,
+    showExport: true,
     showTitle: true,
     showDropdown: true,
   }
@@ -309,7 +225,6 @@ const UnitCapacityGrid = ({
           setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
           setCurrentRowId={() => {}}
-          saveChanges={saveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
@@ -320,6 +235,7 @@ const UnitCapacityGrid = ({
           dropdownConfig={dropdownConfig}
           selectedDropdownValue={selectedDropdown}
           setSelectedDropdownValue={setSelectedDropdown}
+          readonly={true}
         />
       </Stack>
     </Box>

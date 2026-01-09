@@ -647,6 +647,38 @@ const ShutdownAndOperational = () => {
     }
   }
 
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      await InputApiService.saveOperationHoursExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel file imported successfully!',
+        severity: 'success',
+      })
+
+      // Refresh data after import
+      await fetchShutdownAndOperationalData()
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -690,6 +722,7 @@ const ShutdownAndOperational = () => {
           currentRowId={currentRowId}
           setCurrentRowId={() => {}}
           saveChanges={saveChanges}
+          handleExcelUpload={handleExcelUpload}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}

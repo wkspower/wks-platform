@@ -4,10 +4,12 @@ export const UtilityPlantApiServiceV2 = {
   //  Fixed Consumption APIs
   getFixedConsumptionData,
   saveFixedConsumptionData,
+  saveFixedConsumptionExcel,
 
   //   Plant requirement APIs
   getPlantRequirementData,
   savePlantRequirementData,
+  savePlantRequirementExcel,
 
   // Import Consumption APIs
   getImportConsumptionData,
@@ -16,7 +18,11 @@ export const UtilityPlantApiServiceV2 = {
   //Norm Based Utility Budget APIs
   getNormBasedUtilityBudget,
   saveNormsData,
+  saveNormsExcel,
   calculateNormsData,
+
+  // Generic Excel Import
+  saveExcelData,
 }
 
 // ===================== || Fixed Consumption APIs || ===================== //
@@ -216,4 +222,55 @@ async function saveNormsData(keycloak, payload, AOP_YEAR) {
     console.log(e)
     return await Promise.reject(e)
   }
+}
+
+// ===================== || GENERIC EXCEL IMPORT FUNCTION || ===================== //
+/**
+ * Generic function to upload Excel file to any CPP endpoint
+ * @param {File} file - The Excel file to upload
+ * @param {Object} keycloak - Keycloak session object
+ * @param {string} endpoint - The API endpoint path (e.g., 'fixed-consumption/import')
+ * @param {string} PLANT_ID - Plant ID
+ * @param {string} AOP_YEAR - Financial year
+ * @returns {Promise} API response
+ */
+async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/${endpoint}?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    if (!resp.ok) {
+      throw new Error(`Failed to import data: ${resp.status} ${resp.statusText}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error(`Error importing Excel data to ${endpoint}:`, e)
+    return Promise.reject(e)
+  }
+}
+
+// ===================== || SPECIFIC EXCEL IMPORT FUNCTIONS || ===================== //
+
+// Fixed Consumption Excel Import
+async function saveFixedConsumptionExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  return saveExcelData(file, keycloak, 'fixed-consumption/import', PLANT_ID, AOP_YEAR)
+}
+
+// Plant Requirement Excel Import
+async function savePlantRequirementExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  return saveExcelData(file, keycloak, 'plant-requirement/import', PLANT_ID, AOP_YEAR)
+}
+
+// Norms Excel Import
+async function saveNormsExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  return saveExcelData(file, keycloak, 'norms/import', PLANT_ID, AOP_YEAR)
 }

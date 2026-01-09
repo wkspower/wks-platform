@@ -75,8 +75,6 @@ export const dateFields = [
   'fromDate',
   'tentativeMonth',
   'ibrDueDate',
-  'shutdownDate',
-  'startupDate',
 ]
 export const monthMap = {
   january: 1,
@@ -129,6 +127,7 @@ const AdvanceKendoTable = ({
   selectedDropdownValue,
   setSelectedDropdownValue,
   paginationConfig = {},
+  dateCalculationConfig = {},
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -154,7 +153,7 @@ const AdvanceKendoTable = ({
   const initialGroup = Array.isArray(groupBy)
     ? groupBy.map((field) => ({ field }))
     : groupBy
-      ? [{ field: groupBy }]
+      ? [{ field: groupBy, dir:undefined}]
       : []
 
   // Build pagination configuration with defaults
@@ -163,7 +162,7 @@ const AdvanceKendoTable = ({
       threshold: 100,
       buttonCount: 4,
       pageSizes: [10, 20, 50, 100],
-      defaultPageSize: 10,
+      defaultPageSize: 50,
     }
     const config = { ...defaults, ...paginationConfig }
 
@@ -540,6 +539,7 @@ const AdvanceKendoTable = ({
             'Remark',
             'purpose',
             'reasons',
+            'majorJobs',
           ].filter((key) => key in row)
           keyToUpdate = keysToUpdate[0] || 'remark'
           updatedRow = { ...row, [keyToUpdate]: currentRemark, inEdit: true }
@@ -1412,13 +1412,20 @@ const AdvanceKendoTable = ({
             cells={{
               edit: {
                 text: (cellProps) => (
-                  <MultiselectCellEditor
+                  // <MultiselectCellEditor
+                  //   {...cellProps}
+                  //   options={allOptions}
+                  //   textField='displayName'
+                  //   valueField='id'
+                  //   placeholder='Select multiple...'
+                  //   tagLimit={3} // Optional: limit display tags
+                  // />
+                    <SelectCellEditor
                     {...cellProps}
                     options={allOptions}
                     textField='displayName'
                     valueField='id'
-                    placeholder='Select multiple...'
-                    tagLimit={3} // Optional: limit display tags
+                    placeholder='Select...'
                   />
                 ),
               },
