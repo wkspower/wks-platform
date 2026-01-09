@@ -52,29 +52,58 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         String plantId,
         String aopYear,
         String capacityType,
-        String uom) {
+        String uom,
+        String siteId,
+        String verticalId) {
         
+
+
+      
+Sites site = null;
+Verticals vertical = null;
         // Validation
         Plants plant = plantsRepository
             .findById(UUID.fromString(plantId))
             .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));
-        Sites site = siteRepository
+
+        if (plantId != null) {
+         site = siteRepository
             .findById(plant.getSiteFkId())
             .orElseThrow(() -> new RuntimeException("Site not found for ID: " + plantId));
-        Verticals vertical = verticalRepository
+        }
+
+    else if (siteId != null) {
+        site = siteRepository
+            .findById(UUID.fromString(siteId))
+            .orElseThrow(() -> new RuntimeException("Site not found for ID: " + siteId));
+    }
+
+   if (plantId != null) {
+        vertical = verticalRepository
             .findById(plant.getVerticalFKId())
             .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
+   }
+   else if (verticalId != null) {
+    vertical = verticalRepository
+        .findById(UUID.fromString(verticalId))
+        .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + verticalId));
+   }
 
         Map<String, Object> map = new HashMap<>();
         try {
+            List<Object[]> results = new ArrayList<>();
             DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-            List<Object[]> results = getData(
+
+         
+              results = getData(
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
                 site.getName().toUpperCase(),
                 capacityType,
-                uom);
+                uom);  
+            
+        
             List<TCSUnitCapacityDTO> resultsList = new ArrayList<>();
             for (Object[] row : results) {
                 TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
@@ -122,7 +151,12 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
             // Stored Procedure name
             String procedureName = "GetTcsUnitCapacity";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
+                if(plantId != null) {
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";  
+            }
+            else  {
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut"; 
+            }
             }
 
             // Prepare native SQL call with parameters
@@ -130,7 +164,10 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
+            if(plantId != null) {
             query.setParameter("plantId", plantId);
+            }
+          
             query.setParameter("aopYear", aopYear);
             query.setParameter("capacityType", capacityType);
             query.setParameter("uom", uom);
@@ -153,7 +190,12 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
 
         String procedureName = "GetTcsUnitCapacity";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
+            if(plantId != null) {
             procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
+            }
+            else  {
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
+            }
         }
         String callableSql = "{call " + procedureName + "(?, ?, ?, ?)}";
 
@@ -264,14 +306,26 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
     public List<TCSUnitCapacityUOMDTO> getAllUOM(
         String plantId,
         String aopYear,
-        String capacityType) {
+        String capacityType,
+          String verticalId) {
 
+            Verticals vertical = null;
+
+            if(plantId != null) {
             Plants plant = plantsRepository
                 .findById(UUID.fromString(plantId))
-                .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));
-            Verticals vertical = verticalRepository
+                .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));  
+           vertical = verticalRepository
                 .findById(plant.getVerticalFKId())
-                .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
+                .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));  
+            
+            }
+
+            else if(verticalId != null) {
+                vertical = verticalRepository
+                .findById(UUID.fromString(verticalId))
+                .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + verticalId));
+            }
 
             try {
                 List<TCSUnitCapacityUOMDTO> results = getAllUOMData(
@@ -294,15 +348,27 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
             // Stored Procedure name
             String procedureName = "GetTcsUnitCapacity_UOM";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM";
+                if(plantId != null) {
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM"; 
+            }
+            else {
+                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM_OutPut";
+            }
             }
 
             // Prepare native SQL call with parameters
-            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType";
+            String sql = "";
+            if(plantId != null) {
+                sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType";
+            }
+            else {
+                sql = "EXEC " + procedureName + " @aopYear = :aopYear, @capacityType = :capacityType";
+            }
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
-            query.setParameter("plantId", plantId);
+            if(plantId != null) {
+            query.setParameter("plantId", plantId);  }
             query.setParameter("aopYear", aopYear);
             query.setParameter("capacityType", capacityType);
 

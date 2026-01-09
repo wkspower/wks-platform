@@ -48,17 +48,30 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
     private TCSSlowdownRepository tcsSlowdownRepository;
     
     @Override
-    public Map<String, Object> getAll(String plantId, String aopYear) {
+    public Map<String, Object> getAll(String plantId, String aopYear, String siteId, String verticalId) {
         // Validation
+Sites site = null;
+Verticals vertical = null;
+
+if(plantId != null) {
         Plants plant = plantsRepository
             .findById(UUID.fromString(plantId))
             .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));
-        Sites site = siteRepository
+        site = siteRepository
             .findById(plant.getSiteFkId())
             .orElseThrow(() -> new RuntimeException("Site not found for ID: " + plantId));
-        Verticals vertical = verticalRepository
+        vertical = verticalRepository
             .findById(plant.getVerticalFKId())
-            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
+            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));  }
+
+        else {
+            site = siteRepository
+            .findById(UUID.fromString(siteId))
+            .orElseThrow(() -> new RuntimeException("Site not found for ID: " + siteId));
+        vertical = verticalRepository
+            .findById(UUID.fromString(verticalId))
+            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + verticalId));
+        }
         
         Map<String, Object> map = new HashMap<>();
         try {
@@ -118,16 +131,34 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
             // Stored Procedure name
             String procedureName = "GetTcsSlowdown";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
-                procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown";
+                if(plantId != null) {
+                procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown"; 
+             }
+
+                else {
+                    procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown_OutPut";
+                }
             }
 
             // Prepare native SQL call with parameters
-            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+
+            String sql = "";
+            if(plantId != null) {
+            sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+            }
+            else {
+                sql = "EXEC " + procedureName + " @aopYear = :aopYear";
+            }
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
+            if(plantId != null) {
             query.setParameter("plantId", plantId);
+            query.setParameter("aopYear", aopYear);  
+        }
+        else {
             query.setParameter("aopYear", aopYear);
+        }
 
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -145,17 +176,33 @@ public class TCSSlowdownServiceImpl implements TCSSlowdownService {
 
         String procedureName = "GetTcsSlowdown";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
+            if(plantId != null) {
             procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown";
+            }
+            else {
+                procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown_OutPut";
+            }
         }
-        String callableSql = "{call " + procedureName + "(?, ?)}";
+        String callableSql = "";
+        if(plantId != null) {
+        callableSql = "{call " + procedureName + "(?, ?)}";
+        }
+        else {
+            callableSql = "{call " + procedureName + "(?)}";
+        }
 
         List<String> headers = new ArrayList<>();
 		try (
             Connection conn = dataSource.getConnection();
 			CallableStatement stmt = conn.prepareCall(callableSql)) {
 
+            if(plantId != null) {
 			stmt.setString(1, plantId);
 			stmt.setString(2, aopYear);
+            }
+            else {
+                stmt.setString(1, aopYear);
+            }
 
 			boolean hasResultSet = stmt.execute();
 

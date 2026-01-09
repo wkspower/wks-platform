@@ -54,7 +54,10 @@ public class CrudeBlendWindowService {
 
         // *******  fetch CrudeBlendData ********** 
 
-        List<CrudeBlendDTO> crudeBlend = crudeRepo.findCrudeBlendByPlantIdAndSiteId(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+        List<CrudeBlendDTO> crudeBlend = new ArrayList<>();
+
+        if(plantId != null) {
+      crudeBlend = crudeRepo.findCrudeBlendByPlantIdAndSiteId(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
             CrudeBlendDTO dto = new CrudeBlendDTO();
             dto.setId(proj.getId());
             dto.setProperty(proj.getProperty());
@@ -66,7 +69,26 @@ public class CrudeBlendWindowService {
             dto.setRemarks(proj.getRemarks());
             dto.setType(proj.getType());
             return dto;
-        }).toList();
+        }).toList();  
+        }
+
+        else {   
+
+            crudeBlend = crudeRepo.findCrudeBlendBySiteId(java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+                CrudeBlendDTO dto = new CrudeBlendDTO();
+                dto.setId(proj.getId());
+                dto.setProperty(proj.getProperty());
+                dto.setStream(proj.getStream());
+                dto.setUnit(proj.getUnit());
+                dto.setMinValue(proj.getMinValue());
+                dto.setMaxValue(proj.getMaxValue());
+                dto.setCriticality(proj.getCriticality());
+                dto.setRemarks(proj.getRemarks());
+                dto.setType(proj.getType());
+                return dto;
+            }).toList(); 
+
+        }
 
         // hardcoding headers and keys for crude blend 
         List<String> headers = List.of("Id", "Property", "Stream", "Unit", "Min Value", "Max Value", "Criticality", "Remarks", "Type");
@@ -87,7 +109,9 @@ public class CrudeBlendWindowService {
 
         // ******** fetch CrudeSpecificConstraints *************
 
-        List<CrudeSpecificConstraintsDTO> crudeSpecificConstraints = crudeRepo.findCrudeSpecificConstraintsByPlant_FK_IdAndSite_FK_Id(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+        List<CrudeSpecificConstraintsDTO> crudeSpecificConstraints = new ArrayList<>();
+        if(plantId != null) {
+        crudeSpecificConstraints = crudeRepo.findCrudeSpecificConstraintsByPlant_FK_IdAndSite_FK_Id(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
             CrudeSpecificConstraintsDTO dto = new CrudeSpecificConstraintsDTO();
             dto.setId(proj.getId());
             dto.setCrude(proj.getCrude());
@@ -95,6 +119,17 @@ public class CrudeBlendWindowService {
             dto.setReasons(proj.getReasons());
             return dto;
         }).toList();
+        }
+        else {
+            crudeSpecificConstraints = crudeRepo.findCrudeSpecificConstraintsBySite_FK_Id(java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+                CrudeSpecificConstraintsDTO dto = new CrudeSpecificConstraintsDTO();
+                dto.setId(proj.getId());
+                dto.setCrude(proj.getCrude());
+                dto.setMaxBlendLimit(proj.getMaxBlendLimit());
+                dto.setReasons(proj.getReasons());
+                return dto;
+            }).toList();
+        }
 
         List<String> csHeaders = List.of("Id", "Crude", "Max Blend Limit (%)", "Reasons");
         List<String> csKeys = List.of("id", "crude", "maxBlendLimit", "reasons");
@@ -113,7 +148,9 @@ public class CrudeBlendWindowService {
 
         // ******** fetch VGOVRDrop *************
 
-        List<com.wks.caseengine.dto.VGOVRDropDTO> vgovrDrop = crudeRepo.findVGOVRDropByPlant_FK_IdAndSite_FK_Id(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+        List<com.wks.caseengine.dto.VGOVRDropDTO> vgovrDrop = new ArrayList<>();
+        if(plantId != null) {
+        vgovrDrop = crudeRepo.findVGOVRDropByPlant_FK_IdAndSite_FK_Id(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
             com.wks.caseengine.dto.VGOVRDropDTO dto = new com.wks.caseengine.dto.VGOVRDropDTO();
             dto.setId(proj.getId());
             dto.setKbpsd(proj.getkbpsd());
@@ -121,6 +158,17 @@ public class CrudeBlendWindowService {
             dto.setRemarks(proj.getRemarks());
             return dto;
         }).toList();
+        }
+        else {
+            vgovrDrop = crudeRepo.findVGOVRDropBySite_FK_Id(java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+                com.wks.caseengine.dto.VGOVRDropDTO dto = new com.wks.caseengine.dto.VGOVRDropDTO();
+                dto.setId(proj.getId());
+                dto.setKbpsd(proj.getkbpsd());
+                dto.setValue_345(proj.getvalue_345());
+                dto.setRemarks(proj.getRemarks());
+                return dto;
+            }).toList();
+        }
 
         List<String> vgovrHeaders = List.of("Id", "T'put, KBPSD", "345", "Remarks");
         List<String> vgovrKeys = List.of("id", "kbpsd", "value_345", "remarks");

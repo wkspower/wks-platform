@@ -25,8 +25,12 @@ public class FurnaceController {
     @Autowired
     private FurnaceService furnaceService;
 
-    @GetMapping("/furnace/{financialYear}/{siteId}/{plantId}")
-    public MasterFurnaceDTO getFurnaceData(@PathVariable String financialYear, @PathVariable String siteId, @PathVariable String plantId) {
+    @GetMapping({"/furnace/{financialYear}/{siteId}/{plantId}" , "/furnace/{financialYear}/{siteId}"})
+    public MasterFurnaceDTO getFurnaceData(@PathVariable String financialYear, @PathVariable String siteId, @PathVariable(required = false) String plantId) {
+
+        if (plantId == null) { 
+            return furnaceService.getFurnaceData(financialYear, UUID.fromString(siteId), null);
+        }
         return furnaceService.getFurnaceData(financialYear, UUID.fromString(siteId), UUID.fromString(plantId));
     }
 
