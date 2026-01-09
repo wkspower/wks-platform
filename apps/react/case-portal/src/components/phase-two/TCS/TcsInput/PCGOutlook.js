@@ -29,6 +29,7 @@ const PCGOutlook = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
+
   // Fetch PCG Outlook Data
   const fetchPcgOutlookData = useCallback(async () => {
     if (!SITE_ID || !AOP_YEAR) return
@@ -258,20 +259,7 @@ const PCGOutlook = ({
       }
 
       // Custom validation: If any row data is updated, remarks must be filled and different from original
-      const fieldsToCheck = [
-        'apr',
-        'may',
-        'jun',
-        'jul',
-        'aug',
-        'sep',
-        'oct',
-        'nov',
-        'dec',
-        'jan',
-        'feb',
-        'mar',
-      ]
+      const fieldsToCheck = ['apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
       const validationError = validateRowDataWithRemarks(
         data,
         originalRows,

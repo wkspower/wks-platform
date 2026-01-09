@@ -25,9 +25,9 @@ export const NumericEditorWithMinMax = ({
 
         if (min !== undefined && num < min) {
           errorMsg = `Please enter a number between ${min} to ${max}`
-        } else if (max !== undefined && num > max) {
+        } else if(max !== undefined && num > max) {
           errorMsg = `Please enter a number between ${min} to ${max}`
-        }
+        } 
 
         setError(errorMsg)
       } else {

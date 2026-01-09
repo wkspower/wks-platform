@@ -215,7 +215,7 @@ export const recalcEndDate = (startRaw, durationStr, requiredInHr = true) => {
   if (!startRaw) return null
   const start = new Date(startRaw)
   if (!(start instanceof Date) || isNaN(start)) return null
-
+  
   if (requiredInHr) {
     // parse "HH.MM" for hours
     const [hrsPart, minPart = '0'] = String(durationStr).split('.')
@@ -244,7 +244,7 @@ export const recalcDuration = (startRaw, endRaw, requiredInHr = true) => {
   ) {
     const diffMs = end.getTime() - start.getTime()
     if (diffMs < 0) return ''
-
+    
     if (requiredInHr) {
       // Calculate in hours with format "H.MM"
       const totalMins = Math.floor(diffMs / 60000)
@@ -267,12 +267,12 @@ export default function valueFormatterByUOM(value, unit = null) {
   }
 
   const unitsConfig = {
-    oneDigitUnits: [],
-    twoDigitUnits: [],
-    threeDigitUnits: ['MT'],
-    fourDigitUnits: [],
-    fiveDigitUnits: ['KG'],
-  }
+   oneDigitUnits : [],
+   twoDigitUnits : [],
+   threeDigitUnits : ['MT'],
+   fourDigitUnits : [],
+   fiveDigitUnits : ['KG'],
+  };
   // Convert to number safely
   const numValue = Number(value)
   if (Number.isNaN(numValue)) {
@@ -295,3 +295,4 @@ export default function valueFormatterByUOM(value, unit = null) {
   // Default format
   return numValue.toFixed(3)
 }
+

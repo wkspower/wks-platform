@@ -396,9 +396,7 @@ async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
       body: formData,
     })
     if (!resp.ok) {
-      throw new Error(
-        `Failed to import data: ${resp.status} ${resp.statusText}`,
-      )
+      throw new Error(`Failed to import data: ${resp.status} ${resp.statusText}`)
     }
     return json(keycloak, resp)
   } catch (e) {
@@ -411,57 +409,27 @@ async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
 
 // Operation Hours Excel Import (Power)
 async function saveOperationHoursExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'assets/operational-hours/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'assets/operational-hours/import', PLANT_ID, AOP_YEAR)
 }
 
 // STG Operation Hours Excel Import (Steam)
 async function saveSTGOperationHoursExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'assets/stg-operational-hours/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'assets/stg-operational-hours/import', PLANT_ID, AOP_YEAR)
 }
 
 // Import Power Excel Import
 async function saveImportPowerExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'asset-import-mapping/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'asset-import-mapping/import', PLANT_ID, AOP_YEAR)
 }
 
 // Asset Priority Excel Import
 async function saveAssetPriorityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'asset-priority/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'asset-priority/import', PLANT_ID, AOP_YEAR)
 }
 
 // Asset Capacity Excel Import
 async function saveAssetCapacityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'asset-capacity/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'asset-capacity/import', PLANT_ID, AOP_YEAR)
 }
 
 // Heat Rate Excel Import (GT Heat Rate)
@@ -471,22 +439,10 @@ async function saveHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
 
 // STG Heat Rate Excel Import
 async function saveSTGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'stg-extraction-lookup/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'stg-extraction-lookup/import', PLANT_ID, AOP_YEAR)
 }
 
 // HRSG Heat Rate Excel Import
 async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'hrsg-heat-rate-lookup/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  return saveExcelData(file, keycloak, 'hrsg-heat-rate-lookup/import', PLANT_ID, AOP_YEAR)
 }

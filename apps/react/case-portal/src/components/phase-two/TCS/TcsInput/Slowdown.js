@@ -272,7 +272,9 @@ const Slowdown = ({
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         permissions={permissions}
-        dateCalculationConfig={dateFields1}
+        dateCalculationConfig={
+          dateFields1
+        }
       />
     </Box>
   )

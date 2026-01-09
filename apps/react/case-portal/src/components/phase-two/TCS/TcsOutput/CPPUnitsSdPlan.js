@@ -165,6 +165,7 @@ const CPPUnitsSdPlan = ({
     setRemarkDialogOpen(true)
   }
 
+
   const permissions = {
     showAction: true,
     allAction: true,
@@ -200,11 +201,7 @@ const CPPUnitsSdPlan = ({
           setSnackbarData={setSnackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
-          paginationConfig={{
-            threshold: 100,
-            defaultPageSize: 50,
-            pageSizes: [10, 20, 50, 100],
-          }}
+          paginationConfig={{ threshold: 100, defaultPageSize: 50, pageSizes: [10, 20, 50, 100] }}
           dateCalculationConfig={{
             dateField1: 'shutDownDate',
             dateField2: 'startUpDate',
