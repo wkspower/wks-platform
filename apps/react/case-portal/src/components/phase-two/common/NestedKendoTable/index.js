@@ -28,7 +28,10 @@ import { NumericEditorWithMinMax } from '../utilities/NumericEditorWithMinMax'
 import { NumberCellEditor } from '../utilities/NumberCellEditor'
 import Notification from '../utilities/Notification'
 import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
-import valueFormatterByUOM, { recalcDuration, recalcEndDate } from '../commonUtilityFunctions'
+import valueFormatterByUOM, {
+  recalcDuration,
+  recalcEndDate,
+} from '../commonUtilityFunctions'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 
 export const hiddenFields = [
@@ -332,10 +335,17 @@ const NestedKendoTable = ({
           }
 
           // Handle dateCalculationConfig for generic date calculations
-          if (dateCalculationConfig && Object.keys(dateCalculationConfig).length > 0) {
+          if (
+            dateCalculationConfig &&
+            Object.keys(dateCalculationConfig).length > 0
+          ) {
             const { dateField1, dateField2, daysField, requiredInHr } =
               dateCalculationConfig
-            if (dateField1 in updated && dateField2 in updated && daysField in updated) {
+            if (
+              dateField1 in updated &&
+              dateField2 in updated &&
+              daysField in updated
+            ) {
               if (field === dateField1 || field === dateField2) {
                 updated[daysField] = recalcDuration(
                   updated[dateField1],
@@ -358,7 +368,7 @@ const NestedKendoTable = ({
           return updated
         }),
       )
-      
+
       // Track modified cells
       setModifiedCells((prev) => {
         const existingItem = prev[itemId] || { ...dataItem }
@@ -394,10 +404,17 @@ const NestedKendoTable = ({
           existingItem[field] = value
 
           // Handle dateCalculationConfig for generic date calculations
-          if (dateCalculationConfig && Object.keys(dateCalculationConfig).length > 0) {
+          if (
+            dateCalculationConfig &&
+            Object.keys(dateCalculationConfig).length > 0
+          ) {
             const { dateField1, dateField2, daysField, requiredInHr } =
               dateCalculationConfig
-            if (dateField1 in existingItem && dateField2 in existingItem && daysField in existingItem) {
+            if (
+              dateField1 in existingItem &&
+              dateField2 in existingItem &&
+              daysField in existingItem
+            ) {
               if (field === dateField1 || field === dateField2) {
                 existingItem[daysField] = recalcDuration(
                   existingItem[dateField1],
@@ -437,10 +454,17 @@ const NestedKendoTable = ({
         }
 
         // Handle dateCalculationConfig for generic date calculations (for red highlighting)
-        if (dateCalculationConfig && Object.keys(dateCalculationConfig).length > 0) {
+        if (
+          dateCalculationConfig &&
+          Object.keys(dateCalculationConfig).length > 0
+        ) {
           const { dateField1, dateField2, daysField, requiredInHr } =
             dateCalculationConfig
-          if (dateField1 in dataItem && dateField2 in dataItem && daysField in dataItem) {
+          if (
+            dateField1 in dataItem &&
+            dateField2 in dataItem &&
+            daysField in dataItem
+          ) {
             if (field === dateField1 || field === dateField2) {
               // When dates change, also highlight the calculated duration field
               const calculatedDuration = recalcDuration(
@@ -467,7 +491,13 @@ const NestedKendoTable = ({
         }
       })
     },
-    [setRows, setModifiedCells, setCustomModifiedCells, hoursRows, dateCalculationConfig],
+    [
+      setRows,
+      setModifiedCells,
+      setCustomModifiedCells,
+      hoursRows,
+      dateCalculationConfig,
+    ],
   )
 
   const handleRemarkSave = () => {

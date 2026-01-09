@@ -34,7 +34,7 @@ const renderTabComponent = (tabDisplayName, props) => {
   }
 }
 
-const TcsOutput= () => {
+const TcsOutput = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {

@@ -32,7 +32,9 @@ const UnitCapacityGrid = ({
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [selectedDropdown, setSelectedDropdown] = useState(null)
-  const [dropdownConfig, setDropdownConfig] = useState({ ...defaultDropdownConfig })
+  const [dropdownConfig, setDropdownConfig] = useState({
+    ...defaultDropdownConfig,
+  })
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -72,7 +74,14 @@ const UnitCapacityGrid = ({
     } finally {
       setLoadingUOM(false)
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, capacityType, setSnackbarData, setSnackbarOpen])
+  }, [
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    capacityType,
+    setSnackbarData,
+    setSnackbarOpen,
+  ])
 
   // Fetch Unit Capacity data for this capacity type
   const fetchUnitCapacityData = useCallback(
@@ -106,7 +115,10 @@ const UnitCapacityGrid = ({
         setRows(transformedData)
         setOriginalRows(transformedData)
       } catch (err) {
-        console.error(`Error fetching Unit Capacity data (${capacityType}):`, err)
+        console.error(
+          `Error fetching Unit Capacity data (${capacityType}):`,
+          err,
+        )
         setSnackbarData({
           message: `Failed to load Unit Capacity data. Please try again.`,
           severity: 'error',
@@ -117,7 +129,14 @@ const UnitCapacityGrid = ({
         setLoading(false)
       }
     },
-    [keycloak, PLANT_ID, AOP_YEAR, capacityType, setSnackbarData, setSnackbarOpen],
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      capacityType,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
   )
 
   // Fetch UOM options on component mount
@@ -136,7 +155,13 @@ const UnitCapacityGrid = ({
 
   // Column configuration for Unit Capacity
   const columnConfig = {
-    id: { editable: false, type: 'text', minWidth: 50, widthT: 100,hidden:true },
+    id: {
+      editable: false,
+      type: 'text',
+      minWidth: 50,
+      widthT: 100,
+      hidden: true,
+    },
     particulates: { editable: false, type: 'text', minWidth: 50, widthT: 150 },
     value: { editable: true, type: 'number1', minWidth: 50, widthT: 200 },
     remark: { editable: true, type: 'text', minWidth: 100, widthT: 250 },
@@ -185,14 +210,12 @@ const UnitCapacityGrid = ({
     return otherCols
   }, [apiMetadata])
 
-
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
-
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },

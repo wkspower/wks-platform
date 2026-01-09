@@ -29,7 +29,6 @@ const PCGOutlook = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-
   // Fetch PCG Outlook Data
   const fetchPcgOutlookData = useCallback(async () => {
     if (!SITE_ID || !AOP_YEAR) return

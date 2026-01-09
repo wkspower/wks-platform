@@ -32,7 +32,11 @@ const CrudBlendWindow = ({
     }
     try {
       setLoading(true)
-      console.log('Fetching Crude Blend Window data with:', { PLANT_ID, AOP_YEAR, SITE_ID })
+      console.log('Fetching Crude Blend Window data with:', {
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+      })
 
       const response = await TcsOutputApiService.getCrudBlendWindowData(
         keycloak,
@@ -54,7 +58,7 @@ const CrudBlendWindow = ({
       }
 
       console.log('Transformed tables data:', tablesDataMap)
-      console.log('tablesDataMap',tablesDataMap)
+      console.log('tablesDataMap', tablesDataMap)
       setAllTablesData(tablesDataMap)
     } catch (err) {
       console.error('Error fetching Crude Blend Window data:', err)
