@@ -40,6 +40,7 @@ const CrudBlendWindowGrid = ({
         id: item.id || `row_${index}`,
         ...item,
         inEdit: false,
+        isEditable: false,
       }))
       console.log('transformedData',transformedData)
       setApiMetadata({ headers, keys })

@@ -2,7 +2,7 @@ import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
@@ -18,7 +18,7 @@ const ROGC = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterPhaseTwo()
+  const valueFormat = ValueFormatterProduction()
 
   // State management
   const [loading, setLoading] = useState(false)
@@ -84,6 +84,7 @@ const ROGC = ({
           id: item.id || `row_${index}`,
           ...item,
           inEdit: false,
+          isEditable: false,
         }))
         transformedData.push(...furnaceRows)
 

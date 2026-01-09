@@ -78,6 +78,7 @@ const CPPUnitsSdPlan = ({
         ...item,
         majorJobs: item.majorJobs || '',
         inEdit: false,
+        isEditable: false,
       }))
 
       console.log('CPP Units SD Plan API Response:', transformedData)

@@ -304,11 +304,11 @@ const Shutdown = ({
         setModifiedCells={setModifiedCells}
         permissions={permissions}
         dateCalculationConfig={{
-            dateField1: 'startDate',
-            dateField2: 'endDate',
-            daysField: 'durationInDays',
-            requiredInHr: false,
-          }}
+          dateField1: 'startDate',
+          dateField2: 'endDate',
+          daysField: 'durationInDays',
+          requiredInHr: false,
+        }}
       />
     </Box>
   )

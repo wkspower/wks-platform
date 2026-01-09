@@ -50,6 +50,7 @@ const PCGOutlook = ({
           ...item,
           remarks: item.remarks || '',
           inEdit: false,
+          isEditable: false,
         }))
       }
 

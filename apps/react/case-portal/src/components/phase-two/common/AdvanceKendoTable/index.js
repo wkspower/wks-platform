@@ -395,49 +395,26 @@ const AdvanceKendoTable = ({
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
 
-          // Handle fromDate/toDate/durationInHrs calculation
-          if (
-            'fromDate' in updated &&
-            'toDate' in updated &&
-            'durationInHrs' in updated
-          ) {
-            if (field === 'fromDate' || field === 'toDate') {
-              updated.durationInHrs = recalcDuration(
-                updated.fromDate,
-                updated.toDate,
-              )
-            } else if (field === 'durationInHrs') {
-              const newEnd = recalcEndDate(
-                updated.fromDate,
-                value, // string like "10.20"
-              )
-              if (newEnd) {
-                updated.toDate = newEnd
+          if (dateCalculationConfig) {
+            const { dateField1, dateField2, daysField, requiredInHr } =
+              dateCalculationConfig
+            if (dateField1 in updated && dateField2 in updated && daysField in updated) {
+              if (field === dateField1 || field === dateField2) {
+                updated[daysField] = recalcDuration(
+                  updated[dateField1],
+                  updated[dateField2],
+                  requiredInHr,
+                )
+              } else if (field === daysField) {
+                const newEnd = recalcEndDate(
+                  updated[dateField1],
+                  value,
+                  requiredInHr,
+                )
+                if (newEnd) {
+                  updated[dateField2] = newEnd
+                }
               }
-            }
-          }
-
-          // Handle startDate/endDate/durationInDays calculation
-          if (
-            'startDate' in updated &&
-            'endDate' in updated &&
-            'durationInDays' in updated
-          ) {
-            if (field === 'startDate' && updated.endDate) {
-              // If startDate changed and endDate exists, calculate durationInDays
-              updated.durationInDays = calculateDaysBetween(
-                updated.startDate,
-                updated.endDate,
-              )
-            } else if (field === 'endDate' && updated.startDate) {
-              // If endDate changed and startDate exists, calculate durationInDays
-              updated.durationInDays = calculateDaysBetween(
-                updated.startDate,
-                updated.endDate,
-              )
-            } else if (field === 'durationInDays' && updated.startDate) {
-              // If durationInDays changed and startDate exists, calculate endDate
-              updated.endDate = addDaysToDate(updated.startDate, value)
             }
           }
 
@@ -448,34 +425,24 @@ const AdvanceKendoTable = ({
       setModifiedCells((prev) => {
         const base = { ...dataItem, [field]: value }
 
-        // Handle fromDate/toDate/durationInHrs calculation
-        if ('fromDate' in base && 'toDate' in base && 'durationInHrs' in base) {
-          if (field === 'fromDate' || field === 'toDate') {
-            base.durationInHrs = recalcDuration(base.fromDate, base.toDate)
-          } else if (field === 'durationInHrs') {
-            const newEnd = recalcEndDate(base.fromDate, value)
-            if (newEnd) base.toDate = newEnd.toISOString()
-          }
-        }
-
-        // Handle startDate/endDate/durationInDays calculation
-        if (
-          'startDate' in base &&
-          'endDate' in base &&
-          'durationInDays' in base
-        ) {
-          if (field === 'startDate' && base.endDate) {
-            base.durationInDays = calculateDaysBetween(
-              base.startDate,
-              base.endDate,
-            )
-          } else if (field === 'endDate' && base.startDate) {
-            base.durationInDays = calculateDaysBetween(
-              base.startDate,
-              base.endDate,
-            )
-          } else if (field === 'durationInDays' && base.startDate) {
-            base.endDate = addDaysToDate(base.startDate, value)
+        if (dateCalculationConfig) {
+          const { dateField1, dateField2, daysField, requiredInHr } =
+            dateCalculationConfig
+          if (dateField1 in base && dateField2 in base && daysField in base) {
+            if (field === dateField1 || field === dateField2) {
+              base[daysField] = recalcDuration(
+                base[dateField1],
+                base[dateField2],
+                requiredInHr,
+              )
+            } else if (field === daysField) {
+              const newEnd = recalcEndDate(
+                base[dateField1],
+                value,
+                requiredInHr,
+              )
+              if (newEnd) base[dateField2] = newEnd.toISOString()
+            }
           }
         }
 
@@ -486,14 +453,27 @@ const AdvanceKendoTable = ({
       setCustomModifiedCells((prev) => {
         const base = { ...(prev[itemId] || {}), [field]: value }
 
-        if (field === 'percentChange' && permissions?.percentChangeLogic) {
-          const pct = parsePctOrNull(value)
-          if (pct !== null) {
-            const factor = 1 + pct / 100
-            months.forEach((m) => {
-              const original = Number(dataItem[m]) || 0
-              base[m] = Number((original * factor).toFixed(2))
-            })
+        if (dateCalculationConfig) {
+          const { dateField1, dateField2, daysField, requiredInHr } =
+            dateCalculationConfig
+          if (dateField1 in dataItem && dateField2 in dataItem && daysField in dataItem) {
+            if (field === dateField1 || field === dateField2) {
+              // When dates change, also highlight the calculated duration field
+              const calculatedDuration = recalcDuration(
+                field === dateField1 ? value : dataItem[dateField1],
+                field === dateField2 ? value : dataItem[dateField2],
+                requiredInHr,
+              )
+              base[daysField] = calculatedDuration
+            } else if (field === daysField) {
+              // When duration changes, also highlight the calculated end date field
+              const newEnd = recalcEndDate(
+                dataItem[dateField1],
+                value,
+                requiredInHr,
+              )
+              if (newEnd) base[dateField2] = newEnd.toISOString()
+            }
           }
         }
 
@@ -570,16 +550,6 @@ const AdvanceKendoTable = ({
   }
 
   const handleAddRow = () => {
-    if (permissions?.tabIndex) {
-      if (
-        permissions?.tabIndex == 1 ||
-        permissions?.tabIndex == 2 ||
-        permissions?.tabIndex == 3 ||
-        permissions?.tabIndex == 4 ||
-        permissions?.tabIndex == 5
-      )
-        return
-    }
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
     const newRowId = rows.length
