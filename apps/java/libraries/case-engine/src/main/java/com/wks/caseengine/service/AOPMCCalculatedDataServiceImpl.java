@@ -523,17 +523,20 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 					changed = true;
 				}
 				aOPMCCalculatedData.setUpdatedBy(Utility.getUserName());
-				if (!aOPMCCalculatedData.getRemarks().equalsIgnoreCase(aOPMCCalculatedDataDTO.getRemarks())
-						&& changed) {
+				String existingRemarks = aOPMCCalculatedData.getRemarks() != null ? aOPMCCalculatedData.getRemarks() : "";
+				String newRemarks = aOPMCCalculatedDataDTO.getRemarks() != null ? aOPMCCalculatedDataDTO.getRemarks() : "";
+				boolean remarksChanged = !existingRemarks.equalsIgnoreCase(newRemarks);
 
-					outerChanged = true;
-					aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
-					saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
-				}
-				else if (aOPMCCalculatedData.getRemarks().equalsIgnoreCase(aOPMCCalculatedDataDTO.getRemarks()) && changed) {
-					aOPMCCalculatedDataDTO.setErrDescription("Please add/update remark");
-					aOPMCCalculatedDataDTO.setSaveStatus("Failed");
-					failedList.add(aOPMCCalculatedDataDTO);
+				if (remarksChanged && changed) {
+				    outerChanged = true;
+				    aOPMCCalculatedData.setRemarks(aOPMCCalculatedDataDTO.getRemarks());
+				    saved = aOPMCCalculatedDataRepository.save(aOPMCCalculatedData);
+				} 
+				else if (!remarksChanged && changed) {
+				    // If other data changed but remarks remain the same as the database, fail the validation
+				    aOPMCCalculatedDataDTO.setErrDescription("Please add/update remark");
+				    aOPMCCalculatedDataDTO.setSaveStatus("Failed");
+				    failedList.add(aOPMCCalculatedDataDTO);
 				}
 
 				if (saved != null && saved.getId() == null) {
