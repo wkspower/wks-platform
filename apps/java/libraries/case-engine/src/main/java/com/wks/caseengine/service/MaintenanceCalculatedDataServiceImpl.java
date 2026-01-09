@@ -375,37 +375,50 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        Sheet sheet = workbook.createSheet("Maintenance Data");
 	        
 	        List<String> headers = new ArrayList<>(dynamicData.get(0).keySet());
-	        
 	        CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
-	        
 	        Row headerRow = sheet.createRow(0);
 	        for (int i = 0; i < headers.size(); i++) {
 	            Cell cell = headerRow.createCell(i);
 	            cell.setCellValue(headers.get(i));
 	            cell.setCellStyle(headerStyle);
 	        }
-
+	        Map<String, Double> totalsMap = new HashMap<>();
 	        int rowIdx = 1;
 	        for (Map<String, Object> rowData : dynamicData) {
 	            Row row = sheet.createRow(rowIdx++);
 	            for (int colIdx = 0; colIdx < headers.size(); colIdx++) {
+	                String key = headers.get(colIdx);
 	                Cell cell = row.createCell(colIdx);
-	                Object value = rowData.get(headers.get(colIdx));
+	                Object value = rowData.get(key);
 	                
 	                if (value instanceof Number) {
-	                    cell.setCellValue(((Number) value).doubleValue());
+	                    double val = ((Number) value).doubleValue();
+	                    cell.setCellValue(val);
+	                    totalsMap.put(key, totalsMap.getOrDefault(key, 0.0) + val);
 	                } else if (value != null) {
 	                    cell.setCellValue(value.toString());
 	                }
 	            }
 	        }
-
-	        Set<String> fieldsToHide = Set.of("ID", "PLANTID", "AOPYEAR");
-
+	        Row totalRow = sheet.createRow(rowIdx);
+	        CellStyle totalStyle = Utility.createBoldBorderedStyle(workbook); // Reuse bold style
+	        
 	        for (int i = 0; i < headers.size(); i++) {
-	            String currentHeader = headers.get(i).toUpperCase();
-	            
-	            if (fieldsToHide.contains(currentHeader)) {
+	            String header = headers.get(i);
+	            Cell cell = totalRow.createCell(i);
+	            cell.setCellStyle(totalStyle);
+
+	            if (header.equalsIgnoreCase("monthName") || header.equalsIgnoreCase("month")) {
+	                cell.setCellValue("Total");
+	            } else if (totalsMap.containsKey(header)) {
+	                cell.setCellValue(totalsMap.get(header));
+	            } else {
+	                cell.setCellValue("");
+	            }
+	        }
+	        Set<String> fieldsToHide = Set.of("ID", "PLANTID", "AOPYEAR");
+	        for (int i = 0; i < headers.size(); i++) {
+	            if (fieldsToHide.contains(headers.get(i).toUpperCase())) {
 	                sheet.setColumnHidden(i, true);
 	            } else {
 	                sheet.autoSizeColumn(i);
@@ -422,7 +435,6 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    }
 	    return null;
 	}
-	
 	
 	public List<Map<String, Object>> getDynamicData(String plantId, String aopYear, String viewName) {
 	    try {
@@ -448,9 +460,24 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	        query.setParameter("plantId", plantId);
 	        query.setParameter("aopYear", aopYear);
 
-	        NativeQuery<Map<String, Object>> hibernateQuery = query.unwrap(NativeQuery.class);
-	        
-	        hibernateQuery.setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+	        org.hibernate.query.NativeQuery<Map<String, Object>> hibernateQuery = 
+	            query.unwrap(org.hibernate.query.NativeQuery.class);
+	        hibernateQuery.setResultTransformer(new org.hibernate.transform.ResultTransformer() {
+	            @Override
+	            public Object transformTuple(Object[] tuple, String[] aliases) {
+	                Map<String, Object> result = new LinkedHashMap<>(tuple.length);
+	                for (int i = 0; i < aliases.length; i++) {
+	                    result.put(aliases[i], tuple[i]);
+	                }
+	                return result;
+	            }
+
+	            @Override
+	            public List transformList(List collection) {
+	                return collection;
+	            }
+	        });
+
 	        return hibernateQuery.getResultList();
 
 	    } catch (Exception ex) {
@@ -598,7 +625,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year, List<Map<String, Object>> payloadList) {
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    int totalUpdatedRows = 0;
-	    final Set<String> EXCLUDE = Set.of("Id", "PlantId", "AOPYear", "MonthName", "saveStatus", "errDescription");
+	    final Set<String> EXCLUDE = Set.of("Id", "PlantId","NumberOfDays", "AOPYear", "MonthName", "saveStatus", "errDescription");
 
 	    try {
 	        for (Map<String, Object> payload : payloadList) {
@@ -724,7 +751,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            columnNames.add(headerValue != null ? headerValue.trim() : "Column_" + i);
 	        }
 
-	        for (int i = 1; i <= totalRows; i++) {
+	        for (int i = 1; i <= totalRows-1; i++) {
 	            Row row = sheet.getRow(i);
 	            
 	            if (row == null) continue;

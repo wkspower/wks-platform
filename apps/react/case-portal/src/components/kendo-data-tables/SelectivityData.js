@@ -435,7 +435,7 @@ const SelectivityData = (props) => {
       verticalChange?.selectedVertical === 'PP' ||
       verticalChange?.selectedVertical?.toLowerCase() === 'elastomer'
     ) {
-      console.log('getAllGrades .. calling')
+      // console.log('getAllGrades .. calling')
 
       getAllGrades()
     }

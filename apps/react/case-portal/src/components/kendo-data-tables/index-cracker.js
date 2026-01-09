@@ -202,6 +202,7 @@ const KendoDataTablesCracker = ({
         ...r,
         originalIsCr: originalIsCrRef.current[r.id],
         inEdit: r.id === e.dataItem.id, // only that row goes into edit mode
+        // inEdit: r.Id === e.dataItem.Id, // only that row goes into edit mode
       })),
     )
   }

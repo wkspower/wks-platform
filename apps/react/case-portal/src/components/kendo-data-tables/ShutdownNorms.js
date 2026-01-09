@@ -430,7 +430,7 @@ const ShutdownNorms = () => {
           setGrades(fetchedGrades)
 
           if (fetchedGrades.length === 0) {
-            // no grades — clear selection and fetch blank data
+            // no grades � clear selection and fetch blank data
             setGradeId(null)
             await fetchData(null)
             return
@@ -557,6 +557,7 @@ const ShutdownNorms = () => {
         isVCMWithVMD || lowerVertName == 'elastomer'
           ? true
           : lowerVertName == 'meg' ||
+              lowerVertName == 'vcm' ||
               lowerVertName == 'aromatics' ||
               lowerVertName == 'pta' ||
               IS_PE_PP_VERTICAL ||
