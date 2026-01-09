@@ -625,7 +625,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	public AOPMessageVM updateMaintenanceDataForCracker(String plantId, String year, List<Map<String, Object>> payloadList) {
 	    AOPMessageVM aopMessageVM = new AOPMessageVM();
 	    int totalUpdatedRows = 0;
-	    final Set<String> EXCLUDE = Set.of("Id", "PlantId", "AOPYear", "MonthName", "saveStatus", "errDescription");
+	    final Set<String> EXCLUDE = Set.of("Id", "PlantId","NumberOfDays", "AOPYear", "MonthName", "saveStatus", "errDescription");
 
 	    try {
 	        for (Map<String, Object> payload : payloadList) {
