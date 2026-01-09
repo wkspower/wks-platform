@@ -852,7 +852,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
-      downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
+      downloadExcelBtnFromUI: VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Max Achieved Capacity`,
     },
     isOldYear,
@@ -872,9 +872,14 @@ const ProductionvolumeData = ({ permissions }) => {
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
+      downloadExcelBtnFromUI: VERTICAL_NAME === 'pe' || VERTICAL_NAME === 'pp' ? false : true,
+      downloadExcelBtn: VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'  ? true : false,
+      uploadExcelBtn:
+         VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'
+            ? true
+            : false,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Design Capacity`,
-
+      
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
         'Design plant capacity for different furnace mode of operation as per licensor provided data.',
@@ -909,9 +914,9 @@ const ProductionvolumeData = ({ permissions }) => {
         Object.keys(calculationObject || {}).length > 0
           ? true
           : false,
-      downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
+      downloadExcelBtn: VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp' ? false : true,
       uploadExcelBtn:
-         permissions?.hideUploadExcel
+         VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'
             ? false
             : true,
 
@@ -965,6 +970,15 @@ const ProductionvolumeData = ({ permissions }) => {
     })
 
     try {
+      if(VERTICAL_NAME==='pe' || VERTICAL_NAME==='pp'){
+      await ProductionVolumeDataApiService.getProductionVolExcelCommon(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        EXCEL_EXPORT_TITLE,
+      )
+
+      }else{ 
       if (gridType === 'design') {
         await ProductionVolumeDataApiService.getDesignCapacityExcel(
           keycloak,
@@ -987,6 +1001,7 @@ const ProductionvolumeData = ({ permissions }) => {
           EXCEL_EXPORT_TITLE,
         )
       }
+    }
 
       setSnackbarData({
         message: 'Excel download completed successfully!',
@@ -1130,6 +1145,7 @@ const ProductionvolumeData = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
+          handleExcelUpload={handleExcelUpload}
         />
       )}
 
