@@ -22,10 +22,19 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 
+	// Timeout in milliseconds (10 minutes for long-running budget calculations)
+	private static final int CONNECTION_TIMEOUT = 30_000;      // 30 seconds to establish connection
+	private static final int READ_TIMEOUT = 600_000;           // 10 minutes to read response
+
 	@Bean
 	public RestTemplate getRestTemplate() {
+		HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+		factory.setConnectTimeout(CONNECTION_TIMEOUT);
+		factory.setConnectionRequestTimeout(CONNECTION_TIMEOUT);
+		factory.setReadTimeout(READ_TIMEOUT);
+		
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
+		restTemplate.setRequestFactory(factory);
 		return restTemplate;
 	}
 

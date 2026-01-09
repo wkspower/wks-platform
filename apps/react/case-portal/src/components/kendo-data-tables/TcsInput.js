@@ -7,9 +7,9 @@ import { useSelector } from 'react-redux'
 import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
 import { validateFields } from 'utils/validationUtils'
-import KendoDataTables from './index'
-import KendoDataTablesReports from 'components/kendo-data-tables/index-reports'
-import KendoDataTablesReportsTcs from './index-reports-tcs-input'
+import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import AdvanceKendoTable from './AdvanceKendoTable/index'
+import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 
 const TcsInput = () => {
   const keycloak = useSession()
@@ -35,6 +35,7 @@ const TcsInput = () => {
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
 
+  const headerMap = generateHeaderNames(AOP_YEAR)
   // State management
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -46,6 +47,7 @@ const TcsInput = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
+  const valueFormat = ValueFormatterProduction()
   // Tab management
   const rawTabsStatic = [
     'Unit Capacity',
@@ -53,6 +55,7 @@ const TcsInput = () => {
     'Slowdown',
     'CPP Units SD Plan',
     'PCG Outlook',
+    'ROGC',
     'Crude Blend Window',
   ]
   const tabsWithGroupBy = [3, 4]
@@ -66,6 +69,7 @@ const TcsInput = () => {
   const [slowdownRows, setSlowdownRows] = useState([])
   const [zcppShutdownRows, setZcppShutdownRows] = useState([])
   const [gasifierRows, setGasifierRows] = useState([])
+  const [rogcDecokingRows, setRogcDecokingRows] = useState([])
   const [crudeBlendRows, setCrudeBlendRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
 
@@ -83,6 +87,8 @@ const TcsInput = () => {
             locked: true,
             editable: true,
             disable: false,
+            type: 'text',
+            minWidth: 100,
           },
           {
             title: 'Capacity',
@@ -91,16 +97,19 @@ const TcsInput = () => {
                 field: 'uom',
                 title: 'UOM',
                 editable: true,
+                type: 'text',
+                minWidth: 100,
               },
               {
                 field: 'kbpsd',
                 title: 'KBPSD',
                 editable: true,
+                minWidth: 100,
               },
               {
                 field: 'remarks',
                 title: 'Remarks',
-
+                minWidth: 200,
                 editable: true,
               },
             ],
@@ -114,6 +123,8 @@ const TcsInput = () => {
             width: 150,
             locked: true,
             editable: true,
+            type: 'text',
+            minWidth: 100,
           },
 
           {
@@ -124,18 +135,22 @@ const TcsInput = () => {
                 title: 'SD Total duration in days',
                 width: 180,
                 editable: true,
+                minWidth: 100,
               },
               {
                 field: 'tentativeMonth',
-                title: 'Tentative Month',
+                // title: 'Tentative Month',
+                title: 'Start Date',
                 width: 150,
                 editable: true,
+                minWidth: 100,
               },
               {
                 field: 'purposeOfShutdown',
                 title: 'Purpose of Shutdown',
                 width: 200,
                 editable: true,
+                minWidth: 200,
               },
             ],
           },
@@ -151,29 +166,45 @@ const TcsInput = () => {
                 width: 150,
                 locked: true,
                 editable: true,
+                type: 'text',
+                minWidth: 80,
+              },
+              {
+                field: 'UOM',
+                title: 'UOM',
+                width: 150,
+                minWidth: 80,
+                locked: true,
+                editable: true,
+                type: 'text',
               },
               {
                 field: 'tentativeDuration',
                 title: 'Tentative Duration in days',
                 width: 200,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'throughputDuringSlowdown',
                 title: 'Throughput during the Slowdown',
                 width: 220,
+                minWidth: 80,
                 editable: true,
+                type: 'text',
               },
               {
                 field: 'tentativeMonth',
                 title: 'Tentative Month',
                 width: 150,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'purposeOfSlowdown',
                 title: 'Purpose of Slowdown',
                 width: 200,
+                minWidth: 80,
                 editable: true,
               },
             ],
@@ -188,12 +219,15 @@ const TcsInput = () => {
                 field: 'Particulars',
                 title: 'JMD-CPP',
                 width: 120,
+                minWidth: 80,
                 editable: true,
+                type: 'text',
               },
               {
                 field: 'ibrDueDate',
                 title: 'IBR Due date',
                 width: 120,
+                minWidth: 80,
                 editable: true,
               },
               {
@@ -202,7 +236,8 @@ const TcsInput = () => {
                   {
                     field: 'gtMaintenance',
                     title: 'MI/HGPI/CI/Mods',
-                    width: 180,
+                    widthT: 240,
+                    minWidth: 80,
                     editable: true,
                   },
                 ],
@@ -211,25 +246,30 @@ const TcsInput = () => {
                 field: 'noOfDays',
                 title: 'No. of days',
                 width: 100,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'shutdownDate',
                 title: 'Shutdown date',
                 width: 120,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'startupDate',
                 title: 'Startup date',
                 width: 120,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'majorJobs',
                 title: 'Major jobs',
                 width: 180,
+                minWidth: 80,
                 editable: true,
+                type: 'text',
               },
             ],
           },
@@ -242,18 +282,112 @@ const TcsInput = () => {
             width: 150,
             editable: true,
           },
-          { field: 'jan', title: 'Jan-25', width: 70, editable: true },
-          { field: 'feb', title: 'Feb-25', width: 70, editable: true },
-          { field: 'march', title: 'March-25', width: 70, editable: true },
-          { field: 'apr', title: 'Apr-25', width: 70, editable: true },
-          { field: 'may', title: 'May-25', width: 70, editable: true },
-          { field: 'june', title: 'June-25', width: 70, editable: true },
-          { field: 'july', title: 'July-25', width: 70, editable: true },
-          { field: 'aug', title: 'Aug-25', width: 70, editable: true },
-          { field: 'sep', title: 'Sep-25', width: 70, editable: true },
-          { field: 'oct', title: 'Oct-25', width: 70, editable: true },
-          { field: 'nov', title: 'Nov-25', width: 70, editable: true },
-          { field: 'dec', title: 'Dec-25', width: 70, editable: true },
+          { field: 'apr', title: headerMap[4], width: 70, editable: true },
+          { field: 'may', title: headerMap[5], width: 70, editable: true },
+          { field: 'june', title: headerMap[6], width: 70, editable: true },
+          { field: 'july', title: headerMap[7], width: 70, editable: true },
+          { field: 'aug', title: headerMap[8], width: 70, editable: true },
+          { field: 'sep', title: headerMap[9], width: 70, editable: true },
+          { field: 'oct', title: headerMap[10], width: 70, editable: true },
+          { field: 'nov', title: headerMap[11], width: 70, editable: true },
+          { field: 'dec', title: headerMap[12], width: 70, editable: true },
+          { field: 'jan', title: headerMap[1], width: 70, editable: true },
+          { field: 'feb', title: headerMap[2], width: 70, editable: true },
+          { field: 'march', title: headerMap[3], width: 70, editable: true },
+        ]
+      case 'ROGC':
+        return [
+          {
+            field: 'Particulars',
+            title: 'Product',
+            width: 150,
+            editable: true,
+            type: 'text',
+          },
+          {
+            field: 'apr',
+            title: headerMap[4],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'may',
+            title: headerMap[5],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'june',
+            title: headerMap[6],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'july',
+            title: headerMap[7],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'aug',
+            title: headerMap[8],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'sep',
+            title: headerMap[9],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'oct',
+            title: headerMap[10],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'nov',
+            title: headerMap[11],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'dec',
+            title: headerMap[12],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'jan',
+            title: headerMap[1],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'feb',
+            title: headerMap[2],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'march',
+            title: headerMap[3],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
         ]
       case 'Crude Blend Window':
         return [
@@ -266,8 +400,20 @@ const TcsInput = () => {
                 width: 180,
                 editable: true,
               },
-              { field: 'stream', title: 'Stream', width: 120, editable: true },
-              { field: 'unit', title: 'Unit', width: 80, editable: true },
+              {
+                field: 'stream',
+                title: 'Stream',
+                width: 120,
+                editable: true,
+                type: 'text',
+              },
+              {
+                field: 'unit',
+                title: 'Unit',
+                width: 80,
+                editable: true,
+                type: 'text',
+              },
               { field: 'min', title: 'Min', width: 70, editable: true },
               { field: 'max', title: 'Max', width: 70, editable: true },
               {
@@ -310,6 +456,8 @@ const TcsInput = () => {
           return zcppShutdownRows
         case 'PCG Outlook':
           return gasifierRows
+        case 'ROGC':
+          return rogcDecokingRows
         case 'Crude Blend Window':
           return crudeBlendRows
         default:
@@ -322,6 +470,7 @@ const TcsInput = () => {
       slowdownRows,
       zcppShutdownRows,
       gasifierRows,
+      rogcDecokingRows,
       crudeBlendRows,
     ],
   )
@@ -342,6 +491,9 @@ const TcsInput = () => {
         break
       case 'PCG Outlook':
         setGasifierRows(data)
+        break
+      case 'ROGC':
+        setRogcDecokingRows(data)
         break
       case 'Crude Blend Window':
         setCrudeBlendRows(data)
@@ -601,7 +753,8 @@ const TcsInput = () => {
             id: 1,
             Particulars: 'GT-1/HRSG-1',
             ibrDueDate: '2025-01-23',
-            gtMaintenance: 'MI',
+            // gtMaintenance: 'MI',
+            gtMaintenance: ['MI', 'HGPI'],
             noOfDays: 66,
             shutdownDate: '2024-12-24',
             startupDate: '2025-02-28',
@@ -611,7 +764,7 @@ const TcsInput = () => {
             id: 2,
             Particulars: 'GT-6/HRSG-6',
             ibrDueDate: '2025-03-07',
-            gtMaintenance: 'HGPI',
+            gtMaintenance: ['HGPI'],
             noOfDays: 70,
             shutdownDate: '2025-03-01',
             startupDate: '2025-05-10',
@@ -621,7 +774,7 @@ const TcsInput = () => {
             id: 3,
             Particulars: 'GT-13/HRSG-13',
             ibrDueDate: '2025-03-14',
-            gtMaintenance: 'CI',
+            gtMaintenance: ['MI'],
             noOfDays: 11,
             shutdownDate: '2025-03-05',
             startupDate: '2025-03-16',
@@ -631,7 +784,7 @@ const TcsInput = () => {
             id: 4,
             Particulars: 'GT-4/HRSG-4',
             ibrDueDate: '2025-05-13',
-            gtMaintenance: 'HGPI',
+            gtMaintenance: ['HGPI'],
             noOfDays: 30,
             shutdownDate: '2025-03-17',
             startupDate: '2025-04-16',
@@ -675,6 +828,129 @@ const TcsInput = () => {
             dec: 6.0,
           },
         ]
+      case 'ROGC':
+        return [
+          {
+            id: 1,
+            srno: 1,
+            Particulars: 'F1',
+            jan: 18,
+            feb: 0.0,
+            march: 0.0,
+            apr: 0.0,
+            may: 2.3,
+            june: 0.0,
+            july: 0.0,
+            aug: 2.3,
+            sep: 0.0,
+            oct: 0.0,
+            nov: 0.0,
+            dec: 2.3,
+          },
+          {
+            id: 2,
+            srno: 2,
+            Particulars: 'F2',
+            jan: 2.3,
+            feb: 0.0,
+            march: 0.0,
+            apr: 0.0,
+            may: 0.0,
+            june: 0.0,
+            july: 2.3,
+            aug: 0.0,
+            sep: 0.0,
+            oct: 2.3,
+            nov: 0.0,
+            dec: 0.0,
+          },
+          {
+            id: 3,
+            srno: 3,
+            Particulars: 'F3',
+            jan: 0.0,
+            feb: 0.0,
+            march: 0.0,
+            apr: 2.3,
+            may: 0.0,
+            june: 0.0,
+            july: 2.3,
+            aug: 0.0,
+            sep: 0.0,
+            oct: 2.3,
+            nov: 0.0,
+            dec: 0.0,
+          },
+          {
+            id: 4,
+            srno: 4,
+            Particulars: 'F4',
+            jan: 0.0,
+            feb: 2.3,
+            march: 0.0,
+            apr: 2.3,
+            may: 0.0,
+            june: 0.0,
+            july: 0.0,
+            aug: 0.0,
+            sep: 0.0,
+            oct: 0.0,
+            nov: 2.3,
+            dec: 0.0,
+          },
+          {
+            id: 5,
+            srno: 5,
+            Particulars: 'F5',
+            jan: 2.3,
+            feb: 0.0,
+            march: 0.0,
+            apr: 0.0,
+            may: 2.3,
+            june: 0.0,
+            july: 0.0,
+            aug: 2.3,
+            sep: 0.0,
+            oct: 2.3,
+            nov: 0.0,
+            dec: 2.3,
+          },
+          {
+            id: 6,
+            srno: 6,
+            Particulars: 'F6',
+            jan: 0.0,
+            feb: 0.0,
+            march: 2.3,
+            apr: 0.0,
+            may: 0.0,
+            june: 2.3,
+            july: 0.0,
+            aug: 0.0,
+            sep: 0.0,
+            oct: 0.0,
+            nov: 0.0,
+            dec: 0.0,
+          },
+          {
+            id: 7,
+            srno: 7,
+            Particulars: 'Demo',
+            jan: 2.3,
+            feb: 2.3,
+            march: 0.0,
+            apr: 2.3,
+            may: 2.3,
+            june: 0.0,
+            july: 2.3,
+            aug: 2.3,
+            sep: 0.0,
+            oct: 2.3,
+            nov: 0.0,
+            dec: 2.3,
+          },
+        ]
+
       case 'Crude Blend Window':
         return [
           {
@@ -1117,7 +1393,7 @@ const TcsInput = () => {
 
       const rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
-
+      console.log('data', data)
       if (data.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
@@ -1302,7 +1578,8 @@ const TcsInput = () => {
 
           return (
             <Box key={currentTabDisplay}>
-              <KendoDataTablesReportsTcs
+              {/* <KendoDataTablesReportsTcs */}
+              <AdvanceKendoTable
                 rows={rows}
                 setRows={setRowsForCurrent}
                 fetchData={() => fetchTcsData(currentTabDisplay)}

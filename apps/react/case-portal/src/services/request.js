@@ -5,6 +5,10 @@ export function json(keycloak, resp) {
   }
 
   if (resp.ok) {
+    // Handle empty responses (e.g., 204 No Content or void returns with 200)
+    if (resp.status === 204 || resp.headers.get('content-length') === '0') {
+      return Promise.resolve(null)
+    }
     return resp.json()
   }
 

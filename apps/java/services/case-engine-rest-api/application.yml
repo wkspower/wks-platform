@@ -95,3 +95,6 @@ case.engine.email-to-case-outbound-process: email-to-case-outbound
 
 case.engine.actuator.enabled: true
 case.engine.swagger.enabled: true
+
+# Python Budget Calculator Service URL
+pp.budget.calculator.url: ${PP_BUDGET_CALCULATOR_URL:http://pp-budget-calculator:5000}

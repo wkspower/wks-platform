@@ -60,6 +60,7 @@ const defs = {
     monthlyAop: 'Maintenance',
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
+    UtilityPlant: 'Utility Plant',
     packagingConsumables: 'Consumíveis de Embalagem',
   },
   pages: {
@@ -216,6 +217,10 @@ const defs = {
         previousFYAOPResult: 'Resultado AOP do Ano Fiscal Anterior', // New addition
         matBalSheet: 'Balanço de MAT', // New addition
         workflow: 'Fluxo de Trabalho', // New addition
+        utilityPlant: 'Planta de Utilidade', // New addition
+        fixedConsumption: 'Consumo Fixo',
+        norms: 'Normas',
+        importPower: 'Importação de Energia',
 
         //FUNCTIONAL AOP
         functionalAop: 'CES',

@@ -1,0 +1,44 @@
+﻿python : C:\Users\shrik\AppData\Lo
+cal\Programs\Python\Python310\lib\
+site-packages\numpy\_distributor_i
+nit.py:30: UserWarning: loaded 
+more than 1 DLL from .libs:
+At line:1 char:1
++ python .\main.py 2>&1 | 
+Out-File -FilePath 
+debug_output.txt -Encoding ...
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : Not 
+   Specified: (C:\Users\shrik\..  
+  .DLL from .libs::String) [],    
+ RemoteException
+    + FullyQualifiedErrorId : Nat 
+   iveCommandError
+ 
+C:\Users\shrik\AppData\Local\Progr
+ams\Python\Python310\lib\site-pack
+ages\numpy\.libs\libopenblas.FB5AE
+2TYXYH2IJRDKGDGQ3XBKLKTF43H.gfortr
+an-win_amd64.dll
+C:\Users\shrik\AppData\Local\Progr
+ams\Python\Python310\lib\site-pack
+ages\numpy\.libs\libopenblas64__v0
+.3.21-gcc_10_3_0.dll
+  warnings.warn("loaded more than 
+1 DLL from .libs:"
+======================================================================
+POWER PLANT BUDGETING SYSTEM
+With USD Iteration (Power-Steam Balancing)
+======================================================================
+
+--- INPUT: Period ---
+Traceback (most recent call last):
+  File "C:\Users\shrik\Desktop\Pro
+ject\fork repo\development\New\wks
+-platform\apps\python\PPPython-scr
+ipt\main.py", line 81, in <module>
+    month = int(input("Enter 
+Month (1-12): "))
+ValueError: invalid literal for 
+int() with base 10: ''
+Enter Month (1-12): 

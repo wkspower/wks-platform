@@ -980,12 +980,28 @@ const ProductionvolumeData = ({ permissions }) => {
           EXCEL_EXPORT_TITLE,
         )
       } else {
-        await ProductionVolumeDataApiService.getProductionVolExcel(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          EXCEL_EXPORT_TITLE,
-        )
+        if (gridType === 'design') {
+          await ProductionVolumeDataApiService.getDesignCapacityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        } else if (gridType === 'max') {
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        } else {
+          await ProductionVolumeDataApiService.getProductionVolExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        }
       }
 
       setSnackbarData({
