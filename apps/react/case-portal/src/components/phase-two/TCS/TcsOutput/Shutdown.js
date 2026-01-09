@@ -49,6 +49,7 @@ const Shutdown = ({
           id: item.id || `row_${index}`,
           ...item,
           inEdit: false,
+          isEditable: false,
         }))
       }
 
