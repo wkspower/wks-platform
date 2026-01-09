@@ -144,18 +144,18 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	            dto.setSiteFKId(row[1] != null ? row[1].toString() : null);
 	            dto.setPlantFKId(row[2] != null ? row[2].toString() : null);
 	            dto.setMaterialFKId(row[3] != null ? row[3].toString() : null);
-	            dto.setApril(roundToTwoDecimals(row[4]));
-	            dto.setMay(roundToTwoDecimals(row[5]));
-	            dto.setJune(roundToTwoDecimals(row[6]));
-	            dto.setJuly(roundToTwoDecimals(row[7]));
-	            dto.setAugust(roundToTwoDecimals(row[8]));
-	            dto.setSeptember(roundToTwoDecimals(row[9]));
-	            dto.setOctober(roundToTwoDecimals(row[10]));
-	            dto.setNovember(roundToTwoDecimals(row[11]));
-	            dto.setDecember(roundToTwoDecimals(row[12]));
-	            dto.setJanuary(roundToTwoDecimals(row[13]));
-	            dto.setFebruary(roundToTwoDecimals(row[14]));
-	            dto.setMarch(roundToTwoDecimals(row[15]));
+	            dto.setApril(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+	            dto.setMay(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
+	            dto.setJune(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
+	            dto.setJuly(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+	            dto.setAugust(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+	            dto.setSeptember(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+	            dto.setOctober(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+	            dto.setNovember(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+	            dto.setDecember(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+	            dto.setJanuary(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+	            dto.setFebruary(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
+	            dto.setMarch(row[15] != null ? Double.parseDouble(row[15].toString()) : 0.0);
 
 	            dto.setFinancialYear(row[16] != null ? row[16].toString() : null);
 	            dto.setRemarks(row[17] != null ? row[17].toString() : " ");
@@ -313,18 +313,18 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setMaterialFKId(row[1] != null ? row[1].toString() : null);
                 dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
-                dto.setApril(roundValue(row[3]));
-                dto.setMay(roundValue(row[4]));
-                dto.setJune(roundValue(row[5]));
-                dto.setJuly(roundValue(row[6]));
-                dto.setAugust(roundValue(row[7]));
-                dto.setSeptember(roundValue(row[8]));
-                dto.setOctober(roundValue(row[9]));
-                dto.setNovember(roundValue(row[10]));
-                dto.setDecember(roundValue(row[11]));
-                dto.setJanuary(roundValue(row[12]));
-                dto.setFebruary(roundValue(row[13]));
-                dto.setMarch(roundValue(row[14]));
+                dto.setApril(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
+                dto.setMay(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+                dto.setJune(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
+                dto.setJuly(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
+                dto.setAugust(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+                dto.setSeptember(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+                dto.setOctober(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+                dto.setNovember(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+                dto.setDecember(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+                dto.setJanuary(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+                dto.setFebruary(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+                dto.setMarch(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
 
                 dto.setRemarks(row[16] != null ? row[16].toString() : " ");
                 aOPMCCalculatedDataDTOList.add(dto);
@@ -342,16 +342,6 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
             throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
         } catch (Exception ex) {
             throw new RuntimeException("Failed to fetch data", ex);
-        }
-    }
-
-    private Double roundValue(Object val) {
-        if (val == null) return null;
-        try {
-            double d = Double.parseDouble(val.toString());
-            return Math.round(d * 100.0) / 100.0;
-        } catch (NumberFormatException e) {
-            return 0.0;
         }
     }
     
@@ -384,18 +374,18 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setMaterialFKId(row[1] != null ? row[1].toString() : null);
                 dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
-                dto.setApril(roundToTwoDecimals(row[3]));
-                dto.setMay(roundToTwoDecimals(row[4]));
-                dto.setJune(roundToTwoDecimals(row[5]));
-                dto.setJuly(roundToTwoDecimals(row[6]));
-                dto.setAugust(roundToTwoDecimals(row[7]));
-                dto.setSeptember(roundToTwoDecimals(row[8]));
-                dto.setOctober(roundToTwoDecimals(row[9]));
-                dto.setNovember(roundToTwoDecimals(row[10]));
-                dto.setDecember(roundToTwoDecimals(row[11]));
-                dto.setJanuary(roundToTwoDecimals(row[12]));
-                dto.setFebruary(roundToTwoDecimals(row[13]));
-                dto.setMarch(roundToTwoDecimals(row[14]));
+                dto.setApril(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
+                dto.setMay(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
+                dto.setJune(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
+                dto.setJuly(row[6] != null ? Double.parseDouble(row[6].toString()) : 0.0);
+                dto.setAugust(row[7] != null ? Double.parseDouble(row[7].toString()) : 0.0);
+                dto.setSeptember(row[8] != null ? Double.parseDouble(row[8].toString()) : 0.0);
+                dto.setOctober(row[9] != null ? Double.parseDouble(row[9].toString()) : 0.0);
+                dto.setNovember(row[10] != null ? Double.parseDouble(row[10].toString()) : 0.0);
+                dto.setDecember(row[11] != null ? Double.parseDouble(row[11].toString()) : 0.0);
+                dto.setJanuary(row[12] != null ? Double.parseDouble(row[12].toString()) : 0.0);
+                dto.setFebruary(row[13] != null ? Double.parseDouble(row[13].toString()) : 0.0);
+                dto.setMarch(row[14] != null ? Double.parseDouble(row[14].toString()) : 0.0);
                 
                 dto.setRemarks(row[16] != null ? row[16].toString() : " ");
                 aOPMCCalculatedDataDTOList.add(dto);
@@ -416,17 +406,7 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
         }
     }
 
-    private Double roundToTwoDecimals(Object value) {
-        if (value == null) {
-            return null;
-        }
-        try {
-            double dVal = Double.parseDouble(value.toString());
-            return Math.round(dVal * 100.0) / 100.0;
-        } catch (NumberFormatException e) {
-            return 0.0;
-        }
-    }
+   
 	@Override
 	public List<AOPMCCalculatedDataDTO> editAOPMCCalculatedData(List<AOPMCCalculatedDataDTO> aOPMCCalculatedDataDTOList,
 			boolean isFromExcel, String year, String plantId) {
