@@ -22,6 +22,12 @@ from io import StringIO
 
 from services.budget_service import calculate_budget_with_iteration
 from services.fixed_consumption_service import get_fixed_consumption_for_month, print_fixed_consumption
+from services.process_demand_service import (
+    get_process_demand_for_month, 
+    print_process_demands,
+    get_default_process_demands,
+    get_combined_demands_for_month
+)
 from database.connection import get_connection
 
 # ============================================================
@@ -81,8 +87,8 @@ def get_default_cpp_plant() -> str:
         return plants[0]
     return None
 
-# Process Demands (same for all months - these are constant)
-# Fixed demands are fetched dynamically from database per month
+# Default Process Demands (fallback if DB fetch fails)
+# Now fetched dynamically from CalculatedProcessDemand table per month
 DEFAULT_PROCESS_DEMANDS = {
     "lp_process": 30043.15,
     "mp_process": 14030.65,
@@ -105,27 +111,46 @@ DEFAULT_FIXED_DEMANDS = {
 }
 
 
-def get_demands_for_month(month: int, year: int, process_demands: dict = None) -> dict:
+def get_demands_for_month(month: int, year: int, 
+                          process_demands: dict = None,
+                          use_db_process: bool = True,
+                          use_db_fixed: bool = True) -> dict:
     """
     Get combined demands (process + fixed) for a specific month.
-    Fixed demands are fetched from database, process demands are constant.
+    Both process and fixed demands are now fetched dynamically from database.
     
     Args:
         month: Month number (1-12)
         year: Year (e.g., 2025)
-        process_demands: Process demands dict (uses DEFAULT_PROCESS_DEMANDS if None)
+        process_demands: Override process demands dict (uses DB values if None)
+        use_db_process: If True, fetch process demands from DB; else use defaults/override
+        use_db_fixed: If True, fetch fixed demands from DB; else use defaults
     
     Returns:
         Combined demands dict for the month
     """
-    if process_demands is None:
-        process_demands = DEFAULT_PROCESS_DEMANDS.copy()
+    # Get process demands - either from DB, override, or defaults
+    if process_demands is not None:
+        # Use provided override values
+        base_process = process_demands.copy()
+    elif use_db_process:
+        # Fetch from database
+        base_process = get_process_demand_for_month(month, year)
+        # Add non-steam parameters that may not be in DB
+        base_process.setdefault("bfw_ufu", 0.0)
+        base_process.setdefault("export_available", False)
+    else:
+        # Use defaults
+        base_process = DEFAULT_PROCESS_DEMANDS.copy()
     
-    # Fetch fixed consumption from database
-    fixed_data = get_fixed_consumption_for_month(month, year)
+    # Fetch fixed consumption from database or use defaults
+    if use_db_fixed:
+        fixed_data = get_fixed_consumption_for_month(month, year)
+    else:
+        fixed_data = DEFAULT_FIXED_DEMANDS.copy()
     
     # Combine process and fixed demands
-    demands = process_demands.copy()
+    demands = base_process.copy()
     demands["lp_fixed"] = fixed_data.get("lp_fixed", DEFAULT_FIXED_DEMANDS["lp_fixed"])
     demands["mp_fixed"] = fixed_data.get("mp_fixed", DEFAULT_FIXED_DEMANDS["mp_fixed"])
     demands["hp_fixed"] = fixed_data.get("hp_fixed", DEFAULT_FIXED_DEMANDS["hp_fixed"])
@@ -211,23 +236,27 @@ def run_single_month(month, year, demands, save_to_db=True):
         }
 
 
-def run_full_financial_year(financial_year: int, cpp_plant_id: str = None, process_demands=None, save_to_db=True, save_logs=True):
+def run_full_financial_year(financial_year: int, cpp_plant_id: str = None, 
+                            process_demands=None, save_to_db=True, save_logs=True,
+                            use_db_process: bool = True, use_db_fixed: bool = True):
     """
     Run the budget model for all 12 months of a financial year.
-    Fixed demands are fetched dynamically from DB for each month.
+    Both process and fixed demands are fetched dynamically from DB for each month.
     
     Args:
         financial_year: Starting year of FY (e.g., 2025 for FY 2025-26)
         cpp_plant_id: CPP Plant ID (GUID) - uses default if None
-        process_demands: Dict of process demands (uses DEFAULT_PROCESS_DEMANDS if None)
+        process_demands: Override dict of process demands (fetches from DB if None)
         save_to_db: Whether to save results to database
         save_logs: Whether to save individual month logs
+        use_db_process: If True and process_demands is None, fetch from DB
+        use_db_fixed: If True, fetch fixed demands from DB
     
     Returns:
         Dict with summary of all month results
     """
-    if process_demands is None:
-        process_demands = DEFAULT_PROCESS_DEMANDS.copy()
+    # Determine if we're using dynamic process demands
+    use_dynamic_process = (process_demands is None and use_db_process)
     
     # Get CPP Plant ID if not provided
     if cpp_plant_id is None:
@@ -253,26 +282,37 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None, proce
     print(f"Log folder: {run_log_folder}")
     print()
     
-    # Print process demands (constant for all months)
-    print("PROCESS DEMANDS (constant for all months):")
-    print("-" * 40)
-    print(f"  LP Steam:  {process_demands['lp_process']:.2f} MT")
-    print(f"  MP Steam:  {process_demands['mp_process']:.2f} MT")
-    print(f"  HP Steam:  {process_demands['hp_process']:.2f} MT")
-    print(f"  SHP Steam: {process_demands['shp_process']:.2f} MT")
-    print(f"  BFW UFU:   {process_demands['bfw_ufu']:.2f} M3")
-    print(f"  Compressed Air: {process_demands['air_process']:,.0f} NM3")
-    print(f"  Cooling Water 1: {process_demands['cw1_process']:,.0f} KM3")
-    print(f"  Cooling Water 2: {process_demands['cw2_process']:,.0f} KM3")
-    print(f"  DM Water: {process_demands['dm_process']:,.0f} M3")
+    # Print demand source information
+    if use_dynamic_process:
+        print("PROCESS DEMANDS: Will be fetched dynamically from database for each month")
+    else:
+        # Use provided or default process demands
+        if process_demands is None:
+            process_demands = DEFAULT_PROCESS_DEMANDS.copy()
+        print("PROCESS DEMANDS (override/constant for all months):")
+        print("-" * 40)
+        print(f"  LP Steam:  {process_demands['lp_process']:.2f} MT")
+        print(f"  MP Steam:  {process_demands['mp_process']:.2f} MT")
+        print(f"  HP Steam:  {process_demands['hp_process']:.2f} MT")
+        print(f"  SHP Steam: {process_demands['shp_process']:.2f} MT")
+        print(f"  BFW UFU:   {process_demands.get('bfw_ufu', 0):.2f} M3")
+        print(f"  Compressed Air: {process_demands['air_process']:,.0f} NM3")
+        print(f"  Cooling Water 1: {process_demands['cw1_process']:,.0f} KM3")
+        print(f"  Cooling Water 2: {process_demands['cw2_process']:,.0f} KM3")
+        print(f"  DM Water: {process_demands['dm_process']:,.0f} M3")
     print()
-    print("FIXED DEMANDS: Will be fetched dynamically from database for each month")
+    if use_db_fixed:
+        print("FIXED DEMANDS: Will be fetched dynamically from database for each month")
+    else:
+        print("FIXED DEMANDS: Using default values")
     print()
     
     # Results storage
     results = {
         "run_timestamp": run_timestamp,
-        "process_demands": process_demands,
+        "use_dynamic_process": use_dynamic_process,
+        "use_db_fixed": use_db_fixed,
+        "process_demands_override": process_demands if not use_dynamic_process else None,
         "months": {},
         "summary": {
             "total_months": 12,
@@ -295,11 +335,28 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None, proce
         sys.stdout = log_capture
         
         try:
-            # Get demands for this month (process + dynamic fixed from DB)
-            month_demands = get_demands_for_month(month, year, process_demands)
+            # Get demands for this month (both process and fixed from DB if enabled)
+            month_demands = get_demands_for_month(
+                month, year, 
+                process_demands=process_demands,
+                use_db_process=use_dynamic_process,
+                use_db_fixed=use_db_fixed
+            )
+            
+            # Print process demands for this month (if dynamic)
+            if use_dynamic_process:
+                print(f"\nProcess Demands for {month_name} {year} (from DB):")
+                print(f"  LP Process:  {month_demands['lp_process']:.2f} MT")
+                print(f"  MP Process:  {month_demands['mp_process']:.2f} MT")
+                print(f"  HP Process:  {month_demands['hp_process']:.2f} MT")
+                print(f"  SHP Process: {month_demands['shp_process']:.2f} MT")
+                print(f"  Compressed Air: {month_demands['air_process']:,.0f} NM3")
+                print(f"  Cooling Water 1: {month_demands['cw1_process']:,.0f} KM3")
+                print(f"  Cooling Water 2: {month_demands['cw2_process']:,.0f} KM3")
+                print(f"  DM Water: {month_demands['dm_process']:,.0f} M3")
             
             # Print fixed demands for this month
-            print(f"\nFixed Demands for {month_name} {year}:")
+            print(f"\nFixed Demands for {month_name} {year}{' (from DB)' if use_db_fixed else ' (defaults)'}:")
             print(f"  LP Fixed: {month_demands['lp_fixed']:.2f} MT")
             print(f"  MP Fixed: {month_demands['mp_fixed']:.2f} MT")
             print(f"  HP Fixed: {month_demands['hp_fixed']:.2f} MT")
@@ -313,28 +370,42 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None, proce
             
             # Extract key metrics
             success = result.get("overall_success", False)
+            usd_result = result.get("usd_result", {})
+            
+            # Get iterations and converged from correct locations
+            iterations_used = result.get("iterations_used", 0) or usd_result.get("iterations_used", 0)
+            converged = success  # overall_success is set from usd_result.converged
             
             month_result = {
                 "month": month,
                 "year": year,
                 "month_name": month_name,
                 "success": success,
-                "iterations": result.get("iterations", 0),
-                "converged": result.get("converged", False),
+                "iterations": iterations_used,
+                "converged": converged,
             }
             
             # Extract power generation (even if not converged)
-            usd_result = result.get("usd_result", {})
             final_dispatch = usd_result.get("final_dispatch", [])
             
             total_power = sum(asset.get("GrossMWh", 0) * 1000 for asset in final_dispatch)
             month_result["total_power_kwh"] = total_power
             results["summary"]["total_power_kwh"] += total_power
             
-            # Extract SHP steam
-            final_steam = usd_result.get("final_steam_balance", {})
+            # Extract SHP steam - check multiple possible locations
+            final_steam = usd_result.get("final_steam_balance", {}) or result.get("steam_result", {})
             shp_balance = final_steam.get("shp_balance", {})
+            
+            # Try different keys for total SHP
             total_shp = shp_balance.get("total_shp_supply", 0)
+            if total_shp == 0:
+                # Try summary
+                summary = final_steam.get("summary", {})
+                total_shp = summary.get("total_shp_demand", 0)
+            if total_shp == 0:
+                # Try shp_total
+                total_shp = shp_balance.get("shp_total", 0)
+            
             month_result["total_shp_mt"] = total_shp
             results["summary"]["total_shp_mt"] += total_shp
             
