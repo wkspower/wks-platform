@@ -751,7 +751,7 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	            columnNames.add(headerValue != null ? headerValue.trim() : "Column_" + i);
 	        }
 
-	        for (int i = 1; i <= totalRows; i++) {
+	        for (int i = 1; i <= totalRows-1; i++) {
 	            Row row = sheet.getRow(i);
 	            
 	            if (row == null) continue;
