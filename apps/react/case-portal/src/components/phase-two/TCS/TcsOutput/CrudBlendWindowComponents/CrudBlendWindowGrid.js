@@ -2,9 +2,9 @@ import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
+import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const CrudBlendWindowGrid = ({
   tableKey,
@@ -20,7 +20,7 @@ const CrudBlendWindowGrid = ({
   onRefresh,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management for this grid
   const [rows, setRows] = useState([])
@@ -41,7 +41,7 @@ const CrudBlendWindowGrid = ({
         ...item,
         inEdit: false,
       }))
-
+      console.log('transformedData',transformedData)
       setApiMetadata({ headers, keys })
       setRows(transformedData)
       setOriginalRows(transformedData)
@@ -124,103 +124,12 @@ const CrudBlendWindowGrid = ({
     }
   }, [modifiedCells])
 
-  // Save changes for this grid
-  const saveChanges = useCallback(async () => {
-    try {
-      if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-
-      const rawData = Object.values(modifiedCells)
-      const data = rawData.filter((row) => row.inEdit)
-
-      if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-
-      // Custom validation: If any row data is updated, remarks/reasons must be filled and different from original
-      const fieldsToCheck = ['minValue', 'maxValue', 'criticality', 'maxBlendLimit', 'value_345']
-      const remarksFieldName = apiMetadata.keys.includes('remarks') ? 'remarks' : 'reasons'
-      const displayFieldName = tableKey === 'CrudeBlendWindow' ? 'property' : tableKey === 'CrudeSpecificConstraints' ? 'crude' : 'kbpsd'
-      
-      const validationError = validateRowDataWithRemarks(
-        data,
-        originalRows,
-        fieldsToCheck,
-        displayFieldName,
-        remarksFieldName,
-      )
-
-      if (validationError) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationError,
-          severity: 'error',
-        })
-        return
-      }
-
-      const payload = {
-        tableKey: tableKey,
-        data: {results: data}
-      };
-
-      const response = await TcsApiService.saveCrudBlendWindowData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        SITE_ID,
-        payload,
-      )
-
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: `${title} data saved successfully!`,
-        severity: 'success',
-      })
-      setModifiedCells({})
-      // Refresh all tables data from parent
-      if (onRefresh) {
-        onRefresh()
-      }
-    } catch (error) {
-      console.error(`Error saving ${tableKey} data:`, error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: `Error saving ${title} data!`,
-        severity: 'error',
-      })
-    }
-  }, [
-    modifiedCells,
-    originalRows,
-    apiMetadata,
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    SITE_ID,
-    title,
-    setSnackbarData,
-    setSnackbarOpen,
-    onRefresh,
-  ])
 
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: false,
-    remarksEditable: true,
-    showCalculate: false,
-    showExport: false,
-    showImport: false,
-    saveBtnForRemark: true,
-    saveBtn: true,
-    showWorkFlowBtns: false,
+    showExport: true,
     showTitle: true,
     filterable: false,
   }
@@ -241,7 +150,6 @@ const CrudBlendWindowGrid = ({
           setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
           setCurrentRowId={() => {}}
-          saveChanges={saveChanges}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
@@ -250,7 +158,8 @@ const CrudBlendWindowGrid = ({
           setModifiedCells={setModifiedCells}
           permissions={permissions}
           paginationConfig={{ threshold: 100, defaultPageSize: 50, pageSizes: [10, 20, 50, 100] }}
-          {...(tableKey === 'CrudeBlendWindow' && { groupBy: 'type' })}
+          {...(tableKey === 'CrudeBlendWindow' && { groupBy:'type' })}
+          readonly={true}
         />
       </Stack>
     </Box>

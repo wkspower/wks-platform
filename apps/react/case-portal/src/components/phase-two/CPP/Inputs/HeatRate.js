@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import { InputApiService } from 'services/phase-two-services/CPP/inputApiService'
 import STGHeatRate from './STGHeatRate'
 import HRSGHeatRate from './HRSGHeatRate'
@@ -30,7 +30,7 @@ const HeatRate = () => {
   } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   const columns = [
     {
@@ -267,6 +267,38 @@ const HeatRate = () => {
       setLoading(false)
     }
   }
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      await InputApiService.saveHeatRateExcel(
+        file,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel file imported successfully!',
+        severity: 'success',
+      })
+
+      // Refresh data after import
+      await fetchHeatRateData(selectedPlant)
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remarks || '')
@@ -299,6 +331,7 @@ const HeatRate = () => {
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
+        handleExcelUpload={handleExcelUpload}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

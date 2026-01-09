@@ -1,8 +1,8 @@
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
+import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
@@ -18,7 +18,7 @@ const PCGOutlook = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management
   const [loading, setLoading] = useState(false)
@@ -37,7 +37,7 @@ const PCGOutlook = ({
       setLoading(true)
       let transformedData = []
 
-      const response = await TcsApiService.getPcgOutlookData(
+      const response = await TcsOutputApiService.getPcgOutlookData(
         keycloak,
         SITE_ID,
         AOP_YEAR,
@@ -239,93 +239,11 @@ const PCGOutlook = ({
     }
   }, [modifiedCells])
 
-  // Save changes
-  const saveChanges = useCallback(async () => {
-    try {
-      if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-
-      const rawData = Object.values(modifiedCells)
-      const data = rawData.filter((row) => row.inEdit)
-      console.log('PCG Outlook data to save:', data)
-
-      if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        return
-      }
-
-      // Custom validation: If any row data is updated, remarks must be filled and different from original
-      const fieldsToCheck = ['apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar']
-      const validationError = validateRowDataWithRemarks(
-        data,
-        originalRows,
-        fieldsToCheck,
-        'product',
-        'remarks',
-      )
-
-      if (validationError) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: validationError,
-          severity: 'error',
-        })
-        return
-      }
-
-      // Remove id and inEdit fields from payload, keep remarks
-      const cleanedData = data.map(({ id, inEdit, ...rest }) => rest)
-
-      const response = await TcsApiService.savePcgOutlookData(
-        keycloak,
-        SITE_ID,
-        AOP_YEAR,
-        cleanedData,
-      )
-      console.log('Save PCG Outlook response:', response)
-
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'PCG Outlook data saved successfully!',
-        severity: 'success',
-      })
-      setModifiedCells({})
-      fetchPcgOutlookData()
-    } catch (error) {
-      console.error('Error saving PCG Outlook data:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Error saving PCG Outlook data!',
-        severity: 'error',
-      })
-    }
-  }, [
-    modifiedCells,
-    originalRows,
-    keycloak,
-    SITE_ID,
-    AOP_YEAR,
-    setSnackbarData,
-    setSnackbarOpen,
-    fetchPcgOutlookData,
-  ])
-
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: false,
-    remarksEditable: true,
-    showCalculate: false,
-    showExport: false,
-    showImport: false,
-    saveBtnForRemark: true,
-    saveBtn: true,
-    showWorkFlowBtns: false,
+    showExport: true,
     showTitle: true,
     filterable: false,
   }
@@ -352,7 +270,6 @@ const PCGOutlook = ({
         setCurrentRemark={setCurrentRemark}
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
-        saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
@@ -360,6 +277,7 @@ const PCGOutlook = ({
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         permissions={permissions}
+        readonly={true}
       />
     </Box>
   )

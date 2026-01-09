@@ -10,7 +10,7 @@ import {
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import ImportPower from './ImportPower'
 import AssetAvailability from './AssetAvailability'
 import AssetCapacity from './AssetCapacity'
@@ -43,7 +43,7 @@ const Inputs = () => {
   const [loading, setLoading] = useState(false)
 
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // Initialize tabs
   useEffect(() => {
