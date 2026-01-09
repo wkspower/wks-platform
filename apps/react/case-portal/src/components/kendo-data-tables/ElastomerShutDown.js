@@ -649,52 +649,50 @@ const ElastomerShutDown = ({ permissions }) => {
     }
   }, [PLANT_ID, AOP_YEAR, keycloak])
   const slowdownFetchData = useCallback(async () => {
-      if (!PLANT_ID || !AOP_YEAR) return
-      setSlowdownRows([]) 
-      setLoading(true)
-      try {
-        //
-        const resp = await MaintenanceDetailsApiService.getSlowdownConfig(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-        // Add isEditable: true to each row
-        const formatted = (resp.data || []).map((item, idx) => ({
-          ...item,
-          monthly: item.month,
-          originalRemark: item.remark,
-          remarks: item.remark,
-          year: item.year,
-          isEditable: true,
-          id: idx,
-          idFromApi: item.id,
-        }))
-        setSlowdownRows(formatted)
-      } catch (err) {
-        console.error('Error fetching data:', err)
-        setSlowdownRows([])
-      } finally {
-        setLoading(false)
-      }
-    }, [PLANT_ID, AOP_YEAR, keycloak])
-  
-    useEffect(() => {
-      setTabIndex(0)
-    }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
-    useEffect(() => {
-        if (tabIndex === 1) {
-          slowdownFetchData()
-        }
-      }, [tabIndex, slowdownFetchData])
-    
-      useEffect(() => {
-        if (tabIndex === 0) {
-            fetchData()
-        }
-        }, [tabIndex, fetchData])
+    if (!PLANT_ID || !AOP_YEAR) return
+    setSlowdownRows([])
+    setLoading(true)
+    try {
+      //
+      const resp = await MaintenanceDetailsApiService.getSlowdownConfig(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      // Add isEditable: true to each row
+      const formatted = (resp.data || []).map((item, idx) => ({
+        ...item,
+        monthly: item.month,
+        originalRemark: item.remark,
+        remarks: item.remark,
+        year: item.year,
+        isEditable: true,
+        id: idx,
+        idFromApi: item.id,
+      }))
+      setSlowdownRows(formatted)
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setSlowdownRows([])
+    } finally {
+      setLoading(false)
+    }
+  }, [PLANT_ID, AOP_YEAR, keycloak])
 
-  
+  useEffect(() => {
+    setTabIndex(0)
+  }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
+  useEffect(() => {
+    if (tabIndex === 1) {
+      slowdownFetchData()
+    }
+  }, [tabIndex, slowdownFetchData])
+
+  useEffect(() => {
+    if (tabIndex === 0) {
+      fetchData()
+    }
+  }, [tabIndex, fetchData])
 
   const findDuration = (v, row) => {
     if (row.durationInHrs) return row.durationInHrs
@@ -849,7 +847,7 @@ const ElastomerShutDown = ({ permissions }) => {
         return ShutDownAllColumns
     }
   }, [lowerVertName, plantName])
- const slowdownColumns = [
+  const slowdownColumns = [
     {
       field: 'monthly',
       title: 'Month',
@@ -1132,99 +1130,99 @@ const ElastomerShutDown = ({ permissions }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       {defaultTabs?.length > 1 && (
-          <Tabs
-            value={tabIndex}
-            onChange={(e, newIndex) => setTabIndex(newIndex)}
-            variant='scrollable'
-            scrollButtons='auto'
-            sx={{
-              borderBottom: '0px solid #ccc',
-              '.MuiTabs-indicator': { display: 'none' },
-              margin: '0px 0px 10px 0px',
-              minHeight: '28px',
-            }}
-            textColor='primary'
-            indicatorColor='primary'
-          >
-            {defaultTabs.map((label, idx) => (
-              <Tab
-                key={idx}
-                label={label}
-                sx={{
-                  border: '1px solid #ADD8E6',
-                  borderBottom: '1px solid #ADD8E6',
-                  fontSize: '0.75rem',
-                  padding: '9px',
-                  minHeight: '12px',
-                }}
-              />
-            ))}
-          </Tabs>
-        )}
-       {tabIndex === 0 && (
-      <KendoDataTables
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        setRows={setRows}
-        columns={colDefs}
-        rows={rows}
-        paginationOptions={[100, 200, 300]}
-        updateShutdownData={updateShutdownData}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        apiRef={apiRef}
-        deleteId={deleteId}
-        open1={open1}
-        setDeleteId={setDeleteId}
-        setOpen1={setOpen1}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        handleRemarkCellClick={handleRemarkCellClick}
-        fetchData={fetchData}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        deleteRowData={deleteRowData}
-        permissions={adjustedPermissions}
-        disableRedHighlight={true}
-        allProducts={allProducts}
-        allDescriptionDrpdwn={allDescriptionDrpdwn}
-        handleExcelUpload={handleExcelUpload}
-        downloadExcelForConfiguration={downloadExcelForConfiguration}
-        deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
-        screenType='shutdown'
-      />
-        )}
-       {tabIndex === 1 && (
+        <Tabs
+          value={tabIndex}
+          onChange={(e, newIndex) => setTabIndex(newIndex)}
+          variant='scrollable'
+          scrollButtons='auto'
+          sx={{
+            borderBottom: '0px solid #ccc',
+            '.MuiTabs-indicator': { display: 'none' },
+            margin: '0px 0px 10px 0px',
+            minHeight: '28px',
+          }}
+          textColor='primary'
+          indicatorColor='primary'
+        >
+          {defaultTabs.map((label, idx) => (
+            <Tab
+              key={idx}
+              label={label}
+              sx={{
+                border: '1px solid #ADD8E6',
+                borderBottom: '1px solid #ADD8E6',
+                fontSize: '0.75rem',
+                padding: '9px',
+                minHeight: '12px',
+              }}
+            />
+          ))}
+        </Tabs>
+      )}
+      {tabIndex === 0 && (
         <KendoDataTables
-        columns={slowdownColumns}
-        rows={slowdownRows}
-        setRows={setSlowdownRows}
-        fetchData={slowdownFetchData}
-        deleteRowData={handleDeleteSlowdownConfig}
-        saveChanges={saveChangesHHistory}
-        deleteId={deleteId}
-        setDeleteId={setDeleteId}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        open1={open1}
-        setOpen1={setOpen1}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        remarkDialogOpen={remarkDialogOpen1}
-        setRemarkDialogOpen={setRemarkDialogOpen1}
-        currentRemark={currentRemark1}
-        setCurrentRemark={setCurrentRemark1}
-        currentRowId={currentRowId1}
-        handleRemarkCellClick={handleRemarkCellClick1}
-        snackbarData={snackbarData}
-        setSnackbarData={setSnackbarData}
-        permissions={adjustedPermissionsslowdown}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          setRows={setRows}
+          columns={colDefs}
+          rows={rows}
+          paginationOptions={[100, 200, 300]}
+          updateShutdownData={updateShutdownData}
+          saveChanges={saveChanges}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          apiRef={apiRef}
+          deleteId={deleteId}
+          open1={open1}
+          setDeleteId={setDeleteId}
+          setOpen1={setOpen1}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          handleRemarkCellClick={handleRemarkCellClick}
+          fetchData={fetchData}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          deleteRowData={deleteRowData}
+          permissions={adjustedPermissions}
+          disableRedHighlight={true}
+          allProducts={allProducts}
+          allDescriptionDrpdwn={allDescriptionDrpdwn}
+          handleExcelUpload={handleExcelUpload}
+          downloadExcelForConfiguration={downloadExcelForConfiguration}
+          deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
+          screenType='shutdown'
         />
-        )}
+      )}
+      {tabIndex === 1 && (
+        <KendoDataTables
+          columns={slowdownColumns}
+          rows={slowdownRows}
+          setRows={setSlowdownRows}
+          fetchData={slowdownFetchData}
+          deleteRowData={handleDeleteSlowdownConfig}
+          saveChanges={saveChangesHHistory}
+          deleteId={deleteId}
+          setDeleteId={setDeleteId}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          open1={open1}
+          setOpen1={setOpen1}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          remarkDialogOpen={remarkDialogOpen1}
+          setRemarkDialogOpen={setRemarkDialogOpen1}
+          currentRemark={currentRemark1}
+          setCurrentRemark={setCurrentRemark1}
+          currentRowId={currentRowId1}
+          handleRemarkCellClick={handleRemarkCellClick1}
+          snackbarData={snackbarData}
+          setSnackbarData={setSnackbarData}
+          permissions={adjustedPermissionsslowdown}
+        />
+      )}
     </div>
   )
 }

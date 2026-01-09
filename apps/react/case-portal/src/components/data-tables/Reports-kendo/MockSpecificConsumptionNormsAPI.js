@@ -588,7 +588,6 @@ export const MockSpecificConsumptionNormsAPI = {
             {
               title: prevFY4,
               children: [
-                
                 {
                   field: 'actualFourYearsAgo',
                   title: 'Actual',

@@ -662,15 +662,15 @@ const CrakcerConstantsBestAchieved = () => {
     try {
       const data = Object.values(modifiedCellsConstants)
       const requiredFields = ['remarks']
-          const validationMessage = validateFields(data, requiredFields)
-          if (validationMessage) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: validationMessage,
-              severity: 'error',
-            })
-            return
-          } 
+      const validationMessage = validateFields(data, requiredFields)
+      if (validationMessage) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationMessage,
+          severity: 'error',
+        })
+        return
+      }
 
       saveSummary(summary)
 
