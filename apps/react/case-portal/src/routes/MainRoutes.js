@@ -11,6 +11,7 @@ import NormsHistorianBasis from 'components/data-tables/Reports/NormsHistorianBa
 import BestAchievedNorms from 'components/data-tables/Reports/BestAchievedNorms'
 import BusinessDemand from 'components/kendo-data-tables/BusinessDemand'
 import ConsumptionNorms from 'components/kendo-data-tables/ConsumptionNorms'
+import PackagingConsumables from 'components/kendo-data-tables/PackagingConsumables'
 import DecokingConfig from 'components/kendo-data-tables/KendoConfigCrackerActivities'
 import CrackerConfig from 'components/kendo-data-tables/KendoConfigCrackerInput'
 import CrackerConfigOutput from 'components/kendo-data-tables/KendoConfigCrackerOutput'
@@ -69,9 +70,11 @@ import Norms from 'components/phase-two/CPP/Norms'
 
 // TCS
 
-import TcsOutput from 'components/phase-two/TCS/TcsOutput/TcsOutput'
+import TcsOutput from 'components/phase-two/TCS/TcsOutput/index'
 import PimsOutput from 'components/phase-two/TCS/PimsOutput/PimsOutput'
 import TcsInput from 'components/phase-two/TCS/TcsInput/index'
+import AopDashboard from 'components/kendo-data-tables/AopDashboard'
+import ProposedConsumptionNorms from 'components/kendo-data-tables/ProposedConsumptionNorms'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -307,6 +310,23 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='consumption-aop'>
                 <ConsumptionNorms />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'proposed-aop-consumption',
+            element: (
+              <PrivateRoute routeId='proposed-aop-consumption'>
+                <ProposedConsumptionNorms />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'packaging-consumables',
+            element: (
+              <PrivateRoute routeId='packaging-consumables'>
+                <PackagingConsumables />
               </PrivateRoute>
             ),
           },
@@ -553,7 +573,7 @@ export const MainRoutes = (
                 <FixedConsumption />
               </PrivateRoute>
             ),
-          }, 
+          },
           {
             path: 'inputs',
             element: (
@@ -561,9 +581,9 @@ export const MainRoutes = (
                 <Inputs />
               </PrivateRoute>
             ),
-          }, 
+          },
           // ...other utilityPlant routes...
-        ]
+        ],
       },
 
       {
@@ -636,6 +656,15 @@ export const MainRoutes = (
           <PrivateRoute routeId='plant-team'>
             <PlantTeam />
           </PrivateRoute>
+        ),
+      },
+
+      {
+        path: 'dashboard',
+        element: (
+          // <PrivateRoute routeId='dashboard'>
+          <AopDashboard />
+          // </PrivateRoute>
         ),
       },
 

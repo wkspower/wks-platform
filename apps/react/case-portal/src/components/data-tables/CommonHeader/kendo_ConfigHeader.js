@@ -125,7 +125,11 @@ const getEnhancedAOPColDefs = ({
 
       return col
     })
-  } else if (configType == 'pioImpact' || configType == 'shutdownData') {
+  } else if (
+    configType == 'pioImpact' ||
+    configType == 'shutdownData' ||
+    configType == 'cracker_configuration'
+  ) {
     enhancedColDefs = config.map((col) => {
       if (headerMap && headerMap[col.title]) {
         return {

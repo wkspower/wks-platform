@@ -16,12 +16,14 @@ import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownPTAColumns } from 'components/colums/ShutdownColumn'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import { getRoleName } from 'services/role-service'
+import ElastomerShutDown from './ElastomerShutDown'
 const ShutDown = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
   const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
   const dataGridStore = useSelector((state) => state.dataGridStore)
+
   const {
     verticalChange,
     yearChanged,
@@ -35,16 +37,42 @@ const ShutDown = ({ permissions }) => {
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME = plantObject?.name
+
   const SITE_ID = siteObject?.id
+  const SITE_NAME = siteObject?.name
+
   const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+
   const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical
   const SCREEN_NAME = screenTitle?.title
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const lowerVertName = vertName?.toLowerCase()
+  const lowerSiteName = SITE_NAME?.toLowerCase()
+  const lowerPlantName = PLANT_NAME?.toLowerCase()
   const plantName = plantObject?.name
   const siteName = siteObject?.name
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const IS_NON_PRODUCT_VERTICAL =
+    lowerVertName === 'elastomer' ||
+    lowerVertName === 'pvc' ||
+    lowerVertName === 'vcm' ||
+    lowerVertName === 'aromatics' ||
+    lowerVertName === 'pta' ||
+    lowerVertName === 'pet' ||
+    lowerVertName === 'meg' ||
+    lowerVertName === 'pe' ||
+    lowerVertName === 'pp'
 
   const DELETE_NOTE =
     'Warning: Please verify the shutdown consumption quantity before deleting the shutdown activity.'
@@ -67,9 +95,12 @@ const ShutDown = ({ permissions }) => {
   const [currentRowId, setCurrentRowId] = useState(null)
   const keycloak = useSession()
 
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_PET_VERTICAL = lowerVertName === 'pet'
+
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     setCurrentRemark(row.remark || '')
@@ -81,6 +112,7 @@ const ShutDown = ({ permissions }) => {
     try {
       var data = Object.values(modifiedCells)
 
+      //1 NO RECORDS
       if (data.length == 0) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -89,6 +121,7 @@ const ShutDown = ({ permissions }) => {
         })
         return
       }
+
       const yearStr = AOP_YEAR
       let startLimit, endLimit
       if (yearStr) {
@@ -143,14 +176,12 @@ const ShutDown = ({ permissions }) => {
           return
         }
       }
+
+      //2 REMARKS VALIDATION
       let requiredFields
       if (lowerVertName === 'pe') {
-        if (
-          siteName?.toLowerCase() === 'nmd' &&
-          (plantName?.toLowerCase() === 'lldpe1' ||
-            plantName?.toLowerCase() === 'lldpe2')
-        ) {
-          requiredFields = ['discription', 'remark', 'productName1']
+        if (siteName?.toLowerCase() === 'nmd') {
+          requiredFields = ['discription', 'remark']
         } else {
           requiredFields = ['discription', 'remark']
         }
@@ -177,15 +208,19 @@ const ShutDown = ({ permissions }) => {
 
       const validationMessage = validateFields(data, requiredFields)
       if (validationMessage) {
+        let message = validationMessage
+        if (IS_PE_PP_VERTICAL && validationMessage.includes('Remark')) {
+          message = 'Please update the field: Shutdown Basis'
+        }
         setSnackbarOpen(true)
         setSnackbarData({
-          message: validationMessage,
+          message: message,
           severity: 'error',
         })
         return
       }
 
-      // Track duplicate descriptions
+      //3 Track duplicate descriptions
       const duplicateRows = new Set()
       const allDescriptions = rows.map((r) =>
         (r.discription || '').trim().toLowerCase(),
@@ -210,6 +245,7 @@ const ShutDown = ({ permissions }) => {
         return
       }
 
+      //5 START DATE END DATE MANDATORY
       const allRecords = [...rows]
       const timeErrorRows = new Set() // Add this line
 
@@ -251,12 +287,16 @@ const ShutDown = ({ permissions }) => {
         }
       }
 
+      //6 SHUTDOWN SPANS MULTIPLE MONTHS
       if (
         lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||
         lowerVertName == 'vcm' ||
         lowerVertName == 'pvc' ||
-        lowerVertName == 'pta'
+        lowerVertName == 'pta' ||
+        lowerVertName == 'pe' ||
+        lowerVertName == 'pp' ||
+        lowerVertName == 'pet'
       ) {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
@@ -315,12 +355,13 @@ const ShutDown = ({ permissions }) => {
             }
           }
         }
-        // Slowdown and shutdown timeframe overlapping
+
+        //7 Slowdown and shutdown timeframe overlapping
         //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
 
         if (
-          lowerVertName != 'elastomer' ||
-          lowerVertName != 'vcm' ||
+          lowerVertName != 'elastomer' &&
+          lowerVertName != 'vcm' &&
           lowerVertName != 'pvc'
         ) {
           for (let i = 0; i < rows.length; i++) {
@@ -356,7 +397,7 @@ const ShutDown = ({ permissions }) => {
     } catch (error) {
       console.log('Error saving changes:', error)
     }
-  }, [modifiedCells, rows, rowsSlowdown, lowerVertName]) // Add setErrorRows to dependencies
+  }, [modifiedCells, rows, rowsSlowdown, lowerVertName])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -565,7 +606,11 @@ const ShutDown = ({ permissions }) => {
         let data = []
         if (lowerVertName === 'meg') {
           data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        } else if (
+          lowerVertName === 'pe' ||
+          lowerVertName === 'pp' ||
+          lowerVertName === 'pet'
+        ) {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(
@@ -583,7 +628,11 @@ const ShutDown = ({ permissions }) => {
               displayName: product.displayName,
               realId: product.id,
             }))
-        } else if (lowerVertName === 'pe' || lowerVertName === 'pp') {
+        } else if (
+          lowerVertName === 'pe' ||
+          lowerVertName === 'pp' ||
+          lowerVertName === 'pet'
+        ) {
           productList = data?.data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
@@ -736,24 +785,19 @@ const ShutDown = ({ permissions }) => {
 
     try {
       let response
-      if (
-        lowerVertName === 'elastomer' ||
-        lowerVertName === 'pvc' ||
-        lowerVertName === 'vcm' ||
-        lowerVertName === 'aromatics' ||
-        lowerVertName === 'pta' ||
-        lowerVertName === 'pet'
-      ) {
-        response = await DataService.shutdownDetailsElastomerExport(
+      if (IS_NON_PRODUCT_VERTICAL) {
+        response = await DataService.exportShutdownNonProduct(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
-        response = await DataService.shutdownDetailsExport(
+        response = await DataService.exportShutdownNonProductWise(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       }
     } catch (error) {
@@ -766,26 +810,22 @@ const ShutDown = ({ permissions }) => {
       setSnackbarOpen(true)
     }
   }
-  const uploadShutdownDetails = async (rawFile) => {
+
+  const importShutdown = async (rawFile) => {
     setLoading(true)
 
     try {
       let response
 
-      if (
-        lowerVertName == 'elastomer' ||
-        lowerVertName === 'pvc' ||
-        lowerVertName === 'vcm' ||
-        lowerVertName === 'pta'
-      ) {
-        response = await DataService.ImportShutdownElastomerDetails(
+      if (IS_NON_PRODUCT_VERTICAL) {
+        response = await DataService.ImportShutdownNonProduct(
           rawFile,
           keycloak,
           PLANT_ID,
           AOP_YEAR,
         )
       } else {
-        response = await DataService.ImportShutdownDetails(
+        response = await DataService.ImportShutdownProductWise(
           rawFile,
           keycloak,
           PLANT_ID,
@@ -849,8 +889,9 @@ const ShutDown = ({ permissions }) => {
   }
 
   const handleExcelUpload = (rawFile) => {
-    uploadShutdownDetails(rawFile)
+    importShutdown(rawFile)
   }
+
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -881,7 +922,8 @@ const ShutDown = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
-      showNoteWhileDeleting: IS_PE_PP_VERTICAL ? true : false,
+      showNoteWhileDeleting:
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       showTitleNameBusiness: true,
       titleName: `${SCREEN_NAME}`,
@@ -892,12 +934,16 @@ const ShutDown = ({ permissions }) => {
         lowerVertName === 'elastomer' ||
         lowerVertName === 'pvc' ||
         lowerVertName === 'vcm' ||
-        lowerVertName === 'pta'
+        lowerVertName === 'pta' ||
+        lowerVertName === 'pet'
           ? true
           : false,
     },
     isOldYear,
   )
+  if (lowerVertName == 'elastomer') {
+    return <ElastomerShutDown permissions={permissions} />
+  }
 
   return (
     <div>
@@ -941,6 +987,7 @@ const ShutDown = ({ permissions }) => {
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
         deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
+        screenType='shutdown'
       />
     </div>
   )

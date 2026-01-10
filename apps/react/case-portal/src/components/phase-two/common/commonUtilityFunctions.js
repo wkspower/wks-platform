@@ -22,6 +22,7 @@ export const validateRowDataWithRemarks = (
     'mar',
   ],
   displayFieldName,
+  remarksFieldName = 'remarks',
 ) => {
   const invalidRows = data.filter((row) => {
     // Get original row from originalRows
@@ -34,10 +35,10 @@ export const validateRowDataWithRemarks = (
       return row[field] !== originalRow[field]
     })
 
-    // If data was updated, check if remarks is filled and different from original
+    // If data was updated, check if remarks field is filled and different from original
     if (dataWasUpdated) {
-      const currentRemarks = row.remarks || ''
-      const originalRemarks = originalRow.remarks || ''
+      const currentRemarks = row[remarksFieldName] || ''
+      const originalRemarks = originalRow[remarksFieldName] || ''
 
       const remarksIsEmpty = currentRemarks.trim() === ''
       const remarksNotChanged = currentRemarks.trim() === originalRemarks.trim()
@@ -64,6 +65,7 @@ export const validateNestedRowDataWithRemarks = (
   originalRows,
   fieldsToCheck = [],
   displayFieldName = 'assetName',
+  remarksFieldName = 'remarks',
 ) => {
   const invalidRows = data.filter((row) => {
     // Get original row from originalRows
@@ -76,10 +78,10 @@ export const validateNestedRowDataWithRemarks = (
       return getNestedValue(row, field) !== getNestedValue(originalRow, field)
     })
 
-    // If data was updated, check if remarks is filled and different from original
+    // If data was updated, check if remarks field is filled and different from original
     if (dataWasUpdated) {
-      const currentRemarks = row.remarks || ''
-      const originalRemarks = originalRow.remarks || ''
+      const currentRemarks = row[remarksFieldName] || ''
+      const originalRemarks = originalRow[remarksFieldName] || ''
 
       const remarksIsEmpty = currentRemarks.trim() === ''
       const remarksNotChanged = currentRemarks.trim() === originalRemarks.trim()
@@ -209,20 +211,29 @@ export const isEmptyNullUndefined = (value, options = {}) => {
   return false
 }
 
-export const recalcEndDate = (startRaw, durationStr) => {
+export const recalcEndDate = (startRaw, durationStr, requiredInHr = true) => {
   if (!startRaw) return null
   const start = new Date(startRaw)
   if (!(start instanceof Date) || isNaN(start)) return null
-  // parse "HH.MM"
-  const [hrsPart, minPart = '0'] = String(durationStr).split('.')
-  const hrs = parseInt(hrsPart, 10)
-  const mins = parseInt(minPart.padEnd(2, '0').slice(0, 2), 10)
-  if (isNaN(hrs) || isNaN(mins) || mins < 0 || mins > 59) return null
-  const end = new Date(start.getTime() + (hrs * 60 + mins) * 60000)
-  return end
+
+  if (requiredInHr) {
+    // parse "HH.MM" for hours
+    const [hrsPart, minPart = '0'] = String(durationStr).split('.')
+    const hrs = parseInt(hrsPart, 10)
+    const mins = parseInt(minPart.padEnd(2, '0').slice(0, 2), 10)
+    if (isNaN(hrs) || isNaN(mins) || mins < 0 || mins > 59) return null
+    const end = new Date(start.getTime() + (hrs * 60 + mins) * 60000)
+    return end
+  } else {
+    // parse as days (can be decimal like 10.5 days)
+    const days = parseFloat(durationStr)
+    if (isNaN(days) || days < 0) return null
+    const end = new Date(start.getTime() + days * 24 * 60 * 60000)
+    return end
+  }
 }
 
-export const recalcDuration = (startRaw, endRaw) => {
+export const recalcDuration = (startRaw, endRaw, requiredInHr = true) => {
   const start = startRaw ? new Date(startRaw) : null
   const end = endRaw ? new Date(endRaw) : null
   if (
@@ -233,11 +244,18 @@ export const recalcDuration = (startRaw, endRaw) => {
   ) {
     const diffMs = end.getTime() - start.getTime()
     if (diffMs < 0) return ''
-    const totalMins = Math.floor(diffMs / 60000)
-    const hrs = Math.floor(totalMins / 60)
-    const mins = totalMins % 60
-    // format as "H.MM" with two-digit minutes
-    return `${hrs}.${mins.toString().padStart(2, '0')}`
+
+    if (requiredInHr) {
+      // Calculate in hours with format "H.MM"
+      const totalMins = Math.floor(diffMs / 60000)
+      const hrs = Math.floor(totalMins / 60)
+      const mins = totalMins % 60
+      return `${hrs}.${mins.toString().padStart(2, '0')}`
+    } else {
+      // Calculate in days (decimal format)
+      const totalDays = diffMs / (24 * 60 * 60000)
+      return totalDays.toFixed(2)
+    }
   }
   return ''
 }
@@ -249,12 +267,12 @@ export default function valueFormatterByUOM(value, unit = null) {
   }
 
   const unitsConfig = {
-   oneDigitUnits : [],
-   twoDigitUnits : [],
-   threeDigitUnits : ['MT'],
-   fourDigitUnits : [],
-   fiveDigitUnits : ['KG'],
-  };
+    oneDigitUnits: [],
+    twoDigitUnits: [],
+    threeDigitUnits: ['MT'],
+    fourDigitUnits: [],
+    fiveDigitUnits: ['KG'],
+  }
   // Convert to number safely
   const numValue = Number(value)
   if (Number.isNaN(numValue)) {
@@ -277,4 +295,3 @@ export default function valueFormatterByUOM(value, unit = null) {
   // Default format
   return numValue.toFixed(3)
 }
-

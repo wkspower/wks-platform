@@ -61,6 +61,7 @@ const defs = {
     siteWiseAop: 'Consumption Summary (Sites)',
     allSiteSummaryAop: 'Summary',
     UtilityPlant: 'Utility Plant',
+    packagingConsumables: 'Consumíveis de Embalagem',
   },
   pages: {
     dashboard: {
@@ -232,6 +233,7 @@ const defs = {
         manufacturingDivision: 'Manufacturing Division',
         plantSafetyPerformanceTarget: 'S&OR',
         plantTeam: 'People',
+        packagingConsumables: 'Consumíveis de Embalagem',
       },
     },
   },

@@ -28,11 +28,7 @@ const Header = ({ open, handleDrawerToggle, keycloak }) => {
         onClick={handleDrawerToggle}
         edge='start'
         color='secondary'
-        sx={{
-          color: '#FFFFFF',
-          fontSize: '1.5rem',
-          ml: { xs: 0, lg: -3 },
-        }}
+        className='custom-toggle-btn'
       >
         {!open ? <MenuOutlined /> : <CloseOutlined />}
       </IconButton>

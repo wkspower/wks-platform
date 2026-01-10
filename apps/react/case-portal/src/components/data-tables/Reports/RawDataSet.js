@@ -17,6 +17,7 @@ import KendoDataGrid from 'components/Kendo-Report-DataGrid/index'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
+import { OptimizerDataApiService } from 'services/optimizer-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -25,7 +26,7 @@ import {
 } from 'utils/CustomAccrodian'
 
 // Only steam modes and their grids — no other GRID_CONFIGS or fetchers present
-const steamModes = ['5F', '4F', '4F+D']
+// const steamModes = ['5F', '4F', '4F+D']
 
 const RawDataSet = () => {
   const keycloak = useSession()
@@ -53,7 +54,8 @@ const RawDataSet = () => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
   const SCREEN_NAME = screenTitle?.title
@@ -196,15 +198,26 @@ const RawDataSet = () => {
   const loadGrids = useCallback(async () => {
     setLoading(true)
     try {
+      const responseForModes = await OptimizerDataApiService.fetchModes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '1',
+      )
+
+      // Dynamic MODE_GRADES (no hard coding)
+      const MODE_GRADES =
+        responseForModes?.data?.map((mode) => mode?.name).filter(Boolean) || []
+
       const findingSteamResults = await Promise.all(
-        steamModes.map(async (mode) => {
+        MODE_GRADES?.map(async (mode) => {
           const { rows, columns } = await fetchModeGrid('Finding Steam', mode)
           return { name: `Finding Steam (${mode})`, rows, columns }
         }),
       )
 
       const rawSteamResults = await Promise.all(
-        steamModes.map(async (mode) => {
+        MODE_GRADES?.map(async (mode) => {
           const { rows, columns } = await fetchModeGrid('Raw Steam', mode)
           return { name: `Raw Steam (${mode})`, rows, columns }
         }),

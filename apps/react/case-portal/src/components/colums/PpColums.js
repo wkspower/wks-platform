@@ -164,18 +164,25 @@ export const SlowDownPpColumns = [
     widthT: 130,
   },
 
-  {
-    field: 'maintStartDateTime',
-    title: 'SD- From',
-    type: 'dateTime',
-    editable: true,
-  },
+  // {
+  //   field: 'maintStartDateTime',
+  //   title: 'SD- From',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
 
+  // {
+  //   field: 'maintEndDateTime',
+  //   title: 'SD- To',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
   {
-    field: 'maintEndDateTime',
-    title: 'SD- To',
-    type: 'dateTime',
+    field: 'monthly',
+    title: 'Month',
+    type: 'monthDropdownPEPP',
     editable: true,
+    width: 200,
   },
 
   {
@@ -186,7 +193,7 @@ export const SlowDownPpColumns = [
 
   {
     field: 'rate',
-    title: 'Rate (TPH)',
+    title: 'Rate Reduced (TPH)',
     editable: true,
     type: 'number',
   },
@@ -382,7 +389,7 @@ export const ShutdownConsumptionPpColumns = [
     width: 180,
     editable: false,
   },
-  { field: 'UOM', headerName: 'UOM', width: 150, editable: false },
+  { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
 
   ...Array.from({ length: 12 }, (_, i) => {
     const monthIndex = (i + 4) % 12 || 12

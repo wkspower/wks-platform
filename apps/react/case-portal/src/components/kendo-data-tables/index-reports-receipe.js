@@ -151,8 +151,13 @@ const KendoDataTablesReciepe = ({
   const FORMATE_DECIMAL = ValueFormatterProduction()
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { oldYear } = dataGridStore
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+  const [editedCells, setEditedCells] = useState({}) // ADD THIS LINE after other useState declarations
   const shouldShowExportImportButtons = () => {
     const dataGridStore = useSelector((state) => state.dataGridStore)
     const {
@@ -171,9 +176,12 @@ const KendoDataTablesReciepe = ({
     const VERTICAL_ID = verticalObject?.id
     const VERTICAL_NAME = verticalObject?.name
     const AOP_YEAR = year?.selectedYear
-    const isOldYear = oldYear?.oldYear
+    const isOldYear = false
+    const IS_OLD_YEAR = oldYear?.oldYear
+    const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
     const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+    const lowerVertName = vertName?.toLowerCase()
     const SCREEN_NAME = screenTitle?.title
     const siteName = siteObject?.name?.toLowerCase()
     const plantName = plantObject?.name?.toLowerCase()
@@ -226,6 +234,15 @@ const KendoDataTablesReciepe = ({
 
       const { dataItem, field, value } = e
       const itemId = dataItem.id
+      // Track which cell was edited
+      setEditedCells((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...(prev[itemId] || {}),
+          [field]: true,
+        },
+      }))
+
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
@@ -323,6 +340,8 @@ const KendoDataTablesReciepe = ({
 
   const saveConfirmation = async () => {
     saveChanges()
+    setModifiedCells({})
+    setEditedCells({})
     setOpenSaveDialogeBox(false)
     setEdit({})
   }
@@ -360,16 +379,19 @@ const KendoDataTablesReciepe = ({
     }, 500)
   }
 
-  const CustomRow = useCallback(({ dataItem, className, ...rest }) => {
-    const isDisabled =
-      !dataItem.isEditable && dataItem?.isEditable !== undefined
-    const rowClassName = isDisabled ? `custom-disabled-row` : className
-    return (
-      <tr {...rest?.trProps} className={rowClassName}>
-        {rest.children}
-      </tr>
-    )
-  }, [])
+  const CustomRow = useCallback(
+    ({ dataItem, className, ...rest }) => {
+      const isDisabled =
+        !dataItem.isEditable && dataItem?.isEditable !== undefined
+      const rowClassName = isDisabled ? `custom-disabled-row` : className
+      return (
+        <tr {...rest?.trProps} className={rowClassName}>
+          {rest.children}
+        </tr>
+      )
+    },
+    [IS_OLD_YEAR],
+  )
 
   const ColumnMenuCheckboxFilter = getColumnMenuCheckboxFilter(rows)
 
@@ -476,6 +498,8 @@ const KendoDataTablesReciepe = ({
     const value = props.dataItem[props.field]
     const month = monthMap[props.field?.toLowerCase()]
     const normId = props.dataItem.materialFkId
+    const rowId = props.dataItem.id
+    const field = props.field
 
     const isRedFromAllRedCell = allRedCell.some(
       (cell) =>
@@ -483,12 +507,10 @@ const KendoDataTablesReciepe = ({
         cell.normParameterFKId?.toLowerCase() === normId?.toLowerCase(),
     )
 
-    // const isRedFromEdit =
-    //   editedCellMap?.[rowId]?.[props.field] !== undefined &&
-    //   editedCellMap?.[rowId]?.[props.field]?.toString() === value?.toString()
+    // Check if THIS SPECIFIC FIELD was edited
+    const isRedFromEdit = editedCells[rowId]?.[field] === true
 
-    // const isRed = isRedFromAllRedCell || isRedFromEdit
-    const isRed = isRedFromAllRedCell
+    const isRed = isRedFromAllRedCell || isRedFromEdit
 
     return (
       <td
@@ -496,6 +518,7 @@ const KendoDataTablesReciepe = ({
         title={value}
         style={{
           color: isRed ? 'orange' : undefined,
+          fontWeight: isRed ? 'bold' : undefined,
         }}
       >
         {props.children}
@@ -557,7 +580,7 @@ const KendoDataTablesReciepe = ({
           </Box>
 
           {/* RIGHT: Buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {permissions?.addButton && (
               <Button
                 variant='contained'
@@ -771,6 +794,10 @@ const KendoDataTablesReciepe = ({
         onClose={closeSaveDialogeBox}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
@@ -789,6 +816,10 @@ const KendoDataTablesReciepe = ({
       <Dialog
         open={!!remarkDialogOpen}
         onClose={() => setRemarkDialogOpen(false)}
+        disableScrollLock
+        slotProps={{
+          backdrop: { disableScrollLock: true },
+        }}
       >
         <DialogTitle>Add Remark</DialogTitle>
         <DialogContent>

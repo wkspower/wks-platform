@@ -52,9 +52,8 @@ public class WorkFlowController {
     }
     
     @GetMapping(value="/production-aop/work-flow")
-    public Map<String, Object> getProductionAOPWorkflowData( @RequestParam String plantId,@RequestParam String year){
-    	Map<String, Object> data= workflowService.getProductionAOPWorkflowData(plantId,year);
-    	return data;
+    public AOPMessageVM getProductionAOPWorkflowData( @RequestParam String plantId,@RequestParam String year){
+    	return workflowService.getProductionAOPWorkflowData(plantId,year);
     }
     
 

@@ -8,7 +8,7 @@ import Notification from 'components/Utilities/Notification'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
-import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -16,12 +16,13 @@ import {
   CustomAccordionSummary,
 } from 'utils/CustomAccrodian'
 import { getRoleName } from 'services/role-service.js'
+import { OptimizerDataApiService } from 'services/optimizer-api-service'
 const CALL_DELAY_MS = 20
 const MONTH_GRID_NAME = 'Month wise Quantity, Tonnes / Month'
 
 const OptimizerReport = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -44,12 +45,15 @@ const OptimizerReport = () => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const timeoutIdsRef = useRef([])
   const activeRequestsRef = useRef(0)
   const isMountedRef = useRef(true)
   const exportRefs = useRef({})
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || ''
+  const lowerVertName = vertName?.toLowerCase()
   const isCracker = lowerVertName === 'cracker'
 
   useEffect(() => {
@@ -76,7 +80,7 @@ const OptimizerReport = () => {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:0.000}' } : {}),
+        ...(isNumberCol ? { format: '{0:0.0000}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
@@ -298,12 +302,30 @@ const OptimizerReport = () => {
       })
       const orderedTypes = [...inputFirst, ...outputLater]
 
-      // modes to call
-      const modes = [
-        { key: '4F', label: '4F' },
-        { key: '5F', label: '5F' },
-        { key: '4F+D', label: '4F+D' },
-      ]
+      const responseForModes = await OptimizerDataApiService.fetchModes(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        '1',
+      )
+
+      const MODE_GRADES =
+        responseForModes?.data?.map((mode) => mode?.name).filter(Boolean) || []
+
+      // STATIC
+
+      // const modes = [
+      //   { key: '4F', label: '4F' },
+      //   { key: '5F', label: '5F' },
+      //   { key: '4F+D', label: '4F+D' },
+      // ]
+
+      //DYANAMIC
+
+      const modes = MODE_GRADES.map((grade) => ({
+        key: grade,
+        label: grade,
+      }))
 
       // build grid name list: "<TYPE> - <MODE_LABEL>"
       const expandedGridNames = []
@@ -376,7 +398,7 @@ const OptimizerReport = () => {
       const payload = []
 
       // Await the API call here to ensure completion
-      const data = await DataService.getExcel(
+      const data = await AOPWorkFlowService.getExcel(
         keycloak,
         payload,
         PLANT_ID,

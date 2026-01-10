@@ -101,9 +101,12 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
 			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			if (vertical.getName().equalsIgnoreCase("MEG")) {
-				objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
-			}else if (vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("PVC") || vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA")) {
+			if (vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("AROMATICS") || vertical.getName().equalsIgnoreCase("ELASTOMER") || vertical.getName().equalsIgnoreCase("MEG") || vertical.getName().equalsIgnoreCase("PTA")) {
+				//objList = getShutdownNormsMEG(year, plant.getId(), "vwScrnShutdownNorms");
+				// view converted to sp
+				String storedProcedure = verticalName + "_" + site.getName() + "_GetShutdownnorms";
+				objList = getShutdownConsumptionData( plantId,year, storedProcedure);
+			}else if (  vertical.getName().equalsIgnoreCase("PVC") ) {
 				String viewName="vwScrn"+vertical.getName()+"ShutdownNorms";
 				objList = getShutdownNormsMEG(year, plant.getId(), viewName);
 			}else if(vertical.getName().equalsIgnoreCase("CRACKER")) {
@@ -742,6 +745,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			    Map<String, Object> singleEntryMap = new HashMap<>();
 			    singleEntryMap.put("gradeId", grade[0] != null ? grade[0].toString() : null);
 			    singleEntryMap.put("displayName", grade[2] != null ? grade[2].toString() : null);
+				singleEntryMap.put("name", grade[1] != null ? grade[1].toString() : null);
 			    listOfMaps.add(singleEntryMap);
 			}
 			

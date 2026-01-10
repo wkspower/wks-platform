@@ -4,12 +4,12 @@ import { useState, useEffect, useRef } from 'react'
 export const PostCrDaysEditor = ({ dataItem, field, onChange }) => {
   // Check if isCr was true in the original data (before any edits)
   // We'll need to pass this as a prop or check modifiedCells
-  // const wasOriginallyIsCr = dataItem.originalIsCr !== undefined 
-  //   ? dataItem.originalIsCr 
+  // const wasOriginallyIsCr = dataItem.originalIsCr !== undefined
+  //   ? dataItem.originalIsCr
   //   : dataItem.isCr;
-  
- // const isEditable = wasOriginallyIsCr === true;
-  const isEditable = dataItem.isCr === true;
+
+  // const isEditable = wasOriginallyIsCr === true;
+  const isEditable = dataItem.IsCR === true
   const initialValue = dataItem[field] ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
   const isFirstRender = useRef(true)
@@ -29,7 +29,7 @@ export const PostCrDaysEditor = ({ dataItem, field, onChange }) => {
     }
 
     // Only sync if editable
-    if (!isEditable) return;
+    if (!isEditable) return
 
     const handler = setTimeout(() => {
       if (localValue !== initialValue) {
@@ -42,11 +42,7 @@ export const PostCrDaysEditor = ({ dataItem, field, onChange }) => {
 
   // Render decision AFTER all hooks
   if (!isEditable) {
-    return (
-      <td style={{ textAlign: 'end' }}>
-        {dataItem[field] ?? ''}
-      </td>
-    );
+    return <td style={{ textAlign: 'end' }}>{dataItem[field] ?? ''}</td>
   }
 
   return (

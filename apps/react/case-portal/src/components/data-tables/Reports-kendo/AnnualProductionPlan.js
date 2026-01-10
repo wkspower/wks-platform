@@ -1,6 +1,7 @@
 import { Box } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import {
   Backdrop,
@@ -40,6 +41,7 @@ const AnnualProductionPlan = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_PTA_VERTICAL = lowerVertName === 'pta'
 
   let oldYear1 = ''
   if (thisYear && thisYear.includes('-')) {
@@ -76,7 +78,8 @@ const AnnualProductionPlan = () => {
   const [currentRowId3, setCurrentRowId3] = useState(null)
   const [currentRowId4, setCurrentRowId4] = useState(null)
   const [rows, setRows] = useState()
-  const isOldYear = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
 
   const columnsAssumptions = [
     {
@@ -93,7 +96,7 @@ const AnnualProductionPlan = () => {
       flex: 1,
     },
     {
-      field: 'id',
+      field: 'idFromApi',
       hidden: true,
     },
   ]
@@ -325,7 +328,7 @@ const AnnualProductionPlan = () => {
   const fetchData = async (type) => {
     try {
       setLoading(true)
-      var res = await DataService.getAnnualProductionPlanReportData(
+      var res = await AOPWorkFlowService.getAnnualProductionPlanReportData(
         keycloak,
         type,
         PLANT_ID,
@@ -416,7 +419,7 @@ const AnnualProductionPlan = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.calculateAnnualProductionPlanData(
+      const res = await AOPWorkFlowService.calculateAnnualProductionPlanData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,
@@ -466,14 +469,22 @@ const AnnualProductionPlan = () => {
         return
       }
 
-      const dataList = data.map((row) => ({
-        id: row.idFromApi,
-        uom: row.uom,
-        sno: row.sno,
-        activity: row.activity,
-        rateValue: row.rateValue,
-      }))
-      const res = await DataService.saveAnnualProduction(
+      const dataList = data.map((row) => {
+        const obj = {
+          uom: row.uom,
+          sno: row.sno,
+          activity: row.activity,
+          rateValue: row.rateValue,
+        }
+
+        if (row.idFromApi) {
+          obj.id = row.idFromApi
+        }
+
+        return obj
+      })
+
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'assumptions',
@@ -529,7 +540,7 @@ const AnnualProductionPlan = () => {
         activity: row.activity,
         maxHourlyRateValue: row.maxHourlyRateValue,
       }))
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'maxRate',
@@ -584,7 +595,7 @@ const AnnualProductionPlan = () => {
         activity: row.activity,
         rateValue: row.rateValue,
       }))
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'OperatingHrs',
@@ -653,7 +664,7 @@ const AnnualProductionPlan = () => {
               .toISOString()
           : null,
       }))
-      const res = await DataService.saveAnnualProduction(
+      const res = await AOPWorkFlowService.saveAnnualProduction(
         PLANT_ID,
         AOP_YEAR,
         'AverageHourlyrate',
@@ -700,7 +711,7 @@ const AnnualProductionPlan = () => {
     setLoading(true)
     // If row is saved to API, call delete API
     try {
-      const response = await DataService.deleteAnnualProduction(
+      const response = await AOPWorkFlowService.deleteAnnualProduction(
         row.idFromApi,
         keycloak,
       )
@@ -757,8 +768,8 @@ const AnnualProductionPlan = () => {
           saveBtn: !isOldYear,
           allAction: true,
           showReportTitle: true,
-          addButton: IS_PE_PP_VERTICAL ? true : false,
-          deleteButton: IS_PE_PP_VERTICAL ? true : false,
+          addButton: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
+          deleteButton: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
         }}
       />
 

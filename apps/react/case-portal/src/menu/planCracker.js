@@ -84,14 +84,14 @@ const planCracker = {
           icon: icons.IconChartBar,
           breadcrumbs: true,
         },
-    {
+        {
           id: 'production-volume-data',
           title: i18n.t('menu.productMCUVal'),
           type: 'item',
           url: '/production-norms-plan/production-volume-data',
           icon: icons.IconSettings,
           breadcrumbs: true,
-        },        
+        },
         {
           id: 'spyro-menu',
           title: i18n.t('menu.spyroMenu'),

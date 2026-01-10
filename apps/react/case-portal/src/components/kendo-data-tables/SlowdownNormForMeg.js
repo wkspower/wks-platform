@@ -25,7 +25,8 @@ const SlowdownNormForMeg = () => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
 
   const lowerVertName = vertName?.toLowerCase()
@@ -226,7 +227,7 @@ const SlowdownNormForMeg = () => {
         const dynamicColumns = response.data.map((column) => ({
           field: column.field,
           title: column.title,
-widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
+          widthT: column.field.toLowerCase() === 'uom' ? 90 : 150,
 
           editable:
             column.field === 'particulars' ||

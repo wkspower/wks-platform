@@ -28,7 +28,7 @@ import { getRoleName } from 'services/role-service'
 const AopDesignBasisNorms = () => {
   const hasExecutedRef = useRef(false)
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -48,8 +48,11 @@ const AopDesignBasisNorms = () => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  const isOldYear = oldYear?.oldYear
-  const isOldYearFlag = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const [loading, setLoading] = useState(false)
@@ -482,7 +485,7 @@ const AopDesignBasisNorms = () => {
                       />{' '}
                     </Box>
                     {/* Load Button */}
-                    {!isOldYearFlag && (
+                    {!isOldYear && (
                       <Button
                         variant='contained'
                         // onClick={onLoad}

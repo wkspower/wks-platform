@@ -39,9 +39,12 @@ const ProductionNorms = ({ permissions }) => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
+  const plantName = plantObject?.name?.toLowerCase()
+  const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
 
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
@@ -393,7 +396,7 @@ const ProductionNorms = ({ permissions }) => {
       }
 
       let dataSet = response?.data?.aopDTOList
-      // if (lowerVertName === 'elastomer') {
+      // if (lowerVertName === 'cracker') {
       //   dataSet = rowDataForCracker
       // }
 
@@ -626,7 +629,8 @@ const ProductionNorms = ({ permissions }) => {
           lowerVertName !== 'meg' &&
           lowerVertName !== 'cracker' &&
           lowerVertName !== 'elastomer' &&
-          lowerVertName !== 'vcm'
+          lowerVertName !== 'vcm' &&
+          lowerVertName !== 'pta'
         ) {
           finalData = [...formattedData, totalsRow]
         } else {
@@ -772,14 +776,14 @@ const ProductionNorms = ({ permissions }) => {
     setSelectedUnit(unit)
   }
   const isCellEditable = (params) => params.row.id !== 'total'
-  
+
   // const downloadExcelForConfiguration = async () => {
   //     setSnackbarOpen(true)
   //     setSnackbarData({
   //       message: 'Excel download started!',
   //       severity: 'success',
   //     })
-  
+
   //     try {
   //       let response
   //       if ( lowerVertName === 'pta') {
@@ -861,12 +865,12 @@ const ProductionNorms = ({ permissions }) => {
           // ? true
           // : false,
           ExcelName: `${lowerVertName}_Month wise Production plan`,
-           unitForExcelToadd:
-          lowerVertName === 'cracker'
-            ? selectedUnit || 'MT/Month'
-            : lowerVertName === 'vcm' || lowerVertName === 'pta'
-            ? selectedUnit || 'MT'
-            : null,
+          unitForExcelToadd:
+            lowerVertName === 'cracker'
+              ? selectedUnit || 'MT/Month'
+              : lowerVertName === 'vcm' || lowerVertName === 'pta'
+                ? selectedUnit || 'MT'
+                : null,
         },
         isOldYear,
       ),
@@ -940,14 +944,17 @@ const ProductionNorms = ({ permissions }) => {
         unsavedChangesRef={unsavedChangesRef}
         permissions={adjustedPermissions}
         selectedUOM={'UOM'}
-       // downloadExcelForConfiguration={downloadExcelForConfiguration}
+        // downloadExcelForConfiguration={downloadExcelForConfiguration}
         note={
           !permissions?.hideNoteText &&
           lowerVertName !== 'cracker' &&
           lowerVertName !== 'elastomer' &&
           lowerVertName !== 'aromatics' &&
-          lowerVertName !== 'vcm'   && 
-          lowerVertName !== 'pta'
+          lowerVertName !== 'vcm' &&
+          lowerVertName !== 'pe' &&
+          lowerVertName !== 'pp' &&
+          lowerVertName !== 'pta' &&
+          lowerVertName !== 'pet'
             ? '* MT per Annum'
             : ''
         }

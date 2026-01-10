@@ -1,4 +1,8 @@
-export default function getKendoNormsHistorianColumns({ headerMap, type, valueFormat }) {
+export default function getKendoNormsHistorianColumns({
+  headerMap,
+  type,
+  valueFormat,
+}) {
   let rawCols
   switch (type) {
     case 'HistorianValues':

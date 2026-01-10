@@ -26,7 +26,11 @@ import com.wks.caseengine.dto.SlowDownPlanDTO;
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
 import com.wks.caseengine.dto.ShutDownPlanDTO;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
+import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.VerticalsRepository;
 import com.wks.caseengine.service.ShutDownPlanService;
 import com.wks.caseengine.service.SlowdownPlanService;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,6 +44,12 @@ public class SlowdownPlanController {
 	
 	@Autowired
 	private ShutDownPlanService shutDownPlanService;
+	
+	@Autowired
+	private PlantsRepository plantsRepository;
+	
+	@Autowired
+	private VerticalsRepository verticalRepository;
 	
 	@GetMapping(value = "/slowdown")
     public ResponseEntity<List<ShutDownPlanDTO>> findSlowdownDetailsByPlantIdAndType(@RequestParam UUID plantId,@RequestParam String maintenanceTypeName, @RequestParam String year) {
@@ -56,8 +66,15 @@ public class SlowdownPlanController {
 	public ResponseEntity<byte[]> slowdownExport(
 	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
 	    try {
-			
-	        byte[] excelBytes = slowdownPlanService.slowdownExport(year, plantId,maintenanceTypeName, false, null);
+	    	byte[] excelBytes=null;
+	    	Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+				 excelBytes = slowdownPlanService.slowdownExportPE(year, plantId,maintenanceTypeName, false, null);
+			}else {
+				  excelBytes = slowdownPlanService.slowdownExport(year, plantId,maintenanceTypeName, false, null);
+			}
+	       
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(

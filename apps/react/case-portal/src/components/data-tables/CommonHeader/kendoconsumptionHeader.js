@@ -14,7 +14,7 @@ const getEnhancedColDefs = ({ headerMap, lowerVertName, valueFormat }) => {
   if (lowerVertName == 'elastomer') {
     colDefs = productionColDefsElastomer
   }
-  if(lowerVertName == 'vcm'){
+  if (lowerVertName == 'vcm') {
     colDefs = productionColDefsVcm // Using VCM columns for VCM as well
   }
 

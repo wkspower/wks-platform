@@ -33,7 +33,7 @@ const TcsInput = () => {
   const PLANT_NAME = plantObject?.name?.toLowerCase()
 
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'crude'
+  const lowerVertName = vertName?.toLowerCase()
 
   const headerMap = generateHeaderNames(AOP_YEAR)
   // State management
@@ -47,7 +47,7 @@ const TcsInput = () => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  const valueFormat= ValueFormatterProduction()
+  const valueFormat = ValueFormatterProduction()
   // Tab management
   const rawTabsStatic = [
     'Unit Capacity',
@@ -87,8 +87,8 @@ const TcsInput = () => {
             locked: true,
             editable: true,
             disable: false,
-            type:'text',
-            minWidth:100
+            type: 'text',
+            minWidth: 100,
           },
           {
             title: 'Capacity',
@@ -97,19 +97,19 @@ const TcsInput = () => {
                 field: 'uom',
                 title: 'UOM',
                 editable: true,
-                type:'text',
-                minWidth:100
+                type: 'text',
+                minWidth: 100,
               },
               {
                 field: 'kbpsd',
                 title: 'KBPSD',
                 editable: true,
-                 minWidth:100
+                minWidth: 100,
               },
               {
                 field: 'remarks',
                 title: 'Remarks',
-                minWidth:200,
+                minWidth: 200,
                 editable: true,
               },
             ],
@@ -123,8 +123,8 @@ const TcsInput = () => {
             width: 150,
             locked: true,
             editable: true,
-            type:'text',
-            minWidth:100
+            type: 'text',
+            minWidth: 100,
           },
 
           {
@@ -135,7 +135,7 @@ const TcsInput = () => {
                 title: 'SD Total duration in days',
                 width: 180,
                 editable: true,
-                minWidth:100
+                minWidth: 100,
               },
               {
                 field: 'tentativeMonth',
@@ -143,14 +143,14 @@ const TcsInput = () => {
                 title: 'Start Date',
                 width: 150,
                 editable: true,
-                minWidth:100
+                minWidth: 100,
               },
               {
                 field: 'purposeOfShutdown',
                 title: 'Purpose of Shutdown',
                 width: 200,
                 editable: true,
-                minWidth:200
+                minWidth: 200,
               },
             ],
           },
@@ -166,45 +166,45 @@ const TcsInput = () => {
                 width: 150,
                 locked: true,
                 editable: true,
-                type:'text',
-                minWidth:80
+                type: 'text',
+                minWidth: 80,
               },
               {
                 field: 'UOM',
                 title: 'UOM',
                 width: 150,
-                minWidth:80,
+                minWidth: 80,
                 locked: true,
                 editable: true,
-                type:'text'
+                type: 'text',
               },
               {
                 field: 'tentativeDuration',
                 title: 'Tentative Duration in days',
                 width: 200,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'throughputDuringSlowdown',
                 title: 'Throughput during the Slowdown',
                 width: 220,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
-                type:'text'
+                type: 'text',
               },
               {
                 field: 'tentativeMonth',
                 title: 'Tentative Month',
                 width: 150,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'purposeOfSlowdown',
                 title: 'Purpose of Slowdown',
                 width: 200,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
             ],
@@ -219,15 +219,15 @@ const TcsInput = () => {
                 field: 'Particulars',
                 title: 'JMD-CPP',
                 width: 120,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
-                type:'text'
+                type: 'text',
               },
               {
                 field: 'ibrDueDate',
                 title: 'IBR Due date',
                 width: 120,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
               {
@@ -237,7 +237,7 @@ const TcsInput = () => {
                     field: 'gtMaintenance',
                     title: 'MI/HGPI/CI/Mods',
                     widthT: 240,
-                    minWidth:80,
+                    minWidth: 80,
                     editable: true,
                   },
                 ],
@@ -246,30 +246,30 @@ const TcsInput = () => {
                 field: 'noOfDays',
                 title: 'No. of days',
                 width: 100,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'shutdownDate',
                 title: 'Shutdown date',
                 width: 120,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'startupDate',
                 title: 'Startup date',
                 width: 120,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
               },
               {
                 field: 'majorJobs',
                 title: 'Major jobs',
                 width: 180,
-                minWidth:80,
+                minWidth: 80,
                 editable: true,
-                type:'text'
+                type: 'text',
               },
             ],
           },
@@ -293,31 +293,102 @@ const TcsInput = () => {
           { field: 'dec', title: headerMap[12], width: 70, editable: true },
           { field: 'jan', title: headerMap[1], width: 70, editable: true },
           { field: 'feb', title: headerMap[2], width: 70, editable: true },
-          { field: 'march', title:headerMap[3], width: 70, editable: true },
+          { field: 'march', title: headerMap[3], width: 70, editable: true },
         ]
       case 'ROGC':
-          return [
+        return [
           {
             field: 'Particulars',
             title: 'Product',
             width: 150,
             editable: true,
-            type:'text'
+            type: 'text',
           },
-            { field: 'apr', title: headerMap[4], width: 70, editable: true, format: valueFormat,},
-            { field: 'may', title: headerMap[5], width: 70, editable: true, format: valueFormat,},
-            { field: 'june', title: headerMap[6], width: 70, editable: true, format: valueFormat,},
-            { field: 'july', title:headerMap[7], width: 70, editable: true, format: valueFormat,},
-            { field: 'aug', title: headerMap[8], width: 70, editable: true, format: valueFormat,},
-            { field: 'sep', title: headerMap[9], width: 70, editable: true, format: valueFormat,},
-            { field: 'oct', title: headerMap[10], width: 70, editable: true, format: valueFormat,},
-            { field: 'nov', title: headerMap[11], width: 70, editable: true, format: valueFormat,},
-            { field: 'dec', title: headerMap[12], width: 70, editable: true, format: valueFormat,},
-            {field: 'jan', title:headerMap[1], width: 70, editable: true, format: valueFormat,},
-            { field: 'feb', title: headerMap[2], width: 70, editable: true, format: valueFormat,},
-            { field: 'march', title: headerMap[3], width: 70, editable: true, format: valueFormat,},
-
-        ] 
+          {
+            field: 'apr',
+            title: headerMap[4],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'may',
+            title: headerMap[5],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'june',
+            title: headerMap[6],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'july',
+            title: headerMap[7],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'aug',
+            title: headerMap[8],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'sep',
+            title: headerMap[9],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'oct',
+            title: headerMap[10],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'nov',
+            title: headerMap[11],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'dec',
+            title: headerMap[12],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'jan',
+            title: headerMap[1],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'feb',
+            title: headerMap[2],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+          {
+            field: 'march',
+            title: headerMap[3],
+            width: 70,
+            editable: true,
+            format: valueFormat,
+          },
+        ]
       case 'Crude Blend Window':
         return [
           {
@@ -329,8 +400,20 @@ const TcsInput = () => {
                 width: 180,
                 editable: true,
               },
-              { field: 'stream', title: 'Stream', width: 120, editable: true,type:'text' },
-              { field: 'unit', title: 'Unit', width: 80, editable: true ,type:'text'},
+              {
+                field: 'stream',
+                title: 'Stream',
+                width: 120,
+                editable: true,
+                type: 'text',
+              },
+              {
+                field: 'unit',
+                title: 'Unit',
+                width: 80,
+                editable: true,
+                type: 'text',
+              },
               { field: 'min', title: 'Min', width: 70, editable: true },
               { field: 'max', title: 'Max', width: 70, editable: true },
               {
@@ -1310,7 +1393,7 @@ const TcsInput = () => {
 
       const rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
-      console.log('data',data)
+      console.log('data', data)
       if (data.length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No Records to Save!', severity: 'info' })

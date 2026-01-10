@@ -18,8 +18,7 @@ import {
 
 const ConsumptionNormsHistorianBasis = () => {
   const keycloak = useSession()
-  const REPORT_TYPE_FOR_ALL = 'OverallConsumption' // <-- change to your backend's value if needed
-
+  const REPORT_TYPE_FOR_ALL = 'OverallConsumption'
   const [dataMap, setDataMap] = useState({})
   const [gridNames, setGridNames] = useState([])
   const [loading, setLoading] = useState(false)
@@ -42,7 +41,8 @@ const ConsumptionNormsHistorianBasis = () => {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase() || 'meg'
 

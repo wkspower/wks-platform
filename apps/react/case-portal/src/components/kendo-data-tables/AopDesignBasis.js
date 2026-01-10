@@ -36,7 +36,7 @@ const AopDesignBasis = () => {
   const hasExecutedRef = useRef(false)
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -57,8 +57,11 @@ const AopDesignBasis = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
-  const isOldYear = oldYear?.oldYear
-  const isOldYearFlag = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
 
   const [tabIndex, setTabIndex] = useState(0)
@@ -540,7 +543,7 @@ const AopDesignBasis = () => {
                     </Box>
 
                     {/* Load Button */}
-                    {!isOldYearFlag && (
+                    {!isOldYear && (
                       <Button
                         variant='contained'
                         onClick={handleOpenDialog}
@@ -552,7 +555,7 @@ const AopDesignBasis = () => {
                       </Button>
                     )}
 
-                    {!isOldYearFlag && (
+                    {!isOldYear && (
                       <Button
                         variant='contained'
                         // onClick={onLoad}

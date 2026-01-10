@@ -28,7 +28,10 @@ import { NumericEditorWithMinMax } from '../utilities/NumericEditorWithMinMax'
 import { NumberCellEditor } from '../utilities/NumberCellEditor'
 import Notification from '../utilities/Notification'
 import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
-import valueFormatterByUOM from '../commonUtilityFunctions'
+import valueFormatterByUOM, {
+  recalcDuration,
+  recalcEndDate,
+} from '../commonUtilityFunctions'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 
 export const hiddenFields = [
@@ -75,6 +78,7 @@ const NestedKendoTable = ({
   groupBy = null,
   filterable = false,
   hoursRows = {},
+  dateCalculationConfig = {},
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -330,6 +334,37 @@ const NestedKendoTable = ({
             updated[field] = value
           }
 
+          // Handle dateCalculationConfig for generic date calculations
+          if (
+            dateCalculationConfig &&
+            Object.keys(dateCalculationConfig).length > 0
+          ) {
+            const { dateField1, dateField2, daysField, requiredInHr } =
+              dateCalculationConfig
+            if (
+              dateField1 in updated &&
+              dateField2 in updated &&
+              daysField in updated
+            ) {
+              if (field === dateField1 || field === dateField2) {
+                updated[daysField] = recalcDuration(
+                  updated[dateField1],
+                  updated[dateField2],
+                  requiredInHr,
+                )
+              } else if (field === daysField) {
+                const newEnd = recalcEndDate(
+                  updated[dateField1],
+                  value,
+                  requiredInHr,
+                )
+                if (newEnd) {
+                  updated[dateField2] = newEnd
+                }
+              }
+            }
+          }
+
           return updated
         }),
       )
@@ -367,6 +402,36 @@ const NestedKendoTable = ({
           return { ...prev, [itemId]: cloned }
         } else {
           existingItem[field] = value
+
+          // Handle dateCalculationConfig for generic date calculations
+          if (
+            dateCalculationConfig &&
+            Object.keys(dateCalculationConfig).length > 0
+          ) {
+            const { dateField1, dateField2, daysField, requiredInHr } =
+              dateCalculationConfig
+            if (
+              dateField1 in existingItem &&
+              dateField2 in existingItem &&
+              daysField in existingItem
+            ) {
+              if (field === dateField1 || field === dateField2) {
+                existingItem[daysField] = recalcDuration(
+                  existingItem[dateField1],
+                  existingItem[dateField2],
+                  requiredInHr,
+                )
+              } else if (field === daysField) {
+                const newEnd = recalcEndDate(
+                  existingItem[dateField1],
+                  value,
+                  requiredInHr,
+                )
+                if (newEnd) existingItem[dateField2] = newEnd.toISOString()
+              }
+            }
+          }
+
           return { ...prev, [itemId]: existingItem }
         }
       })
@@ -388,13 +453,51 @@ const NestedKendoTable = ({
           }
         }
 
+        // Handle dateCalculationConfig for generic date calculations (for red highlighting)
+        if (
+          dateCalculationConfig &&
+          Object.keys(dateCalculationConfig).length > 0
+        ) {
+          const { dateField1, dateField2, daysField, requiredInHr } =
+            dateCalculationConfig
+          if (
+            dateField1 in dataItem &&
+            dateField2 in dataItem &&
+            daysField in dataItem
+          ) {
+            if (field === dateField1 || field === dateField2) {
+              // When dates change, also highlight the calculated duration field
+              const calculatedDuration = recalcDuration(
+                field === dateField1 ? value : dataItem[dateField1],
+                field === dateField2 ? value : dataItem[dateField2],
+                requiredInHr,
+              )
+              base[daysField] = calculatedDuration
+            } else if (field === daysField) {
+              // When duration changes, also highlight the calculated end date field
+              const newEnd = recalcEndDate(
+                dataItem[dateField1],
+                value,
+                requiredInHr,
+              )
+              if (newEnd) base[dateField2] = newEnd.toISOString()
+            }
+          }
+        }
+
         return {
           ...prev,
           [itemId]: base,
         }
       })
     },
-    [setRows, setModifiedCells, hoursRows],
+    [
+      setRows,
+      setModifiedCells,
+      setCustomModifiedCells,
+      hoursRows,
+      dateCalculationConfig,
+    ],
   )
 
   const handleRemarkSave = () => {

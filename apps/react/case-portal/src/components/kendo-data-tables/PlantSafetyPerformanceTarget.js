@@ -11,10 +11,8 @@ import { useSelector } from 'react-redux'
 export default function PlantSafetyPerformanceTarget() {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      year,
-    } = dataGridStore
-    const AOP_YEAR = year?.selectedYear
+  const { year } = dataGridStore
+  const AOP_YEAR = year?.selectedYear
   const thisYear = AOP_YEAR
 
   const [rows, setRows] = useState([])
@@ -26,9 +24,10 @@ export default function PlantSafetyPerformanceTarget() {
   const [modifiedCells, setModifiedCells] = useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const { verticalChange, yearChanged, oldYear, plantID } = dataGridStore
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
 
   const headerMap = generateHeaderNames(AOP_YEAR)
 

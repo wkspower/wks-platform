@@ -6,6 +6,11 @@ export const ProductionNormsApiService = {
   getAOPData,
   monthlyProductionC2rC3R,
   MonthwiseProductionExport,
+  getQualityParameters,
+  saveQualityParameters,
+
+  getPriceDifferential,
+  savePriceDifferential,
 }
 async function updateProductNormData(turnAroundDetails, keycloak) {
   const url = `${Config.CaseEngineUrl}/task/monthly-production` // Corrected endpoint
@@ -53,7 +58,6 @@ async function handleCalculate(PLANT_ID, AOP_YEAR, keycloak) {
   }
 }
 async function getAOPData(keycloak, type, PLANT_ID, AOP_YEAR) {
-
   const url = `${Config.CaseEngineUrl}/task/monthly-production?plantId=${PLANT_ID}&year=${AOP_YEAR}&type=${type}`
   const headers = {
     Accept: 'application/json',
@@ -110,5 +114,77 @@ export async function MonthwiseProductionExport(keycloak, plantId, year, type) {
   } catch (e) {
     console.error('Error exporting Month wise Production plan Excel:', e)
     return Promise.reject(e)
+  }
+}
+
+async function getQualityParameters(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/quality-parameters?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveQualityParameters(PLANT_ID, PAYLOAD, keycloak, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/quality-parameters?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(PAYLOAD),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getPriceDifferential(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/price-differential?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function savePriceDifferential(PLANT_ID, PAYLOAD, keycloak, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/price-differential?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(PAYLOAD),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

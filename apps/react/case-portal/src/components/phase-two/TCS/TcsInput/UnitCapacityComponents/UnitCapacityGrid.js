@@ -1,5 +1,6 @@
 import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
+import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
@@ -29,8 +30,11 @@ const UnitCapacityGrid = ({
   // State management for this capacity type only
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [selectedDropdown, setSelectedDropdown] = useState(null)
-  const [dropdownConfig, setDropdownConfig] = useState({ ...defaultDropdownConfig })
+  const [dropdownConfig, setDropdownConfig] = useState({
+    ...defaultDropdownConfig,
+  })
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -70,7 +74,14 @@ const UnitCapacityGrid = ({
     } finally {
       setLoadingUOM(false)
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, capacityType, setSnackbarData, setSnackbarOpen])
+  }, [
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    capacityType,
+    setSnackbarData,
+    setSnackbarOpen,
+  ])
 
   // Fetch Unit Capacity data for this capacity type
   const fetchUnitCapacityData = useCallback(
@@ -101,8 +112,12 @@ const UnitCapacityGrid = ({
         }
 
         setRows(transformedData)
+        setOriginalRows(transformedData)
       } catch (err) {
-        console.error(`Error fetching Unit Capacity data (${capacityType}):`, err)
+        console.error(
+          `Error fetching Unit Capacity data (${capacityType}):`,
+          err,
+        )
         setSnackbarData({
           message: `Failed to load Unit Capacity data. Please try again.`,
           severity: 'error',
@@ -113,7 +128,14 @@ const UnitCapacityGrid = ({
         setLoading(false)
       }
     },
-    [keycloak, PLANT_ID, AOP_YEAR, capacityType, setSnackbarData, setSnackbarOpen],
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      capacityType,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
   )
 
   // Fetch UOM options on component mount
@@ -132,7 +154,13 @@ const UnitCapacityGrid = ({
 
   // Column configuration for Unit Capacity
   const columnConfig = {
-    id: { editable: false, type: 'text', minWidth: 50, widthT: 100,hidden:true },
+    id: {
+      editable: false,
+      type: 'text',
+      minWidth: 50,
+      widthT: 100,
+      hidden: true,
+    },
     particulates: { editable: false, type: 'text', minWidth: 50, widthT: 150 },
     value: { editable: true, type: 'number1', minWidth: 50, widthT: 200 },
     remark: { editable: true, type: 'text', minWidth: 100, widthT: 250 },
@@ -181,7 +209,6 @@ const UnitCapacityGrid = ({
     return otherCols
   }, [apiMetadata])
 
-
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
     setCurrentRemark(row.remark || '')
@@ -209,7 +236,29 @@ const UnitCapacityGrid = ({
 
       if (!selectedDropdown) {
         setSnackbarOpen(true)
-        setSnackbarData({ message: 'Please select a UOM before saving!', severity: 'warning' })
+        setSnackbarData({
+          message: 'Please select a UOM before saving!',
+          severity: 'warning',
+        })
+        return
+      }
+
+      // Custom validation: If any row data is updated, remarks must be filled and different from original
+      const fieldsToCheck = ['value']
+      const validationError = validateRowDataWithRemarks(
+        data,
+        originalRows,
+        fieldsToCheck,
+        'particulates',
+        'remark',
+      )
+
+      if (validationError) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationError,
+          severity: 'error',
+        })
         return
       }
 
@@ -238,6 +287,7 @@ const UnitCapacityGrid = ({
     }
   }, [
     modifiedCells,
+    originalRows,
     keycloak,
     PLANT_ID,
     AOP_YEAR,

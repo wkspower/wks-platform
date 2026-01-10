@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 // import { CaseService } from 'services/CaseService'
 import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 // import { TaskService } from 'services/TaskService'
 import { useSession } from 'SessionStoreContext'
 import postmanData from '../../../assets/postmandata.json'
@@ -48,7 +49,7 @@ import SpecificConsumptionNorm from '../Reports-kendo/SpecificConsumptionnorm'
 import { getRoleName } from 'services/role-service'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   // const [steps, setSteps] = useState([])
   const [activeStep, setActiveStep] = useState(0)
   // const [openRejectDialog, setOpenRejectDialog] = useState(false)
@@ -99,9 +100,13 @@ const WorkFlowMerge = () => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [businessKey, setBusinessKey] = useState('')
   const [masterSteps, setMasterSteps] = useState([])
   const [workflowDto, setWorkFlowDto] = useState({})
@@ -141,56 +146,61 @@ const WorkFlowMerge = () => {
         throw new Error('PLANT_ID or AOP_YEAR not found ')
       }
 
-      const [data, res1, res2, res3, res4, res5, res6, res7, res8] =
+      const [data, res1, res2, res3, res4, res5, res6, res7, res8, res9] =
         await Promise.all([
-          DataService.handleCalculateAnnualAopCostMiisContribution(
+          AOPWorkFlowService.handleCalculateAnnualAopCostMiisContribution(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.handleCalculateProductionVolData2(
+          AOPWorkFlowService.handleCalculateProductionVolData2(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.handleCalculatePlantProductionData(
+          AOPWorkFlowService.handleCalculatePlantProductionData(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.handleCalculateMonthwiseProduction(
+          AOPWorkFlowService.handleCalculateMonthwiseProduction(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.calculateTurnAroundPlanReportData(
+          AOPWorkFlowService.calculateTurnAroundPlanReportData(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.calculateAnnualProductionPlanData(
+          AOPWorkFlowService.calculateAnnualProductionPlanData(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.handleCalculatePlantConsumptionData(
+          AOPWorkFlowService.handleCalculatePlantConsumptionData(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
-          DataService.calculatePlantContributionReportData(
-            PLANT_ID,
-            AOP_YEAR,
-            keycloak,
-          ),
-
-          DataService.calculatePlantContributionSummaryYearly(
+          AOPWorkFlowService.calculatePlantContributionReportData(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
           ),
 
-          DataService.calculatePlantContributionBusinessDemand(
+          AOPWorkFlowService.calculatePlantContributionSummaryYearly(
+            PLANT_ID,
+            AOP_YEAR,
+            keycloak,
+          ),
+
+          AOPWorkFlowService.calculatePlantContributionBusinessDemand(
+            PLANT_ID,
+            AOP_YEAR,
+            keycloak,
+          ),
+          AOPWorkFlowService.calculateGradeSpecificConsumptionNorm(
             PLANT_ID,
             AOP_YEAR,
             keycloak,
@@ -199,7 +209,18 @@ const WorkFlowMerge = () => {
           Promise.resolve(null),
         ])
 
-      const responses = [data, res1, res2, res3, res4, res5, res6, res7, res8]
+      const responses = [
+        data,
+        res1,
+        res2,
+        res3,
+        res4,
+        res5,
+        res6,
+        res7,
+        res8,
+        res9,
+      ]
 
       const allSuccess = responses.every(
         (res) => res !== null && res !== undefined,
@@ -248,7 +269,7 @@ const WorkFlowMerge = () => {
       const payload = postmanData
 
       // Await the API call here to ensure completion
-      const data = await DataService.getExcel(
+      const data = await AOPWorkFlowService.getExcel(
         keycloak,
         payload,
         PLANT_ID,
@@ -275,10 +296,10 @@ const WorkFlowMerge = () => {
   }
 
   const handleRemarkCellClick = async (row) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     // do not delete commented code
     // try {
-    //   const cases = await DataService.getCaseId(keycloak)
+    //   const cases = await AOPWorkFlowService.getCaseId(keycloak)
     //   console.log(cases?.workflowList?.length)
     //   if (cases?.workflowList?.length !== 0) return
     setCurrentRemark(row.remark || '')
@@ -362,13 +383,10 @@ const WorkFlowMerge = () => {
   }
 
   const fetchData = async () => {
-    if(!PLANT_ID || !AOP_YEAR) return
+    if (!PLANT_ID || !AOP_YEAR) return
     try {
-      const { headers, keys, results } = await DataService.getWorkflowData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      const { headers, keys, results } =
+        await AOPWorkFlowService.getWorkflowData(keycloak, PLANT_ID, AOP_YEAR)
       const numericKeys = getNumericKeysInAllRows(results)
       const formatted = results.map((row, idx) => ({
         id: idx,
@@ -396,9 +414,9 @@ const WorkFlowMerge = () => {
   }
 
   const getCaseId = async () => {
-    if(!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
+    if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
     try {
-      const cases = await DataService.getCaseId(
+      const cases = await AOPWorkFlowService.getCaseId(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -468,10 +486,10 @@ const WorkFlowMerge = () => {
         // allData: rows,
         workflowYearDTO: rows,
       }
-      const result = await DataService.submitWorkFlow(payload, keycloak)
+      const result = await AOPWorkFlowService.submitWorkFlow(payload, keycloak)
       // console.log(result)
       if (result) {
-        console.log('Workflow instance created successfully')
+        // console.log('Workflow instance created successfully')
       }
       setSnackbarData({
         message: 'Workflow instance created successfully',
@@ -527,7 +545,7 @@ const WorkFlowMerge = () => {
         variables: caseData.attributes,
         workflowDTO: workflowDto,
       }
-      await DataService.completeTask(keycloak, payloadOfCompleteTask)
+      await AOPWorkFlowService.completeTask(keycloak, payloadOfCompleteTask)
       // await CaseService.addComment(keycloak, text, '', businessKey)
       setSnackbarData({
         message: 'Task completed and comment added!',
@@ -548,7 +566,7 @@ const WorkFlowMerge = () => {
   const saveChanges = async () => {
     try {
       // console.log(rows, 'workflowDto')
-      await DataService.saveAnnualWorkFlowData(keycloak, rows, PLANT_ID)
+      await AOPWorkFlowService.saveAnnualWorkFlowData(keycloak, rows, PLANT_ID)
       setSnackbarData({
         message: 'Data Saved Successfully!',
         severity: 'success',
@@ -642,6 +660,16 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary (T-22)',
   ]
+  const vcmTabs = [
+    'Annual AOP Cost',
+    'Plant Production Summary',
+    'Month Wise Production Plan',
+    'Month Wise Raw Data', // Changed for VCM
+    'Turnaround Report',
+    'Annual Production Plan',
+    'Plant Contribution',
+    'Plant Contribution Summary (T-22)',
+  ]
 
   // Pick tabs based on vertical
   // Pick tabs based on vertical
@@ -649,14 +677,15 @@ const WorkFlowMerge = () => {
   let activeTabs = defaultTabs
   if (lowerVertName === 'cracker') {
     activeTabs = crackerTabs
+  } else if (lowerVertName === 'vcm') {
+    activeTabs = vcmTabs
   } else if (
     lowerVertName === 'elastomer' ||
     lowerVertName === 'aromatics' ||
-    lowerVertName === 'pta' ||
-    lowerVertName === 'vcm'
+    lowerVertName === 'pta'
   ) {
     activeTabs = elastomerTabs
-  } else if (lowerVertName === 'pe') {
+  } else if (lowerVertName === 'pe' || lowerVertName === 'pet') {
     activeTabs = customPETabs
   } else if (lowerVertName === 'pp') {
     activeTabs = customPPTabs
@@ -714,7 +743,11 @@ const WorkFlowMerge = () => {
           ))}
         </Stepper>
 
-        <Typography component='div' className='text-note'>
+        <Typography
+          component='div'
+          className='text-note'
+          style={{ marginTop: 24 }}
+        >
           * Prices - MIIS BPC (Last Budget Year), Actual Values - MIIS
           Contribution (YTD).
         </Typography>
@@ -789,7 +822,8 @@ const WorkFlowMerge = () => {
         {/* For OTHER verticals */}
         {(lowerVertName === 'meg' ||
           lowerVertName === 'pe' ||
-          lowerVertName === 'pp') && (
+          lowerVertName === 'pp' ||
+          lowerVertName === 'pet') && (
           <>
             {tabIndex === 0 && (
               <ProductionAopView
@@ -854,7 +888,9 @@ const WorkFlowMerge = () => {
             {tabIndex === 5 && <AnnualProductionPlan />}
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
-            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
+            {(lowerVertName === 'pe' ||
+              lowerVertName === 'pp' ||
+              lowerVertName === 'pet') && (
               <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
             )}
 

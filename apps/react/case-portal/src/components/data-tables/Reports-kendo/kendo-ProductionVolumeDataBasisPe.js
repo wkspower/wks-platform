@@ -79,8 +79,9 @@ const ProductionVolumeDataBasisPe = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
-  const isOldYear = oldYear?.oldYear === 1
+  const lowerVertName = vertName?.toLowerCase()
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const [loading, setLoading] = useState(false)
 
   function parseDDMMYYYY(dateStr) {

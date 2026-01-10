@@ -126,7 +126,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
 				Verticals vertical = verticalRepository.findById(UUID.fromString(row[3].toString())).get();
-				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
 					mCUNormsValueDTO.setGradeId(row[4].toString());
 					mCUNormsValueDTO.setMaterialFkId(row[5].toString());
 					mCUNormsValueDTO.setApril(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -671,6 +671,22 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	private boolean isDifferent(double oldVal, double newVal) {
 	    return Double.compare(oldVal, newVal) != 0;
 	}
+	
+	@Override
+	@Transactional
+	public AOPMessageVM loadGradeWiseConsumptionNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		String storedProcedure = vertical.getName() + "_" + site.getName() + "_LoadGradewiseConsumptionNorms";
+		System.out.println("storedProcedure" + storedProcedure);
+		int result = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+		aopMessageVM.setCode(200);
+		aopMessageVM.setMessage("SP Executed successfully");
+		aopMessageVM.setData(result);
+		return aopMessageVM;
+	}
 
 	@Override
 	@Transactional
@@ -687,6 +703,18 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				"normal-op-norms");
 		List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms");
 		for (ScreenMapping screenMapping : screenMappingList) {
+			if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
+				AopCalculation aopCalculation = new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+		}
+		List<ScreenMapping> calculateScreenMappingList = screenMappingRepository.findByDependentScreen("normal-op-norms-calculate");
+		for (ScreenMapping screenMapping : calculateScreenMappingList) {
 			if (!screenMapping.getCalculationScreen().equalsIgnoreCase(screenMapping.getDependentScreen())) {
 				AopCalculation aopCalculation = new AopCalculation();
 				aopCalculation.setAopYear(year);
@@ -744,6 +772,32 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			stmt.setString(2, siteId);
 			stmt.setString(3, verticalId);
 			stmt.setString(4, finYear);
+
+			// Execute the stored procedure
+			int rowsAffected = stmt.executeUpdate();
+
+			// Optional: commit if auto-commit is off
+			if (!connection.getAutoCommit()) {
+				connection.commit();
+			}
+
+			return rowsAffected;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId, String year) {
+		String callSql = "{call " + procedureName + "(?, ?)}";
+
+		try (Connection connection = dataSource.getConnection();
+				CallableStatement stmt = connection.prepareCall(callSql)) {
+
+			// Set parameters
+			stmt.setString(1, plantId);
+			stmt.setString(2, year);
 
 			// Execute the stored procedure
 			int rowsAffected = stmt.executeUpdate();

@@ -249,7 +249,7 @@ export const MockSpecificConsumptionNormsAPI = {
             { field: 'unit', title: 'Unit', widthT: 60, editable: false },
             { field: 'design', title: 'Design', editable: false },
             {
-              field: 'bestAbestAchievedSinceLastFourYearschieved',
+              field: 'bestAchievedSinceLastFourYears',
               title: 'Best Achieved (last 4 years)',
               editable: false,
               format: valueFormat,
@@ -588,7 +588,6 @@ export const MockSpecificConsumptionNormsAPI = {
             {
               title: prevFY4,
               children: [
-                
                 {
                   field: 'actualFourYearsAgo',
                   title: 'Actual',

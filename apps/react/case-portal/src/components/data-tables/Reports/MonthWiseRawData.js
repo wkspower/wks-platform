@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { CrackerReportsApiDataService } from 'services/cracker-reports-api-service'
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
+import { OptimizerDataApiService } from 'services/optimizer-api-service'
 import { useSession } from 'SessionStoreContext'
 import {
   CustomAccordion,
@@ -15,7 +16,7 @@ import {
 } from 'utils/CustomAccrodian'
 
 const MONTH_GRID_NAME = 'Final Norms'
-const MODE_GRADES = ['4F', '5F', '4F+D']
+// const MODE_GRADES = ['4F', '5F', '4F+D']
 const MODE_TYPES = ['Best Achieved']
 
 export default function MonthWiseRawData() {
@@ -41,7 +42,8 @@ export default function MonthWiseRawData() {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const SCREEN_NAME = screenTitle?.title
@@ -71,7 +73,7 @@ export default function MonthWiseRawData() {
         filterable: true,
         filter: isTextCol ? 'text' : isNumberCol ? 'numeric' : undefined,
         align: isTextCol ? 'left' : isNumberCol ? 'right' : undefined,
-        ...(isNumberCol ? { format: '{0:0.000}' } : {}),
+        ...(isNumberCol ? { format: '{0:0.0000}' } : {}),
         editable: false,
         isRightAlligned: isNumberCol ? 'numeric' : undefined,
       }
@@ -138,6 +140,18 @@ export default function MonthWiseRawData() {
 
   const fetchModeWiseGrids = useCallback(async () => {
     const modeMap = {}
+
+    const responseForModes = await OptimizerDataApiService.fetchModes(
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      '1',
+    )
+
+    // Dynamic MODE_GRADES (no hard coding)
+    const MODE_GRADES =
+      responseForModes?.data?.map((mode) => mode?.name).filter(Boolean) || []
+
     for (const grade of MODE_GRADES) {
       for (const mode of MODE_TYPES) {
         try {

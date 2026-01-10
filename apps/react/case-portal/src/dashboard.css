@@ -1,0 +1,453 @@
+/* =========================================================
+   DIGITAL AOP DASHBOARD ? DESIGN 5: CORPORATE BLUE (ULTRA COMPACT)
+   ========================================================= */
+
+/* ---------- ROOT CONTAINER ---------- */
+.dashboard-root-v2 {
+  background: #e0f2fe;
+  padding: 10px;
+  min-height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* ---------- TITLE ---------- */
+.dashboard-title-v2 {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #0c4a6e !important;
+  margin-bottom: 10px !important;
+  letter-spacing: -0.2px;
+}
+
+/* ---------- CARD ---------- */
+.plant-card-v2 {
+  height: 100%;
+  background: #ffffff !important;
+  border-radius: 8px !important;
+  border: 1px solid #bae6fd !important;
+  box-shadow: 0 1px 4px rgba(2, 132, 199, 0.08) !important;
+  overflow: hidden !important;
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.plant-card-v2:hover {
+  transform: translateY(-3px) scale(1.01) !important;
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.18) !important;
+  border-color: #0284c7 !important;
+}
+
+/* ---------- CARD HEADER ---------- */
+.plant-card-header-v2 {
+  padding: 0 !important;
+  background: none !important;
+}
+
+/* ---------- CARD TITLE ---------- */
+.plant-card-title-v2 {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 0.1px !important;
+  padding: 5px 8px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid #0369a1 !important;
+  transition: background 0.3s ease !important;
+}
+
+.plant-card-v2:hover .plant-card-title-v2 {
+  background: #0369a1 !important;
+}
+
+/* ---------- SECTION DETAILS ---------- */
+.section-details-v2 {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 4px 8px;
+  background: #f0f9ff;
+  border-bottom: 1px solid #e0f2fe;
+}
+
+.detail-pill-v2 {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #0c4a6e;
+  border: 1px solid #bae6fd;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-pill-v2:hover {
+  background: #dbeafe;
+  transform: scale(1.08);
+}
+
+.detail-pill-v2 strong {
+  font-size: 11px;
+  color: #0284c7;
+}
+
+/* ---------- STATUS BREAKDOWN ---------- */
+.status-breakdown-v2 {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-pill-v2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.status-pill-v2:hover {
+  transform: scale(1.12);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.status-count-v2 {
+  font-weight: 700;
+}
+
+/* ---------- CARD BODY ---------- */
+.plant-card-body-v2 {
+  padding: 4px !important;
+  overflow-y: auto;
+  max-height: calc(100vh - 240px);
+}
+
+.plant-card-body-v2::-webkit-scrollbar {
+  width: 4px;
+}
+
+.plant-card-body-v2::-webkit-scrollbar-track {
+  background: #f0f9ff;
+  border-radius: 3px;
+}
+
+.plant-card-body-v2::-webkit-scrollbar-thumb {
+  background: #bae6fd;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.plant-card-body-v2::-webkit-scrollbar-thumb:hover {
+  background: #7dd3fc;
+}
+
+/* ---------- ROWS ---------- */
+.plant-row-v2 {
+  padding: 4px 6px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  border: 1px solid transparent !important;
+  position: relative !important;
+  background: transparent !important;
+}
+
+.plant-row-v2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #0284c7;
+  border-radius: 2px 0 0 2px;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plant-row-v2:hover {
+  transform: translateX(3px) !important;
+  background: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+
+.plant-row-v2:hover::before {
+  opacity: 1;
+}
+
+.plant-row-v2:active {
+  transform: translateX(2px) scale(0.99) !important;
+}
+
+/* ---------- VERTICAL NAME ---------- */
+.vertical-name-v2 {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  flex: 1 !important;
+  color: #0c4a6e !important;
+  transition: color 0.2s ease !important;
+}
+
+.plant-row-v2:hover .vertical-name-v2 {
+  color: #0284c7 !important;
+}
+
+/* ---------- STATUS CHIP ---------- */
+.dashboard-root-v2 .k-chip.status-chip-v2 {
+  font-size: 8px !important;
+  padding: 2px 6px !important;
+  height: auto !important;
+  line-height: 1.1 !important;
+  font-weight: 700 !important;
+  border: none !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.2px !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 3px !important;
+}
+
+.plant-row-v2:hover .k-chip.status-chip-v2 {
+  transform: scale(1.08) translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ---------- PULSE ANIMATION ---------- */
+@keyframes pulse-v2 {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pulse {
+  animation: pulse-v2 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------- FADE IN ANIMATION ---------- */
+@keyframes fadeInUp-v2 {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.plant-card-v2 {
+  animation: fadeInUp-v2 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.plant-card-v2:nth-child(1) {
+  animation-delay: 0.03s;
+}
+.plant-card-v2:nth-child(2) {
+  animation-delay: 0.06s;
+}
+.plant-card-v2:nth-child(3) {
+  animation-delay: 0.09s;
+}
+.plant-card-v2:nth-child(4) {
+  animation-delay: 0.12s;
+}
+.plant-card-v2:nth-child(5) {
+  animation-delay: 0.15s;
+}
+.plant-card-v2:nth-child(6) {
+  animation-delay: 0.18s;
+}
+.plant-card-v2:nth-child(7) {
+  animation-delay: 0.21s;
+}
+.plant-card-v2:nth-child(8) {
+  animation-delay: 0.24s;
+}
+.plant-card-v2:nth-child(9) {
+  animation-delay: 0.27s;
+}
+.plant-card-v2:nth-child(10) {
+  animation-delay: 0.3s;
+}
+.plant-card-v2:nth-child(11) {
+  animation-delay: 0.33s;
+}
+.plant-card-v2:nth-child(12) {
+  animation-delay: 0.36s;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+/* Large Desktop (1920px+) - 6 cards per row */
+@media (min-width: 1920px) {
+  .dashboard-root-v2 {
+    padding: 12px;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 220px);
+  }
+}
+
+/* Desktop (1440px - 1919px) - 6 cards per row */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .dashboard-root-v2 {
+    padding: 10px;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 230px);
+  }
+}
+
+/* Medium Desktop (1200px - 1439px) - 5-6 cards per row */
+@media (min-width: 1200px) and (max-width: 1439px) {
+  .dashboard-title-v2 {
+    font-size: 15px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 10px !important;
+    padding: 4px 7px !important;
+  }
+
+  .vertical-name-v2 {
+    font-size: 9px !important;
+  }
+
+  .dashboard-root-v2 .k-chip.status-chip-v2 {
+    font-size: 7px !important;
+    padding: 2px 5px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 240px);
+  }
+}
+
+/* Tablet Landscape (900px - 1199px) - 4 cards per row */
+@media (min-width: 900px) and (max-width: 1199px) {
+  .dashboard-root-v2 {
+    padding: 8px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 14px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 10px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 260px);
+  }
+}
+
+/* Tablet Portrait (600px - 899px) - 3 cards per row */
+@media (min-width: 600px) and (max-width: 899px) {
+  .dashboard-root-v2 {
+    padding: 8px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 13px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 280px);
+  }
+}
+
+/* Mobile (< 600px) - 1-2 cards per row */
+@media (max-width: 599px) {
+  .dashboard-root-v2 {
+    padding: 6px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 9px !important;
+    padding: 4px 6px !important;
+  }
+
+  .section-details-v2 {
+    padding: 3px 6px;
+  }
+
+  .detail-pill-v2 {
+    padding: 1px 4px;
+    font-size: 8px;
+  }
+
+  .detail-pill-v2 strong {
+    font-size: 10px;
+  }
+
+  .status-pill-v2 {
+    padding: 1px 4px;
+    font-size: 9px;
+  }
+
+  .vertical-name-v2 {
+    font-size: 9px !important;
+  }
+
+  .dashboard-root-v2 .k-chip.status-chip-v2 {
+    font-size: 7px !important;
+    padding: 2px 5px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 300px);
+  }
+}
+
+/* 80% Zoom Optimization */
+@media (min-width: 1600px) {
+  .dashboard-root-v2 {
+    padding: 12px;
+  }
+
+  .dashboard-title-v2 {
+    font-size: 17px !important;
+  }
+
+  .plant-card-title-v2 {
+    font-size: 11px !important;
+    padding: 5px 9px !important;
+  }
+
+  .vertical-name-v2 {
+    font-size: 10px !important;
+  }
+
+  .dashboard-root-v2 .k-chip.status-chip-v2 {
+    font-size: 8px !important;
+  }
+
+  .plant-card-body-v2 {
+    max-height: calc(100vh - 210px);
+  }
+}

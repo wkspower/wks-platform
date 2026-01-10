@@ -8,6 +8,9 @@ export const MaintenanceDetailsApiService = {
   handleCalculateMaintenanceCracker,
   CrackerMaintenanceImport,
   CrackerMaintenanceExport,
+  deleteSlowdownConfig,
+  saveSlowdownConfig,
+  getSlowdownConfig,
 }
 
 async function getCrackerMaintenanceData(keycloak, PLANT_ID, AOP_YEAR) {
@@ -158,5 +161,61 @@ async function CrackerMaintenanceExport(keycloak, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.error('Error exporting Optimizer Input Excel:', e)
     return Promise.reject(e)
+  }
+}
+async function deleteSlowdownConfig(id, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-history?id=${encodeURIComponent(id)}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.json()
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function saveSlowdownConfig(PLANT_ID, AOP_YEAR, dataList, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-history?plantFKId=${encodeURIComponent(PLANT_ID)}&year=${encodeURIComponent(AOP_YEAR)}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(dataList),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error in saveAnnualProduction:', e)
+    return await Promise.reject(e)
+  }
+}
+async function getSlowdownConfig(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/shutdown-history?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }

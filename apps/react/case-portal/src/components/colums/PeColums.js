@@ -164,18 +164,25 @@ export const SlowDownPeColumns = [
     editable: true,
   },
 
-  {
-    field: 'maintStartDateTime',
-    title: 'SD- From',
-    type: 'dateTime',
-    editable: true,
-  },
+  // {
+  //   field: 'maintStartDateTime',
+  //   title: 'SD- From',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
 
+  // {
+  //   field: 'maintEndDateTime',
+  //   title: 'SD- To',
+  //   type: 'dateTime',
+  //   editable: true,
+  // },
   {
-    field: 'maintEndDateTime',
-    title: 'SD- To',
-    type: 'dateTime',
+    field: 'monthly',
+    title: 'Month',
+    type: 'monthDropdownPEPP',
     editable: true,
+    width: 150,
   },
 
   {
@@ -186,7 +193,7 @@ export const SlowDownPeColumns = [
 
   {
     field: 'rate',
-    title: 'Rate (TPH)',
+    title: 'Rate Reduced (TPH)',
     editable: true,
     type: 'number',
   },
@@ -405,7 +412,6 @@ export const ShutdownConsumptionPeColumns = [
   {
     field: 'remarks',
     headerName: 'Remark',
-
     editable: false,
   },
 
@@ -415,6 +421,54 @@ export const ShutdownConsumptionPeColumns = [
     hidden: true,
   },
 ]
+
+export const ShutdownConsumptionPeColumnsPeLldpe = [
+  {
+    field: 'Particulars',
+    headerName: 'Type',
+    width: 120,
+    hidden: true,
+  },
+  {
+    field: 'materialFkId',
+    headerName: 'Particulars',
+    minWidth: 150,
+    editable: false,
+    hidden: true,
+    width: 120,
+  },
+  {
+    field: 'productName',
+    headerName: 'Particulars123',
+    widthT: 120,
+    editable: false,
+  },
+  { field: 'UOM', headerName: 'UOM', widthT: 60, editable: false },
+
+  ...Array.from({ length: 12 }, (_, i) => {
+    const monthIndex = (i + 4) % 12 || 12
+    const monthField = new Date(2000, monthIndex - 1)
+      .toLocaleString('en-US', { month: 'long' })
+      .toLowerCase()
+
+    return {
+      field: monthField,
+      width: 120,
+      type: 'number',
+      format: '{0:#.###}',
+      editable: false,
+      isDisabled: true,
+      monthNumber: monthIndex,
+    }
+  }),
+
+  {
+    field: 'idFromApi',
+    headerName: 'idFromApi',
+    hidden: true,
+  },
+]
+
 export const SlowdownNormsPeColumns = [
   {
     field: 'Particulars',

@@ -34,7 +34,7 @@ const defs = {
     spyroOutput: 'Optimizer Output',
     spyroMenu: 'Optimizer Menu',
     decokingActivities: 'Maintenance Details (Furnace & SAD plan)',
-    maintenanceDetails: 'Maintenance Details',
+    maintenanceDetails: 'Net Production Hours',
     consumptionNorms: 'Overall AOP Consumption (Norm/Quantity)',
     productionNorms: 'Month wise Production plan',
     catalystSelectivity: 'Production & Norms Basis',
@@ -57,10 +57,10 @@ const defs = {
     annualAopCostReport: 'Annual AOP Cost',
     plantRequirement: 'Plant Requirement',
     fixedConsumption: 'Fixed Consumption',
-    norms:'Norms',
-    inputs:'Inputs',
-    importPower:'Import Power',
-    productionVolumeDataBasis: 'Production Volume Data',
+    norms: 'Norms',
+    inputs: 'Inputs',
+    importPower: 'Import Power',
+    productionVolumeDataBasis: 'Production Target Data',
     normsHistorianBasis: 'Norms Historian',
     steadyStateNormsHistorianBasis: 'Steady State Norm Basis',
     consumptionNormsHistorianBasis: 'Overall Consumption Norm Basis',
@@ -102,6 +102,9 @@ const defs = {
 
     //SSRS
     normComparisonReport: 'Norm Comparison Report',
+    packagingConsumables: 'Packaging Consumables',
+    dashboard: 'AOP Dashboard',
+    proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
   },
   pages: {
     dashboard: {
@@ -238,7 +241,7 @@ const defs = {
       title: 'Production / Norms Plan',
       subPages: {
         productMCUVal: 'Production Target',
-        maintenanceDetails: 'Maintenance Details',
+        maintenanceDetails: 'Net Production Hours',
         consumptionNorms: 'Overall AOP Consumption (Norm/Quantity)',
         productionNorms: 'Month wise Production plan',
         catalystSelectivity: 'Production & Norms Basis',
@@ -255,7 +258,7 @@ const defs = {
         reliability: 'Reliability',
         reports: 'Reports',
         annualAopCostReport: 'Annual AOP Cost Basis',
-        productionVolumeDataBasis: 'Production Volume Data Basis',
+        productionVolumeDataBasis: 'Production Target Data Basis',
         normsHistorianBasis: 'Norms Historian Basis',
         steadyStateNormsHistorianBasis: 'Steady State Norm Basis',
         consumptionNormsHistorianBasis: 'Overall Consumption Norm Basis',
@@ -297,6 +300,9 @@ const defs = {
 
         tcsoutput: 'TCS Output',
         pimsoutput: 'PIMS Output',
+        packagingConsumables: 'Packaging Consumables',
+        dashboard: 'AOP Dashboard',
+        proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
       },
     },
   },

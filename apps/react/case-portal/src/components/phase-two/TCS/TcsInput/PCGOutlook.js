@@ -5,6 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
+import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 
 const PCGOutlook = ({
   PLANT_ID,
@@ -22,11 +23,11 @@ const PCGOutlook = ({
   // State management
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
 
   // Fetch PCG Outlook Data
   const fetchPcgOutlookData = useCallback(async () => {
@@ -52,6 +53,7 @@ const PCGOutlook = ({
       }
 
       setRows(transformedData)
+      setOriginalRows(transformedData)
     } catch (err) {
       console.error('Error fetching PCG Outlook data:', err)
       setSnackbarData({
@@ -255,6 +257,38 @@ const PCGOutlook = ({
         return
       }
 
+      // Custom validation: If any row data is updated, remarks must be filled and different from original
+      const fieldsToCheck = [
+        'apr',
+        'may',
+        'jun',
+        'jul',
+        'aug',
+        'sep',
+        'oct',
+        'nov',
+        'dec',
+        'jan',
+        'feb',
+        'mar',
+      ]
+      const validationError = validateRowDataWithRemarks(
+        data,
+        originalRows,
+        fieldsToCheck,
+        'product',
+        'remarks',
+      )
+
+      if (validationError) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationError,
+          severity: 'error',
+        })
+        return
+      }
+
       // Remove id and inEdit fields from payload, keep remarks
       const cleanedData = data.map(({ id, inEdit, ...rest }) => rest)
 
@@ -283,6 +317,7 @@ const PCGOutlook = ({
     }
   }, [
     modifiedCells,
+    originalRows,
     keycloak,
     SITE_ID,
     AOP_YEAR,

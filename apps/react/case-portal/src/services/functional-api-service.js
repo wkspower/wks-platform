@@ -138,7 +138,6 @@ async function saveReliabilityRecords(payloadData, keycloak) {
   }
 }
 async function exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, excelName) {
- 
   let url = ''
   let fileName = ''
   if (excelName === 'Reliability_Performance') {
@@ -180,7 +179,13 @@ async function exportReliabilityExcel(keycloak, PLANT_ID, AOP_YEAR, excelName) {
     return Promise.reject(e)
   }
 }
-async function importReliabilityPerformanceExcel( keycloak, PLANT_ID, AOP_YEAR, rawFile, excelName) {
+async function importReliabilityPerformanceExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  rawFile,
+  excelName,
+) {
   const url = `${Config.CaseEngineUrl}/task/reliability-performance-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', rawFile)
@@ -201,7 +206,13 @@ async function importReliabilityPerformanceExcel( keycloak, PLANT_ID, AOP_YEAR, 
     return await Promise.reject(e)
   }
 }
-async function importReliabilityIncidentExcel( keycloak, PLANT_ID, AOP_YEAR, rawFile, excelName) {
+async function importReliabilityIncidentExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  rawFile,
+  excelName,
+) {
   const url = `${Config.CaseEngineUrl}/task/reliability-records-import-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', rawFile)

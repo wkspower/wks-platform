@@ -1,6 +1,8 @@
 package com.wks.caseengine.entity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Date;
 import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -76,6 +78,15 @@ public class BusinessDemand {
     
     @Column(name="Vertical_FK_Id")
     private UUID verticalFKId;
+    
+    @Column(name="UpdatedBy")
+    private String updatedBy;
+    
+    @Column(name="CreatedOn")
+    private Date createdOn;
+    
+    @Column(name="ModifiedOn")
+    private Date modifiedOn;
     
 
 }

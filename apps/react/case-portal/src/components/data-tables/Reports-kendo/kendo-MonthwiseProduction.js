@@ -2,6 +2,7 @@ import { Box } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import React, { useEffect, useState } from 'react'
 import { DataService } from 'services/DataService'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 import { useSession } from 'SessionStoreContext'
 import { truncateRemarks } from 'utils/remarksUtils'
 import { useSelector } from 'react-redux'
@@ -20,25 +21,25 @@ import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
 import { getRoleName } from 'services/role-service'
 const MonthwiseProduction = () => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-    const {
-      verticalChange,
-      yearChanged,
-      plantID,
-      plantObject,
-      siteObject,
-      verticalObject,
-      year,
-      screenTitle,
-    } = dataGridStore
-    const PLANT_ID = plantObject?.id
-    const SITE_ID = siteObject?.id
-    const VERTICAL_ID = verticalObject?.id
-    const VERTICAL_NAME = verticalObject?.name
-    const AOP_YEAR = year?.selectedYear
-    const vertName = verticalChange?.selectedVertical
-    const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const {
+    verticalChange,
+    yearChanged,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+    screenTitle,
+  } = dataGridStore
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const VERTICAL_NAME = verticalObject?.name
+  const AOP_YEAR = year?.selectedYear
+  const vertName = verticalChange?.selectedVertical
+  const lowerVertName = vertName?.toLowerCase()
   const thisYear = AOP_YEAR
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -58,7 +59,7 @@ const MonthwiseProduction = () => {
     rowsBeforeChange: {},
   })
   const handleRemarkCellClick = (row) => {
-    if(READ_ONLY) return
+    if (READ_ONLY) return
     setCurrentRemark(row.Remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
@@ -68,7 +69,9 @@ const MonthwiseProduction = () => {
     const [start, end] = thisYear.split('-').map(Number)
     oldYear = `${start - 1}-${(end - 1).toString().slice(-2)}`
   }
-  const isOldYear = oldYear?.oldYear === 1
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const VALUE_FORMATTOR_PRODUCTION = ValueFormatterProduction()
   const VALUE_FORMATTOR_CONSUMPTION = ValueFormatterConsumption()
@@ -347,7 +350,11 @@ const MonthwiseProduction = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      var res = await DataService.getMonthWiseSummary(keycloak, PLANT_ID, AOP_YEAR)
+      var res = await DataService.getMonthWiseSummary(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       if (res?.code == 200) {
         res = res?.data?.data.map((item, index) => ({
           ...item,
@@ -464,7 +471,7 @@ const MonthwiseProduction = () => {
     try {
       setLoading(true)
 
-      const res = await DataService.handleCalculateMonthwiseProduction(
+      const res = await AOPWorkFlowService.handleCalculateMonthwiseProduction(
         PLANT_ID,
         AOP_YEAR,
         keycloak,

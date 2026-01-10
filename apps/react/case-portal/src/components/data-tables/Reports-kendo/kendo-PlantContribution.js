@@ -8,10 +8,11 @@ import { DataService } from 'services/DataService'
 import { MockReportService } from './mockPlantContributionAPI'
 import { useSelector } from 'react-redux'
 import { getRoleName } from 'services/role-service'
+import { AOPWorkFlowService } from 'services/AOPWorkFlowService'
 
 export default function PlantContribution() {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -30,9 +31,12 @@ export default function PlantContribution() {
   const VERTICAL_ID = verticalObject?.id
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const vertName = verticalChange?.selectedVertical
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const categories = () => [
     {
       key: 'ProductMixAndProduction',
@@ -57,12 +61,29 @@ export default function PlantContribution() {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [rows, setRows] = useState()
 
-  const FORMAT_VALUES_3_DECIMAL =
-    lowerVertName == 'elastomer' ? '{0:0.000}' : '{0:0.00}'
-  const FORMAT_VALUES_2_DECIMAL =
-    lowerVertName == 'elastomer' ? '{0:0.00}' : '{0:0.00}'
-  const FORMAT_VALUES_COST = lowerVertName == 'elastomer' ? '{0:0}' : '{0:0.00}'
+  const IS_CRACKER = lowerVertName === 'cracker'
+
+  const FORMAT_VALUES_3_DECIMAL = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'elastomer'
+      ? '{0:0.000}'
+      : '{0:0.00}'
+
+  const FORMAT_VALUES_2_DECIMAL = IS_CRACKER ? '{0:0.0000}' : '{0:0.00}'
+
+  const FORMAT_VALUES_COST = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'elastomer'
+      ? '{0:0}'
+      : '{0:0.00}'
+
   const FORMAT_VALUES_PRICE = '{0:0}'
+
+  const FORMAT_VALUES_NORMS = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'meg' || lowerVertName === 'elastomer'
+      ? '{0:0.00000}'
+      : '{0:0.00}'
 
   const loadAll = async () => {
     setLoading(true)
@@ -78,6 +99,7 @@ export default function PlantContribution() {
           FORMAT_VALUES_2_DECIMAL,
           FORMAT_VALUES_COST,
           FORMAT_VALUES_PRICE,
+          FORMAT_VALUES_NORMS,
         })
 
         const apiResp = await DataService.getPlantContributionYearWisePlan(
@@ -119,8 +141,8 @@ export default function PlantContribution() {
   const handleCalculateMonthwiseAndTurnaround = async () => {
     try {
       setLoading(true)
-   
-      const res = await DataService.calculatePlantContributionReportData(
+
+      const res = await AOPWorkFlowService.calculatePlantContributionReportData(
         PLANT_ID,
         AOP_YEAR,
         keycloak,
@@ -227,9 +249,12 @@ export default function PlantContribution() {
         open={!!loading}
       ></Backdrop>
 
-      {/* Main Categories Except 'OtherVariableCost' */}
+      {/* Main Categories Except 'OtherVariableCost' and 'ProductionCostCalculations' */}
       {categories()
-        .filter(({ key }) => key !== 'OtherVariableCost')
+        .filter(
+          ({ key }) =>
+            key !== 'OtherVariableCost' && key !== 'ProductionCostCalculations',
+        )
         .map(({ key, title }, idx) => {
           const rpt = reports[key] || {}
           return (
@@ -282,6 +307,28 @@ export default function PlantContribution() {
                 showTitle: true,
               }}
               saveChanges={saveChanges}
+            />
+          </Box>
+        )
+      })()}
+
+      {/* 'ProductionCostCalculations' as Last Grid */}
+      {(() => {
+        const key = 'ProductionCostCalculations'
+        const rpt = reports[key] || {}
+        return (
+          <Box key={key} sx={{ mt: 1 }}>
+            <KendoDataTablesReports
+              columns={rpt.columns || []}
+              rows={rpt.rows || []}
+              handleCalculate={handleCalculate}
+              title={'Production Cost Calculation'}
+              permissions={{
+                textAlignment: 'center',
+                showCalculate: false,
+                showFinalSubmit: false,
+                showTitle: true,
+              }}
             />
           </Box>
         )

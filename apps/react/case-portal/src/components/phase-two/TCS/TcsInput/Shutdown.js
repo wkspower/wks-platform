@@ -1,5 +1,6 @@
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
+import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
@@ -20,6 +21,7 @@ const Shutdown = ({
   // State management
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -80,6 +82,7 @@ const Shutdown = ({
       }
 
       setRows(transformedData)
+      setOriginalRows(transformedData)
     } catch (err) {
       console.error('Error fetching Shutdown data:', err)
       setSnackbarData({
@@ -189,6 +192,25 @@ const Shutdown = ({
         return
       }
 
+      // Custom validation: If any row data is updated, remarks must be filled and different from original
+      const fieldsToCheck = ['durationInDays', 'startDate', 'endDate']
+      const validationError = validateRowDataWithRemarks(
+        data,
+        originalRows,
+        fieldsToCheck,
+        'particulates',
+        'purpose',
+      )
+
+      if (validationError) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationError,
+          severity: 'error',
+        })
+        return
+      }
+
       // Format date fields to add IST timezone offset before sending to backend
       const formattedData = data.map((item) => {
         const formatted = { ...item }
@@ -226,6 +248,7 @@ const Shutdown = ({
     }
   }, [
     modifiedCells,
+    originalRows,
     keycloak,
     PLANT_ID,
     AOP_YEAR,
@@ -280,6 +303,12 @@ const Shutdown = ({
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         permissions={permissions}
+        dateCalculationConfig={{
+          dateField1: 'startDate',
+          dateField2: 'endDate',
+          daysField: 'durationInDays',
+          requiredInHr: false,
+        }}
       />
     </Box>
   )

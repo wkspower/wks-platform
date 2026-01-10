@@ -27,6 +27,10 @@ export const TcsApiService = {
   getTcsRogcData,
   saveRogcData,
 
+  // TCS CPP Units SD Plan Data APIs
+  getCPPUnitsSdPlanData,
+  saveCPPUnitsSdPlanData,
+
   // TCS PCG Outlook Data APIs
   getPcgOutlookData,
   savePcgOutlookData,
@@ -272,6 +276,51 @@ async function saveCrudBlendWindowData(
     Authorization: `Bearer ${keycloak.token}`,
   }
   const body = JSON.stringify(payload.data)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+// ===================== || TCS CPP Units SD Plan Data APIs || ===================== //
+async function getCPPUnitsSdPlanData(keycloak, financialYear, siteId) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan/${financialYear}/${siteId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveCPPUnitsSdPlanData(keycloak, payload) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
   try {
     const resp = await fetch(url, {
       method: 'POST',

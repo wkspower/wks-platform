@@ -8,6 +8,7 @@ import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import { SlowDownElastomerColumns } from 'components/colums/ElastomerColums'
+import { SlowDownVcmColumns } from 'components/colums/VcmColums'
 import { SlowDownAromaticsColumns } from 'components/colums/AromaticsColumns'
 import { SlowDownMegColumns } from 'components/colums/MegColums'
 import { SlowDownPeColumns } from 'components/colums/PeColums'
@@ -41,12 +42,19 @@ const SlowDown = ({ permissions }) => {
   const AOP_YEAR = year?.selectedYear
   const SCREEN_NAME = screenTitle?.title
 
+  const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
+  const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const FORMATE_DECIMAL = ValueFormatterProduction()
   const vertName = verticalChange?.selectedVertical
   const plantName = plantObject?.name
-  const isOldYear = oldYear?.oldYear
+  const isOldYear = false
+  const IS_OLD_YEAR = oldYear?.oldYear
   const [errorRows, setErrorRows] = useState(new Set())
-  const lowerVertName = vertName?.toLowerCase() || 'meg'
+  const lowerVertName = vertName?.toLowerCase()
   const [rowModesModel, setRowModesModel] = useState({})
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCells2, setModifiedCells2] = React.useState({})
@@ -64,12 +72,15 @@ const SlowDown = ({ permissions }) => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const SHOW_EXCEL_UPLOAD_BUTTON =
     lowerVertName === 'pe' ||
     lowerVertName === 'pp' ||
+    lowerVertName === 'pet' ||
     lowerVertName == 'elastomer' ||
     lowerVertName == 'pvc' ||
     lowerVertName == 'vcm' ||
@@ -78,6 +89,7 @@ const SlowDown = ({ permissions }) => {
     lowerVertName == 'meg'
 
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_PET = lowerVertName === 'pet'
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -119,6 +131,31 @@ const SlowDown = ({ permissions }) => {
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
+
+  useEffect(() => {
+    if (!PLANT_ID || !AOP_YEAR) return
+
+    const getAllDescriptionDrpdwn = async () => {
+      try {
+        // Use your VCM-specific API here
+        const data = await DataService.dropdownValues(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+        const descriptionObjList = data?.data.map((item) => ({
+          id: item.Name,
+          name: item.Name,
+          displayName: item.DisplayName,
+        }))
+        setAllDescriptionDrpdwn(descriptionObjList)
+      } catch (error) {
+        console.error('Error fetching VCM descriptions', error)
+      }
+    }
+
+    if (lowerVertName === 'vcm') getAllDescriptionDrpdwn()
+  }, [oldYear, AOP_YEAR, keycloak, PLANT_ID, lowerVertName])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -191,11 +228,41 @@ const SlowDown = ({ permissions }) => {
         rateEO: null,
         rateEOE: null,
       }))
+      const slowDownDetailsPEPP = newRow.map((row) => ({
+        productId: (() => {
+          const matched = allProducts.find(
+            (p) => p.displayName === row.productName1,
+          )
+          return matched?.realId || null
+        })(),
+        productName: row.productName1,
+        discription: row.discription,
+        durationInHrs:
+          row.durationInHrs !== undefined &&
+          row.durationInHrs !== null &&
+          row.durationInHrs !== ''
+            ? row.durationInHrs
+            : (() => {
+                const v = findDuration('1', row)
+                if (!v) return null
+                const [h = '00', m = '00'] = String(v).split('.')
+                return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+              })(),
+        month: row.monthly,
+        remark: row.remark,
+        rate: row.rate,
+        audityear: AOP_YEAR,
+        id: row.idFromApi || null,
+        rateEO: null,
+        rateEOE: null,
+      }))
       const response = await DataService.saveSlowdownData(
         plantId,
         lowerVertName === 'elastomer'
           ? slowDownDetailsElastomer
-          : slowDownDetailsMEG,
+          : lowerVertName === 'pe' || lowerVertName === 'pp'
+            ? slowDownDetailsPEPP
+            : slowDownDetailsMEG,
         keycloak,
       )
 
@@ -308,47 +375,56 @@ const SlowDown = ({ permissions }) => {
         const y = date.getFullYear()
         return `${d}/${m}/${y}`
       }
-      for (const record of data) {
-        const startDate =
-          record.maintStartDateTime instanceof Date
-            ? record.maintStartDateTime
-            : new Date(record.maintStartDateTime)
-        const endDate =
-          record.maintEndDateTime instanceof Date
-            ? record.maintEndDateTime
-            : new Date(record.maintEndDateTime)
+      if (lowerVertName != 'pe' && lowerVertName !== 'pp') {
+        for (const record of data) {
+          const startDate =
+            record.maintStartDateTime instanceof Date
+              ? record.maintStartDateTime
+              : new Date(record.maintStartDateTime)
+          const endDate =
+            record.maintEndDateTime instanceof Date
+              ? record.maintEndDateTime
+              : new Date(record.maintEndDateTime)
 
-        // Validate date format: dd/mm/yyyy (by parsing and checking)
-        if (
-          startLimit &&
-          endLimit &&
-          (!startDate ||
-            !endDate ||
-            isNaN(startDate) ||
-            isNaN(endDate) ||
-            startDate < startLimit ||
-            startDate > endLimit ||
-            endDate < startLimit ||
-            endDate > endLimit)
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-            severity: 'error',
-          })
-          return
+          // Validate date format: dd/mm/yyyy (by parsing and checking)
+          if (
+            startLimit &&
+            endLimit &&
+            (!startDate ||
+              !endDate ||
+              isNaN(startDate) ||
+              isNaN(endDate) ||
+              startDate < startLimit ||
+              startDate > endLimit ||
+              endDate < startLimit ||
+              endDate > endLimit)
+          ) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
+              severity: 'error',
+            })
+            return
+          }
         }
       }
 
       // Select required fields based on vertical
       const requiredFields = ['discription', 'remark']
-      const requiredFieldsForElastomer = ['discription', 'remark', 'rate']
+      const requiredFieldsForElastomer = [
+        'discription',
+        'remark',
+        'rate',
+        'durationInHrs',
+      ]
       const requiredFieldsForPe = [
         'discription',
         'remark',
         'rate',
         'productName1',
+        'durationInHrs',
+        'monthly',
       ]
       const requiredFieldsForMeg = [
         'discription',
@@ -362,7 +438,7 @@ const SlowDown = ({ permissions }) => {
           ? requiredFieldsForElastomer
           : lowerVertName === 'meg'
             ? requiredFieldsForMeg
-            : IS_PE_PP
+            : IS_PE_PP || IS_PET
               ? requiredFieldsForPe
               : requiredFields
 
@@ -375,10 +451,13 @@ const SlowDown = ({ permissions }) => {
             value === undefined ||
             (typeof value === 'string' && value.trim() === '')
           ) {
+            let displayField = field
+            if (field === 'productName1') displayField = 'Particulars'
+            else if (field === 'monthly') displayField = 'Month'
             record.isError = true
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `Required field "${field}" is missing for "${record.discription || 'this record'}".`,
+              message: `Required field "${displayField}" is missing for "${record.discription || 'this record'}".`,
               severity: 'error',
             })
             return
@@ -405,7 +484,7 @@ const SlowDown = ({ permissions }) => {
         (d, i) => d && allDescriptions.indexOf(d) !== i,
       )
 
-      if (duplicate) {
+      if (duplicate && lowerVertName !== 'vcm') {
         rows.forEach((row) => {
           if ((row.discription || '').trim().toLowerCase() === duplicate) {
             row.isError = true
@@ -420,41 +499,72 @@ const SlowDown = ({ permissions }) => {
       }
 
       // Date required + Start < End check
-      for (const record of data) {
-        const startMissing = !record.maintStartDateTime
-        const endMissing = !record.maintEndDateTime
-        if (startMissing || endMissing) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Start Date and End Date are required for all records.',
-            severity: 'error',
-          })
-          return
+      if (lowerVertName != 'pe' && lowerVertName !== 'pp') {
+        for (const record of data) {
+          const startMissing = !record.maintStartDateTime
+          const endMissing = !record.maintEndDateTime
+          if (startMissing || endMissing) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'Start Date and End Date are required for all records.',
+              severity: 'error',
+            })
+            return
+          }
+          const startDate =
+            record.maintStartDateTime instanceof Date
+              ? record.maintStartDateTime
+              : new Date(record.maintStartDateTime)
+          const endDate =
+            record.maintEndDateTime instanceof Date
+              ? record.maintEndDateTime
+              : new Date(record.maintEndDateTime)
+          if (
+            startDate &&
+            endDate &&
+            startDate.getTime() >= endDate.getTime()
+          ) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `Start time must be before end time for "${record.discription || 'this record'}".`,
+              severity: 'error',
+            })
+            return
+          }
         }
-        if (
-          record.maintStartDateTime &&
-          record.maintEndDateTime &&
-          record.maintStartDateTime.getTime() >=
-            record.maintEndDateTime.getTime()
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
-            severity: 'error',
-          })
-          return
+      }
+      if (lowerVertName === 'vcm') {
+        for (const row of rows) {
+          if (
+            (row.discription || '').trim() === 'Furnace Decoking' &&
+            row.maintStartDateTime &&
+            row.maintEndDateTime
+          ) {
+            const startDate = new Date(row.maintStartDateTime)
+            const endDate = new Date(row.maintEndDateTime)
+            const diffTime = endDate - startDate
+            const diffHours = diffTime / (1000 * 60 * 60)
+            if (diffHours !== 192) {
+              row.isError = true
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `For "Furnace Decoking", the duration between Start Date and End Date must be exactly 192 hours (8 days).`,
+                severity: 'error',
+              })
+              return
+            }
+          }
         }
       }
 
       // MEG specific checks
       if (
         lowerVertName === 'meg' ||
-        lowerVertName === 'elastomer' ||
-        lowerVertName === 'vcm' ||
         lowerVertName === 'pvc' ||
-        lowerVertName === 'pta'
+        lowerVertName === 'pta' ||
+        lowerVertName === 'pet'
       ) {
         // Month span check
         //check timeframe Multiple month spilt into single
@@ -677,6 +787,20 @@ const SlowDown = ({ permissions }) => {
         maintEndDateTime: new Date(item?.maintEndDateTime),
       }))
       setRowsShutdown(formattedDataShutDown)
+      const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ]
 
       const formattedData = data.map((item, index) => ({
         ...item,
@@ -687,6 +811,13 @@ const SlowDown = ({ permissions }) => {
         originalRemark: item.remark,
         maintStartDateTime: new Date(item?.maintStartDateTime),
         maintEndDateTime: new Date(item?.maintEndDateTime),
+        monthly:
+          item?.monthly ||
+          item?.month ||
+          (item?.maintStartDateTime
+            ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
+            : ''),
+        //month: item?.month || '',
       }))
 
       setRows(formattedData)
@@ -776,7 +907,7 @@ const SlowDown = ({ permissions }) => {
         const dynamicColDefs = data1.data.map((item) => ({
           field: item.field,
           title: item.title,
-widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
+          widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
           editable:
             item.field === 'particulars' || item.field.toLowerCase() === 'uom'
               ? false
@@ -808,7 +939,7 @@ widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
         var data = []
         if (lowerVertName == 'meg')
           data = await DataService.getAllProducts(keycloak, PLANT_ID, AOP_YEAR)
-        else if (IS_PE_PP) {
+        else if (IS_PE_PP || IS_PET) {
           data = await DataService.gradeDetails(keycloak, AOP_YEAR, PLANT_ID)
         } else {
           data = await DataService.getAllProductsAll(
@@ -826,7 +957,7 @@ widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
               displayName: product.displayName,
               realId: product.id,
             }))
-        } else if (IS_PE_PP) {
+        } else if (IS_PE_PP || IS_PET) {
           productList = data?.data.map((product) => ({
             id: product.displayName,
             displayName: product.displayName,
@@ -886,7 +1017,9 @@ widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
       case verticalEnums.PVC:
         return SlowDownElastomerColumns
       case verticalEnums.VCM:
-        return SlowDownElastomerColumns
+        return SlowDownVcmColumns
+      case verticalEnums.PET:
+        return SlowDownPeColumns
       default:
         return SlowDownMegColumns
     }
@@ -947,18 +1080,21 @@ widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else if (lowerVertName === 'chemical' || lowerVertName === 'meg') {
         response = await DataService.ExportSlowdownDetailsEOE(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
         response = await DataService.slowdownDetailsExport(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       }
     } catch (error) {
@@ -1179,7 +1315,9 @@ widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
           allProducts={allProducts}
           disableRedHighlight={true}
           handleExcelUpload={handleExcelUpload}
+          screenType='slowdown'
           downloadExcelForConfiguration={downloadExcelForConfiguration}
+          allDescriptionDrpdwn={allDescriptionDrpdwn}
         />
       )}
 
@@ -1210,7 +1348,7 @@ widthT: item.field.toLowerCase() === 'uom' ? 90 : 150,
             allAction: true,
             onlyCellUpdate: true,
             downloadExcelBtnFromUI: true,
-            ExcelName: `${lowerVertName}-Slowdown Activities Configuration`,
+            ExcelName: `${EXCEL_EXPORT_TITLE}-Slowdown Activities(Configuration)`,
             showTitleNameBusiness: true,
             titleName: 'Configuration',
           }}

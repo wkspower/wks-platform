@@ -13,7 +13,7 @@ import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
 const MaintenanceProcessTable = ({ viewOnly }) => {
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const {
@@ -32,8 +32,13 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const plantName = plantObject?.name?.toLowerCase()
-  const siteName = siteObject?.name?.toLowerCase() 
+  const siteName = siteObject?.name?.toLowerCase()
   const lowerVertName = verticalObject?.name?.toLowerCase()
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const isOldYear = false
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
   const dataConfig = useMemo(
     () => ({
       serviceFn: () =>
@@ -47,7 +52,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   )
 
   const headerMap = generateHeaderNames(AOP_YEAR)
-
+  const [columns, setColumns] = useState([])
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -62,12 +67,12 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [calculationObject, setCalculationObject] = useState([]) 
+  const [calculationObject, setCalculationObject] = useState([])
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
     // if (!row?.isEditable) return
 
-    setCurrentRemark(row.remarks || '')
+    setCurrentRemark(row.Remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -112,27 +117,27 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         November: 30,
         December: 31,
       }
-      for (const row of data) {
-        const month = row.monthName
-        if (month && monthDays[month]) {
-          const sum =
-            Number(row.fourF || 0) +
-            Number(row.fiveF || 0) +
-            Number(row.fourFD || 0)
-          if (sum !== monthDays[month]) {
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `Sum of 4F, 5F, and 4F with Demo for ${month} must be ${monthDays[month]} days. Current sum: ${sum}`,
-              severity: 'error',
-            })
-            setLoading(false)
-            return
-          }
-        }
-      }
+      // for (const row of data) {
+      //   const month = row.monthName
+      //   if (month && monthDays[month]) {
+      //     const sum =
+      //       Number(row.fourF || 0) +
+      //       Number(row.fiveF || 0) +
+      //       Number(row.fourFD || 0)
+      //     if (sum !== monthDays[month]) {
+      //       setSnackbarOpen(true)
+      //       setSnackbarData({
+      //         message: `Sum of 4F, 5F, and 4F with Demo for ${month} must be ${monthDays[month]} days. Current sum: ${sum}`,
+      //         severity: 'error',
+      //       })
+      //       setLoading(false)
+      //       return
+      //     }
+      //   }
+      // }
       // --- END VALIDATION ---
 
-      const validationMessage = validateFields(data, ['remarks'])
+      const validationMessage = validateFields(data, ['Remarks'])
       if (validationMessage) {
         setSnackbarOpen(true)
         setSnackbarData({ message: validationMessage, severity: 'error' })
@@ -151,32 +156,50 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const saveCrackerMaintenanceData = async (newRows) => {
     setLoading(true)
     try {
-      const payload = newRows.map((row) => ({
-        fourFD: row.fourFD,
-        aopYear: AOP_YEAR,
-        totalSAD: row.totalSAD,
-        monthName: row.monthName ?? null,
-        plantId: PLANT_ID,
-        numberOfDays: row.numberOfDays,
-        demoBBU: row.demoBBU,
-        coilReplacement: row.coilReplacement,
-        ibr: row.coilReplacement,
-        demoSAD: row.demoSAD,
-        demoSD: row.demoSD,
-        fourF: row.fourF,
-        mnt: row.mnt,
-        total: row.total,
-        fourFHours: row.fourFHours,
-        bbu: row.bbu,
-        bbd: row.bbd,
-        sad: row.sad,
-        demoHSS: row.demoHSS,
-        fiveF: row.fiveF,
-        id: row.idFromApi || row.id,
-        shutdown: row.shutdown,
-        slowdown: row.slowdown,
-        remarks: row.remarks ?? row.remark ?? '',
-      }))
+      // const payload = newRows.map((row) => ({
+      //   fourFD: row.fourFD,
+      //   AOPYear: AOP_YEAR,
+      //   TotalSAD: row.TotalSAD,
+      //   MonthName: row.MonthName ?? null,
+      //   PlantId: PLANT_ID,
+      //   NumberOfDays: row.NumberOfDays,
+      //   DemoBBU: row.DemoBBU,
+      //   CoilReplacement: row.CoilReplacement,
+      //   ibr: row.coilReplacement,
+      //   DemoSAD: row.DemoSAD,
+      //   DemoSD: row.DemoSD,
+      //   fourF: row.fourF,
+      //   MNT: row.MNT,
+      //   Total: row.Total,
+      //   fourFHours: row.fourFHours,
+      //   BBU: row.BBU,
+      //   BBD: row.BBD,
+      //   SAD: row.SAD,
+      //   DemoHSS: row.DemoHSS,
+      //   fiveF: row.fiveF,
+      //   Id: row.IdFromApi || row.Id,
+      //   Shoutdown: row.Shoutdown,
+      //   Slowdown: row.Slowdown,
+      //   Remarks: row.Remarks ?? row.remark ?? '',
+      // }))
+      const excludeFields = [
+        'id',
+        'idFromApi',
+        'isEditable',
+        'originalRemark',
+        'inEdit',
+      ]
+
+      // Dynamically build payload for each row
+      const payload = newRows.map((row) => {
+        const obj = {}
+        Object.keys(row).forEach((key) => {
+          if (!excludeFields.includes(key)) {
+            obj[key] = row[key]
+          }
+        })
+        return obj
+      })
 
       const response =
         await MaintenanceDetailsApiService.saveCrackerMaintenance(
@@ -222,16 +245,25 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data?.data
       setCalculationObject(resp?.data?.aopCalculation)
+      const hiddenKeys = ['Id', 'AOPYear', 'PlantId']
+      const dynamicColumns = (resp.data?.columns || columns).map((col) => ({
+        ...col,
+        editable: col.type === 'number' || col.field === 'Remarks',
+        hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
+        widthT: 120,
+      }))
+      setColumns(dynamicColumns)
+
       const formatted = (raw || []).map((item, idx, arr) => ({
         ...item,
-        idFromApi: item.id,
+        idFromApi: item.Id,
         id: idx,
         isEditable: viewOnly
           ? false
           : idx === arr.length - 1
             ? false
             : item?.isEditable,
-        originalRemark: item.remarks,
+        originalRemark: item?.Remarks?.trim(),
       }))
 
       const finalData = [...formatted]
@@ -404,15 +436,14 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     hidden: true,
   }
 
-  let basecols 
-  if (siteName === 'dmd') {
-    basecols = crackercolumnsDMD
-  } else if (siteName === 'nmd') {
-    basecols = crackercolumns
-  } else {
-    basecols = crackercolumns
-  }
-  
+  // let basecols
+  // if (siteName === 'dmd') {
+  //   basecols = crackercolumnsDMD
+  // } else if (siteName === 'nmd') {
+  //   basecols = crackercolumns
+  // } else {
+  //   basecols = crackercolumns
+  // }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -429,7 +460,6 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       allAction: false,
       uploadExcelBtn: false,
       downloadExcelBtn: false,
-
     }
   }
 
@@ -449,12 +479,16 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
           uploadExcelBtn: viewOnly ? false : true,
           showRefresh: false,
           showCalculate: viewOnly ? false : true,
-          showCalculateVisibility: true,
+          // showCalculateVisibility: true,
+
+          //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
+          showCalculateVisibility: false,
+
           showNote: true,
         },
-        oldYear?.oldYear,
+        isOldYear,
       ),
-    [oldYear],
+    [isOldYear],
   )
 
   return (
@@ -466,7 +500,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
-        columns={basecols}
+        columns={columns}
         rows={rows}
         setRows={setRows}
         fetchData={fetchData}

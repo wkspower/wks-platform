@@ -19,10 +19,13 @@ import {
   getColDefsDesignCapacity,
   getColDefsDesignCapacityPEPP,
   getColDefsMaxAchievedCapacity,
+  getColDefsMaxAchievedCapacityPEPP,
   getColDefsNonEditable,
   getColDefsPercentageSummary,
+  getColDefsPercentageSummaryPEPP,
 } from './Utilities-Kendo/productionTargetColDefs'
 import ProductionTarget from './ProductionTarget'
+import AromaticsProductionGrids from './AromaticsProductionGrids'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import { getRoleName } from 'services/role-service'
 const ProductionvolumeData = ({ permissions }) => {
@@ -38,7 +41,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
 
   const keycloak = useSession()
-  const READ_ONLY = getRoleName(keycloak)
+  // const READ_ONLY = getRoleName(keycloak)
 
   const [calculationObject, setCalculationObject] = useState([])
 
@@ -54,8 +57,11 @@ const ProductionvolumeData = ({ permissions }) => {
     verticalObject,
     year,
   } = dataGridStore
-  //const isOldYear = oldYear?.oldYear
-  const isOldYear = oldYear?.oldYear
+
+  const IS_OLD_YEAR = oldYear?.oldYear
+  const isOldYear = false
+
+  const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const PLANT_ID = plantObject?.id
   const VERTICAL_ID = verticalObject?.id
@@ -63,11 +69,19 @@ const ProductionvolumeData = ({ permissions }) => {
   const AOP_YEAR = year?.selectedYear
 
   const PLANT_NAME = plantObject?.name?.toLowerCase()
+
   const VERTICAL_NAME = verticalObject?.name?.toLowerCase()
+
+  const PLANT_NAME_NO_CASE = plantObject?.name
+  const SITE_NAME_NO_CASE = siteObject?.name
+  const VERTICAL_NAME_NO_CASE = verticalObject?.name
+  const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
+
   const IS_PE_PP =
     verticalObject?.name?.toLowerCase() == 'pe' ||
     verticalObject?.name?.toLowerCase() == 'pp'
   const SITE_NAME = siteObject?.name?.toLowerCase()
+  const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
 
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
@@ -558,18 +572,20 @@ const ProductionvolumeData = ({ permissions }) => {
     })
   }
 
-  const colDefs_percentage_summary = getColDefsPercentageSummary(
-    headerMap,
-    valueFormat,
-  )
-  const colDefs_design_capacity = IS_PE_PP
-    ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
-    : getColDefsDesignCapacity(headerMap, valueFormat)
+  const colDefs_percentage_summary = IS_PE_PP
+    ? getColDefsPercentageSummaryPEPP(headerMap, valueFormat)
+    : getColDefsPercentageSummary(headerMap, valueFormat)
 
-  const colDefs_max_achieved_capacity = getColDefsMaxAchievedCapacity(
-    headerMap,
-    valueFormat,
-  )
+  const colDefs_design_capacity =
+    IS_PE_PP || IS_PET
+      ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
+      : getColDefsDesignCapacity(headerMap, valueFormat)
+
+  const colDefs_max_achieved_capacity =
+    IS_PE_PP || IS_PET
+      ? getColDefsMaxAchievedCapacityPEPP(headerMap, valueFormat)
+      : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
+
   const colDefs_non_editable = getColDefsNonEditable(headerMap, valueFormat)
 
   useEffect(() => {
@@ -593,6 +609,8 @@ const ProductionvolumeData = ({ permissions }) => {
 
   const handleUnitChangeMaxCapacity = (unit) => {
     setUnitMaxCapacity(unit)
+    setUnitDesignCapacity(unit)
+    setSelectedUnit(unit)
   }
 
   const handleUnitChangeMain = (unit) => {
@@ -631,7 +649,7 @@ const ProductionvolumeData = ({ permissions }) => {
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
           remark: item.remarks?.trim() || '',
-          isEditable: IS_PE_PP ? false : true,
+          isEditable: IS_PE_PP || IS_PET ? false : true,
 
           april:
             isTPD && item.april
@@ -713,52 +731,19 @@ const ProductionvolumeData = ({ permissions }) => {
           ...item,
           idFromApi: item?.id,
           productName: item?.materialDisplayName,
-          april:
-            isTPD && item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
-          may:
-            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
-          june:
-            isTPD && item.june
-              ? (item.june * 24).toFixed(2)
-              : item.june || null,
-          july:
-            isTPD && item.july
-              ? (item.july * 24).toFixed(2)
-              : item.july || null,
-          august:
-            isTPD && item.august
-              ? (item.august * 24).toFixed(2)
-              : item.august || null,
+          april: isTPD && item.april ? item.april * 24 : item.april,
+          may: isTPD && item.may ? item.may * 24 : item.may,
+          june: isTPD && item.june ? item.june * 24 : item.june,
+          july: isTPD && item.july ? item.july * 24 : item.july,
+          august: isTPD && item.august ? item.august * 24 : item.august,
           september:
-            isTPD && item.september
-              ? (item.september * 24).toFixed(2)
-              : item.september || null,
-          october:
-            isTPD && item.october
-              ? (item.october * 24).toFixed(2)
-              : item.october || null,
-          november:
-            isTPD && item.november
-              ? (item.november * 24).toFixed(2)
-              : item.november || null,
-          december:
-            isTPD && item.december
-              ? (item.december * 24).toFixed(2)
-              : item.december || null,
-          january:
-            isTPD && item.january
-              ? (item.january * 24).toFixed(2)
-              : item.january || null,
-          february:
-            isTPD && item.february
-              ? (item.february * 24).toFixed(2)
-              : item.february || null,
-          march:
-            isTPD && item.march
-              ? (item.march * 24).toFixed(2)
-              : item.march || null,
+            isTPD && item.september ? item.september * 24 : item.september,
+          october: isTPD && item.october ? item.october * 24 : item.october,
+          november: isTPD && item.november ? item.november * 24 : item.november,
+          december: isTPD && item.december ? item.december * 24 : item.december,
+          january: isTPD && item.january ? item.january * 24 : item.january,
+          february: isTPD && item.february ? item.february * 24 : item.february,
+          march: isTPD && item.march ? item.march * 24 : item.march,
           isEditable: false,
         }))
         setRowsMaxCapacity(formatted)
@@ -840,11 +825,15 @@ const ProductionvolumeData = ({ permissions }) => {
       showCalculate: false,
     }
   }
-  const percentageTitle = IS_PE_PP
-    ? 'Current MCU'
-    : VERTICAL_NAME === 'cracker'
-      ? 'Max Achieved Capacity (Ethylene)'
-      : 'Max Achieved Capacity'
+
+  //POINT-1 Current MCU to be rename as Max Achieved capacity.
+  const percentageTitle =
+    IS_PE_PP || IS_PET
+      ? // ? 'Current MCU'
+        'Max Achieved Capacity'
+      : VERTICAL_NAME === 'cracker'
+        ? 'Max Achieved Capacity (Ethylene)'
+        : 'Max Achieved Capacity'
   const adjustedPermissionsGrid1 = getAdjustedPermissions(
     {
       showAction: permissions?.showAction ?? false,
@@ -852,7 +841,7 @@ const ProductionvolumeData = ({ permissions }) => {
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? true,
+      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: false,
@@ -867,7 +856,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
 
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${VERTICAL_NAME}_Max Achieved Capacity`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}_Max Achieved Capacity`,
     },
     isOldYear,
   )
@@ -882,12 +871,12 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: IS_PE_PP ? false : true,
+      saveBtn: IS_PE_PP || IS_PET ? false : true,
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       downloadExcelBtnFromUI: permissions?.hideDownloadExcel ? false : true,
-      ExcelName: `${VERTICAL_NAME}_Design Capacity`,
+      ExcelName: `${EXCEL_EXPORT_TITLE}_Design Capacity`,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
       titleAndInformation:
@@ -898,7 +887,9 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Design Capacity (Ethylene)'
-          : 'Design Capacity',
+          : VERTICAL_NAME === 'pp' && SITE_NAME === 'nmd'
+            ? 'Design Capacity (MCU from MCU Portal)'
+            : 'Design Capacity',
     },
     isOldYear,
   )
@@ -910,7 +901,7 @@ const ProductionvolumeData = ({ permissions }) => {
       addButton: permissions?.addButton ?? false,
       deleteButton: permissions?.deleteButton ?? false,
       editButton: permissions?.editButton ?? false,
-      showUnit: permissions?.showUnit ?? true,
+      showUnit: permissions?.showUnit ?? false,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
       saveBtn: permissions?.saveBtn ?? true,
@@ -922,22 +913,19 @@ const ProductionvolumeData = ({ permissions }) => {
           ? true
           : false,
       downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
-      uploadExcelBtn:
-        VERTICAL_NAME === 'vcm'
-          ? false
-          : permissions?.hideUploadExcel
-            ? false
-            : true,
+      uploadExcelBtn: permissions?.hideUploadExcel ? false : true,
 
       showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+
+      //TEXT NOTE CHANGED TO 01 YEARS
       titleAndInformation:
-        'Average Ethylene Production achieved in the last 01 year historical data in different furnace mode of operation.',
+        'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.',
 
       showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
       titleName:
         VERTICAL_NAME === 'cracker'
-          ? 'Current Operating Capacity (Ethylene)'
-          : 'Current Operating Capacity',
+          ? 'Proposed Operating Capacity (Ethylene)'
+          : 'Proposed Operating Capacity',
     },
     isOldYear,
   )
@@ -951,7 +939,9 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Percentage Summary (Ethylene)'
-          : 'Percentage Summary',
+          : !IS_PE_PP && !IS_PET
+            ? 'Percentage Summary'
+            : '% Summary of Proposed Operating Capacity',
     },
     isOldYear,
   )
@@ -980,19 +970,38 @@ const ProductionvolumeData = ({ permissions }) => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else if (gridType === 'max') {
         await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
         )
       } else {
-        await ProductionVolumeDataApiService.getProductionVolExcel(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+        if (gridType === 'design') {
+          await ProductionVolumeDataApiService.getDesignCapacityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        } else if (gridType === 'max') {
+          await ProductionVolumeDataApiService.getMaxAchievedCapacityExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        } else {
+          await ProductionVolumeDataApiService.getProductionVolExcel(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            EXCEL_EXPORT_TITLE,
+          )
+        }
       }
 
       setSnackbarData({
@@ -1088,12 +1097,11 @@ const ProductionvolumeData = ({ permissions }) => {
 
   max_achieved_capacity = colDefs_max_achieved_capacity
 
-  if (
-    (VERTICAL_NAME?.toLowerCase() == 'aromatics' ||
-      VERTICAL_NAME?.toLowerCase() == 'elastomer') &&
-    conditionForFirst
-  ) {
+  if (VERTICAL_NAME?.toLowerCase() == 'elastomer' && conditionForFirst) {
     return <ProductionTarget />
+  }
+  if (VERTICAL_NAME?.toLowerCase() == 'aromatics' && conditionForFirst) {
+    return <AromaticsProductionGrids />
   }
 
   return (
@@ -1122,7 +1130,7 @@ const ProductionvolumeData = ({ permissions }) => {
           setSnackbarData={setSnackbarData}
           apiRef={apiRef}
           fetchData={fetchDesignCapacityData}
-          handleUnitChange={handleUnitChangeDesignCapacity}
+          handleUnitChange={handleUnitChangeMaxCapacity}
           handleRemarkCellClick={handleRemarkCellClickDesignCapacity}
           experimentalFeatures={{ newEditingApi: true }}
           remarkDialogOpen={remarkDialogOpenDesignCapacity}
@@ -1134,6 +1142,7 @@ const ProductionvolumeData = ({ permissions }) => {
           permissions={adjustedPermissionsGrid2}
           selectedUnit={unitDesignCapacity}
           setSelectedUnit={setUnitDesignCapacity}
+          supressGridHeight={true}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('design')
           }
@@ -1148,9 +1157,10 @@ const ProductionvolumeData = ({ permissions }) => {
           rows={rowsMaxCapacity}
           fetchData={fetchMaxCapacityData}
           permissions={adjustedPermissionsGrid1}
-          selectedUnit={unitMaxCapacity}
-          setSelectedUnit={setUnitMaxCapacity}
+          selectedUnit={unitDesignCapacity}
+          setSelectedUnit={setUnitDesignCapacity}
           handleUnitChange={handleUnitChangeMaxCapacity}
+          supressGridHeight={true}
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
@@ -1173,7 +1183,7 @@ const ProductionvolumeData = ({ permissions }) => {
         setSnackbarData={setSnackbarData}
         apiRef={apiRef}
         fetchData={fetchData}
-        handleUnitChange={handleUnitChangeMain}
+        handleUnitChange={handleUnitChangeMaxCapacity}
         handleRemarkCellClick={handleRemarkCellClick}
         experimentalFeatures={{ newEditingApi: true }}
         remarkDialogOpen={remarkDialogOpen}
@@ -1183,16 +1193,17 @@ const ProductionvolumeData = ({ permissions }) => {
         currentRowId={currentRowId}
         handleCalculate={handleCalculate}
         permissions={adjustedPermissions}
-        selectedUnit={selectedUnit}
-        setSelectedUnit={setSelectedUnit}
+        selectedUnit={unitDesignCapacity}
+        setSelectedUnit={setUnitDesignCapacity}
         handleExcelUpload={handleExcelUpload}
+        supressGridHeight={true}
         downloadExcelForConfiguration={() =>
           downloadExcelForConfiguration('main')
         }
       />
 
       {/* PERCENTAGE_SUMMARY */}
-      {!permissions?.hideSummary && (
+      {!permissions?.hideSummary && VERTICAL_NAME !== 'pta' && (
         <>
           <KendoDataTables
             setRows={setRowsPercentageSummary}
@@ -1201,6 +1212,7 @@ const ProductionvolumeData = ({ permissions }) => {
             title='Production target Reference'
             fetchData={fetchData}
             permissions={adjustedPermissionsLast}
+            supressGridHeight={true}
           />
         </>
       )}

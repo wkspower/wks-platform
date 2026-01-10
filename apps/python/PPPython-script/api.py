@@ -13,6 +13,14 @@ from services.budget_service import (
     calculate_budget, 
     calculate_budget_with_iteration,
 )
+from services.process_demand_service import (
+    get_process_demand_for_month,
+    get_default_process_demands,
+)
+from services.fixed_consumption_service import (
+    get_fixed_consumption_for_month,
+    get_default_fixed_consumption,
+)
 from run_full_year import run_full_financial_year, get_available_cpp_plants, get_default_cpp_plant
 
 app = Flask(__name__)
@@ -41,7 +49,8 @@ def calculate_budget_api():
     {
         "month": 1,
         "year": 2024,
-        "lp_process": 30043.15,
+        "use_db_demands": true,  // Optional: fetch demands from DB (default: true)
+        "lp_process": 30043.15,  // Optional: override if use_db_demands is false
         "lp_fixed": 5169.51,
         "mp_process": 14030.65,
         "mp_fixed": 518.00,
@@ -68,27 +77,69 @@ def calculate_budget_api():
                     "error": f"Missing required field: {field}"
                 }), 400
         
-        # Extract parameters with defaults
+        month = int(data['month'])
+        year = int(data['year'])
+        
+        # Check if we should fetch demands from DB (default: True)
+        use_db_demands = data.get('use_db_demands', True)
+        
+        if use_db_demands:
+            # Fetch process demands from DB
+            process_demands = get_process_demand_for_month(month, year)
+            # Fetch fixed demands from DB
+            fixed_demands = get_fixed_consumption_for_month(month, year)
+            
+            # Use DB values, but allow overrides from request
+            lp_process = float(data.get('lp_process', process_demands.get('lp_process', 30043.15)))
+            mp_process = float(data.get('mp_process', process_demands.get('mp_process', 14030.65)))
+            hp_process = float(data.get('hp_process', process_demands.get('hp_process', 4971.91)))
+            shp_process = float(data.get('shp_process', process_demands.get('shp_process', 20975.34)))
+            air_process = float(data.get('air_process', process_demands.get('air_process', 6095102.0)))
+            cw1_process = float(data.get('cw1_process', process_demands.get('cw1_process', 15194.0)))
+            cw2_process = float(data.get('cw2_process', process_demands.get('cw2_process', 9016.0)))
+            dm_process = float(data.get('dm_process', process_demands.get('dm_process', 54779.0)))
+            
+            lp_fixed = float(data.get('lp_fixed', fixed_demands.get('lp_fixed', 5169.51)))
+            mp_fixed = float(data.get('mp_fixed', fixed_demands.get('mp_fixed', 518.00)))
+            hp_fixed = float(data.get('hp_fixed', fixed_demands.get('hp_fixed', 0.00)))
+            shp_fixed = float(data.get('shp_fixed', fixed_demands.get('shp_fixed', 0.00)))
+        else:
+            # Use provided values or defaults
+            lp_process = float(data.get('lp_process', 30043.15))
+            mp_process = float(data.get('mp_process', 14030.65))
+            hp_process = float(data.get('hp_process', 4971.91))
+            shp_process = float(data.get('shp_process', 20975.34))
+            air_process = float(data.get('air_process', 6095102.0))
+            cw1_process = float(data.get('cw1_process', 15194.0))
+            cw2_process = float(data.get('cw2_process', 9016.0))
+            dm_process = float(data.get('dm_process', 54779.0))
+            
+            lp_fixed = float(data.get('lp_fixed', 5169.51))
+            mp_fixed = float(data.get('mp_fixed', 518.00))
+            hp_fixed = float(data.get('hp_fixed', 0.00))
+            shp_fixed = float(data.get('shp_fixed', 0.00))
+        
         result = calculate_budget(
-            month=int(data['month']),
-            year=int(data['year']),
-            lp_process=float(data.get('lp_process', 30043.15)),
-            lp_fixed=float(data.get('lp_fixed', 5169.51)),
-            mp_process=float(data.get('mp_process', 14030.65)),
-            mp_fixed=float(data.get('mp_fixed', 518.00)),
-            hp_process=float(data.get('hp_process', 4971.91)),
-            hp_fixed=float(data.get('hp_fixed', 0.00)),
-            shp_process=float(data.get('shp_process', 20975.34)),
-            shp_fixed=float(data.get('shp_fixed', 0.00)),
+            month=month,
+            year=year,
+            lp_process=lp_process,
+            lp_fixed=lp_fixed,
+            mp_process=mp_process,
+            mp_fixed=mp_fixed,
+            hp_process=hp_process,
+            hp_fixed=hp_fixed,
+            shp_process=shp_process,
+            shp_fixed=shp_fixed,
             bfw_ufu=float(data.get('bfw_ufu', 0.00)),
-            air_process=float(data.get('air_process', 6095102.0)),
-            cw1_process=float(data.get('cw1_process', 15194.0)),
-            cw2_process=float(data.get('cw2_process', 9016.0)),
-            dm_process=float(data.get('dm_process', 54779.0)),
+            air_process=air_process,
+            cw1_process=cw1_process,
+            cw2_process=cw2_process,
+            dm_process=dm_process,
         )
         
         return jsonify({
             "success": True,
+            "use_db_demands": use_db_demands,
             "data": result
         })
         
@@ -108,7 +159,8 @@ def calculate_budget_with_iteration_api():
     {
         "month": 1,
         "year": 2024,
-        "lp_process": 30043.15,
+        "use_db_demands": true,  // Optional: fetch demands from DB (default: true)
+        "lp_process": 30043.15,  // Optional: override values
         "lp_fixed": 5169.51,
         "mp_process": 14030.65,
         "mp_fixed": 518.00,
@@ -137,29 +189,71 @@ def calculate_budget_with_iteration_api():
                     "error": f"Missing required field: {field}"
                 }), 400
         
-        # Extract parameters with defaults
+        month = int(data['month'])
+        year = int(data['year'])
+        
+        # Check if we should fetch demands from DB (default: True)
+        use_db_demands = data.get('use_db_demands', True)
+        
+        if use_db_demands:
+            # Fetch process demands from DB
+            process_demands = get_process_demand_for_month(month, year)
+            # Fetch fixed demands from DB
+            fixed_demands = get_fixed_consumption_for_month(month, year)
+            
+            # Use DB values, but allow overrides from request
+            lp_process = float(data.get('lp_process', process_demands.get('lp_process', 30043.15)))
+            mp_process = float(data.get('mp_process', process_demands.get('mp_process', 14030.65)))
+            hp_process = float(data.get('hp_process', process_demands.get('hp_process', 4971.91)))
+            shp_process = float(data.get('shp_process', process_demands.get('shp_process', 20975.34)))
+            air_process = float(data.get('air_process', process_demands.get('air_process', 6095102.0)))
+            cw1_process = float(data.get('cw1_process', process_demands.get('cw1_process', 15194.0)))
+            cw2_process = float(data.get('cw2_process', process_demands.get('cw2_process', 9016.0)))
+            dm_process = float(data.get('dm_process', process_demands.get('dm_process', 54779.0)))
+            
+            lp_fixed = float(data.get('lp_fixed', fixed_demands.get('lp_fixed', 5169.51)))
+            mp_fixed = float(data.get('mp_fixed', fixed_demands.get('mp_fixed', 518.00)))
+            hp_fixed = float(data.get('hp_fixed', fixed_demands.get('hp_fixed', 0.00)))
+            shp_fixed = float(data.get('shp_fixed', fixed_demands.get('shp_fixed', 0.00)))
+        else:
+            # Use provided values or defaults
+            lp_process = float(data.get('lp_process', 30043.15))
+            mp_process = float(data.get('mp_process', 14030.65))
+            hp_process = float(data.get('hp_process', 4971.91))
+            shp_process = float(data.get('shp_process', 20975.34))
+            air_process = float(data.get('air_process', 6095102.0))
+            cw1_process = float(data.get('cw1_process', 15194.0))
+            cw2_process = float(data.get('cw2_process', 9016.0))
+            dm_process = float(data.get('dm_process', 54779.0))
+            
+            lp_fixed = float(data.get('lp_fixed', 5169.51))
+            mp_fixed = float(data.get('mp_fixed', 518.00))
+            hp_fixed = float(data.get('hp_fixed', 0.00))
+            shp_fixed = float(data.get('shp_fixed', 0.00))
+        
         result = calculate_budget_with_iteration(
-            month=int(data['month']),
-            year=int(data['year']),
-            lp_process=float(data.get('lp_process', 30043.15)),
-            lp_fixed=float(data.get('lp_fixed', 5169.51)),
-            mp_process=float(data.get('mp_process', 14030.65)),
-            mp_fixed=float(data.get('mp_fixed', 518.00)),
-            hp_process=float(data.get('hp_process', 4971.91)),
-            hp_fixed=float(data.get('hp_fixed', 0.00)),
-            shp_process=float(data.get('shp_process', 20975.34)),
-            shp_fixed=float(data.get('shp_fixed', 0.00)),
+            month=month,
+            year=year,
+            lp_process=lp_process,
+            lp_fixed=lp_fixed,
+            mp_process=mp_process,
+            mp_fixed=mp_fixed,
+            hp_process=hp_process,
+            hp_fixed=hp_fixed,
+            shp_process=shp_process,
+            shp_fixed=shp_fixed,
             bfw_ufu=float(data.get('bfw_ufu', 0.00)),
             export_available=bool(data.get('export_available', False)),
-            air_process=float(data.get('air_process', 6095102.0)),
-            cw1_process=float(data.get('cw1_process', 15194.0)),
-            cw2_process=float(data.get('cw2_process', 9016.0)),
-            dm_process=float(data.get('dm_process', 54779.0)),
+            air_process=air_process,
+            cw1_process=cw1_process,
+            cw2_process=cw2_process,
+            dm_process=dm_process,
             save_to_db=bool(data.get('save_to_db', False)),
         )
         
         return jsonify({
             "success": True,
+            "use_db_demands": use_db_demands,
             "data": result
         })
         
@@ -180,7 +274,9 @@ def run_full_year_api():
         "financial_year": 2025,      # Required: FY 2025-26 (April 2025 to March 2026)
         "cpp_plant_id": "...",       # Optional: CPP Plant GUID, uses default if not provided
         "save_to_db": true,          # Optional: Save results to database (default: true)
-        "save_logs": true            # Optional: Save log files (default: true)
+        "save_logs": true,           # Optional: Save log files (default: true)
+        "use_db_process": true,      # Optional: Fetch process demands from DB (default: true)
+        "use_db_fixed": true         # Optional: Fetch fixed demands from DB (default: true)
     }
     """
     try:
@@ -197,14 +293,18 @@ def run_full_year_api():
         cpp_plant_id = data.get('cpp_plant_id')
         save_to_db = bool(data.get('save_to_db', True))
         save_logs = bool(data.get('save_logs', True))
+        use_db_process = bool(data.get('use_db_process', True))
+        use_db_fixed = bool(data.get('use_db_fixed', True))
         
-        # Run full year calculation
+        # Run full year calculation with dynamic demands
         results = run_full_financial_year(
             financial_year=financial_year,
             cpp_plant_id=cpp_plant_id,
-            process_demands=None,  # Uses defaults
+            process_demands=None,  # Will fetch from DB if use_db_process is True
             save_to_db=save_to_db,
-            save_logs=save_logs
+            save_logs=save_logs,
+            use_db_process=use_db_process,
+            use_db_fixed=use_db_fixed
         )
         
         # Prepare response

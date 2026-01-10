@@ -8,6 +8,7 @@ import UnitCapacity from './UnitCapacity'
 import DefaultTcsInput from './DefaultTcsInput'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
+import CPPUnitsSdPlan from './CPPUnitsSdPlan'
 import CrudBlendWindow from './CrudBlendWindow'
 import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
@@ -22,7 +23,7 @@ const renderTabComponent = (tabDisplayName, props) => {
     case 'Slowdown':
       return <Slowdown {...props} />
     case 'CPP Units SD Plan':
-      return <DefaultTcsInput {...props} tabDisplayName={tabDisplayName} />
+      return <CPPUnitsSdPlan {...props} />
     case 'PCG Outlook':
       return <PCGOutlook {...props} />
     case 'ROGC':
