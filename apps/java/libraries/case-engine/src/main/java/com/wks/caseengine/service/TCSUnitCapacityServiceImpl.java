@@ -110,9 +110,10 @@ Verticals vertical = null;
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setParticulates(row[1] != null ? row[1].toString() : null);
                 dto.setUom(row[2] != null ? row[2].toString() : null);
-                dto.setValue(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                dto.setRemark(row[4] != null ? row[4].toString() : null);
-                dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
+                dto.setSummer(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
+                dto.setWinter(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
+                dto.setRemark(row[5] != null ? row[5].toString() : null);
+                dto.setInsertedDateTime(row[6] != null ? dateFormatter.parse(row[6].toString()) : null);
                 resultsList.add(dto);
             }
             map.put("results", resultsList);
@@ -160,7 +161,13 @@ Verticals vertical = null;
             }
 
             // Prepare native SQL call with parameters
-            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType, @uom = :uom";
+            String sql = "";
+            if(plantId != null) {
+            sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType";
+            }
+            else {
+                sql = "EXEC " + procedureName + " @aopYear = :aopYear, @capacityType = :capacityType";
+            }
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
@@ -170,7 +177,7 @@ Verticals vertical = null;
           
             query.setParameter("aopYear", aopYear);
             query.setParameter("capacityType", capacityType);
-            query.setParameter("uom", uom);
+         //   query.setParameter("uom", uom);
 
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -197,7 +204,7 @@ Verticals vertical = null;
                 procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
             }
         }
-        String callableSql = "{call " + procedureName + "(?, ?, ?, ?)}";
+        String callableSql = "{call " + procedureName + "(?, ?, ?)}";
 
         List<String> headers = new ArrayList<>();
 		try (
@@ -207,7 +214,7 @@ Verticals vertical = null;
 			stmt.setString(1, plantId);
 			stmt.setString(2, aopYear);
             stmt.setString(3, capacityType);
-            stmt.setString(4, uom);
+       //     stmt.setString(4, uom);
 
 			boolean hasResultSet = stmt.execute();
 
@@ -271,7 +278,8 @@ Verticals vertical = null;
                 }
                 entity.setCapacityType(capacityType);
                 entity.setUom(dto.getUom());
-                entity.setValue(dto.getValue());
+                entity.setSummer(dto.getSummer());
+                entity.setWinter(dto.getWinter());
                 entity.setRemark(dto.getRemark());
                 entity.setAopYear(year);
                 entity.setPlantFkId(UUID.fromString(plantId));
@@ -297,7 +305,8 @@ Verticals vertical = null;
         return TCSUnitCapacityDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
             .uom(entity.getUom())
-            .value(entity.getValue())
+            .summer(entity.getSummer())
+            .winter(entity.getSummer())
             .remark(entity.getRemark())
             .build();
     }

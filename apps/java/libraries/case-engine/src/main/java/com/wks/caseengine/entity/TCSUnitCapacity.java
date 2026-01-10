@@ -32,8 +32,11 @@ public class TCSUnitCapacity {
     @Column(name = "UOM", length = 50, nullable = false)
     private String uom;
 
-    @Column(name = "Value", precision = 18, scale = 4)
-    private Double value;
+    @Column(name = "Summer", precision = 18, scale = 4)
+    private Double summer;
+
+    @Column(name = "Winter", precision = 18, scale = 4)
+    private Double winter;
 
     @Size(max = 1000)
     @Column(name = "Remark", length = 1000)
