@@ -330,13 +330,10 @@ const CPPUnitsSdPlan = ({
 
   const permissions = {
     showAction: true,
-    addButton: false,
-    deleteButton: false,
-    editButton: true,
-    saveBtn: true,
     addButton: true,
     deleteButton: true,
-    showAction: true,
+    editButton: true,
+    saveBtn: true,
     allAction: true,
     showTitleNameBusiness: true,
     showTitle: true,
