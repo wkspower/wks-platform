@@ -11,12 +11,27 @@ export const MultiselectCellEditor = ({
   placeholder = 'Select...',
   tagLimit,
 }) => {
-  const storedValues = dataItem[field] ?? []
+  const rawValue = dataItem[field] ?? []
+
+  // Normalize stored values to array format
+  // Handle both string (comma-separated) and array formats
+  const normalizeToArray = (value) => {
+    if (!value) return []
+    if (Array.isArray(value)) return value
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean)
+    }
+    return []
+  }
+
+  const storedValues = normalizeToArray(rawValue)
 
   // Find the objects that match the stored values array
   const getInitialSelection = () => {
-    if (!Array.isArray(storedValues) || !storedValues.length || !options.length)
-      return []
+    if (!storedValues.length || !options.length) return []
     return options.filter((option) => storedValues.includes(option[valueField]))
   }
 
@@ -93,11 +108,26 @@ export const MultiselectDisplayCell = ({
   valueField = 'value',
   ...tdProps
 }) => {
-  const values = dataItem[field] ?? []
+  const rawValue = dataItem[field] ?? []
+
+  // Normalize to array format
+  const normalizeToArray = (value) => {
+    if (!value) return []
+    if (Array.isArray(value)) return value
+    if (typeof value === 'string') {
+      return value
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean)
+    }
+    return []
+  }
+
+  const values = normalizeToArray(rawValue)
 
   // Convert array of values to display text
   const getDisplayText = () => {
-    if (!Array.isArray(values) || values.length === 0) return '—'
+    if (values.length === 0) return '—'
 
     const displayTexts = values.map((value) => {
       const foundOption = options.find((option) => option[valueField] === value)

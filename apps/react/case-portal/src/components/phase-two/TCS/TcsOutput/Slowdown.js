@@ -6,6 +6,8 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const Slowdown = ({
+  SITE_ID,
+  VERTICAL_ID,
   PLANT_ID,
   AOP_YEAR,
   currentTab,
@@ -30,14 +32,15 @@ const Slowdown = ({
 
   // Fetch Shutdown Data
   const fetchSlowdownData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+    if (!SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       let transformedData = []
 
       const response = await TcsOutputApiService.getTcsSlowdownData(
         keycloak,
-        PLANT_ID,
+        SITE_ID,
+        VERTICAL_ID,
         AOP_YEAR,
       )
       console.log('TCS Slowdown Response:', response)
@@ -70,7 +73,8 @@ const Slowdown = ({
     }
   }, [
     keycloak,
-    PLANT_ID,
+    SITE_ID,
+    VERTICAL_ID,
     AOP_YEAR,
     currentTab.id,
     setSnackbarData,
@@ -79,10 +83,10 @@ const Slowdown = ({
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
+    if (SITE_ID && VERTICAL_ID && AOP_YEAR) {
       fetchSlowdownData()
     }
-  }, [PLANT_ID, AOP_YEAR, fetchSlowdownData])
+  }, [SITE_ID, VERTICAL_ID, AOP_YEAR, fetchSlowdownData])
 
   // Column configuration for Slowdown - dynamically generated from API response
   const columnConfig = {
@@ -101,9 +105,15 @@ const Slowdown = ({
     },
     throughputUOM: {
       editable: true,
-      type: 'wholeNumber',
-      minWidth: 50,
-      widthT: 50,
+      type: 'dropdown',
+      minWidth: 80,
+      widthT: 100,
+      options: [
+        { value: 'KBPSD', label: 'KBPSD' },
+        { value: 'KTPD', label: 'KTPD' },
+        { value: 'TPD', label: 'TPD' },
+        { value: 'TPH', label: 'TPH' },
+      ],
     },
     startDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },
     endDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },

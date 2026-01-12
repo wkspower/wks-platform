@@ -4,10 +4,11 @@ import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUt
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const Shutdown = ({
   PLANT_ID,
+  PLANT_NAME,
   AOP_YEAR,
   currentTab,
   snackbarData,
@@ -16,7 +17,7 @@ const Shutdown = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management
   const [loading, setLoading] = useState(false)
@@ -257,11 +258,70 @@ const Shutdown = ({
     fetchShutdownData,
   ])
 
+  // Delete row data
+  const deleteRowData = useCallback(
+    async (paramsForDelete) => {
+      setLoading(true)
+
+      try {
+        const { id } = paramsForDelete
+        const deleteId = id
+
+        // Check if this is a newly added row (not saved to backend yet)
+        const isNewRow = paramsForDelete.isNew
+
+        if (isNewRow) {
+          // Just remove from local state
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Row removed successfully!',
+            severity: 'success',
+          })
+        } else {
+          // Call API to delete from backend
+          // await TcsApiService.deleteShutdownData(
+          //   keycloak,
+          //   PLANT_ID,
+          //   AOP_YEAR,
+          //   id,
+          // )
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Record deleted successfully!',
+            severity: 'success',
+          })
+          fetchShutdownData()
+        }
+      } catch (error) {
+        console.error('Error deleting record:', error)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error deleting record!',
+          severity: 'error',
+        })
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      fetchShutdownData,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
+  )
+
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: false,
+    addButton: true,
+    deleteButton: true,
+    showAction: true,
     remarksEditable: true,
     showCalculate: false,
     showExport: false,
@@ -296,6 +356,7 @@ const Shutdown = ({
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
+        deleteRowData={deleteRowData}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
@@ -303,11 +364,13 @@ const Shutdown = ({
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         permissions={permissions}
+        initialFieldValues={{ particulates: PLANT_NAME }}
         dateCalculationConfig={{
           dateField1: 'startDate',
           dateField2: 'endDate',
           daysField: 'durationInDays',
           requiredInHr: false,
+          roundDaysAndDates: true,
         }}
       />
     </Box>
