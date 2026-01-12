@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.wks.caseengine.dto.tcs.TCSSlowdownDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.service.tcs.TCSSlowdownService;
 
 @RestController
@@ -19,10 +20,19 @@ public class TCSSlowdownController {
 
     @GetMapping("/tcs-slowdown")
     public Map<String, Object> getAllTCSSlowdown(
-        @RequestParam String plantId,
-        @RequestParam String year) {
+        @RequestParam (required = false) String plantId,
+        @RequestParam String year,
+        @RequestParam(required = false) String siteId,
+        @RequestParam(required = false) String verticalId) {
         
-        return tcsSlowdownService.getAll(plantId, year);
+        if (plantId == null && (siteId == null || verticalId == null)) {
+            throw new RestInvalidArgumentException("Plant ID and Site ID or Vertical ID cannot be null", null);
+        }
+        if (plantId != null && (siteId != null || verticalId != null)) {
+            throw new RestInvalidArgumentException("Plant ID and Site ID or Vertical ID cannot be provided together", null);
+        }
+
+        return tcsSlowdownService.getAll(plantId, year, siteId, verticalId);
     }
 
     @PostMapping("/tcs-slowdown")

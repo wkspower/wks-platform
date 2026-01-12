@@ -22,8 +22,13 @@ public class CrudeBlendWindowController {
     @Autowired
     private CrudeBlendWindowService crudeBlendWindowService;
      
-    @GetMapping("/crude-blend-window/{plantId}/{siteId}/{financialYear}")
-    public ResponseEntity<List<CrudeBlendScreenDTO>> getCrudeBlendWindowByCppAndFY(@PathVariable String plantId, @PathVariable String siteId, @PathVariable String financialYear) {
+    @GetMapping({"/crude-blend-window/{plantId}/{siteId}/{financialYear}" , "/crude-blend-window/{siteId}/{financialYear}"})
+    public ResponseEntity<List<CrudeBlendScreenDTO>> getCrudeBlendWindowByCppAndFY(@PathVariable(required = false) String plantId, @PathVariable String siteId, @PathVariable String financialYear) {
+
+
+        if (plantId == null) {
+            return ResponseEntity.ok(crudeBlendWindowService.getCrudeBlendWindowData(null, siteId, financialYear));
+        }
 
         List<CrudeBlendScreenDTO> crudeBlendScreenDTO = crudeBlendWindowService.getCrudeBlendWindowData(plantId, siteId, financialYear);
         return ResponseEntity.ok(crudeBlendScreenDTO);

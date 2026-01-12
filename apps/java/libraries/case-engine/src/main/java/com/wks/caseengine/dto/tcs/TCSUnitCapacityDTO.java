@@ -15,7 +15,9 @@ public class TCSUnitCapacityDTO {
     private String id;          
     private String particulates;
     private String uom;
-    private Double value;
+ //   private Double value;
+ private Double summer;
+ private Double winter;
     private String remark;
     private Date insertedDateTime;
 }

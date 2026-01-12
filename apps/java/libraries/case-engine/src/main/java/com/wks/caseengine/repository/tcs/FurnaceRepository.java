@@ -28,6 +28,23 @@ public interface FurnaceRepository extends JpaRepository<DummyEntity, UUID> {
         @Param("plantId") UUID plantId
     );
 
+    // tcs output 
+    @Query(
+        value = """
+            EXEC dbo.GetFurnaceData_Output
+                @FinancialYear = :financialYear,
+                @Site_FK_Id = :siteId
+        """,
+        nativeQuery = true
+    )
+    List<FurnaceProjection> getFurnaceOutputData(
+        @Param("financialYear") String financialYear,
+        @Param("siteId") UUID siteId
+      
+    );
+
+
+
 @Query(
        value = """
             select Id, FinancialYearMonthId, GCalPerHr from Furnace_GCalPerHr_Mapping where FinancialYearMonthId in (:financialYearMonthIds)
