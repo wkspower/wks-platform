@@ -27,10 +27,10 @@ public class TCSUnitCapacity {
     @Column(name = "CapacityType", length = 50, nullable = false)
     private String capacityType;
 
-    @NotNull(message = "UOM is required")
-    @Size(max = 50)
-    @Column(name = "UOM", length = 50, nullable = false)
-    private String uom;
+    // @NotNull(message = "UOM is required")
+    // @Size(max = 50)
+    // @Column(name = "UOM", length = 50, nullable = false)
+    // private String uom;
 
     @Column(name = "Summer", precision = 18, scale = 4)
     private Double summer;

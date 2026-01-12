@@ -52,7 +52,7 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
         String plantId,
         String aopYear,
         String capacityType,
-        String uom,
+     //   String uom,
         String siteId,
         String verticalId) {
         
@@ -101,8 +101,9 @@ Verticals vertical = null;
                 aopYear,
                 vertical.getName().toUpperCase(),
                 site.getName().toUpperCase(),
-                capacityType,
-                uom);  
+                capacityType
+               // uom
+            );  
 
                 System.out.println("getData fetched successfully");
             
@@ -122,11 +123,11 @@ Verticals vertical = null;
                 TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setParticulates(row[1] != null ? row[1].toString() : null);
-                dto.setUom(row[2] != null ? row[2].toString() : null);
-                dto.setSummer(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                dto.setWinter(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
-                dto.setRemark(row[5] != null ? row[5].toString() : null);
-                dto.setInsertedDateTime(row[6] != null ? dateFormatter.parse(row[6].toString()) : null);
+             //   dto.setUom(row[2] != null ? row[2].toString() : null);
+                dto.setSummer(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
+                dto.setWinter(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
+                dto.setRemark(row[4] != null ? row[4].toString() : null);
+                dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
                 resultsList.add(dto);
             }
             map.put("results", resultsList);
@@ -137,8 +138,9 @@ Verticals vertical = null;
                 aopYear,
                 vertical.getName().toUpperCase(),
                 site.getName().toUpperCase(),
-                capacityType,
-                uom);
+                capacityType
+              //  uom
+            );
             map.put("headers", headers);
 
             List<String> keys = new ArrayList<>();
@@ -158,8 +160,9 @@ Verticals vertical = null;
         String aopYear,
         String verticalName,
         String siteName,
-        String capacityType,
-        String uom) {
+        String capacityType
+    //    String uom
+    ) {
             
         try {            
             // Stored Procedure name
@@ -213,8 +216,9 @@ Verticals vertical = null;
         String aopYear,
         String verticalName,
         String siteName,
-        String capacityType,
-        String uom) {
+        String capacityType
+    //    String uom
+    ) {
 
         String procedureName = "GetTcsUnitCapacity";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
@@ -284,7 +288,7 @@ Verticals vertical = null;
         String plantId,
         String year,
         String capacityType,
-        String uom,
+       // String uom,
         List<TCSUnitCapacityDTO> dtoList) {
         if (dtoList == null || dtoList.isEmpty()) {
             throw new RestInvalidArgumentException("Payload cannot be empty", null);
@@ -313,7 +317,7 @@ Verticals vertical = null;
                     entity.setUpdatedDateTime(new Date());
                 }
                 entity.setCapacityType(capacityType);
-                entity.setUom(dto.getUom());
+            //    entity.setUom(dto.getUom());
                 entity.setSummer(dto.getSummer());
                 entity.setWinter(dto.getWinter());
                 entity.setRemark(dto.getRemark());
@@ -340,9 +344,9 @@ Verticals vertical = null;
     private TCSUnitCapacityDTO toDTO(TCSUnitCapacity entity) {
         return TCSUnitCapacityDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
-            .uom(entity.getUom())
+          //  .uom(entity.getUom())
             .summer(entity.getSummer())
-            .winter(entity.getSummer())
+            .winter(entity.getWinter())
             .remark(entity.getRemark())
             .build();
     }
