@@ -61,33 +61,34 @@ public class TCSUnitCapacityServiceImpl implements TCSUnitCapacityService {
       
 Sites site = null;
 Verticals vertical = null;
+//final Plants plant = null;
         // Validation
-        Plants plant = plantsRepository
+        if (plantId != null) {
+       Plants plant = plantsRepository
             .findById(UUID.fromString(plantId))
             .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));
 
-        if (plantId != null) {
+       
          site = siteRepository
             .findById(plant.getSiteFkId())
             .orElseThrow(() -> new RuntimeException("Site not found for ID: " + plantId));
+
+            vertical = verticalRepository
+            .findById(plant.getVerticalFKId())
+            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
         }
 
-    else if (siteId != null) {
+    else  {
         site = siteRepository
             .findById(UUID.fromString(siteId))
             .orElseThrow(() -> new RuntimeException("Site not found for ID: " + siteId));
-    }
+    
 
-   if (plantId != null) {
-        vertical = verticalRepository
-            .findById(plant.getVerticalFKId())
-            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
-   }
-   else if (verticalId != null) {
+ 
     vertical = verticalRepository
         .findById(UUID.fromString(verticalId))
         .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + verticalId));
-   }
+    }
 
         Map<String, Object> map = new HashMap<>();
         try {
@@ -102,8 +103,20 @@ Verticals vertical = null;
                 site.getName().toUpperCase(),
                 capacityType,
                 uom);  
+
+                System.out.println("getData fetched successfully");
             
-        
+        //    for(Object[] row : results) {
+        // System.out.println("row1: " + row[0].toString());
+        // System.out.println("row2: " + row[1].toString());
+        // System.out.println("row3: " + row[2].toString());
+        // System.out.println("row4: " + Double.parseDouble(row[3].toString()));
+        // System.out.println("row5: " + Double.parseDouble(row[4].toString()));
+        // System.out.println("row6: " + row[5].toString());
+        // System.out.println("row7: " + dateFormatter.parse(row[6].toString()));
+        //     System.out.println(row[0].toString() + " " + row[1].toString() + " " + row[2].toString() + " " + Double.parseDouble(row[3].toString()) + " " + Double.parseDouble(row[4].toString()) + " " + row[5].toString() + " " + dateFormatter.parse(row[6].toString()));
+        //    }
+
             List<TCSUnitCapacityDTO> resultsList = new ArrayList<>();
             for (Object[] row : results) {
                 TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
@@ -166,17 +179,25 @@ Verticals vertical = null;
             sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear, @capacityType = :capacityType";
             }
             else {
-                sql = "EXEC " + procedureName + " @aopYear = :aopYear, @capacityType = :capacityType";
+              //  sql = "EXEC " + procedureName + " @aopYear = :aopYear, @capacityType = :capacityType";
+              sql = "EXEC " + procedureName + " ?, ?";
+
             }
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
             if(plantId != null) {
             query.setParameter("plantId", plantId);
-            }
+            
           
             query.setParameter("aopYear", aopYear);
-            query.setParameter("capacityType", capacityType);
+            query.setParameter("capacityType", capacityType);  }
+
+            else {
+                query.setParameter(1, aopYear);      // First parameter
+                query.setParameter(2, capacityType);
+
+            }
          //   query.setParameter("uom", uom);
 
             return query.getResultList();
@@ -204,17 +225,32 @@ Verticals vertical = null;
                 procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
             }
         }
-        String callableSql = "{call " + procedureName + "(?, ?, ?)}";
+
+        String callableSql = "";
+        if(plantId != null) {
+        callableSql = "{call " + procedureName + "(?, ?, ?)}";  }
+        else {
+            callableSql = "{call " + procedureName + "(?, ?)}";
+        }
 
         List<String> headers = new ArrayList<>();
 		try (
             Connection conn = dataSource.getConnection();
 			CallableStatement stmt = conn.prepareCall(callableSql)) {
-
-			stmt.setString(1, plantId);
+              if(plantId != null) {
+			stmt.setString(1, plantId);  
+                    
 			stmt.setString(2, aopYear);
-            stmt.setString(3, capacityType);
-       //     stmt.setString(4, uom);
+            stmt.setString(3, capacityType);  
+             //     stmt.setString(4, uom);
+        
+        }
+
+        else {
+            stmt.setString(1, aopYear);
+            stmt.setString(2, capacityType);
+        }
+      
 
 			boolean hasResultSet = stmt.execute();
 

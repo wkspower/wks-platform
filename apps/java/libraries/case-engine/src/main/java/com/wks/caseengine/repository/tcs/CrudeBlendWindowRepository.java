@@ -39,7 +39,7 @@ public interface CrudeBlendWindowRepository extends JpaRepository<DummyEntity, L
                  Remarks, Type
           FROM CrudeBlendWindow
           WHERE 
-            AND Site_FK_Id = :siteId
+             Site_FK_Id = :siteId
             AND FinancialYear = :financialYear
           """,
       nativeQuery = true
