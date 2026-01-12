@@ -4,7 +4,7 @@ import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUt
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const CrudBlendWindowGrid = ({
   tableKey,
@@ -20,7 +20,7 @@ const CrudBlendWindowGrid = ({
   onRefresh,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management for this grid
   const [rows, setRows] = useState([])

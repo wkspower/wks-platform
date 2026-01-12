@@ -5,10 +5,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
+import { convertRowFromKBPSD } from './uomConversionUtils'
 
 const UnitCapacityGrid = ({
   capacityType,
   title,
+  SITE_ID,
+  VERTICAL_ID,
   PLANT_ID,
   AOP_YEAR,
   snackbarData,
@@ -20,7 +23,11 @@ const UnitCapacityGrid = ({
   const valueFormat = ValueFormatterPhaseTwo()
 
   const defaultDropdownConfig = {
-    options: [],
+    options: [
+      { id: 'KBPSD', name: 'KBPSD' },
+      { id: 'KTPD', name: 'KTPD' },
+      { id: 'TPD', name: 'TPD' },
+    ],
     label: 'Select UOM',
     placeholder: 'Select',
     valueKey: 'id',
@@ -31,7 +38,7 @@ const UnitCapacityGrid = ({
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
-  const [selectedDropdown, setSelectedDropdown] = useState(null)
+  const [selectedDropdown, setSelectedDropdown] = useState('KBPSD')
   const [dropdownConfig, setDropdownConfig] = useState({
     ...defaultDropdownConfig,
   })
@@ -43,69 +50,73 @@ const UnitCapacityGrid = ({
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
   // Fetch UOM options for this capacity type
-  const fetchUOMOptions = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
-    try {
-      setLoadingUOM(true)
-      const response = await TcsOutputApiService.getTcsUnitCapacityUOM(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        capacityType,
-      )
+  // const fetchUOMOptions = useCallback(async () => {
+  //   if (!VERTICAL_ID || !AOP_YEAR) return
+  //   try {
+  //     setLoadingUOM(true)
+  //     const response = await TcsOutputApiService.getTcsUnitCapacityUOM(
+  //       keycloak,
+  //       VERTICAL_ID,
+  //       AOP_YEAR,
+  //       capacityType,
+  //     )
 
-      const uomOptions = response || response?.data || []
-      if (uomOptions.length === 0) return
+  //     const uomOptions = response || response?.data || []
+  //     if (uomOptions.length === 0) return
 
-      setDropdownConfig((prev) => ({
-        ...prev,
-        options: uomOptions,
-      }))
+  //     setDropdownConfig((prev) => ({
+  //       ...prev,
+  //       options: uomOptions,
+  //     }))
 
-      const defaultUOM = uomOptions[0].id
-      setSelectedDropdown(defaultUOM)
-    } catch (err) {
-      console.error(`Error fetching UOM options (${capacityType}):`, err)
-      setSnackbarData({
-        message: `Failed to load UOM options. Please try again.`,
-        severity: 'error',
-      })
-      setSnackbarOpen(true)
-    } finally {
-      setLoadingUOM(false)
-    }
-  }, [
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    capacityType,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
+  //     const defaultUOM = uomOptions[0].id
+  //     setSelectedDropdown(defaultUOM)
+  //   } catch (err) {
+  //     console.error(`Error fetching UOM options (${capacityType}):`, err)
+  //     setSnackbarData({
+  //       message: `Failed to load UOM options. Please try again.`,
+  //       severity: 'error',
+  //     })
+  //     setSnackbarOpen(true)
+  //   } finally {
+  //     setLoadingUOM(false)
+  //   }
+  // }, [
+  //   keycloak,
+  //   VERTICAL_ID,
+  //   AOP_YEAR,
+  //   capacityType,
+  //   setSnackbarData,
+  //   setSnackbarOpen,
+  // ])
 
   // Fetch Unit Capacity data for this capacity type
   const fetchUnitCapacityData = useCallback(
     async (selectedUOM) => {
-      if (!PLANT_ID || !AOP_YEAR) return
+      if (!SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
       try {
         setLoading(true)
 
         const response = await TcsOutputApiService.getTcsUnitCapacityData(
           keycloak,
-          PLANT_ID,
+          SITE_ID,
+          VERTICAL_ID,
           AOP_YEAR,
           capacityType,
-          selectedUOM,
         )
 
         let transformedData = []
         if (response?.results && Array.isArray(response.results)) {
-          transformedData = response.results.map((item, index) => ({
-            id: item.id || `row_${index}`,
-            ...item,
-            inEdit: false,
-            isEditable: false,
-          }))
+          transformedData = response.results.map((item, index) => {
+            // Backend data is in KBPSD, convert to selected UOM for display
+            const convertedItem = convertRowFromKBPSD(item, selectedUOM)
+            return {
+              id: item.id || `row_${index}`,
+              ...convertedItem,
+              inEdit: false,
+              isEditable: false,
+            }
+          })
         }
 
         if (response?.headers && response?.keys) {
@@ -131,7 +142,8 @@ const UnitCapacityGrid = ({
     },
     [
       keycloak,
-      PLANT_ID,
+      SITE_ID,
+      VERTICAL_ID,
       AOP_YEAR,
       capacityType,
       setSnackbarData,
@@ -140,18 +152,18 @@ const UnitCapacityGrid = ({
   )
 
   // Fetch UOM options on component mount
-  useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
-      fetchUOMOptions()
-    }
-  }, [PLANT_ID, AOP_YEAR, fetchUOMOptions])
+  // useEffect(() => {
+  //   if (VERTICAL_ID && AOP_YEAR) {
+  //     fetchUOMOptions()
+  //   }
+  // }, [VERTICAL_ID, AOP_YEAR, fetchUOMOptions])
 
   // Fetch capacity data when dropdown selection changes
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR && selectedDropdown) {
+    if (SITE_ID && VERTICAL_ID && AOP_YEAR && selectedDropdown) {
       fetchUnitCapacityData(selectedDropdown)
     }
-  }, [PLANT_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
+  }, [SITE_ID, VERTICAL_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
 
   // Column configuration for Unit Capacity
   const columnConfig = {
@@ -163,7 +175,20 @@ const UnitCapacityGrid = ({
       hidden: true,
     },
     particulates: { editable: false, type: 'text', minWidth: 50, widthT: 150 },
-    value: { editable: true, type: 'number1', minWidth: 50, widthT: 200 },
+    summer: {
+      editable: true,
+      type: 'number1',
+      minWidth: 50,
+      widthT: 120,
+      format: valueFormat,
+    },
+    winter: {
+      editable: true,
+      type: 'number1',
+      minWidth: 50,
+      widthT: 120,
+      format: valueFormat,
+    },
     remark: { editable: true, type: 'text', minWidth: 100, widthT: 250 },
   }
 
@@ -187,27 +212,33 @@ const UnitCapacityGrid = ({
       ...config,
     }))
 
-    // Group 'value' column under 'Capacity' parent at position 2
-    const capacityCol = cols.find((col) => col.field === 'value')
-    const otherCols = cols.filter((col) => col.field !== 'value')
+    // Group 'summer' and 'winter' columns under 'Capacity' parent
+    const summerCol = cols.find((col) => col.field === 'summer')
+    const winterCol = cols.find((col) => col.field === 'winter')
+    const otherCols = cols.filter(
+      (col) => col.field !== 'summer' && col.field !== 'winter',
+    )
 
-    if (capacityCol) {
+    if (summerCol && winterCol) {
       const result = []
       // Position 0: id
-      result.push(otherCols[0]) // id
+      result.push(otherCols.find((col) => col.field === 'id'))
       // Position 1: particulates
-      result.push(otherCols[1]) // particulates
-      // Position 2: Capacity (with value)
+      result.push(otherCols.find((col) => col.field === 'particulates'))
+      // Position 2: Capacity (with summer and winter)
       result.push({
         title: 'Capacity',
-        children: [capacityCol],
+        children: [summerCol, winterCol],
       })
-      // Position 3: remark and others
-      result.push(...otherCols.slice(2))
+      // Position 3: remark and other remaining columns
+      const remainingCols = otherCols.filter(
+        (col) => col.field !== 'id' && col.field !== 'particulates',
+      )
+      result.push(...remainingCols)
       return result
     }
 
-    return otherCols
+    return cols
   }, [apiMetadata])
 
   // Handle remark cell click
