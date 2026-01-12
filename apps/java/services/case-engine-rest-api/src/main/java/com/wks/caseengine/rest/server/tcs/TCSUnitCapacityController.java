@@ -24,7 +24,7 @@ public class TCSUnitCapacityController {
         @RequestParam(required = false) String plantId,
         @RequestParam String year,
         @RequestParam String capacityType,
-        @RequestParam(required = false) String uom,
+      //  @RequestParam(required = false) String uom,
         @RequestParam(required = false) String siteId,
         @RequestParam(required = false) String verticalId)
        
@@ -41,7 +41,7 @@ if (plantId != null && (siteId != null || verticalId != null)) {
             plantId,
             year,
             capacityType,
-            uom,
+      //      uom,
             siteId,
             verticalId);
     }
@@ -51,14 +51,14 @@ if (plantId != null && (siteId != null || verticalId != null)) {
         @RequestParam String plantId,
         @RequestParam String year,
         @RequestParam String capacityType,
-        @RequestParam(required = false) String uom,
+     //   @RequestParam(required = false) String uom,
         @RequestBody List<TCSUnitCapacityDTO> payload) {
 
         return tcsUnitCapacityService.saveOrUpdate(
             plantId,
             year,
             capacityType,
-            uom,
+        //    uom,
             payload);
     }
 
