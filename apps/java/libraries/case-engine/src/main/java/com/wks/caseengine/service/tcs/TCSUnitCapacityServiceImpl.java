@@ -100,7 +100,7 @@ Verticals vertical = null;
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
-                site.getName().toUpperCase(),
+                site.getId(),
                 capacityType
                // uom
             );  
@@ -159,7 +159,7 @@ Verticals vertical = null;
         String plantId,
         String aopYear,
         String verticalName,
-        String siteName,
+        UUID siteId,
         String capacityType
     //    String uom
     ) {
@@ -172,7 +172,8 @@ Verticals vertical = null;
                 procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";  
             }
             else  {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut"; 
+               // procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut"; 
+                procedureName = "GetTcsUnitCapacity_OutPut";
             }
             }
 
@@ -183,7 +184,7 @@ Verticals vertical = null;
             }
             else {
               //  sql = "EXEC " + procedureName + " @aopYear = :aopYear, @capacityType = :capacityType";
-              sql = "EXEC " + procedureName + " ?, ?";
+              sql = "EXEC " + procedureName + " ?, ?, ?";
 
             }
 
@@ -197,8 +198,9 @@ Verticals vertical = null;
             query.setParameter("capacityType", capacityType);  }
 
             else {
-                query.setParameter(1, aopYear);      // First parameter
-                query.setParameter(2, capacityType);
+                query.setParameter(1, siteId);
+                query.setParameter(2, aopYear);      
+                query.setParameter(3, capacityType);
 
             }
          //   query.setParameter("uom", uom);
@@ -215,7 +217,7 @@ Verticals vertical = null;
         String plantId,
         String aopYear,
         String verticalName,
-        String siteName,
+        String siteId,
         String capacityType
     //    String uom
     ) {
@@ -226,7 +228,8 @@ Verticals vertical = null;
             procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
             }
             else  {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
+             //   procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
+                procedureName = "GetTcsUnitCapacity_OutPut";
             }
         }
 
@@ -234,7 +237,7 @@ Verticals vertical = null;
         if(plantId != null) {
         callableSql = "{call " + procedureName + "(?, ?, ?)}";  }
         else {
-            callableSql = "{call " + procedureName + "(?, ?)}";
+            callableSql = "{call " + procedureName + "(?, ?, ?)}";
         }
 
         List<String> headers = new ArrayList<>();
@@ -251,8 +254,9 @@ Verticals vertical = null;
         }
 
         else {
-            stmt.setString(1, aopYear);
-            stmt.setString(2, capacityType);
+            stmt.setString(1, siteId);
+            stmt.setString(2, aopYear);
+            stmt.setString(3, capacityType);
         }
       
 
