@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.dto.cpp.norm.NormParameterDTO;
+import com.wks.caseengine.dto.NormParameterDTO;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Verticals;
