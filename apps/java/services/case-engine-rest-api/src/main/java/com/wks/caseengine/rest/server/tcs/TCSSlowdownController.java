@@ -2,6 +2,7 @@ package com.wks.caseengine.rest.server.tcs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -44,5 +45,11 @@ public class TCSSlowdownController {
         return tcsSlowdownService.saveOrUpdate(plantId, year, payload);
     }
 
-    
+    @DeleteMapping("/tcs-slowdown") 
+    public AOPMessageVM delete(
+        @RequestParam String id) {
+        
+        return tcsSlowdownService.delete(UUID.fromString(id));
+    }
+
 }

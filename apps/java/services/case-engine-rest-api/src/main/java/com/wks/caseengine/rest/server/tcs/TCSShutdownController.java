@@ -2,6 +2,7 @@ package com.wks.caseengine.rest.server.tcs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -41,5 +42,11 @@ public class TCSShutdownController {
         @RequestParam String year,
         @RequestBody List<TCSShutdownDTO> payload) {
         return tcsShutdownService.saveOrUpdate(plantId, year, payload);
+    }
+
+    @DeleteMapping("/tcs-shutdown")
+    public AOPMessageVM delete(
+        @RequestParam String id) {
+        return tcsShutdownService.delete(UUID.fromString(id));
     }
 }

@@ -319,4 +319,20 @@ if(plantId != null) {
             .purpose(entity.getPurpose())
             .build();
     }
+
+    @Override
+    public AOPMessageVM delete(UUID id) {
+        
+        AOPMessageVM  aopMessageVM = new AOPMessageVM();
+     
+      try {
+    
+          tcsShutdownRepository.deleteById(id);
+          aopMessageVM.setCode(200);
+          aopMessageVM.setMessage("Data deleted successfully");
+          return aopMessageVM;
+      } catch (Exception ex) {
+        throw new RuntimeException("Failed to delete data", ex);
+      }
+    }
 }
