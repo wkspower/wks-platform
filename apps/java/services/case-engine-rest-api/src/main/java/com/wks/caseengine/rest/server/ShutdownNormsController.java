@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
@@ -53,8 +54,17 @@ public class ShutdownNormsController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-
 	
+	@PostMapping(value = "/shutdown-consumption-import", consumes = "multipart/form-data")
+	public AOPMessageVM importExcel(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+            @RequestParam(required = false) String gradeId,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	shutdownNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
+	}
+
 	@GetMapping(value="/shutdown-consumption-history-data")
 	public AOPMessageVM getShutConsumptionData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String gradeId){
 		return	shutdownNormsService.getShutConsumptionData(year,plantId,gradeId);
