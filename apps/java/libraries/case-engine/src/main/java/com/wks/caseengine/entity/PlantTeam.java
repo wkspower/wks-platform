@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
 
+import org.hibernate.annotations.GenericGenerator;
+
 @Entity
 @Table(name = "PlantTeam")
 @Data
@@ -12,9 +14,11 @@ import java.util.UUID;
 @Builder
 public class PlantTeam {
 
-    @Id
-    @Column(name = "Id")
-    private UUID id;
+	 	@Id
+	    @GeneratedValue(generator = "UUID")
+	    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+	    @Column(name = "Id", nullable = false, updatable = false)
+	    private UUID id;
 
     @Column(name = "SrNo")
     private Integer srNo;

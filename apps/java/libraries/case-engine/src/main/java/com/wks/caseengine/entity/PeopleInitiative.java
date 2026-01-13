@@ -5,6 +5,9 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.UUID;
+
+import org.hibernate.annotations.GenericGenerator;
+
 import java.time.LocalDate;
 
 @Entity
@@ -16,10 +19,11 @@ import java.time.LocalDate;
 @Builder
 public class PeopleInitiative {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "Id", columnDefinition = "uniqueidentifier")
-    private UUID id;
+	 @Id
+	    @GeneratedValue(generator = "UUID")
+	    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+	    @Column(name = "Id", nullable = false, updatable = false)
+	    private UUID id;
 
     @Column(name = "SrNo")
     private Integer srNo;
