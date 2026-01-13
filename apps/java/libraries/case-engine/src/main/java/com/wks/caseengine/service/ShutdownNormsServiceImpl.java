@@ -19,15 +19,9 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
 import jakarta.persistence.Query;
-import javax.sql.DataSource;
-
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -35,8 +29,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.dto.ShutdownConsumptionDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -60,7 +52,6 @@ import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -369,6 +360,10 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	
 	public List<ShutdownNormsValueDTO> readShutdownConsumption(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutdownNormsValueDTO> configList = new ArrayList<>();
+	    Plants plant = plantsRepository.findById(plantFKId).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		
 	    Map<String, String> gradeMap = getGradeNameIdMap(year, plantFKId);
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        
@@ -414,6 +409,8 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 	                    dto.setId(getStringCellValue(row.getCell(16), dto)); 
 	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
+	                    dto.setSiteFkId(site.getId().toString());
+	                    dto.setVerticalFkId(vertical.getId().toString());
 	                    dto.setGradeFkId(gradeId);
 
 	                } catch (Exception e) {
