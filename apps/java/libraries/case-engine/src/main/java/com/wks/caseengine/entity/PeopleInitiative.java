@@ -1,0 +1,50 @@
+package com.wks.caseengine.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.Date;
+import java.util.UUID;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "PeopleInitiative")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PeopleInitiative {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "Id", columnDefinition = "uniqueidentifier")
+    private UUID id;
+
+    @Column(name = "SrNo")
+    private Integer srNo;
+
+    @Column(name = "Initiative")
+    private String initiative;
+
+    @Column(name = "Outcome")
+    private String outcome;
+
+    @Column(name = "Recommendation")
+    private String recommendation;
+
+    @Column(name = "TargetDate")
+    private Date targetDate;
+
+    @Column(name = "Responsible")
+    private String responsible;
+
+    @Column(name = "Plant_Id")
+    private UUID plantId;
+
+    @Column(name = "AOPYear")
+    private String aopYear;
+
+    @Column(name = "Remark")
+    private String remark;
+}
