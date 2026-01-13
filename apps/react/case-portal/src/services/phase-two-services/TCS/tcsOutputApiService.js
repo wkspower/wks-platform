@@ -27,7 +27,7 @@ export const TcsOutputApiService = {
 
   // TCS PCG Outlook Data APIs
   getPcgOutlookData,
-  
+
   // Excel Import/Export APIs
   downloadTcsExcel,
   uploadTcsExcel,
@@ -174,7 +174,6 @@ async function getCrudBlendWindowData(keycloak, year, siteId) {
   }
 }
 
-
 // ===================== || TCS CPP Units SD Plan Data APIs || ===================== //
 async function getCPPUnitsSdPlanData(keycloak, financialYear, siteId) {
   const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan/${financialYear}/${siteId}`
@@ -196,7 +195,7 @@ async function getCPPUnitsSdPlanData(keycloak, financialYear, siteId) {
 }
 
 // ===================== || TCS ROGC Data APIs || ===================== //
-async function getTcsRogcData(keycloak, siteId,plantId, year) {
+async function getTcsRogcData(keycloak, siteId, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/furnace/${year}/${siteId}/${plantId}`
   const headers = {
     Accept: 'application/json',
