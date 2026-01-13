@@ -85,6 +85,7 @@ if(plantId != null) {
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
+                site.getId(),
                 site.getName().toUpperCase());
             List<TCSShutdownDTO> resultsList = new ArrayList<>();
             //values mapping
@@ -106,6 +107,7 @@ if(plantId != null) {
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
+                site.getId(),
                 site.getName().toUpperCase());
             map.put("headers", headers);
 
@@ -127,6 +129,7 @@ if(plantId != null) {
         String plantId,
         String aopYear,
         String verticalName,
+        UUID siteId,
         String siteName) {
             
         try {            
@@ -137,7 +140,8 @@ if(plantId != null) {
                 procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";  }
 
                 else {
-                    procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
+                 //   procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
+                    procedureName = "GetTcsShutdown_OutPut";
                 }
             }
 
@@ -148,15 +152,20 @@ if(plantId != null) {
         
         } 
         else {
-            sql = "EXEC " + procedureName + " @aopYear = :aopYear";
+            sql = "EXEC " + procedureName + " @siteId = :siteId, @aopYear = :aopYear";
         }
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
             if(plantId != null) {
             query.setParameter("plantId", plantId);
+            
+            query.setParameter("aopYear", aopYear);  }
+
+            else {
+                query.setParameter("siteId", siteId);
+                query.setParameter("aopYear", aopYear);
             }
-            query.setParameter("aopYear", aopYear);
 
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -170,6 +179,7 @@ if(plantId != null) {
         String plantId,
         String aopYear,
         String verticalName,
+        UUID siteId,
         String siteName) {
 
         String procedureName = "GetTcsShutdown";
@@ -178,7 +188,8 @@ if(plantId != null) {
             procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";
             }
             else {
-                procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
+              //  procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
+                procedureName = "GetTcsShutdown_OutPut";
             }
         }
         String callableSql = "";
@@ -186,7 +197,7 @@ if(plantId != null) {
         callableSql = "{call " + procedureName + "(?, ?)}";
         }
         else {
-            callableSql = "{call " + procedureName + "(?)}";
+            callableSql = "{call " + procedureName + "(?, ?)}";
         }
 
         List<String> headers = new ArrayList<>();
@@ -199,7 +210,8 @@ if(plantId != null) {
 			stmt.setString(2, aopYear);  }
 
             else {
-                stmt.setString(1, aopYear);
+                stmt.setString(1, siteId.toString());
+                stmt.setString(2, aopYear);
             }
 
 			boolean hasResultSet = stmt.execute();
