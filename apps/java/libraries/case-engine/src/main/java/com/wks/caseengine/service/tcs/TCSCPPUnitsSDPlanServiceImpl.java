@@ -81,10 +81,13 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
     public void saveTCSCPPUnitsSDPlan(List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs) {
        
         List<Object[]> updates = new ArrayList<>();
+        List<Object[]> inserts = new ArrayList<>();
 
       
 
         for (TCSCPPUnitsSDPlanDTO dto : tcsCppUnitsSDPlanDTOs) {  
+
+
 
              // database date format : yyyy-MM-dd
           // response format : dd-M-yyyy
@@ -94,7 +97,12 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
         //  System.out.println("ibrDueDate: " + ibrDueDate);
         //  System.out.println("shutDownDate: " + shutDownDate);
         //  System.out.println("startUpDate: " + startUpDate);
-             updates.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs(), dto.getId() });
+        if(dto.getId() != null) {
+             updates.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs(), dto.getId() }); 
+            } 
+            else {
+                inserts.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs() });
+            }
      
     }
 
@@ -104,5 +112,17 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
         jdbcTemplate.batchUpdate(sql, updates);
 
     }
+
+    if(inserts.size() > 0) {  
+        String sql = "INSERT INTO TCS_CPPUnitsSD_Plan (Id, Machine, IBRDueDate, GTMaintenance, NoOfDays, ShutDownDate, StartUpDate, MajorJobs) VALUES (NEWID(), ?, ?, ?, ?, ?, ?, ?)";
+        jdbcTemplate.batchUpdate(sql, inserts);
+    }
+
+}
+
+@Override
+public void deleteTCSCPPUnitsSDPlan(UUID id) {   
+    String sql = "DELETE FROM TCS_CPPUnitsSD_Plan WHERE Id = ?";
+    jdbcTemplate.update(sql, id);
 }
 }

@@ -8,6 +8,7 @@ import com.wks.caseengine.dto.tcs.TCSCPPUnitsSDPlanDTO;
 import com.wks.caseengine.service.tcs.TCSCPPUnitsSDPlanService;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +35,12 @@ public class TCSCPPUnitsSDPlanController {
     @PostMapping("/cpp-unit-sd-plan")
     public ResponseEntity<Void> saveTCSCPPUnitsSDPlan(@RequestBody List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs) {
         tcsCppUnitsSDPlanService.saveTCSCPPUnitsSDPlan(tcsCppUnitsSDPlanDTOs);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/cpp-unit-sd-plan/{id}")
+    public ResponseEntity<Void> deleteTCSCPPUnitsSDPlan(@PathVariable String id) {
+        tcsCppUnitsSDPlanService.deleteTCSCPPUnitsSDPlan(UUID.fromString(id));
         return ResponseEntity.ok().build();
     }
 }
