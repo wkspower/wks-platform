@@ -237,6 +237,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					list.add(dto.getMarch());
 					list.add(dto.getRemarks());
 					list.add(dto.getId()); 
+					list.add(dto.getMaterialFkId()); 
 					isEditable.add(dto.getIsEditable());
 					
 					if (isAfterSave) {
@@ -255,6 +256,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				innerHeaders.addAll(monthsList);
 				innerHeaders.add("Remarks");
 				innerHeaders.add("Id");
+				innerHeaders.add("Material Id");
 				if (isAfterSave) {
 					innerHeaders.add("Status");
 					innerHeaders.add("Error Description");
@@ -302,6 +304,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					}
 				}
 				sheet.setColumnHidden(16, true);
+				sheet.setColumnHidden(17, true);
 				
 			} 
 			
@@ -410,6 +413,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    dto.setMarch(getNumericCellValue(row.getCell(14), dto));
 	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 	                    dto.setId(getStringCellValue(row.getCell(16), dto)); 
+	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
 	                    dto.setGradeFkId(gradeId);
 
 	                } catch (Exception e) {
