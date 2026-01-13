@@ -78,7 +78,7 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
 
 
     @Override
-    public void saveTCSCPPUnitsSDPlan(List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs) {
+    public void saveTCSCPPUnitsSDPlan(List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs, UUID siteId) {
        
         List<Object[]> updates = new ArrayList<>();
         List<Object[]> inserts = new ArrayList<>();
@@ -101,7 +101,7 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
              updates.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs(), dto.getId() }); 
             } 
             else {
-                inserts.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs() });
+                inserts.add(new Object[] { dto.getMachine(), dto.getIbrDueDate(), dto.getGtMaintenance(), dto.getNoOfDays(), dto.getShutDownDate(), dto.getStartUpDate(), dto.getMajorJobs(), siteId });
             }
      
     }
@@ -114,7 +114,7 @@ public class TCSCPPUnitsSDPlanServiceImpl implements TCSCPPUnitsSDPlanService {
     }
 
     if(inserts.size() > 0) {  
-        String sql = "INSERT INTO TCS_CPPUnitsSD_Plan (Id, Machine, IBRDueDate, GTMaintenance, NoOfDays, ShutDownDate, StartUpDate, MajorJobs) VALUES (NEWID(), ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TCS_CPPUnitsSD_Plan (Id, Machine, IBRDueDate, GTMaintenance, NoOfDays, ShutDownDate, StartUpDate, MajorJobs, Site_FK_Id) VALUES (NEWID(), ?, ?, ?, ?, ?, ?, ?, ?)";
         jdbcTemplate.batchUpdate(sql, inserts);
     }
 
