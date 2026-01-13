@@ -1,5 +1,6 @@
 package com.wks.caseengine.service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +9,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -177,6 +186,33 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
+	}
+	
+	@Override
+	public AOPMessageVM deletePlantTeam(String id) {
+		Optional<PlantTeam> plantTeam =plantTeamRepository.findById(UUID.fromString(id));
+		if(plantTeam.isPresent()) {
+			plantTeamRepository.delete(plantTeam.get()); 
+		}
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(aopMessageVM);
+		aopMessageVM.setMessage("Record deleted successfully");
+		// TODO Auto-generated method stub
+		return aopMessageVM;
+	}
+
+	@Override
+	public AOPMessageVM deletePeopleInitiative(String id) {
+		Optional<PeopleInitiative> peopleInitiativeOpt =peopleInitiativeRepository.findById(UUID.fromString(id));
+		if(peopleInitiativeOpt.isPresent()) {
+			peopleInitiativeRepository.delete(peopleInitiativeOpt.get()); 
+		}
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(aopMessageVM);
+		aopMessageVM.setMessage("Record deleted successfully");
+		return aopMessageVM;
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
