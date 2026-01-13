@@ -1,4 +1,4 @@
-package com.wks.caseengine.dto.cpp.norm;
+package com.wks.caseengine.dto;
 
 import java.util.UUID;
 

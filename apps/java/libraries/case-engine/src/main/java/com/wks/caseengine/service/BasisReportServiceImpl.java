@@ -35,11 +35,10 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.MCUNormsValueRepository;
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.repository.PlantsRepository;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -1097,6 +1096,8 @@ public class BasisReportServiceImpl implements BasisReportService {
 	                }
 	                gridDataMap.add(rowMap);
 	            }
+
+	            
 	            Map<String, Object> part = new LinkedHashMap<>();
 	            part.put("gridName", gridName);
 	            part.put("data", gridDataMap);
