@@ -52,10 +52,10 @@ import com.wks.caseengine.repository.BusinessDemandDataRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParameterTypeRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
+import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.utility.Utility;
 
 @Service

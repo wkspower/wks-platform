@@ -9,31 +9,24 @@ export const TcsOutputApiService = {
   // TCS Unit Capacity Data APIs
   getTcsUnitCapacityUOM,
   getTcsUnitCapacityData,
-  saveUnitCapacityData,
 
   // TCS Crude Blend Window Data APIs
   getCrudBlendWindowData,
-  saveCrudBlendWindowData,
 
   // TCS Shutdown Data APIs
   getTcsShutdownData,
-  saveShutdownData,
 
   // TCS Slowdown Data APIs
   getTcsSlowdownData,
-  saveSlowdownData,
 
   // TCS ROGC Data APIs
   getTcsRogcData,
-  saveRogcData,
 
   // TCS CPP Units SD Plan Data APIs
   getCPPUnitsSdPlanData,
-  saveCPPUnitsSdPlanData,
 
   // TCS PCG Outlook Data APIs
   getPcgOutlookData,
-  savePcgOutlookData,
 
   // Excel Import/Export APIs
   downloadTcsExcel,
@@ -77,8 +70,8 @@ async function getTcsVisibleTabs(keycloak, VERTICAL_ID, SITE_ID, PLANT_ID) {
 }
 
 // ===================== || TCS Unit Capacity Data APIs || ===================== //
-async function getTcsUnitCapacityUOM(keycloak, plantId, year, capacityType) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity/uom?plantId=${plantId}&year=${year}&capacityType=${capacityType}`
+async function getTcsUnitCapacityUOM(keycloak, verticalId, year, capacityType) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity/uom?verticalId=${verticalId}&year=${year}&capacityType=${capacityType}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -98,12 +91,12 @@ async function getTcsUnitCapacityUOM(keycloak, plantId, year, capacityType) {
 
 async function getTcsUnitCapacityData(
   keycloak,
-  plantId,
+  siteId,
+  verticalId,
   year,
   capacityType,
-  selectedUOM,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${plantId}&year=${year}&capacityType=${capacityType}&uom=${selectedUOM}`
+  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?siteId=${siteId}&verticalId=${verticalId}&year=${year}&capacityType=${capacityType}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -115,38 +108,6 @@ async function getTcsUnitCapacityData(
       throw new Error(`HTTP error! Status: ${resp.status}`)
     }
     return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
-async function saveUnitCapacityData(
-  keycloak,
-  PLANT_ID,
-  AOP_YEAR,
-  capacityType,
-  uom,
-  payload,
-) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${PLANT_ID}&year=${AOP_YEAR}&capacityType=${capacityType}&uom=${uom}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
@@ -154,8 +115,8 @@ async function saveUnitCapacityData(
 }
 
 // ===================== || TCS Shutdown Data APIs || ===================== //
-async function getTcsShutdownData(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?plantId=${plantId}&year=${year}`
+async function getTcsShutdownData(keycloak, siteId, verticalId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?siteId=${siteId}&verticalId=${verticalId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -173,33 +134,9 @@ async function getTcsShutdownData(keycloak, plantId, year) {
   }
 }
 
-async function saveShutdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
 // ===================== || TCS Slowdown Data APIs || ===================== //
-async function getTcsSlowdownData(keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-slowdown?plantId=${plantId}&year=${year}`
+async function getTcsSlowdownData(keycloak, siteId, verticalId, year) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-slowdown?siteId=${siteId}&verticalId=${verticalId}&year=${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -211,31 +148,6 @@ async function getTcsSlowdownData(keycloak, plantId, year) {
       throw new Error(`HTTP error! Status: ${resp.status}`)
     }
     return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
-async function saveSlowdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/tcs-slowdown?plantId=${PLANT_ID}&year=${AOP_YEAR}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
@@ -243,8 +155,8 @@ async function saveSlowdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
 }
 
 // ===================== || TCS Crude Blend Window Data APIs || ===================== //
-async function getCrudBlendWindowData(keycloak, plantId, year, siteId) {
-  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${plantId}/${siteId}/${year}`
+async function getCrudBlendWindowData(keycloak, year, siteId) {
+  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${siteId}/${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -256,37 +168,6 @@ async function getCrudBlendWindowData(keycloak, plantId, year, siteId) {
       throw new Error(`HTTP error! Status: ${resp.status}`)
     }
     return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
-async function saveCrudBlendWindowData(
-  keycloak,
-  plantId,
-  year,
-  siteId,
-  payload,
-) {
-  const url = `${Config.CaseEngineUrl}/task/crude-blend-window/${payload.tableKey}/${year}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload.data)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
@@ -313,31 +194,6 @@ async function getCPPUnitsSdPlanData(keycloak, financialYear, siteId) {
   }
 }
 
-async function saveCPPUnitsSdPlanData(keycloak, payload) {
-  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
 // ===================== || TCS ROGC Data APIs || ===================== //
 async function getTcsRogcData(keycloak, siteId, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/furnace/${year}/${siteId}/${plantId}`
@@ -358,31 +214,6 @@ async function getTcsRogcData(keycloak, siteId, plantId, year) {
   }
 }
 
-async function saveRogcData(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/furnace/${AOP_YEAR}/${SITE_ID}/${PLANT_ID}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
 // ===================== || TCS PCG Outlook Data APIs || ===================== //
 async function getPcgOutlookData(keycloak, siteId, financialYear) {
   const url = `${Config.CaseEngineUrl}/task/pcg-outlook/${siteId}/${financialYear}`
@@ -397,31 +228,6 @@ async function getPcgOutlookData(keycloak, siteId, financialYear) {
       throw new Error(`HTTP error! Status: ${resp.status}`)
     }
     return json(keycloak, resp)
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
-
-async function savePcgOutlookData(keycloak, siteId, financialYear, payload) {
-  const url = `${Config.CaseEngineUrl}/task/pcg-outlook/${siteId}/${financialYear}`
-  const headers = {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  const body = JSON.stringify(payload)
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers,
-      body,
-    })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    const result = await json(keycloak, resp)
-    return result || { success: true }
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)

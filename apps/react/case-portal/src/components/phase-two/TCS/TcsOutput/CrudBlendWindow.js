@@ -26,21 +26,19 @@ const CrudBlendWindow = ({
 
   // Fetch all tables data once
   const fetchAllTablesData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR || !SITE_ID) {
-      console.warn('Missing required params:', { PLANT_ID, AOP_YEAR, SITE_ID })
+    if (!AOP_YEAR || !SITE_ID) {
+      console.warn('Missing required params:', { AOP_YEAR, SITE_ID })
       return
     }
     try {
       setLoading(true)
       console.log('Fetching Crude Blend Window data with:', {
-        PLANT_ID,
         AOP_YEAR,
         SITE_ID,
       })
 
       const response = await TcsOutputApiService.getCrudBlendWindowData(
         keycloak,
-        PLANT_ID,
         AOP_YEAR,
         SITE_ID,
       )
@@ -71,15 +69,15 @@ const CrudBlendWindow = ({
     } finally {
       setLoading(false)
     }
-  }, [keycloak, PLANT_ID, AOP_YEAR, SITE_ID, setSnackbarData, setSnackbarOpen])
+  }, [keycloak, AOP_YEAR, SITE_ID, setSnackbarData, setSnackbarOpen])
 
   // Fetch data on mount and when dependencies change
   useEffect(() => {
-    console.log('useEffect triggered with:', { PLANT_ID, AOP_YEAR, SITE_ID })
-    if (PLANT_ID && AOP_YEAR && SITE_ID) {
+    console.log('useEffect triggered with:', { AOP_YEAR, SITE_ID })
+    if (AOP_YEAR && SITE_ID) {
       fetchAllTablesData()
     }
-  }, [PLANT_ID, AOP_YEAR, SITE_ID, fetchAllTablesData])
+  }, [AOP_YEAR, SITE_ID, fetchAllTablesData])
 
   return (
     <Box>
@@ -95,7 +93,6 @@ const CrudBlendWindow = ({
           key={config.key}
           tableKey={config.key}
           title={config.title}
-          PLANT_ID={PLANT_ID}
           AOP_YEAR={AOP_YEAR}
           SITE_ID={SITE_ID}
           tableData={allTablesData[config.key]}

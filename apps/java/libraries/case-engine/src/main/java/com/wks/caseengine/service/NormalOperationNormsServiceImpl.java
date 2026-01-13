@@ -914,7 +914,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			List<MCUNormsValueDTO> data=null;
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
 				 data= readSteadyState(file.getInputStream(), plantFKId, year);
 			}
 			else {
@@ -926,7 +926,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
 				byte[] fileByteArray =null;
-				if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+				if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
 					 fileByteArray = exportSteadyStateNorms(year, plantFKId, true, failedRecords,mode);
 				}else {
 					 fileByteArray = createExcel(year, plantFKId, true, failedRecords,mode,gradeId);
@@ -1075,31 +1075,31 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	}
 
 	private static String getStringCellValue(Cell cell, MCUNormsValueDTO dto) {
-		try {
-			if (cell == null)
-				return null;
-			cell.setCellType(CellType.STRING);
-			return cell.getStringCellValue().trim();
-		} catch (Exception e) {
-			dto.setSaveStatus("Failed");
-			dto.setErrDescription("Please enter correct values");
-			e.printStackTrace();
-		}
-		return null;
-
+	    try {
+	        if (cell == null) return null;
+	        
+	        cell.setCellType(CellType.STRING);
+	        String value = cell.getStringCellValue().trim();
+	        return value.isEmpty() ? null : value;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
-
 	private static Double getNumericCellValue(Cell cell, MCUNormsValueDTO dto) {
-	    if (cell == null) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
 	        return null;
 	    }
 
 	    if (cell.getCellType() == CellType.NUMERIC) {
 	        return cell.getNumericCellValue();
-	    } else if (cell.getCellType() == CellType.STRING) {
-	        
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
 	        String cellValue = cell.getStringCellValue().trim();
-
 	        if (cellValue.isEmpty()) {
 	            return null; 
 	        }
@@ -1107,16 +1107,21 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	        try {
 	            return Double.parseDouble(cellValue);
 	        } catch (NumberFormatException e) {
-	            
 	            dto.setSaveStatus("Failed");
 	            dto.setErrDescription("Please enter numeric values");
 	        }
-	    } else if (cell.getCellType() == CellType.BLANK) {
-	        return null;
 	    }
+	    
+	    if (cell.getCellType() == CellType.FORMULA) {
+	        try {
+	            return cell.getNumericCellValue();
+	        } catch (Exception e) {
+	            return null;
+	        }
+	    }
+
 	    return null;
 	}
-
 	public static Boolean getBooleanCellValue(Cell cell, MCUNormsValueDTO dto) {
 		if (cell == null)
 			return null;

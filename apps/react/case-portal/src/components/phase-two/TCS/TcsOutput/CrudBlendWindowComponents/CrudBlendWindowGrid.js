@@ -9,7 +9,6 @@ import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPh
 const CrudBlendWindowGrid = ({
   tableKey,
   title,
-  PLANT_ID,
   AOP_YEAR,
   SITE_ID,
   tableData,

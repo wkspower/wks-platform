@@ -1,8 +1,10 @@
 package com.wks.caseengine.service;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Connection;
@@ -21,6 +24,7 @@ import javax.sql.DataSource;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -30,6 +34,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.dto.ShutdownConsumptionDTO;
@@ -315,6 +320,125 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		return null;
 	}
 	
+	@Override
+	public AOPMessageVM importExcel(String year, UUID plantFKId, String gradeId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			Plants plant = plantsRepository.findById(plantFKId).get();
+			List<ShutdownNormsValueDTO> data=null;
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+				 data= readShutdownConsumption(file.getInputStream(), plantFKId, year);
+			}
+			else {
+				data = readShutdownConsumption(file.getInputStream(), plantFKId, year);
+			}
+			
+			Map<String,Object> records = savePPShutdownNormsData(data);
+			@SuppressWarnings("unchecked")
+			List<ShutdownNormsValueDTO> failedRecords = (List<ShutdownNormsValueDTO>) records.get("data");
+			
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (failedRecords != null && failedRecords.size() > 0) {
+				byte[] fileByteArray =null;
+				if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+					 fileByteArray = exportShutdownNorms(year, plantFKId, true, failedRecords);
+				}
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+	
+	public List<ShutdownNormsValueDTO> readShutdownConsumption(InputStream inputStream, UUID plantFKId, String year) {
+	    List<ShutdownNormsValueDTO> configList = new ArrayList<>();
+	    Map<String, String> gradeMap = getGradeNameIdMap(year, plantFKId);
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        
+	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+	            Sheet sheet = workbook.getSheetAt(i);
+	            if (sheet == null) {
+	                continue;
+	            }
+	            String sheetName = sheet.getSheetName();
+	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
+	           
+	            
+	            Iterator<Row> rowIterator = sheet.iterator();
+	            if (rowIterator.hasNext()) {
+	                rowIterator.next(); 
+	            }
+	            while (rowIterator.hasNext()) {
+	                Row row = rowIterator.next();
+	                if (row.getPhysicalNumberOfCells() == 0) {
+	                    continue; 
+	                }
+	                
+	                ShutdownNormsValueDTO dto = new ShutdownNormsValueDTO();
+	                try {
+	                    dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+	                    dto.setProductName(getStringCellValue(row.getCell(1), dto));
+	                    dto.setUOM(getStringCellValue(row.getCell(2), dto));
+
+	                    dto.setFinancialYear(year);
+	                    dto.setPlantFkId(plantFKId.toString());
+	                    dto.setApril(getNumericCellValue(row.getCell(3), dto));
+	                    dto.setMay(getNumericCellValue(row.getCell(4), dto));
+	                    dto.setJune(getNumericCellValue(row.getCell(5), dto));
+	                    dto.setJuly(getNumericCellValue(row.getCell(6), dto));
+	                    dto.setAugust(getNumericCellValue(row.getCell(7), dto));
+	                    dto.setSeptember(getNumericCellValue(row.getCell(8), dto));
+	                    dto.setOctober(getNumericCellValue(row.getCell(9), dto));
+	                    dto.setNovember(getNumericCellValue(row.getCell(10), dto));
+	                    dto.setDecember(getNumericCellValue(row.getCell(11), dto));
+	                    dto.setJanuary(getNumericCellValue(row.getCell(12), dto));
+	                    dto.setFebruary(getNumericCellValue(row.getCell(13), dto));
+	                    dto.setMarch(getNumericCellValue(row.getCell(14), dto));
+	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
+	                    dto.setId(getStringCellValue(row.getCell(16), dto)); 
+	                    dto.setGradeFkId(gradeId);
+
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                    dto.setErrDescription(e.getMessage());
+	                    dto.setSaveStatus("Failed");
+	                }
+	                configList.add(dto);
+	            }
+	        } 
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return configList;
+	}
+	
+	private Map<String, String> getGradeNameIdMap(String year, UUID plantFKId) {
+	    AOPMessageVM gradesVM = getUniqueGrades(year, plantFKId.toString());
+	    List<Map<String, String>> gradeInfoList = extractGradeInfo(gradesVM); // The method you modified earlier
+
+	    Map<String, String> nameIdMap = new HashMap<>();
+	    for (Map<String, String> info : gradeInfoList) {
+	        String sanitizedName = Utility.sanitizeSheetName(info.get("displayName"));
+	        nameIdMap.put(sanitizedName, info.get("gradeId"));
+	    }
+	    return nameIdMap;
+	}
 	
 	public List<Map<String, String>> extractGradeInfo(AOPMessageVM grades) {
 	    List<Map<String, String>> gradeInfoList = new ArrayList<>();
@@ -344,6 +468,56 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	    return gradeInfoList;
 	}
+	
+	private static String getStringCellValue(Cell cell, ShutdownNormsValueDTO dto) {
+	    try {
+	        if (cell == null) return null;
+	        
+	        cell.setCellType(CellType.STRING);
+	        String value = cell.getStringCellValue().trim();
+	        return value.isEmpty() ? null : value;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	private static Double getNumericCellValue(Cell cell, ShutdownNormsValueDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String cellValue = cell.getStringCellValue().trim();
+	        if (cellValue.isEmpty()) {
+	            return null; 
+	        }
+
+	        try {
+	            return Double.parseDouble(cellValue);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    
+	    if (cell.getCellType() == CellType.FORMULA) {
+	        try {
+	            return cell.getNumericCellValue();
+	        } catch (Exception e) {
+	            return null;
+	        }
+	    }
+
+	    return null;
+	}
+
 	
 	@Override
 	public AOPMessageVM saveShutDownNorms(String plantId,List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
@@ -469,11 +643,17 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		String year=null;
 		UUID plantId=null;
 		List<GradeShutdownNormsValue> gradeShutdownNormsValueList=new ArrayList<>();
+		List<ShutdownNormsValueDTO> failedList = new ArrayList<>();
 		UUID gradeId=null;
 		UUID siteId = null;
 		UUID verticalId = null;
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
+				if (shutdownNormsValueDTO.getSaveStatus() != null
+						&& shutdownNormsValueDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(shutdownNormsValueDTO);
+					continue;
+				}
 				year=shutdownNormsValueDTO.getFinancialYear();
 				 gradeId=UUID.fromString(shutdownNormsValueDTO.getGradeFkId());
 				
@@ -564,7 +744,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				aopCalculationRepository.save(aopCalculation);
 			}
 			Map<String,Object> map=new HashMap<>();
-			map.put("data", gradeShutdownNormsValueList);
+			map.put("data", failedList);
 			// TODO Auto-generated method stub
 			return map;
 		} catch (Exception ex) {

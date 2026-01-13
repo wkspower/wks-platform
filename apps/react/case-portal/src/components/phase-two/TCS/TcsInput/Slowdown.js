@@ -3,10 +3,11 @@ import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/ind
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const Slowdown = ({
   PLANT_ID,
+  PLANT_NAME,
   AOP_YEAR,
   currentTab,
   snackbarData,
@@ -15,7 +16,7 @@ const Slowdown = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management
   const [loading, setLoading] = useState(false)
@@ -124,9 +125,15 @@ const Slowdown = ({
     },
     throughputUOM: {
       editable: true,
-      type: 'wholeNumber',
-      minWidth: 50,
-      widthT: 50,
+      type: 'select',
+      minWidth: 80,
+      widthT: 100,
+      options: [
+        { value: 'KBPSD', label: 'KBPSD' },
+        { value: 'KTPD', label: 'KTPD' },
+        { value: 'TPD', label: 'TPD' },
+        { value: 'TPH', label: 'TPH' },
+      ],
     },
     startDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },
     endDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },
@@ -226,11 +233,70 @@ const Slowdown = ({
     fetchSlowdownData,
   ])
 
+  // Delete row data
+  const deleteRowData = useCallback(
+    async (paramsForDelete) => {
+      setLoading(true)
+
+      try {
+        const { id } = paramsForDelete
+        const deleteId = id
+
+        // Check if this is a newly added row (not saved to backend yet)
+        const isNewRow = paramsForDelete.isNew
+
+        if (isNewRow) {
+          // Just remove from local state
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Row removed successfully!',
+            severity: 'success',
+          })
+        } else {
+          // Call API to delete from backend
+          // await TcsApiService.deleteSlowdownData(
+          //   keycloak,
+          //   PLANT_ID,
+          //   AOP_YEAR,
+          //   id,
+          // )
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Record deleted successfully!',
+            severity: 'success',
+          })
+          fetchSlowdownData()
+        }
+      } catch (error) {
+        console.error('Error deleting record:', error)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error deleting record!',
+          severity: 'error',
+        })
+      } finally {
+        setLoading(false)
+      }
+    },
+    [
+      keycloak,
+      PLANT_ID,
+      AOP_YEAR,
+      fetchSlowdownData,
+      setSnackbarData,
+      setSnackbarOpen,
+    ],
+  )
+
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: false,
+    addButton: true,
+    deleteButton: true,
+    showAction: true,
     remarksEditable: true,
     showCalculate: false,
     showExport: false,
@@ -265,6 +331,7 @@ const Slowdown = ({
         currentRowId={currentRowId}
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
+        deleteRowData={deleteRowData}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
@@ -272,7 +339,14 @@ const Slowdown = ({
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
         permissions={permissions}
-        dateCalculationConfig={dateFields1}
+        initialFieldValues={{ particulates: PLANT_NAME }}
+        dateCalculationConfig={{
+          dateField1: 'startDate',
+          dateField2: 'endDate',
+          daysField: 'durationInDays',
+          requiredInHr: false,
+          roundDaysAndDates: true,
+        }}
       />
     </Box>
   )

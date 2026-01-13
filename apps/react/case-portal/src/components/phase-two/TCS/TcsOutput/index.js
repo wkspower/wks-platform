@@ -190,6 +190,7 @@ const TcsOutput = () => {
           PLANT_ID,
           AOP_YEAR,
           SITE_ID,
+          VERTICAL_ID,
           snackbarData,
           setSnackbarData,
           snackbarOpen,

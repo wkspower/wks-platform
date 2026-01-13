@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.time.*;
 import java.time.format.TextStyle;
-import java.util.Date;
 import java.util.Locale;
 import java.util.List;
 import java.util.UUID;
@@ -738,8 +737,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            } else {
 	                list.add(formattedDuration);
 	            }
-	            
-	            list.add(dto.getRate());
+	            if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+	            	 list.add(dto.getRate());
+	            }
+	           
 	            list.add(dto.getRemark());
 	            list.add(dto.getId());
 	            
@@ -757,7 +758,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        innerHeaders.add("SD-From");
 	        innerHeaders.add("SD-To");
 	        innerHeaders.add("Duration (hrs)"); 
-	        innerHeaders.add("Rate (TPH)");
+	        if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+	        	 innerHeaders.add("Rate (TPH)");
+	        }
 	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Id");
 	        
@@ -780,16 +783,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        
 	       
 	        for (List<Object> rowData : rows) {
-	 Row row = sheet.createRow(currentRow++);
-	 for (int col = 0; col < rowData.size(); col++) {
-	 Cell cell = row.createCell(col);
-	 Object value = rowData.get(col);
-
-	 if (value instanceof Date) {
-	 cell.setCellValue((Date) value);
-	 cell.setCellStyle(dateTimeStyle);
-	 } else if (value instanceof Number) {
-	 cell.setCellValue(((Number) value).doubleValue());
+					 Row row = sheet.createRow(currentRow++);
+					 for (int col = 0; col < rowData.size(); col++) {
+					 Cell cell = row.createCell(col);
+					 Object value = rowData.get(col);
+				
+					 if (value instanceof Date) {
+					 cell.setCellValue((Date) value);
+					 cell.setCellStyle(dateTimeStyle);
+					 } else if (value instanceof Number) {
+					 cell.setCellValue(((Number) value).doubleValue());
 	                    
 	                 
 	                    if (col == 3) {
@@ -797,15 +800,19 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    }
 	                    
 						} else if (value instanceof Boolean) {
-	cell.setCellValue((Boolean) value);
-	 } else if (value != null) {
-	 cell.setCellValue(value.toString());
-	} else {
-	 cell.setCellValue("");
-	}}}
+							cell.setCellValue((Boolean) value);
+							 } else if (value != null) {
+							 cell.setCellValue(value.toString());
+							} else {
+							 cell.setCellValue("");
+							}}}
 	        
+	        if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+	        	 sheet.setColumnHidden(6, true);
+	        }else {
+	        	 sheet.setColumnHidden(5, true);
+	        }
 	       
-	        sheet.setColumnHidden(6, true);
 	        
 	        try {
 
@@ -1725,24 +1732,36 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							alreadyFailed = true;
 						}
 					}
+					 if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+						 dto.setRate(getNumericCellValue(row.getCell(4), dto)); 
+					 }
 					
-					dto.setRate(getNumericCellValue(row.getCell(4), dto)); // Field 5 set
 					if (dto.getRate() == null && !alreadyFailed) {
 						dto.setSaveStatus("Failed");
 						dto.setErrDescription("Rate in cell 5 cannot be null.");
 						alreadyFailed = true;
 					}
+					String remark=null;
+					if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+						 remark = getStringCellValue(row.getCell(5), dto);
+					 }else {
+						  remark = getStringCellValue(row.getCell(4), dto);
+					 }
 					
-					String remark = getStringCellValue(row.getCell(5), dto);
-					dto.setRemark(remark); // Field 6 set
+					dto.setRemark(remark); 
 					if((dto.getRemark() == null || dto.getRemark().trim().isEmpty()) && !alreadyFailed) {
 						dto.setSaveStatus("Failed");
 						dto.setErrDescription("Please enter remark in cell 6.");
 						alreadyFailed = true;
 					}
+					String idString =null;
+					if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+						 idString = getStringCellValue(row.getCell(6), dto);
+					 }else {
+						  idString = getStringCellValue(row.getCell(5), dto);
+					 }
 					
-					String idString = getStringCellValue(row.getCell(6), dto);
-					dto.setId(idString); // Field 7 set
+					dto.setId(idString); 
 					
 					if (dto.getId() == null && dto.getDiscription() != null && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
 						// Check DB for existing records with the same description

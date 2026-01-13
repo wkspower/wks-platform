@@ -2,10 +2,9 @@ import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'services/phase-two-services/TCS/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 import { generateHeaderNames } from 'components/Utilities/generateHeaders'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
-import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 
 const ROGC = ({
   PLANT_ID,
@@ -18,7 +17,7 @@ const ROGC = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management
   const [loading, setLoading] = useState(false)
