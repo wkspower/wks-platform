@@ -915,8 +915,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			}else {
 				 data = readNonProductSlowdown(file.getInputStream(), plantId, year);
 			}
-			
-			
 			List<ShutDownPlanDTO> failedList = saveShutdownData(plantId, data);
 			if (failedList != null && failedList.size() > 0) {
 				byte[] fileByteArray = nonProductSlowdownExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
@@ -1735,12 +1733,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					 if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
 						 dto.setRate(getNumericCellValue(row.getCell(4), dto)); 
 					 }
+					 if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+						 if (dto.getRate() == null && !alreadyFailed) {
+								dto.setSaveStatus("Failed");
+								dto.setErrDescription("Rate in cell 5 cannot be null.");
+								alreadyFailed = true;
+						} 
+					 }
 					
-					if (dto.getRate() == null && !alreadyFailed) {
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("Rate in cell 5 cannot be null.");
-						alreadyFailed = true;
-					}
 					String remark=null;
 					if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
 						 remark = getStringCellValue(row.getCell(5), dto);
@@ -2124,7 +2124,10 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                                   plantMaintenanceTransaction.getMaintStartDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
 	            String originalEnd = plantMaintenanceTransaction.getMaintEndDateTime() != null ? 
 	                                 plantMaintenanceTransaction.getMaintEndDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
-	            Double originalRate = plantMaintenanceTransaction.getRate();
+	            Double originalRate=null;
+	            if(plantMaintenanceTransaction.getRate()!=null) {
+	            	 originalRate = plantMaintenanceTransaction.getRate();
+	            }
 	            Double originalDurationInHrs = plantMaintenanceTransaction.getDurationInMins() != null ? 
                         plantMaintenanceTransaction.getDurationInMins() / 60.0 : null;
 	            String originalRemark = plantMaintenanceTransaction.getRemarks();
@@ -2170,7 +2173,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                                  plantMaintenanceTransaction.getMaintStartDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
 	                String newEnd = plantMaintenanceTransaction.getMaintEndDateTime() != null ? 
 	                                plantMaintenanceTransaction.getMaintEndDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
-	                Double newRate = plantMaintenanceTransaction.getRate();
+	                Double newRate=null;
+	                if(plantMaintenanceTransaction.getRate()!=null) {
+	                	 newRate = plantMaintenanceTransaction.getRate();
+	                }
+	                
 	                Double newDurationInHrs = shutDownPlanDTO.getDurationInHrs();
 	                String newRemark = shutDownPlanDTO.getRemark();
 	                Double newRateEo= shutDownPlanDTO.getRateEO()!=null? shutDownPlanDTO.getRateEO():null;
