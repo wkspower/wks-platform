@@ -311,7 +311,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 			return aopMessageVM;
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			
 			throw new RuntimeException("Failed to save data", ex);
 		}
 	}
@@ -349,7 +348,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        for (int col = 0; col < innerHeaders.size(); col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
-	            cell.setCellStyle(normalStyle);
+	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 	        }
 
 	        int dataRowCount = dtoList.size();
@@ -368,7 +367,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
 	            }
-
 	         
 	            for (int col = 0; col < rowData.size(); col++) {
 	                Cell cell = row.createCell(col);
@@ -499,7 +497,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        for (int col = 0; col < innerHeaders.size(); col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
-	            cell.setCellStyle(normalStyle);
+	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 	        }
 
 	        int dataRowCount = dtoList.size();
