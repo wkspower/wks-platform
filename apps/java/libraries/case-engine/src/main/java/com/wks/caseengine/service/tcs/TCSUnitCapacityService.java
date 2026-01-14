@@ -12,15 +12,21 @@ public interface TCSUnitCapacityService {
         String plantId,
         String aopYear,
         String capacityType,
-        String uom);
+    //    String uom,
+        String siteId,
+        String verticalId);
+
     public AOPMessageVM saveOrUpdate(
         String plantId,
         String aopYear,
         String capacityType,
-        String uom,
+     //   String uom,
         List<TCSUnitCapacityDTO> dtoList);
+
     public List<TCSUnitCapacityUOMDTO> getAllUOM(
         String plantId,
         String aopYear,
-        String capacityType);
+        String capacityType,
+        String verticalId
+        );
 }

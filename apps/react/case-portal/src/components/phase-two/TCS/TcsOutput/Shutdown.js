@@ -7,6 +7,8 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const Shutdown = ({
+  SITE_ID,
+  VERTICAL_ID,
   PLANT_ID,
   AOP_YEAR,
   currentTab,
@@ -32,14 +34,15 @@ const Shutdown = ({
 
   // Fetch Shutdown Data
   const fetchShutdownData = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
+    if (!SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
     try {
       setLoading(true)
       let transformedData = []
 
       const response = await TcsOutputApiService.getTcsShutdownData(
         keycloak,
-        PLANT_ID,
+        SITE_ID,
+        VERTICAL_ID,
         AOP_YEAR,
       )
       console.log('TCS Shutdown Response:', response)
@@ -73,7 +76,8 @@ const Shutdown = ({
     }
   }, [
     keycloak,
-    PLANT_ID,
+    SITE_ID,
+    VERTICAL_ID,
     AOP_YEAR,
     currentTab.id,
     setSnackbarData,
@@ -82,10 +86,10 @@ const Shutdown = ({
 
   // Fetch data on mount or when dependencies change
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
+    if (SITE_ID && VERTICAL_ID && AOP_YEAR) {
       fetchShutdownData()
     }
-  }, [PLANT_ID, AOP_YEAR, fetchShutdownData])
+  }, [SITE_ID, VERTICAL_ID, AOP_YEAR, fetchShutdownData])
 
   // Column configuration for Shutdown - dynamically generated from API response
   const columnConfig = {

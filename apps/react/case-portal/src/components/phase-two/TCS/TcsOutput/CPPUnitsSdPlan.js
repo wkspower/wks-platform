@@ -77,6 +77,13 @@ const CPPUnitsSdPlan = ({
         id: item.id || `row_${index}`,
         ...item,
         majorJobs: item.majorJobs || '',
+        // Convert gtMaintenance from comma-separated string to array for display
+        gtMaintenance: item.gtMaintenance
+          ? item.gtMaintenance
+              .split(',')
+              .map((v) => v.trim())
+              .filter(Boolean)
+          : [],
         inEdit: false,
         isEditable: false,
       }))
@@ -114,7 +121,12 @@ const CPPUnitsSdPlan = ({
       minWidth: 100,
       widthT: 120,
     },
-    gtMaintenance: { editable: true, minWidth: 100, widthT: 150 },
+    gtMaintenance: {
+      type: 'multi-select',
+      editable: true,
+      minWidth: 100,
+      widthT: 150,
+    },
     noOfDays: {
       editable: true,
       type: 'wholeNumber',

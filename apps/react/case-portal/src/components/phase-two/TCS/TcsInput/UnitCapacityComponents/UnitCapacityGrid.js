@@ -4,7 +4,8 @@ import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUt
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import { convertFromKBPSD, convertToKBPSD } from './uomConversionUtils'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -17,10 +18,14 @@ const UnitCapacityGrid = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   const defaultDropdownConfig = {
-    options: [],
+    options: [
+      { id: 'KBPSD', name: 'KBPSD' },
+      { id: 'KTPD', name: 'KTPD' },
+      { id: 'TPD', name: 'TPD' },
+    ],
     label: 'Select UOM',
     placeholder: 'Select',
     valueKey: 'id',
@@ -31,7 +36,7 @@ const UnitCapacityGrid = ({
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
-  const [selectedDropdown, setSelectedDropdown] = useState(null)
+  const [selectedDropdown, setSelectedDropdown] = useState('KBPSD')
   const [dropdownConfig, setDropdownConfig] = useState({
     ...defaultDropdownConfig,
   })
@@ -42,46 +47,52 @@ const UnitCapacityGrid = ({
   const [loadingUOM, setLoadingUOM] = useState(false)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
-  // Fetch UOM options for this capacity type
-  const fetchUOMOptions = useCallback(async () => {
-    if (!PLANT_ID || !AOP_YEAR) return
-    try {
-      setLoadingUOM(true)
-      const response = await TcsApiService.getTcsUnitCapacityUOM(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-        capacityType,
-      )
+  // Custom itemChange handler to auto-convert between KBPSD and KTPD
+  const handleCustomItemChange = useCallback((event, setRowsFunc) => {
+    const { dataItem, field, value } = event
 
-      const uomOptions = response || response?.data || []
-      if (uomOptions.length === 0) return
-
-      setDropdownConfig((prev) => ({
-        ...prev,
-        options: uomOptions,
-      }))
-
-      const defaultUOM = uomOptions[0].id
-      setSelectedDropdown(defaultUOM)
-    } catch (err) {
-      console.error(`Error fetching UOM options (${capacityType}):`, err)
-      setSnackbarData({
-        message: `Failed to load UOM options. Please try again.`,
-        severity: 'error',
-      })
-      setSnackbarOpen(true)
-    } finally {
-      setLoadingUOM(false)
+    // Only handle conversion for summer/winter nested fields
+    if (!field.startsWith('summer.') && !field.startsWith('winter.')) {
+      return
     }
-  }, [
-    keycloak,
-    PLANT_ID,
-    AOP_YEAR,
-    capacityType,
-    setSnackbarData,
-    setSnackbarOpen,
-  ])
+
+    setRowsFunc((prevRows) => {
+      return prevRows.map((row) => {
+        if (row.id !== dataItem.id) return row
+
+        const updatedRow = { ...row }
+
+        // Handle conversions based on which field was edited
+        if (field === 'summer.kbpsd') {
+          updatedRow.summer = {
+            ...updatedRow.summer,
+            kbpsd: value,
+            ktpd: convertFromKBPSD(value, 'KTPD'),
+          }
+        } else if (field === 'summer.ktpd') {
+          updatedRow.summer = {
+            ...updatedRow.summer,
+            kbpsd: convertToKBPSD(value, 'KTPD'),
+            ktpd: value,
+          }
+        } else if (field === 'winter.kbpsd') {
+          updatedRow.winter = {
+            ...updatedRow.winter,
+            kbpsd: value,
+            ktpd: convertFromKBPSD(value, 'KTPD'),
+          }
+        } else if (field === 'winter.ktpd') {
+          updatedRow.winter = {
+            ...updatedRow.winter,
+            kbpsd: convertToKBPSD(value, 'KTPD'),
+            ktpd: value,
+          }
+        }
+
+        return updatedRow
+      })
+    })
+  }, [])
 
   // Fetch Unit Capacity data for this capacity type
   const fetchUnitCapacityData = useCallback(
@@ -97,14 +108,64 @@ const UnitCapacityGrid = ({
           capacityType,
           selectedUOM,
         )
+        // const response = {
+        //   headers: [
+        //     'Id',
+        //     'Particulars',
+        //     'UOM',
+        //     'Summer',
+        //     'Winter',
+        //     'Remark',
+        //     'InsertedDateTime',
+        //   ],
+        //   keys: [
+        //     'id',
+        //     'particulates',
+        //     'uom',
+        //     'summer',
+        //     'winter',
+        //     'remark',
+        //     'insertedDateTime',
+        //   ],
+        //   results: [
+        //     {
+        //       id: '9F1897F2-BEB5-4352-A25D-B473C0219FD4',
+        //       particulates: 'CDU-1',
+        //       uom: 'KBPSD',
+        //       summer: 345.0,
+        //       winter: 345.0,
+        //       remark:
+        //         'Unit capacity considered for min API of 27. L+N: CDU-1: 7.4 KTPD max           CDU-2: 6.4 KTPD (Summer: March-Oct) & 7.4 KTPD max in winters (Nov-Feb). RCO: Max 24.2 KTPD VR: Max 14.5 KTPD, however HOT VR to Coker will be 13.6 KTPD max based on hydraulic limitation',
+        //       insertedDateTime: 'Dec 22, 2025, 12:00:00 AM',
+        //     },
+        //   ],
+        // }
 
         let transformedData = []
         if (response?.results && Array.isArray(response.results)) {
-          transformedData = response.results.map((item, index) => ({
-            id: item.id || `row_${index}`,
-            ...item,
-            inEdit: false,
-          }))
+          transformedData = response.results.map((item, index) => {
+            // Backend data is in KBPSD, create nested structure with both KBPSD and KTPD
+            const summerKBPSD = item.summer
+            const winterKBPSD = item.winter
+            const summerKTPD = convertFromKBPSD(summerKBPSD, 'KTPD')
+            const winterKTPD = convertFromKBPSD(winterKBPSD, 'KTPD')
+
+            return {
+              id: item.id || `row_${index}`,
+              particulates: item.particulates,
+              summer: {
+                kbpsd: summerKBPSD,
+                ktpd: summerKTPD,
+              },
+              winter: {
+                kbpsd: winterKBPSD,
+                ktpd: winterKTPD,
+              },
+              remark: item.remark,
+              insertedDateTime: item.insertedDateTime,
+              inEdit: false,
+            }
+          })
         }
 
         if (response?.headers && response?.keys) {
@@ -138,21 +199,16 @@ const UnitCapacityGrid = ({
     ],
   )
 
-  // Fetch UOM options on component mount
-  useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
-      fetchUOMOptions()
-    }
-  }, [PLANT_ID, AOP_YEAR, fetchUOMOptions])
-
   // Fetch capacity data when dropdown selection changes
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR && selectedDropdown) {
+      // Clear modified cells when UOM changes to reset edit state
+      setModifiedCells({})
       fetchUnitCapacityData(selectedDropdown)
     }
   }, [PLANT_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
 
-  // Column configuration for Unit Capacity
+  // Column configuration for Unit Capacity with nested KBPSD and KTPD
   const columnConfig = {
     id: {
       editable: false,
@@ -161,9 +217,40 @@ const UnitCapacityGrid = ({
       widthT: 100,
       hidden: true,
     },
-    particulates: { editable: false, type: 'text', minWidth: 50, widthT: 150 },
-    value: { editable: true, type: 'number1', minWidth: 50, widthT: 200 },
-    remark: { editable: true, type: 'text', minWidth: 100, widthT: 250 },
+    particulates: { editable: false, type: 'text', minWidth: 150, widthT: 150 },
+    'summer.kbpsd': {
+      editable: true,
+      type: 'number1',
+      minWidth: 100,
+      widthT: 100,
+      format: valueFormat,
+      title: 'KBPSD',
+    },
+    'summer.ktpd': {
+      editable: true,
+      type: 'number1',
+      minWidth: 100,
+      widthT: 100,
+      format: valueFormat,
+      title: 'KTPD',
+    },
+    'winter.kbpsd': {
+      editable: true,
+      type: 'number1',
+      minWidth: 100,
+      widthT: 100,
+      format: valueFormat,
+      title: 'KBPSD',
+    },
+    'winter.ktpd': {
+      editable: true,
+      type: 'number1',
+      minWidth: 100,
+      widthT: 100,
+      format: valueFormat,
+      title: 'KTPD',
+    },
+    remark: { editable: true, type: 'text', minWidth: 200, widthT: 250 },
   }
 
   const columns = useMemo(() => {
@@ -182,31 +269,52 @@ const UnitCapacityGrid = ({
     // Build columns using columnConfig for type/formatting
     const cols = Object.entries(columnConfig).map(([key, config]) => ({
       field: key,
-      title: columnMap[key] || key,
+      title: config.title || columnMap[key] || key,
       ...config,
     }))
 
-    // Group 'value' column under 'Capacity' parent at position 2
-    const capacityCol = cols.find((col) => col.field === 'value')
-    const otherCols = cols.filter((col) => col.field !== 'value')
+    // Group nested summer and winter columns
+    const summerKBPSDCol = cols.find((col) => col.field === 'summer.kbpsd')
+    const summerKTPDCol = cols.find((col) => col.field === 'summer.ktpd')
+    const winterKBPSDCol = cols.find((col) => col.field === 'winter.kbpsd')
+    const winterKTPDCol = cols.find((col) => col.field === 'winter.ktpd')
+    const otherCols = cols.filter(
+      (col) =>
+        !col.field.startsWith('summer.') && !col.field.startsWith('winter.'),
+    )
 
-    if (capacityCol) {
+    if (summerKBPSDCol && summerKTPDCol && winterKBPSDCol && winterKTPDCol) {
       const result = []
       // Position 0: id
-      result.push(otherCols[0]) // id
+      result.push(otherCols.find((col) => col.field === 'id'))
       // Position 1: particulates
-      result.push(otherCols[1]) // particulates
-      // Position 2: Capacity (with value)
+      result.push(otherCols.find((col) => col.field === 'particulates'))
+      // Position 2: Capacity with Summer (KBPSD, KTPD) and Winter (KBPSD, KTPD)
       result.push({
         title: 'Capacity',
-        children: [capacityCol],
+        children: [
+          {
+            title: columnMap['summer'] || 'Summer',
+            children: [summerKBPSDCol, summerKTPDCol],
+          },
+          {
+            title: columnMap['winter'] || 'Winter',
+            children: [winterKBPSDCol, winterKTPDCol],
+          },
+        ],
       })
-      // Position 3: remark and others
-      result.push(...otherCols.slice(2))
+      // Position 3: remark and other remaining columns
+      const remainingCols = otherCols.filter(
+        (col) =>
+          col.field !== 'id' &&
+          col.field !== 'particulates' &&
+          col.field !== 'insertedDateTime',
+      )
+      result.push(...remainingCols)
       return result
     }
 
-    return otherCols
+    return cols
   }, [apiMetadata])
 
   // Handle remark cell click
@@ -244,7 +352,12 @@ const UnitCapacityGrid = ({
       }
 
       // Custom validation: If any row data is updated, remarks must be filled and different from original
-      const fieldsToCheck = ['value']
+      const fieldsToCheck = [
+        'summer.kbpsd',
+        'summer.ktpd',
+        'winter.kbpsd',
+        'winter.ktpd',
+      ]
       const validationError = validateRowDataWithRemarks(
         data,
         originalRows,
@@ -262,13 +375,26 @@ const UnitCapacityGrid = ({
         return
       }
 
+      // Extract KBPSD values for backend (backend expects flat summer/winter fields)
+      // Set id to null for new items
+      const dataInKBPSD = data.map((row) => {
+        return {
+          id: row.isNew ? null : row.id,
+          particulates: row.particulates,
+          summer: row.summer?.kbpsd,
+          winter: row.winter?.kbpsd,
+          remark: row.remark,
+          insertedDateTime: row.insertedDateTime,
+        }
+      })
+
       const response = await TcsApiService.saveUnitCapacityData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
         capacityType,
         selectedDropdown,
-        data,
+        dataInKBPSD,
       )
 
       setSnackbarOpen(true)
@@ -310,7 +436,7 @@ const UnitCapacityGrid = ({
     saveBtn: true,
     showWorkFlowBtns: false,
     showTitle: true,
-    showDropdown: true,
+    showDropdown: false,
   }
 
   return (
@@ -344,6 +470,7 @@ const UnitCapacityGrid = ({
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
           permissions={permissions}
+          customItemChange={handleCustomItemChange}
           dropdownConfig={dropdownConfig}
           selectedDropdownValue={selectedDropdown}
           setSelectedDropdownValue={setSelectedDropdown}

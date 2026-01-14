@@ -47,17 +47,35 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
     private TCSShutdownRepository tcsShutdownRepository;
     
     @Override
-    public Map<String, Object> getAll(String plantId, String aopYear) {
+    public Map<String, Object> getAll(String plantId, String aopYear, String siteId, String verticalId) {
         // Validation
-        Plants plant = plantsRepository
-            .findById(UUID.fromString(plantId))
+
+       
+        Sites site = null;
+        Verticals vertical = null;
+
+if(plantId != null) {
+          Plants plant = plantsRepository
+                .findById(UUID.fromString(plantId))
             .orElseThrow(() -> new RuntimeException("Plant not found for ID: " + plantId));
-        Sites site = siteRepository
+           site = siteRepository
             .findById(plant.getSiteFkId())
             .orElseThrow(() -> new RuntimeException("Site not found for ID: " + plantId));
-        Verticals vertical = verticalRepository
+           vertical = verticalRepository
             .findById(plant.getVerticalFKId())
-            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));
+            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + plant.getVerticalFKId()));   
+        
+        }
+
+        else {
+
+            site = siteRepository
+            .findById(UUID.fromString(siteId))
+            .orElseThrow(() -> new RuntimeException("Site not found for ID: " + siteId));
+           vertical = verticalRepository
+            .findById(UUID.fromString(verticalId))
+            .orElseThrow(() -> new RuntimeException("Vertical not found for ID: " + verticalId));
+        }
         
         Map<String, Object> map = new HashMap<>();
         try {
@@ -67,6 +85,7 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
+                site.getId(),
                 site.getName().toUpperCase());
             List<TCSShutdownDTO> resultsList = new ArrayList<>();
             //values mapping
@@ -88,6 +107,7 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
                 plantId,
                 aopYear,
                 vertical.getName().toUpperCase(),
+                site.getId(),
                 site.getName().toUpperCase());
             map.put("headers", headers);
 
@@ -109,22 +129,43 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
         String plantId,
         String aopYear,
         String verticalName,
+        UUID siteId,
         String siteName) {
             
         try {            
             // Stored Procedure name
             String procedureName = "GetTcsShutdown";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
-                procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";
+                if(plantId != null) {
+                procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";  }
+
+                else {
+                 //   procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
+                    procedureName = "GetTcsShutdown_OutPut";
+                }
             }
 
             // Prepare native SQL call with parameters
-            String sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";
+            String sql = "";
+            if(plantId != null) {
+            sql = "EXEC " + procedureName + " @plantId = :plantId, @aopYear = :aopYear";  
+        
+        } 
+        else {
+            sql = "EXEC " + procedureName + " @siteId = :siteId, @aopYear = :aopYear";
+        }
 
             // Call the stored procedure
             Query query = entityManager.createNativeQuery(sql);
+            if(plantId != null) {
             query.setParameter("plantId", plantId);
-            query.setParameter("aopYear", aopYear);
+            
+            query.setParameter("aopYear", aopYear);  }
+
+            else {
+                query.setParameter("siteId", siteId);
+                query.setParameter("aopYear", aopYear);
+            }
 
             return query.getResultList();
         } catch (IllegalArgumentException e) {
@@ -138,21 +179,40 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
         String plantId,
         String aopYear,
         String verticalName,
+        UUID siteId,
         String siteName) {
 
         String procedureName = "GetTcsShutdown";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
+            if(plantId != null) {
             procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";
+            }
+            else {
+              //  procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
+                procedureName = "GetTcsShutdown_OutPut";
+            }
         }
-        String callableSql = "{call " + procedureName + "(?, ?)}";
+        String callableSql = "";
+        if(plantId != null) {
+        callableSql = "{call " + procedureName + "(?, ?)}";
+        }
+        else {
+            callableSql = "{call " + procedureName + "(?, ?)}";
+        }
 
         List<String> headers = new ArrayList<>();
 		try (
             Connection conn = dataSource.getConnection();
 			CallableStatement stmt = conn.prepareCall(callableSql)) {
 
+                if(plantId != null) {
 			stmt.setString(1, plantId);
-			stmt.setString(2, aopYear);
+			stmt.setString(2, aopYear);  }
+
+            else {
+                stmt.setString(1, siteId.toString());
+                stmt.setString(2, aopYear);
+            }
 
 			boolean hasResultSet = stmt.execute();
 
@@ -258,5 +318,21 @@ public class TCSShutdownServiceImpl implements TCSShutdownService {
             .startDate(entity.getStartDate())
             .purpose(entity.getPurpose())
             .build();
+    }
+
+    @Override
+    public AOPMessageVM delete(UUID id) {
+        
+        AOPMessageVM  aopMessageVM = new AOPMessageVM();
+     
+      try {
+    
+          tcsShutdownRepository.deleteById(id);
+          aopMessageVM.setCode(200);
+          aopMessageVM.setMessage("Data deleted successfully");
+          return aopMessageVM;
+      } catch (Exception ex) {
+        throw new RuntimeException("Failed to delete data", ex);
+      }
     }
 }

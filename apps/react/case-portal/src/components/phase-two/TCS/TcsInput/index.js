@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import UnitCapacity from './UnitCapacity'
-import DefaultTcsInput from './DefaultTcsInput'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
 import CPPUnitsSdPlan from './CPPUnitsSdPlan'
@@ -50,6 +49,7 @@ const TcsInput = () => {
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
+  const PLANT_NAME = plantObject?.name
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
@@ -188,6 +188,7 @@ const TcsInput = () => {
         {renderTabComponent(currentTab.displayName, {
           currentTab,
           PLANT_ID,
+          PLANT_NAME,
           AOP_YEAR,
           SITE_ID,
           snackbarData,

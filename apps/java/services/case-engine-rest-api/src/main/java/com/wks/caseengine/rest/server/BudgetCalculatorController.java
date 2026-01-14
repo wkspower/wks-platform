@@ -2,6 +2,8 @@ package com.wks.caseengine.rest.server;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("task/budget")
 @Tag(name = "Budget Calculator", description = "Power Plant Budget Calculation APIs")
 public class BudgetCalculatorController {
+
+    private static final Logger logger = LoggerFactory.getLogger(BudgetCalculatorController.class);
 
     @Autowired
     private BudgetCalculatorService budgetCalculatorService;
@@ -125,23 +129,43 @@ public class BudgetCalculatorController {
     /**
      * Run budget calculation for a full financial year (April to March).
      * 
-     * Request Body Example:
+     * Configuration values are fetched from BudgetCalculatorConfig table by default.
+     * You can optionally override them in the request body.
+     * 
+     * Request Body Examples:
+     * 
+     * Minimal (uses all DB config):
+     * {
+     *     "financial_year": 2025
+     * }
+     * 
+     * With overrides:
      * {
      *     "financial_year": 2025,
-     *     "cpp_plant_id": "...",
-     *     "save_to_db": true,
-     *     "save_logs": true
+     *     "save_to_db": false,
+     *     "save_logs": true,
+     *     "python_exe_path": "C:\\Python310\\python.exe",
+     *     "python_script_folder": "D:\\Custom\\Path"
      * }
      */
     @PostMapping("/run-full-year")
     @Operation(summary = "Run Full Year Budget Calculation", 
-               description = "Calculate budget for all 12 months of a financial year")
+               description = "Calculate budget for all 12 months. Config from DB, can be overridden in request.")
     public ResponseEntity<Map<String, Object>> runFullYear(@RequestBody Map<String, Object> request) {
+        logger.info("Received runFullYear request: financialYear={}, saveToDb={}, saveLogs={}, pythonExePath={}, pythonScriptFolder={}", 
+            request.get("financial_year"),
+            request.get("save_to_db"),
+            request.get("save_logs"),
+            request.get("python_exe_path"),
+            request.get("python_script_folder"));
+        
         Map<String, Object> result = budgetCalculatorService.runFullYear(request);
         
         if (Boolean.TRUE.equals(result.get("success"))) {
+            logger.info("Full year budget calculation completed successfully");
             return ResponseEntity.ok(result);
         } else {
+            logger.error("Full year budget calculation failed: {}", result.get("error"));
             return ResponseEntity.status(500).body(result);
         }
     }

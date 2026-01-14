@@ -4,7 +4,7 @@ import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUt
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const CrudBlendWindowGrid = ({
   tableKey,
@@ -20,7 +20,7 @@ const CrudBlendWindowGrid = ({
   onRefresh,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
 
   // State management for this grid
   const [rows, setRows] = useState([])
@@ -30,6 +30,7 @@ const CrudBlendWindowGrid = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
+  const [selectedGroupType, setSelectedGroupType] = useState('')
 
   // Process table data when it's provided
   useEffect(() => {
@@ -45,11 +46,19 @@ const CrudBlendWindowGrid = ({
       setApiMetadata({ headers, keys })
       setRows(transformedData)
       setOriginalRows(transformedData)
+
+      // Set default group type for CrudeBlendWindow
+      if (tableKey === 'CrudeBlendWindow' && results && results.length > 0) {
+        const firstType = results[0]?.type
+        if (firstType && !selectedGroupType) {
+          setSelectedGroupType(firstType)
+        }
+      }
     } else {
       setRows([])
       setApiMetadata({ headers: [], keys: [] })
     }
-  }, [tableData])
+  }, [tableData, tableKey])
 
   // Refresh function for this grid
   const fetchGridData = useCallback(() => {
@@ -57,6 +66,13 @@ const CrudBlendWindowGrid = ({
       onRefresh()
     }
   }, [onRefresh])
+
+  // Get unique group types for CrudeBlendWindow
+  const groupTypes = useMemo(() => {
+    if (tableKey !== 'CrudeBlendWindow') return []
+    const types = [...new Set(rows.map((row) => row.type).filter(Boolean))]
+    return types
+  }, [rows, tableKey])
 
   // Build columns dynamically from API metadata
   const columns = useMemo(() => {
@@ -72,12 +88,14 @@ const CrudBlendWindowGrid = ({
       columnMap[keys[index]] = header
     })
     // Build columns with editable configuration
-    return keys.map((key) => {
+    const cols = keys.map((key) => {
       const isRemarkField = key === 'remarks' || key === 'reasons'
       const col = {
         field: key,
         title: columnMap[key] || key,
         editable: [
+          'property',
+          'type',
           'minValue',
           'maxValue',
           'criticality',
@@ -99,8 +117,14 @@ const CrudBlendWindowGrid = ({
           : 'text',
         minWidth: isRemarkField ? 350 : 150,
         widthT: isRemarkField ? 450 : 250,
-        hidden: ['id', 'type'].includes(key),
-        locked: ['property', 'stream', 'unit', 'crude'].includes(key),
+        hidden: ['id'].includes(key),
+        locked: ['stream', 'unit', 'crude'].includes(key),
+      }
+
+      // Configure 'type' as dropdown field
+      if (key === 'type') {
+        col.type = 'select'
+        col.options = groupTypes.map((type) => ({ value: type, label: type }))
       }
 
       // Add min/max validation for maxBlendLimit
@@ -111,7 +135,16 @@ const CrudBlendWindowGrid = ({
 
       return col
     })
-  }, [apiMetadata])
+
+    // Reorder columns: id, type, then rest
+    const idCol = cols.find((col) => col.field === 'id')
+    const typeCol = cols.find((col) => col.field === 'type')
+    const otherCols = cols.filter(
+      (col) => col.field !== 'id' && col.field !== 'type',
+    )
+
+    return [idCol, typeCol, ...otherCols].filter(Boolean)
+  }, [apiMetadata, groupTypes])
 
   console.log('columns', columns)
 
@@ -198,9 +231,17 @@ const CrudBlendWindowGrid = ({
         return
       }
 
+      // Set id to null for new items
+      const formattedData = data.map((item) => {
+        if (item.isNew) {
+          return { ...item, id: null }
+        }
+        return item
+      })
+
       const payload = {
         tableKey: tableKey,
-        data: { results: data },
+        data: { results: formattedData },
       }
 
       const response = await TcsApiService.saveCrudBlendWindowData(
@@ -238,16 +279,87 @@ const CrudBlendWindowGrid = ({
     AOP_YEAR,
     SITE_ID,
     title,
+    tableKey,
     setSnackbarData,
     setSnackbarOpen,
     onRefresh,
   ])
 
+  // Delete row data
+  const deleteRowData = useCallback(
+    async (paramsForDelete) => {
+      try {
+        const { id } = paramsForDelete
+        const deleteId = id
+
+        // Check if this is a newly added row (not saved to backend yet)
+        const isNewRow = paramsForDelete.isNew
+
+        if (isNewRow) {
+          // Just remove from local state
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Row removed successfully!',
+            severity: 'success',
+          })
+        } else {
+          // Call API to delete from backend
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Record deleted successfully!',
+            severity: 'success',
+          })
+          if (onRefresh) {
+            onRefresh()
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting record:', error)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error deleting record!',
+          severity: 'error',
+        })
+      }
+    },
+    [onRefresh, setSnackbarData, setSnackbarOpen],
+  )
+
+  // Dropdown config for group type selection (only for CrudeBlendWindow)
+  const groupTypeDropdownConfig = useMemo(() => {
+    if (tableKey !== 'CrudeBlendWindow' || groupTypes.length === 0) return null
+
+    return {
+      options: groupTypes.map((type) => ({ id: type, name: type })),
+      label: 'Select Type',
+      placeholder: 'Select group type',
+      valueKey: 'id',
+      labelKey: 'name',
+    }
+  }, [groupTypes, tableKey])
+
+  // Initial field values for new rows
+  const initialFieldValues = useMemo(() => {
+    if (tableKey === 'CrudeBlendWindow') {
+      return {
+        type: selectedGroupType || (groupTypes.length > 0 ? groupTypes[0] : ''),
+        property: '',
+        stream: '',
+        unit: '',
+      }
+    }
+    return {}
+  }, [tableKey, selectedGroupType, groupTypes])
+
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
     allAction: true,
-    addButton: false,
+    addButton: true,
+    deleteButton: true,
+    showAction: true,
     remarksEditable: true,
     showCalculate: false,
     showExport: false,
@@ -276,6 +388,7 @@ const CrudBlendWindowGrid = ({
           currentRowId={currentRowId}
           setCurrentRowId={() => {}}
           saveChanges={saveChanges}
+          deleteRowData={deleteRowData}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
@@ -283,6 +396,12 @@ const CrudBlendWindowGrid = ({
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
           permissions={permissions}
+          initialFieldValues={initialFieldValues}
+          {...(groupTypeDropdownConfig && {
+            dropdownConfig: groupTypeDropdownConfig,
+            selectedDropdownValue: selectedGroupType,
+            setSelectedDropdownValue: setSelectedGroupType,
+          })}
           paginationConfig={{
             threshold: 100,
             defaultPageSize: 50,

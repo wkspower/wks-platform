@@ -29,6 +29,23 @@ public interface CrudeBlendWindowRepository extends JpaRepository<DummyEntity, L
 )
      List<CrudeBlendProjection> findCrudeBlendByPlantIdAndSiteId(@Param("plantId") UUID plantId, @Param("siteId") UUID siteId, @Param("financialYear") String financialYear);
 
+
+     // tcs output 
+
+     @Query(
+      value = """
+          SELECT Id, Property, Stream, Unit,
+                 MinValue, MaxValue, Criticality,
+                 Remarks, Type
+          FROM CrudeBlendWindow
+          WHERE 
+             Site_FK_Id = :siteId
+            AND FinancialYear = :financialYear
+          """,
+      nativeQuery = true
+  )
+       List<CrudeBlendProjection> findCrudeBlendBySiteId(@Param("siteId") UUID siteId, @Param("financialYear") String financialYear);
+
      // fetch crude specific constraints data
      @Query(
         value = """
@@ -42,6 +59,23 @@ public interface CrudeBlendWindowRepository extends JpaRepository<DummyEntity, L
     )
      List<CrudeSpecificConstraintsProjection> findCrudeSpecificConstraintsByPlant_FK_IdAndSite_FK_Id(@Param("plantId") UUID plantId, @Param("siteId") UUID siteId, @Param("financialYear") String financialYear);
 
+
+     // tcs output  for crude specific constraints
+
+     @Query(
+      value = """
+          SELECT Id, Crude, MaxBlendLimit, Reasons
+          FROM CrudeSpecificConstraints
+          WHERE 
+            Site_FK_Id = :siteId
+            AND FinancialYear = :financialYear
+          """,
+      nativeQuery = true
+  )
+   List<CrudeSpecificConstraintsProjection> findCrudeSpecificConstraintsBySite_FK_Id(@Param("siteId") UUID siteId, @Param("financialYear") String financialYear);
+
+
+
       @Query(
          value = """
               SELECT Id, kbpsd, value_345, Remarks
@@ -53,5 +87,19 @@ public interface CrudeBlendWindowRepository extends JpaRepository<DummyEntity, L
          nativeQuery = true )
 
      List<VGOVRDropProjection> findVGOVRDropByPlant_FK_IdAndSite_FK_Id(@Param("plantId") UUID plantId, @Param("siteId") UUID siteId, @Param("financialYear") String financialYear);
+
+     // tcs output  for vgovr drop
+     @Query(
+      value = """
+          SELECT Id, kbpsd, value_345, Remarks
+          FROM VGOVRDrop
+          WHERE 
+            Site_FK_Id = :siteId
+            AND FinancialYear = :financialYear
+          """,
+      nativeQuery = true
+  )
+   List<VGOVRDropProjection> findVGOVRDropBySite_FK_Id(@Param("siteId") UUID siteId, @Param("financialYear") String financialYear);
+
 
 }

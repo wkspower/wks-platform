@@ -18,10 +18,12 @@ export const TcsApiService = {
   // TCS Shutdown Data APIs
   getTcsShutdownData,
   saveShutdownData,
+  deleteShutdownData,
 
   // TCS Slowdown Data APIs
   getTcsSlowdownData,
   saveSlowdownData,
+  deleteSlowdownData,
 
   // TCS ROGC Data APIs
   getTcsRogcData,
@@ -30,6 +32,7 @@ export const TcsApiService = {
   // TCS CPP Units SD Plan Data APIs
   getCPPUnitsSdPlanData,
   saveCPPUnitsSdPlanData,
+  deleteCPPUnitsSdPlanData,
 
   // TCS PCG Outlook Data APIs
   getPcgOutlookData,
@@ -197,6 +200,29 @@ async function saveShutdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
     return await Promise.reject(e)
   }
 }
+
+async function deleteShutdownData(keycloak, id) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-shutdown?id=${id}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 // ===================== || TCS Slowdown Data APIs || ===================== //
 async function getTcsSlowdownData(keycloak, plantId, year) {
   const url = `${Config.CaseEngineUrl}/task/tcs-slowdown?plantId=${plantId}&year=${year}`
@@ -230,6 +256,29 @@ async function saveSlowdownData(keycloak, PLANT_ID, AOP_YEAR, payload) {
       method: 'POST',
       headers,
       body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function deleteSlowdownData(keycloak, id) {
+  const url = `${Config.CaseEngineUrl}/task/tcs-slowdown?id=${id}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
     })
     if (!resp.ok) {
       throw new Error(`HTTP error! Status: ${resp.status}`)
@@ -313,8 +362,13 @@ async function getCPPUnitsSdPlanData(keycloak, financialYear, siteId) {
   }
 }
 
-async function saveCPPUnitsSdPlanData(keycloak, payload) {
-  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan`
+async function saveCPPUnitsSdPlanData(
+  keycloak,
+  financialYear,
+  siteId,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan/${financialYear}/${siteId}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -326,6 +380,29 @@ async function saveCPPUnitsSdPlanData(keycloak, payload) {
       method: 'POST',
       headers,
       body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function deleteCPPUnitsSdPlanData(keycloak, id) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-unit-sd-plan/${id}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
     })
     if (!resp.ok) {
       throw new Error(`HTTP error! Status: ${resp.status}`)
