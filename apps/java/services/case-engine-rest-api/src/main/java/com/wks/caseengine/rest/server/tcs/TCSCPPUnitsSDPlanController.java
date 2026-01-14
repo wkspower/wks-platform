@@ -32,9 +32,9 @@ public class TCSCPPUnitsSDPlanController {
         return ResponseEntity.ok(tcsCppUnitsSDPlanDTOs);
     }
 
-    @PostMapping("/cpp-unit-sd-plan/{siteId}")
-    public ResponseEntity<Void> saveTCSCPPUnitsSDPlan(@RequestBody List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs, @PathVariable String siteId) {
-        tcsCppUnitsSDPlanService.saveTCSCPPUnitsSDPlan(tcsCppUnitsSDPlanDTOs, UUID.fromString(siteId));
+    @PostMapping("/cpp-unit-sd-plan/{financialYear}/{siteId}")
+    public ResponseEntity<Void> saveTCSCPPUnitsSDPlan(@RequestBody List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs, @PathVariable String financialYear, @PathVariable String siteId) {
+        tcsCppUnitsSDPlanService.saveTCSCPPUnitsSDPlan(tcsCppUnitsSDPlanDTOs, UUID.fromString(siteId), financialYear);
         return ResponseEntity.ok().build();
     }
 
