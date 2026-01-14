@@ -63,16 +63,16 @@ import FeedStockAvailability from 'components/kendo-data-tables/FeedStockavailab
 import TurnaroundPlanTable from 'components/kendo-data-tables/TurnaroundPlanTable'
 import NormComparisonReport from 'components/kendo-data-tables/NormComparisonReport'
 //CPP
-import Inputs from 'components/phase-two/CPP/Inputs/index'
-import PlantRequirement from 'components/phase-two/CPP/PlantRequirement'
-import FixedConsumption from 'components/phase-two/CPP/FixedConsumption'
-import Norms from 'components/phase-two/CPP/Norms'
+import Inputs from 'components/aop-phase-two/cpp/Inputs/index'
+import PlantRequirement from 'components/aop-phase-two/cpp/PlantRequirement'
+import FixedConsumption from 'components/aop-phase-two/cpp/FixedConsumption'
+import Norms from 'components/aop-phase-two/cpp/Norms'
 
 // TCS
 
-import TcsOutput from 'components/phase-two/TCS/TcsOutput/index'
-import PimsOutput from 'components/phase-two/TCS/PimsOutput/PimsOutput'
-import TcsInput from 'components/phase-two/TCS/TcsInput/index'
+import TcsOutput from 'components/aop-phase-two/tcs/TcsOutput/index'
+import PimsOutput from 'components/aop-phase-two/tcs/PimsOutput/PimsOutput'
+import TcsInput from 'components/aop-phase-two/tcs/TcsInput/index'
 import AopDashboard from 'components/kendo-data-tables/AopDashboard'
 import ProposedConsumptionNorms from 'components/kendo-data-tables/ProposedConsumptionNorms'
 

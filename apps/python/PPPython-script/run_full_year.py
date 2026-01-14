@@ -33,8 +33,14 @@ from database.connection import get_connection
 # ============================================================
 # CONFIGURATION
 # ============================================================
-# Use environment variable for log folder, with fallback for local development
-LOG_FOLDER = os.environ.get("LOG_FOLDER", r"C:\Users\shrik\Desktop\Project\fork repo\development\PP python-script repo\PPPython-script\logs\full_year_run")
+# Log folder: Use environment variable, or default to script's directory/logs
+# This ensures logs work both locally and when called from SQL Server
+def get_default_log_folder():
+    """Get default log folder relative to script location."""
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(script_dir, "logs", "full_year_run")
+
+LOG_FOLDER = os.environ.get("LOG_FOLDER", get_default_log_folder())
 
 
 def get_fy_months(financial_year: int) -> list:
@@ -227,10 +233,21 @@ def run_single_month(month, year, demands, save_to_db=True):
         )
         return result
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"\n{'='*80}")
+        print(f"ERROR IN BUDGET CALCULATION")
+        print(f"{'='*80}")
+        print(f"Exception Type: {type(e).__name__}")
+        print(f"Exception Message: {str(e)}")
+        print(f"\nFull Traceback:")
+        print(error_details)
+        print(f"{'='*80}\n")
         return {
             "overall_success": False,
-            "error_type": "EXCEPTION",
+            "error_type": type(e).__name__,
             "message": str(e),
+            "traceback": error_details,
             "converged": False,
             "iterations": 0,
         }
