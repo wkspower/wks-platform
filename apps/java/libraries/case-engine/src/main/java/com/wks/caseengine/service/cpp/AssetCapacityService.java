@@ -9,9 +9,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.AssetUtilityDTO;
 import com.wks.caseengine.dto.MonthCapacityDto;
@@ -289,5 +295,355 @@ public class AssetCapacityService {
             jdbcTemplate.batchUpdate(updateRemarksSql, updatesRemarks);
         }
 
+}
+
+public void importExcel(MultipartFile file, String financialYear) {  
+
+    List<AssetCapacityDTO> assetCapacityDTOs = new ArrayList<>();
+
+     try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        System.out.println("total rows: " + totalRows);
+        for(int i = 2; i <= totalRows; i++) {   // itertate through each row
+            Row row = sheet.getRow(i);
+            if(row == null) continue;
+
+            String assetName = row.getCell(0).getStringCellValue();
+
+            System.out.println("asset name: " + assetName);
+
+            UUID assetId = assetCapacityRepo.getAssetIdByAssetName(assetName);
+
+            if(assetId == null) {
+                throw new IllegalArgumentException("Asset not found: " + assetName);
+            }
+
+            AssetUtilityDTO utilityDistributed = new AssetUtilityDTO();
+            AssetUtilityDTO utilityGenerated = new AssetUtilityDTO();
+            MonthCapacityDto april = new MonthCapacityDto();
+            MonthCapacityDto may = new MonthCapacityDto();
+            MonthCapacityDto june = new MonthCapacityDto();
+            MonthCapacityDto july = new MonthCapacityDto();
+            MonthCapacityDto aug = new MonthCapacityDto();
+            MonthCapacityDto sep = new MonthCapacityDto();
+            MonthCapacityDto oct = new MonthCapacityDto();
+            MonthCapacityDto nov = new MonthCapacityDto();
+            MonthCapacityDto dec = new MonthCapacityDto();
+            MonthCapacityDto jan = new MonthCapacityDto();
+            MonthCapacityDto feb = new MonthCapacityDto();
+            MonthCapacityDto march = new MonthCapacityDto();
+
+            AssetCapacityDTO assetCapacityDTO = new AssetCapacityDTO();
+
+            assetCapacityDTO.setAssetId(assetId.toString());
+            assetCapacityDTO.setAssetName(assetName);
+
+            System.out.println("column iteration for asset " + assetName + " started");
+
+            DataFormatter formatter = new DataFormatter();
+
+            for(int j = 1; j <= 34; j++) {  
+        
+                 if(j == 1) {  
+
+                    if(row.getCell(j) == null) {  
+
+                        assetCapacityDTO.setPlantCode(null);
+                    }
+                    else {
+                        assetCapacityDTO.setPlantCode(row.getCell(j).getStringCellValue());
+                    }
+                 }
+
+                 else if(j == 2) {
+                 
+                    if(row.getCell(j) == null) {  
+                        utilityDistributed.setName(null);
+                 }
+                 else {
+                    utilityDistributed.setName(row.getCell(j).getStringCellValue());
+                 }  
+                }
+
+                 else if(j == 3) {
+                    if(row.getCell(j) == null) {  
+                        utilityDistributed.setSapCode(null);
+                    }
+                    else {
+                        utilityDistributed.setSapCode(row.getCell(j).getStringCellValue());
+                    }
+                 }
+
+                 else if(j == 4) {
+                    if(row.getCell(j) == null) {  
+                        utilityGenerated.setName(null);
+                    }
+                    else {
+                        utilityGenerated.setName(row.getCell(j).getStringCellValue());
+                    }
+                 }
+                 
+                 else if(j == 5) {
+                    if(row.getCell(j) == null) {  
+                        utilityGenerated.setSapCode(null);
+                    }
+                    else {
+                        utilityGenerated.setSapCode(row.getCell(j).getStringCellValue());
+                    }
+                 }
+
+                 else if(j == 6) {
+                    if(row.getCell(j) == null) {  
+                        assetCapacityDTO.setUom(null);
+                    }
+                    else {
+                        assetCapacityDTO.setUom(row.getCell(j).getStringCellValue());
+                    }
+                 }
+
+            
+
+                 else if(j == 7) {
+                    if(row.getCell(j) == null) {  
+                        assetCapacityDTO.setFixedMin(null); 
+                    }
+                    else {
+                        assetCapacityDTO.setFixedMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 8) {
+                    if(row.getCell(j) == null) {  
+                        assetCapacityDTO.setFixedMax(null);
+                    }
+                    else {
+                        assetCapacityDTO.setFixedMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 9) {
+                    if(row.getCell(j) == null) {  
+                        april.setMin(null);
+                    }
+                    else {
+                        april.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 10) {
+                    if(row.getCell(j) == null) {  
+                        april.setMax(null);
+                    }
+                    else {  
+                        april.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 11) {
+                    if(row.getCell(j) == null) {  
+                        may.setMin(null);
+                    }
+                    else {
+                        may.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 12) {
+                    if(row.getCell(j) == null) {  
+                        may.setMax(null);
+                    }
+                    else {
+                        may.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 13) {
+                    if(row.getCell(j) == null) {  
+                        june.setMin(null);
+                    }
+                    else {
+                        june.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 14) {
+                    if(row.getCell(j) == null) {  
+                        june.setMax(null);
+                    }
+                    else {
+                        june.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 
+                 else if(j == 15) {
+                    if(row.getCell(j) == null) {  
+                        july.setMin(null);
+                    }
+                    else {
+                        july.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 16) {
+                    if(row.getCell(j) == null) {  
+                        july.setMax(null);
+                    }
+                    else {
+                        july.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 17) { 
+                    if(row.getCell(j) == null) {  
+                        aug.setMin(null);
+                    }
+                    else {
+                        aug.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                        else if(j == 18) {
+                    if(row.getCell(j) == null) {  
+                        aug.setMax(null);
+                    }
+                    else {
+                        aug.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 19) {
+                    if(row.getCell(j) == null) {  
+                        sep.setMin(null);
+                    }
+                    else {
+                        sep.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 20) {
+                    if(row.getCell(j) == null) {  
+                        sep.setMax(null);
+                    }
+                    else {
+                        sep.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 21) {
+                    if(row.getCell(j) == null) {  
+                        oct.setMin(null);
+                    }
+                    else {
+                        oct.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 22) {
+                    if(row.getCell(j) == null) {  
+                        oct.setMax(null);
+                    }
+                    else {
+                        oct.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 23) {
+                    if(row.getCell(j) == null) {  
+                        nov.setMin(null);
+                    }
+                    else {
+                        nov.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 24) {
+                    if(row.getCell(j) == null) {  
+                        nov.setMax(null);
+                    }
+                    else {
+                        nov.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 25) {
+                    if(row.getCell(j) == null) {  
+                        dec.setMin(null);
+                    }
+                    else {
+                        dec.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 26) {
+                    if(row.getCell(j) == null) {  
+                        dec.setMax(null);
+                    }
+                    else {
+                        dec.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 27) {
+                    if(row.getCell(j) == null) {  
+                        jan.setMin(null);
+                    }
+                    else {
+                        jan.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 28) {
+                    if(row.getCell(j) == null) {  
+                        jan.setMax(null);
+                    }
+                    else {
+                        jan.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 29) {
+                    if(row.getCell(j) == null) {  
+                        feb.setMin(null);
+                    }
+                    else {
+                        feb.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 30) {
+                    if(row.getCell(j) == null) {  
+                        feb.setMax(null);
+                    }
+                    else {
+                        feb.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 31) {
+                    if(row.getCell(j) == null) {  
+                        march.setMin(null);
+                    }
+                    else {
+                        march.setMin(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+                 else if(j == 32) {
+                    if(row.getCell(j) == null) {  
+                        march.setMax(null);
+                    }
+                    else {
+                        march.setMax(row.getCell(j).getNumericCellValue());
+                    }
+                 }
+
+                 else if(j == 33) {
+                    if(row.getCell(j) == null) {  
+                        assetCapacityDTO.setRemarks(null);
+                    }
+                    else {
+                        assetCapacityDTO.setRemarks(row.getCell(j).getStringCellValue());
+                    }
+                 }
+            }
+
+            assetCapacityDTOs.add(assetCapacityDTO);
+
+
+        }   // row for loop
+
+        System.out.println("asset capacity dto's: " + assetCapacityDTOs);
+     } // end of try block
+
+     catch(Exception e) {
+        throw new RuntimeException("Error importing Excel file: " + e.getMessage());
+     }
+
+     updateAssetCapacities(assetCapacityDTOs, financialYear);
+    
 }
 }
