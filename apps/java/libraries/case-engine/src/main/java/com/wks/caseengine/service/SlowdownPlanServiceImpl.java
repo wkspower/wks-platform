@@ -464,7 +464,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 			innerHeaders.add("SD-To");
 			innerHeaders.add("Duration (hrs)");
 			innerHeaders.add("Rate (TPH)");
-			innerHeaders.add("Shutdown Basis");
+			innerHeaders.add("Remarks");
 			innerHeaders.add("Id");
 			innerHeaders.add("Product");
 			if (isAfterSave) {
@@ -538,10 +538,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        Workbook workbook = new XSSFWorkbook();
 	        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm");
 	        
-	        // --- STYLES ---
 	        CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm");
-	        
-	        // Create Decimal Style to force 1.50 instead of 1.5
 	        CellStyle decimalStyle = workbook.createCellStyle();
 	        decimalStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
 	        
@@ -555,10 +552,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        for (ShutDownPlanDTO dto : dtoList) {
 	            List<Object> list = new ArrayList<>();
 	            
-	            // 1. Slowdown Desc
 	            list.add(dto.getDiscription());
-	            
-	            // 2. Particulars (Product Name)
 	            if (dto.getProduct() != null) {
 	                try {
 	                    UUID productId = UUID.fromString(dto.getProduct());
@@ -571,27 +565,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                list.add(dto.getProductName());
 	            }
 
-	            // 3. Month
 	            if (dto.getMaintStartDateTime() != null) {
 	                int monthNumber = dto.getMaintStartDateTime().toInstant()
 	                        .atZone(ZoneId.systemDefault()).toLocalDate().getMonthValue();
 	                dto.setMonth(getMonthName(monthNumber));
 	            }
 	            list.add(dto.getMonth());
-
-	            // 4. Duration (hrs) - INDEX 3
 	            list.add(dto.getDurationInHrs());
-
-	            // 5. Rate
 	            list.add(dto.getRate());
-
-	            // 6. Remark (Shutdown Basis)
 	            list.add(dto.getRemark());
-
-	            // 7. Hidden ID
 	            list.add(dto.getId());
-
-	            // 8. Hidden Product ID
 	            list.add(dto.getProduct());
 
 	            if (isAfterSave) {
@@ -602,8 +585,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            rows.add(list);
 	        }
 
-	        // --- HEADERS ---
-	        List<String> headers = new ArrayList<>(Arrays.asList("Slowdown Desc", "Particulars", "Month", "Duration (hrs)", "Rate (TPH)", "Shutdown Basis", "Id", "Product"));
+	        List<String> headers = new ArrayList<>(Arrays.asList("Slowdown Desc", "Particulars", "Month", "Duration (hrs)", "Rate (TPH)", "Remarks", "Id", "Product"));
 	        if (isAfterSave) {
 	            headers.add("Status");
 	            headers.add("Error Description");
@@ -615,8 +597,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            cell.setCellValue(headers.get(i));
 	            cell.setCellStyle(boldStyle);
 	        }
-
-	        // --- DATA ROWS ---
 	        for (List<Object> rowData : rows) {
 	            Row row = sheet.createRow(currentRow++);
 	            for (int col = 0; col < rowData.size(); col++) {
@@ -628,7 +608,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    cell.setCellStyle(dateTimeStyle);
 	                } else if (value instanceof Number) {
 	                    cell.setCellValue(((Number) value).doubleValue());
-	                    // Apply the 0.00 format specifically to the Duration column (Index 3)
 	                    if (col == 3) {
 	                        cell.setCellStyle(decimalStyle);
 	                    }
@@ -642,11 +621,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            }
 	        }
 
-	        // Hide ID and Product ID columns
 	        sheet.setColumnHidden(6, true);
 	        sheet.setColumnHidden(7, true);
-	        
-	        // Auto-size columns for better readability
 	        for (int i = 0; i < headers.size(); i++) {
 	            sheet.autoSizeColumn(i);
 	        }
@@ -670,7 +646,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
 	}
 
-	// Place this inside your class or a relevant Utility class
 	private CellStyle createDecimalStyle(Workbook workbook, String format) {
 	    CellStyle style = workbook.createCellStyle();
 	    DataFormat dataFormat = workbook.createDataFormat();
@@ -843,16 +818,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				aopMessageVM.setCode(400);
 				aopMessageVM.setMessage("Partial data has been saved");
 			} else {
-				// aopMessageVM.setData();
+				
 				aopMessageVM.setCode(200);
 				aopMessageVM.setMessage("All data has been saved");
 			}
-
 			return aopMessageVM;
-			// return ResponseEntity.ok(data);
 		} catch (Exception e) {
 			e.printStackTrace();
-			// return ResponseEntity.internalServerError().build();
 		}
 		return null;
 	}
@@ -889,16 +861,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				aopMessageVM.setCode(400);
 				aopMessageVM.setMessage("Partial data has been saved");
 			} else {
-				// aopMessageVM.setData();
 				aopMessageVM.setCode(200);
 				aopMessageVM.setMessage("All data has been saved");
 			}
 
 			return aopMessageVM;
-			// return ResponseEntity.ok(data);
 		} catch (Exception e) {
 			e.printStackTrace();
-			// return ResponseEntity.internalServerError().build();
 		}
 		return null;
 	}
@@ -923,16 +892,13 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				aopMessageVM.setCode(400);
 				aopMessageVM.setMessage("Partial data has been saved");
 			} else {
-				// aopMessageVM.setData();
 				aopMessageVM.setCode(200);
 				aopMessageVM.setMessage("All data has been saved");
 			}
 
 			return aopMessageVM;
-			// return ResponseEntity.ok(data);
 		} catch (Exception e) {
 			e.printStackTrace();
-			// return ResponseEntity.internalServerError().build();
 		}
 		return null;
 	}
