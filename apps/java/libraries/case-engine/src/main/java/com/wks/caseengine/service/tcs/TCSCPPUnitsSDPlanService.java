@@ -9,6 +9,8 @@ public interface TCSCPPUnitsSDPlanService {
 
     List<TCSCPPUnitsSDPlanDTO> getTCSCPPUnitsSDPlan(String financialYear, UUID siteId);
 
-    void saveTCSCPPUnitsSDPlan(List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs);
+    void saveTCSCPPUnitsSDPlan(List<TCSCPPUnitsSDPlanDTO> tcsCppUnitsSDPlanDTOs, UUID siteId, String financialYear);
+
+    void deleteTCSCPPUnitsSDPlan(UUID id);
     
 }

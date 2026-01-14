@@ -131,6 +131,8 @@ const AdvanceKendoTable = ({
   setSelectedDropdownValue,
   paginationConfig = {},
   dateCalculationConfig = {},
+  initialFieldValues = {},
+  customItemChange = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -187,6 +189,13 @@ const AdvanceKendoTable = ({
       defaultPageSize: 10,
     }
     const config = { ...defaults, ...paginationConfig }
+
+    // Only apply defaultTake if pagination is enabled
+    // If rows.length <= threshold, pagination is disabled, so return undefined to show all rows
+    if (rows?.length <= config.threshold) {
+      return undefined
+    }
+
     return config.defaultPageSize
   }
 
@@ -355,32 +364,6 @@ const AdvanceKendoTable = ({
       })),
     )
   }
-  // Helper function to calculate days between two dates
-  const calculateDaysBetween = (startDate, endDate) => {
-    if (!startDate || !endDate) return null
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return null
-    const diffTime = Math.abs(end - start)
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays
-  }
-
-  // Helper function to add days to a date
-  const addDaysToDate = (date, days) => {
-    if (!date || !days) return null
-    const result = new Date(date)
-    result.setDate(result.getDate() + parseInt(days, 10))
-    return result
-  }
-
-  // Helper function to subtract days from a date
-  const subtractDaysFromDate = (date, days) => {
-    if (!date || !days) return null
-    const result = new Date(date)
-    result.setDate(result.getDate() - parseInt(days, 10))
-    return result
-  }
 
   const itemChange = useCallback(
     (e) => {
@@ -396,22 +379,45 @@ const AdvanceKendoTable = ({
       setRows((prev) =>
         prev.map((r) => {
           if (r.id !== itemId) return r
-          const updated = { ...r, [field]: value }
+
+          // Handle nested field paths (e.g., "summer.kbpsd")
+          const fieldParts = field.split('.')
+          const updated = { ...r }
+
+          if (fieldParts.length === 1) {
+            // Simple field
+            updated[field] = value
+          } else if (fieldParts.length === 2) {
+            // Nested field (e.g., summer.kbpsd)
+            const [parent, child] = fieldParts
+            updated[parent] = { ...updated[parent], [child]: value }
+          } else {
+            // Deeper nesting (if needed in future)
+            updated[field] = value
+          }
 
           if (dateCalculationConfig) {
-            const { dateField1, dateField2, daysField, requiredInHr } =
-              dateCalculationConfig
+            const {
+              dateField1,
+              dateField2,
+              daysField,
+              requiredInHr,
+              roundDaysAndDates,
+            } = dateCalculationConfig
             if (
               dateField1 in updated &&
               dateField2 in updated &&
               daysField in updated
             ) {
               if (field === dateField1 || field === dateField2) {
-                updated[daysField] = recalcDuration(
+                const duration = recalcDuration(
                   updated[dateField1],
                   updated[dateField2],
                   requiredInHr,
                 )
+                updated[daysField] = roundDaysAndDates
+                  ? Math.floor(duration)
+                  : duration
               } else if (field === daysField) {
                 const newEnd = recalcEndDate(
                   updated[dateField1],
@@ -433,15 +439,23 @@ const AdvanceKendoTable = ({
         const base = { ...dataItem, [field]: value }
 
         if (dateCalculationConfig) {
-          const { dateField1, dateField2, daysField, requiredInHr } =
-            dateCalculationConfig
+          const {
+            dateField1,
+            dateField2,
+            daysField,
+            requiredInHr,
+            roundDaysAndDates,
+          } = dateCalculationConfig
           if (dateField1 in base && dateField2 in base && daysField in base) {
             if (field === dateField1 || field === dateField2) {
-              base[daysField] = recalcDuration(
+              const duration = recalcDuration(
                 base[dateField1],
                 base[dateField2],
                 requiredInHr,
               )
+              base[daysField] = roundDaysAndDates
+                ? Math.floor(duration)
+                : duration
             } else if (field === daysField) {
               const newEnd = recalcEndDate(
                 base[dateField1],
@@ -461,8 +475,13 @@ const AdvanceKendoTable = ({
         const base = { ...(prev[itemId] || {}), [field]: value }
 
         if (dateCalculationConfig) {
-          const { dateField1, dateField2, daysField, requiredInHr } =
-            dateCalculationConfig
+          const {
+            dateField1,
+            dateField2,
+            daysField,
+            requiredInHr,
+            roundDaysAndDates,
+          } = dateCalculationConfig
           if (
             dateField1 in dataItem &&
             dateField2 in dataItem &&
@@ -475,7 +494,9 @@ const AdvanceKendoTable = ({
                 field === dateField2 ? value : dataItem[dateField2],
                 requiredInHr,
               )
-              base[daysField] = calculatedDuration
+              base[daysField] = roundDaysAndDates
+                ? Math.floor(calculatedDuration)
+                : calculatedDuration
             } else if (field === daysField) {
               // When duration changes, also highlight the calculated end date field
               const newEnd = recalcEndDate(
@@ -493,8 +514,13 @@ const AdvanceKendoTable = ({
           [itemId]: base,
         }
       })
+
+      // Call custom itemChange handler if provided
+      if (customItemChange) {
+        customItemChange(e, setRows)
+      }
     },
-    [setRows, setModifiedCells, setCustomModifiedCells],
+    [setRows, setModifiedCells, setCustomModifiedCells, customItemChange],
   )
 
   useEffect(() => {
@@ -563,9 +589,8 @@ const AdvanceKendoTable = ({
   const handleAddRow = () => {
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
-    const newRowId = rows.length
-      ? Math.max(...rows.map((row) => row.id)) + 1
-      : 1
+    // Generate unique ID using timestamp to avoid NaN with non-numeric IDs
+    const newRowId = `new_row_${Date.now()}`
     console.log('columns', columns)
 
     // Helper function to extract all fields from columns including nested ones
@@ -589,7 +614,9 @@ const AdvanceKendoTable = ({
     const newRow = {
       id: newRowId,
       isNew: true,
+      isEditable: true, // Ensure new rows are editable
       ...Object.fromEntries(allFields.map((field) => [field, ''])),
+      ...initialFieldValues, // Override with any initial values provided
     }
 
     console.log('newRow', newRow)
@@ -1238,10 +1265,7 @@ const AdvanceKendoTable = ({
             cells={{
               edit: {
                 text: (cellProps) => (
-                  <NumberCellEditor
-                    {...cellProps}
-                    wholeNumberOnly={col?.wholeNumberOnly || false}
-                  />
+                  <NumberCellEditor {...cellProps} wholeNumberOnly={true} />
                 ),
               },
               data: (props) =>
@@ -1292,6 +1316,67 @@ const AdvanceKendoTable = ({
             columnMenu={ColumnMenuCheckboxFilter}
             // filter='numeric'
             format={col.format}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+      if (col?.type === 'select') {
+        // Change this to your multiselect field name
+        let allOptions = col.options
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <SelectCellEditor
+                    {...cellProps}
+                    options={allOptions}
+                    textField='label'
+                    valueField='value'
+                    placeholder='Select...'
+                  />
+                ),
+              },
+              data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
+            width={setWidth(col?.minWidth || col?.widthT)}
+          />
+        )
+      }
+      if (col?.type === 'multi-select') {
+        // Change this to your multiselect field name
+        let allOptions = col.options || []
+        return (
+          <GridColumn
+            key={col.field}
+            field={col.field}
+            title={col.title || col.headerName}
+            hidden={col.hidden}
+            editable={col?.editable ? true : false}
+            cells={{
+              edit: {
+                text: (cellProps) => (
+                  <MultiselectCellEditor
+                    {...cellProps}
+                    options={allOptions}
+                    textField='label'
+                    valueField='value'
+                    placeholder='Select multiple...'
+                    tagLimit={3} // Optional: limit display tags
+                  />
+                ),
+              },
+              data: toolTipRenderer,
+              headerCell: SimpleHeaderWithTooltip,
+            }}
+            columnMenu={ColumnMenuCheckboxFilter}
             width={setWidth(col?.minWidth || col?.widthT)}
           />
         )
@@ -1355,52 +1440,6 @@ const AdvanceKendoTable = ({
             cells={{
               edit: {
                 text: (cellProps) => (
-                  <SelectCellEditor
-                    {...cellProps}
-                    options={allOptions}
-                    textField='displayName'
-                    valueField='id'
-                    placeholder='Select...'
-                  />
-                ),
-              },
-              data: toolTipRenderer,
-              headerCell: SimpleHeaderWithTooltip,
-            }}
-            columnMenu={ColumnMenuCheckboxFilter}
-            width={setWidth(col?.minWidth || col?.widthT)}
-          />
-        )
-      }
-
-      // Example: Using MultiselectCellEditor for specific field (same structure as single select)
-      if (col?.field === 'gtMaintenance') {
-        // Change this to your multiselect field name
-        let allOptions = [
-          { id: 'MI', displayName: 'MI' },
-          { id: 'HGPI', displayName: 'HGPI' },
-          { id: 'IBR', displayName: 'IBR' },
-          { id: 'RLA', displayName: 'RLA' },
-          { id: 'Others', displayName: 'Others' },
-        ]
-        return (
-          <GridColumn
-            key={col.field}
-            field={col.field}
-            title={col.title || col.headerName}
-            hidden={col.hidden}
-            editable={col?.editable ? true : false}
-            cells={{
-              edit: {
-                text: (cellProps) => (
-                  // <MultiselectCellEditor
-                  //   {...cellProps}
-                  //   options={allOptions}
-                  //   textField='displayName'
-                  //   valueField='id'
-                  //   placeholder='Select multiple...'
-                  //   tagLimit={3} // Optional: limit display tags
-                  // />
                   <SelectCellEditor
                     {...cellProps}
                     options={allOptions}
@@ -1537,18 +1576,17 @@ const AdvanceKendoTable = ({
 
           {/* RIGHT: Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {permissions?.addButton &&
-              ![1, 2, 3, 4, 5].includes(permissions?.tabIndex) && (
-                <Button
-                  variant='contained'
-                  // className='custom-btn-additem'
-                  className='btn-save'
-                  onClick={handleAddRow}
-                  disabled={false}
-                >
-                  Add Item
-                </Button>
-              )}
+            {permissions?.addButton && (
+              <Button
+                variant='contained'
+                // className='custom-btn-additem'
+                className='btn-save'
+                onClick={handleAddRow}
+                disabled={false}
+              >
+                Add Item
+              </Button>
+            )}
             {permissions?.saveBtn && (
               <Button
                 variant='contained'

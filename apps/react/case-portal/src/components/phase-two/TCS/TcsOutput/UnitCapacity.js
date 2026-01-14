@@ -2,6 +2,8 @@ import { Box } from '@mui/material'
 import UnitCapacityGrid from './UnitCapacityComponents/UnitCapacityGrid'
 
 const UnitCapacity = ({
+  VERTICAL_ID,
+  SITE_ID,
   PLANT_ID,
   AOP_YEAR,
   currentTab,
@@ -23,6 +25,8 @@ const UnitCapacity = ({
           key={type.key}
           capacityType={type.key}
           title={type.title}
+          SITE_ID={SITE_ID}
+          VERTICAL_ID={VERTICAL_ID}
           PLANT_ID={PLANT_ID}
           AOP_YEAR={AOP_YEAR}
           snackbarData={snackbarData}

@@ -854,7 +854,7 @@ const NestedKendoTable = ({
                   return (
                     <NumberCellEditor
                       {...cellProps}
-                      wholeNumberOnly={col?.wholeNumberOnly || true}
+                      wholeNumberOnly={true}
                       maxValue={maxValue}
                     />
                   )

@@ -35,8 +35,15 @@ public class FurnaceService {
             UUID plantId
     ) {
 
-        List<FurnaceProjection> projections =
-                furnaceRepository.getFurnaceData(financialYear, siteId, plantId);
+      
+List<FurnaceProjection> projections = new ArrayList<>();
+
+if(plantId != null) {
+    projections = furnaceRepository.getFurnaceData(financialYear, siteId, plantId);
+}
+else {
+    projections = furnaceRepository.getFurnaceOutputData(financialYear, siteId);
+}
 
         List<FurnaceDTO> furnaceDTOs = projections.stream().map(p -> {
             FurnaceDTO dto = new FurnaceDTO();

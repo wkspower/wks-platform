@@ -28,7 +28,11 @@ export const validateRowDataWithRemarks = (
     // Get original row from originalRows
     const originalRow = originalRows.find((orig) => orig.id === row.id)
 
-    if (!originalRow) return false
+    // For new rows (not in originalRows), always require remarks
+    if (!originalRow) {
+      const currentRemarks = row[remarksFieldName] || ''
+      return currentRemarks.trim() === ''
+    }
 
     // Check if any data field was updated
     const dataWasUpdated = fieldsToCheck.some((field) => {
@@ -71,7 +75,11 @@ export const validateNestedRowDataWithRemarks = (
     // Get original row from originalRows
     const originalRow = originalRows.find((orig) => orig.id === row.id)
 
-    if (!originalRow) return false
+    // For new rows (not in originalRows), always require remarks
+    if (!originalRow) {
+      const currentRemarks = row[remarksFieldName] || ''
+      return currentRemarks.trim() === ''
+    }
 
     // Check if any data field was updated (supports nested paths like 'april.shutdownHrs')
     const dataWasUpdated = fieldsToCheck.some((field) => {

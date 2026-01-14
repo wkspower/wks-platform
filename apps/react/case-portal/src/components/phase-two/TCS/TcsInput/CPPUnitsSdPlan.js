@@ -10,7 +10,7 @@ import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUt
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterProduction from 'utils/ValueFormatterProduction'
+import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
 
 const CPPUnitsSdPlan = ({
   PLANT_ID,
@@ -23,7 +23,7 @@ const CPPUnitsSdPlan = ({
   setSnackbarOpen,
 }) => {
   const keycloak = useSession()
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat = ValueFormatterPhaseTwo()
   // State management
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
@@ -76,6 +76,13 @@ const CPPUnitsSdPlan = ({
         id: item.id || `row_${index}`,
         ...item,
         majorJobs: item.majorJobs || '',
+        // Convert gtMaintenance from comma-separated string to array for multi-select
+        gtMaintenance: item.gtMaintenance
+          ? item.gtMaintenance
+              .split(',')
+              .map((v) => v.trim())
+              .filter(Boolean)
+          : [],
         inEdit: false,
       }))
 
@@ -105,14 +112,25 @@ const CPPUnitsSdPlan = ({
 
   // Column configuration for CPP Units SD Plan
   const columnConfig = {
-    machine: { editable: false, type: 'text', minWidth: 100, widthT: 120 },
+    machine: { editable: true, type: 'text', minWidth: 100, widthT: 120 },
     ibrDueDate: {
       editable: true,
       type: 'dateTime',
       minWidth: 100,
       widthT: 120,
     },
-    gtMaintenance: { editable: true, minWidth: 100, widthT: 150 },
+    gtMaintenance: {
+      type: 'multi-select',
+      options: [
+        { value: 'MI', label: 'MI' },
+        { value: 'HGPI', label: 'HGPI' },
+        { value: 'IBR', label: 'IBR' },
+        { value: 'RLA', label: 'RLA' },
+      ],
+      editable: true,
+      minWidth: 100,
+      widthT: 150,
+    },
     noOfDays: {
       editable: true,
       type: 'wholeNumber',
@@ -227,8 +245,20 @@ const CPPUnitsSdPlan = ({
 
     try {
       // Format date fields to add IST timezone offset before sending to backend
+      // Set id to null for new items
       const formattedData = modifiedData.map((item) => {
         const { inEdit, ...rest } = item
+
+        // If this is a new item, set id to null
+        if (item.isNew) {
+          rest.id = null
+        }
+
+        // Convert gtMaintenance from array to comma-separated string for API
+        if (rest.gtMaintenance && Array.isArray(rest.gtMaintenance)) {
+          rest.gtMaintenance = rest.gtMaintenance.join(',')
+        }
+
         if (rest.ibrDueDate) {
           rest.ibrDueDate = addTimeOffset(rest.ibrDueDate)
         }
@@ -245,6 +275,8 @@ const CPPUnitsSdPlan = ({
 
       const response = await TcsApiService.saveCPPUnitsSdPlanData(
         keycloak,
+        AOP_YEAR,
+        SITE_ID,
         formattedData,
       )
 
@@ -267,10 +299,54 @@ const CPPUnitsSdPlan = ({
     }
   }
 
+  // Delete row data
+  const deleteRowData = useCallback(
+    async (paramsForDelete) => {
+      setLoading(true)
+
+      try {
+        const { id } = paramsForDelete
+        const deleteId = id
+
+        // Check if this is a newly added row (not saved to backend yet)
+        const isNewRow = paramsForDelete.isNew
+
+        if (isNewRow) {
+          // Just remove from local state
+          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Row removed successfully!',
+            severity: 'success',
+          })
+        } else {
+          // Call API to delete from backend
+          await TcsApiService.deleteCPPUnitsSdPlanData(keycloak, id)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Record deleted successfully!',
+            severity: 'success',
+          })
+          fetchData()
+        }
+      } catch (error) {
+        console.error('Error deleting record:', error)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Error deleting record!',
+          severity: 'error',
+        })
+      } finally {
+        setLoading(false)
+      }
+    },
+    [keycloak, PLANT_ID, AOP_YEAR, fetchData, setSnackbarData, setSnackbarOpen],
+  )
+
   const permissions = {
     showAction: true,
-    addButton: false,
-    deleteButton: false,
+    addButton: true,
+    deleteButton: true,
     editButton: true,
     saveBtn: true,
     allAction: true,
@@ -305,6 +381,7 @@ const CPPUnitsSdPlan = ({
           setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
           setCurrentRowId={() => {}}
+          deleteRowData={deleteRowData}
           saveChanges={saveChanges}
           snackbarData={snackbarData}
           setSnackbarData={setSnackbarData}
@@ -320,6 +397,7 @@ const CPPUnitsSdPlan = ({
             dateField2: 'startUpDate',
             daysField: 'noOfDays',
             requiredInHr: false,
+            roundDaysAndDates: true,
           }}
         />
       </Stack>
