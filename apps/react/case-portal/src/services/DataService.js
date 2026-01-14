@@ -1843,7 +1843,7 @@ async function getConfigurationExcel(
 
   try {
     const resp = await fetch(url, {
-      method: 'POST', // changed from GET to POST since we’re sending a body
+      method: 'POST', // changed from GET to POST since weï¿½re sending a body
       headers,
       body,
     })
@@ -3058,72 +3058,72 @@ async function updateRevision(keycloak, payload, PLANT_ID, AOP_YEAR) {
   }
 }
 export async function getDataTeamPlant(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
-    const resp = await fetch(url, { method: 'GET', headers });
-    return await resp.json();
+    const resp = await fetch(url, { method: 'GET', headers })
+    return await resp.json()
   } catch (e) {
-    console.error('Error fetching Plant Team data:', e);
-    return Promise.reject(e);
+    console.error('Error fetching Plant Team data:', e)
+    return Promise.reject(e)
   }
 }
 export async function getPeopleInitiative(keycloak, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
-    const resp = await fetch(url, { method: 'GET', headers });
-    return await resp.json();
+    const resp = await fetch(url, { method: 'GET', headers })
+    return await resp.json()
   } catch (e) {
-    console.error('Error fetching Plant Team data:', e);
-    return Promise.reject(e);
+    console.error('Error fetching Plant Team data:', e)
+    return Promise.reject(e)
   }
 }
 export async function savePlantTeam(keycloak, PLANT_ID, AOP_YEAR, data) {
-  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(data),
-    });
-    return await resp.json();
+    })
+    return await resp.json()
   } catch (e) {
-    console.error('Error saving Plant Team data:', e);
-    return Promise.reject(e);
+    console.error('Error saving Plant Team data:', e)
+    return Promise.reject(e)
   }
 }
 
 export async function savePeopleInitiative(keycloak, PLANT_ID, AOP_YEAR, data) {
-  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
       body: JSON.stringify(data),
-    });
-    return await resp.json();
+    })
+    return await resp.json()
   } catch (e) {
-    console.error('Error saving People Initiative data:', e);
-    return Promise.reject(e);
+    console.error('Error saving People Initiative data:', e)
+    return Promise.reject(e)
   }
 }
 async function deletePlantTeam(plantTeamId, keycloak) {
@@ -3177,7 +3177,7 @@ export async function PlantTeamExport(
   EXCEL_EXPORT_TITLE,
 ) {
   const maintenanceTypeName = 'Slowdown'
-    const url = `${Config.CaseEngineUrl}/task/plant-team-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
+  const url = `${Config.CaseEngineUrl}/task/plant-team-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -3195,7 +3195,7 @@ export async function PlantTeamExport(
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `${EXCEL_EXPORT_TITLE || 'plant_team'}.xlsx`;
+    a.download = `${EXCEL_EXPORT_TITLE || 'plant_team'}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3211,7 +3211,7 @@ export async function ExportPeopleInitiative(
   year,
   EXCEL_EXPORT_TITLE,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/people-initiative-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
+  const url = `${Config.CaseEngineUrl}/task/people-initiative-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
   const headers = {
     'Content-Type': 'application/json',
     Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -3240,43 +3240,48 @@ export async function ExportPeopleInitiative(
   }
 }
 export async function ImportPlantTeamExcel(file, keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/plant-team-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
-  const formData = new FormData();
-  formData.append('file', file);
+  const url = `${Config.CaseEngineUrl}/task/plant-team-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const formData = new FormData()
+  formData.append('file', file)
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
       body: formData,
-    });
-    return await resp.json();
+    })
+    return await resp.json()
   } catch (e) {
-    console.error('Error importing Plant Team Excel:', e);
-    return Promise.reject(e);
+    console.error('Error importing Plant Team Excel:', e)
+    return Promise.reject(e)
   }
 }
 
-export async function ImportPeopleInitiativeExcel(file, keycloak, plantId, year) {
-  const url = `${Config.CaseEngineUrl}/task/people-initiative-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
-  const formData = new FormData();
-  formData.append('file', file);
+export async function ImportPeopleInitiativeExcel(
+  file,
+  keycloak,
+  plantId,
+  year,
+) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const formData = new FormData()
+  formData.append('file', file)
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
-  };
+  }
   try {
     const resp = await fetch(url, {
       method: 'POST',
       headers,
       body: formData,
-    });
-    return await resp.json();
+    })
+    return await resp.json()
   } catch (e) {
-    console.error('Error importing People Initiative Excel:', e);
-    return Promise.reject(e);
+    console.error('Error importing People Initiative Excel:', e)
+    return Promise.reject(e)
   }
 }
