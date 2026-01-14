@@ -1615,9 +1615,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 									dto.setErrDescription("End date/time cannot be before start date/time.");
 									alreadyFailed = true;
 								} else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("Start and end date/time must belong to the same month.");
-									alreadyFailed = true;
+									if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+										dto.setSaveStatus("Failed");
+										dto.setErrDescription("Start and end date/time must belong to the same month.");
+										alreadyFailed = true;
+									}	
 								} else if (ldtStart != null) {
 									boolean overlaps = false;
 									for (LocalDateTime[] prevPeriod : validTimeRanges) {
