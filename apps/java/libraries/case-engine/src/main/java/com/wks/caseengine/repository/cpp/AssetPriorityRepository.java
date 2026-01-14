@@ -108,5 +108,21 @@ public interface AssetPriorityRepository extends JpaRepository<DummyEntity, UUID
             @Param("financialYearMonthIds") Collection<UUID> financialYearMonthIds
     );
 
+@Query(value = """
+     SELECT 
+        a.Id,
+        a.AssetId,
+        f.[Month]
+    FROM AssetAvailability a
+    LEFT JOIN FinancialYearMonth f 
+        ON f.Id = a.FinancialYearMonthId
+    WHERE a.AssetId IN (
+        SELECT pga.AssetId
+        FROM powergenerationassets pga
+        WHERE pga.AssetName = :assetName)
+    """,
+     nativeQuery = true)
+    List<Object[]> getAssetAvailabilityByAssetName(@Param("assetName") String assetName);
+
 }
 

@@ -41,6 +41,13 @@ List<Object[]> getAssetCapacitiesByAssetsAndFYMonths(
         @Param("financialYearMonthIds") Collection<UUID> financialYearMonthIds
 );
 
+@Query(value = """
+    SELECT AssetId
+    FROM PowerGenerationAssets
+    WHERE AssetName = :assetName
+    """, nativeQuery = true)
+UUID  getAssetIdByAssetName(@Param("assetName") String assetName);
+
 }
 
 

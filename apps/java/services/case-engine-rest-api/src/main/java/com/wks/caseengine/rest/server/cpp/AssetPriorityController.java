@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.cpp.AssetPrioriryDTO;
 import com.wks.caseengine.service.cpp.AssetPriorityService;
@@ -35,4 +37,16 @@ public class AssetPriorityController {
         assetPriorityService.setAssetPriority( payload, financialYear);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping(  value = "/asset-priority/import-excel/{financialYear}",
+    consumes = "multipart/form-data")  
+    public ResponseEntity<?> importExcel(
+        @RequestParam("file") MultipartFile file, @PathVariable String financialYear) {
+
+    assetPriorityService.importExcel(file, financialYear);
+    return ResponseEntity.ok().build();
+}
+
+
+
 }

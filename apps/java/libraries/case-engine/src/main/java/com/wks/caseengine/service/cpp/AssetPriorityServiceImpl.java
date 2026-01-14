@@ -11,8 +11,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.wks.caseengine.dto.cpp.AssetPrioriryDTO;
@@ -243,4 +248,170 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
 
         return fyRepo.findFinancialMonthId(year, month);
     }
+
+    @Override
+    public void importExcel(MultipartFile file, String financialYear) {
+       
+    //     if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx") || !file.getOriginalFilename().endsWith(".xls")) {
+    //         throw new IllegalArgumentException("Invalid or empty Excel file.");
+    // }
+
+    List<AssetPrioriryDTO> assetPrioriryDTOs = new ArrayList<>();
+
+    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        System.out.println("total rows: " + totalRows);
+        for(int i = 1; i <= totalRows; i++) {   // itertate through each row
+            Row row = sheet.getRow(i);
+            if(row == null) continue;
+
+            String assetName = row.getCell(0).getStringCellValue();  // make data base query base on assetName, if no data found for a given asset it means the assetName is edited and throw error
+            System.out.println("asset name: " + assetName);
+            // fetch the AssetAvailability base on AssetName
+            List<Object[]> assetAvailability = assetPriorityRepository.getAssetAvailabilityByAssetName(assetName);
+            // 0 : Id, 1 : AssetId  2 : month
+
+            if(assetAvailability.isEmpty()) {
+                throw new IllegalArgumentException("Asset not found: " + assetName);
+            }
+
+            //  iterate though each column and get the value    
+            AssetPrioriryDTO assetPrioriryDTO = new AssetPrioriryDTO();
+
+           assetPrioriryDTO.setAssetName(assetName);
+           assetPrioriryDTO.setAssetId(UUID.fromString((String) assetAvailability.get(0)[1]));
+
+         System.out.println("column iteration for asset " + assetName + " started");
+
+            for(int j = 1; j <= 13; j++) {    
+
+               if(j == 1) {  
+                   if(row.getCell(j) == null) {  
+                          assetPrioriryDTO.setApril(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setApril(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                 
+                   }
+
+                   
+                else if(j == 2) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setMay(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setMay(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 3) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setJune(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setJune(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 4) {
+                    if(row.getCell(j) == null) {  
+                            assetPrioriryDTO.setJuly(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setJuly(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 5) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setAug(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setAug(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 6) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setSep(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setSep(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 7) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setOct(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setOct(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 8) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setNov(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setNov(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 9) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setDec(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setDec(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 10) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setJan(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setJan(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 11) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setFeb(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setFeb(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 12) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setMar(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setMar(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
+                   }
+                }
+                else if(j == 13) {
+                    if(row.getCell(j) == null) {  
+                        assetPrioriryDTO.setRemarks(null);
+                   }
+                   else {
+                    assetPrioriryDTO.setRemarks(row.getCell(j).getStringCellValue());
+                   }
+                }
+                
+             
+            } // column for loop
+
+            assetPrioriryDTOs.add(assetPrioriryDTO);  // new dto for each row
+         } // row for loop
+
+         System.out.println("asset prioriry dto's: " + assetPrioriryDTOs);
+
+        //   System.out.println("all rows iterated and dto's created");
+          setAssetPriority(assetPrioriryDTOs, financialYear);
+   
+    
+  }  catch(Exception e) {
+        throw new RuntimeException("Error importing Excel file: " + e.getMessage());
+    }
+
 }
+
+}
+
+

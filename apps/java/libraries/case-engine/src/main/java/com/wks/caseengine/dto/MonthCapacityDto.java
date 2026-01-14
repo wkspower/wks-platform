@@ -14,5 +14,9 @@ public class MonthCapacityDto {
         this.max = max;
     }
 
-    
+    public MonthCapacityDto() {
+        this.min = null;
+        this.max = null;
+    }
+
 }
