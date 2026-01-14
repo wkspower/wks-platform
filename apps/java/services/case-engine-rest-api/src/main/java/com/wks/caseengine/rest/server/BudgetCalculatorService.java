@@ -109,11 +109,20 @@ public class BudgetCalculatorService {
     public Map<String, Object> runFullYear(Map<String, Object> request) {
         logger.info("Calling stored procedure usp_CalculateBalanceUSDIteration for full year");
         
-        // Extract financial_year from request (JSON numbers come as Double)
+        // Extract financial_year from request (can come as Number or String depending on client)
         Integer financialYear = null;
         Object yearObj = request.get("financial_year");
         if (yearObj instanceof Number) {
             financialYear = ((Number) yearObj).intValue();
+        } else if (yearObj instanceof String) {
+            String yearStr = ((String) yearObj).trim();
+            if (!yearStr.isEmpty()) {
+                try {
+                    financialYear = Integer.parseInt(yearStr);
+                } catch (NumberFormatException e) {
+                    logger.warn("Invalid financial_year format: '{}'", yearStr);
+                }
+            }
         }
         
         if (financialYear == null) {
