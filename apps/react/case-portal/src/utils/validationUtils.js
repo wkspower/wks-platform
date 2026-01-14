@@ -19,6 +19,16 @@ export const validateFields = (data, requiredFields) => {
     productName: 'Particulars',
     discriptionDrpdwn: 'Description',
     monthly: 'Month',
+    functions: 'Function',
+    jobRole: 'Job Role',
+    name: 'Name',
+    age: 'Age',
+    teamSize: 'Team Size',
+    initiative: 'Initiative',
+    outcome: 'Outcome',
+    recommendation: 'Recommendation',
+    targetDate: 'Target Date',
+    responsible: 'Responsible',
   }
 
   const invalidRows = data.filter((row) => {

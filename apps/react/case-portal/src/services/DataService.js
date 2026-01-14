@@ -133,6 +133,16 @@ export const DataService = {
   slowdownconsumptionExport,
   getRevision,
   updateRevision,
+  getDataTeamPlant,
+  getPeopleInitiative,
+  savePlantTeam,
+  savePeopleInitiative,
+  deletePlantTeam,
+  deletePeopleInitiative,
+  PlantTeamExport,
+  ExportPeopleInitiative,
+  ImportPlantTeamExcel,
+  ImportPeopleInitiativeExcel,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -3045,5 +3055,228 @@ async function updateRevision(keycloak, payload, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+export async function getDataTeamPlant(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+  try {
+    const resp = await fetch(url, { method: 'GET', headers });
+    return await resp.json();
+  } catch (e) {
+    console.error('Error fetching Plant Team data:', e);
+    return Promise.reject(e);
+  }
+}
+export async function getPeopleInitiative(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+  try {
+    const resp = await fetch(url, { method: 'GET', headers });
+    return await resp.json();
+  } catch (e) {
+    console.error('Error fetching Plant Team data:', e);
+    return Promise.reject(e);
+  }
+}
+export async function savePlantTeam(keycloak, PLANT_ID, AOP_YEAR, data) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+    return await resp.json();
+  } catch (e) {
+    console.error('Error saving Plant Team data:', e);
+    return Promise.reject(e);
+  }
+}
+
+export async function savePeopleInitiative(keycloak, PLANT_ID, AOP_YEAR, data) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    });
+    return await resp.json();
+  } catch (e) {
+    console.error('Error saving People Initiative data:', e);
+    return Promise.reject(e);
+  }
+}
+async function deletePlantTeam(plantTeamId, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team?id=${encodeURIComponent(plantTeamId)}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function deletePeopleInitiative(peopleInitiativeId, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?id=${encodeURIComponent(peopleInitiativeId)}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+export async function PlantTeamExport(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
+  const maintenanceTypeName = 'Slowdown'
+    const url = `${Config.CaseEngineUrl}/task/plant-team-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `${EXCEL_EXPORT_TITLE || 'plant_team'}.xlsx`;
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function ExportPeopleInitiative(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `${EXCEL_EXPORT_TITLE || 'People_Initiative'}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function ImportPlantTeamExcel(file, keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
+  const formData = new FormData();
+  formData.append('file', file);
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    return await resp.json();
+  } catch (e) {
+    console.error('Error importing Plant Team Excel:', e);
+    return Promise.reject(e);
+  }
+}
+
+export async function ImportPeopleInitiativeExcel(file, keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`;
+  const formData = new FormData();
+  formData.append('file', file);
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  };
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+    return await resp.json();
+  } catch (e) {
+    console.error('Error importing People Initiative Excel:', e);
+    return Promise.reject(e);
   }
 }
