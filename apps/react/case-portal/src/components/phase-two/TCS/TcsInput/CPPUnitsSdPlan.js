@@ -76,6 +76,13 @@ const CPPUnitsSdPlan = ({
         id: item.id || `row_${index}`,
         ...item,
         majorJobs: item.majorJobs || '',
+        // Convert gtMaintenance from comma-separated string to array for multi-select
+        gtMaintenance: item.gtMaintenance
+          ? item.gtMaintenance
+              .split(',')
+              .map((v) => v.trim())
+              .filter(Boolean)
+          : [],
         inEdit: false,
       }))
 
@@ -105,7 +112,7 @@ const CPPUnitsSdPlan = ({
 
   // Column configuration for CPP Units SD Plan
   const columnConfig = {
-    machine: { editable: false, type: 'text', minWidth: 100, widthT: 120 },
+    machine: { editable: true, type: 'text', minWidth: 100, widthT: 120 },
     ibrDueDate: {
       editable: true,
       type: 'dateTime',
@@ -238,8 +245,20 @@ const CPPUnitsSdPlan = ({
 
     try {
       // Format date fields to add IST timezone offset before sending to backend
+      // Set id to null for new items
       const formattedData = modifiedData.map((item) => {
         const { inEdit, ...rest } = item
+
+        // If this is a new item, set id to null
+        if (item.isNew) {
+          rest.id = null
+        }
+
+        // Convert gtMaintenance from array to comma-separated string for API
+        if (rest.gtMaintenance && Array.isArray(rest.gtMaintenance)) {
+          rest.gtMaintenance = rest.gtMaintenance.join(',')
+        }
+
         if (rest.ibrDueDate) {
           rest.ibrDueDate = addTimeOffset(rest.ibrDueDate)
         }
@@ -256,6 +275,8 @@ const CPPUnitsSdPlan = ({
 
       const response = await TcsApiService.saveCPPUnitsSdPlanData(
         keycloak,
+        AOP_YEAR,
+        SITE_ID,
         formattedData,
       )
 
@@ -300,13 +321,7 @@ const CPPUnitsSdPlan = ({
           })
         } else {
           // Call API to delete from backend
-          // await TcsApiService.deleteSlowdownData(
-          //   keycloak,
-          //   PLANT_ID,
-          //   AOP_YEAR,
-          //   id,
-          // )
-          setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+          await TcsApiService.deleteCPPUnitsSdPlanData(keycloak, id)
           setSnackbarOpen(true)
           setSnackbarData({
             message: 'Record deleted successfully!',

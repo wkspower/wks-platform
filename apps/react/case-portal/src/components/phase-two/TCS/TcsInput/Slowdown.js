@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/phase-two/common/ValueFormatterPhaseTwo'
+import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
 
 const Slowdown = ({
   PLANT_ID,
@@ -26,32 +27,9 @@ const Slowdown = ({
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
 
-  // Detect numeric fields from data
-  const getNumericKeysInAllRows = (rowsData = []) => {
-    if (!Array.isArray(rowsData) || rowsData.length === 0) return []
-
-    const allKeys = Array.from(
-      rowsData.reduce((set, row) => {
-        if (row && typeof row === 'object') {
-          Object.keys(row).forEach((k) => set.add(k))
-        }
-        return set
-      }, new Set()),
-    )
-
-    return allKeys.filter((key) =>
-      rowsData.every((row) => {
-        const v = row?.[key]
-        if (v === undefined || v === null || String(v).trim() === '')
-          return true
-        const n = Number(String(v).trim())
-        return Number.isFinite(n)
-      }),
-    )
-  }
-
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
+  const [originalRows, setOriginalRows] = useState([])
 
   // Fetch Shutdown Data
   const fetchSlowdownData = useCallback(async () => {
@@ -81,6 +59,7 @@ const Slowdown = ({
       }
 
       setRows(transformedData)
+      setOriginalRows(transformedData)
     } catch (err) {
       console.error('Error fetching Slowdown data:', err)
       setSnackbarData({
@@ -131,8 +110,6 @@ const Slowdown = ({
       options: [
         { value: 'KBPSD', label: 'KBPSD' },
         { value: 'KTPD', label: 'KTPD' },
-        { value: 'TPD', label: 'TPD' },
-        { value: 'TPH', label: 'TPH' },
       ],
     },
     startDate: { editable: true, type: 'dateTime', minWidth: 150, widthT: 150 },
@@ -180,6 +157,15 @@ const Slowdown = ({
     }
   }, [modifiedCells])
 
+  // Helper function to add IST timezone offset (+5:30) to dates before sending to backend
+  const addTimeOffset = (dateTime) => {
+    if (!dateTime) return null
+    const date = new Date(dateTime)
+    date.setUTCHours(date.getUTCHours() + 5)
+    date.setUTCMinutes(date.getUTCMinutes() + 30)
+    return date
+  }
+
   // Save changes
   const saveChanges = useCallback(async () => {
     try {
@@ -199,12 +185,58 @@ const Slowdown = ({
         return
       }
 
+      // Custom validation: If any row data is updated, remarks must be filled and different from original
+      const fieldsToCheck = [
+        'durationInDays',
+        'throughputDuringSlowdown',
+        'throughputUOM',
+        'startDate',
+        'endDate',
+      ]
+      const validationError = validateRowDataWithRemarks(
+        data,
+        originalRows,
+        fieldsToCheck,
+        'particulates',
+        'purpose',
+      )
+
+      if (validationError) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: validationError,
+          severity: 'error',
+        })
+        return
+      }
+
+      // Format date fields to add IST timezone offset before sending to backend
+      // Set id to null for new items
+      const formattedData = data.map((item) => {
+        const formatted = { ...item }
+
+        // If this is a new item, set id to null
+        if (item.isNew) {
+          formatted.id = null
+        }
+
+        // Add timezone offset to date fields
+        if (formatted.startDate) {
+          formatted.startDate = addTimeOffset(formatted.startDate)
+        }
+        if (formatted.endDate) {
+          formatted.endDate = addTimeOffset(formatted.endDate)
+        }
+
+        return formatted
+      })
+
       // TODO: Replace with actual API call
       const response = await TcsApiService.saveSlowdownData(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        data,
+        formattedData,
       )
       console.log('Save Slowdown response:', response)
 
@@ -255,12 +287,7 @@ const Slowdown = ({
           })
         } else {
           // Call API to delete from backend
-          // await TcsApiService.deleteSlowdownData(
-          //   keycloak,
-          //   PLANT_ID,
-          //   AOP_YEAR,
-          //   id,
-          // )
+          await TcsApiService.deleteSlowdownData(keycloak, id)
           setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
           setSnackbarOpen(true)
           setSnackbarData({
