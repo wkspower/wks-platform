@@ -20,9 +20,6 @@ public class PlantTeam {
 	    @Column(name = "Id", nullable = false, updatable = false)
 	    private UUID id;
 
-    @Column(name = "SrNo")
-    private Integer srNo;
-
     @Column(name = "Functions")
     private String functions;
 

@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class PeopleInitiativeDTO {
 	
 	private String id;
-    private Integer sNo;
     private String initiative;
     private String outcome;
     private String recommendation;

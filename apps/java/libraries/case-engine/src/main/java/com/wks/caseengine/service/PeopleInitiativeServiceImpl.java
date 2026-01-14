@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -16,8 +15,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,22 +24,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.PeopleInitiativeDTO;
 import com.wks.caseengine.dto.PlantTeamDTO;
-import com.wks.caseengine.dto.YieldDTO;
-import com.wks.caseengine.entity.NormAttributeTransactions;
-import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.PeopleInitiative;
 import com.wks.caseengine.entity.PlantTeam;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
-import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.PeopleInitiativeRepository;
 import com.wks.caseengine.repository.PlantTeamRepository;
-import com.wks.caseengine.repository.PlantsRepository;
-import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
@@ -54,15 +43,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	
 	@PersistenceContext
 	private EntityManager entityManager;
-	
-	@Autowired
-	private PlantsRepository plantsRepository;
-	
-	@Autowired
-	private SiteRepository siteRepository;
-	
-	@Autowired
-	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
 	@Autowired
 	private PlantTeamRepository plantTeamRepository;
@@ -85,24 +65,20 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 				PlantTeamDTO plantTeamDTO = new PlantTeamDTO();
 				plantTeamDTO.setId(row[0] != null ? row[0].toString() : "");
 
-				plantTeamDTO.setSNo(
-						(row[1] != null && !row[1].toString().trim().isEmpty())
-								? Integer.parseInt(row[1].toString().trim())
-								: 0);
-				plantTeamDTO.setFunctions(row[2] != null ? row[2].toString() : "");
-				plantTeamDTO.setJobRole(row[3] != null ? row[3].toString() : "");
-				plantTeamDTO.setName(row[4] != null ? row[4].toString() : "");
+				plantTeamDTO.setFunctions(row[1] != null ? row[1].toString() : "");
+				plantTeamDTO.setJobRole(row[2] != null ? row[2].toString() : "");
+				plantTeamDTO.setName(row[3] != null ? row[3].toString() : "");
 				plantTeamDTO.setAge(
+						(row[4] != null && !row[4].toString().trim().isEmpty())
+								? Integer.parseInt(row[4].toString().trim())
+								: 0);
+				plantTeamDTO.setTeamSize(
 						(row[5] != null && !row[5].toString().trim().isEmpty())
 								? Integer.parseInt(row[5].toString().trim())
 								: 0);
-				plantTeamDTO.setTeamSize(
-						(row[6] != null && !row[6].toString().trim().isEmpty())
-								? Integer.parseInt(row[6].toString().trim())
-								: 0);
-				plantTeamDTO.setPlantId(row[7] != null ? row[7].toString() : "");
-				plantTeamDTO.setAopYear(row[8] != null ? row[8].toString() : "");
-				plantTeamDTO.setRemark(row[9] != null ? row[9].toString() : "");
+				plantTeamDTO.setPlantId(row[6] != null ? row[6].toString() : "");
+				plantTeamDTO.setAopYear(row[7] != null ? row[7].toString() : "");
+				plantTeamDTO.setRemark(row[8] != null ? row[8].toString() : "");
 				plantTeamDTOs.add(plantTeamDTO);
 				
 			}
@@ -137,26 +113,21 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 			for (Object[] row : obj) {
 				PeopleInitiativeDTO peopleInitiativeDTO = new PeopleInitiativeDTO();
 				peopleInitiativeDTO.setId(row[0] != null ? row[0].toString() : "");
-
-				peopleInitiativeDTO.setSNo(
-						(row[1] != null && !row[1].toString().trim().isEmpty())
-								? Integer.parseInt(row[1].toString().trim())
-								: 0);
-				peopleInitiativeDTO.setInitiative(row[2] != null ? row[2].toString() : "");
-				peopleInitiativeDTO.setOutcome(row[3] != null ? row[3].toString() : "");
-				peopleInitiativeDTO.setRecommendation(row[4] != null ? row[4].toString() : "");
-				if (row[5] != null) {
-				    java.util.Date dateValue = (java.util.Date) row[5];
+				peopleInitiativeDTO.setInitiative(row[1] != null ? row[1].toString() : "");
+				peopleInitiativeDTO.setOutcome(row[2] != null ? row[2].toString() : "");
+				peopleInitiativeDTO.setRecommendation(row[3] != null ? row[3].toString() : "");
+				if (row[4] != null) {
+				    java.util.Date dateValue = (java.util.Date) row[4];
 				    peopleInitiativeDTO.setTargetDate(
 				    		dateValue
 				    );
 				} else {
 				    peopleInitiativeDTO.setTargetDate(null);
 				}
-				peopleInitiativeDTO.setResponsible(row[6] != null ? row[6].toString() : "");
-				peopleInitiativeDTO.setPlantId(row[7] != null ? row[7].toString() : "");
-				peopleInitiativeDTO.setAopYear(row[8] != null ? row[8].toString() : "");
-				peopleInitiativeDTO.setRemark(row[9] != null ? row[9].toString() : "");
+				peopleInitiativeDTO.setResponsible(row[5] != null ? row[5].toString() : "");
+				peopleInitiativeDTO.setPlantId(row[6] != null ? row[6].toString() : "");
+				peopleInitiativeDTO.setAopYear(row[7] != null ? row[7].toString() : "");
+				peopleInitiativeDTO.setRemark(row[8] != null ? row[8].toString() : "");
 				peopleInitiativeDTOs.add(peopleInitiativeDTO);
 				
 			}
@@ -252,7 +223,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 				plantTeam.setName(plantTeamDTO.getName());
 				plantTeam.setPlantId(plantId);
 				plantTeam.setRemark(plantTeamDTO.getRemark());
-				plantTeam.setSrNo(plantTeamDTO.getSNo());
 				plantTeam.setTeamSize(plantTeamDTO.getTeamSize());
 				plantTeamRepository.save(plantTeam);
 			}
@@ -299,7 +269,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 				peopleInitiative.setResponsible(peopleInitiativeDTO.getResponsible());
 				peopleInitiative.setPlantId(plantId);
 				peopleInitiative.setRemark(peopleInitiativeDTO.getRemark());
-				peopleInitiative.setSrNo(peopleInitiativeDTO.getSNo());
 				peopleInitiative.setTargetDate(peopleInitiativeDTO.getTargetDate());
 				peopleInitiativeRepository.save(peopleInitiative);
 			}
@@ -329,11 +298,9 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        Workbook workbook = new XSSFWorkbook();
 	        Sheet sheet = workbook.createSheet("Sheet1");
 
-	        CellStyle normalStyle = workbook.createCellStyle();
 	     	int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
-	        innerHeaders.add("S.No.");
 	        innerHeaders.add("Initiative");
 	        innerHeaders.add("Outcome");
 	        innerHeaders.add("Recommendation");
@@ -356,7 +323,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        	PeopleInitiativeDTO dto = dtoList.get(i);
 	            Row row = sheet.createRow(currentRow++);
 	            List<Object> rowData = new ArrayList<>();
-	            rowData.add(dto.getSNo());
 	            rowData.add(dto.getInitiative());
 	            rowData.add(dto.getOutcome());
 	            rowData.add(dto.getRecommendation());
@@ -382,7 +348,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                }
 	            }
 	        }
-	        sheet.setColumnHidden(6, true);
+	        sheet.setColumnHidden(5, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -439,13 +405,12 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	            
 	            PeopleInitiativeDTO dto = new PeopleInitiativeDTO();
 	            try {
-	                dto.setSNo(getIntegerCellValue(row.getCell(0), dto));
-	                dto.setInitiative(getStringCellValue(row.getCell(1), dto));
-	                dto.setOutcome(getStringCellValue(row.getCell(2), dto));
-	                dto.setRecommendation(getStringCellValue(row.getCell(3), dto));
-	                dto.setTargetDate(getDateCellValue(row.getCell(4), dto));
-	                dto.setResponsible(getStringCellValue(row.getCell(5), dto));
-	                dto.setId(getStringCellValue(row.getCell(6), dto));
+	                dto.setInitiative(getStringCellValue(row.getCell(0), dto));
+	                dto.setOutcome(getStringCellValue(row.getCell(1), dto));
+	                dto.setRecommendation(getStringCellValue(row.getCell(2), dto));
+	                dto.setTargetDate(getDateCellValue(row.getCell(3), dto));
+	                dto.setResponsible(getStringCellValue(row.getCell(4), dto));
+	                dto.setId(getStringCellValue(row.getCell(5), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 
@@ -476,13 +441,9 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 
 	        Workbook workbook = new XSSFWorkbook();
 	        Sheet sheet = workbook.createSheet("Sheet1");
-
-	        CellStyle normalStyle = workbook.createCellStyle();
-	       
 	        int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
-	        innerHeaders.add("S.No.");
 	        innerHeaders.add("Function");
 	        innerHeaders.add("Job Role");
 	        innerHeaders.add("Name");
@@ -505,7 +466,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        	PlantTeamDTO dto = dtoList.get(i);
 	            Row row = sheet.createRow(currentRow++);
 	            List<Object> rowData = new ArrayList<>();
-	            rowData.add(dto.getSNo());
 	            rowData.add(dto.getFunctions());
 	            rowData.add(dto.getJobRole());
 	            rowData.add(dto.getName());
@@ -517,7 +477,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                rowData.add(dto.getErrDescription());
 	            }
 
-	         
 	            for (int col = 0; col < rowData.size(); col++) {
 	                Cell cell = row.createCell(col);
 	                Object value = rowData.get(col);
@@ -529,11 +488,10 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                    cell.setCellValue(value.toString());
 	                } else {
 	                    cell.setCellValue("");
-	                }
-	            
+	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(6, true);
+	        sheet.setColumnHidden(5, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -546,7 +504,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 
 	@Override
 	public AOPMessageVM importPlantTeam(String year,UUID plantId,MultipartFile file) {
-		// TODO Auto-generated method stub
 		try {
 			List<PlantTeamDTO> data = readPlantTeam(file.getInputStream(), plantId, year);
 			 AOPMessageVM aopMessageVM = savePlantTeam(year, plantId.toString(),data);
@@ -579,8 +536,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
-
-	      
 	        Iterator<Row> rowIterator = sheet.iterator();
 
 	        if (rowIterator.hasNext())
@@ -591,13 +546,12 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	            
 	            PlantTeamDTO dto = new PlantTeamDTO();
 	            try {
-	                dto.setSNo(getIntegerCellValue(row.getCell(0), dto));
-	                dto.setFunctions(getStringCellValue(row.getCell(1), dto));
-	                dto.setJobRole(getStringCellValue(row.getCell(2), dto));
-	                dto.setName(getStringCellValue(row.getCell(3), dto));
-	                dto.setAge(getIntegerCellValue(row.getCell(4), dto));
-	                dto.setTeamSize(getIntegerCellValue(row.getCell(5), dto));
-	                dto.setId(getStringCellValue(row.getCell(6), dto));
+	                dto.setFunctions(getStringCellValue(row.getCell(0), dto));
+	                dto.setJobRole(getStringCellValue(row.getCell(1), dto));
+	                dto.setName(getStringCellValue(row.getCell(2), dto));
+	                dto.setAge(getIntegerCellValue(row.getCell(3), dto));
+	                dto.setTeamSize(getIntegerCellValue(row.getCell(4), dto));
+	                dto.setId(getStringCellValue(row.getCell(5), dto));
 	              } 
 	              catch (Exception e) {
 	                e.printStackTrace();

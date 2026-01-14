@@ -105,9 +105,6 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		this.dataSource = dataSource;
 	}
 
-
-	
-
 	@Override
 	@Transactional
 	public AOPMessageVM getSlowdownNormsData(String year, String plantId,String gradeId) {

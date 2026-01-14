@@ -25,9 +25,6 @@ public class PeopleInitiative {
 	    @Column(name = "Id", nullable = false, updatable = false)
 	    private UUID id;
 
-    @Column(name = "SrNo")
-    private Integer srNo;
-
     @Column(name = "Initiative")
     private String initiative;
 

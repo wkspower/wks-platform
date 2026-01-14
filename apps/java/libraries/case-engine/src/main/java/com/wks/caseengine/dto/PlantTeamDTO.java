@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 public class PlantTeamDTO {
 	
 	private String id;
-    private Integer sNo;
     private String functions;
     private String jobRole;
     private String name;
