@@ -27,7 +27,7 @@ export default function PlantTeam() {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const PLANT_NAME = plantObject?.name
+
   const SCREEN_NAME = screenTitle?.title
   const AOP_YEAR = year?.selectedYear
   const thisYear = AOP_YEAR
@@ -468,7 +468,7 @@ export default function PlantTeam() {
       let EXCEL_EXPORT_TITLE = ''
 
       if (type === 'plantTeam') {
-        EXCEL_EXPORT_TITLE = `${vertName}_${PLANT_NAME}_Plant_Team`
+        EXCEL_EXPORT_TITLE = `${vertName}_Plant_Team`
         response = await DataService.PlantTeamExport(
           keycloak,
           PLANT_ID,
@@ -476,7 +476,7 @@ export default function PlantTeam() {
           EXCEL_EXPORT_TITLE,
         )
       } else if (type === 'peopleInitiative') {
-        EXCEL_EXPORT_TITLE = `${vertName}_${PLANT_NAME}_People_Initiative`
+        EXCEL_EXPORT_TITLE = `${vertName}_People_Initiative`
         response = await DataService.ExportPeopleInitiative(
           keycloak,
           PLANT_ID,
