@@ -1,6 +1,10 @@
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import AdvanceKendoTable from 'components/phase-two/common/AdvanceKendoTable/index'
-import { validateRowDataWithRemarks } from 'components/phase-two/common/commonUtilityFunctions'
+import {
+  validateRowDataWithRemarks,
+  recalcDuration,
+  recalcEndDate,
+} from 'components/phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'services/phase-two-services/TCS/tcsApiService'
 import { useSession } from 'SessionStoreContext'
@@ -27,30 +31,6 @@ const Shutdown = ({
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-
-  // Detect numeric fields from data
-  const getNumericKeysInAllRows = (rowsData = []) => {
-    if (!Array.isArray(rowsData) || rowsData.length === 0) return []
-
-    const allKeys = Array.from(
-      rowsData.reduce((set, row) => {
-        if (row && typeof row === 'object') {
-          Object.keys(row).forEach((k) => set.add(k))
-        }
-        return set
-      }, new Set()),
-    )
-
-    return allKeys.filter((key) =>
-      rowsData.every((row) => {
-        const v = row?.[key]
-        if (v === undefined || v === null || String(v).trim() === '')
-          return true
-        const n = Number(String(v).trim())
-        return Number.isFinite(n)
-      }),
-    )
-  }
 
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
@@ -213,8 +193,15 @@ const Shutdown = ({
       }
 
       // Format date fields to add IST timezone offset before sending to backend
+      // Set id to null for new items
       const formattedData = data.map((item) => {
         const formatted = { ...item }
+
+        // If this is a new item, set id to null
+        if (item.isNew) {
+          formatted.id = null
+        }
+
         if (formatted.startDate) {
           formatted.startDate = addTimeOffset(formatted.startDate)
         }
@@ -280,12 +267,7 @@ const Shutdown = ({
           })
         } else {
           // Call API to delete from backend
-          // await TcsApiService.deleteShutdownData(
-          //   keycloak,
-          //   PLANT_ID,
-          //   AOP_YEAR,
-          //   id,
-          // )
+          await TcsApiService.deleteShutdownData(keycloak, id)
           setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
           setSnackbarOpen(true)
           setSnackbarData({
