@@ -157,7 +157,7 @@ export default function PlantTeam() {
         const mapped = res?.data?.Data?.map((item, index) => ({
           id: item.id || null,
           idFromApi: item.id || null,
-          serialNumber: item.sNo,
+          serialNumber: index,
           function: item.functions,
           jobRole: item.jobRole,
           name: item.name,
@@ -172,7 +172,7 @@ export default function PlantTeam() {
           ...item,
           id: item.id || null,
           idFromApi: item.id || null,
-          serialNumber: item.sNo,
+          serialNumber: index,
         }))
         setRows(mapped)
         setPeopleInitiativeRows(peopleInitiativeMapped)
@@ -219,14 +219,8 @@ export default function PlantTeam() {
         return
       }
 
-      const maxSerialNumber = rows.reduce(
-        (max, row) => (row.serialNumber > max ? row.serialNumber : max),
-        0,
-      )
-      let nextSerial = maxSerialNumber + 1
-      const payload = data.map((item) => ({
+      const payload = data.map((item, index) => ({
         id: item.id || null,
-        sNo: item.id ? item.serialNumber : nextSerial++,
         functions: item.function,
         jobRole: item.jobRole,
         name: item.name,
@@ -298,14 +292,8 @@ export default function PlantTeam() {
         return
       }
 
-      const maxSerialNumber = peopleInitiativeRows.reduce(
-        (max, row) => (row.serialNumber > max ? row.serialNumber : max),
-        0,
-      )
-      let nextSerial = maxSerialNumber + 1
-      const payload = data.map((item) => ({
+      const payload = data.map((item, index) => ({
         id: item.id || null,
-        sNo: item.id ? item.serialNumber : nextSerial++,
         initiative: item.initiative,
         outcome: item.outcome,
         recommendation: item.recommendation,
