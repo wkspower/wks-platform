@@ -331,12 +331,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        Sheet sheet = workbook.createSheet("Sheet1");
 
 	        CellStyle normalStyle = workbook.createCellStyle();
-	        CellStyle totalRowStyle = workbook.createCellStyle();
-	        totalRowStyle.cloneStyleFrom(normalStyle);
-	        totalRowStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-	        totalRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-	        int currentRow = 0;
+	     	int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("S.No.");
@@ -374,9 +369,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                rowData.add(dto.getErrDescription());
 	            }
 
-	            boolean isLastRow = (i == dataRowCount - 1);
-	            CellStyle styleToUse = isLastRow ? totalRowStyle : normalStyle;
-
+	         
 	            for (int col = 0; col < rowData.size(); col++) {
 	                Cell cell = row.createCell(col);
 	                Object value = rowData.get(col);
@@ -389,7 +382,6 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                } else {
 	                    cell.setCellValue("");
 	                }
-	                cell.setCellStyle(styleToUse);
 	            }
 	        }
 	        sheet.setColumnHidden(6, true);
@@ -439,18 +431,14 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 
-	        int lastRowNum = sheet.getLastRowNum();  // highest row index (0-based)
 	        Iterator<Row> rowIterator = sheet.iterator();
 
 	        if (rowIterator.hasNext())
-	            rowIterator.next();  // skip header
+	            rowIterator.next();  
 
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
-	            if (row.getRowNum() == lastRowNum) {
-	                // skip the last row
-	                break;
-	            }
+	            
 	            PeopleInitiativeDTO dto = new PeopleInitiativeDTO();
 	            try {
 	                dto.setSNo(getIntegerCellValue(row.getCell(0), dto));
@@ -460,6 +448,8 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                dto.setTargetDate(getDateCellValue(row.getCell(4), dto));
 	                dto.setResponsible(getStringCellValue(row.getCell(5), dto));
 	                dto.setId(getStringCellValue(row.getCell(6), dto));
+	                dto.setPlantId(plantFKId.toString());
+	                dto.setAopYear(year);
 	              } 
 	              catch (Exception e) {
 	                e.printStackTrace();
@@ -490,11 +480,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	        Sheet sheet = workbook.createSheet("Sheet1");
 
 	        CellStyle normalStyle = workbook.createCellStyle();
-	        CellStyle totalRowStyle = workbook.createCellStyle();
-	        totalRowStyle.cloneStyleFrom(normalStyle);
-	        totalRowStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-	        totalRowStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
+	       
 	        int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
@@ -533,9 +519,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                rowData.add(dto.getErrDescription());
 	            }
 
-	            boolean isLastRow = (i == dataRowCount - 1);
-	            CellStyle styleToUse = isLastRow ? totalRowStyle : normalStyle;
-
+	         
 	            for (int col = 0; col < rowData.size(); col++) {
 	                Cell cell = row.createCell(col);
 	                Object value = rowData.get(col);
@@ -548,7 +532,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	                } else {
 	                    cell.setCellValue("");
 	                }
-	                cell.setCellStyle(styleToUse);
+	            
 	            }
 	        }
 	        sheet.setColumnHidden(6, true);
@@ -598,7 +582,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 
-	        int lastRowNum = sheet.getLastRowNum();  
+	      
 	        Iterator<Row> rowIterator = sheet.iterator();
 
 	        if (rowIterator.hasNext())
@@ -606,9 +590,7 @@ public class PeopleInitiativeServiceImpl implements PeopleInitiativeService{
 
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
-	            if (row.getRowNum() == lastRowNum) {
-	                break;
-	            }
+	            
 	            PlantTeamDTO dto = new PlantTeamDTO();
 	            try {
 	                dto.setSNo(getIntegerCellValue(row.getCell(0), dto));
