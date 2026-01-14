@@ -157,7 +157,7 @@ export default function PlantTeam() {
         const mapped = res?.data?.Data?.map((item, index) => ({
           id: item.id || null,
           idFromApi: item.id || null,
-          serialNumber: index,
+          serialNumber: index+1,
           function: item.functions,
           jobRole: item.jobRole,
           name: item.name,
@@ -172,7 +172,7 @@ export default function PlantTeam() {
           ...item,
           id: item.id || null,
           idFromApi: item.id || null,
-          serialNumber: index,
+          serialNumber: index+1,
         }))
         setRows(mapped)
         setPeopleInitiativeRows(peopleInitiativeMapped)
