@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
@@ -225,7 +225,7 @@ const AssetAvailability = () => {
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
     showImport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `Asset Priority - ${AOP_YEAR}`,
     showTitle: true,
   }
@@ -328,21 +328,54 @@ const AssetAvailability = () => {
 
     setLoading(true)
     try {
-      await InputApiService.saveAssetPriorityExcel(
+      const response = await InputApiService.saveAssetPriorityExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Excel file imported successfully!',
-        severity: 'success',
-      })
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        await fetchAssetPriorityData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
 
-      // Refresh data after import
-      await fetchAssetPriorityData()
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `Error File - Asset Priority.xlsx`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        await fetchAssetPriorityData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
       setSnackbarOpen(true)
@@ -352,6 +385,31 @@ const AssetAvailability = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await InputApiService.exportAssetPriorityExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Asset Priority data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
     }
   }
 
@@ -387,6 +445,7 @@ const AssetAvailability = () => {
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
+        handleExport={handleExport}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

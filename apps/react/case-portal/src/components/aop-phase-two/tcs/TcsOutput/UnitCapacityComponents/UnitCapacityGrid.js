@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { convertFromKBPSD } from './uomConversionUtils'
+import { convertFromKBPSD, convertToKBPSD } from './uomConversionUtils'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -21,6 +22,7 @@ const UnitCapacityGrid = ({
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
+  const headerMap = generateHeaderNames(AOP_YEAR)
 
   const defaultDropdownConfig = {
     options: [
@@ -108,23 +110,35 @@ const UnitCapacityGrid = ({
         let transformedData = []
         if (response?.results && Array.isArray(response.results)) {
           transformedData = response.results.map((item, index) => {
-            // Backend data is in KBPSD, create nested structure with both KBPSD and KTPD
-            const summerKBPSD = item.summer
-            const winterKBPSD = item.winter
-            const summerKTPD = convertFromKBPSD(summerKBPSD, 'KTPD')
-            const winterKTPD = convertFromKBPSD(winterKBPSD, 'KTPD')
+            // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
+            const months = [
+              'april',
+              'may',
+              'june',
+              'july',
+              'aug',
+              'sep',
+              'oct',
+              'nov',
+              'dec',
+              'jan',
+              'feb',
+              'mar',
+            ]
+            const monthData = {}
+
+            months.forEach((month) => {
+              const kbpsdValue = item[month] || 0
+              monthData[month] = {
+                kbpsd: kbpsdValue,
+                ktpd: convertFromKBPSD(kbpsdValue, 'KTPD'),
+              }
+            })
 
             return {
               id: item.id || `row_${index}`,
               particulates: item.particulates,
-              summer: {
-                kbpsd: summerKBPSD,
-                ktpd: summerKTPD,
-              },
-              winter: {
-                kbpsd: winterKBPSD,
-                ktpd: winterKTPD,
-              },
+              ...monthData,
               remark: item.remark,
               insertedDateTime: item.insertedDateTime,
               inEdit: false,
@@ -179,55 +193,72 @@ const UnitCapacityGrid = ({
     }
   }, [SITE_ID, VERTICAL_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
 
-  // Column configuration for Unit Capacity with nested KBPSD and KTPD
-  const columnConfig = {
-    id: {
+  // Column configuration for Unit Capacity with monthly nested KBPSD and KTPD
+  const columnConfig = useMemo(() => {
+    const config = {
+      id: {
+        editable: false,
+        type: 'text',
+        minWidth: 50,
+        widthT: 100,
+        hidden: true,
+      },
+      particulates: {
+        editable: false,
+        type: 'text',
+        minWidth: 150,
+        widthT: 150,
+      },
+    }
+
+    // Add monthly columns with KBPSD and KTPD sub-columns
+    const months = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'mar',
+    ]
+    months.forEach((month) => {
+      config[`${month}.kbpsd`] = {
+        editable: false,
+        type: 'number1',
+        minWidth: 80,
+        widthT: 100,
+        format: valueFormat,
+        title: 'KBPSD',
+      }
+      config[`${month}.ktpd`] = {
+        editable: false,
+        type: 'number1',
+        minWidth: 80,
+        widthT: 100,
+        format: valueFormat,
+        title: 'KTPD',
+      }
+    })
+
+    config.remark = {
       editable: false,
       type: 'text',
-      minWidth: 50,
-      widthT: 100,
-      hidden: true,
-    },
-    particulates: { editable: false, type: 'text', minWidth: 150, widthT: 150 },
-    'summer.kbpsd': {
-      editable: false,
-      type: 'number1',
-      minWidth: 100,
-      widthT: 100,
-      format: valueFormat,
-      title: 'KBPSD',
-    },
-    'summer.ktpd': {
-      editable: false,
-      type: 'number1',
-      minWidth: 100,
-      widthT: 100,
-      format: valueFormat,
-      title: 'KTPD',
-    },
-    'winter.kbpsd': {
-      editable: false,
-      type: 'number1',
-      minWidth: 100,
-      widthT: 100,
-      format: valueFormat,
-      title: 'KBPSD',
-    },
-    'winter.ktpd': {
-      editable: false,
-      type: 'number1',
-      minWidth: 100,
-      widthT: 100,
-      format: valueFormat,
-      title: 'KTPD',
-    },
-    remark: { editable: false, type: 'text', minWidth: 200, widthT: 250 },
-  }
+      minWidth: 200,
+      widthT: 250,
+    }
+
+    return config
+  }, [valueFormat])
 
   const columns = useMemo(() => {
     const { headers, keys } = apiMetadata
 
-    if (!headers || !keys || headers.length === 0) {
+    if (!headers || !keys || headers.length === 0 || !headerMap) {
       return []
     }
 
@@ -244,49 +275,62 @@ const UnitCapacityGrid = ({
       ...config,
     }))
 
-    // Group nested summer and winter columns
-    const summerKBPSDCol = cols.find((col) => col.field === 'summer.kbpsd')
-    const summerKTPDCol = cols.find((col) => col.field === 'summer.ktpd')
-    const winterKBPSDCol = cols.find((col) => col.field === 'winter.kbpsd')
-    const winterKTPDCol = cols.find((col) => col.field === 'winter.ktpd')
+    // Group monthly columns with KBPSD and KTPD sub-columns
+    const months = [
+      { key: 'april', headerKey: 4 },
+      { key: 'may', headerKey: 5 },
+      { key: 'june', headerKey: 6 },
+      { key: 'july', headerKey: 7 },
+      { key: 'aug', headerKey: 8 },
+      { key: 'sep', headerKey: 9 },
+      { key: 'oct', headerKey: 10 },
+      { key: 'nov', headerKey: 11 },
+      { key: 'dec', headerKey: 12 },
+      { key: 'jan', headerKey: 1 },
+      { key: 'feb', headerKey: 2 },
+      { key: 'mar', headerKey: 3 },
+    ]
+
     const otherCols = cols.filter(
-      (col) =>
-        !col.field.startsWith('summer.') && !col.field.startsWith('winter.'),
+      (col) => !months.some((m) => col.field.startsWith(`${m.key}.`)),
     )
 
-    if (summerKBPSDCol && summerKTPDCol && winterKBPSDCol && winterKTPDCol) {
-      const result = []
-      // Position 0: id
-      result.push(otherCols.find((col) => col.field === 'id'))
-      // Position 1: particulates
-      result.push(otherCols.find((col) => col.field === 'particulates'))
-      // Position 2: Capacity with Summer (KBPSD, KTPD) and Winter (KBPSD, KTPD)
+    const result = []
+    // Position 0: id
+    result.push(otherCols.find((col) => col.field === 'id'))
+    // Position 1: particulates
+    result.push(otherCols.find((col) => col.field === 'particulates'))
+
+    // Position 2: Capacity with monthly columns (Apr to Mar)
+    const monthlyColumns = months
+      .map((month) => {
+        const kbpsdCol = cols.find((col) => col.field === `${month.key}.kbpsd`)
+        const ktpdCol = cols.find((col) => col.field === `${month.key}.ktpd`)
+
+        return {
+          title: headerMap[month.headerKey] || month.key.toUpperCase(),
+          children: [kbpsdCol, ktpdCol].filter(Boolean),
+        }
+      })
+      .filter((col) => col.children.length > 0)
+
+    if (monthlyColumns.length > 0) {
       result.push({
         title: 'Capacity',
-        children: [
-          {
-            title: columnMap['summer'] || 'Summer',
-            children: [summerKBPSDCol, summerKTPDCol],
-          },
-          {
-            title: columnMap['winter'] || 'Winter',
-            children: [winterKBPSDCol, winterKTPDCol],
-          },
-        ],
+        children: monthlyColumns,
       })
-      // Position 3: remark and other remaining columns
-      const remainingCols = otherCols.filter(
-        (col) =>
-          col.field !== 'id' &&
-          col.field !== 'particulates' &&
-          col.field !== 'insertedDateTime',
-      )
-      result.push(...remainingCols)
-      return result
     }
 
-    return cols
-  }, [apiMetadata])
+    // Position 3: remark and other remaining columns
+    const remainingCols = otherCols.filter(
+      (col) =>
+        col.field !== 'id' &&
+        col.field !== 'particulates' &&
+        col.field !== 'insertedDateTime',
+    )
+    result.push(...remainingCols)
+    return result
+  }, [apiMetadata, columnConfig, headerMap])
 
   // Handle remark cell click
   const handleRemarkCellClick = (row) => {
@@ -302,6 +346,7 @@ const UnitCapacityGrid = ({
     showExport: true,
     showTitle: true,
     showDropdown: false,
+    approveBtn: true,
   }
 
   return (

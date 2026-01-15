@@ -7,7 +7,7 @@ import {
   CircularProgress,
   Stack,
 } from '@mui/material'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'

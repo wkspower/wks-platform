@@ -320,6 +320,7 @@ const NetUnitCapacity = ({
     showWorkFlowBtns: false,
     showTitle: true,
     showDropdown: false,
+    approveBtn: true,
   }
 
   return (

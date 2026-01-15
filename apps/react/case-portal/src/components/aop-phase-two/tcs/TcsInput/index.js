@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
+import RemarksAccordion from 'components/aop-phase-two/common/utilities/RemarksAccordion'
 import UnitCapacity from './UnitCapacity'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
@@ -131,6 +132,17 @@ const TcsInput = () => {
     }
   }
 
+  // Handle remark submission
+  const handleRemarkSubmit = (remark) => {
+    console.log('Remark submitted:', remark)
+    // TODO: Add API call to save remark
+    setSnackbarData({
+      message: 'Remark submitted successfully!',
+      severity: 'success',
+    })
+    setSnackbarOpen(true)
+  }
+
   return (
     <Box
       sx={{
@@ -140,6 +152,15 @@ const TcsInput = () => {
         backgroundColor: '#fff',
       }}
     >
+      {/* Remarks Accordion */}
+      <RemarksAccordion
+        title='TCS Input Submission'
+        placeholder='Enter your remarks here...'
+        onSubmit={handleRemarkSubmit}
+        defaultExpanded={true}
+        maxLength={1000}
+      />
+
       {/* Tabs */}
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs

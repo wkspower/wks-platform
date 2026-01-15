@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 

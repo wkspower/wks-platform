@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
