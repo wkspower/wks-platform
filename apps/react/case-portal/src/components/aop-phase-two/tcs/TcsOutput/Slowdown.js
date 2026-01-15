@@ -167,6 +167,7 @@ const Slowdown = ({
     showExport: true,
     showTitle: true,
     filterable: false,
+    approveBtn: true,
   }
 
   return (

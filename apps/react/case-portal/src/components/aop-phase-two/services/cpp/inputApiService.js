@@ -14,10 +14,12 @@ export const InputApiService = {
   getAssetPriority,
   saveAssetPriority,
   saveAssetPriorityExcel,
+  exportAssetPriorityExcel,
 
   getAssetCapacity,
   saveAssetCapacity,
   saveAssetCapacityExcel,
+  exportAssetCapacityExcel,
 
   getPlantList,
   getHeatRateData,
@@ -32,8 +34,9 @@ export const InputApiService = {
   saveHRSGHeatRateData,
   saveHRSGHeatRateExcel,
 
-  // Generic Excel Import
+  // Generic Excel Import/Export
   saveExcelData,
+  exportExcelData,
 }
 
 // ===================== ||Shutdown and Operational hrs APIs || ===================== //
@@ -382,7 +385,7 @@ async function saveHRSGHeatRateData(keycloak, PLANT_ID, AOP_YEAR, payload) {
  * @returns {Promise} API response
  */
 async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/${endpoint}?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/${endpoint}/${PLANT_ID}/${AOP_YEAR}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -395,14 +398,89 @@ async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
       headers,
       body: formData,
     })
+
+    const responseData = await json(keycloak, resp)
+
+    // Return response data for both success and 400 (partial success with error file)
+    // Components will handle error file download based on code and data
+    if (resp.status === 400 || resp.status === 200) {
+      return responseData
+    }
+
     if (!resp.ok) {
       throw new Error(
         `Failed to import data: ${resp.status} ${resp.statusText}`,
       )
     }
-    return json(keycloak, resp)
+
+    return responseData
   } catch (e) {
     console.error(`Error importing Excel data to ${endpoint}:`, e)
+    return Promise.reject(e)
+  }
+}
+
+// ===================== || GENERIC EXCEL EXPORT FUNCTION || ===================== //
+/**
+ * Generic function to export Excel file from backend
+ * @param {Object} keycloak - Keycloak session object
+ * @param {Object} params - Export parameters
+ * @param {string} params.endpoint - The API endpoint path (e.g., 'export-excel')
+ * @param {Object} params.queryParams - Query parameters (e.g., { year: '2024', plantId: '123', type: 'Production' })
+ * @param {Object|null} params.payload - Optional POST body payload
+ * @param {string} params.fileName - Downloaded file name (e.g., 'plant_production_plan.xlsx')
+ * @param {string} params.method - HTTP method ('GET' or 'POST'), defaults to 'GET'
+ * @returns {Promise} Success/error response
+ */
+async function exportExcelData(keycloak, params) {
+  const {
+    endpoint,
+    queryParams = {},
+    payload = null,
+    fileName,
+    method = 'GET',
+  } = params
+
+  const queryString = new URLSearchParams(queryParams).toString()
+  const url = `${Config.CaseEngineUrl}/task/${endpoint}${queryString ? `?${queryString}` : ''}`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const fetchOptions = {
+      method,
+      headers,
+    }
+
+    if (payload && (method === 'POST' || method === 'PUT')) {
+      fetchOptions.body = JSON.stringify(payload)
+    }
+
+    const resp = await fetch(url, fetchOptions)
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to export Excel: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+
+    return { success: true, message: 'Excel exported successfully' }
+  } catch (e) {
+    console.error(`Error exporting Excel from ${endpoint}:`, e)
     return Promise.reject(e)
   }
 }
@@ -453,6 +531,16 @@ async function saveAssetPriorityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   )
 }
 
+// Asset Priority Excel Export
+async function exportAssetPriorityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `asset-priority/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `asset_priority_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
+}
+
 // Asset Capacity Excel Import
 async function saveAssetCapacityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   return saveExcelData(
@@ -462,6 +550,16 @@ async function saveAssetCapacityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
     PLANT_ID,
     AOP_YEAR,
   )
+}
+
+// Asset Capacity Excel Export
+async function exportAssetCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `asset-capacity/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `asset_capacity_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
 }
 
 // Heat Rate Excel Import (GT Heat Rate)
