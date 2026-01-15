@@ -1,8 +1,12 @@
 package com.wks.caseengine.service.cpp;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +15,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -23,9 +29,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import com.wks.caseengine.dto.cpp.AssetPrioriryDTO;
 import com.wks.caseengine.dto.cpp.AssetPriorityProjection;
 import com.wks.caseengine.entity.FinancialYearMonth;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.cpp.AssetPriorityRepository;
 import com.wks.caseengine.repository.ExistingAssetAvailabilityProjection;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class AssetPriorityServiceImpl implements AssetPriorityService {
@@ -232,7 +240,7 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
         }
 
         if (!inserts.isEmpty()) {
-            String insertSql = "INSERT INTO AssetAvailability (Id, AssetId, FinancialYearMonthId, IsAssetAvailable, Priority) VALUES (NEWID(), ?, ?, 1, ?)";
+            String insertSql = "INSERT INTO AssetAvailability (Id, AssetId, FinancialYearMonthId, Priority) VALUES (NEWID(), ?, ?, ?)";
               jdbcTemplate.batchUpdate(insertSql, inserts);
            System.out.println("inserts: " + inserts.size()  + "comma separated: " + inserts.stream().map(Object::toString).collect(Collectors.joining(", ")));
         }
@@ -250,167 +258,250 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
     }
 
     @Override
-    public void importExcel(MultipartFile file, String financialYear) {
-       
-    //     if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx") || !file.getOriginalFilename().endsWith(".xls")) {
-    //         throw new IllegalArgumentException("Invalid or empty Excel file.");
-    // }
-
-    List<AssetPrioriryDTO> assetPrioriryDTOs = new ArrayList<>();
-
-    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-        Sheet sheet = workbook.getSheetAt(0);
-        int totalRows = sheet.getLastRowNum();
-        System.out.println("total rows: " + totalRows);
-        for(int i = 1; i <= totalRows; i++) {   // itertate through each row
-            Row row = sheet.getRow(i);
-            if(row == null) continue;
-
-            String assetName = row.getCell(0).getStringCellValue();  // make data base query base on assetName, if no data found for a given asset it means the assetName is edited and throw error
-            System.out.println("asset name: " + assetName);
-            // fetch the AssetAvailability base on AssetName
-            List<Object[]> assetAvailability = assetPriorityRepository.getAssetAvailabilityByAssetName(assetName);
-            // 0 : Id, 1 : AssetId  2 : month
-
-            if(assetAvailability.isEmpty()) {
-                throw new IllegalArgumentException("Asset not found: " + assetName);
+    public byte[] exportAssetPriority(UUID cppId, String financialYear, boolean isAfterSave, List<AssetPrioriryDTO> dtoList) {
+        try {
+            if (!isAfterSave) {
+                dtoList = getAssetPriority(cppId, financialYear);
             }
 
-            //  iterate though each column and get the value    
-            AssetPrioriryDTO assetPrioriryDTO = new AssetPrioriryDTO();
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Asset Priority");
+            int currentRow = 0;
 
-           assetPrioriryDTO.setAssetName(assetName);
-           assetPrioriryDTO.setAssetId(UUID.fromString((String) assetAvailability.get(0)[1]));
+            // Header row
+            List<String> headers = new ArrayList<>();
+            headers.add("Asset Name");
+            headers.add("April");
+            headers.add("May");
+            headers.add("June");
+            headers.add("July");
+            headers.add("August");
+            headers.add("September");
+            headers.add("October");
+            headers.add("November");
+            headers.add("December");
+            headers.add("January");
+            headers.add("February");
+            headers.add("March");
+            headers.add("Remarks");
+            headers.add("AssetId"); // Hidden column
 
-         System.out.println("column iteration for asset " + assetName + " started");
+            if (isAfterSave) {
+                headers.add("Status");
+                headers.add("Error Description");
+            }
 
-            for(int j = 1; j <= 13; j++) {    
+            Row headerRow = sheet.createRow(currentRow++);
+            for (int col = 0; col < headers.size(); col++) {
+                Cell cell = headerRow.createCell(col);
+                cell.setCellValue(headers.get(col));
+                cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+            }
 
-               if(j == 1) {  
-                   if(row.getCell(j) == null) {  
-                          assetPrioriryDTO.setApril(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setApril(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                 
-                   }
+            // Data rows
+            for (AssetPrioriryDTO dto : dtoList) {
+                Row row = sheet.createRow(currentRow++);
+                int col = 0;
 
-                   
-                else if(j == 2) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setMay(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setMay(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 3) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setJune(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setJune(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 4) {
-                    if(row.getCell(j) == null) {  
-                            assetPrioriryDTO.setJuly(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setJuly(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 5) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setAug(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setAug(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 6) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setSep(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setSep(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 7) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setOct(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setOct(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 8) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setNov(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setNov(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 9) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setDec(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setDec(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 10) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setJan(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setJan(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 11) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setFeb(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setFeb(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 12) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setMar(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setMar(Integer.valueOf((int) row.getCell(j).getNumericCellValue()));
-                   }
-                }
-                else if(j == 13) {
-                    if(row.getCell(j) == null) {  
-                        assetPrioriryDTO.setRemarks(null);
-                   }
-                   else {
-                    assetPrioriryDTO.setRemarks(row.getCell(j).getStringCellValue());
-                   }
-                }
-                
-             
-            } // column for loop
+                row.createCell(col++).setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
+                setCellValue(row.createCell(col++), dto.getApril());
+                setCellValue(row.createCell(col++), dto.getMay());
+                setCellValue(row.createCell(col++), dto.getJune());
+                setCellValue(row.createCell(col++), dto.getJuly());
+                setCellValue(row.createCell(col++), dto.getAug());
+                setCellValue(row.createCell(col++), dto.getSep());
+                setCellValue(row.createCell(col++), dto.getOct());
+                setCellValue(row.createCell(col++), dto.getNov());
+                setCellValue(row.createCell(col++), dto.getDec());
+                setCellValue(row.createCell(col++), dto.getJan());
+                setCellValue(row.createCell(col++), dto.getFeb());
+                setCellValue(row.createCell(col++), dto.getMar());
+                row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                row.createCell(col++).setCellValue(dto.getAssetId() != null ? dto.getAssetId().toString() : "");
 
-            assetPrioriryDTOs.add(assetPrioriryDTO);  // new dto for each row
-         } // row for loop
+                if (isAfterSave) {
+                    row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                }
+            }
 
-         System.out.println("asset prioriry dto's: " + assetPrioriryDTOs);
+            // Hide AssetId column (column index 14)
+            sheet.setColumnHidden(14, true);
 
-        //   System.out.println("all rows iterated and dto's created");
-          setAssetPriority(assetPrioriryDTOs, financialYear);
-   
-    
-  }  catch(Exception e) {
-        throw new RuntimeException("Error importing Excel file: " + e.getMessage());
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-}
+    @Override
+    public AOPMessageVM importExcel(UUID cppId, String financialYear, MultipartFile file) {
+        try {
+            List<AssetPrioriryDTO> data = readAssetPriority(file.getInputStream(), cppId, financialYear);
+            
+            // Separate failed records from successful ones
+            List<AssetPrioriryDTO> validRecords = new ArrayList<>();
+            List<AssetPrioriryDTO> failedRecords = new ArrayList<>();
+            
+            for (AssetPrioriryDTO dto : data) {
+                if (dto.getSaveStatus() != null && dto.getSaveStatus().equalsIgnoreCase("Failed")) {
+                    failedRecords.add(dto);
+                } else {
+                    validRecords.add(dto);
+                }
+            }
+
+            // Try to save valid records
+            if (!validRecords.isEmpty()) {
+                try {
+                    setAssetPriority(validRecords, financialYear);
+                } catch (Exception e) {
+                    // Mark all valid records as failed if save fails
+                    for (AssetPrioriryDTO dto : validRecords) {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("Save failed: " + e.getMessage());
+                        failedRecords.add(dto);
+                    }
+                }
+            }
+
+            AOPMessageVM aopMessageVM = new AOPMessageVM();
+            if (!failedRecords.isEmpty()) {
+                byte[] fileByteArray = exportAssetPriority(cppId, financialYear, true, failedRecords);
+                String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+                aopMessageVM.setData(base64File);
+                aopMessageVM.setCode(400);
+                aopMessageVM.setMessage("Partial data has been saved");
+            } else {
+                aopMessageVM.setCode(200);
+                aopMessageVM.setMessage("All data has been saved");
+            }
+
+            return aopMessageVM;
+        } catch (Exception e) {
+            e.printStackTrace();
+            AOPMessageVM errorVM = new AOPMessageVM();
+            errorVM.setCode(500);
+            errorVM.setMessage("Error importing file: " + e.getMessage());
+            return errorVM;
+        }
+    }
+
+    private List<AssetPrioriryDTO> readAssetPriority(InputStream inputStream, UUID cppId, String financialYear) {
+        List<AssetPrioriryDTO> assetList = new ArrayList<>();
+
+        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            // Skip header row
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
+            }
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                AssetPrioriryDTO dto = new AssetPrioriryDTO();
+                
+                try {
+                    dto.setAssetName(getStringCellValue(row.getCell(0)));
+                    dto.setApril(getIntegerCellValue(row.getCell(1)));
+                    dto.setMay(getIntegerCellValue(row.getCell(2)));
+                    dto.setJune(getIntegerCellValue(row.getCell(3)));
+                    dto.setJuly(getIntegerCellValue(row.getCell(4)));
+                    dto.setAug(getIntegerCellValue(row.getCell(5)));
+                    dto.setSep(getIntegerCellValue(row.getCell(6)));
+                    dto.setOct(getIntegerCellValue(row.getCell(7)));
+                    dto.setNov(getIntegerCellValue(row.getCell(8)));
+                    dto.setDec(getIntegerCellValue(row.getCell(9)));
+                    dto.setJan(getIntegerCellValue(row.getCell(10)));
+                    dto.setFeb(getIntegerCellValue(row.getCell(11)));
+                    dto.setMar(getIntegerCellValue(row.getCell(12)));
+                    dto.setRemarks(getStringCellValue(row.getCell(13)));
+                    
+                    String assetIdStr = getStringCellValue(row.getCell(14));
+                    if (assetIdStr != null && !assetIdStr.isEmpty()) {
+                        dto.setAssetId(UUID.fromString(assetIdStr));
+                    } else {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("Asset ID is missing");
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    dto.setSaveStatus("Failed");
+                    dto.setErrDescription(e.getMessage());
+                }
+                
+                assetList.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return assetList;
+    }
+
+    private void setCellValue(Cell cell, Integer value) {
+        if (value != null) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    private String getStringCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            String value;
+            if (cell.getCellType() == CellType.NUMERIC) {
+                value = String.valueOf((long) cell.getNumericCellValue());
+            } else if (cell.getCellType() == CellType.STRING) {
+                value = cell.getStringCellValue();
+            } else if (cell.getCellType() == CellType.FORMULA) {
+                value = cell.getStringCellValue();
+            } else {
+                return null;
+            }
+            
+            if (value == null || value.trim().isEmpty()) {
+                return null;
+            }
+            return value.trim();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Integer getIntegerCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return (int) cell.getNumericCellValue();
+            } else if (cell.getCellType() == CellType.STRING) {
+                String value = cell.getStringCellValue().trim();
+                if (value.isEmpty()) {
+                    return null;
+                }
+                return Integer.parseInt(value);
+            }
+        } catch (NumberFormatException e) {
+            // Return null for invalid numbers
+        }
+        return null;
+    }
 
 }
 
