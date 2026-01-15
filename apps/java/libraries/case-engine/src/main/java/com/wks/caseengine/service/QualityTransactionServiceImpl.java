@@ -166,7 +166,6 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 					qualityTransaction.setPrevActual(qualityTransactionDTO.getPrevActual());
 					qualityTransaction.setPrevBudget(qualityTransactionDTO.getPrevBudget());
 					qualityTransaction.setPlantId(plantId);
-					qualityTransactionRepository.save(qualityTransaction);
 				}
 				qualityTransaction.setRemark(qualityTransactionDTO.getRemark());
 				qualityTransaction.setUpdatedBy(Utility.getUserName());

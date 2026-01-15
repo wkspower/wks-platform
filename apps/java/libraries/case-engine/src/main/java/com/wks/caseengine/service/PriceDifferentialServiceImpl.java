@@ -14,10 +14,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.PriceDifferentialTransactionDTO;
+import com.wks.caseengine.dto.QualityTransactionDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.PriceDifferentialTransaction;
+import com.wks.caseengine.entity.QualityTransaction;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -27,6 +31,7 @@ import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
 import com.wks.caseengine.repository.PlantsRepository;
+import com.wks.caseengine.repository.PriceDifferentialTransactionRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -59,6 +64,9 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
+	
+	@Autowired
+	private PriceDifferentialTransactionRepository priceDifferentialTransactionRepository;
 
 	@Override
 	public AOPMessageVM getPriceDifferential(String plantId, String year) {
@@ -108,7 +116,53 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
-	
+
+	@Override
+	public AOPMessageVM getPriceDifferentialTransaction(String plantId, String year) {
+		
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			List<Object[]> obj = new ArrayList<>();
+			
+				String procedureName = verticalName + "_" + site.getName() + "_PriceDifferentialTransaction";
+				obj = findByYearAndPlantId(year, UUID.fromString(plantId), procedureName);
+			
+			List<PriceDifferentialTransactionDTO> priceDifferentialTransactionDTOs = new ArrayList<>();
+			for (Object[] row : obj) {
+				PriceDifferentialTransactionDTO priceDifferentialTransactionDTO = new PriceDifferentialTransactionDTO();
+				priceDifferentialTransactionDTO.setId(row[0] != null ? row[0].toString() : "");
+				priceDifferentialTransactionDTO.setMaterialId(row[1] != null ? row[1].toString() : "");
+				priceDifferentialTransactionDTO.setNormParameterTypeName(row[2] != null ? row[2].toString() : "");
+				priceDifferentialTransactionDTO.setDisplayName(row[3] != null ? row[3].toString() : "");
+				priceDifferentialTransactionDTO.setPercentage(
+						(row[4] != null && !row[4].toString().trim().isEmpty()) ? Double.parseDouble(row[4].toString())
+								: 0.0);
+				priceDifferentialTransactionDTO.setPlantId(row[5] != null ? row[5].toString() : "");
+				priceDifferentialTransactionDTO.setAopYear(row[6] != null ? row[6].toString() : "");
+				priceDifferentialTransactionDTO.setRemark(row[9] != null ? row[9].toString() : "");
+				
+				
+				priceDifferentialTransactionDTOs.add(priceDifferentialTransactionDTO);
+			}
+			Map<String, Object> map = new HashMap<>(); 
+			
+			map.put("data", priceDifferentialTransactionDTOs);
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	public List<Object[]> findByYearAndPlantId(String aopYear, UUID plantId, String procedureName) {
 		try {
 
@@ -191,6 +245,51 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 			throw new RuntimeException("Failed to save data", ex);
 		}
 	}
+	
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Override
+	public AOPMessageVM savePriceDifferentialTransaction(String year, String plantFKId,
+			List<PriceDifferentialTransactionDTO> priceDifferentialTransactionDTOs) {
+		try {
+			List<PriceDifferentialTransactionDTO> failedList = new ArrayList<>();
+			UUID plantId = UUID.fromString(plantFKId);
+
+			for (PriceDifferentialTransactionDTO priceDifferentialTransactionDTO : priceDifferentialTransactionDTOs) {
+				if (priceDifferentialTransactionDTO.getSaveStatus() != null
+						&& priceDifferentialTransactionDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(priceDifferentialTransactionDTO);
+					continue;
+				}
+				PriceDifferentialTransaction priceDifferentialTransaction =null;
+				UUID material=UUID.fromString(priceDifferentialTransactionDTO.getMaterialId());
+				Optional<PriceDifferentialTransaction> priceDifferentialTransactionOpt =priceDifferentialTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
+				if(priceDifferentialTransactionOpt.isPresent()) {
+					priceDifferentialTransaction=priceDifferentialTransactionOpt.get();
+				}else {
+					priceDifferentialTransaction = new PriceDifferentialTransaction();
+					priceDifferentialTransaction.setMaterialId(UUID.fromString(priceDifferentialTransactionDTO.getMaterialId()));
+					priceDifferentialTransaction.setAopYear(year);
+					priceDifferentialTransaction.setPlantId(plantId);
+				}
+				priceDifferentialTransaction.setPercentage(priceDifferentialTransactionDTO.getPercentage());
+				priceDifferentialTransaction.setRemark(priceDifferentialTransactionDTO.getRemark());
+				priceDifferentialTransaction.setUpdatedBy(Utility.getUserName());
+				priceDifferentialTransaction.setModifiedOn(new Date());
+				
+				priceDifferentialTransactionRepository.save(priceDifferentialTransaction);
+			}
+			
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(failedList);
+			aopMessageVM.setMessage("Data updated successfully");
+			return aopMessageVM;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to save data", ex);
+		}
+	}
+
 	
 	void saveData(NormParameters normParameter, Integer i, String year, Double attributeValue,
 			ConfigurationDTO configurationDTO,String plantFKId) {
