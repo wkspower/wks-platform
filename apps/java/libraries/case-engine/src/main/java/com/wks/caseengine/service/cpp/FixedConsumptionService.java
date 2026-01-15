@@ -1,20 +1,33 @@
 package com.wks.caseengine.service.cpp;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.cpp.FinancialYearMonthProjection;
 import com.wks.caseengine.dto.cpp.FixedConsumptionDto;
 import com.wks.caseengine.dto.cpp.FixedConsumptionProjection;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.cpp.FixedConsumptionRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class FixedConsumptionService {
@@ -58,6 +71,8 @@ public class FixedConsumptionService {
          List<UUID> existingRemarkIds =  repository.getExistingRemarkIds(fixedConsumptionDtoList.stream()
          .map(FixedConsumptionDto::getRemarkId)
          .collect(Collectors.toList()));
+
+         List<Object[]> utilityUpdates = new ArrayList<>();
 
         for(FixedConsumptionDto fixedConsumptionDto : fixedConsumptionDtoList) {
 
@@ -103,6 +118,8 @@ public class FixedConsumptionService {
              }
            }
  
+           String idsCsv = String.join(",", utilityFixedConsumptionIds);
+
             if(fixedConsumptionDto.getApril() != null) {  
 
             String financialYearMonthId =    financialYearMonthList.stream()
@@ -110,7 +127,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getApril(), utilityFixedConsumptionIds, financialYearMonthId);
+            //    repository.updateUtilityFixedConsumption(fixedConsumptionDto.getApril(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getApril(), idsCsv, financialYearMonthId });
                 
             }
 
@@ -121,7 +139,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getMay(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getMay(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getMay(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getJune() != null) {  
@@ -131,7 +150,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getJune(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getJune(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getJune(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getJuly() != null) {  
@@ -141,7 +161,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getJuly(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getJuly(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getJuly(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getAug() != null) {  
@@ -151,7 +172,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getAug(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getAug(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getAug(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getSep() != null) {  
@@ -161,7 +183,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getSep(), utilityFixedConsumptionIds, financialYearMonthId);
+              //  repository.updateUtilityFixedConsumption(fixedConsumptionDto.getSep(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getSep(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getOct() != null) {  
@@ -171,7 +194,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getOct(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getOct(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getOct(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getNov() != null) {  
@@ -181,7 +205,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getNov(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getNov(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getNov(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getDec() != null) {  
@@ -191,7 +216,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getDec(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getDec(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getDec(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getJan() != null) {  
@@ -200,7 +226,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getJan(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getJan(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getJan(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getFeb() != null) {  
@@ -210,7 +237,8 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getFeb(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getFeb(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getFeb(), idsCsv, financialYearMonthId });
             }
 
             if(fixedConsumptionDto.getMar() != null) {  
@@ -220,11 +248,18 @@ public class FixedConsumptionService {
                 .map(f -> f.getId())
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("Financial year month not found"));
 
-                repository.updateUtilityFixedConsumption(fixedConsumptionDto.getMar(), utilityFixedConsumptionIds, financialYearMonthId);
+             //   repository.updateUtilityFixedConsumption(fixedConsumptionDto.getMar(), utilityFixedConsumptionIds, financialYearMonthId);
+                utilityUpdates.add(new Object[]{ fixedConsumptionDto.getMar(), idsCsv, financialYearMonthId });
             }
             }
 
-  
+            if(!utilityUpdates.isEmpty()) { 
+                String sql = "Update UtilityFixedConsumption set ConsumptionValue = ? WHERE Id IN (SELECT value FROM STRING_SPLIT(?, ','))  and FinancialYearMonth_FK_Id = ?";
+                jdbcTemplate.batchUpdate(sql, utilityUpdates);
+            }
+ //  @Query(value = "UPDATE UtilityFixedConsumption SET ConsumptionValue = :consumptionValue WHERE Id IN :utilityFixedConsumptionIds AND FinancialYearMonth_FK_Id = :financialYearMonthId", nativeQuery = true)
+   
+
             if(!remarkUpdates.isEmpty()) { 
 
                 String sql = "Update UtilityFixedConsumption_Remarks set Remarks = ?, FinancialYear = ? where Id = ?";
@@ -284,6 +319,320 @@ public class FixedConsumptionService {
         Optional.ofNullable(p.getMar()).orElse(0.0));
 
         return dto;
+    }
+
+    public byte[] exportFixedConsumption(UUID plantId, String financialYear, boolean isAfterSave, List<FixedConsumptionDto> dtoList) {
+
+      
+        try {
+            if (!isAfterSave) {
+                dtoList = getData(plantId, financialYear);
+            }
+
+            System.out.println("export fixed consumption dto: " + dtoList);
+
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Fixed Consumption");
+            int currentRow = 0;
+
+            // Header row
+            List<String> headers = new ArrayList<>();
+            headers.add("Plant");
+            headers.add("Plant Id");
+            headers.add("CPP Utilities");
+            headers.add("CPP Utility Ids");
+            headers.add("CPP Plant");
+            headers.add("CPP Plant Id");
+            headers.add("UOM");
+            headers.add("April");
+            headers.add("May");
+            headers.add("June");
+            headers.add("July");
+            headers.add("August");
+            headers.add("September");
+            headers.add("October");
+            headers.add("November");
+            headers.add("December");
+            headers.add("January");
+            headers.add("February");
+            headers.add("March");
+            headers.add("Grand Total");
+            headers.add("Remarks");
+            // Hidden columns
+            headers.add("remarkId");
+            headers.add("costCenter_FK_Id");
+            headers.add("costCenterId");
+            headers.add("normParameter_FK_Id");
+            headers.add("normParameterId");
+
+            if (isAfterSave) {
+                headers.add("Status");
+                headers.add("Error Description");
+            }
+
+            Row headerRow = sheet.createRow(currentRow++);
+            for (int col = 0; col < headers.size(); col++) {
+                Cell cell = headerRow.createCell(col);
+                cell.setCellValue(headers.get(col));
+                cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+            }
+
+            // Data rows
+            for (FixedConsumptionDto dto : dtoList) {
+                Row row = sheet.createRow(currentRow++);
+                int col = 0;
+
+                row.createCell(col++).setCellValue(dto.getPlant() != null ? dto.getPlant() : "");
+                row.createCell(col++).setCellValue(dto.getPlantId() != null ? dto.getPlantId() : "");
+                row.createCell(col++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+                row.createCell(col++).setCellValue(dto.getCppUtilityId() != null ? dto.getCppUtilityId() : "");
+                row.createCell(col++).setCellValue(dto.getCppPlant() != null ? dto.getCppPlant() : "");
+                row.createCell(col++).setCellValue(dto.getCppPlantId() != null ? dto.getCppPlantId() : "");
+                row.createCell(col++).setCellValue(dto.getUom() != null ? dto.getUom() : "");
+                
+                setDoubleCellValue(row.createCell(col++), dto.getApril());
+                setDoubleCellValue(row.createCell(col++), dto.getMay());
+                setDoubleCellValue(row.createCell(col++), dto.getJune());
+                setDoubleCellValue(row.createCell(col++), dto.getJuly());
+                setDoubleCellValue(row.createCell(col++), dto.getAug());
+                setDoubleCellValue(row.createCell(col++), dto.getSep());
+                setDoubleCellValue(row.createCell(col++), dto.getOct());
+                setDoubleCellValue(row.createCell(col++), dto.getNov());
+                setDoubleCellValue(row.createCell(col++), dto.getDec());
+                setDoubleCellValue(row.createCell(col++), dto.getJan());
+                setDoubleCellValue(row.createCell(col++), dto.getFeb());
+                setDoubleCellValue(row.createCell(col++), dto.getMar());
+                setDoubleCellValue(row.createCell(col++), dto.getGrandTotal());
+                
+                row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                
+                // Hidden columns
+                row.createCell(col++).setCellValue(dto.getRemarkId() != null ? dto.getRemarkId().toString() : "");
+                row.createCell(col++).setCellValue(dto.getCostCenter_FK_Id() != null ? dto.getCostCenter_FK_Id().toString() : "");
+                row.createCell(col++).setCellValue(dto.getCostCenterId() != null ? dto.getCostCenterId() : "");
+                row.createCell(col++).setCellValue(dto.getNormParameter_FK_Id() != null ? dto.getNormParameter_FK_Id().toString() : "");
+                row.createCell(col++).setCellValue(dto.getNormParameterId() != null ? dto.getNormParameterId() : "");
+
+                if (isAfterSave) {
+                    row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                }
+            }
+
+            // Hide specified columns (21-25: remarkId, costCenter_FK_Id, costCenterId, normParameter_FK_Id, normParameterId)
+            sheet.setColumnHidden(21, true); // remarkId
+            sheet.setColumnHidden(22, true); // costCenter_FK_Id
+            sheet.setColumnHidden(23, true); // costCenterId
+            sheet.setColumnHidden(24, true); // normParameter_FK_Id
+            sheet.setColumnHidden(25, true); // normParameterId
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public AOPMessageVM importExcel(UUID plantId, String financialYear, MultipartFile file) {
+        try {
+            List<FixedConsumptionDto> data = readFixedConsumption(file.getInputStream(), plantId, financialYear);
+
+            System.out.println("import fixed consumption data: " + data);
+            
+            // Separate failed records from successful ones
+            List<FixedConsumptionDto> validRecords = new ArrayList<>();
+            List<FixedConsumptionDto> failedRecords = new ArrayList<>();
+            
+            for (FixedConsumptionDto dto : data) {
+                if (dto.getSaveStatus() != null && dto.getSaveStatus().equalsIgnoreCase("Failed")) {
+                    failedRecords.add(dto);
+                } else {
+                    validRecords.add(dto);
+                }
+            }
+
+            // Try to save valid records
+            if (!validRecords.isEmpty()) {
+                try {
+                    updateData(validRecords, financialYear);
+                } catch (Exception e) {
+                    // Mark all valid records as failed if save fails
+                    for (FixedConsumptionDto dto : validRecords) {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("Save failed: " + e.getMessage());
+                        failedRecords.add(dto);
+                    }
+                }
+            }
+
+            AOPMessageVM aopMessageVM = new AOPMessageVM();
+            if (!failedRecords.isEmpty()) {
+                byte[] fileByteArray = exportFixedConsumption(plantId, financialYear, true, failedRecords);
+                String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+                aopMessageVM.setData(base64File);
+                aopMessageVM.setCode(400);
+                aopMessageVM.setMessage("Partial data has been saved");
+            } else {
+                aopMessageVM.setCode(200);
+                aopMessageVM.setMessage("All data has been saved");
+            }
+
+            return aopMessageVM;
+        } catch (Exception e) {
+            e.printStackTrace();
+            AOPMessageVM errorVM = new AOPMessageVM();
+            errorVM.setCode(500);
+            errorVM.setMessage("Error importing file: " + e.getMessage());
+            return errorVM;
+        }
+    }
+
+    private List<FixedConsumptionDto> readFixedConsumption(InputStream inputStream, UUID plantId, String financialYear) {
+        List<FixedConsumptionDto> dataList = new ArrayList<>();
+
+        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            // Skip header row
+            if (rowIterator.hasNext()) {
+                rowIterator.next();
+            }
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                FixedConsumptionDto dto = new FixedConsumptionDto();
+                
+                try {
+                    int col = 0;
+                    dto.setPlant(getStringCellValue(row.getCell(col++)));
+                    dto.setPlantId(getStringCellValue(row.getCell(col++)));
+                    dto.setCppUtility(getStringCellValue(row.getCell(col++)));
+                    dto.setCppUtilityId(getStringCellValue(row.getCell(col++)));
+                    dto.setCppPlant(getStringCellValue(row.getCell(col++)));
+                    dto.setCppPlantId(getStringCellValue(row.getCell(col++)));
+                    dto.setUom(getStringCellValue(row.getCell(col++)));
+                    
+                    dto.setApril(getDoubleCellValue(row.getCell(col++)));
+                    dto.setMay(getDoubleCellValue(row.getCell(col++)));
+                    dto.setJune(getDoubleCellValue(row.getCell(col++)));
+                    dto.setJuly(getDoubleCellValue(row.getCell(col++)));
+                    dto.setAug(getDoubleCellValue(row.getCell(col++)));
+                    dto.setSep(getDoubleCellValue(row.getCell(col++)));
+                    dto.setOct(getDoubleCellValue(row.getCell(col++)));
+                    dto.setNov(getDoubleCellValue(row.getCell(col++)));
+                    dto.setDec(getDoubleCellValue(row.getCell(col++)));
+                    dto.setJan(getDoubleCellValue(row.getCell(col++)));
+                    dto.setFeb(getDoubleCellValue(row.getCell(col++)));
+                    dto.setMar(getDoubleCellValue(row.getCell(col++)));
+                    
+                    // Grand Total is read-only, skip it
+                    col++; // Skip Grand Total column
+                    
+                    dto.setRemarks(getStringCellValue(row.getCell(col++)));
+                    
+                    // Hidden columns
+                    String remarkIdStr = getStringCellValue(row.getCell(col++));
+                    if (remarkIdStr != null && !remarkIdStr.isEmpty()) {
+                        dto.setRemarkId(UUID.fromString(remarkIdStr));
+                    }
+                    
+                    String costCenterFKIdStr = getStringCellValue(row.getCell(col++));
+                    if (costCenterFKIdStr != null && !costCenterFKIdStr.isEmpty()) {
+                        dto.setCostCenter_FK_Id(UUID.fromString(costCenterFKIdStr));
+                    }
+                    
+                    dto.setCostCenterId(getStringCellValue(row.getCell(col++)));
+                    
+                    String normParameterFKIdStr = getStringCellValue(row.getCell(col++));
+                    if (normParameterFKIdStr != null && !normParameterFKIdStr.isEmpty()) {
+                        dto.setNormParameter_FK_Id(UUID.fromString(normParameterFKIdStr));
+                    } else {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("NormParameter FK Id is missing");
+                    }
+                    
+                    String normParameterIdStr = getStringCellValue(row.getCell(col++));
+                    if (normParameterIdStr != null && !normParameterIdStr.isEmpty()) {
+                        dto.setNormParameterId(normParameterIdStr);
+                    } else {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("NormParameter Id is missing");
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    dto.setSaveStatus("Failed");
+                    dto.setErrDescription(e.getMessage());
+                }
+                
+                dataList.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dataList;
+    }
+
+    private void setDoubleCellValue(Cell cell, Double value) {
+        if (value != null) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    private String getStringCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            String value;
+            if (cell.getCellType() == CellType.NUMERIC) {
+                value = String.valueOf((long) cell.getNumericCellValue());
+            } else if (cell.getCellType() == CellType.STRING) {
+                value = cell.getStringCellValue();
+            } else if (cell.getCellType() == CellType.FORMULA) {
+                value = cell.getStringCellValue();
+            } else {
+                return null;
+            }
+            
+            if (value == null || value.trim().isEmpty()) {
+                return null;
+            }
+            return value.trim();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Double getDoubleCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return cell.getNumericCellValue();
+            } else if (cell.getCellType() == CellType.STRING) {
+                String value = cell.getStringCellValue().trim();
+                if (value.isEmpty()) {
+                    return null;
+                }
+                return Double.parseDouble(value);
+            }
+        } catch (NumberFormatException e) {
+            // Return null for invalid numbers
+        }
+        return null;
     }
 }
 
