@@ -67,7 +67,7 @@ public class PeopleInitiativeController {
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = peopleInitiativeService.exportPeopleInitiative(year,plantId,false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+	        byte[] excelBytes = peopleInitiativeService.exportPeopleInitiative(year,plantId,false,null); 
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(

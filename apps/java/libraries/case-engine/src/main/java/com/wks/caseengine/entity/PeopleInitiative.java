@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import java.time.LocalDate;
+
 
 @Entity
 @Table(name = "PeopleInitiative")
