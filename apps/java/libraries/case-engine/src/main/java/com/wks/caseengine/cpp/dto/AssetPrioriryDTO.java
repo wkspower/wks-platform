@@ -24,5 +24,8 @@ public class AssetPrioriryDTO {
     private Integer feb;
     private Integer mar;
     private String remarks;
+    
+    // Fields for import/export tracking
+    private String saveStatus;
+    private String errDescription;
 }
-

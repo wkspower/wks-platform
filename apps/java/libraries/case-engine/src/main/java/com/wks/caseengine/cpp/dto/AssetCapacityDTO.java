@@ -37,5 +37,7 @@ public class AssetCapacityDTO {
     private MonthCapacityDto feb;
     private MonthCapacityDto march;
  
+    // Fields for import/export tracking
+    private String saveStatus;
+    private String errDescription;
 }
-

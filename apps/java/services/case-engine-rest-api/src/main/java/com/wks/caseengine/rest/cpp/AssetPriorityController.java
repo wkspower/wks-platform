@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.cpp.dto.AssetPrioriryDTO;
 import com.wks.caseengine.cpp.service.AssetPriorityService;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 
 
 @RestController
@@ -38,16 +41,28 @@ public class AssetPriorityController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping(  value = "/asset-priority/import-excel/{financialYear}",
-    consumes = "multipart/form-data")  
-    public ResponseEntity<?> importExcel(
-        @RequestParam("file") MultipartFile file, @PathVariable String financialYear) {
+    @GetMapping(value = "/asset-priority/export/{plantId}/{financialYear}")
+    public ResponseEntity<byte[]> exportAssetPriority(@PathVariable UUID plantId, @PathVariable String financialYear) {
+        byte[] excelFile = assetPriorityService.exportAssetPriority(plantId, financialYear, false, null);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "AssetPriority_" + financialYear + ".xlsx");
+        
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(excelFile);
+    }
 
-    assetPriorityService.importExcel(file, financialYear);
-    return ResponseEntity.ok().build();
-}
-
-
+    @PostMapping(value = "/asset-priority/import/{plantId}/{financialYear}")
+    public ResponseEntity<AOPMessageVM> importAssetPriority(
+            @PathVariable UUID plantId, 
+            @PathVariable String financialYear,
+            @RequestParam("file") MultipartFile file) {
+        
+        AOPMessageVM result = assetPriorityService.importExcel(plantId, financialYear, file);
+        return ResponseEntity.ok(result);
+    }
 
 }
 
