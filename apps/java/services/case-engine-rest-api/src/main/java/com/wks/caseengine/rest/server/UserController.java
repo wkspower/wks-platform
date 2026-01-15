@@ -45,3 +45,4 @@ public class UserController {
 		return userService.searchUsers(search);
 	}
 }
+

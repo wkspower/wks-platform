@@ -1,0 +1,15 @@
+package com.wks.caseengine.cpp.dto;
+
+import lombok.Data;
+import java.util.Map;
+
+@Data
+public class AssetImportMappingPivotResponseDTO {
+
+    private String assetName;
+    private String uom;
+
+    private Map<String, Double> monthValues;
+}
+
+
