@@ -741,13 +741,4 @@ public class AssetCapacityService {
             }
         }
     }
-
-<<<<<<< HEAD:apps/java/libraries/case-engine/src/main/java/com/wks/caseengine/cpp/service/AssetCapacityService.java
-     updateAssetCapacities(assetCapacityDTOs, financialYear);
-    
 }
-}
-
-=======
-}
->>>>>>> origin/aop-inprogress-phase2:apps/java/libraries/case-engine/src/main/java/com/wks/caseengine/service/cpp/AssetCapacityService.java
