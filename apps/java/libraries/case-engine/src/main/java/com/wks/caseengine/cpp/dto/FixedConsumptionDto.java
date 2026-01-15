@@ -35,6 +35,10 @@ public class FixedConsumptionDto {
     private UUID costCenter_FK_Id;
     private UUID normParameter_FK_Id;
 
+    // Fields for import/export tracking
+    private String saveStatus;
+    private String errDescription;
+
 }
 
 
