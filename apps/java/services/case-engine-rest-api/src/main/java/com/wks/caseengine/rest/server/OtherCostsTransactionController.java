@@ -21,14 +21,11 @@ import com.wks.caseengine.dto.OtherCostsTransactionDto;
 import com.wks.caseengine.dto.QualityTransactionDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.OtherCostsTransactionService;
-import com.wks.caseengine.service.QualityTransactionService;
+
 
 @RestController
 @RequestMapping("task")
 public class OtherCostsTransactionController {
-	
-	@Autowired
-	private QualityTransactionService qualityTransactionService;
 	
 	@Autowired
 	private OtherCostsTransactionService otherCostsTransactionService;
@@ -51,13 +48,13 @@ public class OtherCostsTransactionController {
 	        ) {
 	    try {
 			
-	        byte[] excelBytes = qualityTransactionService.exportQualityTransaction(year,plantId,false,null); 
+	        byte[] excelBytes = otherCostsTransactionService.exportOtherCostsTransaction(year,plantId,false,null); 
 
 	        HttpHeaders headers = new HttpHeaders();
 	        headers.setContentType(MediaType.parseMediaType(
 	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
 	        headers.setContentDisposition(ContentDisposition.builder("attachment")
-	                .filename("Quality_Transaction.xlsx")
+	                .filename("Other_Costs_Transaction.xlsx")
 	                .build());
 	        headers.setContentLength(excelBytes.length);
 
@@ -73,7 +70,7 @@ public class OtherCostsTransactionController {
             @RequestParam("year") String year,
 			@RequestParam("file") MultipartFile file
 	        ) {
-			return	qualityTransactionService.importQualityTransaction(year,UUID.fromString(plantId), file); 
+			return	otherCostsTransactionService.importOtherCostsTransaction(year,UUID.fromString(plantId), file); 
 	}
 	
 }

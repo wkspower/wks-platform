@@ -192,7 +192,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 		}
 	}
 	
-	public byte[] exportQualityTransaction(String year, String plantId, boolean isAfterSave, List<OtherCostsTransactionDto> dtoList) {
+	public byte[] exportOtherCostsTransaction(String year, String plantId, boolean isAfterSave, List<OtherCostsTransactionDto> dtoList) {
 	    try {   
 	        if (!isAfterSave) {
 	        	AOPMessageVM aopMessageVM = getOtherCostsTransaction(plantId,year);
@@ -276,14 +276,14 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	}
 
 	@Override
-	public AOPMessageVM importQualityTransaction(String year,UUID plantId,MultipartFile file) {
+	public AOPMessageVM importOtherCostsTransaction(String year,UUID plantId,MultipartFile file) {
 		try {
-			List<OtherCostsTransactionDto> data = readQualityTransaction(file.getInputStream(), plantId, year);
+			List<OtherCostsTransactionDto> data = readOtherCostsTransaction(file.getInputStream(), plantId, year);
 			 AOPMessageVM aopMessageVM = saveOtherCostsTransaction(year, plantId.toString(),data);
 			 List<OtherCostsTransactionDto> failedList = (List<OtherCostsTransactionDto>) aopMessageVM.getData();
 			
 			if (failedList != null && failedList.size() > 0) {
-				byte[] fileByteArray = exportQualityTransaction(year, plantId.toString(), true, failedList);
+				byte[] fileByteArray = exportOtherCostsTransaction(year, plantId.toString(), true, failedList);
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
 				aopMessageVM.setCode(400);
@@ -303,7 +303,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 		return null;
 	}
 	
-	public List<OtherCostsTransactionDto> readQualityTransaction(InputStream inputStream, UUID plantFKId, String year) {
+	public List<OtherCostsTransactionDto> readOtherCostsTransaction(InputStream inputStream, UUID plantFKId, String year) {
 	    List<OtherCostsTransactionDto> otherCostsTransactionDtos = new ArrayList<>();
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
