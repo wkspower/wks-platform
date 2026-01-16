@@ -42,7 +42,9 @@ import jakarta.persistence.EntityManagerFactory;
 	    basePackages = {
 	        "com.wks.caseengine.rest.db1.repository", // Repository package for DB1
 	        "com.wks.caseengine.product.repository",
-	        "com.wks.caseengine.repository"// Additional repository package
+	        "com.wks.caseengine.repository",// Additional repository package
+	        "com.wks.caseengine.cpp.repository", // CPP repository package
+	        "com.wks.caseengine.tcs.repository"  // TCS repository package
 	    },
 	    entityManagerFactoryRef = "db1EntityManagerFactory",
 	    transactionManagerRef = "db1TransactionManager"
@@ -95,7 +97,9 @@ public class DB1Config {
                 .dataSource(db1DataSource())
                 .packages(
                     "com.wks.caseengine.rest.db1.entity", 
-                    "com.wks.caseengine.entity"
+                    "com.wks.caseengine.entity",
+                    "com.wks.caseengine.cpp.entity",
+                    "com.wks.caseengine.tcs.entity"
                 ) // Include both packages
                 .persistenceUnit("db1")
                 .properties(hibernateProperties())
@@ -124,3 +128,4 @@ public class DB1Config {
     }
 
 }
+

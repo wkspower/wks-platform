@@ -9,11 +9,13 @@ import '@progress/kendo-theme-default/dist/all.css'
 import GenericDropdown from 'components/aop-phase-two/common/utilities/GenericDropdown'
 import { useCallback, useRef, useState, useEffect } from 'react'
 import '../../../../../src/kendo-data-grid.css'
+import '../../css/advance-kendo-table.css'
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import RemarkDialog from './components/RemarkDialog'
 import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
+import ApproveDialog from './components/ApproveDialog'
 import { TextCellEditorUpdated } from '../utilities/TextCellEditorUpdated'
 import { SelectCellEditor } from '../utilities/SelectCellEditor'
 import { MultiselectCellEditor } from '../utilities/MultiselectCellEditor'
@@ -133,6 +135,7 @@ const AdvanceKendoTable = ({
   dateCalculationConfig = {},
   initialFieldValues = {},
   customItemChange = null,
+  labelField = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -142,8 +145,10 @@ const AdvanceKendoTable = ({
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
+  const [openApproveDialogeBox, setOpenApproveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
+  const closeApproveDialogeBox = () => setOpenApproveDialogeBox(false)
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
@@ -655,6 +660,13 @@ const AdvanceKendoTable = ({
   const saveModalOpen = async () => {
     setIsButtonDisabled(true)
     setOpenSaveDialogeBox(true)
+    setTimeout(() => {
+      setIsButtonDisabled(false)
+    }, 500)
+  }
+  const approveModalOpen = async () => {
+    setIsButtonDisabled(true)
+    setOpenApproveDialogeBox(true)
     setTimeout(() => {
       setIsButtonDisabled(false)
     }, 500)
@@ -1580,6 +1592,17 @@ const AdvanceKendoTable = ({
 
           {/* RIGHT: Buttons */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {permissions?.approveBtn && (
+              <Button
+                variant='contained'
+                className='btn-save'
+                onClick={approveModalOpen}
+                disabled={isButtonDisabled || READ_ONLY}
+              >
+                Approve
+              </Button>
+            )}
+
             {permissions?.addButton && (
               <Button
                 variant='contained'
@@ -1788,6 +1811,23 @@ const AdvanceKendoTable = ({
         openSaveDialogeBox={openSaveDialogeBox}
         closeSaveDialogeBox={closeSaveDialogeBox}
         saveConfirmation={saveConfirmation}
+      />
+      {/* Approve Dialog */}
+      <ApproveDialog
+        open={openApproveDialogeBox}
+        onClose={closeApproveDialogeBox}
+        onApprove={(selectedIds) => {
+          console.log('Approved entries:', selectedIds)
+          // TODO: Implement approve logic here
+          // You can call an API or update state based on selectedIds
+        }}
+        entries={rows.map((row) => ({
+          id: row.id,
+          label: labelField
+            ? row[labelField]
+            : row.name || row.title || row.particulates || `Row ${row.id}`,
+          description: row.description || row.remarks || '',
+        }))}
       />
     </div>
   )

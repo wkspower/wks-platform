@@ -152,6 +152,7 @@ const CrudBlendWindowGrid = ({
     showExport: true,
     showTitle: true,
     filterable: false,
+    approveBtn: true,
   }
 
   return (
@@ -183,6 +184,7 @@ const CrudBlendWindowGrid = ({
             pageSizes: [10, 20, 50, 100],
           }}
           {...(tableKey === 'CrudeBlendWindow' && { groupBy: 'type' })}
+          {...(tableKey === 'CrudeBlendWindow' && { labelField: 'property' })}
           readonly={true}
         />
       </Stack>

@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import UnitCapacity from './UnitCapacity'
+import NetUnitCapacity from './NetUnitCapacity'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
 import CPPUnitsSdPlan from './CPPUnitsSdPlan'
@@ -17,6 +18,8 @@ const renderTabComponent = (tabDisplayName, props) => {
   switch (tabDisplayName) {
     case 'Unit Capacity':
       return <UnitCapacity {...props} />
+    case 'Net Unit Capacity':
+      return <NetUnitCapacity {...props} />
     case 'Shutdown':
       return <Shutdown {...props} />
     case 'Slowdown':

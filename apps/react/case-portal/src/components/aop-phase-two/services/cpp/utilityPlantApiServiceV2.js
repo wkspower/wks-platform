@@ -5,11 +5,13 @@ export const UtilityPlantApiServiceV2 = {
   getFixedConsumptionData,
   saveFixedConsumptionData,
   saveFixedConsumptionExcel,
+  exportFixedConsumptionExcel,
 
   //   Plant requirement APIs
   getPlantRequirementData,
   savePlantRequirementData,
   savePlantRequirementExcel,
+  exportPlantRequirementExcel,
 
   // Import Consumption APIs
   getImportConsumptionData,
@@ -19,10 +21,12 @@ export const UtilityPlantApiServiceV2 = {
   getNormBasedUtilityBudget,
   saveNormsData,
   saveNormsExcel,
+  exportNormsExcel,
   calculateNormsData,
 
-  // Generic Excel Import
+  // Generic Excel Import/Export
   saveExcelData,
+  exportExcelData,
 }
 
 // ===================== || Fixed Consumption APIs || ===================== //
@@ -235,7 +239,7 @@ async function saveNormsData(keycloak, payload, AOP_YEAR) {
  * @returns {Promise} API response
  */
 async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
-  const url = `${Config.CaseEngineUrl}/task/${endpoint}?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/${endpoint}`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -260,6 +264,71 @@ async function saveExcelData(file, keycloak, endpoint, PLANT_ID, AOP_YEAR) {
   }
 }
 
+// ===================== || GENERIC EXCEL EXPORT FUNCTION || ===================== //
+/**
+ * Generic function to export Excel file from backend
+ * @param {Object} keycloak - Keycloak session object
+ * @param {Object} params - Export parameters
+ * @param {string} params.endpoint - The API endpoint path
+ * @param {Object} params.queryParams - Query parameters
+ * @param {Object|null} params.payload - Optional POST body payload
+ * @param {string} params.fileName - Downloaded file name
+ * @param {string} params.method - HTTP method ('GET' or 'POST'), defaults to 'GET'
+ * @returns {Promise} Success/error response
+ */
+async function exportExcelData(keycloak, params) {
+  const {
+    endpoint,
+    queryParams = {},
+    payload = null,
+    fileName,
+    method = 'GET',
+  } = params
+
+  const queryString = new URLSearchParams(queryParams).toString()
+  const url = `${Config.CaseEngineUrl}/task/${endpoint}`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const fetchOptions = {
+      method,
+      headers,
+    }
+
+    if (payload && (method === 'POST' || method === 'PUT')) {
+      fetchOptions.body = JSON.stringify(payload)
+    }
+
+    const resp = await fetch(url, fetchOptions)
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to export Excel: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = fileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+
+    return { success: true, message: 'Excel exported successfully' }
+  } catch (e) {
+    console.error(`Error exporting Excel from ${endpoint}:`, e)
+    return Promise.reject(e)
+  }
+}
+
 // ===================== || SPECIFIC EXCEL IMPORT FUNCTIONS || ===================== //
 
 // Fixed Consumption Excel Import
@@ -267,10 +336,20 @@ async function saveFixedConsumptionExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   return saveExcelData(
     file,
     keycloak,
-    'fixed-consumption/import',
+    `fixed-consumption/import/${PLANT_ID}/${AOP_YEAR}`,
     PLANT_ID,
     AOP_YEAR,
   )
+}
+
+// Fixed Consumption Excel Export
+async function exportFixedConsumptionExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `fixed-consumption/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `FixedConsumption_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
 }
 
 // Plant Requirement Excel Import
@@ -278,13 +357,33 @@ async function savePlantRequirementExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   return saveExcelData(
     file,
     keycloak,
-    'plant-requirement/import',
+    `plant-requirement/import/${PLANT_ID}/${AOP_YEAR}`,
     PLANT_ID,
     AOP_YEAR,
   )
 }
 
+// Plant Requirement Excel Export
+async function exportPlantRequirementExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `plant-requirement/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: { plantId: PLANT_ID, year: AOP_YEAR },
+    fileName: `plant_requirement_${PLANT_ID}_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
+}
+
 // Norms Excel Import
 async function saveNormsExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   return saveExcelData(file, keycloak, 'norms/import', PLANT_ID, AOP_YEAR)
+}
+
+// Norms Excel Export
+async function exportNormsExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `norms/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: { plantId: PLANT_ID, year: AOP_YEAR },
+    fileName: `norms_${PLANT_ID}_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
 }

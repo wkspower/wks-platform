@@ -6,7 +6,7 @@ import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiServi
 import { useSession } from 'SessionStoreContext'
 import { convertFromKBPSD, convertToKBPSD } from './uomConversionUtils'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 
 const UnitCapacityGrid = ({
   capacityType,

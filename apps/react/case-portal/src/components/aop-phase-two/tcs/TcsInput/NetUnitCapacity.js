@@ -9,7 +9,7 @@ import {
   convertToKBPSD,
 } from './UnitCapacityComponents/uomConversionUtils'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { generateHeaderNames } from 'components/Utilities/generateHeaders'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 
 const NetUnitCapacity = ({
   title,

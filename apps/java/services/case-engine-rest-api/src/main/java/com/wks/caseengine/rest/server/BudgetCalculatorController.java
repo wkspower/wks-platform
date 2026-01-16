@@ -212,3 +212,4 @@ public class BudgetCalculatorController {
         return ResponseEntity.ok(result);
     }
 }
+

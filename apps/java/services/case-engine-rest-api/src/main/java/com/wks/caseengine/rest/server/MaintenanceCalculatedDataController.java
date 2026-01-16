@@ -129,3 +129,4 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataService.getMacroData(value,year,plantId);		
 	}
 }
+

@@ -1039,6 +1039,18 @@ const NestedKendoTable = ({
               </Button>
             )}
 
+            {permissions?.showExport && (
+              <Button
+                variant='contained'
+                onClick={handleExport}
+                disabled={isButtonDisabled}
+                className='btn-save'
+                // className='custom-btn-export'
+              >
+                Export
+              </Button>
+            )}
+
             {permissions?.downloadExcelBtnFromUI && (
               <Button
                 variant='contained'
