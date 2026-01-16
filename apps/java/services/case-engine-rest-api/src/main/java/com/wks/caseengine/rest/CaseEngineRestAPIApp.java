@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 		basePackageClasses = { com.wks.api.security.config.ApiSecurityScan.class,
 				com.wks.caseengine.config.CaseEngineScan.class },
 
-		basePackages = { "com.wks.caseengine.rest.config", "com.wks.caseengine.rest.server", "com.wks.caseengine.dto" })
+		basePackages = { "com.wks.caseengine.rest.config", "com.wks.caseengine.rest.server", "com.wks.caseengine.rest.cpp", "com.wks.caseengine.rest.data", "com.wks.caseengine.rest.tcs", "com.wks.caseengine.dto", "com.wks.caseengine.cpp", "com.wks.caseengine.tcs" })
 
 public class CaseEngineRestAPIApp {
 
@@ -31,3 +31,4 @@ public class CaseEngineRestAPIApp {
 	}
 
 }
+
