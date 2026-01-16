@@ -49,7 +49,7 @@ const PlantRequirement = () => {
     {
       field: 'processPlant',
       title: 'Process Plant',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -58,7 +58,7 @@ const PlantRequirement = () => {
     {
       field: 'processPlantId',
       title: 'Plant Code',
-      width: 120,
+      widthT: 120,
       minWidth: 120,
       type: 'text',
       editable: false,
@@ -68,7 +68,7 @@ const PlantRequirement = () => {
       field: 'cppUtility',
       title: 'CPP Utilities',
       widthT: 120,
-      minWidth: 80,
+      minWidth: 120,
       type: 'text',
       editable: false,
     },
@@ -76,7 +76,7 @@ const PlantRequirement = () => {
       field: 'cppUtilityId',
       title: 'CPP Utility ID',
       widthT: 120,
-      minWidth: 80,
+      minWidth: 120,
       type: 'text',
       editable: false,
     },
@@ -84,15 +84,15 @@ const PlantRequirement = () => {
       field: 'cppPlant',
       title: 'CPP Plant',
       widthT: 120,
-      minWidth: 80,
+      minWidth: 120,
       type: 'text',
       editable: false,
     },
     {
       field: 'cppPlantId',
       title: 'CPP Plant ID',
-      widthT: 100,
-      minWidth: 80,
+      widthT: 120,
+      minWidth: 120,
       type: 'text',
       editable: false,
       hidden: true,
@@ -241,7 +241,7 @@ const PlantRequirement = () => {
     {
       field: 'remarks',
       title: 'Remarks',
-      width: 250,
+      widthT: 250,
       type: 'textarea',
       editable: true,
       minWidth: 250,
@@ -533,6 +533,7 @@ const PlantRequirement = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        customHeight={80}
         paginationConfig={{
           threshold: 100, // Show pagination if > 50 rows
           buttonCount: 5,

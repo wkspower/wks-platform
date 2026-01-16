@@ -375,15 +375,21 @@ async function exportPlantRequirementExcel(keycloak, PLANT_ID, AOP_YEAR) {
 
 // Norms Excel Import
 async function saveNormsExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(file, keycloak, 'norms/import', PLANT_ID, AOP_YEAR)
+  return saveExcelData(
+    file,
+    keycloak,
+    `norm-based-utility-budget/import?cppPlantId=${PLANT_ID}&financialYear=${AOP_YEAR}`,
+    PLANT_ID,
+    AOP_YEAR,
+  )
 }
 
 // Norms Excel Export
 async function exportNormsExcel(keycloak, PLANT_ID, AOP_YEAR) {
   return exportExcelData(keycloak, {
-    endpoint: `norms/export/${PLANT_ID}/${AOP_YEAR}`,
-    queryParams: { plantId: PLANT_ID, year: AOP_YEAR },
-    fileName: `norms_${PLANT_ID}_${AOP_YEAR}.xlsx`,
+    endpoint: `norm-based-utility-budget/export?cppPlantId=${PLANT_ID}&financialYear=${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `Norms_${PLANT_ID}_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
 }

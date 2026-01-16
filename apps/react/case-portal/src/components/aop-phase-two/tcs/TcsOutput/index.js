@@ -12,6 +12,8 @@ import CPPUnitsSdPlan from './CPPUnitsSdPlan'
 import CrudBlendWindow from './CrudBlendWindow'
 import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
+import StatusAccordian from '../TcsInput/workflow/StatusAccordian'
+import RemarksAccordion from '../TcsInput/workflow/RemarksAccordion'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -131,6 +133,32 @@ const TcsOutput = () => {
     }
   }
 
+  const data = [
+    {
+      id: 1,
+      status: 'Approved',
+      remarks: 'OK',
+      submittedBy: 'OMS HEAD',
+      submittedDate: '2022-01-10',
+    },
+    {
+      id: 2,
+      status: 'Rejected',
+      remarks:
+        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem mollitia distinctio officia possimus. Modi dolorum, quod doloribus, amet impedit adipisci suscipit ducimus sapiente maxime id laborum voluptatibus, incidunt perspiciatis deserunt.',
+      submittedBy: 'EPS HEAD',
+      submittedDate: '2022-01-05',
+    },
+    {
+      id: 3,
+      status: 'Rejected',
+      remarks:
+        'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Excepturi, a natus. Quasi consequatur amet pariatur eius saepe cum, qui itaque eos nobis aliquam. Provident dolores dicta repellendus! Soluta alias architecto, quos necessitatibus modi provident! Placeat odit eos exercitationem enim error itaque pariatur numquam ipsam at sequi corporis, maiores rerum aut labore reiciendis perferendis! Repellendus soluta, deserunt, quisquam omnis cumque, necessitatibus possimus ratione eos deleniti maxime in odit quae. Iure, quas dolore optio quo numquam illo eos voluptas, vero ab debitis delectus vel laudantium? Voluptatibus dignissimos ut sunt laboriosam, labore nostrum voluptatem nulla distinctio alias tenetur, id aspernatur corrupti expedita fugit sit quis quo consequuntur minus voluptates sint rerum. Harum optio aliquam veniam ut officia magnam quasi ea, similique eos, minus beatae? Saepe ratione ex explicabo magni at id magnam odio in suscipit pariatur provident facilis rem nulla harum praesentium porro molestiae, dolorem quam libero veniam asperiores excepturi vero! Unde exercitationem quidem quam eos soluta modi tempora fugit nemo velit voluptatem nihil, iste odio, aspernatur amet nulla obcaecati quae, accusamus expedita! Dignissimos quas ex molestias ratione sequi. Iusto iure impedit accusamus quibusdam nulla voluptatem magnam alias similique assumenda perferendis laboriosam sint, quam animi laborum possimus nihil, vel aspernatur doloremque quidem maiores?',
+      submittedBy: 'EPS HEAD',
+      submittedDate: '2022-01-01',
+    },
+  ]
+
   return (
     <Box
       sx={{
@@ -140,6 +168,18 @@ const TcsOutput = () => {
         backgroundColor: '#fff',
       }}
     >
+      {/*Workflow Status Accordion */}
+      <StatusAccordian title='Level Two Status' data={data} />
+
+      {/* Remarks Accordion */}
+      <RemarksAccordion
+        title='Level One Submission Remarks'
+        placeholder='Enter your remarks here...'
+        // onSubmit={handleRemarkSubmit}
+        defaultExpanded={true}
+        maxLength={1000}
+      />
+
       {/* Tabs */}
       <Box sx={{ overflowX: 'auto', width: '100%' }}>
         <Tabs

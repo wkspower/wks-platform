@@ -96,7 +96,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'april.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -104,7 +105,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'april.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -117,7 +119,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'may.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -125,7 +128,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'may.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -138,7 +142,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'june.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -146,7 +151,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'june.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -159,7 +165,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'july.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -167,7 +174,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'july.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -180,7 +188,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'aug.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -188,7 +197,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'aug.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -201,7 +211,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'sep.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -209,7 +220,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'sep.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -222,7 +234,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'oct.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -230,7 +243,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'oct.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -243,7 +257,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'nov.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -251,7 +266,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'nov.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -264,7 +280,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'dec.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -272,7 +289,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'dec.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -285,7 +303,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'jan.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -293,7 +312,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'jan.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -306,7 +326,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'feb.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -314,7 +335,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'feb.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -327,7 +349,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'march.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -335,7 +358,8 @@ const STGShutdownAndOperationalHr = ({ hoursRows = [] }) => {
         {
           field: 'march.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
