@@ -170,14 +170,14 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 					otherCostsTransaction = new OtherCostsTransaction();
 					otherCostsTransaction.setMaterialId(UUID.fromString(otherCostsTransactionDto.getMaterialId()));
 					otherCostsTransaction.setAopYear(year);
-					otherCostsTransaction.setPrevActual(otherCostsTransactionDto.getPrevActual());
-					otherCostsTransaction.setPrevBudget(otherCostsTransactionDto.getPrevBudget());
 					otherCostsTransaction.setPlantId(plantId);
 				}
 				otherCostsTransaction.setRemark(otherCostsTransactionDto.getRemark());
 				otherCostsTransaction.setUpdatedBy(Utility.getUserName());
 				otherCostsTransaction.setModifiedOn(new Date());
 				otherCostsTransaction.setProposedNorm(otherCostsTransactionDto.getProposedNorm());
+				otherCostsTransaction.setPrevActual(otherCostsTransactionDto.getPrevActual());
+				otherCostsTransaction.setPrevBudget(otherCostsTransactionDto.getPrevBudget());
 				otherCostsTransactionRepository.save(otherCostsTransaction);
 			}
 			
