@@ -1,15 +1,19 @@
 package com.wks.caseengine.service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
 import com.wks.caseengine.dto.PriceDifferentialTransactionDTO;
@@ -461,6 +466,112 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	        return outputStream.toByteArray();
 	    } catch (Exception e) {
 	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	@Override
+	public AOPMessageVM importPriceDifferentialTransaction(String year,UUID plantId,MultipartFile file) {
+		try {
+			List<PriceDifferentialTransactionDTO> data = readPriceDifferentialTransaction(file.getInputStream(), plantId, year);
+			 AOPMessageVM aopMessageVM = savePriceDifferentialTransaction(year, plantId.toString(),data);
+			 List<PriceDifferentialTransactionDTO> failedList = (List<PriceDifferentialTransactionDTO>) aopMessageVM.getData();
+			
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = exportPriceDifferentialTransaction(year, plantId.toString(), true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+		return null;
+	}
+	
+	public List<PriceDifferentialTransactionDTO> readPriceDifferentialTransaction(InputStream inputStream, UUID plantFKId, String year) {
+	    List<PriceDifferentialTransactionDTO> priceDifferentialTransactionDTOs = new ArrayList<>();
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+
+	        if (rowIterator.hasNext())
+	            rowIterator.next();  
+
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            
+	            PriceDifferentialTransactionDTO dto = new PriceDifferentialTransactionDTO();
+	            try {
+	            	dto.setDisplayName(getStringCellValue(row.getCell(0), dto));
+	                dto.setPercentage(getNumericCellValue(row.getCell(1), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(2), dto));
+	                dto.setId(getStringCellValue(row.getCell(3), dto));
+	                dto.setAopYear(year);
+	                dto.setPlantId(plantFKId.toString());
+	              } 
+	              catch (Exception e) {
+	                e.printStackTrace();
+	                dto.setErrDescription(e.getMessage());
+	                dto.setSaveStatus("Failed");
+	            }
+	            priceDifferentialTransactionDTOs.add(dto);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return priceDifferentialTransactionDTOs;
+	}
+	private static String getStringCellValue(Cell cell, PriceDifferentialTransactionDTO dto) {
+	    try {
+	        if (cell == null || cell.getCellType() == CellType.BLANK) {
+	            return null;
+	        }
+	        
+	        cell.setCellType(CellType.STRING);
+	        String val = cell.getStringCellValue().trim();
+	        
+	        // Return null if the string is empty after trimming
+	        return val.isEmpty() ? null : val;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	private static Double getNumericCellValue(Cell cell, PriceDifferentialTransactionDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; // Return null for blank strings
+	        }
+	        try {
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
 	    }
 	    return null;
 	}
