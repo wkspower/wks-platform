@@ -1,13 +1,29 @@
 package com.wks.caseengine.cpp.serviceimpl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.wks.caseengine.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -225,7 +241,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
     // =========================
     //  JSON → Month DTO
     // =========================
-    private NormBasedUtilityBudgetMonthDTO parseMonthJson(String json, String monthName, int rowIndex) {
+    private NormBasedUtilityBudgetMonthDTO parseMonthJson(String json, String monthName, int rowIndex) { 
         try {
             if (json == null) {
                 log.debug("Row {} - {} is null, returning empty DTO with all null fields", rowIndex, monthName);
@@ -308,18 +324,22 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
     //Method To Save the NormsMonthDetail
 
     @Override
-    @jakarta.transaction.Transactional
-    public AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto, String financialYear, List<Object[]> remarkUpdates) {
+   // @jakarta.transaction.Transactional
+    public AOPMessageVM saveOrUpdate(NormsMonthUpdateRequestDTO dto, String financialYear, List<Object[]> remarkUpdates, List<NormsMonthDetail> allNormsMonthDetailsToUpdate) {
 
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
 
+        List<NormsMonthDetail> normsMonthDetailsToUpdate = new ArrayList<>();
+
 
         if (dto == null) {
+          
             throw new RestInvalidArgumentException("Request body cannot be null", null);
         }
 
         if (dto.getNormsHeaderFkId() == null) {
+           
             throw new RestInvalidArgumentException("normsHeaderFkId is mandatory", null);
         }
         
@@ -347,18 +367,65 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
      
 
-        processMonth(dto.getApr(), headerId, "APR", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getMay(), headerId, "MAY", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getJun(), headerId, "JUN", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getJul(), headerId, "JUL", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getAug(), headerId, "AUG", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getSep(), headerId, "SEP", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getOct(), headerId, "OCT", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getNov(), headerId, "NOV", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getDec(), headerId, "DEC", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getJan(), headerId, "JAN", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getFeb(), headerId, "FEB", updatedMonths, skippedMonths, errors);
-        processMonth(dto.getMar(), headerId, "MAR", updatedMonths, skippedMonths, errors);
+        processMonth(dto.getApr(), headerId, "APR", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getMay(), headerId, "MAY", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getJun(), headerId, "JUN", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getJul(), headerId, "JUL", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getAug(), headerId, "AUG", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getSep(), headerId, "SEP", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getOct(), headerId, "OCT", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getNov(), headerId, "NOV", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getDec(), headerId, "DEC", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getJan(), headerId, "JAN", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getFeb(), headerId, "FEB", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+        processMonth(dto.getMar(), headerId, "MAR", updatedMonths, skippedMonths, errors, normsMonthDetailsToUpdate);
+
+        try {
+
+     //     normsMonthDetailRepository.saveAllAndFlush(normsMonthDetailsToUpdate);
+        allNormsMonthDetailsToUpdate.addAll(normsMonthDetailsToUpdate);
+    // String sql = """
+    //     UPDATE dbo.NormsMonthDetail
+    //     SET
+    //         NormsHeader_FK_Id = ?,
+    //         FinancialYearMonth_FK_Id = ?,
+    //         ScenarioType = ?,
+    //         Norms = ?,
+    //         Quantity = ?,
+    //         Amount = ?,
+    //         Price = ?,
+    //         DisplayOrder = ?,
+    //         GenerationUOM = ?,
+    //         QTY = ?
+    //     WHERE Id = ?
+    //     """;
+
+    // jdbcTemplate.batchUpdate(
+    //     sql,
+    //     normsMonthDetailsToUpdate,
+    //     500,   // batch size (optimal for SQL Server)
+    //     (ps, n) -> {
+    //         ps.setObject(1, n.getNormsHeaderFkId());
+    //         ps.setObject(2, n.getFinancialYearMonthFkId());
+    //         ps.setString(3, n.getScenarioType());
+    //         ps.setBigDecimal(4, n.getNorms());
+    //         ps.setBigDecimal(5, n.getQuantity());
+    //         ps.setBigDecimal(6, n.getAmount());
+    //         ps.setBigDecimal(7, n.getPrice());
+    //         ps.setObject(8, n.getDisplayOrder());
+    //         ps.setString(9, n.getGenerationUom());
+    //         ps.setBigDecimal(10, n.getQty());
+    //         ps.setObject(11, n.getId());
+    //     }
+    // );
+      
+        } catch (Exception e) {
+            System.out.println("failed to process all the months " );
+            
+        }
+
+
+        
 
         if (updatedMonths.isEmpty() && errors.isEmpty()) {
             throw new RestInvalidArgumentException(
@@ -367,12 +434,14 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         }
 
         if (!errors.isEmpty()) {
+
             throw new RestInvalidArgumentException(
                     "Failed to update some months: " + String.join(", ", errors),
                     null);
         }
 
-        entityManager.flush();
+
+     //   entityManager.flush();
 
         AOPMessageVM vm = new AOPMessageVM();
         vm.setCode(200);
@@ -392,6 +461,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         vm.setMessage(message);
         vm.setData(null);
 
+
         return vm;
     }
 
@@ -401,7 +471,8 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             String monthName,
             List<String> updatedMonths,
             List<String> skippedMonths,
-            List<String> errors) {
+            List<String> errors,
+            List<NormsMonthDetail> normsMonthDetailsToUpdate) {
         try {
 
             if (dto == null) {
@@ -477,11 +548,14 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                 skippedMonths.add(monthName + " (no changes detected)");
                 return;
             }
-
-            normsMonthDetailRepository.saveAndFlush(existing);
+              
+        //    normsMonthDetailRepository.saveAndFlush(existing);
+            normsMonthDetailsToUpdate.add(existing);
             updatedMonths.add(monthName);
+          
 
         } catch (Exception e) {
+            System.out.println("failed to process month " );
             errors.add(monthName + " (error: " + e.getMessage() + ")");
         }
     }
@@ -499,7 +573,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
 
     @Override
-    @jakarta.transaction.Transactional
+    @Transactional
     public AOPMessageVM saveOrUpdateBulk(List<NormsMonthUpdateRequestDTO> dtoList, String financialYear) {
 
         if (dtoList == null || dtoList.isEmpty()) {
@@ -508,9 +582,50 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
         List<Object[]> remarkUpdates = new ArrayList<>();
 
+        List<NormsMonthDetail> allNormsMonthDetailsToUpdate = new ArrayList<>();
+
         for (NormsMonthUpdateRequestDTO dto : dtoList) {
-            saveOrUpdate(dto, financialYear, remarkUpdates); 
+
+            saveOrUpdate(dto, financialYear, remarkUpdates, allNormsMonthDetailsToUpdate); 
+
+            
         }
+
+        normsMonthDetailRepository.saveAllAndFlush(allNormsMonthDetailsToUpdate);
+//    String sql1 = """
+//     UPDATE dbo.NormsMonthDetail
+//     SET
+//         NormsHeader_FK_Id = ?,
+//         FinancialYearMonth_FK_Id = ?,
+//         ScenarioType = ?,
+//         Norms = ?,
+//         Quantity = ?,
+//         Amount = ?,
+//         Price = ?,
+//         GenerationUOM = ?,
+//         QTY = ?
+//     WHERE Id = ?
+//     """;
+
+// jdbcTemplate.batchUpdate(
+//     sql1,
+//     allNormsMonthDetailsToUpdate,
+//     500,   // ✅ optimal for SQL Server
+//     (ps, dto) -> {
+//         ps.setObject(1, dto.getNormsHeaderFkId());
+//         ps.setObject(2, dto.getFinancialYearMonthFkId());
+//         ps.setString(3, dto.getScenarioType());
+//         ps.setBigDecimal(4, dto.getNorms());
+//         ps.setBigDecimal(5, dto.getQuantity());
+//         ps.setBigDecimal(6, dto.getAmount());
+//         ps.setBigDecimal(7, dto.getPrice());
+//         ps.setString(9, dto.getGenerationUom());
+//         ps.setBigDecimal(10, dto.getQty());
+//         ps.setObject(11, dto.getId());
+//     }
+// );
+
+        entityManager.flush();
 
         if(!remarkUpdates.isEmpty()) {
 
@@ -541,6 +656,519 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         vm.setData(null);
 
         return vm;
+    }
+
+    @Override
+    public byte[] exportNormBasedUtilityBudget(UUID cppPlantId, String financialYear, boolean isAfterSave, List<NormBasedUtilityBudgetResponseDTO> dtoList) {
+        try {
+            if (!isAfterSave) {
+                AOPMessageVM result = getNormBasedUtilityBudget(cppPlantId, financialYear);
+                if (result.getData() instanceof List) {
+                    dtoList = (List<NormBasedUtilityBudgetResponseDTO>) result.getData();
+                }
+            }
+
+            if (dtoList == null) {
+                dtoList = new ArrayList<>();
+            }
+
+            Workbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Norm Based Utility Budget");
+            CellStyle boldStyle = Utility.createBoldBorderedStyle(workbook);
+            
+            int currentRow = 0;
+            int col = 0;
+
+            // Create top header row (Row 0) with merged cells for months
+            Row topHeaderRow = sheet.createRow(currentRow++);
+            col = 0;
+            
+            // Static columns that span both rows
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Generating Plant", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility ID", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "UOM", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Account", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Material", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "SAP Code", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing Plant", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing UOM", boldStyle);
+            col++;
+            
+            // Month headers (each spans 7 columns: Qty, Gen UOM, Norms, Quantity, Amount, Price, financialYearMonthFkId)
+            String[] months = {"April", "May", "June", "July", "August", "September", 
+                             "October", "November", "December", "January", "February", "March"};
+            
+            int monthStartCol = col;
+            List<Integer> financialYearMonthFkIdColumns = new ArrayList<>();
+            for (String month : months) {
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 6, month, boldStyle);
+                financialYearMonthFkIdColumns.add(col + 6); // Track the financialYearMonthFkId column position
+                col += 7;
+            }
+            
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "id", boldStyle);
+            int idCol = col;
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "normHeaderId", boldStyle);
+            int normHeaderIdCol = col;
+            col++;
+            
+            if (isAfterSave) {
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", boldStyle);
+                col++;
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", boldStyle);
+                col++;
+            }
+            
+            // Create sub-header row (Row 1) for month details
+            Row subHeaderRow = sheet.createRow(currentRow++);
+            col = monthStartCol; // Start after static columns
+            
+            // Sub-headers for each month (Qty, Gen UOM, Norms, Quantity, Amount, Price, financialYearMonthFkId)
+            for (int i = 0; i < 12; i++) {
+                Cell cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("Qty");
+                cell.setCellStyle(boldStyle);
+                
+                cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("Generation UOM");
+                cell.setCellStyle(boldStyle);
+                
+                cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("Norms");
+                cell.setCellStyle(boldStyle);
+                
+                cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("Quantity");
+                cell.setCellStyle(boldStyle);
+                
+                cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("Amount");
+                cell.setCellStyle(boldStyle);
+                
+                cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("Price");
+                cell.setCellStyle(boldStyle);
+                
+                cell = subHeaderRow.createCell(col++);
+                cell.setCellValue("financialYearMonthFkId");
+                cell.setCellStyle(boldStyle);
+            }
+
+            // Data rows
+            for (NormBasedUtilityBudgetResponseDTO dto : dtoList) {
+                Row row = sheet.createRow(currentRow++);
+                col = 0;
+
+                row.createCell(col++).setCellValue(dto.getGeneratingPlantName() != null ? dto.getGeneratingPlantName() : "");
+                row.createCell(col++).setCellValue(dto.getUtilityName() != null ? dto.getUtilityName() : "");
+                row.createCell(col++).setCellValue(dto.getUtilityId() != null ? dto.getUtilityId() : "");
+                row.createCell(col++).setCellValue(dto.getUom() != null ? dto.getUom() : "");
+                row.createCell(col++).setCellValue(dto.getAccountName() != null ? dto.getAccountName() : "");
+                row.createCell(col++).setCellValue(dto.getMaterialName() != null ? dto.getMaterialName() : "");
+                row.createCell(col++).setCellValue(dto.getMaterialId() != null ? dto.getMaterialId() : "");
+                row.createCell(col++).setCellValue(dto.getIssuingPlantName() != null ? dto.getIssuingPlantName() : "");
+                row.createCell(col++).setCellValue(dto.getIssuingUom() != null ? dto.getIssuingUom() : "");
+                
+                // April
+                setMonthCellValues(row, col, dto.getApr());
+                col += 7;
+                // May
+                setMonthCellValues(row, col, dto.getMay());
+                col += 7;
+                // June
+                setMonthCellValues(row, col, dto.getJun());
+                col += 7;
+                // July
+                setMonthCellValues(row, col, dto.getJul());
+                col += 7;
+                // August
+                setMonthCellValues(row, col, dto.getAug());
+                col += 7;
+                // September
+                setMonthCellValues(row, col, dto.getSep());
+                col += 7;
+                // October
+                setMonthCellValues(row, col, dto.getOct());
+                col += 7;
+                // November
+                setMonthCellValues(row, col, dto.getNov());
+                col += 7;
+                // December
+                setMonthCellValues(row, col, dto.getDec());
+                col += 7;
+                // January
+                setMonthCellValues(row, col, dto.getJan());
+                col += 7;
+                // February
+                setMonthCellValues(row, col, dto.getFeb());
+                col += 7;
+                // March
+                setMonthCellValues(row, col, dto.getMar());
+                col += 7;
+                
+                row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                row.createCell(col++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+                row.createCell(col++).setCellValue(dto.getNormHeaderId() != null ? dto.getNormHeaderId() : "");
+
+                if (isAfterSave) {
+                    row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                }
+            }
+
+            // Hide id and normHeaderId columns
+            sheet.setColumnHidden(idCol, true);
+            sheet.setColumnHidden(normHeaderIdCol, true);
+            
+            // Hide financialYearMonthFkId columns for all months
+            for (Integer fymCol : financialYearMonthFkIdColumns) {
+                sheet.setColumnHidden(fymCol, true);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+            return outputStream.toByteArray();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public AOPMessageVM importExcel(UUID cppPlantId, String financialYear, MultipartFile file) {
+        try {
+
+          
+            List<NormBasedUtilityBudgetResponseDTO> data = readNormBasedUtilityBudget(file.getInputStream(), cppPlantId, financialYear);
+            
+           
+            
+            // Separate failed records from successful ones
+            List<NormBasedUtilityBudgetResponseDTO> validRecords = new ArrayList<>();
+            List<NormBasedUtilityBudgetResponseDTO> failedRecords = new ArrayList<>(); 
+
+
+            for (NormBasedUtilityBudgetResponseDTO dto : data) {
+                if (dto.getSaveStatus() != null && dto.getSaveStatus().equalsIgnoreCase("Failed")) {
+                    failedRecords.add(dto);
+                } else {
+                    validRecords.add(dto);
+                }
+            }
+
+          
+
+            // Try to save valid records
+            if (!validRecords.isEmpty()) {
+                try {
+                    // Convert to update request DTOs and save
+                    List<NormsMonthUpdateRequestDTO> updateRequests = convertToUpdateRequests(validRecords);
+                    saveOrUpdateBulk(updateRequests, financialYear);
+                } catch (Exception e) {
+                    System.out.println("error in import method: " + e.getMessage());
+                    // Mark all valid records as failed if save fails
+                    for (NormBasedUtilityBudgetResponseDTO dto : validRecords) {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("Save failed: " + e.getMessage());
+                        failedRecords.add(dto);
+                    }
+                }
+            }
+
+            AOPMessageVM aopMessageVM = new AOPMessageVM();
+            if (!failedRecords.isEmpty()) {
+                byte[] fileByteArray = exportNormBasedUtilityBudget(cppPlantId, financialYear, true, failedRecords);
+                String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+                aopMessageVM.setData(base64File);
+                aopMessageVM.setCode(400);
+                aopMessageVM.setMessage("Partial data has been saved");
+            } else {
+                aopMessageVM.setCode(200);
+                aopMessageVM.setMessage("All data has been saved");
+            }
+
+            return aopMessageVM;
+        } catch (Exception e) {
+            e.printStackTrace();
+            AOPMessageVM errorVM = new AOPMessageVM();
+            errorVM.setCode(500);
+            errorVM.setMessage("Error importing file: " + e.getMessage());
+            return errorVM;
+        }
+    }
+
+    private List<NormBasedUtilityBudgetResponseDTO> readNormBasedUtilityBudget(InputStream inputStream, UUID cppPlantId, String financialYear) {
+        List<NormBasedUtilityBudgetResponseDTO> dataList = new ArrayList<>();
+
+        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            // Skip both header rows (top header and sub-header)
+            if (rowIterator.hasNext()) {
+                rowIterator.next(); // Skip top header row
+            }
+            if (rowIterator.hasNext()) {
+                rowIterator.next(); // Skip sub-header row
+            }
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                NormBasedUtilityBudgetResponseDTO dto = new NormBasedUtilityBudgetResponseDTO();
+                
+                try {
+                    int col = 0;
+                    dto.setGeneratingPlantName(getStringCellValue(row.getCell(col++)));
+                    dto.setUtilityName(getStringCellValue(row.getCell(col++)));
+                    dto.setUtilityId(getStringCellValue(row.getCell(col++)));
+                    dto.setUom(getStringCellValue(row.getCell(col++)));
+                    dto.setAccountName(getStringCellValue(row.getCell(col++)));
+                    dto.setMaterialName(getStringCellValue(row.getCell(col++)));
+                    dto.setMaterialId(getStringCellValue(row.getCell(col++)));
+                    dto.setIssuingPlantName(getStringCellValue(row.getCell(col++)));
+                    dto.setIssuingUom(getStringCellValue(row.getCell(col++)));
+                    
+                    // April
+                    dto.setApr(readMonthData(row, col));
+                    col += 7;
+                    // May
+                    dto.setMay(readMonthData(row, col));
+                    col += 7;
+                    // June
+                    dto.setJun(readMonthData(row, col));
+                    col += 7;
+                    // July
+                    dto.setJul(readMonthData(row, col));
+                    col += 7;
+                    // August
+                    dto.setAug(readMonthData(row, col));
+                    col += 7;
+                    // September
+                    dto.setSep(readMonthData(row, col));
+                    col += 7;
+                    // October
+                    dto.setOct(readMonthData(row, col));
+                    col += 7;
+                    // November
+                    dto.setNov(readMonthData(row, col));
+                    col += 7;
+                    // December
+                    dto.setDec(readMonthData(row, col));
+                    col += 7;
+                    // January
+                    dto.setJan(readMonthData(row, col));
+                    col += 7;
+                    // February
+                    dto.setFeb(readMonthData(row, col));
+                    col += 7;
+                    // March
+                    dto.setMar(readMonthData(row, col));
+                    col += 7;
+                    
+                    dto.setRemarks(getStringCellValue(row.getCell(col++)));
+                    
+                    String idStr = getStringCellValue(row.getCell(col++));
+                    if (idStr != null && !idStr.isEmpty()) {
+                        dto.setId(Integer.parseInt(idStr));
+                    }
+                    
+                    dto.setNormHeaderId(getStringCellValue(row.getCell(col++)));
+
+                    if (dto.getNormHeaderId() == null || dto.getNormHeaderId().isEmpty()) {
+                        dto.setSaveStatus("Failed");
+                        dto.setErrDescription("NormHeaderId is missing");
+                    }
+
+                } catch (Exception e) {
+                    
+                    System.out.println("error while reading row: " + e.getMessage());
+                    e.printStackTrace();
+                    dto.setSaveStatus("Failed");
+                    dto.setErrDescription(e.getMessage());
+                }
+                
+                dataList.add(dto);
+            }
+
+        } catch (Exception e) {
+            System.out.println("error while reading file: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return dataList;
+    }
+
+    private List<NormsMonthUpdateRequestDTO> convertToUpdateRequests(List<NormBasedUtilityBudgetResponseDTO> dtoList) {
+        List<NormsMonthUpdateRequestDTO> requests = new ArrayList<>();
+        
+        for (NormBasedUtilityBudgetResponseDTO dto : dtoList) {
+            NormsMonthUpdateRequestDTO request = new NormsMonthUpdateRequestDTO();
+            
+            if (dto.getNormHeaderId() != null && !dto.getNormHeaderId().isEmpty()) {
+                request.setNormsHeaderFkId(UUID.fromString(dto.getNormHeaderId()));
+            }
+            
+            request.setRemarks(dto.getRemarks());
+            request.setApr(convertToNormsMonthValueDTO(dto.getApr()));
+            request.setMay(convertToNormsMonthValueDTO(dto.getMay()));
+            request.setJun(convertToNormsMonthValueDTO(dto.getJun()));
+            request.setJul(convertToNormsMonthValueDTO(dto.getJul()));
+            request.setAug(convertToNormsMonthValueDTO(dto.getAug()));
+            request.setSep(convertToNormsMonthValueDTO(dto.getSep()));
+            request.setOct(convertToNormsMonthValueDTO(dto.getOct()));
+            request.setNov(convertToNormsMonthValueDTO(dto.getNov()));
+            request.setDec(convertToNormsMonthValueDTO(dto.getDec()));
+            request.setJan(convertToNormsMonthValueDTO(dto.getJan()));
+            request.setFeb(convertToNormsMonthValueDTO(dto.getFeb()));
+            request.setMar(convertToNormsMonthValueDTO(dto.getMar()));
+            
+            requests.add(request);
+        }
+        
+        return requests;
+    }
+
+    private NormsMonthValueDTO convertToNormsMonthValueDTO(NormBasedUtilityBudgetMonthDTO monthDTO) {
+        if (monthDTO == null) {
+            return null;
+        }
+        
+        NormsMonthValueDTO valueDTO = new NormsMonthValueDTO();
+        valueDTO.setNorms(monthDTO.getNorms() != null ? BigDecimal.valueOf(monthDTO.getNorms()) : null);
+        valueDTO.setQuantity(monthDTO.getQuantity() != null ? BigDecimal.valueOf(monthDTO.getQuantity()) : null);
+        valueDTO.setAmount(monthDTO.getAmount() != null ? BigDecimal.valueOf(monthDTO.getAmount()) : null);
+        valueDTO.setPrice(monthDTO.getPrice() != null ? BigDecimal.valueOf(monthDTO.getPrice()) : null);
+        valueDTO.setQty(monthDTO.getQty() != null ? BigDecimal.valueOf(monthDTO.getQty()) : null);
+        valueDTO.setGenerationUom(monthDTO.getGenerationUom());
+        
+        if (monthDTO.getFinancialYearMonthFkId() != null && !monthDTO.getFinancialYearMonthFkId().isEmpty()) {
+            valueDTO.setFinancialYearMonthFkId(UUID.fromString(monthDTO.getFinancialYearMonthFkId()));
+        }
+        
+        return valueDTO;
+    }
+
+    private void setMonthCellValues(Row row, int startCol, NormBasedUtilityBudgetMonthDTO monthDTO) {
+        if (monthDTO != null) {
+            setDoubleCellValue(row.createCell(startCol), monthDTO.getQty());
+            row.createCell(startCol + 1).setCellValue(monthDTO.getGenerationUom() != null ? monthDTO.getGenerationUom() : "");
+            setDoubleCellValue(row.createCell(startCol + 2), monthDTO.getNorms());
+            setDoubleCellValue(row.createCell(startCol + 3), monthDTO.getQuantity());
+            setDoubleCellValue(row.createCell(startCol + 4), monthDTO.getAmount());
+            setDoubleCellValue(row.createCell(startCol + 5), monthDTO.getPrice());
+            row.createCell(startCol + 6).setCellValue(monthDTO.getFinancialYearMonthFkId() != null ? monthDTO.getFinancialYearMonthFkId() : "");
+        } else {
+            for (int i = 0; i < 7; i++) {
+                row.createCell(startCol + i).setCellValue("");
+            }
+        }
+    }
+
+    private NormBasedUtilityBudgetMonthDTO readMonthData(Row row, int startCol) {
+        NormBasedUtilityBudgetMonthDTO monthDTO = new NormBasedUtilityBudgetMonthDTO();
+        monthDTO.setQty(getDoubleCellValue(row.getCell(startCol)));
+        monthDTO.setGenerationUom(getStringCellValue(row.getCell(startCol + 1)));
+        monthDTO.setNorms(getDoubleCellValue(row.getCell(startCol + 2)));
+        monthDTO.setQuantity(getDoubleCellValue(row.getCell(startCol + 3)));
+        monthDTO.setAmount(getDoubleCellValue(row.getCell(startCol + 4)));
+        monthDTO.setPrice(getDoubleCellValue(row.getCell(startCol + 5)));
+        monthDTO.setFinancialYearMonthFkId(getStringCellValue(row.getCell(startCol + 6)));
+        return monthDTO;
+    }
+
+    private void createMergedHeaderCell(Sheet sheet, Row row, int rowStart, int rowEnd, 
+                                       int colStart, int colEnd, String value, CellStyle style) {
+        if (rowStart != rowEnd || colStart != colEnd) {
+            sheet.addMergedRegion(new CellRangeAddress(rowStart, rowEnd, colStart, colEnd));
+        }
+        
+        Cell cell = row.createCell(colStart);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+        
+        for (int r = rowStart; r <= rowEnd; r++) {
+            Row currentRow = sheet.getRow(r);
+            if (currentRow == null) {
+                currentRow = sheet.createRow(r);
+            }
+            for (int c = colStart; c <= colEnd; c++) {
+                Cell currentCell = currentRow.getCell(c);
+                if (currentCell == null) {
+                    currentCell = currentRow.createCell(c);
+                }
+                currentCell.setCellStyle(style);
+            }
+        }
+    }
+
+    private void setDoubleCellValue(Cell cell, Double value) {
+        if (value != null) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    private String getStringCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            String value;
+            if (cell.getCellType() == CellType.NUMERIC) {
+                value = String.valueOf((long) cell.getNumericCellValue());
+            } else if (cell.getCellType() == CellType.STRING) {
+                value = cell.getStringCellValue();
+            } else if (cell.getCellType() == CellType.FORMULA) {
+                value = cell.getStringCellValue();
+            } else {
+                return null;
+            }
+            
+            if (value == null || value.trim().isEmpty()) {
+                return null;
+            }
+            return value.trim();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Double getDoubleCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return cell.getNumericCellValue();
+            } else if (cell.getCellType() == CellType.STRING) {
+                String value = cell.getStringCellValue().trim();
+                if (value.isEmpty()) {
+                    return null;
+                }
+                return Double.parseDouble(value);
+            }
+        } catch (NumberFormatException e) {
+            // Return null for invalid numbers
+        }
+        return null;
     }
 
 }
