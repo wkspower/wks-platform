@@ -105,6 +105,7 @@ const defs = {
     packagingConsumables: 'Packaging Consumables',
     dashboard: 'AOP Dashboard',
     proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
+    qualitypackaging: 'Quality & Packaging Norms',
   },
   pages: {
     dashboard: {
@@ -303,6 +304,7 @@ const defs = {
         packagingConsumables: 'Packaging Consumables',
         dashboard: 'AOP Dashboard',
         proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
+        qualitypackaging: 'Quality & Packaging Norms',
       },
     },
   },

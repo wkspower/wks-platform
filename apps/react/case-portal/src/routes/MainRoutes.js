@@ -27,7 +27,7 @@ import Loadable from 'components/Loadable'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
-
+import QualityPackagingNorms from  'components/kendo-data-tables/QualityPackagingNorms'
 import MainLayout from 'layout/MainLayout'
 import { lazy } from 'react'
 import { CaseList } from 'views/caseList/caseList'
@@ -396,6 +396,14 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='feed-stock-availability'>
                 <FeedStockAvailability />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'quality-packaging-norms',
+            element: (
+              <PrivateRoute routeId='quality-packaging-norms'>
+                <QualityPackagingNorms />
               </PrivateRoute>
             ),
           },
