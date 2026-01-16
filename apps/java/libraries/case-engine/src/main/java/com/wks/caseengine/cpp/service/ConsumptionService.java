@@ -18,7 +18,7 @@ public interface ConsumptionService {
 
 	public ProcessDemandUpdateResponse updateProcessDemand(String financialYear, List<ProcessDemandUpdateRequest> requests);
 
-	public byte[] exportConsumption(UUID plantId, String financialYear, boolean isAfterSave, List<PlantRequirementDTO> dtoList);
+	public byte[] exportConsumption(UUID plantId, String financialYear, boolean isAfterSave, List<CalculatedProcessDemandDTO> dtoList);
 
 	public AOPMessageVM importExcel(UUID plantId, String financialYear, MultipartFile file);
 }

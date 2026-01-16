@@ -67,7 +67,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 				.orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
 
 		List<PlantConsumpProjection> results = plantsRepository.findPlantConsumptionByMaterial(plantId, year);
-
+System.out.println("total results: " + results.size());
 		
 
 		for (PlantConsumpProjection result : results) {
@@ -318,11 +318,15 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 				.build();
 	}
 
-	public byte[] exportConsumption(UUID plantId, String financialYear, boolean isAfterSave, List<PlantRequirementDTO> dtoList) {
+	@Override
+	public byte[] exportConsumption(UUID plantId, String financialYear, boolean isAfterSave, List<CalculatedProcessDemandDTO> dtoList) {
 		try {
 			if (!isAfterSave) {
-				dtoList = getCppConsumptions(plantId, financialYear);
+				dtoList = getProcessDemand(financialYear);
 			}
+
+			System.out.println("exportConsumption dtoList: " + dtoList);
+			System.out.println("exportConsumption dtoList size: " + dtoList.size());
 
 			Workbook workbook = new XSSFWorkbook();
 			Sheet sheet = workbook.createSheet("Consumption");
@@ -366,20 +370,20 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 		sheet.setColumnHidden(18, true);
 
 		// Data rows
-		for (PlantRequirementDTO dto : dtoList) {
+		for (CalculatedProcessDemandDTO dto : dtoList) {
 			Row row = sheet.createRow(currentRow++);
 			int col = 0;
 
-			row.createCell(col++).setCellValue(dto.getPlantName() != null ? dto.getPlantName() : "");
-			row.createCell(col++).setCellValue(dto.getCppUtilities() != null ? dto.getCppUtilities() : "");
-			row.createCell(col++).setCellValue(dto.getCppUtiltiyIds() != null ? dto.getCppUtiltiyIds() : "");
+			row.createCell(col++).setCellValue(dto.getProcessPlant() != null ? dto.getProcessPlant() : "");
+			row.createCell(col++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+			row.createCell(col++).setCellValue(dto.getCppUtilityId() != null ? dto.getCppUtilityId() : "");
 			row.createCell(col++).setCellValue(dto.getCppPlant() != null ? dto.getCppPlant() : "");
 			row.createCell(col++).setCellValue(dto.getUom() != null ? dto.getUom() : "");
 			
-			setDoubleCellValue(row.createCell(col++), dto.getApril());
+			setDoubleCellValue(row.createCell(col++), dto.getApr());
 			setDoubleCellValue(row.createCell(col++), dto.getMay());
-			setDoubleCellValue(row.createCell(col++), dto.getJune());
-			setDoubleCellValue(row.createCell(col++), dto.getJuly());
+			setDoubleCellValue(row.createCell(col++), dto.getJun());
+			setDoubleCellValue(row.createCell(col++), dto.getJul());
 			setDoubleCellValue(row.createCell(col++), dto.getAug());
 			setDoubleCellValue(row.createCell(col++), dto.getSep());
 			setDoubleCellValue(row.createCell(col++), dto.getOct());
@@ -387,15 +391,17 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 			setDoubleCellValue(row.createCell(col++), dto.getDec());
 			setDoubleCellValue(row.createCell(col++), dto.getJan());
 			setDoubleCellValue(row.createCell(col++), dto.getFeb());
-			setDoubleCellValue(row.createCell(col++), dto.getMarch());
+			setDoubleCellValue(row.createCell(col++), dto.getMar());
 			
 			row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-			row.createCell(col++).setCellValue(dto.getPlantCode() != null ? dto.getPlantCode() : ""); // Hidden column
+			row.createCell(col++).setCellValue(dto.getProcessPlantId() != null ? dto.getProcessPlantId() : ""); // Hidden column
 
 			if (isAfterSave) {
 				row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
 				row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
 			}
+
+			
 		}
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -404,21 +410,23 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 			return outputStream.toByteArray();
 
 		} catch (Exception e) {
+			System.out.println("exportConsumption error: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
+	@Override
 	public AOPMessageVM importExcel(UUID plantId, String financialYear, MultipartFile file) {
 		try {
-			List<PlantRequirementDTO> data = readConsumption(file.getInputStream(), plantId, financialYear);
+			List<CalculatedProcessDemandDTO> data = readConsumption(file.getInputStream(), plantId, financialYear);
 			
 			
 			// Separate failed records from successful ones
-			List<PlantRequirementDTO> validRecords = new ArrayList<>();
-			List<PlantRequirementDTO> failedRecords = new ArrayList<>();
+			List<CalculatedProcessDemandDTO> validRecords = new ArrayList<>();
+			List<CalculatedProcessDemandDTO> failedRecords = new ArrayList<>();
 			
-			for (PlantRequirementDTO dto : data) {
+			for (CalculatedProcessDemandDTO dto : data) {
 				if (dto.getSaveStatus() != null && dto.getSaveStatus().equalsIgnoreCase("Failed")) {
 					failedRecords.add(dto);
 				} else {
@@ -446,7 +454,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 					}
 				} catch (Exception e) {
 					// Mark all valid records as failed if save fails
-					for (PlantRequirementDTO dto : validRecords) {
+					for (CalculatedProcessDemandDTO dto : validRecords) {
 						dto.setSaveStatus("Failed");
 						dto.setErrDescription("Save failed: " + e.getMessage());
 						failedRecords.add(dto);
@@ -476,8 +484,8 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 		}
 	}
 
-	private List<PlantRequirementDTO> readConsumption(InputStream inputStream, UUID plantId, String financialYear) {
-		List<PlantRequirementDTO> dataList = new ArrayList<>();
+	private List<CalculatedProcessDemandDTO> readConsumption(InputStream inputStream, UUID plantId, String financialYear) {
+		List<CalculatedProcessDemandDTO> dataList = new ArrayList<>();
 
 		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 			Sheet sheet = workbook.getSheetAt(0);
@@ -490,20 +498,20 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 
 			while (rowIterator.hasNext()) {
 				Row row = rowIterator.next();
-				PlantRequirementDTO dto = new PlantRequirementDTO();
+				CalculatedProcessDemandDTO dto = new CalculatedProcessDemandDTO();
 				
 			try {
 				int col = 0;
-				dto.setPlantName(getStringCellValue(row.getCell(col++)));
-				dto.setCppUtilities(getStringCellValue(row.getCell(col++)));
-				dto.setCppUtiltiyIds(getStringCellValue(row.getCell(col++)));
+				dto.setProcessPlant(getStringCellValue(row.getCell(col++)));
+				dto.setCppUtility(getStringCellValue(row.getCell(col++)));
+				dto.setCppUtilityId(getStringCellValue(row.getCell(col++)));
 				dto.setCppPlant(getStringCellValue(row.getCell(col++)));
 				dto.setUom(getStringCellValue(row.getCell(col++)));
 				
-				dto.setApril(getDoubleCellValue(row.getCell(col++)));
+				dto.setApr(getDoubleCellValue(row.getCell(col++)));
 				dto.setMay(getDoubleCellValue(row.getCell(col++)));
-				dto.setJune(getDoubleCellValue(row.getCell(col++)));
-				dto.setJuly(getDoubleCellValue(row.getCell(col++)));
+				dto.setJun(getDoubleCellValue(row.getCell(col++)));
+				dto.setJul(getDoubleCellValue(row.getCell(col++)));
 				dto.setAug(getDoubleCellValue(row.getCell(col++)));
 				dto.setSep(getDoubleCellValue(row.getCell(col++)));
 				dto.setOct(getDoubleCellValue(row.getCell(col++)));
@@ -511,17 +519,17 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 				dto.setDec(getDoubleCellValue(row.getCell(col++)));
 				dto.setJan(getDoubleCellValue(row.getCell(col++)));
 				dto.setFeb(getDoubleCellValue(row.getCell(col++)));
-				dto.setMarch(getDoubleCellValue(row.getCell(col++)));
+				dto.setMar(getDoubleCellValue(row.getCell(col++)));
 				
 				dto.setRemarks(getStringCellValue(row.getCell(col++)));
-				dto.setPlantCode(getStringCellValue(row.getCell(col++))); // Read from hidden column
+				dto.setProcessPlantId(getStringCellValue(row.getCell(col++))); // Read from hidden column
 
 				// Validate required fields
-				if (dto.getPlantCode() == null || dto.getPlantCode().isEmpty()) {
+				if (dto.getProcessPlantId() == null || dto.getProcessPlantId().isEmpty()) {
 					dto.setSaveStatus("Failed");
 					dto.setErrDescription("Plant Code is missing");
 				}
-				if (dto.getCppUtiltiyIds() == null || dto.getCppUtiltiyIds().isEmpty()) {
+				if (dto.getCppUtilityId() == null || dto.getCppUtilityId().isEmpty()) {
 					dto.setSaveStatus("Failed");
 					dto.setErrDescription("CPP Utility Ids is missing");
 				}
@@ -532,14 +540,14 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 					dto.setErrDescription(e.getMessage());
 				}
 
-				System.out.println("outer missing plantCode: " + dto.getPlantCode());
-				System.out.println("outer missing cppUtiltiyIds: " + dto.getCppUtiltiyIds());
-				if(dto.getPlantCode() == "40N6" && dto.getCppUtiltiyIds() == "310027940") {
+				System.out.println("outer missing plantCode: " + dto.getProcessPlantId());
+				System.out.println("outer missing cppUtiltiyIds: " + dto.getCppUtilityId());
+				if(dto.getProcessPlantId() == "40N6" && dto.getCppUtilityId() == "310027940") {
 					System.out.println(" missing dto: " + dto);
 					System.out.println("missing cppPlantId: " + dto.getCppPlantId());
 				}
 
-				if(dto.getPlantCode() == "40N6" && dto.getCppUtiltiyIds() == "310027924") {
+				if(dto.getProcessPlantId() == "40N6" && dto.getCppUtilityId() == "310027924") {
 					System.out.println(" missing dto: " + dto);
 					System.out.println("missing cppPlantId: " + dto.getCppPlantId());
 				}
@@ -553,17 +561,17 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 		return dataList;
 	}
 
-	private List<ProcessDemandUpdateRequest> convertToUpdateRequests(List<PlantRequirementDTO> dtoList) {
+	private List<ProcessDemandUpdateRequest> convertToUpdateRequests(List<CalculatedProcessDemandDTO> dtoList) {
 		List<ProcessDemandUpdateRequest> requests = new ArrayList<>();
 		
-		for (PlantRequirementDTO dto : dtoList) {
+		for (CalculatedProcessDemandDTO dto : dtoList) {
 			ProcessDemandUpdateRequest request = ProcessDemandUpdateRequest.builder()
-					.processPlantId(dto.getPlantCode())  // Map plantCode to processPlantId
-					.cppUtilityId(dto.getCppUtiltiyIds())
-					.apr(dto.getApril())
+					.processPlantId(dto.getProcessPlantId())
+					.cppUtilityId(dto.getCppUtilityId())
+					.apr(dto.getApr())
 					.may(dto.getMay())
-					.jun(dto.getJune())
-					.jul(dto.getJuly())
+					.jun(dto.getJun())
+					.jul(dto.getJul())
 					.aug(dto.getAug())
 					.sep(dto.getSep())
 					.oct(dto.getOct())
@@ -571,7 +579,7 @@ public class ConsumptionServiceImpl implements ConsumptionService {
 					.dec(dto.getDec())
 					.jan(dto.getJan())
 					.feb(dto.getFeb())
-					.mar(dto.getMarch())
+					.mar(dto.getMar())
 					.remarks(dto.getRemarks())
 					.build();
 			

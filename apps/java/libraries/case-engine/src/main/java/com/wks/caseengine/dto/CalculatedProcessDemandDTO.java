@@ -36,5 +36,7 @@ public class CalculatedProcessDemandDTO {
     private Double mar;
     private Boolean isCalculated;
     private String remarks;
+    private String saveStatus;
+    private String errDescription;
 
 }
