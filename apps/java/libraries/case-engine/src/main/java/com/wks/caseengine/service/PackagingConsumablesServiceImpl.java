@@ -1,19 +1,32 @@
 package com.wks.caseengine.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.OtherCostsTransactionDto;
 import com.wks.caseengine.dto.PackagingAndConsumableTransactionDTO;
 import com.wks.caseengine.dto.PriceDifferentialTransactionDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -436,6 +449,253 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 
 		}
 		return configurationDTO.getJan();
+	}
+	public byte[] exportPackagingConsumablesTransaction(String year, String plantId, boolean isAfterSave, List<PackagingAndConsumableTransactionDTO> dtoList) {
+	    try {   
+	        if (!isAfterSave) {
+	        	AOPMessageVM aopMessageVM = getPackagingConsumablesTransaction(plantId,year);
+	        	Map<String, Object> innerMap = (Map<String, Object>) aopMessageVM.getData();
+
+		        if (innerMap != null) {
+		             dtoList = (List<PackagingAndConsumableTransactionDTO>) innerMap.get("data");
+		        }
+	        }
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+	        int currentRow = 0;
+
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Material Id");
+	        innerHeaders.add("Name of Item");
+	        innerHeaders.add("Unit");
+	        innerHeaders.add("Packaging Price (Rs)");
+	        innerHeaders.add("Budget "+getNextFiscalYear(year));
+	        innerHeaders.add("Actual "+getNextFiscalYear(year));
+	        innerHeaders.add("Proposed Cost "+year);
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+	        }
+
+	        int dataRowCount = dtoList.size();
+	        for (int i = 0; i < dataRowCount; i++) {
+	        	PackagingAndConsumableTransactionDTO dto = dtoList.get(i);
+	            Row row = sheet.createRow(currentRow++);
+	            List<Object> rowData = new ArrayList<>();
+	            rowData.add(dto.getMaterialId());
+	            rowData.add(dto.getDisplayName());
+	            rowData.add(dto.getUom());
+	            rowData.add(dto.getPackagingPrice());
+	            rowData.add(dto.getPrevBudget());
+	            rowData.add(dto.getPrevActual());
+	            rowData.add(dto.getProposedNorm());
+	            if (isAfterSave) {
+	                rowData.add(dto.getSaveStatus());
+	                rowData.add(dto.getErrDescription());
+	            }
+
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }  
+	            }
+	        }
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	
+	public String getNextFiscalYear(String currentYear) {
+	    String[] parts = currentYear.split("-");
+	    
+	    int startYear = Integer.parseInt(parts[0]);
+	    int endYearSuffix = Integer.parseInt(parts[1]);
+	    int nextStartYear = startYear - 1;
+	    int nextEndYearSuffix = endYearSuffix - 1;
+	    return nextStartYear + "-" + String.format("%02d", nextEndYearSuffix % 100);
+	}
+
+	@Override
+	public AOPMessageVM importPackagingConsumablesTransaction(String year,UUID plantId,MultipartFile file) {
+		try {
+			List<PackagingAndConsumableTransactionDTO> data = readPackagingConsumablesTransaction(file.getInputStream(), plantId, year);
+			 AOPMessageVM aopMessageVM = savePackagingConsumablesTransaction(year, plantId.toString(),data);
+			 List<PackagingAndConsumableTransactionDTO> failedList = (List<PackagingAndConsumableTransactionDTO>) aopMessageVM.getData();
+			
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = exportPackagingConsumablesTransaction(year, plantId.toString(), true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+		return null;
+	}
+	
+	public List<PackagingAndConsumableTransactionDTO> readPackagingConsumablesTransaction(InputStream inputStream, UUID plantFKId, String year) {
+	    List<PackagingAndConsumableTransactionDTO> packagingAndConsumableTransactionDTOs = new ArrayList<>();
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+
+	        if (rowIterator.hasNext())
+	            rowIterator.next();  
+
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            
+	            PackagingAndConsumableTransactionDTO dto = new PackagingAndConsumableTransactionDTO();
+	            try {
+	            	dto.setMaterialId(getStringCellValue(row.getCell(0), dto));
+	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
+	                dto.setUom(getStringCellValue(row.getCell(2), dto));
+	                dto.setPackagingPrice(getNumericCellValue(row.getCell(3), dto));
+	                dto.setPrevBudget(getNumericCellValue(row.getCell(4), dto));
+	                dto.setPrevActual(getNumericCellValue(row.getCell(5), dto));
+	                dto.setProposedNorm(getNumericCellValue(row.getCell(6), dto));
+	                dto.setPlantId(plantFKId.toString());
+	                dto.setAopYear(year);
+	              } 
+	              catch (Exception e) {
+	                e.printStackTrace();
+	                dto.setErrDescription(e.getMessage());
+	                dto.setSaveStatus("Failed");
+	            }
+	            packagingAndConsumableTransactionDTOs.add(dto);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return packagingAndConsumableTransactionDTOs;
+	}
+
+	private static java.util.Date getDateCellValue(Cell cell, PackagingAndConsumableTransactionDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        if (DateUtil.isCellDateFormatted(cell)) {
+	            return cell.getDateCellValue();
+	        } else {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Invalid date format in cell");
+	        }
+	    } else if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; 
+	        }
+	        try {
+	            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+	            return sdf.parse(val);
+	        } catch (java.text.ParseException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter date in correct format (yyyy-MM-dd)");
+	        }
+	    }
+	    return null;
+	}
+	private static Integer getIntegerCellValue(Cell cell, PackagingAndConsumableTransactionDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        
+	        return (int) cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; 
+	        }
+	        try {
+	            
+	            return Integer.parseInt(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter valid integer values");
+	        }
+	    }
+	    return null;
+	}
+	private static String getStringCellValue(Cell cell, PackagingAndConsumableTransactionDTO dto) {
+	    try {
+	        if (cell == null || cell.getCellType() == CellType.BLANK) {
+	            return null;
+	        }
+	        
+	        cell.setCellType(CellType.STRING);
+	        String val = cell.getStringCellValue().trim();
+	        
+	        // Return null if the string is empty after trimming
+	        return val.isEmpty() ? null : val;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	private static Double getNumericCellValue(Cell cell, PackagingAndConsumableTransactionDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; // Return null for blank strings
+	        }
+	        try {
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    return null;
 	}
 
 	
