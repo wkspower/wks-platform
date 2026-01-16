@@ -38,7 +38,7 @@ const RemarksAccordion = ({
       sx={{
         mb: 2,
         backgroundColor: '#ffffff',
-        border: 'none',
+        border: '1px solid #e0e0e0',
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         '&:before': {
           display: 'none',
@@ -48,34 +48,34 @@ const RemarksAccordion = ({
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         sx={{
-          backgroundColor: '#ffffff',
+          backgroundColor: '#f9f9f9',
           borderBottom: expanded ? '1px solid #e0e0e0' : 'none',
-          minHeight: '40px',
+          minHeight: '48px',
           '&.Mui-expanded': {
-            minHeight: '40px',
+            minHeight: '48px',
           },
           '& .MuiAccordionSummary-content': {
-            margin: '8px 0',
+            margin: '12px 0',
           },
           '& .MuiAccordionSummary-content.Mui-expanded': {
-            margin: '8px 0',
+            margin: '12px 0',
           },
           '&:hover': {
             backgroundColor: '#f5f5f5',
           },
         }}
       >
-        <Typography variant='subtitle1' sx={{ fontWeight: 500 }}>
+        <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>
           {title}
         </Typography>
       </AccordionSummary>
       <AccordionDetails
         sx={{
-          p: 2,
+          p: 3,
           backgroundColor: '#ffffff',
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextArea
             rows={4}
             placeholder={placeholder}
@@ -86,7 +86,7 @@ const RemarksAccordion = ({
             style={{
               width: '100%',
               fontSize: '0.875rem',
-              minHeight: '80px',
+              minHeight: '100px',
               resize: 'vertical',
             }}
           />

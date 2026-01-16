@@ -6,7 +6,7 @@ import {
   isColumnMenuSortActive,
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
-import { useCallback, useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import { SvgIcon } from '@progress/kendo-react-common'
 import { trashIcon } from '@progress/kendo-svg-icons'
 import '../../../../../src/kendo-data-grid.css'
@@ -79,6 +79,7 @@ const NestedKendoTable = ({
   filterable = false,
   hoursRows = {},
   dateCalculationConfig = {},
+  customHeight = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -187,6 +188,41 @@ const NestedKendoTable = ({
       extractAllColumns,
     ],
   )
+
+  // Helper function to calculate the maximum depth of nested headers
+  const getMaxHeaderDepth = useCallback((cols) => {
+    const getDepth = (columns, currentDepth = 1) => {
+      let maxDepth = currentDepth
+      columns.forEach((col) => {
+        if (col.children && Array.isArray(col.children)) {
+          const childDepth = getDepth(col.children, currentDepth + 1)
+          maxDepth = Math.max(maxDepth, childDepth)
+        }
+      })
+      return maxDepth
+    }
+    return getDepth(cols)
+  }, [])
+
+  // Constants for viewport height calculation
+  const rowHeightVH = 5 // each row ~5vh
+  const baseHeaderVH = 10 // base grid header/filter area
+  const pageHeaderVH = 15 // top app bar + stepper + controls
+  const maxVH = 75 // cap grid height
+
+  // Calculate dynamic viewport height based on number of rows and nested headers
+  const calculatedVH = useMemo(() => {
+    if (!rows || rows?.length === 0) return 20
+
+    // Calculate additional header height based on nesting depth
+    const headerDepth = getMaxHeaderDepth(columns)
+    const additionalHeaderVH = (headerDepth - 1) * 5 // Each additional header level adds ~5vh
+    const totalHeaderVH = baseHeaderVH + additionalHeaderVH
+
+    const needed = rows?.length * rowHeightVH + totalHeaderVH
+    const available = 100 - pageHeaderVH
+    return Math.round(Math.min(needed, maxVH, available))
+  }, [rows?.length, columns, getMaxHeaderDepth])
 
   const handleEditChange = useCallback((e) => {
     setEdit(e.edit)
@@ -1096,6 +1132,15 @@ const NestedKendoTable = ({
             fileName={`${permissions?.ExcelName}.xlsx`}
           >
             <Grid
+              style={{
+                flex: 1,
+                overflow: 'auto',
+                height: customHeight
+                  ? `${customHeight}vh`
+                  : rows?.length > 10
+                    ? `${calculatedVH}vh`
+                    : undefined,
+              }}
               modifiedCells={modifiedCells}
               data={rows}
               rows={{ data: CustomRow }}

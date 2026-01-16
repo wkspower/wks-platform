@@ -68,7 +68,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'assetName',
       title: 'Asset Name',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -77,7 +77,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'assetType',
       title: 'Asset Type',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -87,7 +87,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityDistributed.name',
       title: 'Utility Distributed',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -96,7 +96,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityDistributed.sapCode',
       title: 'Distributed SAP Code',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -105,7 +105,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityGenerated.name',
       title: 'Utility Generated',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -114,7 +114,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'utilityGenerated.sapCode',
       title: 'Generated SAP Code',
-      width: 150,
+      widthT: 150,
       minWidth: 150,
       type: 'text',
       editable: false,
@@ -126,7 +126,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'april.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -134,7 +135,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'april.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -147,7 +149,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'may.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -155,7 +158,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'may.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -168,7 +172,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'june.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -176,7 +181,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'june.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -189,7 +195,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'july.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -197,7 +204,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'july.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -210,7 +218,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'aug.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -218,7 +227,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'aug.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -231,7 +241,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'sep.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -239,7 +250,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'sep.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -252,7 +264,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'oct.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -260,7 +273,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'oct.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -273,7 +287,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'nov.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -281,7 +296,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'nov.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -294,7 +310,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'dec.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -302,7 +319,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'dec.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -315,7 +333,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'jan.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -323,7 +342,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'jan.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -336,7 +356,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'feb.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -344,7 +365,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'feb.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -357,7 +379,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'march.shutdownHrs',
           title: 'Shutdown Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'wholeNumber',
           format: valueFormat,
@@ -365,7 +388,8 @@ const ShutdownAndOperational = () => {
         {
           field: 'march.netOperationHrs',
           title: 'Operational Hrs',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: false,
           type: 'wholeNumber',
           format: valueFormat,
@@ -375,7 +399,7 @@ const ShutdownAndOperational = () => {
     {
       field: 'remarks',
       title: 'Remarks',
-      width: 250,
+      widthT: 250,
       type: 'textarea',
       editable: true,
       minWidth: 250,
@@ -387,7 +411,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'apr',
       title: headerMap[4] || 'Apr',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -395,7 +420,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'may',
       title: headerMap[5] || 'May',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -403,7 +429,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'jun',
       title: headerMap[6] || 'Jun',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -411,7 +438,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'jul',
       title: headerMap[7] || 'Jul',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -419,7 +447,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'aug',
       title: headerMap[8] || 'Aug',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -427,7 +456,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'sep',
       title: headerMap[9] || 'Sep',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -435,7 +465,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'oct',
       title: headerMap[10] || 'Oct',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -443,7 +474,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'nov',
       title: headerMap[11] || 'Nov',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -451,7 +483,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'dec',
       title: headerMap[12] || 'Dec',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -459,7 +492,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'jan',
       title: headerMap[1] || 'Jan',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -467,7 +501,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'feb',
       title: headerMap[2] || 'Feb',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,
@@ -475,7 +510,8 @@ const ShutdownAndOperational = () => {
     {
       field: 'mar',
       title: headerMap[3] || 'Mar',
-      width: 40,
+      widthT: 60,
+      minWidth: 60,
       editable: false,
       type: 'wholeNumber',
       format: valueFormat,

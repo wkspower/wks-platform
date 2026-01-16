@@ -49,18 +49,18 @@ const AssetAvailability = () => {
     {
       field: 'assetName',
       title: 'Asset Name',
-      width: 150,
+      widthT: 150,
       type: 'text',
       editable: false,
       locked: true,
-      minWidth: 100,
+      minWidth: 150,
     },
 
     // Apr
     {
       title: headerMap[4],
       field: 'april',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -69,7 +69,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[5],
       field: 'may',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -78,7 +78,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[6],
       field: 'june',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -87,7 +87,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[7],
       field: 'july',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -96,7 +96,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[8],
       field: 'aug',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -105,7 +105,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[9],
       field: 'sep',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -114,7 +114,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[10],
       field: 'oct',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -123,7 +123,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[11],
       field: 'nov',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -132,7 +132,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[12],
       field: 'dec',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -141,7 +141,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[1],
       field: 'jan',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -150,7 +150,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[2],
       field: 'feb',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -159,7 +159,7 @@ const AssetAvailability = () => {
     {
       title: headerMap[3],
       field: 'march',
-      width: 80,
+      widthT: 80,
       type: 'wholeNumber',
       editable: true,
       wholeNumberOnly: true,
@@ -167,7 +167,7 @@ const AssetAvailability = () => {
     {
       field: 'remarks',
       title: 'Remarks',
-      width: 250,
+      widthT: 250,
       type: 'textarea',
       editable: true,
       minWidth: 250,

@@ -48,8 +48,8 @@ const AssetCapacity = () => {
     {
       field: 'assetName',
       title: 'Asset Name',
-      width: 120,
-      minWidth: 120,
+      widthT: 150,
+      minWidth: 150,
       type: 'text',
       editable: false,
       locked: true,
@@ -57,8 +57,8 @@ const AssetCapacity = () => {
     {
       field: 'plantCode',
       title: 'Plant Code',
-      width: 80,
-      minWidth: 80,
+      widthT: 130,
+      minWidth: 130,
       type: 'text',
       editable: false,
       locked: true,
@@ -66,8 +66,8 @@ const AssetCapacity = () => {
     {
       field: 'utilityDistributed.name',
       title: 'Utility Distributed',
-      width: 100,
-      minWidth: 100,
+      widthT: 130,
+      minWidth: 130,
       type: 'text',
       editable: false,
       locked: true,
@@ -75,8 +75,8 @@ const AssetCapacity = () => {
     {
       field: 'utilityDistributed.sapCode',
       title: 'Utility Distributed Code',
-      width: 100,
-      minWidth: 100,
+      widthT: 160,
+      minWidth: 160,
       type: 'text',
       editable: false,
       locked: true,
@@ -84,8 +84,8 @@ const AssetCapacity = () => {
     {
       field: 'utilityGenerated.name',
       title: 'Utility Generated',
-      width: 100,
-      minWidth: 100,
+      widthT: 130,
+      minWidth: 130,
       type: 'text',
       editable: false,
       locked: true,
@@ -93,8 +93,8 @@ const AssetCapacity = () => {
     {
       field: 'utilityGenerated.sapCode',
       title: 'Utility Generated Code',
-      width: 100,
-      minWidth: 100,
+      widthT: 160,
+      minWidth: 160,
       type: 'text',
       editable: false,
       locked: true,
@@ -102,7 +102,7 @@ const AssetCapacity = () => {
     {
       field: 'uom',
       title: 'UOM',
-      width: 80,
+      widthT: 80,
       minWidth: 80,
       type: 'text',
       editable: false,
@@ -110,7 +110,8 @@ const AssetCapacity = () => {
     {
       field: 'fixedMin',
       title: 'Fixed Min',
-      width: 80,
+      widthT: 100,
+      minWidth: 100,
       editable: true,
       type: 'number1',
       format: valueFormat,
@@ -118,7 +119,8 @@ const AssetCapacity = () => {
     {
       field: 'fixedMax',
       title: 'Fixed Max',
-      width: 80,
+      widthT: 100,
+      minWidth: 100,
       editable: true,
       type: 'number1',
       format: valueFormat,
@@ -129,7 +131,8 @@ const AssetCapacity = () => {
         {
           field: 'april.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -137,7 +140,8 @@ const AssetCapacity = () => {
         {
           field: 'april.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -150,7 +154,8 @@ const AssetCapacity = () => {
         {
           field: 'may.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -158,7 +163,8 @@ const AssetCapacity = () => {
         {
           field: 'may.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -171,7 +177,8 @@ const AssetCapacity = () => {
         {
           field: 'june.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -179,7 +186,8 @@ const AssetCapacity = () => {
         {
           field: 'june.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -192,7 +200,8 @@ const AssetCapacity = () => {
         {
           field: 'july.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -200,7 +209,8 @@ const AssetCapacity = () => {
         {
           field: 'july.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -213,7 +223,8 @@ const AssetCapacity = () => {
         {
           field: 'aug.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -221,7 +232,8 @@ const AssetCapacity = () => {
         {
           field: 'aug.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -234,7 +246,8 @@ const AssetCapacity = () => {
         {
           field: 'sep.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -242,7 +255,8 @@ const AssetCapacity = () => {
         {
           field: 'sep.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -255,7 +269,8 @@ const AssetCapacity = () => {
         {
           field: 'oct.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -263,7 +278,8 @@ const AssetCapacity = () => {
         {
           field: 'oct.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -276,7 +292,8 @@ const AssetCapacity = () => {
         {
           field: 'nov.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -284,7 +301,8 @@ const AssetCapacity = () => {
         {
           field: 'nov.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -297,7 +315,8 @@ const AssetCapacity = () => {
         {
           field: 'dec.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -305,7 +324,8 @@ const AssetCapacity = () => {
         {
           field: 'dec.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -318,7 +338,8 @@ const AssetCapacity = () => {
         {
           field: 'jan.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -326,7 +347,8 @@ const AssetCapacity = () => {
         {
           field: 'jan.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -339,7 +361,8 @@ const AssetCapacity = () => {
         {
           field: 'feb.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -347,7 +370,8 @@ const AssetCapacity = () => {
         {
           field: 'feb.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -360,7 +384,8 @@ const AssetCapacity = () => {
         {
           field: 'march.min',
           title: 'Min Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -368,7 +393,8 @@ const AssetCapacity = () => {
         {
           field: 'march.max',
           title: 'Max Capacity',
-          width: 80,
+          widthT: 120,
+          minWidth: 120,
           editable: true,
           type: 'number1',
           format: valueFormat,
@@ -378,7 +404,7 @@ const AssetCapacity = () => {
     {
       field: 'remarks',
       title: 'Remarks',
-      width: 250,
+      widthT: 250,
       type: 'textarea',
       editable: true,
       minWidth: 250,
