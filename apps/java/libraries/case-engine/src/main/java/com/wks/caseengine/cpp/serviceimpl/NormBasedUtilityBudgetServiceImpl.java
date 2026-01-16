@@ -551,6 +551,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             }
               
         //    normsMonthDetailRepository.saveAndFlush(existing);
+    //    normsMonthDetailRepository.save(existing);
             normsMonthDetailsToUpdate.add(existing);
             updatedMonths.add(monthName);
           
@@ -591,8 +592,10 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
             
         }
+        normsMonthDetailRepository.saveAll(allNormsMonthDetailsToUpdate);
 
-        normsMonthDetailRepository.saveAllAndFlush(allNormsMonthDetailsToUpdate);
+
+   
 //    String sql1 = """
 //     UPDATE dbo.NormsMonthDetail
 //     SET
