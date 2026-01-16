@@ -191,10 +191,39 @@ class LogCapture:
         self.buffer = StringIO()
 
 
-def save_month_log(output_text, month, year, log_folder):
-    """Save log for a single month."""
-    os.makedirs(log_folder, exist_ok=True)
-    filename = f"month_{year}_{month:02d}_{MONTH_NAMES[month]}.txt"
+def extract_summary_from_log(output_text: str) -> str:
+    """
+    Extract the BUDGET CALCULATION SUMMARY section from the log output.
+    This includes Power Balance, Steam Balance, and Quick Summary sections.
+    """
+    lines = output_text.split('\n')
+    summary_lines = []
+    capturing = False
+    
+    for line in lines:
+        # Start capturing when we see BUDGET CALCULATION SUMMARY
+        if 'BUDGET CALCULATION SUMMARY' in line:
+            capturing = True
+            summary_lines.append(line)
+            continue
+        
+        # Stop capturing when we see the next major section or end markers
+        if capturing:
+            # Stop at certain markers that indicate end of summary
+            if ('UTILITY CONSUMPTION SUMMARY' in line or 
+                'NMD BUDGET FORMAT' in line or
+                'Saving results to database' in line or
+                '=' * 80 in line and len(summary_lines) > 100):  # Long separator after summary
+                break
+            summary_lines.append(line)
+    
+    return '\n'.join(summary_lines) if summary_lines else ""
+
+
+def save_month_log(output_text: str, month: int, year: int, log_folder: str) -> str:
+    """Save the captured output for a single month to a log file."""
+    month_name = MONTH_NAMES[month]
+    filename = f"{year}_{month:02d}_{month_name}.log"
     filepath = os.path.join(log_folder, filename)
     
     with open(filepath, 'w', encoding='utf-8') as f:
@@ -451,11 +480,16 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
                 for error in month_result.get("errors", []):
                     print(f"  Note: {error.get('message', 'Unknown')}")
             
+            # Extract summary section from log output
+            log_output = log_capture.get_output()
+            month_summary = extract_summary_from_log(log_output)
+            month_result["detailed_summary"] = month_summary
+            
             results["months"][f"{year}_{month:02d}"] = month_result
             
             # Save month log
             if save_logs:
-                log_path = save_month_log(log_capture.get_output(), month, year, run_log_folder)
+                log_path = save_month_log(log_output, month, year, run_log_folder)
                 month_result["log_file"] = log_path
         
         except Exception as e:
@@ -488,7 +522,7 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
     summary_path = os.path.join(run_log_folder, "summary.txt")
     with open(summary_path, 'w', encoding='utf-8') as f:
         f.write(f"FULL FINANCIAL YEAR RUN SUMMARY - {fy_label}\n")
-        f.write("=" * 60 + "\n\n")
+        f.write("=" * 120 + "\n\n")
         f.write(f"CPP Plant ID: {cpp_plant_id}\n")
         f.write(f"Run timestamp: {run_timestamp}\n")
         f.write(f"Successful months: {results['summary']['successful']}/12\n")
@@ -496,8 +530,8 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
         f.write(f"Total Power: {results['summary']['total_power_kwh']:,.0f} KWH\n")
         f.write(f"Total SHP: {results['summary']['total_shp_mt']:,.2f} MT\n\n")
         
-        f.write("MONTH-BY-MONTH RESULTS:\n")
-        f.write("-" * 60 + "\n")
+        f.write("MONTH-BY-MONTH QUICK RESULTS:\n")
+        f.write("-" * 120 + "\n")
         for key, month_data in results["months"].items():
             status = "✓" if month_data.get("success") else "✗"
             f.write(f"{status} {month_data['month_name']} {month_data['year']}: ")
@@ -506,6 +540,34 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
                 f.write(f"SHP={month_data.get('total_shp_mt', 0):,.2f} MT\n")
             else:
                 f.write(f"FAILED - {month_data.get('error', 'Unknown')}\n")
+        
+        # Add detailed month-wise summaries
+        f.write("\n\n")
+        f.write("=" * 120 + "\n")
+        f.write("DETAILED MONTH-WISE SUMMARIES\n")
+        f.write("=" * 120 + "\n\n")
+        
+        # Sort months in chronological order (April to March)
+        sorted_months = sorted(results["months"].items(), 
+                              key=lambda x: (x[1]['year'], x[1]['month']) if x[1]['month'] >= 4 else (x[1]['year'], x[1]['month'] + 12))
+        
+        for key, month_data in sorted_months:
+            month_name = month_data['month_name']
+            year = month_data['year']
+            
+            f.write("\n" + "=" * 120 + "\n")
+            f.write(f"{month_name} {year}\n")
+            f.write("=" * 120 + "\n")
+            
+            # Write the detailed summary if available
+            detailed_summary = month_data.get("detailed_summary", "")
+            if detailed_summary:
+                f.write(detailed_summary)
+                f.write("\n")
+            else:
+                f.write(f"No detailed summary available for {month_name} {year}\n")
+                if not month_data.get("success"):
+                    f.write(f"Reason: {month_data.get('error', 'Unknown error')}\n")
     
     print(f"\nSummary saved to: {summary_path}")
     
