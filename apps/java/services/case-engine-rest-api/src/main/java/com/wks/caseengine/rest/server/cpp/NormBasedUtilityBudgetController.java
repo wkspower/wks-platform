@@ -3,6 +3,7 @@ package com.wks.caseengine.rest.server.cpp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.cpp.norm.NormsMonthUpdateRequestDTO;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -13,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +122,36 @@ public class NormBasedUtilityBudgetController {
             return ResponseEntity.status(500).body(errorResponse);
         }
     }
+
+    @GetMapping(value = "/norm-based-utility-budget/export")
+    public ResponseEntity<byte[]> exportNormBasedUtilityBudget(
+            @RequestParam UUID cppPlantId, 
+            @RequestParam String financialYear) {
+        
+        byte[] excelFile = normBasedUtilityBudgetService.exportNormBasedUtilityBudget(cppPlantId, financialYear, false, null);
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "NormBasedUtilityBudget_" + financialYear + ".xlsx");
+        
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(excelFile);
+    }
+
+    @PostMapping(value = "/norm-based-utility-budget/import")
+    public ResponseEntity<AOPMessageVM> importNormBasedUtilityBudget(
+            @RequestParam UUID cppPlantId, 
+            @RequestParam String financialYear,
+            @RequestParam("file") MultipartFile file) {
+        
+        AOPMessageVM result = normBasedUtilityBudgetService.importExcel(cppPlantId, financialYear, file);
+        return ResponseEntity.ok(result);
+    }
+
     
+
+  
 
 
 

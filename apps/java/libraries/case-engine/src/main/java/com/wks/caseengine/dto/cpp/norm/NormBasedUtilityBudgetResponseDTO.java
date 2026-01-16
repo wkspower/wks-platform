@@ -80,4 +80,8 @@ public class NormBasedUtilityBudgetResponseDTO {
 
     @JsonProperty("remarks")
     private String remarks;
+
+    // Fields for import/export tracking
+    private String saveStatus;
+    private String errDescription;
 }

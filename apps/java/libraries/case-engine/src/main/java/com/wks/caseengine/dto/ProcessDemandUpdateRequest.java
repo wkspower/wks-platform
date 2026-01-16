@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProcessDemandUpdateRequest {
     
-    private String processPlantId;  // Required - composite key part
+    private String processPlantId;  // Required - composite key part  plantCode
     private String cppUtilityId;    // Required - composite key part
     
     // Optional month fields - only send months being updated

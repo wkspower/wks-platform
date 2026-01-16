@@ -13,13 +13,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class PlantRequirementDTO {
-	private String plantName;
+	private String plantName;  // Process Plant
     private String plantCode;
-	private String cppUtilities;
-    private String cppUtiltiyIds;
-    private String cppPlant; 
+	private String cppUtilities;  // CPP Utility
+    private String cppUtiltiyIds;  // CPP Utility ID
+    private String cppPlant;      // CPP Plant
     private String cppPlantId; 
-    private String uom;
+    private String uom;    // UOM
     private Double april;
     private Double may;
     private Double june;
@@ -32,6 +32,10 @@ public class PlantRequirementDTO {
     private Double jan;
     private Double feb;
     private Double march;
-    private Double grandTotal;
+    private Double grandTotal;  
     private String remarks;
+    
+    // Fields for import/export tracking
+    private String saveStatus;
+    private String errDescription;
 }
