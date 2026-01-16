@@ -1,5 +1,6 @@
 package com.wks.caseengine.service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +9,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -387,6 +393,77 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 		return configurationDTO.getJan();
 	}
 
-	
+	public byte[] exportPriceDifferentialTransaction(String year, String plantId, boolean isAfterSave, List<PriceDifferentialTransactionDTO> dtoList) {
+	    try {   
+	        if (!isAfterSave) {
+	        	AOPMessageVM aopMessageVM = getPriceDifferentialTransaction(plantId,year);
+	        	Map<String, Object> innerMap = (Map<String, Object>) aopMessageVM.getData();
+
+		        if (innerMap != null) {
+		             dtoList = (List<PriceDifferentialTransactionDTO>) innerMap.get("data");
+		        }
+	        }
+
+	        Workbook workbook = new XSSFWorkbook();
+	        Sheet sheet = workbook.createSheet("Sheet1");
+	        int currentRow = 0;
+
+	        List<String> innerHeaders = new ArrayList<>();
+	        innerHeaders.add("Quality type");
+	        innerHeaders.add("%");
+	        innerHeaders.add("Material Id");
+	        innerHeaders.add("Id");
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+	        Row headerRow = sheet.createRow(currentRow++);
+	        for (int col = 0; col < innerHeaders.size(); col++) {
+	            Cell cell = headerRow.createCell(col);
+	            cell.setCellValue(innerHeaders.get(col));
+	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+	        }
+
+	        int dataRowCount = dtoList.size();
+	        for (int i = 0; i < dataRowCount; i++) {
+	        	PriceDifferentialTransactionDTO dto = dtoList.get(i);
+	            Row row = sheet.createRow(currentRow++);
+	            List<Object> rowData = new ArrayList<>();
+	            
+	            rowData.add(dto.getDisplayName());
+	            rowData.add(dto.getPercentage());
+	            rowData.add(dto.getMaterialId());
+	            rowData.add(dto.getId());
+	            if (isAfterSave) {
+	                rowData.add(dto.getSaveStatus());
+	                rowData.add(dto.getErrDescription());
+	            }
+
+	            for (int col = 0; col < rowData.size(); col++) {
+	                Cell cell = row.createCell(col);
+	                Object value = rowData.get(col);
+	                if (value instanceof Number) {
+	                    cell.setCellValue(((Number) value).doubleValue());
+	                } else if (value instanceof Boolean) {
+	                    cell.setCellValue((Boolean) value);
+	                } else if (value != null) {
+	                    cell.setCellValue(value.toString());
+	                } else {
+	                    cell.setCellValue("");
+	                }  
+	            }
+	        }
+	        sheet.setColumnHidden(2, true);
+	        sheet.setColumnHidden(3, true);
+	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	        workbook.write(outputStream);
+	        workbook.close();
+	        return outputStream.toByteArray();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
 
 }

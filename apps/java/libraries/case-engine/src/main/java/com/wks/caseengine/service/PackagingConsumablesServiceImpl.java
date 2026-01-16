@@ -14,10 +14,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.PackagingAndConsumableTransactionDTO;
+import com.wks.caseengine.dto.PriceDifferentialTransactionDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.NormAttributeTransactions;
 import com.wks.caseengine.entity.NormParameters;
+import com.wks.caseengine.entity.PackagingAndConsumableTransaction;
 import com.wks.caseengine.entity.Plants;
+import com.wks.caseengine.entity.PriceDifferentialTransaction;
 import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -26,6 +30,7 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.AopCalculationRepository;
 import com.wks.caseengine.repository.NormAttributeTransactionsRepository;
 import com.wks.caseengine.repository.NormParametersRepository;
+import com.wks.caseengine.repository.PackagingAndConsumableTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.SiteRepository;
@@ -59,7 +64,10 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	
 	@Autowired
 	private ScreenMappingRepository screenMappingRepository;
-
+	
+	@Autowired
+	private PackagingAndConsumableTransactionRepository packagingAndConsumableTransactionRepository;
+	
 	@Override
 	public AOPMessageVM getPackagingConsumables(String plantId, String year) {
 		
@@ -145,7 +153,112 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+
+	@Override
+	public AOPMessageVM getPackagingConsumablesTransaction(String plantId, String year) {
+		
+		try {
+			String verticalName = plantsRepository.findVerticalNameByPlantId(UUID.fromString(plantId));
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			List<Object[]> obj = new ArrayList<>();
+			
+				String procedureName = verticalName + "_" + site.getName() + "_PackagingAndConsumableTransaction";
+				obj = findByYearAndPlantId(year, UUID.fromString(plantId), procedureName);
+			
+			List<PackagingAndConsumableTransactionDTO> packagingAndConsumableTransactionDTOs = new ArrayList<>();
+			int i = 0;
+			for (Object[] row : obj) {
+				PackagingAndConsumableTransactionDTO packagingAndConsumableTransactionDTO = new PackagingAndConsumableTransactionDTO();
+				packagingAndConsumableTransactionDTO.setId(row[0] != null ? row[0].toString() : "");
+				packagingAndConsumableTransactionDTO.setMaterialId(row[1] != null ? row[1].toString() : "");
+				packagingAndConsumableTransactionDTO.setNormParameterTypeName(row[2] != null ? row[2].toString() : "");
+				packagingAndConsumableTransactionDTO.setDisplayName(row[3] != null ? row[3].toString() : "");
+				packagingAndConsumableTransactionDTO.setUom(row[4] != null ? row[4].toString() : "");
+				packagingAndConsumableTransactionDTO.setPackagingPrice(
+						(row[5] != null && !row[5].toString().trim().isEmpty())
+								? Double.parseDouble(row[5].toString().trim())
+								: 0.0);
+				packagingAndConsumableTransactionDTO.setPrevBudget(
+						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
+								: 0.0);
+				packagingAndConsumableTransactionDTO.setPrevActual(
+						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
+								: 0.0);
+				packagingAndConsumableTransactionDTO.setProposedNorm(
+						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
+								: 0.0);
+				packagingAndConsumableTransactionDTO.setPlantId(row[9] != null ? row[9].toString() : "");
+				packagingAndConsumableTransactionDTO.setAopYear(row[10] != null ? row[10].toString() : "");
+				packagingAndConsumableTransactionDTO.setRemark((row[13] != null ? row[13].toString() : ""));
+					
+				
+				packagingAndConsumableTransactionDTOs.add(packagingAndConsumableTransactionDTO);
+				
+			}
+			Map<String, Object> map = new HashMap<>(); 
+			map.put("data", packagingAndConsumableTransactionDTOs);
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(map);
+			aopMessageVM.setMessage("Data fetched successfully");
+
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 	
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Override
+	public AOPMessageVM savePackagingConsumablesTransaction(String year, String plantFKId,
+			List<PackagingAndConsumableTransactionDTO> packagingAndConsumableTransactionDTOs) {
+		try {
+			List<PackagingAndConsumableTransactionDTO> failedList = new ArrayList<>();
+			UUID plantId = UUID.fromString(plantFKId);
+
+			for (PackagingAndConsumableTransactionDTO packagingAndConsumableTransactionDTO : packagingAndConsumableTransactionDTOs) {
+				if (packagingAndConsumableTransactionDTO.getSaveStatus() != null
+						&& packagingAndConsumableTransactionDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(packagingAndConsumableTransactionDTO);
+					continue;
+				}
+				PackagingAndConsumableTransaction packagingAndConsumableTransaction =null;
+				UUID material=UUID.fromString(packagingAndConsumableTransactionDTO.getMaterialId());
+				Optional<PackagingAndConsumableTransaction> packagingAndConsumableTransactionOpt =packagingAndConsumableTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
+				if(packagingAndConsumableTransactionOpt.isPresent()) {
+					packagingAndConsumableTransaction=packagingAndConsumableTransactionOpt.get();
+				}else {
+					packagingAndConsumableTransaction = new PackagingAndConsumableTransaction();
+					packagingAndConsumableTransaction.setMaterialId(UUID.fromString(packagingAndConsumableTransactionDTO.getMaterialId()));
+					packagingAndConsumableTransaction.setAopYear(year);
+					packagingAndConsumableTransaction.setPlantId(plantId);
+				}
+				packagingAndConsumableTransaction.setPackagingPrice(packagingAndConsumableTransactionDTO.getPackagingPrice());
+				packagingAndConsumableTransaction.setRemark(packagingAndConsumableTransactionDTO.getRemark());
+				packagingAndConsumableTransaction.setUpdatedBy(Utility.getUserName());
+				packagingAndConsumableTransaction.setModifiedOn(new Date());
+				packagingAndConsumableTransaction.setPrevBudget(packagingAndConsumableTransactionDTO.getPrevBudget());
+				packagingAndConsumableTransaction.setPrevActual(packagingAndConsumableTransactionDTO.getPrevActual());
+				packagingAndConsumableTransaction.setProposedNorm(packagingAndConsumableTransactionDTO.getProposedNorm());
+				packagingAndConsumableTransactionRepository.save(packagingAndConsumableTransaction);
+			}
+			
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(failedList);
+			aopMessageVM.setMessage("Data updated successfully");
+			return aopMessageVM;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("Failed to save data", ex);
+		}
+	}
+
+
 	public List<Object[]> findByYearAndPlantId(String aopYear, UUID plantId, String procedureName) {
 		try {
 

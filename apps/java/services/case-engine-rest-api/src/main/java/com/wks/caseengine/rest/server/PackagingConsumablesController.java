@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.ConfigurationDTO;
+import com.wks.caseengine.dto.PackagingAndConsumableTransactionDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.PackagingConsumablesService;
 
@@ -24,6 +25,16 @@ public class PackagingConsumablesController {
 	@GetMapping(value="/packaging-consumables")
 	public AOPMessageVM getPackagingConsumables(@RequestParam String plantId,@RequestParam String year){
 		 return  packagingConsumablesService.getPackagingConsumables(plantId,year);
+	}
+	
+	@GetMapping(value="/packaging-consumables-transaction")
+	public AOPMessageVM getPackagingConsumablesTransaction(@RequestParam String plantId,@RequestParam String year){
+		 return  packagingConsumablesService.getPackagingConsumablesTransaction(plantId,year);
+	}
+	
+	@PostMapping(value="/packaging-consumables-transaction")
+	public AOPMessageVM savePackagingConsumablesTransaction(@RequestParam String year,@RequestParam String plantId, @RequestBody List<PackagingAndConsumableTransactionDTO> packagingConsumablesTransactionDTOs) {
+		return 	packagingConsumablesService.savePackagingConsumablesTransaction(year,plantId,packagingConsumablesTransactionDTOs);
 	}
 	
 	@PostMapping(value="/packaging-consumables")
