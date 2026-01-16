@@ -152,9 +152,9 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             }
 
             // Expected columns: id, generatingPlantName, utilityName, utilityId, uom, accountName, 
-            // materialName, materialId, issuingPlantName, issuingUom, remarks, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
-            if (r.length < 23) {
-                log.warn("Row {} has less than 22 columns ({}), returning empty DTO", rowIndex, r.length);
+            // materialName, materialId, issuingPlantName, issuingUom, generationUom, apr, may, jun, jul, aug, sep, oct, nov, dec, jan, feb, mar
+            if (r.length < 24) {
+                log.warn("Row {} has less than 23 columns ({}), returning empty DTO", rowIndex, r.length);
                 return dto;
             }
             
@@ -172,6 +172,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             dto.setMaterialId(getString(r[i++]));       // modified   
             dto.setIssuingPlantName(getString(r[i++]));
             dto.setIssuingUom(getString(r[i++]));
+            dto.setGenerationUom(getString(r[i++]));    // new generation UOM (common for all months)
             
             // Month columns (each contains JSON)
             dto.setApr(parseMonthJson(getString(r[i++]), "apr", rowIndex));
