@@ -324,17 +324,19 @@ def distribute_by_priority(
     fym_id = row[0]
 
     # NET DEMAND (Plant + Fixed) - Fetch separately for logging
-    # Fetch process plant demand total
-    cur.execute("""
-        SELECT COALESCE(SUM(powerRequirement), 0) FROM PlantRequirement WHERE FinancialYearMonthId = ?
-    """, (fym_id,))
-    plant_demand = float(cur.fetchone()[0])
+    # Fetch process plant demand from CalculatedProcessDemand
+    from services.process_demand_service import get_process_demand_for_month
+    process_demands = get_process_demand_for_month(month, year)
+    power_process_kwh = process_demands.get("power_process", 0.0)
+    # Convert KWH to MWh
+    plant_demand = power_process_kwh / 1000.0
     
-    # Fetch fixed consumption total
-    cur.execute("""
-        SELECT COALESCE(SUM(powerRequirement), 0) FROM FixedConsumption WHERE FinancialYearMonthId = ?
-    """, (fym_id,))
-    fixed_demand = float(cur.fetchone()[0])
+    # Fetch fixed consumption from UtilityFixedConsumption table via fixed_consumption_service
+    from services.fixed_consumption_service import get_fixed_consumption_for_month
+    fixed_consumption = get_fixed_consumption_for_month(month, year)
+    fixed_demand_kwh = fixed_consumption.get("power_fixed_kwh", 0.0)
+    # Convert KWH to MWh
+    fixed_demand = fixed_demand_kwh / 1000.0
     
     base_demand = plant_demand + fixed_demand
     
