@@ -919,7 +919,7 @@ export default function QualityPackagingNorms() {
         saveBtn: true,
         allAction: true,
         showTitleNameBusiness: true,
-        titleName: 'Price Differential As percentage wrt Quality',
+        titleName: 'Price Differential As Percentage wrt Quality',
         adjustedPermissions: true,
         downloadExcelBtn: true,
         uploadExcelBtn: true,
@@ -1052,12 +1052,13 @@ export default function QualityPackagingNorms() {
               downloadExcelForConfiguration('Quality_Parameters')
             }
             handleExcelUpload={handleExcelUpload('Quality_Parameters')}
+            groupBy='Particulars'
           />
           <KendoDataTables
             columns={priceDiffColumns}
             rows={priceDiffRows}
             setRows={setPriceDiffRows}
-            title='Price Differential As percentage wrt Quality'
+            title='Price Differential As Percentage wrt Quality'
             modifiedCells={modifiedCellsDiff}
             setModifiedCells={setModifiedCellsDiff}
             permissions={peopleInitiativePermissionDifferential}
@@ -1073,6 +1074,7 @@ export default function QualityPackagingNorms() {
               downloadExcelForConfiguration('Price_differential')
             }
             handleExcelUpload={handleExcelUpload('Price_differential')}
+            groupBy='Particulars'
           />
         </Box>
       )}
@@ -1098,6 +1100,7 @@ export default function QualityPackagingNorms() {
               downloadExcelForConfiguration('packaging')
             }
             handleExcelUpload={handleExcelUpload('packaging')}
+            groupBy='Particulars'
           />
           <KendoDataTables
             columns={columnsOtherCosts}
@@ -1119,6 +1122,7 @@ export default function QualityPackagingNorms() {
               downloadExcelForConfiguration('othercost')
             }
             handleExcelUpload={handleExcelUpload('othercost')}
+            groupBy='Particulars'
             // Add other props as needed
           />
         </Box>
