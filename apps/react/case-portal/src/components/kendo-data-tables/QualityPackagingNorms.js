@@ -777,7 +777,7 @@ export default function QualityPackagingNorms() {
             severity: 'success',
           })
           setModifiedCellsOtherCosts({})
-          // fetchOtherCostsRows()
+          fetchOtherCostsRows()
         }
       } else {
         setSnackbarOpen(true)
@@ -983,8 +983,8 @@ export default function QualityPackagingNorms() {
       showTitleNameBusiness: true,
       titleName: 'Other Costs',
       adjustedPermissions: true,
-      downloadExcelBtn: false,
-      uploadExcelBtn: false,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Other_Costs`,
       addButton: false,
       deleteButton: false,
