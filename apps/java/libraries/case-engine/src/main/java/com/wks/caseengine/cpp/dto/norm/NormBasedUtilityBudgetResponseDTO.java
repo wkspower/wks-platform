@@ -39,6 +39,9 @@ public class NormBasedUtilityBudgetResponseDTO {
     @JsonProperty("issuingUom")
     private String issuingUom;
 
+    @JsonProperty("generationUom")
+    private String generationUom;
+
     @JsonProperty("normHeaderId")
     private String normHeaderId;
 
