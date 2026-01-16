@@ -113,6 +113,11 @@ export default function QualityPackagingNorms() {
       type: 'number',
     },
     {
+      field: 'normParameterTypeName ',
+      title: 'Norm Parameter Type',
+      hidden: true,
+    },
+    {
       field: 'materialId',
       title: 'Material ID',
       hidden: true,
@@ -178,7 +183,9 @@ export default function QualityPackagingNorms() {
           budget: item.prevBudget,
           actual: item.prevActual,
           proposedNorm: item.proposedNorm,
+          normParameterTypeName: item.normParameterTypeName,
           isEditable: item.isEditable !== false,
+          Particulars: item.normParameterTypeName,
         }))
         setRows(mappedRows)
       } else {
@@ -217,7 +224,9 @@ export default function QualityPackagingNorms() {
         materialId: item.materialId,
         qualityType: item.displayName,
         percentage: item.percentage,
+        normParameterTypeName: item.normParameterTypeName,
         remark: item.remark,
+        Particulars: item.normParameterTypeName,
       }))
       setPriceDiffRows(mappedPriceDiffRows)
     } catch (err) {
@@ -261,6 +270,7 @@ export default function QualityPackagingNorms() {
           budget: item.prevBudget,
           actual: item.prevActual,
           proposedNorm: item.proposedNorm,
+          Particulars: item.normParameterTypeName,
         }))
         setPackagingRows(mappedRows)
       } else {
@@ -293,6 +303,8 @@ export default function QualityPackagingNorms() {
           budget: item.prevBudget,
           actual: item.prevActual,
           proposedNorm: item.proposedNorm,
+          normParameterTypeName: item.normTypeName,
+          Particulars: item.normTypeName,
         }))
         setRowsOtherCosts(mappedRows)
       } else {
@@ -329,23 +341,30 @@ export default function QualityPackagingNorms() {
       editable: false,
     },
     {
+      field: 'normParameterTypeName ',
+      title: 'Norm Parameter Type',
+      hidden: true,
+    },
+    {
       field: 'qualityType',
-      title: 'Quality type',
+      title: 'Quality Type',
       editable: false,
+      widthT: 200,
     },
     {
       field: 'percentage',
       title: 'Value (%)',
       editable: true,
       type: 'number',
-      format: valueFormat, // Add format for 2 decimal places
+      format: valueFormat,
+      widthT: 200,
     },
   ]
 
   const packagingColumns = [
     {
       field: 'sno',
-      title: 'Sr no',
+      title: 'S.no',
       widthT: 70,
       format: '{0:n0}',
       editable: false,
@@ -358,7 +377,7 @@ export default function QualityPackagingNorms() {
     },
     {
       field: 'name',
-      title: 'Name of item',
+      title: 'Name of Item',
       editable: false,
     },
     {
@@ -369,7 +388,7 @@ export default function QualityPackagingNorms() {
     },
     {
       field: 'packagingPrice',
-      title: 'Packaging Price(Rs)',
+      title: 'Packaging Price (Rs)',
       editable: true,
       type: 'number',
       format: valueFormat,
@@ -400,7 +419,7 @@ export default function QualityPackagingNorms() {
   const columnsOtherCosts = [
     {
       field: 'sno',
-      title: 'Sr no',
+      title: 'S.no',
       widthT: 70,
       type: 'number',
       format: '{0:n0}',
@@ -411,8 +430,13 @@ export default function QualityPackagingNorms() {
       editable: false,
     },
     {
+      field: 'normParameterTypeName ',
+      title: 'Norm Parameter Type',
+      hidden: true,
+    },
+    {
       field: 'name',
-      title: 'Name of item',
+      title: 'Name of Item',
       editable: false,
     },
     {
