@@ -16,6 +16,7 @@ export const QualityParameterService = {
   getOtherCostData,
   saveOtherCostData,
   OtherCostExport,
+  OtherCostExcel,
 }
 export async function getQualityParameterData(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/quality-transaction?plantId=${PLANT_ID}&year=${AOP_YEAR}`
@@ -353,7 +354,7 @@ async function OtherCostExport(
   AOP_YEAR,
   EXCEL_EXPORT_TITLE,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/other-cost-transaction-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
+  const url = `${Config.CaseEngineUrl}/task/other-costs-transaction-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -382,6 +383,26 @@ async function OtherCostExport(
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
     console.error('Error exporting Optimizer Input Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function OtherCostExcel(file, keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/other-costs-transaction-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error importing Plant Team Excel:', e)
     return Promise.reject(e)
   }
 }

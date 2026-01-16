@@ -204,9 +204,9 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	        innerHeaders.add("Material Id");
 	        innerHeaders.add("Name");
 	        innerHeaders.add("UOM");
-	        innerHeaders.add("Budget "+year);
-	        innerHeaders.add("Actual "+year);
-	        innerHeaders.add("Proposed Norm "+getNextFiscalYear(year));
+	        innerHeaders.add("Budget "+getNextFiscalYear(year));
+	        innerHeaders.add("Actual "+getNextFiscalYear(year));
+	        innerHeaders.add("Proposed Norm "+year);
 	        
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
@@ -266,8 +266,8 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	    
 	    int startYear = Integer.parseInt(parts[0]);
 	    int endYearSuffix = Integer.parseInt(parts[1]);
-	    int nextStartYear = startYear + 1;
-	    int nextEndYearSuffix = endYearSuffix + 1;
+	    int nextStartYear = startYear -1;
+	    int nextEndYearSuffix = endYearSuffix - 1;
 	    return nextStartYear + "-" + String.format("%02d", nextEndYearSuffix % 100);
 	}
 

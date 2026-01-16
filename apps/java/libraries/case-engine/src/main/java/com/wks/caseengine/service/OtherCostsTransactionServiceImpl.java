@@ -211,9 +211,9 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	        innerHeaders.add("Material Id");
 	        innerHeaders.add("Name of Item");
 	        innerHeaders.add("UOM");
-	        innerHeaders.add("Budget "+year);
-	        innerHeaders.add("Actual "+year);
-	        innerHeaders.add("Proposed Cost "+getNextFiscalYear(year));
+	        innerHeaders.add("Budget "+getNextFiscalYear(year));
+	        innerHeaders.add("Actual "+getNextFiscalYear(year));
+	        innerHeaders.add("Proposed Cost "+year);
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -270,8 +270,8 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	    
 	    int startYear = Integer.parseInt(parts[0]);
 	    int endYearSuffix = Integer.parseInt(parts[1]);
-	    int nextStartYear = startYear + 1;
-	    int nextEndYearSuffix = endYearSuffix + 1;
+	    int nextStartYear = startYear - 1;
+	    int nextEndYearSuffix = endYearSuffix - 1;
 	    return nextStartYear + "-" + String.format("%02d", nextEndYearSuffix % 100);
 	}
 
