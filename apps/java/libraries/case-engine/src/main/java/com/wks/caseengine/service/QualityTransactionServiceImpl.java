@@ -204,10 +204,10 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	        innerHeaders.add("Material Id");
 	        innerHeaders.add("Name");
 	        innerHeaders.add("UOM");
-	        innerHeaders.add("Budget");
-	        innerHeaders.add("Actual");
-	        innerHeaders.add("Proposed Norm");
-	        innerHeaders.add("Id");
+	        innerHeaders.add("Budget "+year);
+	        innerHeaders.add("Actual "+year);
+	        innerHeaders.add("Proposed Norm "+getNextFiscalYear(year));
+	        
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -230,7 +230,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
-	            rowData.add(dto.getId());
+	            
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -250,7 +250,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(6, true);
+	        sheet.setColumnHidden(1, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -259,6 +259,16 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	        e.printStackTrace();
 	    }
 	    return null;
+	}
+	
+	public String getNextFiscalYear(String currentYear) {
+	    String[] parts = currentYear.split("-");
+	    
+	    int startYear = Integer.parseInt(parts[0]);
+	    int endYearSuffix = Integer.parseInt(parts[1]);
+	    int nextStartYear = startYear + 1;
+	    int nextEndYearSuffix = endYearSuffix + 1;
+	    return nextStartYear + "-" + String.format("%02d", nextEndYearSuffix % 100);
 	}
 
 	@Override

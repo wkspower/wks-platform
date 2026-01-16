@@ -414,10 +414,10 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	        int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
-	        innerHeaders.add("Quality type");
-	        innerHeaders.add("%");
+	        innerHeaders.add("Quality Type");
+	        innerHeaders.add("Value %");
 	        innerHeaders.add("Material Id");
-	        innerHeaders.add("Id");
+	       
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -438,7 +438,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	            rowData.add(dto.getDisplayName());
 	            rowData.add(dto.getPercentage());
 	            rowData.add(dto.getMaterialId());
-	            rowData.add(dto.getId());
+	            
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -459,7 +459,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	            }
 	        }
 	        sheet.setColumnHidden(2, true);
-	        sheet.setColumnHidden(3, true);
+	        
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();

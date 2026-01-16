@@ -192,14 +192,14 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 		}
 	}
 	
-	public byte[] exportQualityTransaction(String year, String plantId, boolean isAfterSave, List<QualityTransactionDTO> dtoList) {
+	public byte[] exportQualityTransaction(String year, String plantId, boolean isAfterSave, List<OtherCostsTransactionDto> dtoList) {
 	    try {   
 	        if (!isAfterSave) {
 	        	AOPMessageVM aopMessageVM = getOtherCostsTransaction(plantId,year);
 	        	Map<String, Object> innerMap = (Map<String, Object>) aopMessageVM.getData();
 
 		        if (innerMap != null) {
-		             dtoList = (List<QualityTransactionDTO>) innerMap.get("Data");
+		             dtoList = (List<OtherCostsTransactionDto>) innerMap.get("Data");
 		        }
 	        }
 
@@ -209,12 +209,11 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("Material Id");
-	        innerHeaders.add("Name");
+	        innerHeaders.add("Name of Item");
 	        innerHeaders.add("UOM");
-	        innerHeaders.add("Budget");
-	        innerHeaders.add("Actual");
-	        innerHeaders.add("Proposed Norm");
-	        innerHeaders.add("Id");
+	        innerHeaders.add("Budget "+year);
+	        innerHeaders.add("Actual "+year);
+	        innerHeaders.add("Proposed Cost "+getNextFiscalYear(year));
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -228,7 +227,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 
 	        int dataRowCount = dtoList.size();
 	        for (int i = 0; i < dataRowCount; i++) {
-	        	QualityTransactionDTO dto = dtoList.get(i);
+	        	OtherCostsTransactionDto dto = dtoList.get(i);
 	            Row row = sheet.createRow(currentRow++);
 	            List<Object> rowData = new ArrayList<>();
 	            rowData.add(dto.getMaterialId());
@@ -237,7 +236,6 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
-	            rowData.add(dto.getId());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -257,7 +255,6 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(6, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -267,13 +264,23 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	    }
 	    return null;
 	}
+	
+	public String getNextFiscalYear(String currentYear) {
+	    String[] parts = currentYear.split("-");
+	    
+	    int startYear = Integer.parseInt(parts[0]);
+	    int endYearSuffix = Integer.parseInt(parts[1]);
+	    int nextStartYear = startYear + 1;
+	    int nextEndYearSuffix = endYearSuffix + 1;
+	    return nextStartYear + "-" + String.format("%02d", nextEndYearSuffix % 100);
+	}
 
 	@Override
 	public AOPMessageVM importQualityTransaction(String year,UUID plantId,MultipartFile file) {
 		try {
-			List<QualityTransactionDTO> data = readQualityTransaction(file.getInputStream(), plantId, year);
-			 AOPMessageVM aopMessageVM = saveOtherCostsTransaction(year, plantId.toString(),null);
-			 List<QualityTransactionDTO> failedList = (List<QualityTransactionDTO>) aopMessageVM.getData();
+			List<OtherCostsTransactionDto> data = readQualityTransaction(file.getInputStream(), plantId, year);
+			 AOPMessageVM aopMessageVM = saveOtherCostsTransaction(year, plantId.toString(),data);
+			 List<OtherCostsTransactionDto> failedList = (List<OtherCostsTransactionDto>) aopMessageVM.getData();
 			
 			if (failedList != null && failedList.size() > 0) {
 				byte[] fileByteArray = exportQualityTransaction(year, plantId.toString(), true, failedList);
@@ -296,8 +303,8 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 		return null;
 	}
 	
-	public List<QualityTransactionDTO> readQualityTransaction(InputStream inputStream, UUID plantFKId, String year) {
-	    List<QualityTransactionDTO> qualityTransactions = new ArrayList<>();
+	public List<OtherCostsTransactionDto> readQualityTransaction(InputStream inputStream, UUID plantFKId, String year) {
+	    List<OtherCostsTransactionDto> otherCostsTransactionDtos = new ArrayList<>();
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
@@ -309,7 +316,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            
-	            QualityTransactionDTO dto = new QualityTransactionDTO();
+	            OtherCostsTransactionDto dto = new OtherCostsTransactionDto();
 	            try {
 	            	dto.setMaterialId(getStringCellValue(row.getCell(0), dto));
 	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
@@ -317,7 +324,6 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(3), dto));
 	                dto.setPrevActual(getNumericCellValue(row.getCell(4), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(5), dto));
-	                dto.setId(getStringCellValue(row.getCell(6), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 
@@ -326,17 +332,17 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                dto.setErrDescription(e.getMessage());
 	                dto.setSaveStatus("Failed");
 	            }
-	            qualityTransactions.add(dto);
+	            otherCostsTransactionDtos.add(dto);
 	        }
 
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
 
-	    return qualityTransactions;
+	    return otherCostsTransactionDtos;
 	}
 
-	private static java.util.Date getDateCellValue(Cell cell, QualityTransactionDTO dto) {
+	private static java.util.Date getDateCellValue(Cell cell, OtherCostsTransactionDto dto) {
 	    if (cell == null || cell.getCellType() == CellType.BLANK) {
 	        return null;
 	    }
@@ -363,7 +369,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	    }
 	    return null;
 	}
-	private static Integer getIntegerCellValue(Cell cell, QualityTransactionDTO dto) {
+	private static Integer getIntegerCellValue(Cell cell, OtherCostsTransactionDto dto) {
 	    if (cell == null || cell.getCellType() == CellType.BLANK) {
 	        return null;
 	    }
@@ -388,7 +394,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	    }
 	    return null;
 	}
-	private static String getStringCellValue(Cell cell, QualityTransactionDTO dto) {
+	private static String getStringCellValue(Cell cell, OtherCostsTransactionDto dto) {
 	    try {
 	        if (cell == null || cell.getCellType() == CellType.BLANK) {
 	            return null;
@@ -407,7 +413,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	    }
 	    return null;
 	}
-	private static Double getNumericCellValue(Cell cell, QualityTransactionDTO dto) {
+	private static Double getNumericCellValue(Cell cell, OtherCostsTransactionDto dto) {
 	    if (cell == null || cell.getCellType() == CellType.BLANK) {
 	        return null;
 	    }
