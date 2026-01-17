@@ -15,12 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.wks.caseengine.dto.AssetMonthlyOperationalProjection;
+import com.wks.caseengine.cpp.dto.AssetMonthlyOperationalProjection;
 import com.wks.caseengine.dto.AssetOperationalResponseDTO;
 import com.wks.caseengine.dto.AssetUtilityDTO;
 import com.wks.caseengine.dto.MonthlyHoursDTO;
-import com.wks.caseengine.dto.PowerGenerationNormParametersProjection;
-import com.wks.caseengine.dto.PowerGenerationSteamResposeProject;
+import com.wks.caseengine.cpp.dto.PowerGenerationNormParametersProjection;
+import com.wks.caseengine.cpp.dto.PowerGenerationSteamResposeProject;
 import com.wks.caseengine.dto.MasterAssetOperationalResponseDTO;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.cpp.repository.PowerGenerationRepository;

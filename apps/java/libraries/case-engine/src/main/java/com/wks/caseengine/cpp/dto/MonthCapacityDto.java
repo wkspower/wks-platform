@@ -1,4 +1,4 @@
-package com.wks.caseengine.dto;
+package com.wks.caseengine.cpp.dto;
 
 import lombok.Data;
 

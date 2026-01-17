@@ -3,7 +3,7 @@ package com.wks.caseengine.cpp.dto;
 import java.util.UUID;
 
 import com.wks.caseengine.dto.AssetUtilityDTO;
-import com.wks.caseengine.dto.MonthCapacityDto;
+import com.wks.caseengine.cpp.dto.MonthCapacityDto;
 
 import lombok.Data;
 

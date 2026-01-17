@@ -1,4 +1,4 @@
-package com.wks.caseengine.dto;
+package com.wks.caseengine.cpp.dto;
 
 import org.springframework.context.annotation.Configuration;
 
