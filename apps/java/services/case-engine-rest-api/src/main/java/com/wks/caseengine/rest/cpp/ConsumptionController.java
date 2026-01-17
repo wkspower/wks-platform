@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
-import com.wks.caseengine.dto.PlantRequirementDTO;
-import com.wks.caseengine.dto.ProcessDemandUpdateRequest;
-import com.wks.caseengine.dto.ProcessDemandUpdateResponse;
+import com.wks.caseengine.cpp.dto.CalculatedProcessDemandDTO;
+import com.wks.caseengine.cpp.dto.PlantRequirementDTO;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateRequest;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateResponse;
 import com.wks.caseengine.cpp.service.ConsumptionService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
