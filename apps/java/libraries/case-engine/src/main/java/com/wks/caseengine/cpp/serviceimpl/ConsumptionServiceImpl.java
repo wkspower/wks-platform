@@ -24,11 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.cpp.service.ConsumptionService;
-import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
+import com.wks.caseengine.cpp.dto.CalculatedProcessDemandDTO;
 import com.wks.caseengine.dto.PlantConsumpProjection;
-import com.wks.caseengine.dto.PlantRequirementDTO;
-import com.wks.caseengine.dto.ProcessDemandUpdateRequest;
-import com.wks.caseengine.dto.ProcessDemandUpdateResponse;
+import com.wks.caseengine.cpp.dto.PlantRequirementDTO;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateRequest;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateResponse;
 import com.wks.caseengine.entity.CalculatedProcessDemand;
 import com.wks.caseengine.entity.ProcessDemandMaster;
 import com.wks.caseengine.exception.RestInvalidArgumentException;

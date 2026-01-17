@@ -16,10 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
-import com.wks.caseengine.dto.PlantRequirementDTO;
-import com.wks.caseengine.dto.ProcessDemandUpdateRequest;
-import com.wks.caseengine.dto.ProcessDemandUpdateResponse;
+
+import com.wks.caseengine.cpp.dto.CalculatedProcessDemandDTO;
+import com.wks.caseengine.cpp.dto.PlantRequirementDTO;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateRequest;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateResponse;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.cpp.service.ConsumptionService;
 

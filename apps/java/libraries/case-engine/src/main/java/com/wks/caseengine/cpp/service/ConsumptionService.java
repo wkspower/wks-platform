@@ -3,12 +3,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
-
-import com.wks.caseengine.dto.CalculatedProcessDemandDTO;
-import com.wks.caseengine.dto.PlantRequirementDTO;
-import com.wks.caseengine.dto.ProcessDemandUpdateRequest;
-import com.wks.caseengine.dto.ProcessDemandUpdateResponse;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.cpp.dto.CalculatedProcessDemandDTO;
+import com.wks.caseengine.cpp.dto.PlantRequirementDTO;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateRequest;
+import com.wks.caseengine.cpp.dto.ProcessDemandUpdateResponse;
+
 
 public interface ConsumptionService {
 	
