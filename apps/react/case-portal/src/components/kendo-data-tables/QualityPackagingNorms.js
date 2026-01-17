@@ -735,6 +735,31 @@ export default function QualityPackagingNorms() {
           })
           setModifiedCells({})
           fetchQualityParameters()
+        } else if (response?.code === 400 && response?.data) {
+          // Error file handling
+          const byteCharacters = atob(response.data)
+          const byteNumbers = Array.from(byteCharacters, (char) =>
+            char.charCodeAt(0),
+          )
+          const byteArray = new Uint8Array(byteNumbers)
+          const blob = new Blob([byteArray], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', `Error File - ${type}.xlsx`)
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Partial data saved. Error file downloaded.',
+            severity: 'warning',
+          })
+          fetchQualityParameters()
         }
       } else if (type === 'Price_differential') {
         response = await QualityParameterService.PriceDifferentialExcel(
@@ -750,6 +775,31 @@ export default function QualityPackagingNorms() {
             severity: 'success',
           })
           setModifiedCellsDiff({})
+          fetchPriceDifferential()
+        } else if (response?.code === 400 && response?.data) {
+          // Error file handling
+          const byteCharacters = atob(response.data)
+          const byteNumbers = Array.from(byteCharacters, (char) =>
+            char.charCodeAt(0),
+          )
+          const byteArray = new Uint8Array(byteNumbers)
+          const blob = new Blob([byteArray], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', `Error File - ${type}.xlsx`)
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Partial data saved. Error file downloaded.',
+            severity: 'warning',
+          })
           fetchPriceDifferential()
         }
       } else if (type === 'packaging') {
@@ -767,6 +817,31 @@ export default function QualityPackagingNorms() {
           })
           setModifiedCellsPackaging({})
           fetchPackagingRows()
+        } else if (response?.code === 400 && response?.data) {
+          // Error file handling
+          const byteCharacters = atob(response.data)
+          const byteNumbers = Array.from(byteCharacters, (char) =>
+            char.charCodeAt(0),
+          )
+          const byteArray = new Uint8Array(byteNumbers)
+          const blob = new Blob([byteArray], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', `Error File - ${type}.xlsx`)
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Partial data saved. Error file downloaded.',
+            severity: 'warning',
+          })
+          fetchPackagingRows()
         }
       } else if (type === 'othercost') {
         response = await QualityParameterService.OtherCostExcel(
@@ -783,6 +858,31 @@ export default function QualityPackagingNorms() {
           })
           setModifiedCellsOtherCosts({})
           fetchOtherCostsRows()
+        } else if (response?.code === 400 && response?.data) {
+          // Error file handling
+          const byteCharacters = atob(response.data)
+          const byteNumbers = Array.from(byteCharacters, (char) =>
+            char.charCodeAt(0),
+          )
+          const byteArray = new Uint8Array(byteNumbers)
+          const blob = new Blob([byteArray], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.setAttribute('download', `Error File - ${type}.xlsx`)
+          document.body.appendChild(link)
+          link.click()
+          link.remove()
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Partial data saved. Error file downloaded.',
+            severity: 'warning',
+          })
+          fetchOtherCostsRows()
         }
       } else {
         setSnackbarOpen(true)
@@ -793,7 +893,10 @@ export default function QualityPackagingNorms() {
         return
       }
 
-      if (response?.code !== 200) {
+      if (
+        response?.code !== 200 &&
+        !(response?.code === 400 && response?.data)
+      ) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Upload Failed!',
