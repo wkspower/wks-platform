@@ -9,7 +9,6 @@ import com.wks.caseengine.cpp.dto.PlantRequirementDTO;
 import com.wks.caseengine.cpp.dto.ProcessDemandUpdateRequest;
 import com.wks.caseengine.cpp.dto.ProcessDemandUpdateResponse;
 
-
 public interface ConsumptionService {
 	
 	public List<PlantRequirementDTO> getCppConsumptions(UUID plantId, String financialYear);
