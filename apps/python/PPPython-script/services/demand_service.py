@@ -96,16 +96,19 @@ def fetch_fixed_process_demands(month: int, year: int) -> dict:
         return None
     fym_id = row[0]
     
-    # Fetch Power demands
-    cur.execute("""
-        SELECT COALESCE(SUM(powerRequirement), 0) FROM PlantRequirement WHERE FinancialYearMonthId = ?
-    """, (fym_id,))
-    power_process = float(cur.fetchone()[0])
+    # Fetch Power demands from CalculatedProcessDemand via process_demand_service
+    from services.process_demand_service import get_process_demand_for_month
+    process_demands = get_process_demand_for_month(month, year)
+    power_process_kwh = process_demands.get("power_process", 0.0)
+    # Convert KWH to MWh
+    power_process = power_process_kwh / 1000.0
     
-    cur.execute("""
-        SELECT COALESCE(SUM(powerRequirement), 0) FROM FixedConsumption WHERE FinancialYearMonthId = ?
-    """, (fym_id,))
-    power_fixed = float(cur.fetchone()[0])
+    # Fetch Fixed consumption from UtilityFixedConsumption table via fixed_consumption_service
+    from services.fixed_consumption_service import get_fixed_consumption_for_month
+    fixed_consumption = get_fixed_consumption_for_month(month, year)
+    power_fixed_kwh = fixed_consumption.get("power_fixed_kwh", 0.0)
+    # Convert KWH to MWh
+    power_fixed = power_fixed_kwh / 1000.0
     
     conn.close()
     

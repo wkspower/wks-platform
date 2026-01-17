@@ -1,0 +1,44 @@
+/* ==================== Column Header Borders ==================== */
+/* kendo-data-grid.css already has: .k-grid-header .k-header { border-right: 1px solid #ccc; } */
+/* Only add bottom borders here to avoid double borders */
+
+/* Add bottom border to all header cells */
+.k-grid-header {
+  border-bottom: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+}
+
+/* Top-level grouped header cells - add bottom border */
+.k-grid-header th.k-header[colspan] {
+  border-bottom: 1px solid #ccc !important;
+  border-right: 1px solid #ccc !important;
+}
+
+/* ==================== Button Styles ==================== */
+
+/* Green Submit Button */
+.btn-submit {
+  background-color: #28a745;
+  color: #ffffff;
+  border-radius: 4px;
+  padding: 6px 16px;
+  text-transform: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 80px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+
+.btn-submit:hover {
+  background-color: #218838;
+  box-shadow: none;
+}
+
+.btn-submit:disabled {
+  background-color: #94d3a2;
+  color: #ffffff;
+  opacity: 0.7;
+  cursor: not-allowed;
+}

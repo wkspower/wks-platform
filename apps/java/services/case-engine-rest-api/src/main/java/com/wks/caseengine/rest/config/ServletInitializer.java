@@ -24,3 +24,4 @@ public class ServletInitializer extends SpringBootServletInitializer {
 	}
 
 }
+
