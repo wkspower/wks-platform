@@ -139,14 +139,14 @@ export default function QualityPackagingNorms() {
       field: 'budget',
       title: `Budget ${previousYear}`,
       editable: false,
-      type: 'number',
+      type: 'numberWithUOMValidation',
       format: valueFormat,
     },
     {
       field: 'actual',
       title: `Actual ${previousYear}`,
       editable: false,
-      type: 'number',
+      type: 'numberWithUOMValidation',
       format: valueFormat,
     },
 
@@ -156,7 +156,7 @@ export default function QualityPackagingNorms() {
       width: 150,
       editable: true,
       editor: 'numeric',
-      type: 'number',
+      type: 'numberWithUOMValidation',
       format: valueFormat,
     },
   ]
@@ -227,6 +227,7 @@ export default function QualityPackagingNorms() {
         normParameterTypeName: item.normParameterTypeName,
         remark: item.remark,
         Particulars: item.normParameterTypeName,
+        unit: '%',
       }))
       setPriceDiffRows(mappedPriceDiffRows)
     } catch (err) {
@@ -355,9 +356,13 @@ export default function QualityPackagingNorms() {
       field: 'percentage',
       title: 'Value (%)',
       editable: true,
-      type: 'number',
+      type: 'numberWithUOMValidation',
       format: valueFormat,
       widthT: 200,
+    },
+    {
+      field: 'unit',
+      hidden: true,
     },
   ]
 
@@ -953,8 +958,8 @@ export default function QualityPackagingNorms() {
       titleName: 'Packagings & Consumables',
       adjustedPermissions: true,
       //downloadExcelBtnFromUI: true,
-      downloadExcelBtn: false,
-      uploadExcelBtn: false,
+      downloadExcelBtn: true,
+      uploadExcelBtn: true,
       ExcelName: `${lowerVertName}_Packagings_Consumables`,
       addButton: false,
       deleteButton: false,

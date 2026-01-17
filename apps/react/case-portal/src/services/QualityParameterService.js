@@ -257,7 +257,7 @@ async function PackagingConsumbleExport(
   AOP_YEAR,
   EXCEL_EXPORT_TITLE,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/packaging-consumble-transaction-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
+  const url = `${Config.CaseEngineUrl}/task/packaging-consumables-transaction-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
     'Content-Type': 'application/json',
