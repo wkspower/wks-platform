@@ -79,11 +79,11 @@ const Norms = () => {
     //UOM
     {
       field: 'uom',
-      title: 'UOM',
-      widthT: 80,
+      title: 'Generation UOM',
+      widthT: 130,
       type: 'text',
       editable: false,
-      minWidth: 80,
+      minWidth: 130,
     },
     // Account
     {
@@ -128,14 +128,6 @@ const Norms = () => {
       type: 'text',
       editable: false,
       minWidth: 120,
-    },
-    {
-      field: 'generationUom',
-      title: 'Generation UOM',
-      widthT: 130,
-      type: 'text',
-      editable: false,
-      minWidth: 130,
     },
     // Apr
     {
