@@ -32,4 +32,5 @@ public class PackagingAndConsumableTransactionDTO {
     private String saveStatus;
     private String errDescription;
     private String normParameterTypeName;
+    private String sapMaterialCode;
 }

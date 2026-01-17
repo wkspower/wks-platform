@@ -30,4 +30,5 @@ public class OtherCostsTransactionDto {
     private String uom;
     private String saveStatus;
     private String errDescription;
+    private String sapMaterialCode;
 }

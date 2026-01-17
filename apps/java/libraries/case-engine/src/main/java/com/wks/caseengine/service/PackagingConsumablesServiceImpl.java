@@ -185,27 +185,26 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 				PackagingAndConsumableTransactionDTO packagingAndConsumableTransactionDTO = new PackagingAndConsumableTransactionDTO();
 				packagingAndConsumableTransactionDTO.setId(row[0] != null ? row[0].toString() : "");
 				packagingAndConsumableTransactionDTO.setMaterialId(row[1] != null ? row[1].toString() : "");
-				packagingAndConsumableTransactionDTO.setNormParameterTypeName(row[2] != null ? row[2].toString() : "");
-				packagingAndConsumableTransactionDTO.setDisplayName(row[3] != null ? row[3].toString() : "");
-				packagingAndConsumableTransactionDTO.setUom(row[4] != null ? row[4].toString() : "");
+				packagingAndConsumableTransactionDTO.setSapMaterialCode(row[2] != null ? row[2].toString() : "");
+				packagingAndConsumableTransactionDTO.setNormParameterTypeName(row[3] != null ? row[3].toString() : "");
+				packagingAndConsumableTransactionDTO.setDisplayName(row[4] != null ? row[4].toString() : "");
+				packagingAndConsumableTransactionDTO.setUom(row[5] != null ? row[5].toString() : "");
 				packagingAndConsumableTransactionDTO.setPackagingPrice(
-						(row[5] != null && !row[5].toString().trim().isEmpty())
-								? Double.parseDouble(row[5].toString().trim())
+						(row[6] != null && !row[6].toString().trim().isEmpty())
+								? Double.parseDouble(row[6].toString().trim())
 								: 0.0);
 				packagingAndConsumableTransactionDTO.setPrevBudget(
-						(row[6] != null && !row[6].toString().trim().isEmpty()) ? Double.parseDouble(row[6].toString())
-								: 0.0);
-				packagingAndConsumableTransactionDTO.setPrevActual(
 						(row[7] != null && !row[7].toString().trim().isEmpty()) ? Double.parseDouble(row[7].toString())
 								: 0.0);
-				packagingAndConsumableTransactionDTO.setProposedNorm(
+				packagingAndConsumableTransactionDTO.setPrevActual(
 						(row[8] != null && !row[8].toString().trim().isEmpty()) ? Double.parseDouble(row[8].toString())
 								: 0.0);
-				packagingAndConsumableTransactionDTO.setPlantId(row[9] != null ? row[9].toString() : "");
-				packagingAndConsumableTransactionDTO.setAopYear(row[10] != null ? row[10].toString() : "");
-				packagingAndConsumableTransactionDTO.setRemark((row[13] != null ? row[13].toString() : ""));
-					
-				
+				packagingAndConsumableTransactionDTO.setProposedNorm(
+						(row[9] != null && !row[9].toString().trim().isEmpty()) ? Double.parseDouble(row[9].toString())
+								: 0.0);
+				packagingAndConsumableTransactionDTO.setPlantId(row[10] != null ? row[10].toString() : "");
+				packagingAndConsumableTransactionDTO.setAopYear(row[11] != null ? row[11].toString() : "");
+				packagingAndConsumableTransactionDTO.setRemark((row[14] != null ? row[14].toString() : ""));
 				packagingAndConsumableTransactionDTOs.add(packagingAndConsumableTransactionDTO);
 				
 			}
@@ -466,13 +465,14 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	        int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
-	        innerHeaders.add("Material Id");
+	        innerHeaders.add("SAP Material Code");
 	        innerHeaders.add("Name of Item");
 	        innerHeaders.add("Unit");
 	        innerHeaders.add("Packaging Price (Rs)");
 	        innerHeaders.add("Budget "+getNextFiscalYear(year));
 	        innerHeaders.add("Actual "+getNextFiscalYear(year));
 	        innerHeaders.add("Proposed Cost "+year);
+	        innerHeaders.add("Material Id");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -489,13 +489,14 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	        	PackagingAndConsumableTransactionDTO dto = dtoList.get(i);
 	            Row row = sheet.createRow(currentRow++);
 	            List<Object> rowData = new ArrayList<>();
-	            rowData.add(dto.getMaterialId());
+	            rowData.add(dto.getSapMaterialCode());
 	            rowData.add(dto.getDisplayName());
 	            rowData.add(dto.getUom());
 	            rowData.add(dto.getPackagingPrice());
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
+	            rowData.add(dto.getMaterialId());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -515,6 +516,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	                }  
 	            }
 	        }
+	        sheet.setColumnHidden(7, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -578,11 +580,12 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	            
 	            PackagingAndConsumableTransactionDTO dto = new PackagingAndConsumableTransactionDTO();
 	            try {
-	            	dto.setMaterialId(getStringCellValue(row.getCell(0), dto));
+	            	dto.setSapMaterialCode(getStringCellValue(row.getCell(0), dto));
 	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
 	                dto.setUom(getStringCellValue(row.getCell(2), dto));
 	                dto.setPackagingPrice(getNumericCellValue(row.getCell(3), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(6), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(7), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 

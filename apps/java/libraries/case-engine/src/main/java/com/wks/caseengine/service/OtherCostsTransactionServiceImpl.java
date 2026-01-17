@@ -90,25 +90,26 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 				otherCostsTransactionDto.setId(row[0] != null ? row[0].toString() : "");
 
 				otherCostsTransactionDto.setMaterialId(row[1] != null ? row[1].toString() : "");
-				otherCostsTransactionDto.setNormTypeName(row[2] != null ? row[2].toString() : "");
-				otherCostsTransactionDto.setDisplayName(row[3] != null ? row[3].toString() : "");
-				otherCostsTransactionDto.setUom(row[4] != null ? row[4].toString() : "");
+				otherCostsTransactionDto.setSapMaterialCode(row[2] != null ? row[2].toString() : "");
+				otherCostsTransactionDto.setNormTypeName(row[3] != null ? row[3].toString() : "");
+				otherCostsTransactionDto.setDisplayName(row[4] != null ? row[4].toString() : "");
+				otherCostsTransactionDto.setUom(row[5] != null ? row[5].toString() : "");
 				otherCostsTransactionDto.setPrevBudget(
-						(row[5] != null && !row[5].toString().trim().isEmpty())
-								? Double.parseDouble(row[5].toString().trim())
-								: 0.0);
-				otherCostsTransactionDto.setPrevActual(
 						(row[6] != null && !row[6].toString().trim().isEmpty())
 								? Double.parseDouble(row[6].toString().trim())
 								: 0.0);
-				otherCostsTransactionDto.setProposedNorm(
+				otherCostsTransactionDto.setPrevActual(
 						(row[7] != null && !row[7].toString().trim().isEmpty())
 								? Double.parseDouble(row[7].toString().trim())
 								: 0.0);
+				otherCostsTransactionDto.setProposedNorm(
+						(row[8] != null && !row[8].toString().trim().isEmpty())
+								? Double.parseDouble(row[8].toString().trim())
+								: 0.0);
 				
-				otherCostsTransactionDto.setPlantId(row[8] != null ? row[8].toString() : "");
-				otherCostsTransactionDto.setAopYear(row[9] != null ? row[9].toString() : "");
-				otherCostsTransactionDto.setRemark(row[12] != null ? row[12].toString() : "");
+				otherCostsTransactionDto.setPlantId(row[9] != null ? row[9].toString() : "");
+				otherCostsTransactionDto.setAopYear(row[10] != null ? row[10].toString() : "");
+				otherCostsTransactionDto.setRemark(row[13] != null ? row[13].toString() : "");
 				otherCostsTransactionDtos.add(otherCostsTransactionDto);
 				
 			}
@@ -208,12 +209,13 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	        int currentRow = 0;
 
 	        List<String> innerHeaders = new ArrayList<>();
-	        innerHeaders.add("Material Id");
+	        innerHeaders.add("SAP Material Code");
 	        innerHeaders.add("Name of Item");
 	        innerHeaders.add("UOM");
 	        innerHeaders.add("Budget "+getNextFiscalYear(year));
 	        innerHeaders.add("Actual "+getNextFiscalYear(year));
 	        innerHeaders.add("Proposed Cost "+year);
+	        innerHeaders.add("Material Id");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
@@ -230,12 +232,13 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	        	OtherCostsTransactionDto dto = dtoList.get(i);
 	            Row row = sheet.createRow(currentRow++);
 	            List<Object> rowData = new ArrayList<>();
-	            rowData.add(dto.getMaterialId());
+	            rowData.add(dto.getSapMaterialCode());
 	            rowData.add(dto.getDisplayName());
 	            rowData.add(dto.getUom());
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
+	            rowData.add(dto.getMaterialId());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
@@ -255,6 +258,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                }  
 	            }
 	        }
+	        sheet.setColumnHidden(6, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -318,12 +322,13 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	            
 	            OtherCostsTransactionDto dto = new OtherCostsTransactionDto();
 	            try {
-	            	dto.setMaterialId(getStringCellValue(row.getCell(0), dto));
+	            	dto.setSapMaterialCode(getStringCellValue(row.getCell(0), dto));
 	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
 	                dto.setUom(getStringCellValue(row.getCell(2), dto));
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(3), dto));
 	                dto.setPrevActual(getNumericCellValue(row.getCell(4), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(5), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(6), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 
