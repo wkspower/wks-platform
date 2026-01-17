@@ -76,7 +76,10 @@ public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Lo
     );
 
 
-    @Query(value = "select Name, NormType_FK_Id, SAPMaterialCode, AssetId from NormParameters where AssetId in :assetIds", nativeQuery = true)
+    // @Query(value = "select Name, NormType_FK_Id, SAPMaterialCode, AssetId from NormParameters where AssetId in :assetIds", nativeQuery = true)
+    // List<PowerGenerationNormParametersProjection> getNormParametersByAssetIds(@Param("assetIds") List<UUID> assetIds);
+
+    @Query(value = "select np.Name, np.NormType_FK_Id, np.SAPMaterialCode, anm.AssetId from  CPP_AssetNorms_Mapping anm join NormParameters np on anm.NormParameters_ID = np.Id where anm.AssetId in :assetIds", nativeQuery = true)
     List<PowerGenerationNormParametersProjection> getNormParametersByAssetIds(@Param("assetIds") List<UUID> assetIds);
 
 
