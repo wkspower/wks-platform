@@ -513,6 +513,15 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	            PriceDifferentialTransactionDTO dto = new PriceDifferentialTransactionDTO();
 	            try {
 	            	dto.setDisplayName(getStringCellValue(row.getCell(0), dto));
+	            	Double cellValue = getNumericCellValue(row.getCell(1), dto);
+	                if (cellValue != null) {
+	                    if (cellValue >= 0 && cellValue <= 100) {
+	                        dto.setPercentage(cellValue);
+	                    } else {
+	                    	dto.setErrDescription("Percentage value should be between 0 to 100");
+	    	                dto.setSaveStatus("Failed");
+	                    }
+	                }
 	                dto.setPercentage(getNumericCellValue(row.getCell(1), dto));
 	                dto.setMaterialId(getStringCellValue(row.getCell(2), dto));
 	                dto.setId(getStringCellValue(row.getCell(3), dto));

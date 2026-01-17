@@ -319,7 +319,15 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	                dto.setUom(getStringCellValue(row.getCell(2), dto));
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(3), dto));
 	                dto.setPrevActual(getNumericCellValue(row.getCell(4), dto));
-	                dto.setProposedNorm(getNumericCellValue(row.getCell(5), dto));
+	                Double cellValue = getNumericCellValue(row.getCell(5), dto);
+	                if (cellValue != null) {
+	                    if (cellValue >= 0 && cellValue <= 100) {
+	                        dto.setProposedNorm(cellValue);
+	                    } else {
+	                    	dto.setErrDescription("Proposed Norm value should be between 0 to 100");
+	    	                dto.setSaveStatus("Failed");
+	                    }
+	                }
 	                dto.setId(getStringCellValue(row.getCell(6), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);

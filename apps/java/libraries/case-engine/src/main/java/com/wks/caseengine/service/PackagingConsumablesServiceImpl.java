@@ -249,13 +249,13 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 					packagingAndConsumableTransaction.setMaterialId(UUID.fromString(packagingAndConsumableTransactionDTO.getMaterialId()));
 					packagingAndConsumableTransaction.setAopYear(year);
 					packagingAndConsumableTransaction.setPlantId(plantId);
+					packagingAndConsumableTransaction.setPrevBudget(packagingAndConsumableTransactionDTO.getPrevBudget());
+					packagingAndConsumableTransaction.setPrevActual(packagingAndConsumableTransactionDTO.getPrevActual());
 				}
 				packagingAndConsumableTransaction.setPackagingPrice(packagingAndConsumableTransactionDTO.getPackagingPrice());
 				packagingAndConsumableTransaction.setRemark(packagingAndConsumableTransactionDTO.getRemark());
 				packagingAndConsumableTransaction.setUpdatedBy(Utility.getUserName());
 				packagingAndConsumableTransaction.setModifiedOn(new Date());
-				packagingAndConsumableTransaction.setPrevBudget(packagingAndConsumableTransactionDTO.getPrevBudget());
-				packagingAndConsumableTransaction.setPrevActual(packagingAndConsumableTransactionDTO.getPrevActual());
 				packagingAndConsumableTransaction.setProposedNorm(packagingAndConsumableTransactionDTO.getProposedNorm());
 				packagingAndConsumableTransactionRepository.save(packagingAndConsumableTransaction);
 			}
@@ -582,8 +582,6 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
 	                dto.setUom(getStringCellValue(row.getCell(2), dto));
 	                dto.setPackagingPrice(getNumericCellValue(row.getCell(3), dto));
-	                dto.setPrevBudget(getNumericCellValue(row.getCell(4), dto));
-	                dto.setPrevActual(getNumericCellValue(row.getCell(5), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(6), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
