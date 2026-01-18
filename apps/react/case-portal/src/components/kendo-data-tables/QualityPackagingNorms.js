@@ -271,6 +271,7 @@ export default function QualityPackagingNorms() {
           budget: item.prevBudget,
           actual: item.prevActual,
           proposedNorm: item.proposedNorm,
+          SapMaterialCode: item.SapMaterialCode,
           Particulars: item.normParameterTypeName,
         }))
         setPackagingRows(mappedRows)
@@ -304,6 +305,7 @@ export default function QualityPackagingNorms() {
           budget: item.prevBudget,
           actual: item.prevActual,
           proposedNorm: item.proposedNorm,
+          SapMaterialCode: item.SapMaterialCode,
           normParameterTypeName: item.normTypeName,
           Particulars: item.normTypeName,
         }))
@@ -379,6 +381,12 @@ export default function QualityPackagingNorms() {
       field: 'materialId',
       title: 'Material ID',
       editable: false,
+      hidden: true,
+    },
+    {
+      field: 'SapMaterialCode',
+      title: 'SAP Material Code',
+      editable: false,
     },
     {
       field: 'name',
@@ -432,6 +440,12 @@ export default function QualityPackagingNorms() {
     {
       field: 'materialId',
       title: 'Material ID',
+      editable: false,
+      hidden: true,
+    },
+    {
+      field: 'SapMaterialCode',
+      title: 'SAP Material Code',
       editable: false,
     },
     {
