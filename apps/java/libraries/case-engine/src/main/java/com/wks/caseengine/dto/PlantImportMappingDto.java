@@ -23,4 +23,6 @@ public class PlantImportMappingDto {
     private double feb;
     private double mar;
     private String remarks;
+    private String saveStatus;
+    private String errDescription;
 }
