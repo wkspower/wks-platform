@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.AssetUtilityDTO;
-import com.wks.caseengine.dto.MonthCapacityDto;
+import com.wks.caseengine.cpp.dto.MonthCapacityDto;
 import com.wks.caseengine.cpp.dto.AssetCapacityDTO;
 import com.wks.caseengine.cpp.dto.AssetCapacityProjection;
 import com.wks.caseengine.cpp.repository.AssetCapacityRepository;

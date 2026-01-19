@@ -48,6 +48,9 @@ UTILITY_MAPPING = {
     "HP Steam_Dis": "hp_process",
     "SHP Steam": "shp_process",
     "SHP Steam_Dis": "shp_process",
+    # Power utility
+    "Power": "power_process",
+    "Power_Dis": "power_process",
     # Other utilities
     "COMPRESSED AIR": "air_process",
     "Compressed Air": "air_process",
@@ -94,6 +97,7 @@ def get_process_demand_for_month(month: int, year: int) -> Dict[str, float]:
     Returns:
         Dict with process demand values:
         {
+            "power_process": float (KWH),
             "lp_process": float (MT),
             "mp_process": float (MT),
             "hp_process": float (MT),
@@ -138,6 +142,7 @@ def get_process_demand_for_month(month: int, year: int) -> Dict[str, float]:
         
         # Initialize with zeros
         result = {
+            "power_process": 0.0,
             "lp_process": 0.0,
             "mp_process": 0.0,
             "hp_process": 0.0,
@@ -212,6 +217,7 @@ def get_default_process_demands() -> Dict[str, float]:
     These are the original hardcoded values from the model.
     """
     return {
+        "power_process": 0.0,  # No default, should come from DB
         "lp_process": 30043.15,
         "mp_process": 14030.65,
         "hp_process": 4971.91,
@@ -228,6 +234,7 @@ def print_process_demands(data: Dict[str, float], month: int = None, year: int =
     header = f"Process Demands for {month}/{year}" if month and year else "Process Demands"
     print(f"\n{header}:")
     print("-" * 50)
+    print(f"  Power:          {data.get('power_process', 0):>12,.2f} KWH")
     print(f"  LP Steam:       {data['lp_process']:>12,.2f} MT")
     print(f"  MP Steam:       {data['mp_process']:>12,.2f} MT")
     print(f"  HP Steam:       {data['hp_process']:>12,.2f} MT")
@@ -289,6 +296,7 @@ def get_combined_demands_for_month(month: int, year: int,
     # Combine into single dict
     combined = {
         # Process demands
+        "power_process": process_demands.get("power_process", 0.0),
         "lp_process": process_demands.get("lp_process", 0.0),
         "mp_process": process_demands.get("mp_process", 0.0),
         "hp_process": process_demands.get("hp_process", 0.0),

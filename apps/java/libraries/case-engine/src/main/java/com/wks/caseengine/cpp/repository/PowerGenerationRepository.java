@@ -10,9 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.wks.caseengine.dto.AssetMonthlyOperationalProjection;
-import com.wks.caseengine.dto.PowerGenerationNormParametersProjection;
-import com.wks.caseengine.dto.PowerGenerationSteamResposeProject;
+import com.wks.caseengine.cpp.dto.AssetMonthlyOperationalProjection;
+import com.wks.caseengine.cpp.dto.PowerGenerationNormParametersProjection;
+import com.wks.caseengine.cpp.dto.PowerGenerationSteamResposeProject;
 import com.wks.caseengine.entity.DummyEntity;
 
 

@@ -7,7 +7,7 @@ import {
 } from '@progress/kendo-react-grid'
 import '@progress/kendo-theme-default/dist/all.css'
 import GenericDropdown from 'components/aop-phase-two/common/utilities/GenericDropdown'
-import { useCallback, useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect, useMemo } from 'react'
 import '../../../../../src/kendo-data-grid.css'
 import '../../css/advance-kendo-table.css'
 import { useSession } from 'SessionStoreContext'
@@ -15,7 +15,7 @@ import { getRoleName } from 'services/role-service'
 import RemarkDialog from './components/RemarkDialog'
 import DeleteDialog from './components/DeleteDialog'
 import SaveConfirmationDialog from './components/SaveConfirmationDialog'
-import ApproveDialog from './components/ApproveDialog'
+import ApproveDialog from '../../tcs/TcsInput/workflow/ApproveDialog'
 import { TextCellEditorUpdated } from '../utilities/TextCellEditorUpdated'
 import { SelectCellEditor } from '../utilities/SelectCellEditor'
 import { MultiselectCellEditor } from '../utilities/MultiselectCellEditor'
@@ -135,7 +135,8 @@ const AdvanceKendoTable = ({
   dateCalculationConfig = {},
   initialFieldValues = {},
   customItemChange = null,
-  labelField = null,
+  onApproveClick = null,
+  customHeight = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -145,10 +146,8 @@ const AdvanceKendoTable = ({
   const [openDeleteDialogeBox, setOpenDeleteDialogeBox] = useState(false)
   const [isButtonDisabled, setIsButtonDisabled] = useState(false)
   const [openSaveDialogeBox, setOpenSaveDialogeBox] = useState(false)
-  const [openApproveDialogeBox, setOpenApproveDialogeBox] = useState(false)
   const [paramsForDelete, setParamsForDelete] = useState([])
   const closeSaveDialogeBox = () => setOpenSaveDialogeBox(false)
-  const closeApproveDialogeBox = () => setOpenApproveDialogeBox(false)
   const [edit, setEdit] = useState({})
   const [sort, setSort] = useState([])
   const [issRowEdited, setIsRowEdited] = useState(false)
@@ -184,6 +183,20 @@ const AdvanceKendoTable = ({
     }
     return false
   }, [rows?.length, paginationConfig])
+
+  // Constants for viewport height calculation
+  const rowHeightVH = 5 // each row ~5vh
+  const headerVH = 10 // grid's own header/filter area
+  const pageHeaderVH = 20 // top app bar + stepper + controls
+  const maxVH = 60 // cap grid height
+
+  // Calculate dynamic viewport height based on number of rows
+  const calculatedVH = useMemo(() => {
+    if (!rows || rows?.length === 0) return 20
+    const needed = rows?.length * rowHeightVH + headerVH
+    const available = 100 - pageHeaderVH
+    return Math.round(Math.min(needed, maxVH, available))
+  }, [rows?.length])
 
   // Get the default page size from config
   const getDefaultTake = () => {
@@ -665,11 +678,9 @@ const AdvanceKendoTable = ({
     }, 500)
   }
   const approveModalOpen = async () => {
-    setIsButtonDisabled(true)
-    setOpenApproveDialogeBox(true)
-    setTimeout(() => {
-      setIsButtonDisabled(false)
-    }, 500)
+    if (onApproveClick) {
+      onApproveClick()
+    }
   }
   const handleCalculateBtn = async () => {
     setIsButtonDisabled(true)
@@ -999,7 +1010,7 @@ const AdvanceKendoTable = ({
 
   const renderColumns = (cols, filter, sort) =>
     cols.map((col, idx) => {
-      const isEditable = col.editable === true
+      const isEditable = !READ_ONLY && col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
       const headerColorClass = undefined
@@ -1024,11 +1035,12 @@ const AdvanceKendoTable = ({
             field={col.field}
             title={col.title || col.headerName}
             width={setWidth(col?.minWidth || 120)}
+            className={!isEditable ? 'non-editable-cell' : undefined}
             cells={{
               data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  onRemarkClick={handleRemarkCellClick}
+                  onRemarkClick={isEditable ? handleRemarkCellClick : () => {}}
                 />
               ),
             }}
@@ -1054,11 +1066,12 @@ const AdvanceKendoTable = ({
             field={col.field}
             title={col.title || col.headerName}
             width={setWidth(col?.minWidth || 120)}
+            className={!isEditable ? 'non-editable-cell' : undefined}
             cells={{
               data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  onRemarkClick={handleRemarkCellClick}
+                  onRemarkClick={isEditable ? handleRemarkCellClick : () => {}}
                 />
               ),
             }}
@@ -1222,7 +1235,7 @@ const AdvanceKendoTable = ({
             hidden={col.hidden}
             editable={col?.editable ? true : false}
             className={
-              !col?.editable ? 'k-number-right-disabled' : 'k-number-right'
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
             }
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
@@ -1275,7 +1288,7 @@ const AdvanceKendoTable = ({
             hidden={col.hidden}
             editable={col?.editable ? true : false}
             className={
-              !col?.editable ? 'k-number-right-disabled' : 'k-number-right'
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
             }
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
@@ -1322,7 +1335,7 @@ const AdvanceKendoTable = ({
             title={col.title || col.headerName}
             hidden={col.hidden}
             editable={col?.editable ? true : false}
-            className={!col?.editable ? 'k-right-disabled' : undefined}
+            className={!isEditable ? 'k-right-disabled' : undefined}
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
               edit: { text: TextCellEditorUpdated },
@@ -1609,7 +1622,7 @@ const AdvanceKendoTable = ({
                 // className='custom-btn-additem'
                 className='btn-save'
                 onClick={handleAddRow}
-                disabled={false}
+                disabled={isButtonDisabled || READ_ONLY}
               >
                 Add Item
               </Button>
@@ -1618,7 +1631,7 @@ const AdvanceKendoTable = ({
               <Button
                 variant='contained'
                 onClick={saveModalOpen}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
                 // className='custom-btn-save'
               >
@@ -1630,7 +1643,7 @@ const AdvanceKendoTable = ({
               <Button
                 variant='contained'
                 onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
                 // className='custom-btn-calculate'
               >
@@ -1655,7 +1668,7 @@ const AdvanceKendoTable = ({
                 variant='contained'
                 className='btn-save'
                 onClick={excelExport}
-                disabled={READ_ONLY || rows?.length === 0}
+                disabled={rows?.length === 0}
                 // className='custom-btn-export'
               >
                 Export
@@ -1687,6 +1700,7 @@ const AdvanceKendoTable = ({
             {permissions?.showFinalSubmit && (
               <Button
                 variant='contained'
+                disabled={isButtonDisabled || READ_ONLY}
                 // className='custom-btn-submit'
                 className='btn-save'
               >
@@ -1730,6 +1744,15 @@ const AdvanceKendoTable = ({
             fileName={`${permissions?.ExcelName}.xlsx`}
           >
             <Grid
+              style={{
+                flex: 1,
+                overflow: 'auto',
+                height: customHeight
+                  ? `${customHeight}vh`
+                  : rows?.length > 10
+                    ? `${calculatedVH}vh`
+                    : undefined,
+              }}
               modifiedCells={modifiedCells}
               data={rows}
               rows={{ data: CustomRow }}
@@ -1811,23 +1834,6 @@ const AdvanceKendoTable = ({
         openSaveDialogeBox={openSaveDialogeBox}
         closeSaveDialogeBox={closeSaveDialogeBox}
         saveConfirmation={saveConfirmation}
-      />
-      {/* Approve Dialog */}
-      <ApproveDialog
-        open={openApproveDialogeBox}
-        onClose={closeApproveDialogeBox}
-        onApprove={(selectedIds) => {
-          console.log('Approved entries:', selectedIds)
-          // TODO: Implement approve logic here
-          // You can call an API or update state based on selectedIds
-        }}
-        entries={rows.map((row) => ({
-          id: row.id,
-          label: labelField
-            ? row[labelField]
-            : row.name || row.title || row.particulates || `Row ${row.id}`,
-          description: row.description || row.remarks || '',
-        }))}
       />
     </div>
   )

@@ -7,6 +7,7 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { convertFromKBPSD, convertToKBPSD } from './uomConversionUtils'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import ApproveDialog from '../../TcsInput/workflow/ApproveDialog'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -50,6 +51,30 @@ const UnitCapacityGrid = ({
   const [currentRowId, setCurrentRowId] = useState(null)
   const [loadingUOM, setLoadingUOM] = useState(false)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
+
+  const [openApproveDialogeBox, setOpenApproveDialogeBox] = useState(false)
+  // Approve Dialog handlers
+  const closeApproveDialogeBox = () => setOpenApproveDialogeBox(false)
+  const handleApprove = (plantId, remark) => {
+    console.log('Approved plantId:', plantId, 'Remark:', remark)
+    // TODO: Call API to approve the plant
+    setSnackbarData({
+      message: `Plant ${plantId} approved successfully`,
+      severity: 'success',
+    })
+    setSnackbarOpen(true)
+    closeApproveDialogeBox()
+  }
+  const handleReject = (plantId, remark) => {
+    console.log('Rejected plantId:', plantId, 'Remark:', remark)
+    // TODO: Call API to reject the plant
+    setSnackbarData({
+      message: `Plant ${plantId} rejected`,
+      severity: 'error',
+    })
+    setSnackbarOpen(true)
+    closeApproveDialogeBox()
+  }
 
   // Fetch UOM options for this capacity type
   const fetchUOMOptions = useCallback(async () => {
@@ -109,6 +134,10 @@ const UnitCapacityGrid = ({
 
         let transformedData = []
         if (response?.results && Array.isArray(response.results)) {
+          // Create a map of particulates to plantId
+          const particulatesMap = new Map()
+          let plantIdCounter = 1
+
           transformedData = response.results.map((item, index) => {
             // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
             const months = [
@@ -135,12 +164,27 @@ const UnitCapacityGrid = ({
               }
             })
 
+            let plantId = item.plantId
+
+            // If no plantId exists, use particulates field to determine plantId
+            if (!plantId && item.particulates) {
+              if (!particulatesMap.has(item.particulates)) {
+                particulatesMap.set(item.particulates, plantIdCounter++)
+              }
+              plantId = particulatesMap.get(item.particulates)
+            } else if (!plantId) {
+              // Fallback if neither plantId nor particulates exists
+              plantId = new Date().getTime() + index
+            }
+
             return {
               id: item.id || `row_${index}`,
               particulates: item.particulates,
               ...monthData,
               remark: item.remark,
               insertedDateTime: item.insertedDateTime,
+              plantId: plantId,
+              plantName: item.plantName || item.particulates,
               inEdit: false,
               isEditable: false,
             }
@@ -383,8 +427,21 @@ const UnitCapacityGrid = ({
           selectedDropdownValue={selectedDropdown}
           setSelectedDropdownValue={setSelectedDropdown}
           readonly={true}
+          onApproveClick={() => setOpenApproveDialogeBox(true)}
         />
       </Stack>
+      {/* Approve Dialog */}
+      <ApproveDialog
+        open={openApproveDialogeBox}
+        onClose={closeApproveDialogeBox}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        entries={rows.map((row) => ({
+          id: row.id,
+          plantId: row.plantId,
+          plantName: row.plantName,
+        }))}
+      />
     </Box>
   )
 }

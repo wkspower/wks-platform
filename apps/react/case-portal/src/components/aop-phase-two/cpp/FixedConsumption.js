@@ -49,7 +49,7 @@ const FixedConsumption = () => {
     {
       field: 'plant',
       title: 'Plant',
-      width: 150,
+      widthT: 150,
       type: 'text',
       editable: false,
       hidden: false,
@@ -57,7 +57,7 @@ const FixedConsumption = () => {
     {
       field: 'plantId',
       title: 'Plant ID',
-      width: 120,
+      widthT: 120,
       type: 'text',
       editable: false,
       hidden: false,
@@ -88,7 +88,7 @@ const FixedConsumption = () => {
     {
       field: 'cppUtilityId',
       title: 'CPP Utility IDs',
-      widthT: 105,
+      widthT: 120,
       type: 'text',
       editable: false,
     },
@@ -102,7 +102,7 @@ const FixedConsumption = () => {
     {
       field: 'cppPlantId',
       title: 'CPP Plant ID',
-      width: 120,
+      widthT: 120,
       type: 'text',
       editable: false,
     },
@@ -237,7 +237,7 @@ const FixedConsumption = () => {
     {
       field: 'remarks',
       title: 'Remarks',
-      width: 250,
+      widthT: 250,
       type: 'textarea',
       editable: true,
       minWidth: 250,
@@ -537,6 +537,7 @@ const FixedConsumption = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        customHeight={80}
         groupBy='plant'
         // groupBy={['plant', 'plantId']}
       />
