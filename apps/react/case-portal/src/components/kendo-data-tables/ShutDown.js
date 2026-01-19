@@ -291,7 +291,7 @@ const ShutDown = ({ permissions }) => {
       if (
         lowerVertName == 'meg' ||
         lowerVertName == 'elastomer' ||
-        // lowerVertName == 'vcm' ||
+        lowerVertName == 'vcm' ||
         lowerVertName == 'pvc' ||
         lowerVertName == 'pta' ||
         lowerVertName == 'pe' ||
@@ -361,7 +361,7 @@ const ShutDown = ({ permissions }) => {
 
         if (
           lowerVertName != 'elastomer' &&
-          lowerVertName != 'vcm' &&
+          // lowerVertName != 'vcm' &&
           lowerVertName != 'pvc'
         ) {
           for (let i = 0; i < rows.length; i++) {

@@ -114,6 +114,7 @@ const NormalOpNormsScreen = () => {
         id: `${index}`,
         originalRemark: item.remarks,
         Particulars: item.normParameterTypeDisplayName,
+        isEditable: isPEPP ? false : true,
       }))
 
       setRows(formattedData)
@@ -578,7 +579,7 @@ const NormalOpNormsScreen = () => {
       editButton: false,
       showUnit: false,
       saveWithRemark: true,
-      saveBtn: true,
+      saveBtn: isPEPP ? false : true,
       showCalculate: true,
       downloadExcelBtnFromUI: false,
       showCheckbox: false,
@@ -591,7 +592,7 @@ const NormalOpNormsScreen = () => {
       titleName:
         !isPEPP || !isPET ? SCREEN_NAME : 'Steady State Consumption (Norm)',
       downloadExcelBtn: true,
-      uploadExcelBtn: true,
+      uploadExcelBtn: isPEPP ? false : true,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
     },
     isOldYear,
