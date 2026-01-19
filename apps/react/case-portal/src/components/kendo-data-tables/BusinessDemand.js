@@ -75,6 +75,9 @@ const BusinessDemand = ({ permissions }) => {
 
   const fetchData = async () => {
     if (!PLANT_ID || !SITE_ID || !VERTICAL_ID || !AOP_YEAR) return
+
+    setModifiedCells({})
+
     setLoading(true)
     try {
       var data = await BusinessDemandDataApiService.getBDData(

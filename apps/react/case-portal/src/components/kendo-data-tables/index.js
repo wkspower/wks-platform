@@ -186,9 +186,11 @@ const KendoDataTables = ({
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
 
-  const { verticalChange, oldYear, year } = dataGridStore
+  const { verticalChange, oldYear, year, plantObject } = dataGridStore
   const IS_OLD_YEAR = oldYear?.oldYear
   const AOP_YEAR = year?.selectedYear
+  const PLANT_ID = plantObject?.id
+
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const vertName = verticalChange?.selectedVertical
@@ -1126,6 +1128,10 @@ const KendoDataTables = ({
   useEffect(() => {
     setSelectedGrade(null)
   }, [plantID])
+
+  useEffect(() => {
+    setEdit({})
+  }, [PLANT_ID, AOP_YEAR])
 
   useEffect(() => {
     if (
