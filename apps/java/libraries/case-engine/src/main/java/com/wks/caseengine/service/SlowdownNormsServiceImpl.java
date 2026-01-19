@@ -619,7 +619,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
 		
 		try {
-			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
 				UUID grade=null;
 				if(gradeId!=null) {
 					 grade=UUID.fromString(gradeId);
