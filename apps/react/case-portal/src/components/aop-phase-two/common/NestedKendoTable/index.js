@@ -800,7 +800,7 @@ const NestedKendoTable = ({
   // Render columns recursively with nested support
   const renderColumns = (cols, filter, sort) =>
     cols.map((col, idx) => {
-      const isEditable = col.editable === true
+      const isEditable = !READ_ONLY && col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
       const headerColorClass = undefined
@@ -831,7 +831,7 @@ const NestedKendoTable = ({
             title={col.title || col.headerName}
             hidden={col.hidden}
             className={
-              !col.editable ? 'k-number-right-disabled' : 'k-number-right'
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
             }
             editable={col?.editable ? true : false}
             headerClassName={isActive ? 'active-column' : ''}
@@ -873,7 +873,7 @@ const NestedKendoTable = ({
             hidden={col.hidden}
             editable={col?.editable ? true : false}
             className={
-              !col?.editable ? 'k-number-right-disabled' : 'k-number-right'
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
             }
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
@@ -947,10 +947,11 @@ const NestedKendoTable = ({
               data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  onRemarkClick={handleRemarkCellClick}
+                  onRemarkClick={isEditable ? handleRemarkCellClick : () => {}}
                 />
               ),
             }}
+            className={!isEditable ? 'non-editable-cell' : undefined}
             columnMenu={ColumnMenuCheckboxFilter}
             headerClassName={isActive ? 'active-column' : ''}
           />
@@ -1057,6 +1058,7 @@ const NestedKendoTable = ({
                 variant='contained'
                 onClick={handleCalculateBtn}
                 className='btn-save'
+                disabled={isButtonDisabled || READ_ONLY}
                 // className='custom-btn-calculate'
               >
                 Calculate
@@ -1067,7 +1069,7 @@ const NestedKendoTable = ({
               <Button
                 variant='contained'
                 onClick={saveModalOpen}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
                 // className='custom-btn-save'
               >
