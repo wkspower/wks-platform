@@ -1010,7 +1010,7 @@ const AdvanceKendoTable = ({
 
   const renderColumns = (cols, filter, sort) =>
     cols.map((col, idx) => {
-      const isEditable = col.editable === true
+      const isEditable = !READ_ONLY && col.editable === true
       const isActive = isColumnActive(col.field, filter, sort)
 
       const headerColorClass = undefined
@@ -1035,11 +1035,12 @@ const AdvanceKendoTable = ({
             field={col.field}
             title={col.title || col.headerName}
             width={setWidth(col?.minWidth || 120)}
+            className={!isEditable ? 'non-editable-cell' : undefined}
             cells={{
               data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  onRemarkClick={handleRemarkCellClick}
+                  onRemarkClick={isEditable ? handleRemarkCellClick : () => {}}
                 />
               ),
             }}
@@ -1065,11 +1066,12 @@ const AdvanceKendoTable = ({
             field={col.field}
             title={col.title || col.headerName}
             width={setWidth(col?.minWidth || 120)}
+            className={!isEditable ? 'non-editable-cell' : undefined}
             cells={{
               data: (cellProps) => (
                 <RemarkCell
                   {...cellProps}
-                  onRemarkClick={handleRemarkCellClick}
+                  onRemarkClick={isEditable ? handleRemarkCellClick : () => {}}
                 />
               ),
             }}
@@ -1233,7 +1235,7 @@ const AdvanceKendoTable = ({
             hidden={col.hidden}
             editable={col?.editable ? true : false}
             className={
-              !col?.editable ? 'k-number-right-disabled' : 'k-number-right'
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
             }
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
@@ -1286,7 +1288,7 @@ const AdvanceKendoTable = ({
             hidden={col.hidden}
             editable={col?.editable ? true : false}
             className={
-              !col?.editable ? 'k-number-right-disabled' : 'k-number-right'
+              !isEditable ? 'k-number-right-disabled' : 'k-number-right'
             }
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
@@ -1333,7 +1335,7 @@ const AdvanceKendoTable = ({
             title={col.title || col.headerName}
             hidden={col.hidden}
             editable={col?.editable ? true : false}
-            className={!col?.editable ? 'k-right-disabled' : undefined}
+            className={!isEditable ? 'k-right-disabled' : undefined}
             headerClassName={`${isActive ? 'active-column' : ''} ${headerColorClass}`}
             cells={{
               edit: { text: TextCellEditorUpdated },
@@ -1620,7 +1622,7 @@ const AdvanceKendoTable = ({
                 // className='custom-btn-additem'
                 className='btn-save'
                 onClick={handleAddRow}
-                disabled={false}
+                disabled={isButtonDisabled || READ_ONLY}
               >
                 Add Item
               </Button>
@@ -1629,7 +1631,7 @@ const AdvanceKendoTable = ({
               <Button
                 variant='contained'
                 onClick={saveModalOpen}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
                 // className='custom-btn-save'
               >
@@ -1641,7 +1643,7 @@ const AdvanceKendoTable = ({
               <Button
                 variant='contained'
                 onClick={handleCalculateBtn}
-                disabled={isButtonDisabled}
+                disabled={isButtonDisabled || READ_ONLY}
                 className='btn-save'
                 // className='custom-btn-calculate'
               >
@@ -1666,7 +1668,7 @@ const AdvanceKendoTable = ({
                 variant='contained'
                 className='btn-save'
                 onClick={excelExport}
-                disabled={READ_ONLY || rows?.length === 0}
+                disabled={rows?.length === 0}
                 // className='custom-btn-export'
               >
                 Export
@@ -1698,6 +1700,7 @@ const AdvanceKendoTable = ({
             {permissions?.showFinalSubmit && (
               <Button
                 variant='contained'
+                disabled={isButtonDisabled || READ_ONLY}
                 // className='custom-btn-submit'
                 className='btn-save'
               >
