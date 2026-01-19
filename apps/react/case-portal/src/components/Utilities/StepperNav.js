@@ -138,6 +138,11 @@ export default function StepperNav() {
         '& .MuiStepConnector-alternativeLabel': {
           top: '16px',
         },
+        '& .MuiStepIcon-root': {
+          zIndex: 1,
+          backgroundColor: '#fff',
+          borderRadius: '50%',
+        },
       }}
     >
       {steps.map((step) => {
