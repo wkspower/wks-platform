@@ -1,22 +1,33 @@
 package com.wks.caseengine.cpp.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateLookupDTO;
 import com.wks.caseengine.cpp.dto.heatrate.HeatRateDTO;
-import com.wks.caseengine.cpp.dto.heatrate.HeatRateDropDownProjection;
-import com.wks.caseengine.cpp.dto.heatrate.HeatRateProjection;
 import com.wks.caseengine.cpp.dto.heatrate.STGExtractionLookupDTO;
 import com.wks.caseengine.cpp.entity.HRSGHeatRateLookup;
 import com.wks.caseengine.cpp.entity.STGExtractionLookup;
 import com.wks.caseengine.cpp.repository.HRSGHeatRateLookupRepository;
 import com.wks.caseengine.cpp.repository.HeatRateRepository;
 import com.wks.caseengine.cpp.repository.STGExtractionLookupRepository;
+import com.wks.caseengine.utility.Utility;
 
 
 @Service
@@ -129,6 +140,8 @@ public class HeatRateService {
 
     public void updateHeatRate(List<HeatRateDTO> heatRateDTOs) {
        
+        System.out.println("Updating Heat Rate");
+        System.out.println("Heat Rate DTOs: " + heatRateDTOs);
         List<Object[]> updates = new ArrayList<>();
         for(HeatRateDTO heatRateDTO : heatRateDTOs) {
             updates.add(new Object[] { heatRateDTO.getGtLoad(), heatRateDTO.getHeatRate(), heatRateDTO.getFreeSteamFactor(), heatRateDTO.getRemarks(), heatRateDTO.getId() });
@@ -159,6 +172,351 @@ public void updateSTGExtraction(List<STGExtractionLookupDTO> stgExtractionLookup
     if(updates.size() > 0) {
         String sql = "update STGExtractionLookup set LoadMW = ?, SVHInletTPH = ?, SMBleedFlowTPH = ?, SLExtFlowTPH = ?, CondensingLoadM3Hr = ?, HeatRateKcalKWH = ?, Remarks = ? where Id = ?";
         jdbcTemplate.batchUpdate(sql, updates);
+    }
+}
+
+// ============================================================
+// EXPORT METHODS
+// ============================================================
+
+/**
+ * Export HRSG Heat Rate Lookup data to Excel
+ */
+public byte[] exportHRSGHeatRateLookup() throws IOException {
+    List<HRSGHeatRateLookupDTO> data = getHRSGHeatRateLookup();
+    
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("HRSG Heat Rate Lookup");
+    CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+    
+    int rowNum = 0;
+    
+    // Create header row
+    Row headerRow = sheet.createRow(rowNum++);
+    String[] headers = {"Equipment Type", "CPP Utility", "HRSG Load", "Heat Rate", "Remarks", "Id"};
+    for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerStyle);
+    }
+    
+    // Hide ID column (index 5)
+    sheet.setColumnHidden(5, true);
+    
+    // Create data rows
+    for (HRSGHeatRateLookupDTO dto : data) {
+        Row row = sheet.createRow(rowNum++);
+        int colNum = 0;
+        
+        row.createCell(colNum++).setCellValue(dto.getEquipmentName() != null ? dto.getEquipmentName() : "");
+        row.createCell(colNum++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+        row.createCell(colNum++).setCellValue(dto.getHrsgLoad() != null ? dto.getHrsgLoad().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getHeatRate() != null ? dto.getHeatRate().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        row.createCell(colNum++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+    }
+    
+    // Auto-size columns
+    for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
+    }
+    
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    workbook.write(outputStream);
+    workbook.close();
+    
+    return outputStream.toByteArray();
+}
+
+/**
+ * Export STG Extraction Lookup data to Excel
+ */
+public byte[] exportSTGExtractionLookup() throws IOException {
+    List<STGExtractionLookupDTO> data = getSTGExtractionLookup();
+    
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("STG Extraction Lookup");
+    CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+    
+    int rowNum = 0;
+    
+    // Create header row
+    Row headerRow = sheet.createRow(rowNum++);
+    String[] headers = {"Load (MW)", "SVH Inlet (TPH)", "SM Bleed Flow (TPH)", "SL Ext Flow (TPH)", 
+                       "Condensing Load (M3/Hr)", "Heat Rate (Kcal/KWH)", "Remarks", "Id"};
+    for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerStyle);
+    }
+    
+    // Hide ID column (index 7)
+    sheet.setColumnHidden(7, true);
+    
+    // Create data rows
+    for (STGExtractionLookupDTO dto : data) {
+        Row row = sheet.createRow(rowNum++);
+        int colNum = 0;
+        
+        row.createCell(colNum++).setCellValue(dto.getLoadMW() != null ? dto.getLoadMW().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getSvhInletTPH() != null ? dto.getSvhInletTPH().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getSmBleedFlowTPH() != null ? dto.getSmBleedFlowTPH().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getSlExtFlowTPH() != null ? dto.getSlExtFlowTPH().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getCondensingLoadM3Hr() != null ? dto.getCondensingLoadM3Hr().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getHeatRateKcalKWH() != null ? dto.getHeatRateKcalKWH().doubleValue() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        row.createCell(colNum++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+    }
+    
+    // Auto-size columns
+    for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
+    }
+    
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    workbook.write(outputStream);
+    workbook.close();
+    
+    return outputStream.toByteArray();
+}
+
+/**
+ * Export Heat Rate data to Excel for a specific asset
+ */
+public byte[] exportHeatRate(String assetId) throws IOException {
+    List<HeatRateDTO> data = getHeatRateByAssetId(assetId);
+    
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("Heat Rate");
+    CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+    
+    int rowNum = 0;
+    
+    // Create header row
+    Row headerRow = sheet.createRow(rowNum++);
+    String[] headers = {"Equipment Type", "CPP Utility", "GT Load", "Heat Rate", "Free Steam Factor", "Remarks", "Id"};
+    for (int i = 0; i < headers.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(headers[i]);
+        cell.setCellStyle(headerStyle);
+    }
+    
+    // Hide ID column (index 6)
+    sheet.setColumnHidden(6, true);
+    
+    // Create data rows
+    for (HeatRateDTO dto : data) {
+        Row row = sheet.createRow(rowNum++);
+        int colNum = 0;
+        
+        row.createCell(colNum++).setCellValue(dto.getEquipType() != null ? dto.getEquipType() : "");
+        row.createCell(colNum++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+        row.createCell(colNum++).setCellValue(dto.getGtLoad() != null ? dto.getGtLoad() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getHeatRate() != null ? dto.getHeatRate() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getFreeSteamFactor() != null ? dto.getFreeSteamFactor() : 0.0);
+        row.createCell(colNum++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        row.createCell(colNum++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+    }
+    
+    // Auto-size columns
+    for (int i = 0; i < headers.length; i++) {
+        sheet.autoSizeColumn(i);
+    }
+    
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    workbook.write(outputStream);
+    workbook.close();
+    
+    return outputStream.toByteArray();
+}
+
+// ============================================================
+// IMPORT METHODS
+// ============================================================
+
+/**
+ * Import HRSG Heat Rate Lookup data from Excel
+ */
+public void importHRSGHeatRateLookup(MultipartFile file) throws IOException {
+
+   
+    
+    List<HRSGHeatRateLookupDTO> dtos = new ArrayList<>();
+    
+    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        
+        // Start from row 1 (skip header row 0)
+        for (int i = 1; i <= totalRows; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) continue;
+            
+            HRSGHeatRateLookupDTO dto = new HRSGHeatRateLookupDTO();
+            
+            // Read ID from hidden column (index 5)
+            String idStr = getCellValueAsString(row, 5);
+            if (idStr != null && !idStr.isEmpty()) {
+                dto.setId(UUID.fromString(idStr));
+            }
+            
+            dto.setEquipmentName(getCellValueAsString(row, 0));
+            dto.setCppUtility(getCellValueAsString(row, 1));
+            dto.setHrsgLoad(getCellValueAsBigDecimal(row, 2));
+            dto.setHeatRate(getCellValueAsBigDecimal(row, 3));
+            dto.setRemarks(getCellValueAsString(row, 4));
+            
+            dtos.add(dto);
+        }
+    }
+    
+    if (!dtos.isEmpty()) {
+        updateHRSGHeatRate(dtos);
+    }
+}
+
+/**
+ * Import STG Extraction Lookup data from Excel
+ */
+public void importSTGExtractionLookup(MultipartFile file) throws IOException {
+    List<STGExtractionLookupDTO> dtos = new ArrayList<>();
+    
+    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        
+        // Start from row 1 (skip header row 0)
+        for (int i = 1; i <= totalRows; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) continue;
+            
+            STGExtractionLookupDTO dto = new STGExtractionLookupDTO();
+            
+            // Read ID from hidden column (index 7)
+            String idStr = getCellValueAsString(row, 7);
+            if (idStr != null && !idStr.isEmpty()) {
+                dto.setId(UUID.fromString(idStr));
+            }
+            
+            dto.setLoadMW(getCellValueAsBigDecimal(row, 0));
+            dto.setSvhInletTPH(getCellValueAsBigDecimal(row, 1));
+            dto.setSmBleedFlowTPH(getCellValueAsBigDecimal(row, 2));
+            dto.setSlExtFlowTPH(getCellValueAsBigDecimal(row, 3));
+            dto.setCondensingLoadM3Hr(getCellValueAsBigDecimal(row, 4));
+            dto.setHeatRateKcalKWH(getCellValueAsBigDecimal(row, 5));
+            dto.setRemarks(getCellValueAsString(row, 6));
+            
+            dtos.add(dto);
+        }
+    }
+    
+    if (!dtos.isEmpty()) {
+        updateSTGExtraction(dtos);
+    }
+}
+
+/**
+ * Import Heat Rate data from Excel
+ */
+public void importHeatRate(MultipartFile file) throws IOException {
+
+    System.out.println("Importing Heat Rate");
+    List<HeatRateDTO> dtos = new ArrayList<>();
+    
+    try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        Sheet sheet = workbook.getSheetAt(0);
+        int totalRows = sheet.getLastRowNum();
+        
+        // Start from row 1 (skip header row 0)
+        for (int i = 1; i <= totalRows; i++) {
+            Row row = sheet.getRow(i);
+            if (row == null) continue;
+            
+            HeatRateDTO dto = new HeatRateDTO();
+            
+            // Read ID from hidden column (index 6)
+            String idStr = getCellValueAsString(row, 6);
+            if (idStr != null && !idStr.isEmpty()) {
+                dto.setId(UUID.fromString(idStr));
+            }
+            
+            dto.setEquipType(getCellValueAsString(row, 0));
+            dto.setCppUtility(getCellValueAsString(row, 1));
+            dto.setGtLoad(getCellValueAsDouble(row, 2));
+            dto.setHeatRate(getCellValueAsDouble(row, 3));
+            dto.setFreeSteamFactor(getCellValueAsDouble(row, 4));
+            dto.setRemarks(getCellValueAsString(row, 5));
+            
+            dtos.add(dto);
+        }
+    }
+    
+    if (!dtos.isEmpty()) {
+        updateHeatRate(dtos);
+    }
+}
+
+// ============================================================
+// HELPER METHODS
+// ============================================================
+
+private String getCellValueAsString(Row row, int cellIndex) {
+    if (row.getCell(cellIndex) == null) {
+        return null;
+    }
+    
+    try {
+        DataFormatter formatter = new DataFormatter();
+        String value = formatter.formatCellValue(row.getCell(cellIndex));
+        return value != null && !value.trim().isEmpty() ? value.trim() : null;
+    } catch (Exception e) {
+        return null;
+    }
+}
+
+private BigDecimal getCellValueAsBigDecimal(Row row, int cellIndex) {
+    if (row.getCell(cellIndex) == null) {
+        return null;
+    }
+    
+    try {
+        switch (row.getCell(cellIndex).getCellType()) {
+            case NUMERIC:
+                return BigDecimal.valueOf(row.getCell(cellIndex).getNumericCellValue());
+            case STRING:
+                String strValue = row.getCell(cellIndex).getStringCellValue().trim();
+                if (strValue.isEmpty()) {
+                    return null;
+                }
+                return new BigDecimal(strValue);
+            default:
+                return null;
+        }
+    } catch (Exception e) {
+        return null;
+    }
+}
+
+private Double getCellValueAsDouble(Row row, int cellIndex) {
+    if (row.getCell(cellIndex) == null) {
+        return null;
+    }
+    
+    try {
+        switch (row.getCell(cellIndex).getCellType()) {
+            case NUMERIC:
+                return row.getCell(cellIndex).getNumericCellValue();
+            case STRING:
+                String strValue = row.getCell(cellIndex).getStringCellValue().trim();
+                if (strValue.isEmpty()) {
+                    return null;
+                }
+                return Double.parseDouble(strValue);
+            default:
+                return null;
+        }
+    } catch (Exception e) {
+        return null;
     }
 }
 }
