@@ -110,8 +110,6 @@ Verticals vertical = null;
                 capacityType
                // uom
             );  
-
-                System.out.println("getData fetched successfully");
             
         //    for(Object[] row : results) {
         // System.out.println("row1: " + row[0].toString());
@@ -126,14 +124,26 @@ Verticals vertical = null;
 
             List<TCSUnitCapacityDTO> resultsList = new ArrayList<>();
             for (Object[] row : results) {
+
+
                 TCSUnitCapacityDTO dto = new TCSUnitCapacityDTO();
                 dto.setId(row[0] != null ? row[0].toString() : null);
                 dto.setParticulates(row[1] != null ? row[1].toString() : null);
+                dto.setApr(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
+                dto.setMay(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
+                dto.setJun(row[4] != null ? Double.parseDouble(row[4].toString()) : null);
+                dto.setJul(row[5] != null ? Double.parseDouble(row[5].toString()) : null);
+                dto.setAug(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
+                dto.setSep(row[7] != null ? Double.parseDouble(row[7].toString()) : null);
+                dto.setOct(row[8] != null ? Double.parseDouble(row[8].toString()) : null);
+                dto.setNov(row[9] != null ? Double.parseDouble(row[9].toString()) : null);
+                dto.setDec(row[10] != null ? Double.parseDouble(row[10].toString()) : null);
+                dto.setJan(row[11] != null ? Double.parseDouble(row[11].toString()) : null);
+                dto.setFeb(row[12] != null ? Double.parseDouble(row[12].toString()) : null);
+                dto.setMar(row[13] != null ? Double.parseDouble(row[13].toString()) : null);
              //   dto.setUom(row[2] != null ? row[2].toString() : null);
-                dto.setSummer(row[2] != null ? Double.parseDouble(row[2].toString()) : null);
-                dto.setWinter(row[3] != null ? Double.parseDouble(row[3].toString()) : null);
-                dto.setRemark(row[4] != null ? row[4].toString() : null);
-                dto.setInsertedDateTime(row[5] != null ? dateFormatter.parse(row[5].toString()) : null);
+                dto.setRemark(row[14] != null ? row[14].toString() : null);
+                dto.setInsertedDateTime(row[15] != null ? dateFormatter.parse(row[15].toString()) : null);
                 resultsList.add(dto);
             }
             map.put("results", resultsList);
@@ -328,8 +338,18 @@ Verticals vertical = null;
                 }
                 entity.setCapacityType(capacityType);
             //    entity.setUom(dto.getUom());
-                entity.setSummer(dto.getSummer());
-                entity.setWinter(dto.getWinter());
+                  entity.setApr(dto.getApr());
+                  entity.setMay(dto.getMay());
+                  entity.setJun(dto.getJun());
+                  entity.setJul(dto.getJul());
+                  entity.setAug(dto.getAug());
+                  entity.setSep(dto.getSep());
+                  entity.setOct(dto.getOct());
+                  entity.setNov(dto.getNov());
+                  entity.setDec(dto.getDec());
+                  entity.setJan(dto.getJan());
+                  entity.setFeb(dto.getFeb());
+                  entity.setMar(dto.getMar());
                 entity.setRemark(dto.getRemark());
                 entity.setAopYear(year);
                 entity.setPlantFkId(UUID.fromString(plantId));
@@ -355,8 +375,18 @@ Verticals vertical = null;
         return TCSUnitCapacityDTO.builder()
             .id(entity.getId() != null ? entity.getId().toString() : null)
           //  .uom(entity.getUom())
-            .summer(entity.getSummer())
-            .winter(entity.getWinter())
+                .apr(entity.getApr())
+                .may(entity.getMay())
+                .jun(entity.getJun())
+                .jul(entity.getJul())
+                .aug(entity.getAug())
+                .sep(entity.getSep())
+                .oct(entity.getOct())
+                .nov(entity.getNov())
+                .dec(entity.getDec())
+                .jan(entity.getJan())
+                .feb(entity.getFeb())
+                .mar(entity.getMar())
             .remark(entity.getRemark())
             .build();
     }
