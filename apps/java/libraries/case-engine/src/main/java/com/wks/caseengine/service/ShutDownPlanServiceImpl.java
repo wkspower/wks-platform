@@ -944,7 +944,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                            dto.setSaveStatus("Failed");
 	                            dto.setErrDescription("End date/time cannot be before start date/time.");
 	                            alreadyFailed = true;
-	                        } else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
+	                        } else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth() && !vertical.getName().equalsIgnoreCase("VCM")) {
 	                            dto.setSaveStatus("Failed");
 	                            dto.setErrDescription("Start and end date/time must belong to the same month.");
 	                            alreadyFailed = true;
