@@ -373,7 +373,21 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 		
 	    Map<String, String> gradeMap = getGradeNameIdMap(year, plantFKId);
+	    Set<Integer> activeMonths = new HashSet<>();
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	    	for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+	            Sheet sheet = workbook.getSheetAt(i);
+	            if (sheet == null) {
+	                continue;
+	            }
+	            String sheetName = sheet.getSheetName();
+	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
+	            List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown",year,gradeId);
+                List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown",year,gradeId);
+                
+                if (shutdown != null) activeMonths.addAll(shutdown);
+                if (slowdown != null) activeMonths.addAll(slowdown);
+	    	}
 	        
 	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
 	            Sheet sheet = workbook.getSheetAt(i);
@@ -394,11 +408,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    continue; 
 	                }
 	                
-	                List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown",year,gradeId);
-	                List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown",year,gradeId);
-	                Set<Integer> activeMonths = new HashSet<>();
-	                if (shutdown != null) activeMonths.addAll(shutdown);
-	                if (slowdown != null) activeMonths.addAll(slowdown);
+	                
 	                ShutdownNormsValueDTO dto = new ShutdownNormsValueDTO();
 	                try {
 	                    dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
