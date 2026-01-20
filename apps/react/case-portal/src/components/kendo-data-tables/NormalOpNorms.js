@@ -114,9 +114,7 @@ const NormalOpNormsScreen = () => {
         id: `${index}`,
         originalRemark: item.remarks,
         Particulars: item.normParameterTypeDisplayName,
-        isEditable: isPEPP
-          ? item.normParameterTypeName === 'CatChem'
-          : true,
+        isEditable: isPEPP ? item.normParameterTypeName === 'CatChem' : true,
       }))
 
       setRows(formattedData)
