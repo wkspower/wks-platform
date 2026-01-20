@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class PlantContributionSummaryT17DTO {
-    private Object sno;
+    private Integer sno;
     private String id;
     private String material;
     private Double price;
@@ -32,7 +32,7 @@ public class PlantContributionSummaryT17DTO {
     private Double actualPrevYearRsMT;
     private Double proposedBudget;
     private Double proposedBudgetRsMT;
-    private Object plantFkId;
-    private Object aopYear;
+    private String plantFkId;
+    private String aopYear;
     private String remarks;
 }

@@ -3,6 +3,7 @@ package com.wks.caseengine.service;
 import java.util.List;
 
 import com.wks.caseengine.dto.PlantContributionSummaryDTO;
+import com.wks.caseengine.dto.PlantContributionSummaryT17DTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
 public interface AOPReportService {
@@ -14,6 +15,7 @@ public interface AOPReportService {
 	public AOPMessageVM getPlantContributionFiveYearSummaryReport( String reportType, String plantId, String year);
 	public AOPMessageVM getSpecificConsumptionNormsReport( String reportType, String plantId, String year);
 	public AOPMessageVM getSpecificConsumptionNormsT17Report(String reportType, String plantId, String year);
+	public AOPMessageVM updateSpecificConsumptionNormsT17Report(List<PlantContributionSummaryT17DTO> plantContributionSummaryT17DTOs, String plantId, String year);
 	public AOPMessageVM getGradewiseConsumptionNorms(String plantId, String year,String reportType);
 	public AOPMessageVM updatePlantContributionFiveYearSummaryReport( List<PlantContributionSummaryDTO> plantContributionSummaryDTO);
 }
