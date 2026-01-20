@@ -1494,7 +1494,7 @@ const KendoDataTables = ({
                       disableScrollLock: true,
                     },
                   }}
-                  disabled={rows?.length === 0}
+                  // disabled={rows?.length === 0}
                 >
                   <MenuItem value='' disabled>
                     Select UOM
