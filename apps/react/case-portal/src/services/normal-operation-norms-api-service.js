@@ -16,6 +16,7 @@ export const NormalOperationNormsApiService = {
   handleCalculateNormalOperationNorms,
   getNormalOpsNormsExcel,
   getNormalOpsNormsExcelpe,
+  saveShutdownNormsExcel,
   updateFinalNormsData,
   getfinalNorms,
   calculateFinalNorms,
@@ -408,6 +409,39 @@ async function saveNormalOpsNormsExcel(
 ) {
   let url = ''
   url = `${Config.CaseEngineUrl}/task/steady-state-norms-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  if (GRADE_ID) {
+    url += `&gradeId=${GRADE_ID}`
+  }
+
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveShutdownNormsExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  GRADE_ID,
+) {
+  let url = ''
+  url = `${Config.CaseEngineUrl}/task/shutdown-consumption-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
 
   if (GRADE_ID) {
     url += `&gradeId=${GRADE_ID}`

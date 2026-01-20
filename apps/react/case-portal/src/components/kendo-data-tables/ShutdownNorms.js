@@ -523,6 +523,11 @@ const ShutdownNorms = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
+
+  const handleExcelUpload = (rawFile) => {
+    saveExcelFile(rawFile)
+  }
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -547,6 +552,68 @@ const ShutdownNorms = () => {
       })
     } finally {
       setSnackbarOpen(true)
+    }
+  }
+
+  const saveExcelFile = async (rawFile) => {
+    setLoading(true)
+    try {
+      const response =
+        await NormalOperationNormsApiService.saveShutdownNormsExcel(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          gradeId,
+        )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchAllData(gradeId)
+      } else if (response?.code === 400 && response?.data) {
+        // Partial save, error file download
+        const byteCharacters = atob(response.data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File Steady state Norms.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
+      setLoading(false)
+    } finally {
+      // fetchData()
+      setLoading(false)
     }
   }
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -621,6 +688,7 @@ const ShutdownNorms = () => {
       downloadExcelBtnFromUI:
         IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
       downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
+      uploadExcelBtn: IS_PE_PP_VERTICAL ? true : false,
       showTitleNameBusiness: true,
 
       titleName:
@@ -681,6 +749,7 @@ const ShutdownNorms = () => {
         permissions={adjustedPermissions}
         handleGradeChange={handleGradeChange}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
+        handleExcelUpload={handleExcelUpload}
         calculatebtnClicked={calculatebtnClicked}
         plantID={plantID}
         grades={grades}
