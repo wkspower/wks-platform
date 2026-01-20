@@ -462,6 +462,14 @@ const SlowDown = ({ permissions }) => {
             if (field === 'productName1') displayField = 'Particulars'
             else if (field === 'monthly') displayField = 'Month'
             record.isError = true
+            setRows((prevRows) =>
+              prevRows.map((row) => {
+                if (row.id === record.id) {
+                  return { ...row, isError: true }
+                }
+                return row
+              }),
+            )
             setSnackbarOpen(true)
             setSnackbarData({
               message: `Required field "${displayField}" is missing for "${record.discription || 'this record'}".`,
@@ -475,6 +483,11 @@ const SlowDown = ({ permissions }) => {
       const validationMessage = validateFields(data, chosenFields)
       if (validationMessage) {
         data.forEach((r) => (r.isError = true))
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            data.some((d) => d.id === row.id) ? { ...row, isError: true } : row,
+          ),
+        )
         setSnackbarOpen(true)
         setSnackbarData({
           message: validationMessage,

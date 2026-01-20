@@ -688,7 +688,7 @@ const ShutdownNorms = () => {
       downloadExcelBtnFromUI:
         IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
       downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
-      uploadExcelBtn: IS_PE_PP_VERTICAL ? true : false,
+      uploadExcelBtn: IS_PE_NMD_LDPE || lowerVertName === 'pp' ? true : false,
       showTitleNameBusiness: true,
 
       titleName:

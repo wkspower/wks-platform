@@ -201,6 +201,14 @@ const ShutDown = ({ permissions }) => {
           if (!record[field] || record[field].trim() === '') {
             record.isError = true
             rowsWithErrors.add(record.id)
+            setRows((prevRows) =>
+              prevRows.map((row) => {
+                if (row.id === record.id) {
+                  return { ...row, isError: true }
+                }
+                return row
+              }),
+            )
             break // Exit inner loop once we find one missing field
           }
         }
@@ -212,6 +220,11 @@ const ShutDown = ({ permissions }) => {
         if (IS_PE_PP_VERTICAL && validationMessage.includes('Remark')) {
           message = 'Please update the field: Shutdown Basis'
         }
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            data.some((d) => d.id === row.id) ? { ...row, isError: true } : row,
+          ),
+        )
         setSnackbarOpen(true)
         setSnackbarData({
           message: message,
