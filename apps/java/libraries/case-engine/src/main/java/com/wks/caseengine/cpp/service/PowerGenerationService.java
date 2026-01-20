@@ -780,7 +780,7 @@ public class PowerGenerationService {
 
     public AOPMessageVM importPowerResponseExcel(UUID cppPlantId, String financialYear, MultipartFile file) {
         try {
-            List<AssetOperationalResponseDTO> data = readOperationalHoursExcel(file.getInputStream());
+            List<AssetOperationalResponseDTO> data = readOperationalHoursExcel(file.getInputStream(), financialYear);
             
             // Separate failed records from successful ones
             List<AssetOperationalResponseDTO> validRecords = new ArrayList<>();
@@ -834,7 +834,7 @@ public class PowerGenerationService {
 
     public AOPMessageVM importSteamResponseExcel(UUID cppPlantId, String financialYear, MultipartFile file) {
         try {
-            List<AssetOperationalResponseDTO> data = readOperationalHoursExcel(file.getInputStream());
+            List<AssetOperationalResponseDTO> data = readOperationalHoursExcel(file.getInputStream(), financialYear);
             System.out.println("steam import dataList: " + data);
             // Separate failed records from successful ones
             List<AssetOperationalResponseDTO> validRecords = new ArrayList<>();
@@ -886,8 +886,11 @@ public class PowerGenerationService {
         }
     }
 
-    private List<AssetOperationalResponseDTO> readOperationalHoursExcel(InputStream inputStream) {
+    private List<AssetOperationalResponseDTO> readOperationalHoursExcel(InputStream inputStream, String financialYear) {
         List<AssetOperationalResponseDTO> dataList = new ArrayList<>();
+
+        int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        int endYear = startYear + 1;
 
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
@@ -924,40 +927,40 @@ public class PowerGenerationService {
                     }
                     
                     // April
-                    dto.setApril(readMonthData(row, col));
+                    dto.setApril(readMonthData(row, col, startYear, 4));
                     col += 2;
                     // May
-                    dto.setMay(readMonthData(row, col));
+                    dto.setMay(readMonthData(row, col, startYear, 5));
                     col += 2;
                     // June
-                    dto.setJune(readMonthData(row, col));
+                    dto.setJune(readMonthData(row, col, startYear, 6));
                     col += 2;
                     // July
-                    dto.setJuly(readMonthData(row, col));
+                    dto.setJuly(readMonthData(row, col, startYear, 7));
                     col += 2;
                     // August
-                    dto.setAug(readMonthData(row, col));
+                    dto.setAug(readMonthData(row, col, startYear, 8));
                     col += 2;
                     // September
-                    dto.setSep(readMonthData(row, col));
+                    dto.setSep(readMonthData(row, col, startYear, 9));
                     col += 2;
                     // October
-                    dto.setOct(readMonthData(row, col));
+                    dto.setOct(readMonthData(row, col, startYear, 10));
                     col += 2;
                     // November
-                    dto.setNov(readMonthData(row, col));
+                    dto.setNov(readMonthData(row, col, startYear, 11));
                     col += 2;
                     // December
-                    dto.setDec(readMonthData(row, col));
+                    dto.setDec(readMonthData(row, col, startYear, 12));
                     col += 2;
                     // January
-                    dto.setJan(readMonthData(row, col));
+                    dto.setJan(readMonthData(row, col, endYear, 1));
                     col += 2;
                     // February
-                    dto.setFeb(readMonthData(row, col));
+                    dto.setFeb(readMonthData(row, col, endYear, 2));
                     col += 2;
                     // March
-                    dto.setMarch(readMonthData(row, col));
+                    dto.setMarch(readMonthData(row, col, endYear, 3));
                     col += 2;
                     
                     dto.setRemarks(getStringCellValue(row.getCell(col++)));
@@ -988,12 +991,38 @@ public class PowerGenerationService {
         return dataList;
     }
 
-    private MonthlyHoursDTO readMonthData(Row row, int startCol) {
+    private MonthlyHoursDTO readMonthData(Row row, int startCol, int year, int month) {
+
+
+        // private void validateMonthDTO(MonthlyHoursDTO dto, int year, int month, String assetName) {
+
+        // validateMonthDTO(dto.getApril(), startYear, 4, dto.getAssetName());
+
+        // int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        // int endYear = startYear + 1;
+
         Double shutdownHrs = getDoubleCellValue(row.getCell(startCol));
         Double operationalHrs = getDoubleCellValue(row.getCell(startCol + 1));
+
+    
+
+        YearMonth ym = YearMonth.of(year, month);
+        int totalHours = ym.lengthOfMonth() * 24;
+
         
         if (operationalHrs == null) operationalHrs = 0.0;
         if (shutdownHrs == null) shutdownHrs = 0.0;
+
+        if(shutdownHrs > totalHours) {  
+            throw new IllegalArgumentException(
+                String.format(
+                    "Shutdown hours cannot be greater than total hours for %d-%02d",
+                    year, month
+                )
+            );
+        }
+
+        operationalHrs = totalHours - shutdownHrs;
         
         return new MonthlyHoursDTO(operationalHrs, shutdownHrs);
     }

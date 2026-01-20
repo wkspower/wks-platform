@@ -16,10 +16,21 @@ public class TCSUnitCapacityDTO {
     private String particulates;
   //  private String uom;
  //   private Double value;
- private Double summer;
- private Double winter;
-    private String remark;
-    private Date insertedDateTime;
+  private Double apr;
+  private Double may;
+  private Double jun;
+  private Double jul;
+  private Double aug;
+  private Double sep;
+  private Double oct;
+  private Double nov;
+  private Double dec;
+  private Double jan;
+  private Double feb;
+  private Double mar;
+  
+  private String remark;
+  private Date insertedDateTime;
 }
 
 
