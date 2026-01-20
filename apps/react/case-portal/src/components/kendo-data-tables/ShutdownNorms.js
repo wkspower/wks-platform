@@ -8,6 +8,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { NormalOperationNormsApiService } from 'services/normal-operation-norms-api-service'
+import { DataService } from 'services/DataService'
 import { validateFields } from 'utils/validationUtils'
 import KendoDataTables from './index'
 import { ShutdownNormsApiService } from 'services/shutdown-norms-api-service'
@@ -69,7 +70,10 @@ const ShutdownNorms = () => {
 
   const IS_PE_PP_VERTICAL = ['pe', 'pp'].includes(lowerVertName)
   const IS_PET_VERTICAL = ['pet'].includes(lowerVertName)
-
+  const IS_PE_NMD_LDPE =
+    ['pe'].includes(lowerVertName) &&
+    ['nmd'].includes(SITE_NAME_LOWERCASE) &&
+    ['ldpe'].includes(PLANT_NAME_LOWERCASE)
   // const IS_PE_PP_VERTICAL_NMD_LLDPE =
   //   ['pe'].includes(lowerVertName) &&
   //   ['nmd'].includes(SITE_NAME_LOWERCASE) &&
@@ -162,21 +166,58 @@ const ShutdownNorms = () => {
         } else {
           await fetchData()
         }
-        let data
 
-        {
-          data = await ShutdownNormsApiService.getShutdownMonths(
+        // Fetch shutdown months
+        const shutdownMonthsRes =
+          await ShutdownNormsApiService.getShutdownMonths(
             keycloak,
             null,
             PLANT_ID,
             AOP_YEAR,
           )
-        }
-        setShutdownMonths(data)
 
-        // if (lowerVertName == 'cracker') {
-        //   setShutdownMonths([1])
-        // }
+        // Fetch grades for slowdown months
+        let slowdownMonthsRes = []
+        if (IS_PE_NMD_LDPE || lowerVertName === 'pp') {
+          const gradesRes =
+            await NormalOperationNormsApiService.getGradesForShutdownNorms(
+              keycloak,
+              PLANT_ID,
+              AOP_YEAR,
+            )
+          if (gradesRes?.code === 200 && Array.isArray(gradesRes.data)) {
+            for (const grade of gradesRes.data) {
+              const res = await DataService.getSlowdownMonths(
+                keycloak,
+                grade.id || grade.gradeId || null,
+                PLANT_ID,
+                AOP_YEAR,
+              )
+              if (Array.isArray(res)) {
+                slowdownMonthsRes = slowdownMonthsRes.concat(res)
+              }
+            }
+          }
+        } else {
+          const res = await DataService.getSlowdownMonths(
+            keycloak,
+            null,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+          if (Array.isArray(res)) {
+            slowdownMonthsRes = res
+          }
+        }
+
+        // Combine and deduplicate
+        const combinedMonths = [
+          ...(Array.isArray(shutdownMonthsRes) ? shutdownMonthsRes : []),
+          ...(Array.isArray(slowdownMonthsRes) ? slowdownMonthsRes : []),
+        ]
+        const distinctMonths = [...new Set(combinedMonths)]
+
+        setShutdownMonths(distinctMonths)
       } catch (error) {
         console.error('Error in loadData:', error)
       }

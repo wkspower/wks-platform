@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wks.caseengine.dto.PlantContributionSummaryDTO;
+import com.wks.caseengine.dto.PlantContributionSummaryT17DTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.service.AOPReportService;
 
@@ -59,6 +60,11 @@ public class AOPReportController {
 	@GetMapping(value="/specific-consumption-t17")
 	public AOPMessageVM getSpecificConsumptionNormsT17Report(@RequestParam(required=false) String reportType,@RequestParam String plantId,@RequestParam String year) {
 		return aopReportService.getSpecificConsumptionNormsT17Report(reportType,plantId,year);
+	}
+	
+	@PostMapping(value="/specific-consumption-t17")
+	public AOPMessageVM updateSpecificConsumptionNormsT17Report(@RequestBody List<PlantContributionSummaryT17DTO> plantContributionSummaryT17DTOs,@RequestParam String plantId,@RequestParam String year) {
+		return aopReportService.updateSpecificConsumptionNormsT17Report(plantContributionSummaryT17DTOs,plantId,year);
 	}
 	
 	@PostMapping(value="/report-plant-contribution-summary-yearly")
