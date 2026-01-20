@@ -236,17 +236,23 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
 						continue;
 					}
+					Optional<NormParameterType> normParameterType=normParameterTypeRepository.findById(normParametersOpt.get().getNormParameterTypeFkId());
+					if(normParameterType.isPresent() && !(normParameterType.get().getName().equalsIgnoreCase("CatChem"))) {
+						continue;
+					}
 					
-
 					for (int month = 1; month <= 12; month++) {
 						Double oldVal = getMonthlyValue(value, month);
 						Double newVal = getMonthlyValue(dto, month);
 
-						if(newVal != null && !Objects.equals(oldVal, newVal) && value.getRemarks().equals(dto.getRemarks())) {
-							dto.setErrDescription("Please add/update remark");
-							dto.setSaveStatus("Failed");
-							failedList.add(dto);
-							break;
+						if (newVal != null 
+						    && !Objects.equals(oldVal, newVal) 
+						    && Objects.equals(value.getRemarks(), dto.getRemarks())) {
+						    
+						    dto.setErrDescription("Please add/update remark");
+						    dto.setSaveStatus("Failed");
+						    failedList.add(dto);
+						    break;
 						}
 						if (newVal != null && !Objects.equals(oldVal, newVal)) {
 							NormsTransactions normsTransactions = new NormsTransactions();
@@ -330,7 +336,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				MCUNormsValueGrade mCUNormsValueGrade = new MCUNormsValueGrade();
 
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
-					if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+					if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")  || vertical.getName().equalsIgnoreCase("PET")) {
 
 						Optional<MCUNormsValueGrade> optionalNormsValue = mcuNormsValueGradeRepository
 								.findById(UUID.fromString(mCUNormsValueDTO.getId()));
@@ -339,6 +345,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							if(mCUNormsValueGrade.getMaterialFkId()!=null) {
 								Optional<NormParameters> normParametersOpt =normParametersRepository.findById(mCUNormsValueGrade.getMaterialFkId());
 								if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
+									continue;
+								}
+								Optional<NormParameterType> normParameterType=normParameterTypeRepository.findById(normParametersOpt.get().getNormParameterTypeFkId());
+								if(normParameterType.isPresent() && !(normParameterType.get().getName().equalsIgnoreCase("CatChem"))) {
 									continue;
 								}
 							}
@@ -474,11 +484,11 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							mCUNormsValueGrade.setModifiedOn(new Date());
 							mCUNormsValueGrade.setGradeFkId(UUID.fromString(mCUNormsValueDTO.getGradeId()));
 							System.out.println("Data Saved Succussfully" + mCUNormsValue);
-							if(changed && mCUNormsValueGrade.getRemarks().equals(mCUNormsValueDTO.getRemarks())) {
-								mCUNormsValueDTO.setErrDescription("Please add/update remark");
-								mCUNormsValueDTO.setSaveStatus("Failed");
-								failedList.add(mCUNormsValueDTO);
-								continue;
+							if (changed && Objects.equals(mCUNormsValueGrade.getRemarks(), mCUNormsValueDTO.getRemarks())) {
+							    mCUNormsValueDTO.setErrDescription("Please add/update remark");
+							    mCUNormsValueDTO.setSaveStatus("Failed");
+							    failedList.add(mCUNormsValueDTO);
+							    continue;
 							}
 							mCUNormsValueGrade.setRemarks(mCUNormsValueDTO.getRemarks());
 							mcuNormsValueGradeRepository.save(mCUNormsValueGrade);
@@ -508,9 +518,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							mCUNormsValue.setModifiedOn(new Date());
 							boolean changed = false;
 
-							
-
-							// January
 							double newJan = Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0);
 							double oldJan = Optional.ofNullable(mCUNormsValue.getJanuary()).orElse(0.0);
 							if (isDifferent(oldJan, newJan)) {
@@ -1076,28 +1083,47 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 
 	private static String getStringCellValue(Cell cell, MCUNormsValueDTO dto) {
 	    try {
-	        if (cell == null) return null;
 	        
-	        cell.setCellType(CellType.STRING);
-	        String value = cell.getStringCellValue().trim();
-	        return value.isEmpty() ? null : value;
+	        if (cell == null || cell.getCellType() == CellType.BLANK) {
+	            return null;
+	        }
+	        
+	        
+	        String value;
+	        if (cell.getCellType() == CellType.STRING) {
+	            value = cell.getStringCellValue();
+	        } else {
+	           
+	            cell.setCellType(CellType.STRING);
+	            value = cell.getStringCellValue();
+	        }
+
+	        
+	        if (value == null || value.trim().isEmpty()) {
+	            return null;
+	        }
+
+	        return value.trim();
 	        
 	    } catch (Exception e) {
 	        dto.setSaveStatus("Failed");
-	        dto.setErrDescription("Please enter correct values");
+	        dto.setErrDescription("Error reading string value");
 	        e.printStackTrace();
 	    }
 	    return null;
 	}
 	private static Double getNumericCellValue(Cell cell, MCUNormsValueDTO dto) {
+	    
 	    if (cell == null || cell.getCellType() == CellType.BLANK) {
 	        return null;
 	    }
 
+	   
 	    if (cell.getCellType() == CellType.NUMERIC) {
 	        return cell.getNumericCellValue();
 	    } 
 	    
+	   
 	    if (cell.getCellType() == CellType.STRING) {
 	        String cellValue = cell.getStringCellValue().trim();
 	        if (cellValue.isEmpty()) {
@@ -1108,12 +1134,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	            return Double.parseDouble(cellValue);
 	        } catch (NumberFormatException e) {
 	            dto.setSaveStatus("Failed");
-	            dto.setErrDescription("Please enter numeric values");
+	            dto.setErrDescription("Invalid number format: " + cellValue);
+	            return null;
 	        }
 	    }
-	    
 	    if (cell.getCellType() == CellType.FORMULA) {
 	        try {
+	           
 	            return cell.getNumericCellValue();
 	        } catch (Exception e) {
 	            return null;
