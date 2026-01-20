@@ -210,14 +210,25 @@ const ShutdownNorms = () => {
           }
         }
 
-        // Combine and deduplicate
-        const combinedMonths = [
-          ...(Array.isArray(shutdownMonthsRes) ? shutdownMonthsRes : []),
-          ...(Array.isArray(slowdownMonthsRes) ? slowdownMonthsRes : []),
-        ]
-        const distinctMonths = [...new Set(combinedMonths)]
+        const finalMonths =
+          IS_PE_PP_VERTICAL || IS_PE_NMD_LDPE || lowerVertName === 'pp'
+            ? [
+                ...new Set([
+                  ...(Array.isArray(shutdownMonthsRes)
+                    ? shutdownMonthsRes
+                    : []),
+                  ...(Array.isArray(slowdownMonthsRes)
+                    ? slowdownMonthsRes
+                    : []),
+                ]),
+              ]
+            : [
+                ...new Set(
+                  Array.isArray(shutdownMonthsRes) ? shutdownMonthsRes : [],
+                ),
+              ]
 
-        setShutdownMonths(distinctMonths)
+        setShutdownMonths(finalMonths)
       } catch (error) {
         console.error('Error in loadData:', error)
       }
@@ -542,6 +553,9 @@ const ShutdownNorms = () => {
           keycloak,
           PLANT_ID,
           AOP_YEAR,
+          PLANT_NAME,
+          SITE_NAME,
+          VERTICAL_NAME,
         )
       }
     } catch (error) {
@@ -574,7 +588,7 @@ const ShutdownNorms = () => {
           severity: 'success',
         })
         setModifiedCells({})
-        fetchAllData(gradeId)
+        fetchData(gradeId)
       } else if (response?.code === 400 && response?.data) {
         // Partial save, error file download
         const byteCharacters = atob(response.data)
@@ -589,7 +603,7 @@ const ShutdownNorms = () => {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File Steady state Norms.xlsx')
+        link.setAttribute('download', 'Error File Shutdown_Consumption.xlsx')
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -612,7 +626,7 @@ const ShutdownNorms = () => {
       console.error('Error saving data:', error)
       setLoading(false)
     } finally {
-      // fetchData()
+      fetchData(gradeId)
       setLoading(false)
     }
   }
