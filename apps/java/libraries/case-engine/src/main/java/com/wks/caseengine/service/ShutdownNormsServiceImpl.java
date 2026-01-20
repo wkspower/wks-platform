@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -82,6 +84,12 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	private GradeShutdownNormsValueRepository gradeShutdownNormsValueRepository;
 	
 	private DataSource dataSource;
+	
+	@Autowired
+	private  PlantService plantService;
+	
+	@Autowired
+	private SlowdownNormsService slowdownNormsService;
 
 	// Inject or set your DataSource (e.g., via constructor or setter)
 	public ShutdownNormsServiceImpl(DataSource dataSource) {
@@ -386,6 +394,11 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    continue; 
 	                }
 	                
+	                List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown",year,gradeId);
+	                List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown",year,gradeId);
+	                Set<Integer> activeMonths = new HashSet<>();
+	                if (shutdown != null) activeMonths.addAll(shutdown);
+	                if (slowdown != null) activeMonths.addAll(slowdown);
 	                ShutdownNormsValueDTO dto = new ShutdownNormsValueDTO();
 	                try {
 	                    dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
@@ -394,18 +407,18 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	                    dto.setFinancialYear(year);
 	                    dto.setPlantFkId(plantFKId.toString());
-	                    dto.setApril(getNumericCellValue(row.getCell(3), dto));
-	                    dto.setMay(getNumericCellValue(row.getCell(4), dto));
-	                    dto.setJune(getNumericCellValue(row.getCell(5), dto));
-	                    dto.setJuly(getNumericCellValue(row.getCell(6), dto));
-	                    dto.setAugust(getNumericCellValue(row.getCell(7), dto));
-	                    dto.setSeptember(getNumericCellValue(row.getCell(8), dto));
-	                    dto.setOctober(getNumericCellValue(row.getCell(9), dto));
-	                    dto.setNovember(getNumericCellValue(row.getCell(10), dto));
-	                    dto.setDecember(getNumericCellValue(row.getCell(11), dto));
-	                    dto.setJanuary(getNumericCellValue(row.getCell(12), dto));
-	                    dto.setFebruary(getNumericCellValue(row.getCell(13), dto));
-	                    dto.setMarch(getNumericCellValue(row.getCell(14), dto));
+	                    if (activeMonths.contains(4)) dto.setApril(getNumericCellValue(row.getCell(3), dto));
+	                    if (activeMonths.contains(5)) dto.setMay(getNumericCellValue(row.getCell(4), dto));
+	                    if (activeMonths.contains(6)) dto.setJune(getNumericCellValue(row.getCell(5), dto));
+	                    if (activeMonths.contains(7)) dto.setJuly(getNumericCellValue(row.getCell(6), dto));
+	                    if (activeMonths.contains(8)) dto.setAugust(getNumericCellValue(row.getCell(7), dto));
+	                    if (activeMonths.contains(9)) dto.setSeptember(getNumericCellValue(row.getCell(8), dto));
+	                    if (activeMonths.contains(10)) dto.setOctober(getNumericCellValue(row.getCell(9), dto));
+	                    if (activeMonths.contains(11)) dto.setNovember(getNumericCellValue(row.getCell(10), dto));
+	                    if (activeMonths.contains(12)) dto.setDecember(getNumericCellValue(row.getCell(11), dto));
+	                    if (activeMonths.contains(1)) dto.setJanuary(getNumericCellValue(row.getCell(12), dto));
+	                    if (activeMonths.contains(2)) dto.setFebruary(getNumericCellValue(row.getCell(13), dto));
+	                    if (activeMonths.contains(3)) dto.setMarch(getNumericCellValue(row.getCell(14), dto));
 	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
 	                    dto.setId(getStringCellValue(row.getCell(16), dto)); 
 	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
@@ -527,7 +540,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		Map<String,Object> map=null;
 		// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		if(vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PE")) {
+		if(vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PET")) {
 			 map=	savePPShutdownNormsData(shutdownNormsValueDTOList);
 		}else {
 			 map= saveShutdownNormsData(shutdownNormsValueDTOList);
@@ -656,7 +669,16 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 					continue;
 				}
 				year=shutdownNormsValueDTO.getFinancialYear();
-				 gradeId=UUID.fromString(shutdownNormsValueDTO.getGradeFkId());
+				
+				if (shutdownNormsValueDTO.getGradeFkId() != null && !shutdownNormsValueDTO.getGradeFkId().trim().isEmpty()) {
+				    try {
+				        gradeId = UUID.fromString(shutdownNormsValueDTO.getGradeFkId());
+				    } catch (IllegalArgumentException e) {
+				        // Handle case where the string is not a valid UUID format
+				        shutdownNormsValueDTO.setSaveStatus("Failed");
+				        shutdownNormsValueDTO.setErrDescription("Invalid Grade ID format");
+				    }
+				}
 				
 				plantId=UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
 				GradeShutdownNormsValue gradeShutdownNormsValue = new GradeShutdownNormsValue();
@@ -725,7 +747,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				gradeShutdownNormsValueList.add(gradeShutdownNormsValueRepository.save(gradeShutdownNormsValue));
 			}
 			String name=normParametersRepository.findNormParameterName(gradeId);
-			if(name.equalsIgnoreCase("All Grade")) {
+			if(name!=null && name.equalsIgnoreCase("All Grade")) {
 				Plants plant = plantsRepository.findById(plantId).get();
 				// Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 				Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
