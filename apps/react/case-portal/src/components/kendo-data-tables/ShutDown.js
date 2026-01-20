@@ -313,33 +313,37 @@ const ShutDown = ({ permissions }) => {
       ) {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
-        for (const row of allRecords) {
-          const start = new Date(row.maintStartDateTime)
-          const end = new Date(row.maintEndDateTime)
-          //shutdown timeframe for Multiple months
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
 
-          const formatDate = (date) =>
-            date.toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })
+        if (lowerVertName != 'vcm') {
+          for (const row of allRecords) {
+            const start = new Date(row.maintStartDateTime)
+            const end = new Date(row.maintEndDateTime)
+            //shutdown timeframe for Multiple months
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
 
-          const isSameMonth =
-            start.getMonth() === end.getMonth() &&
-            start.getFullYear() === end.getFullYear()
+            const formatDate = (date) =>
+              date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              })
 
-          if (!isSameMonth) {
-            row.isError = true
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
-              severity: 'error',
-            })
-            return
+            const isSameMonth =
+              start.getMonth() === end.getMonth() &&
+              start.getFullYear() === end.getFullYear()
+
+            if (!isSameMonth) {
+              row.isError = true
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
+                severity: 'error',
+              })
+              return
+            }
           }
         }
+
         //Shutdown timeframe overlapping of same time
         for (let i = 0; i < allRecords.length; i++) {
           const a = allRecords[i]

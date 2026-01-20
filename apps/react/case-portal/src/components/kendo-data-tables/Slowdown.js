@@ -589,26 +589,28 @@ const SlowDown = ({ permissions }) => {
       ) {
         // Month span check
         //check timeframe Multiple month spilt into single
-        for (const row of rows) {
-          const start = new Date(row.maintStartDateTime)
-          const end = new Date(row.maintEndDateTime)
-          if (isNaN(start) || isNaN(end)) continue
 
-          const isSameMonth =
-            start.getMonth() === end.getMonth() &&
-            start.getFullYear() === end.getFullYear()
+        if (lowerVertName != 'vcm') {
+          for (const row of rows) {
+            const start = new Date(row.maintStartDateTime)
+            const end = new Date(row.maintEndDateTime)
+            if (isNaN(start) || isNaN(end)) continue
 
-          if (!isSameMonth) {
-            row.isError = true
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `The slowdown timeframe for '${row.discription}' spans multiple months. Please split into separate entries.`,
-              severity: 'error',
-            })
-            return
+            const isSameMonth =
+              start.getMonth() === end.getMonth() &&
+              start.getFullYear() === end.getFullYear()
+
+            if (!isSameMonth) {
+              row.isError = true
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `The slowdown timeframe for '${row.discription}' spans multiple months. Please split into separate entries.`,
+                severity: 'error',
+              })
+              return
+            }
           }
         }
-
         // Overlap within Slowdown  of timeframe ovelaping
         for (let i = 0; i < rows.length; i++) {
           const a = rows[i]
