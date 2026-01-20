@@ -236,8 +236,11 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
 						continue;
 					}
+					Optional<NormParameterType> normParameterType=normParameterTypeRepository.findById(normParametersOpt.get().getNormParameterTypeFkId());
+					if(normParameterType.isPresent() && !(normParameterType.get().getName().equalsIgnoreCase("CatChem"))) {
+						continue;
+					}
 					
-
 					for (int month = 1; month <= 12; month++) {
 						Double oldVal = getMonthlyValue(value, month);
 						Double newVal = getMonthlyValue(dto, month);
@@ -330,7 +333,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				MCUNormsValueGrade mCUNormsValueGrade = new MCUNormsValueGrade();
 
 				if (mCUNormsValueDTO.getId() != null || !mCUNormsValueDTO.getId().isEmpty()) {
-					if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+					if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") && || vertical.getName().equalsIgnoreCase("PET")) {
 
 						Optional<MCUNormsValueGrade> optionalNormsValue = mcuNormsValueGradeRepository
 								.findById(UUID.fromString(mCUNormsValueDTO.getId()));
@@ -339,6 +342,10 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							if(mCUNormsValueGrade.getMaterialFkId()!=null) {
 								Optional<NormParameters> normParametersOpt =normParametersRepository.findById(mCUNormsValueGrade.getMaterialFkId());
 								if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
+									continue;
+								}
+								Optional<NormParameterType> normParameterType=normParameterTypeRepository.findById(normParametersOpt.get().getNormParameterTypeFkId());
+								if(normParameterType.isPresent() && !(normParameterType.get().getName().equalsIgnoreCase("CatChem"))) {
 									continue;
 								}
 							}
@@ -508,9 +515,6 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							mCUNormsValue.setModifiedOn(new Date());
 							boolean changed = false;
 
-							
-
-							// January
 							double newJan = Optional.ofNullable(mCUNormsValueDTO.getJanuary()).orElse(0.0);
 							double oldJan = Optional.ofNullable(mCUNormsValue.getJanuary()).orElse(0.0);
 							if (isDifferent(oldJan, newJan)) {
