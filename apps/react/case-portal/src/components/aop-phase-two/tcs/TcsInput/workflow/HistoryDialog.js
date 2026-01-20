@@ -72,10 +72,13 @@ const HistoryDialog = ({
   title = 'History',
   data = [],
   columns = [
-    { field: 'submittedDate', header: 'Date', width: '20%' },
-    { field: 'status', header: 'Action', width: '15%', isChip: true },
-    { field: 'submittedBy', header: 'Submitted By', width: '20%' },
-    { field: 'remarks', header: 'Remarks', width: '45%' },
+    { field: 'submittedDate', header: 'Submitted Date', width: '10%' },
+    { field: 'submittedBy', header: 'Submitted By', width: '15%' },
+    { field: 'submittedRemark', header: 'Submitted Remark', width: '20%' },
+    { field: 'verifiedDate', header: 'Verified Date', width: '10%' },
+    { field: 'verifiedBy', header: 'Verified By', width: '15%' },
+    { field: 'verifiedRemark', header: 'Verified Remark', width: '20%' },
+    { field: 'status', header: 'Status', width: '10%', isChip: true },
   ],
 }) => {
   const getStatusColor = (status) => {

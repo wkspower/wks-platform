@@ -256,7 +256,7 @@ const ImportPower = () => {
     saveBtn: true,
     allAction: true,
     showImport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `Import Power - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
@@ -357,21 +357,54 @@ const ImportPower = () => {
 
     setLoading(true)
     try {
-      await InputApiService.saveImportPowerExcel(
+      const response = await InputApiService.saveImportPowerExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Excel file imported successfully!',
-        severity: 'success',
-      })
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        await fetchImportConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
 
-      // Refresh data after import
-      await fetchImportConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `Error File - Import Power.xlsx`)
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        await fetchImportConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
       setSnackbarOpen(true)
@@ -381,6 +414,28 @@ const ImportPower = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await InputApiService.exportImportPowerExcel(keycloak, PLANT_ID, AOP_YEAR)
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Import Power data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
     }
   }
 
@@ -416,6 +471,7 @@ const ImportPower = () => {
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
+        handleExport={handleExport}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

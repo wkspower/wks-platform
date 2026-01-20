@@ -173,7 +173,7 @@ const HeatRate = () => {
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
     showImport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `GT Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
     showDropdown: true,
@@ -272,21 +272,28 @@ const HeatRate = () => {
 
     setLoading(true)
     try {
-      await InputApiService.saveHeatRateExcel(
+      const response = await InputApiService.saveHeatRateExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Excel file imported successfully!',
-        severity: 'success',
-      })
-
-      // Refresh data after import
-      await fetchHeatRateData(selectedPlant)
+      if (response?.success) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        await fetchHeatRateData(selectedPlant)
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
       setSnackbarOpen(true)
@@ -296,6 +303,28 @@ const HeatRate = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await InputApiService.exportHeatRateExcel(keycloak, selectedPlant)
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Heat Rate data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
     }
   }
 
@@ -332,6 +361,7 @@ const HeatRate = () => {
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
+        handleExport={handleExport}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

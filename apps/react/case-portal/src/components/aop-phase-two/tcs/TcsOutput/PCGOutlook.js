@@ -6,6 +6,7 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
 
 const PCGOutlook = ({
   PLANT_ID,
@@ -257,28 +258,30 @@ const PCGOutlook = ({
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <AdvanceKendoTable
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchPcgOutlookData}
-        configType='tcs_pcg_outlook'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columns}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-        readonly={true}
-      />
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchPcgOutlookData}
+          configType='tcs_pcg_outlook'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columns}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          readonly={true}
+        />
+      </Stack>
     </Box>
   )
 }

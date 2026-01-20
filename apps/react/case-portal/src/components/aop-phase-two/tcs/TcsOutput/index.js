@@ -1,4 +1,5 @@
-import { Box, Tab, Tabs } from '@mui/material'
+import { Box, Tab, Tabs, IconButton, Tooltip, Button } from '@mui/material'
+import HistoryIcon from '@mui/icons-material/History'
 import Notification from 'components/Utilities/Notification'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -12,8 +13,8 @@ import CPPUnitsSdPlan from './CPPUnitsSdPlan'
 import CrudBlendWindow from './CrudBlendWindow'
 import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
-import StatusAccordian from '../TcsInput/workflow/StatusAccordian'
-import RemarksAccordion from '../TcsInput/workflow/RemarksAccordion'
+import RemarkDialog from '../TcsInput/workflow/RemarkDialog'
+import HistoryDialog from '../TcsInput/workflow/HistoryDialog'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -68,6 +69,14 @@ const TcsOutput = () => {
   // Tab management
   const [tabObj, setTabObj] = useState([])
   const [tabIndex, setTabIndex] = useState(0)
+
+  // Remark state
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+
+  const handleViewHistory = () => {
+    setHistoryDialogOpen(true)
+  }
 
   // Get current tab object (has id, displayName, displaySequence)
   const currentTab = tabObj[tabIndex] || {}
@@ -133,6 +142,17 @@ const TcsOutput = () => {
     }
   }
 
+  // Handle remark submission
+  const handleRemarkSubmit = (remark) => {
+    console.log('Remark submitted:', remark)
+    // TODO: Add API call to save remark
+    setSnackbarData({
+      message: 'Remark submitted successfully!',
+      severity: 'success',
+    })
+    setSnackbarOpen(true)
+  }
+
   const data = [
     {
       id: 1,
@@ -168,62 +188,88 @@ const TcsOutput = () => {
         backgroundColor: '#fff',
       }}
     >
-      {/*Workflow Status Accordion */}
-      <StatusAccordian title='Level Two Status' data={data} />
+      {/* Tabs and Action Buttons in One Row */}
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}
+      >
+        {/* Tabs Section - Flex grow to fill available space */}
+        <Box sx={{ flex: 1, overflowX: 'auto' }}>
+          <Tabs
+            // sx={{
+            //   '& .MuiTabs-indicator': {
+            //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            //   },
+            //   '& .MuiTab-root.Mui-selected': {
+            //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            //     backgroundClip: 'text',
+            //     WebkitBackgroundClip: 'text',
+            //     WebkitTextFillColor: 'transparent',
+            //   },
+            // }}
+            sx={{
+              borderBottom: '0px solid #ccc',
+              '.MuiTabs-indicator': { display: 'none' },
+              margin: '0px 0px 0px 0px',
+              minHeight: '28px',
+            }}
+            textColor='primary'
+            indicatorColor='primary'
+            value={tabIndex}
+            onChange={(e, newIndex) => {
+              if (newIndex >= 0 && newIndex < tabObj.length) {
+                setTabIndex(newIndex)
+              }
+            }}
+          >
+            {tabObj &&
+              tabObj?.map((tab) => (
+                <Tab
+                  key={tab.id}
+                  sx={{
+                    border: '1px solid #ADD8E6',
+                    borderBottom: '1px solid #ADD8E6',
+                    fontSize: '0.75rem',
+                    padding: '9px',
+                    minHeight: '12px',
+                  }}
+                  label={tab.displayName || tab.name}
+                />
+              ))}
+          </Tabs>
+        </Box>
 
-      {/* Remarks Accordion */}
-      <RemarksAccordion
-        title='Level One Submission Remarks'
-        placeholder='Enter your remarks here...'
-        // onSubmit={handleRemarkSubmit}
-        defaultExpanded={true}
-        maxLength={1000}
-      />
-
-      {/* Tabs */}
-      <Box sx={{ overflowX: 'auto', width: '100%' }}>
-        <Tabs
-          // sx={{
-          //   '& .MuiTabs-indicator': {
-          //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
-          //   },
-          //   '& .MuiTab-root.Mui-selected': {
-          //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
-          //     backgroundClip: 'text',
-          //     WebkitBackgroundClip: 'text',
-          //     WebkitTextFillColor: 'transparent',
-          //   },
-          // }}
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 0px 0px',
-            minHeight: '28px',
-          }}
-          textColor='primary'
-          indicatorColor='primary'
-          value={tabIndex}
-          onChange={(e, newIndex) => {
-            if (newIndex >= 0 && newIndex < tabObj.length) {
-              setTabIndex(newIndex)
-            }
-          }}
+        {/* Submit button and History icon - Fixed on right */}
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}
         >
-          {tabObj &&
-            tabObj?.map((tab) => (
-              <Tab
-                key={tab.id}
-                sx={{
-                  border: '1px solid #ADD8E6',
-                  borderBottom: '1px solid #ADD8E6',
-                  fontSize: '0.75rem',
-                  padding: '9px',
-                  minHeight: '12px',
-                }}
-                label={tab.displayName || tab.name}
-              />
-            ))}
-        </Tabs>
+          <Button
+            className='btn-save'
+            style={{ background: '#28a745', color: '#ffffff' }}
+            onClick={() => setRemarkDialogOpen(true)}
+          >
+            Submit
+          </Button>
+          <Tooltip title='View History'>
+            <Button
+              variant='outlined'
+              size='small'
+              onClick={handleViewHistory}
+              sx={{
+                textTransform: 'none',
+                borderColor: '#1976d2',
+                color: '#1976d2',
+                padding: '6px 16px',
+                maxHeight: '1.8rem',
+                '&:hover': {
+                  borderColor: '#1565c0',
+                  backgroundColor: '#e3f2fd',
+                },
+              }}
+            >
+              <HistoryIcon />
+            </Button>
+          </Tooltip>
+        </Box>
       </Box>
 
       {/* Tab Content */}
@@ -240,6 +286,24 @@ const TcsOutput = () => {
           setSnackbarOpen,
         })}
       </Box>
+
+      <RemarkDialog
+        open={remarkDialogOpen}
+        handleClose={() => setRemarkDialogOpen(false)}
+        title='Level One Remark Submission'
+        placeholder='Enter your remarks here...'
+        onSubmit={handleRemarkSubmit}
+        maxLength={1000}
+        historyData={data}
+      />
+
+      {/* History Dialog */}
+      <HistoryDialog
+        open={historyDialogOpen}
+        onClose={() => setHistoryDialogOpen(false)}
+        title='Audit Trail'
+        data={data}
+      />
 
       <Notification
         open={snackbarOpen}
