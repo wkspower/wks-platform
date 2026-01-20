@@ -350,6 +350,13 @@ export const NormalOpNormPeColumns = [
     type: 'number',
   },
   {
+    field: 'remarks',
+    title: 'Remark',
+    widthT: 80,
+    editable: true,
+  },
+
+  {
     field: 'idFromApi',
     title: 'idFromApi',
     hidden: true,
