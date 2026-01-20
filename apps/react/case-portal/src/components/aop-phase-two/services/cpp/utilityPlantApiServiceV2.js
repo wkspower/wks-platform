@@ -316,7 +316,18 @@ async function exportExcelData(keycloak, params) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = fileName
+
+    // Extract filename from Content-Disposition header if available
+    const contentDisposition = resp.headers.get('content-disposition')
+    let downloadFileName = fileName
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^";\n]+)"?/i)
+      if (filenameMatch && filenameMatch[1]) {
+        downloadFileName = filenameMatch[1]
+      }
+    }
+
+    a.download = downloadFileName
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -368,7 +379,7 @@ async function exportPlantRequirementExcel(keycloak, PLANT_ID, AOP_YEAR) {
   return exportExcelData(keycloak, {
     endpoint: `plant-requirement/export/${PLANT_ID}/${AOP_YEAR}`,
     queryParams: { plantId: PLANT_ID, year: AOP_YEAR },
-    fileName: `plant_requirement_${PLANT_ID}_${AOP_YEAR}.xlsx`,
+    fileName: `Plant_requirement_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
 }
@@ -389,7 +400,7 @@ async function exportNormsExcel(keycloak, PLANT_ID, AOP_YEAR) {
   return exportExcelData(keycloak, {
     endpoint: `norm-based-utility-budget/export?cppPlantId=${PLANT_ID}&financialYear=${AOP_YEAR}`,
     queryParams: {},
-    fileName: `Norms_${PLANT_ID}_${AOP_YEAR}.xlsx`,
+    fileName: `Norms_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
 }

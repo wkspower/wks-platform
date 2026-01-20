@@ -283,7 +283,13 @@ const UnitCapacityGrid = ({
       }
     })
 
-    config.remark = { editable: true, type: 'text', minWidth: 200, widthT: 250 }
+    config.remark = {
+      title: 'Remark',
+      editable: true,
+      type: 'text',
+      minWidth: 200,
+      widthT: 250,
+    }
 
     return config
   }, [valueFormat])

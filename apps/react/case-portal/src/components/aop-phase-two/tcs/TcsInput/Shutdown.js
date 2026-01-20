@@ -11,6 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
 
 const Shutdown = ({
   PLANT_ID,
@@ -460,38 +461,40 @@ const Shutdown = ({
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <AdvanceKendoTable
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchShutdownData}
-        configType='tcs_shutdown'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columns}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        saveChanges={validateData}
-        deleteRowData={deleteRowData}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-        customItemChange={handleCustomItemChange}
-        initialFieldValues={{ particulates: PLANT_NAME }}
-        dateCalculationConfig={{
-          dateField1: 'startDate',
-          dateField2: 'endDate',
-          daysField: 'durationInDays',
-          requiredInHr: false,
-          roundDaysAndDates: true,
-        }}
-      />
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchShutdownData}
+          configType='tcs_shutdown'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columns}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          saveChanges={validateData}
+          deleteRowData={deleteRowData}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          customItemChange={handleCustomItemChange}
+          initialFieldValues={{ particulates: PLANT_NAME }}
+          dateCalculationConfig={{
+            dateField1: 'startDate',
+            dateField2: 'endDate',
+            daysField: 'durationInDays',
+            requiredInHr: false,
+            roundDaysAndDates: true,
+          }}
+        />
+      </Stack>
     </Box>
   )
 }

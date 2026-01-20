@@ -6,6 +6,7 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
 
 const ROGC = ({
   PLANT_ID,
@@ -398,29 +399,30 @@ const ROGC = ({
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <AdvanceKendoTable
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchRogcData}
-        configType='tcs_rogc'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columns}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        saveChanges={saveChanges}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-      />
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchRogcData}
+          configType='tcs_rogc'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columns}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          saveChanges={saveChanges}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+        />
+      </Stack>
     </Box>
   )
 }
