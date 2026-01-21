@@ -236,10 +236,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
 						continue;
 					}
-					Optional<NormParameterType> normParameterType=normParameterTypeRepository.findById(normParametersOpt.get().getNormParameterTypeFkId());
-					if(normParameterType.isPresent() && !(normParameterType.get().getName().equalsIgnoreCase("CatChem"))) {
-						continue;
-					}
+					
 					
 					for (int month = 1; month <= 12; month++) {
 						Double oldVal = getMonthlyValue(value, month);
@@ -347,10 +344,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 								if(!normParametersOpt.isEmpty() && (!normParametersOpt.get().getIsEditable())) {
 									continue;
 								}
-								Optional<NormParameterType> normParameterType=normParameterTypeRepository.findById(normParametersOpt.get().getNormParameterTypeFkId());
-								if(normParameterType.isPresent() && !(normParameterType.get().getName().equalsIgnoreCase("CatChem"))) {
-									continue;
-								}
+								
 							}
 							
 							mCUNormsValueGrade.setId(UUID.fromString(mCUNormsValueDTO.getId()));
