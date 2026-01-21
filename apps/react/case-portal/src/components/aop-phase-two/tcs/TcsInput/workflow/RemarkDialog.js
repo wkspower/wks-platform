@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { TextArea } from '@progress/kendo-react-inputs'
+import { ROLES } from '../../utils/roleUtils'
 
 const RemarkDialog = ({
   open,
@@ -21,12 +22,29 @@ const RemarkDialog = ({
   onSubmit,
   disabled = false,
   maxLength = 1000,
+  role = '',
+  historyData = [],
 }) => {
   const [remark, setRemark] = useState('')
   const handleSubmit = () => {
     if (remark.trim()) {
       onSubmit(remark)
       setRemark('')
+    }
+  }
+
+  const getTitle = () => {
+    switch (role) {
+      case ROLES.PLANT_MANAGER:
+        return 'Plant Manager Remark Submission'
+      case ROLES.EPS_ENGINEER:
+        return 'EPS Manager Remark Submission'
+      case ROLES.CTS_HEAD:
+        return 'CTS Head Remark Submission'
+      case ROLES.EPS_HEAD:
+        return 'EPS Head Remark Submission'
+      default:
+        return title
     }
   }
 
@@ -56,7 +74,7 @@ const RemarkDialog = ({
             }}
           >
             <Typography variant='h6' component='div' fontWeight='600'>
-              {title}
+              {getTitle()}
             </Typography>
             <IconButton
               onClick={handleClose}

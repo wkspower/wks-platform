@@ -55,10 +55,10 @@ const UnitCapacityGrid = ({
 
     // List of month fields that have nested kbpsd/ktpd
     const monthFields = [
-      'april',
+      'apr',
       'may',
-      'june',
-      'july',
+      'jun',
+      'jul',
       'aug',
       'sep',
       'oct',
@@ -69,7 +69,7 @@ const UnitCapacityGrid = ({
       'mar',
     ]
 
-    // Check if field is a nested month field (e.g., 'april.kbpsd')
+    // Check if field is a nested month field (e.g., 'apr.kbpsd')
     const isMonthField = monthFields.some((month) =>
       field.startsWith(`${month}.`),
     )
@@ -157,10 +157,10 @@ const UnitCapacityGrid = ({
           transformedData = response.results.map((item, index) => {
             // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
             const months = [
-              'april',
+              'apr',
               'may',
-              'june',
-              'july',
+              'jun',
+              'jul',
               'aug',
               'sep',
               'oct',
@@ -251,10 +251,10 @@ const UnitCapacityGrid = ({
 
     // Add monthly columns with KBPSD and KTPD sub-columns
     const months = [
-      'april',
+      'apr',
       'may',
-      'june',
-      'july',
+      'jun',
+      'jul',
       'aug',
       'sep',
       'oct',
@@ -316,10 +316,10 @@ const UnitCapacityGrid = ({
 
     // Group monthly columns with KBPSD and KTPD sub-columns
     const months = [
-      { key: 'april', headerKey: 4 },
+      { key: 'apr', headerKey: 4 },
       { key: 'may', headerKey: 5 },
-      { key: 'june', headerKey: 6 },
-      { key: 'july', headerKey: 7 },
+      { key: 'jun', headerKey: 6 },
+      { key: 'jul', headerKey: 7 },
       { key: 'aug', headerKey: 8 },
       { key: 'sep', headerKey: 9 },
       { key: 'oct', headerKey: 10 },
@@ -407,14 +407,14 @@ const UnitCapacityGrid = ({
 
       // Custom validation: If any row data is updated, remarks must be filled and different from original
       const fieldsToCheck = [
-        'april.kbpsd',
-        'april.ktpd',
+        'apr.kbpsd',
+        'apr.ktpd',
         'may.kbpsd',
         'may.ktpd',
-        'june.kbpsd',
-        'june.ktpd',
-        'july.kbpsd',
-        'july.ktpd',
+        'jun.kbpsd',
+        'jun.ktpd',
+        'jul.kbpsd',
+        'jul.ktpd',
         'aug.kbpsd',
         'aug.ktpd',
         'sep.kbpsd',
@@ -455,10 +455,10 @@ const UnitCapacityGrid = ({
         return {
           id: row.isNew ? null : row.id,
           particulates: row.particulates,
-          april: row.april?.kbpsd,
+          apr: row.apr?.kbpsd,
           may: row.may?.kbpsd,
-          june: row.june?.kbpsd,
-          july: row.july?.kbpsd,
+          jun: row.jun?.kbpsd,
+          jul: row.jul?.kbpsd,
           aug: row.aug?.kbpsd,
           sep: row.sep?.kbpsd,
           oct: row.oct?.kbpsd,

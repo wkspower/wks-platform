@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+import { ROLES } from '../../utils/roleUtils'
 
 const CrudBlendWindowGrid = ({
   tableKey,
@@ -17,6 +18,7 @@ const CrudBlendWindowGrid = ({
   snackbarOpen,
   setSnackbarOpen,
   onRefresh,
+  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -145,15 +147,18 @@ const CrudBlendWindowGrid = ({
     }
   }, [modifiedCells])
 
-  const permissions = {
-    customHeight: { mainBox: '32vh', otherBox: '100%' },
-    textAlignment: 'center',
-    allAction: true,
-    showExport: true,
-    showTitle: true,
-    filterable: false,
-    approveBtn: true,
-  }
+  const permissions = useMemo(
+    () => ({
+      customHeight: { mainBox: '32vh', otherBox: '100%' },
+      textAlignment: 'center',
+      allAction: true,
+      showExport: true,
+      showTitle: true,
+      filterable: false,
+      approveBtn: userRole === ROLES.EPS_ENGINEER,
+    }),
+    [userRole],
+  )
 
   return (
     <Box>

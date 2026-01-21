@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs, IconButton, Tooltip } from '@mui/material'
 import HistoryIcon from '@mui/icons-material/History'
 import Notification from 'components/Utilities/Notification'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
@@ -16,6 +16,7 @@ import NetUnitCapacity from './NetUnitCapacity'
 import RemarkDialog from './workflow/RemarkDialog'
 import { Button } from '../../../../../node_modules/@mui/material/index'
 import HistoryDialog from './workflow/HistoryDialog'
+import { getUserRole } from '../utils/roleUtils'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -89,6 +90,12 @@ const TcsInput = () => {
   // Console user roles
   console.log('User Roles:', keycloak?.realmAccess?.roles)
 
+  const userRole = useMemo(() => {
+    let allUsers = keycloak?.realmAccess?.roles
+    console.log('allUsers', allUsers)
+    return getUserRole(allUsers)
+  }, [keycloak?.realmAccess?.roles])
+
   // Fetch all tabs and visible tab IDs from backend
   useEffect(() => {
     fetchTabsData()
@@ -151,6 +158,7 @@ const TcsInput = () => {
 
   // Handle remark submission
   const handleRemarkSubmit = (remark) => {
+    console.log('Remark submitted submitted by:', userRole)
     console.log('Remark submitted:', remark)
     // TODO: Add API call to save remark
     setSnackbarData({
@@ -163,20 +171,20 @@ const TcsInput = () => {
   const data = [
     {
       id: 1,
-      submittedDate: '2022-01-15',
+      submittedDate: '2022-01-15 14:30:00',
       submittedBy: 'Plant Manager',
       submittedRemark: 'Resubmitted after corrections',
-      verifiedDate: '2022-01-16',
+      verifiedDate: '2022-01-16 09:15:00',
       verifiedBy: 'EPS Engineer',
       verifiedRemark: 'Data looks good, approved for processing',
       status: 'Approved',
     },
     {
       id: 2,
-      submittedDate: '2022-01-10',
+      submittedDate: '2022-01-10 10:45:00',
       submittedBy: 'Plant Manager',
       submittedRemark: 'Initial submission with all data validated',
-      verifiedDate: '2022-01-12',
+      verifiedDate: '2022-01-12 11:20:00',
       verifiedBy: 'EPS Engineer',
       verifiedRemark: 'Minor discrepancies found, needs revision',
       status: 'Rejected',
@@ -298,6 +306,7 @@ const TcsInput = () => {
         onSubmit={handleRemarkSubmit}
         maxLength={1000}
         historyData={data}
+        role={userRole}
       />
 
       {/* History Dialog */}
@@ -306,6 +315,7 @@ const TcsInput = () => {
         onClose={handleCloseHistory}
         title='Audit Trail'
         data={data}
+        role={userRole}
       />
 
       <Notification
