@@ -585,7 +585,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            rows.add(list);
 	        }
 
-	        List<String> headers = new ArrayList<>(Arrays.asList("Slowdown Desc", "Particulars", "Month", "Duration (hrs)", "Rate (TPH)", "Remarks", "Id", "Product"));
+	        List<String> headers = new ArrayList<>(Arrays.asList("Slowdown Desc", "Particulars", "Month", "Duration (hrs)", "Reduced Rate (TPH)", "Remarks", "Id", "Product"));
 	        if (isAfterSave) {
 	            headers.add("Status");
 	            headers.add("Error Description");
