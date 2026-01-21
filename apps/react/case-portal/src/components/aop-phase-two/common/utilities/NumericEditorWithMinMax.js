@@ -8,7 +8,17 @@ export const NumericEditorWithMinMax = ({
   min,
   max,
 }) => {
-  const initialValue = dataItem[field] ?? ''
+  // Resolve nested field paths (e.g., 'april.min' -> dataItem.april.min)
+  const getNestedValue = (obj, fieldPath) => {
+    const parts = fieldPath.split('.')
+    let value = obj
+    for (let part of parts) {
+      value = value?.[part]
+    }
+    return value ?? ''
+  }
+
+  const initialValue = getNestedValue(dataItem, field)
   const [localValue, setLocalValue] = useState(initialValue)
   const [error, setError] = useState('')
 

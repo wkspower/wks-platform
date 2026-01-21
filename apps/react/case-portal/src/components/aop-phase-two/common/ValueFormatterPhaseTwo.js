@@ -5,5 +5,8 @@ export default function ValueFormatterPhaseTwo() {
 
   const VERTICAL_NAME = dataGridStore?.verticalObject?.name?.toLowerCase()
 
+  if (VERTICAL_NAME === 'cpp') {
+    return '{0:0.0000}'
+  }
   return '{0:0.00}'
 }
