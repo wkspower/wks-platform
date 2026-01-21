@@ -46,6 +46,17 @@ import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
 import valueFormatterByUOM from '../commonUtilityFunctions'
 import DateTimePickerEditor from '../utilities/DatePickeronSelectedYr'
 
+// Helper function to get nested value from object
+const getNestedValue = (obj, path) => {
+  if (!path || !obj) return undefined
+  const parts = path.split('.')
+  let value = obj
+  for (let part of parts) {
+    value = value?.[part]
+  }
+  return value
+}
+
 // Helper function to apply Kendo number format
 const applyKendoNumberFormat = (value, format) => {
   if (!format || value === null || value === undefined) return value
@@ -803,7 +814,10 @@ const AdvanceKendoTable = ({
       format = null,
     } = props
     const rowId = dataItem.id
-    let value = dataItem[field]
+    // Handle nested fields like 'apr.kbpsd'
+    let value = field?.includes('.')
+      ? getNestedValue(dataItem, field)
+      : dataItem[field]
     let formattedValue = value
 
     // Apply Kendo number format if provided
@@ -864,7 +878,10 @@ const AdvanceKendoTable = ({
       format = null,
     } = props
     const rowId = dataItem.id
-    let value = dataItem[field]
+    // Handle nested fields like 'apr.kbpsd'
+    let value = field?.includes('.')
+      ? getNestedValue(dataItem, field)
+      : dataItem[field]
     let formattedValue = value
 
     // Apply Kendo number format if provided
