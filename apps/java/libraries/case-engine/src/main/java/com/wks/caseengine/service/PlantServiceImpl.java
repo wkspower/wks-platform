@@ -56,11 +56,13 @@ public class PlantServiceImpl implements PlantService {
 	@Transactional
      public List getShutdownMonths(UUID plantId,String maintenanceName,String year,String gradeId){
 		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
-		if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {	
+		if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {	
 			// return	plantsRepository.getShutdownMonthsWithGrades(plantId,maintenanceName,year,UUID.fromString(gradeId));
 			return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
 		}else if(verticalName.equalsIgnoreCase("VCM") ) {	
 			return	plantsRepository.getVCMShutdownMonths(plantId,maintenanceName,year);
+		}else if(verticalName.equalsIgnoreCase("PTA") ) {	
+			return	plantsRepository.getPTAShutdownMonths(plantId,maintenanceName,year);
 		}else {
 			return	plantsRepository.getShutdownMonths(plantId,maintenanceName,year);
 		}

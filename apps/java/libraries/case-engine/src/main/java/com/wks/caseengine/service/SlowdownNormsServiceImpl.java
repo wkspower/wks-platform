@@ -627,6 +627,8 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				return	slowdownNormsRepository.getSlowdownMonthsWithGrades(plantId,maintenanceName,year,grade);
 			}else if(verticalName.equalsIgnoreCase("VCM")){
 				return	slowdownNormsRepository.getVCMSlowdownMonths(plantId,maintenanceName,year);
+			}else if(verticalName.equalsIgnoreCase("PTA")){
+				return	slowdownNormsRepository.getPTASlowdownMonths(plantId,maintenanceName,year);
 			}else {
 				return	slowdownNormsRepository.getSlowdownMonths(plantId,maintenanceName,year);
 			}
