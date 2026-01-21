@@ -712,10 +712,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            } else {
 	                list.add(formattedDuration);
 	            }
-	            if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
-	            	 list.add(dto.getRate());
-	            }
-	           
+	            
+	            list.add(dto.getRate());
 	            list.add(dto.getRemark());
 	            list.add(dto.getId());
 	            
@@ -733,9 +731,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        innerHeaders.add("SD-From");
 	        innerHeaders.add("SD-To");
 	        innerHeaders.add("Duration (hrs)"); 
-	        if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
-	        	 innerHeaders.add("Rate (TPH)");
-	        }
+	        innerHeaders.add("Rate (TPH)");
 	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Id");
 	        
@@ -782,13 +778,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							 cell.setCellValue("");
 							}}}
 	        
-	        if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
-	        	 sheet.setColumnHidden(6, true);
-	        }else {
-	        	 sheet.setColumnHidden(5, true);
-	        }
-	       
 	        
+	        	 sheet.setColumnHidden(6, true);
 	        try {
 
 	            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1698,23 +1689,21 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 							alreadyFailed = true;
 						}
 					}
-					 if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+					 
 						 dto.setRate(getNumericCellValue(row.getCell(4), dto)); 
-					 }
-					 if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+					 
+					
 						 if (dto.getRate() == null && !alreadyFailed) {
 								dto.setSaveStatus("Failed");
 								dto.setErrDescription("Rate in cell 5 cannot be null.");
 								alreadyFailed = true;
 						} 
-					 }
+					 
 					
 					String remark=null;
-					if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+					
 						 remark = getStringCellValue(row.getCell(5), dto);
-					 }else {
-						  remark = getStringCellValue(row.getCell(4), dto);
-					 }
+					 
 					
 					dto.setRemark(remark); 
 					if((dto.getRemark() == null || dto.getRemark().trim().isEmpty()) && !alreadyFailed) {
@@ -1723,11 +1712,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 						alreadyFailed = true;
 					}
 					String idString =null;
-					if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
+					
 						 idString = getStringCellValue(row.getCell(6), dto);
-					 }else {
-						  idString = getStringCellValue(row.getCell(5), dto);
-					 }
+					 
 					
 					dto.setId(idString); 
 					
