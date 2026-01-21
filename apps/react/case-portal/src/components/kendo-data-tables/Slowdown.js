@@ -418,7 +418,7 @@ const SlowDown = ({ permissions }) => {
       }
 
       // Select required fields based on vertical
-      const requiredFields = ['discription', 'remark']
+      const requiredFields = ['discription', 'remark', 'rate']
       const requiredFieldsForElastomer = [
         'discription',
         'remark',
@@ -788,6 +788,7 @@ const SlowDown = ({ permissions }) => {
 
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
+    setModifiedCells({})
     setLoading(true)
     try {
       const data = await DataService.getSlowDownPlantData(
@@ -1258,6 +1259,14 @@ const SlowDown = ({ permissions }) => {
       showTitleNameBusiness: true,
       titleName: SCREEN_NAME,
       uploadExcelBtn: SHOW_EXCEL_UPLOAD_BUTTON,
+      highlightDiscription:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      MonthDropdownPEPPHighlight:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightRate:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightDuration:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
     },
     isOldYear,
   )
