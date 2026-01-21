@@ -203,7 +203,7 @@ const ProductionvolumeData = ({ permissions }) => {
           severity: 'success',
         })
         setModifiedCells({})
-        setEdit({})
+        // setEdit({})
 
         const responseForNorms =
           await DataService.calculateNormsHistorianValues(
@@ -415,7 +415,7 @@ const ProductionvolumeData = ({ permissions }) => {
     setModifiedCellsDesignCapacity({})
     setEnableSaveAddBtnDesignCapacity({})
     setModifiedCells({})
-    setEdit({})
+    // setEdit({})
 
     try {
       setLoading(true)
@@ -1043,7 +1043,7 @@ const ProductionvolumeData = ({ permissions }) => {
           severity: 'success',
         })
         setModifiedCells({})
-        setEdit({})
+        // setEdit({})
 
         const responseForNorms =
           await DataService.calculateNormsHistorianValues(
