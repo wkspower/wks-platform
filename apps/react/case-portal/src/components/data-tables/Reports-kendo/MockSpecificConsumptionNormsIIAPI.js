@@ -973,7 +973,6 @@ export const MockSpecificConsumptionNormsIIAPI = {
           ],
         }
 
-
       default:
         return { columns: [] }
     }

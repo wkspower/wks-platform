@@ -689,12 +689,11 @@ const WorkFlowMerge = () => {
     lowerVertName === 'pta'
   ) {
     activeTabs = elastomerTabs
-  } else if ( lowerVertName === 'pet') {
+  } else if (lowerVertName === 'pet') {
     activeTabs = customPETTabs
   } else if (lowerVertName === 'pe') {
     activeTabs = customPETabs
-  }
-  else if (lowerVertName === 'pp') {
+  } else if (lowerVertName === 'pp') {
     activeTabs = customPPTabs
   }
   return (
@@ -900,9 +899,7 @@ const WorkFlowMerge = () => {
               lowerVertName === 'pet') && (
               <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
             )}
-             {(lowerVertName === 'pe' ||
-              lowerVertName === 'pp'
-              ) && (
+            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
               <>{tabIndex === 9 && <SpecificConsumptionNormsII />}</>
             )}
 
