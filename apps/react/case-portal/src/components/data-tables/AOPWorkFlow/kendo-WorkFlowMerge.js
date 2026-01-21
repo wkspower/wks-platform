@@ -46,6 +46,7 @@ import OptimizerReport from '../Reports/OptimizerReport'
 import TurnaroundReportCracker from '../Reports/TurnaroundReportCracker'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import SpecificConsumptionNorm from '../Reports-kendo/SpecificConsumptionnorm'
+import SpecificConsumptionNormsII from '../Reports-kendo/specificConsumptionNormsII'
 import { getRoleName } from 'services/role-service'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -595,7 +596,7 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary (T-22)',
   ]
-  const customPETabs = [
+  const customPETTabs = [
     'Annual AOP Cost',
     'Plant Production Summary (T-14)',
     'Month Wise Production Plan (T-16)',
@@ -616,17 +617,20 @@ const WorkFlowMerge = () => {
     'Annual Production Plan(T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
-    'Specific Consumption Norms',
+    'Norms Entry Sheet',
+    'Specific Consumption Norms II',
   ]
-  const PETabs = [
+  const customPETabs = [
     'Annual AOP Cost',
-    'Plant Production Summary',
-    'Month Wise Production Plan',
-    'Month Wise Raw Data',
-    'Turnaround Report',
-    'Annual Production Plan',
-    'Plant Contribution',
-    'Plant Contribution Summary ',
+    'Plant Production Summary (T-14)',
+    'Month Wise Production Plan (T-16)',
+    'Month Wise Raw Data(T-18)',
+    'Turnaround Report(T-19A)',
+    'Annual Production Plan(T-15)',
+    'Plant Contribution(T-21)',
+    'Plant Contribution Summary (T-22)',
+    'Norms Entry Sheet',
+    'Specific Consumption Norms (T-17)',
   ]
 
   const PPTabs = [
@@ -685,9 +689,12 @@ const WorkFlowMerge = () => {
     lowerVertName === 'pta'
   ) {
     activeTabs = elastomerTabs
-  } else if (lowerVertName === 'pe' || lowerVertName === 'pet') {
+  } else if ( lowerVertName === 'pet') {
+    activeTabs = customPETTabs
+  } else if (lowerVertName === 'pe') {
     activeTabs = customPETabs
-  } else if (lowerVertName === 'pp') {
+  }
+  else if (lowerVertName === 'pp') {
     activeTabs = customPPTabs
   }
   return (
@@ -892,6 +899,11 @@ const WorkFlowMerge = () => {
               lowerVertName === 'pp' ||
               lowerVertName === 'pet') && (
               <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
+            )}
+             {(lowerVertName === 'pe' ||
+              lowerVertName === 'pp'
+              ) && (
+              <>{tabIndex === 9 && <SpecificConsumptionNormsII />}</>
             )}
 
             <Notification
