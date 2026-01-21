@@ -55,12 +55,12 @@ const getEnhancedColDefsProposedNorms = ({
     if (monthShort) {
       if (/^prevYearBudget/i.test(field)) {
         // Prev year -> "Apr Budget-24"
-        newCol.title = `${monthShort} Budget-${prevSuffix}`
+        newCol.title = `${monthShort} Last FY Budget-${prevSuffix}`
         newCol.editable = false
         newCol.isDisabled = true
       } else if (/^currYearBudget/i.test(field)) {
         // Curr year budget -> "Apr Budget-25"
-        newCol.title = `${monthShort} Budget-${currSuffix}`
+        newCol.title = `${monthShort} Sys Generated-${currSuffix}`
         newCol.editable = false
         newCol.isDisabled = true
       } else if (/^currYearProposed/i.test(field)) {
@@ -80,7 +80,7 @@ const getEnhancedColDefsProposedNorms = ({
         ...newCol,
         type: 'number',
         format: valueFormat || '{0:#.###}',
-        widthT: 120,
+        widthT: 150,
       }
     }
 

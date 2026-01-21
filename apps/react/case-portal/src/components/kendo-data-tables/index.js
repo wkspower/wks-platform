@@ -1209,6 +1209,7 @@ const KendoDataTables = ({
       const defaultUnit = permissions.units[0]
       setSelectedUnit(defaultUnit)
       handleUnitChange(defaultUnit)
+      // setEdit({})
     }
   }, [permissions])
 
@@ -1326,6 +1327,23 @@ const KendoDataTables = ({
                   }}
                 >
                   {permissions?.titleName}
+                </Typography>
+              )}
+
+              {permissions?.titleNameExtra && (
+                <Typography
+                  component='div'
+                  className='grid-title-extra'
+                  sx={{
+                    fontSize: '0.60rem', // little smaller
+                    fontWeight: 800,
+                    color: '#336063', // very light grey
+                    fontStyle: 'italic',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  *Enter Number of Continious / Discontinious GCOs per grade for
+                  each Month.
                 </Typography>
               )}
 
@@ -1551,6 +1569,7 @@ const KendoDataTables = ({
                   select
                   value={selectedUnit || permissions?.units?.[0]}
                   onChange={(e) => {
+                    setEdit({})
                     setSelectedUnit(e.target.value)
                     handleUnitChange(e.target.value)
                   }}

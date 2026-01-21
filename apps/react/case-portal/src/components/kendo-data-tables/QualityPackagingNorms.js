@@ -142,10 +142,11 @@ export default function QualityPackagingNorms() {
       type: 'numberWithUOMValidation',
       format: valueFormat,
     },
+
     {
       field: 'actual',
       title: `Actual ${previousYear}`,
-      editable: false,
+      editable: true,
       type: 'numberWithUOMValidation',
       format: valueFormat,
     },
@@ -416,7 +417,7 @@ export default function QualityPackagingNorms() {
     {
       field: 'actual',
       title: `Actual ${previousYear}`,
-      editable: false,
+      editable: true,
       type: 'number',
       format: valueFormat,
     },

@@ -54,6 +54,7 @@ const BusinessDemand = ({ permissions }) => {
   const IS_PE_PP_VERTICAL = lowerVertName === 'pp' || lowerVertName === 'pe'
   const IS_PTA_VERTICAL = lowerVertName === 'pta'
   const IS_PET_VERTICAL = lowerVertName === 'pet'
+  const IS_VCM_VERTICAL = lowerVertName === 'vcm'
 
   const SCREEN_NAME = screenTitle?.title
   const apiRef = useGridApiRef()
@@ -149,6 +150,7 @@ const BusinessDemand = ({ permissions }) => {
       //
 
       if (
+        IS_VCM_VERTICAL ||
         IS_PE_PP_VERTICAL ||
         IS_PTA_VERTICAL ||
         IS_PET_VERTICAL ||
@@ -363,6 +365,7 @@ const BusinessDemand = ({ permissions }) => {
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
       isTotalFooterActive:
+        IS_VCM_VERTICAL ||
         IS_PE_PP_VERTICAL ||
         IS_PTA_VERTICAL ||
         IS_PET_VERTICAL ||

@@ -1,3 +1,28 @@
+export const InclusionDateColumns = [
+  {
+    field: 'maintenanceId',
+    title: 'Maintenance ID',
+    editable: false,
+    hidden: true,
+  },
+  {
+    field: 'maintStartDateTime',
+    title: 'From',
+    editable: true,
+  },
+  {
+    field: 'maintEndDateTime',
+    title: 'To',
+    editable: true,
+  },
+
+  {
+    field: 'remark',
+    title: 'Reason',
+    editable: true,
+  },
+]
+
 export const ShutDownAllColumns = [
   {
     field: 'discription',
