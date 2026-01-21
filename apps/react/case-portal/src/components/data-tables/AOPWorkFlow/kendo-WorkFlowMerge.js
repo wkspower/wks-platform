@@ -600,21 +600,20 @@ const WorkFlowMerge = () => {
     'Annual AOP Cost',
     'Plant Production Summary (T-14)',
     'Month Wise Production Plan (T-16)',
-    'Month Wise Raw Data(T-18)',
-    'Turnaround Report(T-19A)',
-    'Annual Production Plan(T-15)',
-    'Plant Contribution(T-21)',
+    'Month Wise Raw Data (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
+    'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
     'Specific Consumption Norms',
   ]
-
   const customPPTabs = [
     'Annual AOP Cost',
     'Plant Production Summary (T-14)',
     'Month Wise Production Plan (T-16)',
-    'Month Wise Raw Data(T-18)',
-    'Turnaround Report(T-19A)',
-    'Annual Production Plan(T-15)',
+    'Month Wise Raw Data (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
     'Norms Entry Sheet',
@@ -624,15 +623,14 @@ const WorkFlowMerge = () => {
     'Annual AOP Cost',
     'Plant Production Summary (T-14)',
     'Month Wise Production Plan (T-16)',
-    'Month Wise Raw Data(T-18)',
-    'Turnaround Report(T-19A)',
-    'Annual Production Plan(T-15)',
+    'Month Wise Raw Data (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
     'Norms Entry Sheet',
     'Specific Consumption Norms (T-17)',
   ]
-
   const PPTabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
@@ -643,7 +641,6 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary',
   ]
-
   const crackerTabs = [
     'Optimizer Input / Output',
     'Month Wise Production Plan',
@@ -653,7 +650,6 @@ const WorkFlowMerge = () => {
     'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
   ]
-
   const elastomerTabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
@@ -915,13 +911,6 @@ const WorkFlowMerge = () => {
         {/* For CRACKER */}
         {lowerVertName === 'cracker' && (
           <>
-            {/* {tabIndex === 0 && <BestAchievedReport />}
-            {tabIndex === 1 && <MonthWiseRawData />}
-            {tabIndex === 2 && <FurnaceRawData />}
-            {tabIndex === 3 && <PlantContribution />}
-            {tabIndex === 4 && <PlantContributionLastFourYears />}
- */}
-
             {tabIndex === 0 && <OptimizerReport />}
             {tabIndex === 1 && <BestAchievedReport />}
             {tabIndex === 2 && <MonthWiseRawData />}

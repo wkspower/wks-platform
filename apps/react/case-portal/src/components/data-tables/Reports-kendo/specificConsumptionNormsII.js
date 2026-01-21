@@ -143,10 +143,7 @@ export default function SpecificConsumptionNormsII() {
   const saveChanges = async (key) => {
     try {
       setLoading(true)
-      const modifiedCells = gridStates[key]?.modifiedCells || {}
-      const data = Object.values(modifiedCells)
-
-      if (data.length === 0) {
+      if (Object.keys(modifiedCells).length === 0) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'No Records to Save!',
@@ -158,6 +155,8 @@ export default function SpecificConsumptionNormsII() {
 
       // Get the original rows to merge with modified data
       const currentRows = reports[key]?.rows || []
+
+      var data = Object.values(modifiedCells)
 
       // Map data with proper field handling
       const payload = data.map((item) => {
@@ -283,7 +282,7 @@ export default function SpecificConsumptionNormsII() {
     <Box sx={{ width: '100%' }}>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
+        open={!!loading}
       >
         <CircularProgress color='inherit' />
       </Backdrop>
@@ -292,7 +291,7 @@ export default function SpecificConsumptionNormsII() {
         {`Specific Consumption Norms (T-17)`}
       </Typography>
 
-      {specificConsumptionCategories().map(({ key, title }) => {
+      {specificConsumptionCategories().map(({ key, title }, index) => {
         const rpt = reports[key] || {}
         const gridState = gridStates[key] || {
           remarkDialogOpen: false,
@@ -308,7 +307,6 @@ export default function SpecificConsumptionNormsII() {
               rows={rpt.rows || []}
               title={title}
               setRows={(updaterFn) => {
-                // Handle both direct values and updater functions
                 if (typeof updaterFn === 'function') {
                   const currentRows = rpt.rows || []
                   const newRows = updaterFn(currentRows)
@@ -317,7 +315,6 @@ export default function SpecificConsumptionNormsII() {
                   updateCategoryRows(key, updaterFn)
                 }
               }}
-              // Pass individual grid state
               remarkDialogOpen={gridState.remarkDialogOpen}
               setRemarkDialogOpen={(value) =>
                 updateGridState(key, { remarkDialogOpen: value })
@@ -330,13 +327,9 @@ export default function SpecificConsumptionNormsII() {
               setCurrentRowId={(value) =>
                 updateGridState(key, { currentRowId: value })
               }
-              modifiedCells={gridState.modifiedCells}
-              setModifiedCells={(value) =>
-                handleModifiedCellsUpdate(key, value)
-              }
-              loading={loading}
+              modifiedCells={modifiedCells}
+              setModifiedCells={setModifiedCells}
               handleRemarkCellClick={(row) => handleRemarkCellClick(key, row)}
-              // Pass save function for this specific category
               saveChanges={() => saveChanges(key)}
               permissions={{
                 customHeight: { mainBox: '32vh', otherBox: '100%' },
@@ -344,7 +337,7 @@ export default function SpecificConsumptionNormsII() {
                 remarksEditable: true,
                 showCalculate: false,
                 saveBtnForRemark: true,
-                saveBtn: true,
+                saveBtn: index === 0,
                 showWorkFlowBtns: true,
                 showTitle: true,
               }}

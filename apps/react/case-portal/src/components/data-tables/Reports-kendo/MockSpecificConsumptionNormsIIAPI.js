@@ -174,7 +174,7 @@ export const MockSpecificConsumptionNormsIIAPI = {
               field: 'remarks',
               title: 'Remarks',
               editable: true,
-              widthT: 100,
+              fixedWidth: 110,
             },
           ],
         }
@@ -334,6 +334,7 @@ export const MockSpecificConsumptionNormsIIAPI = {
               field: 'remarks',
               title: 'Remarks',
               editable: true,
+              fixedWidth: 110,
             },
           ],
         }
@@ -493,6 +494,7 @@ export const MockSpecificConsumptionNormsIIAPI = {
               field: 'remarks',
               title: 'Remarks',
               editable: true,
+              fixedWidth: 110,
             },
           ],
         }
@@ -652,6 +654,7 @@ export const MockSpecificConsumptionNormsIIAPI = {
               field: 'remarks',
               title: 'Remarks',
               editable: true,
+              fixedWidth: 110,
             },
           ],
         }
@@ -811,6 +814,7 @@ export const MockSpecificConsumptionNormsIIAPI = {
               field: 'remarks',
               title: 'Remarks',
               editable: true,
+              fixedWidth: 110,
             },
           ],
         }
@@ -969,6 +973,7 @@ export const MockSpecificConsumptionNormsIIAPI = {
               field: 'remarks',
               title: 'Remarks',
               editable: true,
+              fixedWidth: 110,
             },
           ],
         }
