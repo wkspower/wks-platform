@@ -1905,7 +1905,11 @@ const KendoDataTables = ({
                         data: (cellProps) => (
                           <ProductCell
                             {...cellProps}
+                            customModifiedCells={customModifiedCells}
+                            highlightField='productName1'
+                            rowId={cellProps.dataItem.id}
                             allProducts={allProducts}
+                            highlight={!!permissions?.highlightProductName1}
                           />
                         ),
                         headerCell: SimpleHeaderWithTooltip,

@@ -2,7 +2,17 @@ import { useMemo } from 'react'
 import { DropDownList } from '@progress/kendo-react-dropdowns'
 
 const ProductCellEditor = (props) => {
-  const { dataItem, field, onChange, allProducts, ...tdProps } = props
+  const {
+    dataItem,
+    field,
+    onChange,
+    allProducts,
+    customModifiedCells,
+    highlightField,
+    highlight,
+    rowId,
+    ...tdProps
+  } = props
 
   const allOptions = useMemo(
     () =>
@@ -14,7 +24,11 @@ const ProductCellEditor = (props) => {
     () => allOptions.find((opt) => opt.value === dataItem[field]) || null,
     [allOptions, dataItem, field],
   )
+  const checkField = highlightField || field
 
+  const isEdited = !!(
+    customModifiedCells?.[rowId] && checkField in customModifiedCells[rowId]
+  )
   if (typeof onChange === 'function') {
     const handleChange = (e) => {
       onChange({
@@ -31,7 +45,11 @@ const ProductCellEditor = (props) => {
         dataItemKey='value'
         value={currentValueObj}
         onChange={handleChange}
-        style={{ width: '100%' }}
+        style={{
+          width: '100%',
+          color: highlight && isEdited ? 'orange' : undefined,
+          fontWeight: highlight && isEdited ? 'bold' : undefined,
+        }}
       />
     )
   }

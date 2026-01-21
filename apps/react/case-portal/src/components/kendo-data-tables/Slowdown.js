@@ -1267,6 +1267,8 @@ const SlowDown = ({ permissions }) => {
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
       highlightDuration:
         lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightProductName1:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
     },
     isOldYear,
   )
