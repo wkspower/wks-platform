@@ -171,6 +171,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 				qualityTransaction.setUpdatedBy(Utility.getUserName());
 				qualityTransaction.setModifiedOn(new Date());
 				qualityTransaction.setProposedNorm(qualityTransactionDTO.getProposedNorm());
+				qualityTransaction.setPrevActual(qualityTransactionDTO.getPrevActual());
 				qualityTransactionRepository.save(qualityTransaction);
 			}
 			

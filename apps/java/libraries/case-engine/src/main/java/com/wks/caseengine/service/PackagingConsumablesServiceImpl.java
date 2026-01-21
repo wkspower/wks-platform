@@ -256,6 +256,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 				packagingAndConsumableTransaction.setUpdatedBy(Utility.getUserName());
 				packagingAndConsumableTransaction.setModifiedOn(new Date());
 				packagingAndConsumableTransaction.setProposedNorm(packagingAndConsumableTransactionDTO.getProposedNorm());
+				packagingAndConsumableTransaction.setPrevActual(packagingAndConsumableTransactionDTO.getPrevActual());
 				packagingAndConsumableTransactionRepository.save(packagingAndConsumableTransaction);
 			}
 			
@@ -584,6 +585,8 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
 	                dto.setUom(getStringCellValue(row.getCell(2), dto));
 	                dto.setPackagingPrice(getNumericCellValue(row.getCell(3), dto));
+	                dto.setPrevBudget(getNumericCellValue(row.getCell(4), dto));
+	                dto.setPrevActual(getNumericCellValue(row.getCell(5), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(6), dto));
 	                dto.setMaterialId(getStringCellValue(row.getCell(7), dto));
 	                dto.setPlantId(plantFKId.toString());
