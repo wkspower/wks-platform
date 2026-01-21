@@ -213,6 +213,7 @@ const NetUnitCapacity = ({
     })
 
     config.remark = {
+      title: 'Remark',
       editable: false,
       type: 'text',
       minWidth: 200,

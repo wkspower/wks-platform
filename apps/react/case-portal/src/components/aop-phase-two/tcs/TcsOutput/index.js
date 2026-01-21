@@ -1,7 +1,7 @@
 import { Box, Tab, Tabs, IconButton, Tooltip, Button } from '@mui/material'
 import HistoryIcon from '@mui/icons-material/History'
 import Notification from 'components/Utilities/Notification'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
@@ -15,6 +15,7 @@ import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
 import RemarkDialog from '../TcsInput/workflow/RemarkDialog'
 import HistoryDialog from '../TcsInput/workflow/HistoryDialog'
+import { getUserRole, ROLES } from '../utils/roleUtils'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -78,6 +79,12 @@ const TcsOutput = () => {
     setHistoryDialogOpen(true)
   }
 
+  const userRole = useMemo(() => {
+    let allUsers = keycloak?.realmAccess?.roles
+    console.log('allUsers', allUsers)
+    return getUserRole(allUsers)
+  }, [keycloak?.realmAccess?.roles])
+  console.log('userRole', userRole)
   // Get current tab object (has id, displayName, displaySequence)
   const currentTab = tabObj[tabIndex] || {}
 
@@ -284,17 +291,18 @@ const TcsOutput = () => {
           setSnackbarData,
           snackbarOpen,
           setSnackbarOpen,
+          userRole,
         })}
       </Box>
 
       <RemarkDialog
         open={remarkDialogOpen}
         handleClose={() => setRemarkDialogOpen(false)}
-        title='Level One Remark Submission'
         placeholder='Enter your remarks here...'
         onSubmit={handleRemarkSubmit}
         maxLength={1000}
         historyData={data}
+        role={userRole}
       />
 
       {/* History Dialog */}
@@ -303,6 +311,7 @@ const TcsOutput = () => {
         onClose={() => setHistoryDialogOpen(false)}
         title='Audit Trail'
         data={data}
+        role={userRole}
       />
 
       <Notification
