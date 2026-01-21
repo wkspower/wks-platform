@@ -6,7 +6,7 @@ import { MockSpecificConsumptionNormsIIAPI } from './MockSpecificConsumptionNorm
 import { useSession } from 'SessionStoreContext'
 import { useSelector } from 'react-redux'
 import ValueFormatterConsumption from 'utils/ValueFormatterConsumption'
-import { DataService } from 'services/DataService'
+import { SpecificConsumptionService } from 'services/SpecificConsumptionService'
 import {
   CircularProgress,
   Typography,
@@ -69,10 +69,10 @@ export default function SpecificConsumptionNormsII() {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const keycloak = useSession()
-  const [modifiedCells, setModifiedCells] = useState({});
+  const [modifiedCells, setModifiedCells] = useState({})
   // Create separate state for each grid
   const [gridStates, setGridStates] = useState({})
-  
+
   const valueFormat = ValueFormatterConsumption()
 
   // Initialize grid states
@@ -121,15 +121,15 @@ export default function SpecificConsumptionNormsII() {
   // Handle modified cells update and sync with rows
   const handleModifiedCellsUpdate = (key, modifiedCells) => {
     updateGridState(key, { modifiedCells })
-    
+
     // Update the rows in reports to reflect the changes
     setReports((prev) => {
       const currentRows = prev[key]?.rows || []
-      const updatedRows = currentRows.map(row => {
+      const updatedRows = currentRows.map((row) => {
         const modifiedRow = modifiedCells[row.id]
         return modifiedRow ? { ...row, ...modifiedRow } : row
       })
-      
+
       return {
         ...prev,
         [key]: {
@@ -140,91 +140,97 @@ export default function SpecificConsumptionNormsII() {
     })
   }
 
-
   const saveChanges = async (key) => {
-  try {
-    setLoading(true)
-    const modifiedCells = gridStates[key]?.modifiedCells || {}
-    const data = Object.values(modifiedCells)
-    
-    if (data.length === 0) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'No Records to Save!',
-        severity: 'info',
-      })
-      setLoading(false)
-      return
-    }
-    
-    // Get the original rows to merge with modified data
-    const currentRows = reports[key]?.rows || []
-    
-    // Map data with proper field handling
-    const payload = data.map(item => {
-      // Find the original row to get all fields
-      const originalRow = currentRows.find(row => row.id === item.id) || {}
-      
-      return {
-        sno: item.sno ?? originalRow.sno,
-        id: item.id ?? originalRow.id,
-        material: item.material ?? originalRow.material,
-        price: item.price ?? originalRow.price,
-        uom: item.uom ?? item.unit ?? originalRow.uom ?? originalRow.unit,
-        design: item.design ?? originalRow.design,
-        designRsMt: item.designRsMt ?? originalRow.designRsMt,
-        bestAchivedActual: item.bestAchivedActual ?? originalRow.bestAchivedActual,
-        bestAchivedActualRsMT: item.bestAchivedActualRsMT ?? originalRow.bestAchivedActualRsMT,
-        globalBenchmark: item.globalBenchmark ?? originalRow.globalBenchmark,
-        globalBenchmarkRsMT: item.globalBenchmarkRsMT ?? originalRow.globalBenchmarkRsMT,
-        budgetPrevYear: item.budgetPrevYear ?? originalRow.budgetPrevYear,
-        budgetPrevYearRsMT: item.budgetPrevYearRsMT ?? originalRow.budgetPrevYearRsMT,
-        actualPrevYear: item.actualPrevYear ?? originalRow.actualPrevYear,
-        actualPrevYearRsMT: item.actualPrevYearRsMT ?? originalRow.actualPrevYearRsMT,
-        proposedBudget: item.proposedBudget ?? originalRow.proposedBudget,
-        proposedBudgetRsMT: item.proposedBudgetRsMT ?? originalRow.proposedBudgetRsMT,
-        plantFkId: item.plantFkId ?? originalRow.plantFkId ?? PLANT_ID,
-        aopYear: item.aopYear ?? originalRow.aopYear ?? AOP_YEAR,
-        remarks: item.remarks ?? originalRow.remarks ?? '',
+    try {
+      setLoading(true)
+      const modifiedCells = gridStates[key]?.modifiedCells || {}
+      const data = Object.values(modifiedCells)
+
+      if (data.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'No Records to Save!',
+          severity: 'info',
+        })
+        setLoading(false)
+        return
       }
-    })
 
-    console.log('Saving payload:', payload) // Debug log
+      // Get the original rows to merge with modified data
+      const currentRows = reports[key]?.rows || []
 
-    // Save to API
-    const response = await DataService.saveSpecificConsumptionII(
-      keycloak,
-      payload,
-      PLANT_ID,
-      AOP_YEAR
-    )
+      // Map data with proper field handling
+      const payload = data.map((item) => {
+        // Find the original row to get all fields
+        const originalRow = currentRows.find((row) => row.id === item.id) || {}
 
-    if (response?.code === 200) {
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Saved Successfully!',
-        severity: 'success',
+        return {
+          sno: item.sno ?? originalRow.sno,
+          id: item.id ?? originalRow.id,
+          material: item.material ?? originalRow.material,
+          price: item.price ?? originalRow.price,
+          uom: item.uom ?? item.unit ?? originalRow.uom ?? originalRow.unit,
+          design: item.design ?? originalRow.design,
+          designRsMt: item.designRsMt ?? originalRow.designRsMt,
+          bestAchivedActual:
+            item.bestAchivedActual ?? originalRow.bestAchivedActual,
+          bestAchivedActualRsMT:
+            item.bestAchivedActualRsMT ?? originalRow.bestAchivedActualRsMT,
+          globalBenchmark: item.globalBenchmark ?? originalRow.globalBenchmark,
+          globalBenchmarkRsMT:
+            item.globalBenchmarkRsMT ?? originalRow.globalBenchmarkRsMT,
+          budgetPrevYear: item.budgetPrevYear ?? originalRow.budgetPrevYear,
+          budgetPrevYearRsMT:
+            item.budgetPrevYearRsMT ?? originalRow.budgetPrevYearRsMT,
+          actualPrevYear: item.actualPrevYear ?? originalRow.actualPrevYear,
+          actualPrevYearRsMT:
+            item.actualPrevYearRsMT ?? originalRow.actualPrevYearRsMT,
+          proposedBudget: item.proposedBudget ?? originalRow.proposedBudget,
+          proposedBudgetRsMT:
+            item.proposedBudgetRsMT ?? originalRow.proposedBudgetRsMT,
+          plantFkId: item.plantFkId ?? originalRow.plantFkId ?? PLANT_ID,
+          aopYear: item.aopYear ?? originalRow.aopYear ?? AOP_YEAR,
+          remarks: item.remarks ?? originalRow.remarks ?? '',
+        }
       })
-      updateGridState(key, { modifiedCells: {} })
-      await loadAll()
-    } else {
+
+      console.log('Saving payload:', payload) // Debug log
+
+      // Save to API
+      const response =
+        await SpecificConsumptionService.saveSpecificConsumptionII(
+          keycloak,
+          payload,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+        updateGridState(key, { modifiedCells: {} })
+        await loadAll()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Save failed!',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Save error:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: response?.message || 'Save failed!',
+        message: error?.message || 'Unexpected error occurred!',
         severity: 'error',
       })
+    } finally {
+      setLoading(false)
     }
-  } catch (error) {
-    console.error('Save error:', error)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: error?.message || 'Unexpected error occurred!',
-      severity: 'error',
-    })
-  } finally {
-    setLoading(false)
   }
-}
 
   const loadAll = async () => {
     setLoading(true)
@@ -233,17 +239,19 @@ export default function SpecificConsumptionNormsII() {
       await Promise.all(
         specificConsumptionCategories().map(async ({ key }) => {
           try {
-            const { columns } = await MockSpecificConsumptionNormsIIAPI.getReport({
-              category: key,
-              AOP_YEAR,
-              valueFormat,
-            })
-            const apiResp = await DataService.getSpecificConsumptionII(
-              keycloak,
-              key,
-              PLANT_ID,
-              AOP_YEAR,
-            )
+            const { columns } =
+              await MockSpecificConsumptionNormsIIAPI.getReport({
+                category: key,
+                AOP_YEAR,
+                valueFormat,
+              })
+            const apiResp =
+              await SpecificConsumptionService.getSpecificConsumptionII(
+                keycloak,
+                key,
+                PLANT_ID,
+                AOP_YEAR,
+              )
             const rows = apiResp?.data?.plantProductionData || []
             out[key] = { columns, rows }
           } catch (error) {
@@ -309,7 +317,6 @@ export default function SpecificConsumptionNormsII() {
                   updateCategoryRows(key, updaterFn)
                 }
               }}
-              
               // Pass individual grid state
               remarkDialogOpen={gridState.remarkDialogOpen}
               setRemarkDialogOpen={(value) =>
@@ -327,13 +334,10 @@ export default function SpecificConsumptionNormsII() {
               setModifiedCells={(value) =>
                 handleModifiedCellsUpdate(key, value)
               }
-              
               loading={loading}
               handleRemarkCellClick={(row) => handleRemarkCellClick(key, row)}
-              
               // Pass save function for this specific category
               saveChanges={() => saveChanges(key)}
-              
               permissions={{
                 customHeight: { mainBox: '32vh', otherBox: '100%' },
                 textAlignment: 'center',

@@ -12,12 +12,12 @@ export const MockSpecificConsumptionNormsIIAPI = {
       prevFY3 = `${start - 3}-${(end - 3).toString().padStart(2, '0')}`
       prevFY4 = `${start - 4}-${(end - 4).toString().padStart(2, '0')}`
     }
-//ProductMixAndProduction
-//OtherVariableCost
-//ProductionCostCalculations
-//BYPRODUCT
-//CatChem
-//RAWMATERIAL
+    //ProductMixAndProduction
+    //OtherVariableCost
+    //ProductionCostCalculations
+    //BYPRODUCT
+    //CatChem
+    //RAWMATERIAL
     switch (category) {
       case 'RAWMATERIAL':
         return {
