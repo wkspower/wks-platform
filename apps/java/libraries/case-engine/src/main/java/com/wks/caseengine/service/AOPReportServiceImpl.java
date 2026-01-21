@@ -1017,22 +1017,27 @@ public class AOPReportServiceImpl implements AOPReportService {
 	@Override
 	public AOPMessageVM updateSpecificConsumptionNormsT17Report(
 			List<PlantContributionSummaryT17DTO> plantContributionSummaryT17DTOs, String plantId, String year) {
+		List<PlantContributionSummaryBusinessDemandBasis> plantContributionSummaryBusinessDemandBasisList = new ArrayList<>();
 		try {
+			
 			for(PlantContributionSummaryT17DTO plantContributionSummaryT17DTO:plantContributionSummaryT17DTOs) {
 				if(plantContributionSummaryT17DTO.getId()!=null) {
 					Optional<PlantContributionSummaryBusinessDemandBasis> plantContributionSummaryBusinessDemandBasisOpt=	plantContributionSummaryBusinessDemandBasisRepository.findById(UUID.fromString(plantContributionSummaryT17DTO.getId()));
 					if(plantContributionSummaryBusinessDemandBasisOpt.isPresent()) {
 						PlantContributionSummaryBusinessDemandBasis plantContributionSummaryBusinessDemandBasis=plantContributionSummaryBusinessDemandBasisOpt.get();
 						plantContributionSummaryBusinessDemandBasis.setRemarks(plantContributionSummaryT17DTO.getRemarks());
-						plantContributionSummaryBusinessDemandBasisRepository.save(plantContributionSummaryBusinessDemandBasis);
+						plantContributionSummaryBusinessDemandBasisList.add(plantContributionSummaryBusinessDemandBasisRepository.save(plantContributionSummaryBusinessDemandBasis));
 					}
 				}
 			}
 		}catch (Exception ex) {
 			throw new RuntimeException("Failed to update data", ex);
 		}
-		// TODO Auto-generated method stub
-		return null;
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		aopMessageVM.setCode(200);
+		aopMessageVM.setData(plantContributionSummaryBusinessDemandBasisList);
+		aopMessageVM.setMessage("Data updated successfully");
+		return aopMessageVM;
 	}
 
 	
