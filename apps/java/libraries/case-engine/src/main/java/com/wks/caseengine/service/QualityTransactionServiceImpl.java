@@ -319,7 +319,16 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	                dto.setDisplayName(getStringCellValue(row.getCell(1), dto));
 	                dto.setUom(getStringCellValue(row.getCell(2), dto));
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(3), dto));
-	                dto.setPrevActual(getNumericCellValue(row.getCell(4), dto));
+	                Double prevActual = getNumericCellValue(row.getCell(4), dto);
+	                if (prevActual != null) {
+	                    if (prevActual >= 0 && prevActual <= 100) {
+	                        dto.setPrevActual(prevActual);
+	                    } else {
+	                    	dto.setErrDescription("Prev. Actual value should be between 0 to 100");
+	    	                dto.setSaveStatus("Failed");
+	                    }
+	                }
+
 	                Double cellValue = getNumericCellValue(row.getCell(5), dto);
 	                if (cellValue != null) {
 	                    if (cellValue >= 0 && cellValue <= 100) {
