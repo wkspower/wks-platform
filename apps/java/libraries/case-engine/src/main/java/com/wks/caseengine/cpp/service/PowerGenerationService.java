@@ -98,19 +98,19 @@ public class PowerGenerationService {
 
             Map<String, MonthlyHoursDTO> monthMap = new LinkedHashMap<>();
 
-            monthMap.put("April",     buildMonth(row.getApril(),     startYear, 4));
+            monthMap.put("April",     buildMonth(row.getApr(),     startYear, 4));
             monthMap.put("May",       buildMonth(row.getMay(),       startYear, 5));
-            monthMap.put("June",      buildMonth(row.getJune(),      startYear, 6));
-            monthMap.put("July",      buildMonth(row.getJuly(),      startYear, 7));
-            monthMap.put("August",    buildMonth(row.getAugust(),    startYear, 8));
-            monthMap.put("September", buildMonth(row.getSeptember(), startYear, 9));
-            monthMap.put("October",   buildMonth(row.getOctober(),   startYear,10));
-            monthMap.put("November",  buildMonth(row.getNovember(),  startYear,11));
-            monthMap.put("December",  buildMonth(row.getDecember(),  startYear,12));
+            monthMap.put("June",      buildMonth(row.getJun(),      startYear, 6));
+            monthMap.put("July",      buildMonth(row.getJul(),      startYear, 7));
+            monthMap.put("August",    buildMonth(row.getAug(),    startYear, 8));
+            monthMap.put("September", buildMonth(row.getSep(), startYear, 9));
+            monthMap.put("October",   buildMonth(row.getOct(),   startYear,10));
+            monthMap.put("November",  buildMonth(row.getNov(),  startYear,11));
+            monthMap.put("December",  buildMonth(row.getDec(),  startYear,12));
 
-            monthMap.put("January",   buildMonth(row.getJanuary(),   endYear, 1));
-            monthMap.put("February",  buildMonth(row.getFebruary(),  endYear, 2));
-            monthMap.put("March",     buildMonth(row.getMarch(),     endYear, 3));
+            monthMap.put("January",   buildMonth(row.getJan(),   endYear, 1));
+            monthMap.put("February",  buildMonth(row.getFeb(),  endYear, 2));
+            monthMap.put("March",     buildMonth(row.getMar(),     endYear, 3));
 
           
            
@@ -309,23 +309,25 @@ public class PowerGenerationService {
      List<AssetOperationalResponseDTO> nonEditableFields = new ArrayList<>();
 
            for(AssetMonthlyOperationalProjection operationalHour : operationalHours) {
+
+            System.out.println("getUtilityGenerated(): " + operationalHour.getUtilityGenerated() + "  " + "net operation hours: " + operationalHour.getJun());
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
             dto.setAssetName(operationalHour.getAssetName());
             dto.setAssetId(operationalHour.getAssetId());         // for post api
             dto.setAssetType(operationalHour.getAssetType());
             dto.setIsEditable(false);
-            dto.setApril(buildMonth(operationalHour.getApril(), startYear, 4));
+            dto.setApril(buildMonth(operationalHour.getApr(), startYear, 4));
             dto.setMay(buildMonth(operationalHour.getMay(), startYear, 5));
-            dto.setJune(buildMonth(operationalHour.getJune(), startYear, 6));
-            dto.setJuly(buildMonth(operationalHour.getJuly(), startYear, 7));
-            dto.setAug(buildMonth(operationalHour.getAugust(), startYear, 8));
-            dto.setSep(buildMonth(operationalHour.getSeptember(), startYear, 9));
-            dto.setOct(buildMonth(operationalHour.getOctober(), startYear, 10));
-            dto.setNov(buildMonth(operationalHour.getNovember(), startYear, 11));
-            dto.setDec(buildMonth(operationalHour.getDecember(), startYear, 12));
-            dto.setJan(buildMonth(operationalHour.getJanuary(), endYear, 1));
-            dto.setFeb(buildMonth(operationalHour.getFebruary(), endYear, 2));
-            dto.setMarch(buildMonth(operationalHour.getMarch(), endYear, 3));
+            dto.setJune(buildMonth(operationalHour.getJun(), startYear, 6));
+            dto.setJuly(buildMonth(operationalHour.getJul(), startYear, 7));
+            dto.setAug(buildMonth(operationalHour.getAug(), startYear, 8));
+            dto.setSep(buildMonth(operationalHour.getSep(), startYear, 9));
+            dto.setOct(buildMonth(operationalHour.getOct(), startYear, 10));
+            dto.setNov(buildMonth(operationalHour.getNov(), startYear, 11));
+            dto.setDec(buildMonth(operationalHour.getDec(), startYear, 12));
+            dto.setJan(buildMonth(operationalHour.getJan(), endYear, 1));
+            dto.setFeb(buildMonth(operationalHour.getFeb(), endYear, 2));
+            dto.setMarch(buildMonth(operationalHour.getMar(), endYear, 3));
           //  dto.setRemarks(operationalHour.getRemarks());
             dto.setUtilityGenerated(new AssetUtilityDTO(operationalHour.getUtilityGenerated(), operationalHour.getUtilityGeneratedSAPCode()));
             dto.setUtilityDistributed(new AssetUtilityDTO(operationalHour.getUtilityDistributed(), operationalHour.getUtilityDistributedSAPCode()));
@@ -355,6 +357,7 @@ public class PowerGenerationService {
 
                 dto.setIndex(7);
             }
+            System.out.println("dto utility generated: " + dto.getUtilityGenerated().getName() + "  " + "net operation hours: " + dto.getJune().getNetOperationHrs() + "  " + "shutdown hours: " + dto.getJune().getShutdownHrs());
             nonEditableFields.add(dto);
            }
     
