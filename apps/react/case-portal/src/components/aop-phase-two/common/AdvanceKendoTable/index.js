@@ -46,6 +46,42 @@ import { getColumnMenuCheckboxFilter } from '../utilities/ColumnMenu1'
 import valueFormatterByUOM from '../commonUtilityFunctions'
 import DateTimePickerEditor from '../utilities/DatePickeronSelectedYr'
 
+// Helper function to get nested value from object
+const getNestedValue = (obj, path) => {
+  if (!path || !obj) return undefined
+  const parts = path.split('.')
+  let value = obj
+  for (let part of parts) {
+    value = value?.[part]
+  }
+  return value
+}
+
+// Helper function to apply Kendo number format
+const applyKendoNumberFormat = (value, format) => {
+  if (!format || value === null || value === undefined) return value
+
+  // Parse Kendo format string like '{0:0.00}' or '{0:0.0000}'
+  const match = format.match(/\{0:([^}]+)\}/)
+  if (!match) return value
+
+  const formatSpec = match[1]
+  const numValue = parseFloat(value)
+
+  if (isNaN(numValue)) return value
+
+  // Handle decimal format like '0.00' or '0.0000'
+  if (formatSpec.match(/^0+\.0+$/)) {
+    const decimalPlaces = formatSpec.split('.')[1].length
+    // Truncate instead of rounding to preserve original precision
+    const factor = Math.pow(10, decimalPlaces)
+    const truncated = Math.trunc(numValue * factor) / factor
+    return truncated.toFixed(decimalPlaces)
+  }
+
+  return value
+}
+
 export const particulars = [
   'normParameterId',
   'normParametersFKId',
@@ -155,7 +191,6 @@ const AdvanceKendoTable = ({
   const [gridCurrent, setGridCurrent] = useState(0)
   const [customModifiedCells, setCustomModifiedCells] = useState({})
   const [disableRedHighlight, setDisableRedHighlight] = useState(false)
-  const [isFormatByUOM, setIsFormatByUOM] = useState(false)
   const keycloak = useSession()
   const READ_ONLY = getRoleName(keycloak)
   const ColumnMenuCheckboxFilterDate = getColumnMenuDateFilter(rows)
@@ -776,15 +811,27 @@ const AdvanceKendoTable = ({
       children,
       customModifiedCells,
       allRedCell,
-      isFormatByUOM = false,
+      format = null,
     } = props
-    const uomType = dataItem?.UOM
     const rowId = dataItem.id
-    let value = valueFormatterByUOM(dataItem[field], uomType)
+    // Handle nested fields like 'apr.kbpsd'
+    let value = field?.includes('.')
+      ? getNestedValue(dataItem, field)
+      : dataItem[field]
+    let formattedValue = value
+
+    // Apply Kendo number format if provided
+    if (format && (typeof value === 'number' || typeof value === 'string')) {
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      if (!isNaN(numValue)) {
+        formattedValue = applyKendoNumberFormat(numValue, format)
+      }
+    }
+
     if (disableRedHighlight) {
       return (
         <td {...tdProps} title={value}>
-          {isFormatByUOM ? value : children}
+          {formattedValue}
         </td>
       )
     }
@@ -814,7 +861,7 @@ const AdvanceKendoTable = ({
           fontWeight: shouldHighlight ? 'bold' : undefined,
         }}
       >
-        {isFormatByUOM ? value : children}
+        {formattedValue}
       </td>
     )
   }
@@ -828,15 +875,27 @@ const AdvanceKendoTable = ({
       customModifiedCells,
       allRedCell,
       allRedCell2,
-      isFormatByUOM = false,
+      format = null,
     } = props
-    const uomType = dataItem?.UOM
     const rowId = dataItem.id
-    let value = valueFormatterByUOM(dataItem[field], uomType)
+    // Handle nested fields like 'apr.kbpsd'
+    let value = field?.includes('.')
+      ? getNestedValue(dataItem, field)
+      : dataItem[field]
+    let formattedValue = value
+
+    // Apply Kendo number format if provided
+    if (format && (typeof value === 'number' || typeof value === 'string')) {
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      if (!isNaN(numValue)) {
+        formattedValue = applyKendoNumberFormat(numValue, format)
+      }
+    }
+
     if (disableRedHighlight) {
       return (
         <td {...tdProps} title={value}>
-          {isFormatByUOM ? value : children}
+          {formattedValue}
         </td>
       )
     }
@@ -911,7 +970,7 @@ const AdvanceKendoTable = ({
           // backgroundColor: highlightColorFullCell ? 'lightGrey' : undefined,
         }}
       >
-        {isFormatByUOM ? value : children}
+        {children}
       </td>
     )
   }
@@ -1119,6 +1178,7 @@ const AdvanceKendoTable = ({
                   customModifiedCells={customModifiedCells}
                   allRedCell={allRedCell}
                   disableRedHighlight={disableRedHighlight}
+                  format={col.format}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,
@@ -1198,7 +1258,7 @@ const AdvanceKendoTable = ({
                     allRedCell={allRedCell}
                     allRedCell2={allRedCell2}
                     disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
+                    format={col.format}
                   />
                 ) : (
                   <RedHighlightCell
@@ -1206,7 +1266,7 @@ const AdvanceKendoTable = ({
                     customModifiedCells={customModifiedCells}
                     allRedCell={allRedCell}
                     disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
+                    format={col.format}
                   />
                 ),
               headerCell: SimpleHeaderWithTooltip,
@@ -1258,7 +1318,7 @@ const AdvanceKendoTable = ({
                     allRedCell={allRedCell}
                     allRedCell2={allRedCell2}
                     disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
+                    format={col.format}
                   />
                 ) : (
                   <RedHighlightCell
@@ -1266,7 +1326,7 @@ const AdvanceKendoTable = ({
                     customModifiedCells={customModifiedCells}
                     allRedCell={allRedCell}
                     disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
+                    format={col.format}
                   />
                 ),
               headerCell: SimpleHeaderWithTooltip,
@@ -1305,7 +1365,7 @@ const AdvanceKendoTable = ({
                     allRedCell={allRedCell}
                     allRedCell2={allRedCell2}
                     disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
+                    format={col.format}
                   />
                 ) : (
                   <RedHighlightCell
@@ -1313,7 +1373,7 @@ const AdvanceKendoTable = ({
                     customModifiedCells={customModifiedCells}
                     allRedCell={allRedCell}
                     disableRedHighlight={disableRedHighlight}
-                    isFormatByUOM={isFormatByUOM}
+                    format={col.format}
                   />
                 ),
               headerCell: SimpleHeaderWithTooltip,

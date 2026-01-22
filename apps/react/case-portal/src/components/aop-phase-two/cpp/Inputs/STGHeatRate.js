@@ -48,6 +48,7 @@ const STGHeatRate = () => {
       title: 'SVH Inlet (TPH)',
       width: 120,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 100,
     },
@@ -56,6 +57,7 @@ const STGHeatRate = () => {
       title: 'SM Bleed Flow (TPH)',
       width: 140,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 120,
     },
@@ -64,6 +66,7 @@ const STGHeatRate = () => {
       title: 'SL Ext Flow (TPH)',
       width: 130,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 110,
     },
@@ -72,6 +75,7 @@ const STGHeatRate = () => {
       title: 'Condensing load (m3/hr)',
       width: 150,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 130,
     },
@@ -80,6 +84,7 @@ const STGHeatRate = () => {
       title: 'Heat Rate Calc (Kcal/KWH)',
       width: 160,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 140,
     },
@@ -135,7 +140,7 @@ const STGHeatRate = () => {
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
     showImport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `STG Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
     showDropdown: false,
@@ -228,21 +233,28 @@ const STGHeatRate = () => {
 
     setLoading(true)
     try {
-      await InputApiService.saveSTGHeatRateExcel(
+      const response = await InputApiService.saveSTGHeatRateExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Excel file imported successfully!',
-        severity: 'success',
-      })
-
-      // Refresh data after import
-      await fetchSTGHeatRateData()
+      if (response?.success) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        await fetchHeatRateData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
       setSnackbarOpen(true)
@@ -252,6 +264,28 @@ const STGHeatRate = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await InputApiService.exportSTGHeatRateExcel(keycloak)
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting STG Heat Rate data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
     }
   }
 
@@ -288,6 +322,7 @@ const STGHeatRate = () => {
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
+        handleExport={handleExport}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

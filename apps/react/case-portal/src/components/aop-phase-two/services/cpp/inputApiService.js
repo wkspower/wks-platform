@@ -6,10 +6,15 @@ export const InputApiService = {
   saveOperationHours,
   saveOperationHoursExcel,
   saveSTGOperationHoursExcel,
+  exportPowerResponseExcel,
+  savePowerResponseExcel,
+  exportSteamResponseExcel,
+  saveSteamResponseExcel,
 
   getImportPowerData,
   saveImportPower,
   saveImportPowerExcel,
+  exportImportPowerExcel,
 
   getAssetPriority,
   saveAssetPriority,
@@ -25,14 +30,17 @@ export const InputApiService = {
   getHeatRateData,
   saveHeatRateData,
   saveHeatRateExcel,
+  exportHeatRateExcel,
 
   getSTGHeatRateData,
   saveSTGHeatRateData,
   saveSTGHeatRateExcel,
+  exportSTGHeatRateExcel,
 
   getHRSGHeatRateData,
   saveHRSGHeatRateData,
   saveHRSGHeatRateExcel,
+  exportHRSGHeatRateExcel,
 
   // Generic Excel Import/Export
   saveExcelData,
@@ -82,6 +90,48 @@ async function saveOperationHours(keycloak, AOP_YEAR, payload) {
     console.log(e)
     return await Promise.reject(e)
   }
+}
+
+// Power Response Excel Import
+async function savePowerResponseExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  return saveExcelData(
+    file,
+    keycloak,
+    'assets/power-response/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
+}
+
+// Power Response Excel Export
+async function exportPowerResponseExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `assets/power-response/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `Power_Generation_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
+}
+
+// Steam Response Excel Import
+async function saveSteamResponseExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  return saveExcelData(
+    file,
+    keycloak,
+    'assets/steam-response/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
+}
+
+// Steam Response Excel Export
+async function exportSteamResponseExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `assets/steam-response/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `Steam_Generation_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
 }
 
 // ========================|| Import Power APIs ||=====================================//
@@ -472,7 +522,18 @@ async function exportExcelData(keycloak, params) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = fileName
+
+    // Extract filename from Content-Disposition header if available
+    const contentDisposition = resp.headers.get('content-disposition')
+    let downloadFileName = fileName
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^";\n]+)"?/i)
+      if (filenameMatch && filenameMatch[1]) {
+        downloadFileName = filenameMatch[1]
+      }
+    }
+
+    a.download = downloadFileName
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -520,6 +581,16 @@ async function saveImportPowerExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   )
 }
 
+// Import Power Excel Export
+async function exportImportPowerExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `asset-import-mapping/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `plant_import_mapping_${AOP_YEAR}.xlsx`,
+    method: 'GET',
+  })
+}
+
 // Asset Priority Excel Import
 async function saveAssetPriorityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   return saveExcelData(
@@ -564,27 +635,117 @@ async function exportAssetCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
 
 // Heat Rate Excel Import (GT Heat Rate)
 async function saveHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(file, keycloak, 'heat-rate/import', PLANT_ID, AOP_YEAR)
+  const url = `${Config.CaseEngineUrl}/task/heat-rate/import`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return { success: true }
+  } catch (e) {
+    console.error(`Error importing Heat Rate Excel:`, e)
+    return Promise.reject(e)
+  }
+}
+
+// Heat Rate Excel Export
+async function exportHeatRateExcel(keycloak, assetId) {
+  return exportExcelData(keycloak, {
+    endpoint: `heat-rate/export/${assetId}`,
+    queryParams: {},
+    fileName: `Heat_Rate.xlsx`,
+    method: 'GET',
+  })
 }
 
 // STG Heat Rate Excel Import
 async function saveSTGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'stg-extraction-lookup/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  const url = `${Config.CaseEngineUrl}/task/stg-extraction-lookup/import`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return { success: true }
+  } catch (e) {
+    console.error(`Error importing STG Heat Rate Excel:`, e)
+    return Promise.reject(e)
+  }
+}
+
+// STG Heat Rate Excel Export
+async function exportSTGHeatRateExcel(keycloak) {
+  return exportExcelData(keycloak, {
+    endpoint: `stg-extraction-lookup/export`,
+    queryParams: {},
+    fileName: `STG_Extraction_Lookup.xlsx`,
+    method: 'GET',
+  })
 }
 
 // HRSG Heat Rate Excel Import
 async function saveHRSGHeatRateExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
-  return saveExcelData(
-    file,
-    keycloak,
-    'hrsg-heat-rate-lookup/import',
-    PLANT_ID,
-    AOP_YEAR,
-  )
+  const url = `${Config.CaseEngineUrl}/task/hrsg-heat-rate-lookup/import`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return { success: true }
+  } catch (e) {
+    console.error(`Error importing HRSG Heat Rate Excel:`, e)
+    return Promise.reject(e)
+  }
+}
+
+// HRSG Heat Rate Excel Export
+async function exportHRSGHeatRateExcel(keycloak) {
+  return exportExcelData(keycloak, {
+    endpoint: `hrsg-heat-rate-lookup/export`,
+    queryParams: {},
+    fileName: `HRSG_Heat_Rate_Lookup.xlsx`,
+    method: 'GET',
+  })
 }

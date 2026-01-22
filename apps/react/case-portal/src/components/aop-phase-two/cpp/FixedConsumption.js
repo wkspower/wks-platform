@@ -64,19 +64,19 @@ const FixedConsumption = () => {
     },
     {
       field: 'costCenter',
-      title: 'CostCenter',
+      title: 'Cost Center',
       widthT: 120,
       type: 'text',
       editable: false,
-      hidden: true,
+      hidden: false,
     },
     {
       field: 'costCenterId',
-      title: 'CostCenter ID',
+      title: 'Cost Center ID',
       widthT: 95,
       type: 'text',
       editable: false,
-      hidden: true,
+      hidden: false,
     },
     {
       field: 'cppUtility',
@@ -225,13 +225,6 @@ const FixedConsumption = () => {
       align: 'left',
       headerAlign: 'left',
       type: 'number1',
-      format: valueFormat,
-    },
-    {
-      field: 'grandTotal',
-      title: 'Grand Total',
-      widthT: 120,
-      type: 'number',
       format: valueFormat,
     },
     {

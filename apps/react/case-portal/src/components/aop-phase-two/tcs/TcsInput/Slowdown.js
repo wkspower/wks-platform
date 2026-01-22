@@ -11,6 +11,7 @@ import {
   validateDateRanges,
   validateDateOverlaps,
 } from 'components/aop-phase-two/common/commonUtilityFunctions'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
 
 const Slowdown = ({
   PLANT_ID,
@@ -484,38 +485,40 @@ const Slowdown = ({
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      <AdvanceKendoTable
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchSlowdownData}
-        configType='tcs_slowdown'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columns}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        saveChanges={validateData}
-        deleteRowData={deleteRowData}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-        customItemChange={handleCustomItemChange}
-        initialFieldValues={{ particulates: PLANT_NAME }}
-        dateCalculationConfig={{
-          dateField1: 'startDate',
-          dateField2: 'endDate',
-          daysField: 'durationInDays',
-          requiredInHr: false,
-          roundDaysAndDates: true,
-        }}
-      />
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchSlowdownData}
+          configType='tcs_slowdown'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columns}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          saveChanges={validateData}
+          deleteRowData={deleteRowData}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          customItemChange={handleCustomItemChange}
+          initialFieldValues={{ particulates: PLANT_NAME }}
+          dateCalculationConfig={{
+            dateField1: 'startDate',
+            dateField2: 'endDate',
+            daysField: 'durationInDays',
+            requiredInHr: false,
+            roundDaysAndDates: true,
+          }}
+        />
+      </Stack>
     </Box>
   )
 }

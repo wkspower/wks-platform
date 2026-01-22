@@ -10,6 +10,7 @@ import {
 } from './UnitCapacityComponents/uomConversionUtils'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import { ROLES } from '../utils/roleUtils'
 
 const NetUnitCapacity = ({
   title,
@@ -19,6 +20,7 @@ const NetUnitCapacity = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
+  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -213,6 +215,7 @@ const NetUnitCapacity = ({
     })
 
     config.remark = {
+      title: 'Remark',
       editable: false,
       type: 'text',
       minWidth: 200,
@@ -306,22 +309,25 @@ const NetUnitCapacity = ({
     setRemarkDialogOpen(true)
   }
 
-  const permissions = {
-    customHeight: { mainBox: '32vh', otherBox: '100%' },
-    textAlignment: 'center',
-    allAction: true,
-    addButton: false,
-    remarksEditable: false,
-    showCalculate: false,
-    showExport: true,
-    showImport: false,
-    saveBtnForRemark: false,
-    saveBtn: false,
-    showWorkFlowBtns: false,
-    showTitle: true,
-    showDropdown: false,
-    approveBtn: true,
-  }
+  const permissions = useMemo(
+    () => ({
+      customHeight: { mainBox: '32vh', otherBox: '100%' },
+      textAlignment: 'center',
+      allAction: true,
+      addButton: false,
+      remarksEditable: false,
+      showCalculate: false,
+      showExport: true,
+      showImport: false,
+      saveBtnForRemark: false,
+      saveBtn: false,
+      showWorkFlowBtns: false,
+      showTitle: true,
+      showDropdown: false,
+      approveBtn: userRole === ROLES.EPS_ENGINEER,
+    }),
+    [userRole],
+  )
 
   return (
     <Box>
