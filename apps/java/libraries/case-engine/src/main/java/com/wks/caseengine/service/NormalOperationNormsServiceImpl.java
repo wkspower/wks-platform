@@ -115,6 +115,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 	@Override
 	public AOPMessageVM getNormalOperationNormsData(String year, String plantId, String gradeId,String mode) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Boolean withGrade=false;
+		if(plant.getName().equalsIgnoreCase("SBR") && site.getName().equalsIgnoreCase("HMD") && vertical.getName().equalsIgnoreCase("ELASTOMER")) {
+			withGrade=true;
+		}
 		try {
 			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId), gradeId,mode);
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
@@ -125,8 +132,8 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				mCUNormsValueDTO.setSiteFkId(row[1].toString());
 				mCUNormsValueDTO.setPlantFkId(row[2].toString());
 				mCUNormsValueDTO.setVerticalFkId(row[3].toString());
-				Verticals vertical = verticalRepository.findById(UUID.fromString(row[3].toString())).get();
-				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
+				
+				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || withGrade) {
 					mCUNormsValueDTO.setGradeId(row[4].toString());
 					mCUNormsValueDTO.setMaterialFkId(row[5].toString());
 					mCUNormsValueDTO.setApril(row[6] != null ? Double.parseDouble(row[6].toString()) : null);
@@ -821,12 +828,16 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		try {
 			Plants plant = plantsRepository.findById(plantId).get();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Boolean withGrade=false;
+			if(plant.getName().equalsIgnoreCase("SBR") && site.getName().equalsIgnoreCase("HMD") && vertical.getName().equalsIgnoreCase("ELASTOMER")) {
+				withGrade=true;
+			}
 			String viewName = "vwScrn" + vertical.getName() + "NormalOperationNorms";
 			// Validate or sanitize viewName before using it directly in the query to
 			// prevent SQL injection
 			String sql = null;
-			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || withGrade) {
 				sql = "SELECT * FROM " + viewName
 						+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND Grade_FK_Id = :gradeId";
 			}else if (vertical.getName().equalsIgnoreCase("Cracker")) {
@@ -838,7 +849,7 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("financialYear", financialYear);
 			query.setParameter("plantId", plantId);
-			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")) {
+			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || withGrade) {
 				query.setParameter("gradeId", UUID.fromString(gradeId));
 			}
 			if (vertical.getName().equalsIgnoreCase("Cracker")) {
