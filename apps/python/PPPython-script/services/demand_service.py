@@ -96,7 +96,7 @@ def fetch_fixed_process_demands(month: int, year: int) -> dict:
         return None
     fym_id = row[0]
     
-    # Fetch Power demands from CalculatedProcessDemand via process_demand_service
+   # Fetch Power demands from CalculatedProcessDemand via process_demand_service
     from services.process_demand_service import get_process_demand_for_month
     process_demands = get_process_demand_for_month(month, year)
     power_process_kwh = process_demands.get("power_process", 0.0)

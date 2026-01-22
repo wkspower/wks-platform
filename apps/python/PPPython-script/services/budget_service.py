@@ -621,16 +621,20 @@ def calculate_budget_with_iteration(
         for hrsg_data in hrsg_dispatch_list:
             hrsg_name = hrsg_data.get("name", "").upper()
             dispatched_supp = hrsg_data.get("dispatched_supp_mt", 0)
+            free_steam = hrsg_data.get("free_steam_mt", 0)
+            
+            # HRSG is available only if it has free steam or dispatched supp firing
+            is_available = (free_steam > 0 or dispatched_supp > 0)
             
             if 'HRSG1' in hrsg_name:
                 shp_from_hrsg1 = dispatched_supp
-                hrsg1_available = True
+                hrsg1_available = is_available
             elif 'HRSG2' in hrsg_name:
                 shp_from_hrsg2 = dispatched_supp
-                hrsg2_available = True
+                hrsg2_available = is_available
             elif 'HRSG3' in hrsg_name:
                 shp_from_hrsg3 = dispatched_supp
-                hrsg3_available = True
+                hrsg3_available = is_available
     else:
         # Fallback to old logic if hrsg_dispatch not available
         if usd_result.get("final_shp_capacity"):
@@ -658,12 +662,18 @@ def calculate_budget_with_iteration(
     # Free steam is tracked separately in total_free_steam
     # Total SHP supply = total_free_steam + shp_from_hrsg1 + shp_from_hrsg2 + shp_from_hrsg3
     
+    # Extract power result data for utility calculation
+    power_result_data = usd_result.get("power_result", {})
+    import_power_mwh = power_result_data.get("mandatoryImportUsed", 0)
+    total_demand_mwh = power_result_data.get("totalDemandUnits", 0)
+    
     # Calculate utilities
     utilities = calculate_utilities_from_dispatch(
         gt1_gross_mwh=gt1_gross,
         gt2_gross_mwh=gt2_gross,
         gt3_gross_mwh=gt3_gross,
         stg_gross_mwh=stg_gross,
+        import_power_mwh=import_power_mwh,  # Import power from Rev Proc
         shp_from_hrsg1=shp_from_hrsg1,
         shp_from_hrsg2=shp_from_hrsg2,
         shp_from_hrsg3=shp_from_hrsg3,
@@ -684,6 +694,7 @@ def calculate_budget_with_iteration(
         gt1_free_steam_factor=gt1_free_steam_factor,  # Free steam factor from HeatRateLookup
         gt2_free_steam_factor=gt2_free_steam_factor,  # Free steam factor from HeatRateLookup
         gt3_free_steam_factor=gt3_free_steam_factor,  # Free steam factor from HeatRateLookup
+        total_demand_mwh=total_demand_mwh,  # Total demand including U4U
         gt1_available=gt1_avail,
         gt2_available=gt2_avail,
         gt3_available=gt3_avail,
