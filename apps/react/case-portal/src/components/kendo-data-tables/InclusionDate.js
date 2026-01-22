@@ -805,7 +805,7 @@ const InclusionDate = ({ permissions }) => {
         IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       showTitleNameBusiness: true,
-      titleName: `${SCREEN_NAME}`,
+      titleName: 'inclusion Date',
 
       uploadExcelBtn:
         lowerVertName === 'pe' ||

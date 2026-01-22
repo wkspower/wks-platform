@@ -79,6 +79,8 @@ export const dateFields1 = [
   'sdED',
   'sdSD',
   'targetDate',
+  'inclusionEndDate',
+  'inclusionStartDate',
 ]
 
 export const monthMap = {
@@ -1776,6 +1778,7 @@ const KendoDataTables = ({
                   return (
                     <GridColumn
                       key={col.field}
+                      width={col?.fixedWidth ? col?.fixedWidth : undefined}
                       field={col.field}
                       title={col.title || col.headerName}
                       cells={{

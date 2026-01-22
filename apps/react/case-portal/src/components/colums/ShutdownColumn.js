@@ -6,20 +6,23 @@ export const InclusionDateColumns = [
     hidden: true,
   },
   {
-    field: 'maintStartDateTime',
-    title: 'From',
+    field: 'inclusionStartDate',
+    title: 'From Date',
     editable: true,
+    fixedWidth: '200px',
   },
   {
-    field: 'maintEndDateTime',
-    title: 'To',
+    field: 'inclusionEndDate',
+    title: 'To Date',
     editable: true,
+    fixedWidth: '200px',
   },
 
   {
     field: 'remark',
     title: 'Reason',
     editable: true,
+    fixedWidth: '200px',
   },
 ]
 
