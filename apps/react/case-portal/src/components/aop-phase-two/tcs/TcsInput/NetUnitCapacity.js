@@ -28,7 +28,6 @@ const NetUnitCapacity = ({
   const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
-  const [selectedDropdown, setSelectedDropdown] = useState('KBPSD')
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -36,69 +35,29 @@ const NetUnitCapacity = ({
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
 
   // Fetch Unit Capacity data for this capacity type
-  const fetchUnitCapacityData = useCallback(
-    async (selectedUOM) => {
-      if (!PLANT_ID || !AOP_YEAR) return
-      try {
-        setLoading(true)
+  const fetchNetCapacityData = useCallback(async () => {
+    if (!AOP_YEAR) return
+    try {
+      setLoading(true)
 
-        const response = await TcsApiService.getTcsUnitCapacityData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+      const response = await TcsApiService.getTcsNetCapacityData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        'currentOperating',
+      )
 
-        // Add 2 dummy records to the API response
-        if (response?.results && Array.isArray(response.results)) {
-          response.results.push(
-            {
-              id: 'dummy_1',
-              particulates: 'Dummy Unit 1',
-              april: 100,
-              may: 105,
-              june: 110,
-              july: 115,
-              aug: 120,
-              sep: 125,
-              oct: 130,
-              nov: 135,
-              dec: 140,
-              jan: 145,
-              feb: 150,
-              mar: 155,
-              remark: 'This is a dummy record for testing',
-              insertedDateTime: new Date().toISOString(),
-            },
-            {
-              id: 'dummy_2',
-              particulates: 'Dummy Unit 2',
-              april: 200,
-              may: 210,
-              june: 220,
-              july: 230,
-              aug: 240,
-              sep: 250,
-              oct: 260,
-              nov: 270,
-              dec: 280,
-              jan: 290,
-              feb: 300,
-              mar: 310,
-              remark: 'This is another dummy record for testing',
-              insertedDateTime: new Date().toISOString(),
-            },
-          )
-        }
-
-        let transformedData = []
-        if (response?.results && Array.isArray(response.results)) {
-          transformedData = response.results.map((item, index) => {
+      let transformedData = []
+      if (response?.results && Array.isArray(response.results)) {
+        transformedData = response.results
+          .filter((item) => Object.keys(item).length > 0)
+          .map((item, index) => {
             // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
             const months = [
-              'april',
+              'apr',
               'may',
-              'june',
-              'july',
+              'jun',
+              'jul',
               'aug',
               'sep',
               'oct',
@@ -128,37 +87,34 @@ const NetUnitCapacity = ({
               isEditable: false,
             }
           })
-        }
-
-        if (response?.headers && response?.keys) {
-          setApiMetadata({ headers: response.headers, keys: response.keys })
-        }
-
-        setRows(transformedData)
-        setOriginalRows(transformedData)
-      } catch (err) {
-        console.error(`Error fetching Net Unit Capacity data:`, err)
-        setSnackbarData({
-          message: `Failed to load Unit Capacity data. Please try again.`,
-          severity: 'error',
-        })
-        setSnackbarOpen(true)
-        setRows([])
-      } finally {
-        setLoading(false)
       }
-    },
-    [keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen],
-  )
+
+      if (response?.headers && response?.keys) {
+        setApiMetadata({ headers: response.headers, keys: response.keys })
+      }
+
+      setRows(transformedData)
+      setOriginalRows(transformedData)
+    } catch (err) {
+      console.error(`Error fetching Net Unit Capacity data:`, err)
+      setSnackbarData({
+        message: `Failed to load Unit Capacity data. Please try again.`,
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      setRows([])
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak, PLANT_ID, AOP_YEAR, setSnackbarData, setSnackbarOpen])
 
   // Fetch capacity data when dropdown selection changes
   useEffect(() => {
-    if (PLANT_ID && AOP_YEAR && selectedDropdown) {
-      // Clear modified cells when UOM changes to reset edit state
+    if (AOP_YEAR) {
       setModifiedCells({})
-      fetchUnitCapacityData(selectedDropdown)
+      fetchNetCapacityData()
     }
-  }, [PLANT_ID, AOP_YEAR, selectedDropdown, fetchUnitCapacityData])
+  }, [AOP_YEAR])
 
   // Column configuration for Unit Capacity with monthly nested KBPSD and KTPD
   const columnConfig = useMemo(() => {
@@ -180,10 +136,10 @@ const NetUnitCapacity = ({
 
     // Add monthly columns with KBPSD and KTPD sub-columns
     const months = [
-      'april',
+      'apr',
       'may',
-      'june',
-      'july',
+      'jun',
+      'jul',
       'aug',
       'sep',
       'oct',
@@ -212,13 +168,13 @@ const NetUnitCapacity = ({
       }
     })
 
-    config.remark = {
-      title: 'Remark',
-      editable: false,
-      type: 'text',
-      minWidth: 200,
-      widthT: 250,
-    }
+    // config.remark = {
+    //   title: 'Remark',
+    //   editable: false,
+    //   type: 'text',
+    //   minWidth: 200,
+    //   widthT: 250,
+    // }
 
     return config
   }, [valueFormat])
@@ -245,10 +201,10 @@ const NetUnitCapacity = ({
 
     // Group monthly columns with KBPSD and KTPD sub-columns
     const months = [
-      { key: 'april', headerKey: 4 },
+      { key: 'apr', headerKey: 4 },
       { key: 'may', headerKey: 5 },
-      { key: 'june', headerKey: 6 },
-      { key: 'july', headerKey: 7 },
+      { key: 'jun', headerKey: 6 },
+      { key: 'jul', headerKey: 7 },
       { key: 'aug', headerKey: 8 },
       { key: 'sep', headerKey: 9 },
       { key: 'oct', headerKey: 10 },
@@ -336,7 +292,7 @@ const NetUnitCapacity = ({
         <AdvanceKendoTable
           rows={rows}
           setRows={setRows}
-          fetchData={() => fetchUnitCapacityData(selectedDropdown)}
+          fetchData={() => fetchNetCapacityData()}
           title={title}
           handleRemarkCellClick={handleRemarkCellClick}
           columns={columns}
@@ -353,8 +309,6 @@ const NetUnitCapacity = ({
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
           permissions={permissions}
-          selectedDropdownValue={selectedDropdown}
-          setSelectedDropdownValue={setSelectedDropdown}
         />
       </Stack>
     </Box>
