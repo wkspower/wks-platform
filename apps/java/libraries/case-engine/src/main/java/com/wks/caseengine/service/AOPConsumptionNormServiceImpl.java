@@ -571,6 +571,9 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			}
 			String sql=null;
 			String viewName = "vwScrn" + vertical.getName() + "AOPConsumptionNorms";
+			if(withGrade){
+				viewName = "vwScrn" + vertical.getName() + "AOPConsumptionNormsGrade";
+			}
 			if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || withGrade) {
 				 sql = "SELECT * FROM " + viewName + " WHERE Plant_FK_Id = :plantFkId AND AOPYear = :aopYear AND Grade_FK_Id = :gradeId";
 			}else {

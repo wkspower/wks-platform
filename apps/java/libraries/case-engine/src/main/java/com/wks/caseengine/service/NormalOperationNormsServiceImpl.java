@@ -834,13 +834,17 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 				withGrade=true;
 			}
 			String viewName = "vwScrn" + vertical.getName() + "NormalOperationNorms";
+			if(withGrade) {
+				viewName = "vwScrn" + vertical.getName() + "NormalOperationNormsGrade";
+			}
 			// Validate or sanitize viewName before using it directly in the query to
 			// prevent SQL injection
 			String sql = null;
 			if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET") || withGrade) {
 				sql = "SELECT * FROM " + viewName
 						+ " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND Grade_FK_Id = :gradeId";
-			}else if (vertical.getName().equalsIgnoreCase("Cracker")) {
+			}
+			else if (vertical.getName().equalsIgnoreCase("Cracker")) {
 				sql = "SELECT * FROM " + viewName + " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId AND mode = :mode";
 			} else {
 				sql = "SELECT * FROM " + viewName + " WHERE FinancialYear = :financialYear AND Plant_FK_Id = :plantId";
