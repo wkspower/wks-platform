@@ -11,18 +11,17 @@ public interface AssetMonthlyOperationalProjection {
     String getUtilityGeneratedSAPCode();
     String getUtilityDistributed();
     String getUtilityDistributedSAPCode();
-    Double getApril();
+    Double getApr();
     Double getMay();
-    Double getJune();
-    Double getJuly();
-    Double getAugust();
-    Double getSeptember();
-    Double getOctober();
-    Double getNovember();
-    Double getDecember();
-
-    Double getJanuary();
-    Double getFebruary();
-    Double getMarch();
+    Double getJun();
+    Double getJul();
+    Double getAug();
+    Double getSep();
+    Double getOct();
+    Double getNov();
+    Double getDec();
+    Double getJan();
+    Double getFeb();
+    Double getMar();
     String getRemarks();
 }
