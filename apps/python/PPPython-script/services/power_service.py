@@ -109,10 +109,18 @@ def _dispatch_once(
     4. Only dispatch available assets
     5. If demand < total MIN load, all assets still run at MIN (excess power generated)
     
+    PRIORITY NORMALIZATION:
+    =======================
+    - NULL → 999 (dispatch last)
+    - 0 or negative → 1 (convert to minimum valid priority)
+    - > 100 → 100 (cap at maximum)
+    - Valid range: 1-100 (1 = highest priority)
+    
     This ensures:
     - No asset runs below its minimum operating capacity
     - Assets are increased in priority order (not jumped to MAX)
     - Demand is met incrementally, not by maxing out assets
+    - Invalid priorities are handled gracefully
     """
     avail = avail_df.copy()
     dispatch = []
@@ -168,12 +176,28 @@ def _dispatch_once(
     
     for idx, r in avail.iterrows():
         min_energy = float(r["minEnergy"])
+        
+        # NORMALIZE PRIORITY (handle 0, NULL, negative, out-of-range)
+        # Business Rule: Valid priority range is 1-100
+        # - NULL → 999 (dispatch last)
+        # - 0 or negative → 1 (convert to minimum valid priority)
+        # - > 100 → 100 (cap at maximum)
+        raw_priority = r["Priority"]
+        if pd.isna(raw_priority) or raw_priority is None:
+            normalized_priority = 999.0  # NULL → Dispatch last
+        elif raw_priority <= 0:
+            normalized_priority = 1.0     # 0 or negative → Minimum valid priority
+        elif raw_priority > 100:
+            normalized_priority = 100.0   # Cap at maximum
+        else:
+            normalized_priority = float(raw_priority)
+        
         asset_dispatch[idx] = {
             "row": r,
             "gross": min_energy,  # Start at MIN load
             "min_energy": min_energy,
             "max_energy": float(r["maxEnergy"]),
-            "priority": float(r["Priority"]),
+            "priority": normalized_priority,  # Use normalized priority
         }
         total_gross += min_energy
     
