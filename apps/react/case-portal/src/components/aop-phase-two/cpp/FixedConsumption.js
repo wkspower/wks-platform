@@ -73,7 +73,7 @@ const FixedConsumption = () => {
     {
       field: 'costCenterId',
       title: 'Cost Center ID',
-      widthT: 95,
+      widthT: 120,
       type: 'text',
       editable: false,
       hidden: false,
