@@ -1271,65 +1271,69 @@ const ConfigurationTable = () => {
           flexDirection: 'column',
         }}
       >
-        <AopTabs
-          tabIndex={tabIndex}
-          setTabIndex={setTabIndex}
-          tabs={tabs.map((tabId) => {
-            const tabInfo = availableTabs.find(
-              (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-            )
+        <Box display='flex' alignItems='center'>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={tabs.map((tabId) => {
+              const tabInfo = availableTabs.find(
+                (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+              )
 
-            if (tabInfo) {
-              const originalName = tabInfo.displayName
-              if (
-                lowerVertName === 'aromatics' &&
-                ['constant', 'constants'].includes(originalName?.toLowerCase())
-              ) {
-                return 'User Input'
+              if (tabInfo) {
+                const originalName = tabInfo.displayName
+                if (
+                  lowerVertName === 'aromatics' &&
+                  ['constant', 'constants'].includes(
+                    originalName?.toLowerCase(),
+                  )
+                ) {
+                  return 'User Input'
+                }
+                return originalName
               }
-              return originalName
-            }
-          })}
-        />
+            })}
+          />
 
-        {lowerVertName === 'aromatics' && tabs?.length > 0 && (
-          <Box mt={0.5}>
-            <ButtonGroup aria-label='revision group'>
-              {['1', '2', '3'].map((num) => {
-                const selected = revision === num
+          {lowerVertName === 'aromatics' && tabs?.length > 0 && (
+            <Box ml='auto'>
+              <ButtonGroup aria-label='revision group'>
+                {['1', '2', '3'].map((num) => {
+                  const selected = revision === num
 
-                return (
-                  <Button
-                    key={num}
-                    onClick={() => handleOpenDialogRev(num)}
-                    variant={selected ? 'contained' : 'outlined'}
-                    size='small'
-                    sx={{
-                      textTransform: 'none',
-                      fontSize: '0.75rem',
-                      padding: '1px 7px',
-                      minWidth: '36px',
-                      mr: 0.5,
-                      ...(selected && {
-                        bgcolor: '#0100cb',
-                        color: '#fff',
-                        borderColor: '#0100cb',
-                        fontWeight: 'bold',
-                      }),
-                      ...(!selected && {
-                        borderColor: '#000000ff',
-                        color: '#000000ff',
-                        fontWeight: 'bold',
-                      }),
-                    }}
-                  >
-                    {`Rev ${num}`}
-                  </Button>
-                )
-              })}
-            </ButtonGroup>
-          </Box>
-        )}
+                  return (
+                    <Button
+                      key={num}
+                      onClick={() => handleOpenDialogRev(num)}
+                      variant={selected ? 'contained' : 'outlined'}
+                      size='small'
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        padding: '1px 7px',
+                        minWidth: '36px',
+                        mr: 0.5,
+                        ...(selected && {
+                          bgcolor: '#0100cb',
+                          color: '#fff',
+                          borderColor: '#0100cb',
+                          fontWeight: 'bold',
+                        }),
+                        ...(!selected && {
+                          borderColor: '#000000ff',
+                          color: '#000000ff',
+                          fontWeight: 'bold',
+                        }),
+                      }}
+                    >
+                      {`Rev ${num}`}
+                    </Button>
+                  )
+                })}
+              </ButtonGroup>
+            </Box>
+          )}
+        </Box>
 
         <Box>
           {(() => {

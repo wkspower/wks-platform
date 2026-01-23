@@ -1,103 +1,51 @@
 import { useGridApiRef } from '@mui/x-data-grid'
-import React, { useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import { validateFields } from 'utils/validationUtils'
-import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
-
 import { ExclusionDateColumns } from 'components/colums/ShutdownColumn'
-import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
+import { ExclusionDateApiDataService } from 'services/exclusion-date-api-service'
 import { getRoleName } from 'services/role-service'
-import ElastomerShutDown from './ElastomerShutDown'
 
 const ExclusionDate = ({ permissions }) => {
-  const [_plantID, set_PlantID] = useState('')
-  const [modifiedCells, setModifiedCells] = React.useState({})
-  const [allProducts, setAllProducts] = useState([])
-  const [allDescriptionDrpdwn, setAllDescriptionDrpdwn] = useState([])
+  const [modifiedCells, setModifiedCells] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
   const {
     verticalChange,
     yearChanged,
     oldYear,
-    plantID,
     plantObject,
     siteObject,
-    verticalObject,
     year,
     screenTitle,
   } = dataGridStore
 
   const PLANT_ID = plantObject?.id
-  const PLANT_NAME = plantObject?.name
-
-  const SITE_ID = siteObject?.id
-  const SITE_NAME = siteObject?.name
-
-  const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
-
-  const AOP_YEAR = year?.selectedYear
-  const vertName = verticalChange?.selectedVertical
-  const SCREEN_NAME = screenTitle?.title
-
   const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
   const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
-  const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
-
+  const VERTICAL_NAME_NO_CASE = verticalChange?.selectedVertical?.toUpperCase()
   const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
-
-  const lowerVertName = vertName?.toLowerCase()
-  const lowerSiteName = SITE_NAME?.toLowerCase()
-  const lowerPlantName = PLANT_NAME?.toLowerCase()
-  const plantName = plantObject?.name
-  const siteName = siteObject?.name
-  const isOldYear = false
-  const IS_OLD_YEAR = oldYear?.oldYear
-
-  const IS_NON_PRODUCT_VERTICAL =
-    lowerVertName === 'elastomer' ||
-    lowerVertName === 'pvc' ||
-    lowerVertName === 'vcm' ||
-    lowerVertName === 'aromatics' ||
-    lowerVertName === 'pta' ||
-    lowerVertName === 'pet' ||
-    lowerVertName === 'meg' ||
-    lowerVertName === 'pe' ||
-    lowerVertName === 'pp'
-
-  const DELETE_NOTE =
-    'Warning: Please verify the shutdown consumption quantity before deleting the shutdown activity.'
-
+  const AOP_YEAR = year?.selectedYear
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
-  const [rows, setRows] = useState()
-  const [rowsSlowdown, setRowsSlowdown] = useState()
-
+  const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const keycloak = useSession()
-
-  // const READ_ONLY = getRoleName(keycloak)
+  const IS_OLD_YEAR = oldYear?.oldYear
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
-
-  const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
-  const IS_PET_VERTICAL = lowerVertName === 'pet'
+  const colDefs = ExclusionDateColumns
 
   const handleRemarkCellClick = (row) => {
     if (READ_ONLY) return
@@ -106,486 +54,33 @@ const ExclusionDate = ({ permissions }) => {
     setRemarkDialogOpen(true)
   }
 
-  const saveChanges = React.useCallback(async () => {
-    try {
-      var data = Object.values(modifiedCells)
-
-      //1 NO RECORDS
-      if (data.length == 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'No Records to Save!',
-          severity: 'info',
-        })
-        return
-      }
-
-      const yearStr = AOP_YEAR
-      let startLimit, endLimit
-      if (yearStr) {
-        const [startYear, endYear] = yearStr
-          .split('-')
-          .map((y) => parseInt(y.trim(), 10))
-        if (!isNaN(startYear) && !isNaN(endYear)) {
-          // Use yyyy-mm-dd format for reliable parsing
-          startLimit = new Date(`${startYear}-04-01T00:00:00`)
-          endLimit = new Date(`20${endYear}-03-31T23:59:59`)
-        }
-      }
-      // Helper to format date as dd/mm/yyyy
-      // eslint-disable-next-line
-      function formatDateDDMMYYYY(date) {
-        if (!(date instanceof Date) || isNaN(date)) return ''
-        const d = date.getDate().toString().padStart(2, '0')
-        const m = (date.getMonth() + 1).toString().padStart(2, '0')
-        const y = date.getFullYear()
-        return `${d}/${m}/${y}`
-      }
-
-      for (const record of data) {
-        const startDate =
-          record.maintStartDateTime instanceof Date
-            ? record.maintStartDateTime
-            : new Date(record.maintStartDateTime)
-        const endDate =
-          record.maintEndDateTime instanceof Date
-            ? record.maintEndDateTime
-            : new Date(record.maintEndDateTime)
-
-        // Validate date format: dd/mm/yyyy (by parsing and checking)
-        if (
-          startLimit &&
-          endLimit &&
-          (!startDate ||
-            !endDate ||
-            isNaN(startDate) ||
-            isNaN(endDate) ||
-            startDate < startLimit ||
-            startDate > endLimit ||
-            endDate < startLimit ||
-            endDate > endLimit)
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-            severity: 'error',
-          })
-          return
-        }
-      }
-
-      //2 REMARKS VALIDATION
-      let requiredFields
-      if (lowerVertName === 'pe') {
-        if (siteName?.toLowerCase() === 'nmd') {
-          requiredFields = ['discription', 'remark']
-        } else {
-          requiredFields = ['discription', 'remark']
-        }
-      } else if (lowerVertName === 'pta') {
-        requiredFields = ['discriptionDrpdwn', 'remark']
-      } else if (lowerVertName === 'pp') {
-        requiredFields = ['discription', 'remark']
-      } else {
-        requiredFields = ['discription', 'remark']
-      }
-
-      const rowsWithErrors = new Set()
-
-      // Check each record for missing required fields
-      for (const record of data) {
-        for (const field of requiredFields) {
-          if (!record[field] || record[field].trim() === '') {
-            record.isError = true
-            rowsWithErrors.add(record.id)
-            setRows((prevRows) =>
-              prevRows.map((row) => {
-                if (row.id === record.id) {
-                  return { ...row, isError: true }
-                }
-                return row
-              }),
-            )
-            break // Exit inner loop once we find one missing field
-          }
-        }
-      }
-
-      const validationMessage = validateFields(data, requiredFields)
-      if (validationMessage) {
-        let message = validationMessage
-        if (IS_PE_PP_VERTICAL && validationMessage.includes('Remark')) {
-          message = 'Please update the field: Shutdown Basis'
-        }
-        setRows((prevRows) =>
-          prevRows.map((row) =>
-            data.some((d) => d.id === row.id) ? { ...row, isError: true } : row,
-          ),
-        )
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: message,
-          severity: 'error',
-        })
-        return
-      }
-
-      //3 Track duplicate descriptions
-      const duplicateRows = new Set()
-      const allDescriptions = rows.map((r) =>
-        (r.discription || '').trim().toLowerCase(),
-      )
-      const duplicate = allDescriptions.find(
-        (d, i) => d && allDescriptions.indexOf(d) !== i,
-      )
-
-      if (duplicate && lowerVertName !== 'pta') {
-        rows.forEach((row) => {
-          if ((row.discription || '').trim().toLowerCase() === duplicate) {
-            row.isError = true
-          } else {
-            row.isError = false
-          }
-        })
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: `The description "${duplicate}" already exists in the list. Please enter a unique description to avoid duplication.`,
-          severity: 'error',
-        })
-        return
-      }
-
-      //5 START DATE END DATE MANDATORY
-      const allRecords = [...rows]
-      const timeErrorRows = new Set() // Add this line
-
-      for (const record of data) {
-        // Date required validation (before checking time order)
-        const dateRequiredRows = new Set()
-        for (const record of data) {
-          const startMissing = !record.maintStartDateTime
-          const endMissing = !record.maintEndDateTime
-
-          if (startMissing || endMissing) {
-            record.isError = true
-            dateRequiredRows.add(record.id)
-          }
-        }
-
-        if (dateRequiredRows.size > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Start Date and End Date are required for all records.',
-            severity: 'error',
-          })
-          return
-        }
-
-        if (
-          record.maintStartDateTime &&
-          record.maintEndDateTime &&
-          record.maintStartDateTime.getTime() >=
-            record.maintEndDateTime.getTime()
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
-            severity: 'error',
-          })
-          return
-        }
-      }
-
-      //6 SHUTDOWN SPANS MULTIPLE MONTHS
-      if (
-        lowerVertName == 'meg' ||
-        lowerVertName == 'elastomer' ||
-        lowerVertName == 'vcm' ||
-        lowerVertName == 'pvc' ||
-        lowerVertName == 'pta' ||
-        lowerVertName == 'pe' ||
-        lowerVertName == 'pp' ||
-        lowerVertName == 'pet'
-      ) {
-        // Check for shutdown timeframe spanning multiple months
-        const monthSpanRows = new Set() // Add this line
-
-        if (lowerVertName != 'vcm') {
-          for (const row of allRecords) {
-            const start = new Date(row.maintStartDateTime)
-            const end = new Date(row.maintEndDateTime)
-            //shutdown timeframe for Multiple months
-            if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
-
-            const formatDate = (date) =>
-              date.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-              })
-
-            const isSameMonth =
-              start.getMonth() === end.getMonth() &&
-              start.getFullYear() === end.getFullYear()
-
-            if (!isSameMonth) {
-              row.isError = true
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
-                severity: 'error',
-              })
-              return
-            }
-          }
-        }
-
-        //Shutdown timeframe overlapping of same time
-        for (let i = 0; i < allRecords.length; i++) {
-          const a = allRecords[i]
-          const aStart = new Date(a.maintStartDateTime).getTime()
-          const aEnd = new Date(a.maintEndDateTime).getTime()
-
-          if (isNaN(aStart) || isNaN(aEnd)) continue
-
-          for (let j = 0; j < allRecords.length; j++) {
-            if (i === j) continue
-            const b = allRecords[j]
-            const bStart = new Date(b.maintStartDateTime).getTime()
-            const bEnd = new Date(b.maintEndDateTime).getTime()
-
-            if (isNaN(bStart) || isNaN(bEnd)) continue
-
-            if (aStart < bEnd && bStart < aEnd) {
-              a.isError = true
-              b.isError = true
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: `The shutdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
-                severity: 'error',
-              })
-              return
-            }
-          }
-        }
-
-        //7 Slowdown and shutdown timeframe overlapping
-        //THEN CHECK 1 SCREEN DATA WITH ANOTHER SCREEN
-
-        if (
-          lowerVertName != 'elastomer' &&
-          // lowerVertName != 'vcm' &&
-          lowerVertName != 'pvc'
-        ) {
-          for (let i = 0; i < rows.length; i++) {
-            const a = rows[i]
-            const aStart = new Date(a.maintStartDateTime).getTime()
-            const aEnd = new Date(a.maintEndDateTime).getTime()
-
-            if (isNaN(aStart) || isNaN(aEnd)) continue
-
-            for (let j = 0; j < rowsSlowdown.length; j++) {
-              const b = rowsSlowdown[j]
-              const bStart = new Date(b.maintStartDateTime).getTime()
-              const bEnd = new Date(b.maintEndDateTime).getTime()
-
-              if (isNaN(bStart) || isNaN(bEnd)) continue
-
-              if (aStart < bEnd && bStart < aEnd) {
-                // Add this line
-                a.isError = true // Add this line
-                setSnackbarOpen(true)
-                setSnackbarData({
-                  message: `The timeframe for "${a.discription} (Shutdown)" overlaps with "${b.discription} (Slowdown)". Please ensure no overlapping timeframes.`,
-                  severity: 'error',
-                })
-                return
-              }
-            }
-          }
-        }
-      }
-
-      saveShutdownData(data)
-    } catch (error) {
-      console.log('Error saving changes:', error)
-    }
-  }, [modifiedCells, rows, rowsSlowdown, lowerVertName])
-
-  function addTimeOffset(dateTime) {
-    if (!dateTime) return null
-    const date = new Date(dateTime)
-    date.setUTCHours(date.getUTCHours() + 5)
-    date.setUTCMinutes(date.getUTCMinutes() + 30)
-    return date
-  }
-
-  const saveShutdownData = async (newRow) => {
-    setLoading(true)
-    try {
-      const shutdownDetails = newRow.map((row) => ({
-        productId: (() => {
-          if (
-            lowerVertName === verticalEnums.PE ||
-            lowerVertName === verticalEnums.PP
-          ) {
-            const matched = allProducts.find(
-              (p) => p.displayName === row.productName1,
-            )
-            return matched?.realId || null
-          }
-          return null
-        })(),
-        productName:
-          lowerVertName === verticalEnums.PE ||
-          lowerVertName === verticalEnums.PP
-            ? row.productName1
-            : null,
-        discription: row.discription || row.discriptionDrpdwn,
-        durationInHrs: (() => {
-          const v = findDuration('1', row)
-          if (!v) return null
-          const [h = '00', m = '00'] = String(v).split('.')
-          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
-        })(),
-        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-        audityear: AOP_YEAR,
-        id: row.idFromApi || null,
-        remark: row.remark || 'null',
-      }))
-
-      const response = await DataService.saveShutdownData(
-        PLANT_ID,
-        shutdownDetails,
-        keycloak,
-      )
-
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Saved Successfully!',
-        severity: 'success',
-      })
-
-      const maintenanceResponse =
-        await MaintenanceDetailsApiService.getMaintenanceData(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-
-      setModifiedCells({})
-
-      setLoading(false)
-      return response
-    } catch (error) {
-      setLoading(false)
-      console.error('Error saving shutdown data:', error)
-    } finally {
-      fetchData()
-
-      setLoading(false)
-    }
-  }
-
-  const updateShutdownData = async (newRow) => {
-    try {
-      var maintenanceId = newRow?.maintenanceId
-
-      const slowDownDetails = {
-        productId: newRow.product,
-        discription: newRow.discription,
-        durationInHrs: newRow.durationInHrs,
-        maintEndDateTime: newRow.maintEndDateTime,
-        maintStartDateTime: newRow.maintStartDateTime,
-      }
-
-      const response = await DataService.updateShutdownData(
-        maintenanceId,
-        slowDownDetails,
-        keycloak,
-      )
-
-      setSnackbarOpen(true)
-
-      setSnackbarData({
-        message: 'Updated successfully!',
-        severity: 'success',
-      })
-
-      return response
-    } catch (error) {
-      console.error('Error saving  data:', error)
-    } finally {
-      fetchData()
-    }
-  }
-
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
     try {
       setLoading(true)
-      const data = await DataService.getShutDownPlantData(
+      const data = await ExclusionDateApiDataService.getExclusionDate(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      const dataSlowDown = await DataService.getSlowDownPlantData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-
-      const formattedDataSlowDown = dataSlowDown.map((item, index) => ({
+      const modifiedData = data.map((item, index) => ({
         ...item,
         idFromApi: item?.id,
         id: index,
         originalRemark: item.remark,
-        inEdit: false,
-        maintStartDateTime: new Date(item?.maintStartDateTime),
-        maintEndDateTime: new Date(item?.maintEndDateTime),
+        exclusionEndDate: item?.exclusionEndDate
+          ? new Date(item.exclusionEndDate)
+          : null,
+        exclusionStartDate: item?.exclusionStartDate
+          ? new Date(item.exclusionStartDate)
+          : null,
       }))
 
-      setRowsSlowdown(formattedDataSlowDown)
-
-      const formattedData = data.map((item, index) => {
-        const productObj = allProducts.find((p) => p.realId === item.product)
-        const descriptionObj = allDescriptionDrpdwn.find(
-          (p) => p.name === item.discription,
-        )
-
-        if (lowerVertName == 'pta') {
-          return {
-            ...item,
-            idFromApi: item?.id,
-            id: index,
-            originalRemark: item.remark,
-            inEdit: false,
-            maintStartDateTime: new Date(item?.maintStartDateTime),
-            maintEndDateTime: new Date(item?.maintEndDateTime),
-            discriptionDrpdwn: descriptionObj ? descriptionObj.displayName : '',
-          }
-        }
-
-        return {
-          ...item,
-          idFromApi: item?.id,
-          id: index,
-          originalRemark: item.remark,
-          inEdit: false,
-          maintStartDateTime: new Date(item?.maintStartDateTime),
-          maintEndDateTime: new Date(item?.maintEndDateTime),
-          productName1: productObj ? productObj.displayName : '',
-        }
-      })
-
-      setRows(formattedData)
-      setLoading(false)
+      setRows(modifiedData)
     } catch (error) {
       console.error('Error fetching data:', error)
+    } finally {
       setLoading(false)
     }
   }
@@ -594,91 +89,50 @@ const ExclusionDate = ({ permissions }) => {
     fetchData()
   }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
 
-  useEffect(() => {
-    if (lowerVertName == 'pta' && allDescriptionDrpdwn?.length > 0) {
-      fetchData()
-    } else if (allProducts.length > 0) {
-      if (!PLANT_ID || !AOP_YEAR) return
-      fetchData()
-    }
-  }, [
-    allProducts,
-    allDescriptionDrpdwn,
-    oldYear,
-    yearChanged,
-    keycloak,
-    PLANT_ID,
-    lowerVertName,
-  ])
-
-  const colDefs = useMemo(() => {
-    switch (lowerVertName) {
-      case verticalEnums.AROMATICS:
-        return ExclusionDateColumns
-      default:
-        return ExclusionDateColumns
-    }
-  }, [lowerVertName, plantName])
-
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
-
     try {
       const { idFromApi, id } = paramsForDelete
-      const deleteId = id
-
+      const deleteIdLocal = id
       if (!idFromApi) {
-        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
-      }
-
-      if (idFromApi) {
-        await DataService.deleteShutdownData(idFromApi, keycloak, PLANT_ID)
-        setRows((prevRows) => prevRows.filter((row) => row.id !== deleteId))
+        setRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteIdLocal),
+        )
+      } else {
+        await ExclusionDateApiDataService.deleteExclusionDate(
+          idFromApi,
+          keycloak,
+        )
+        setRows((prevRows) =>
+          prevRows.filter((row) => row.id !== deleteIdLocal),
+        )
         setSnackbarOpen(true)
         setSnackbarData({
           message: 'Record Deleted successfully!',
           severity: 'success',
         })
-        fetchData()
-
-        const maintenanceResponse =
-          await MaintenanceDetailsApiService.getMaintenanceData(
-            keycloak,
-            PLANT_ID,
-            AOP_YEAR,
-          )
-      } else {
-        setLoading(false)
+        // refresh list
+        await fetchData()
       }
     } catch (error) {
       console.error('Error deleting Record', error)
+    } finally {
+      setLoading(false)
     }
   }
 
   const downloadExcelForConfiguration = async () => {
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Excel download started!',
-      severity: 'success',
-    })
-
     try {
       let response
-      if (IS_NON_PRODUCT_VERTICAL) {
-        response = await DataService.exportShutdownNonProduct(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          EXCEL_EXPORT_TITLE,
-        )
-      } else {
-        response = await DataService.exportShutdownNonProductWise(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          EXCEL_EXPORT_TITLE,
-        )
-      }
+
+      response = await ExclusionDateApiDataService.exportExclusionDate(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        EXCEL_EXPORT_TITLE,
+      )
+
+      return response
     } catch (error) {
       console.error('Error downloading Excel:', error)
       setSnackbarData({
@@ -690,27 +144,18 @@ const ExclusionDate = ({ permissions }) => {
     }
   }
 
-  const importShutdown = async (rawFile) => {
+  const importExcel = async (rawFile) => {
     setLoading(true)
 
     try {
       let response
 
-      if (IS_NON_PRODUCT_VERTICAL) {
-        response = await DataService.ImportShutdownNonProduct(
-          rawFile,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      } else {
-        response = await DataService.ImportShutdownProductWise(
-          rawFile,
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      }
+      response = await ExclusionDateApiDataService.importExclusionDate(
+        rawFile,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -719,7 +164,7 @@ const ExclusionDate = ({ permissions }) => {
           severity: 'success',
         })
         setModifiedCells({})
-        fetchData()
+        await fetchData()
       } else if (response?.code === 400 && response?.data) {
         const byteCharacters = atob(response.data)
         const byteNumbers = Array.from(byteCharacters, (char) =>
@@ -745,18 +190,15 @@ const ExclusionDate = ({ permissions }) => {
           message: 'Partial data saved. Error file downloaded.',
           severity: 'warning',
         })
-        fetchData()
+        await fetchData()
       } else {
         setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Upload Failed!',
-          severity: 'error',
-        })
+        setSnackbarData({ message: 'Upload Failed!', severity: 'error' })
       }
 
       return response
     } catch (error) {
-      console.error('Error uploading xcel:', error)
+      console.error('Error uploading excel:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Unexpected error occurred!',
@@ -768,7 +210,7 @@ const ExclusionDate = ({ permissions }) => {
   }
 
   const handleExcelUpload = (rawFile) => {
-    importShutdown(rawFile)
+    importExcel(rawFile)
   }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
@@ -801,25 +243,68 @@ const ExclusionDate = ({ permissions }) => {
       customHeight: permissions?.customHeight,
       allAction: true,
       downloadExcelBtn: true,
-      showNoteWhileDeleting:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
-
       showTitleNameBusiness: true,
       titleName: 'Exclusion Date',
-
-      uploadExcelBtn:
-        lowerVertName === 'pe' ||
-        lowerVertName === 'pp' ||
-        lowerVertName === 'elastomer' ||
-        lowerVertName === 'pvc' ||
-        lowerVertName === 'vcm' ||
-        lowerVertName === 'pta' ||
-        lowerVertName === 'pet'
-          ? true
-          : false,
+      uploadExcelBtn: true,
     },
-    isOldYear,
+    IS_OLD_YEAR,
   )
+
+  const saveAPI = async (newRows) => {
+    try {
+      const payloadData = newRows.map((row) => ({
+        id: row?.id || null,
+        exclusionEndDate: row?.exclusionEndDate,
+        exclusionStartDate: row?.exclusionStartDate,
+        remarks: row?.remark || row?.remarks,
+      }))
+
+      const response = await ExclusionDateApiDataService.postExclusionDate(
+        payloadData,
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
+      setModifiedCells({})
+
+      // intentionally not tracking unsavedChangesRef here (was undefined in original code)
+      await fetchData()
+      return response
+    } catch (error) {
+      console.error('Error in saving data!', error)
+    }
+  }
+
+  const saveChanges = useCallback(async () => {
+    setLoading(true)
+
+    try {
+      if (Object.keys(modifiedCells).length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+        setLoading(false)
+        return
+      }
+
+      const rawData = Object.values(modifiedCells)
+      const data = rawData.filter((row) => row.inEdit)
+      if (data.length === 0) {
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+        setLoading(false)
+        return
+      }
+
+      await saveAPI(data)
+    } catch (error) {
+      console.log('Error saving changes:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [modifiedCells])
 
   return (
     <div>
@@ -837,7 +322,6 @@ const ExclusionDate = ({ permissions }) => {
         columns={colDefs}
         rows={rows}
         paginationOptions={[100, 200, 300]}
-        updateShutdownData={updateShutdownData}
         saveChanges={saveChanges}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
@@ -857,13 +341,8 @@ const ExclusionDate = ({ permissions }) => {
         currentRowId={currentRowId}
         deleteRowData={deleteRowData}
         permissions={adjustedPermissions}
-        disableRedHighlight={true}
-        allProducts={allProducts}
-        allDescriptionDrpdwn={allDescriptionDrpdwn}
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
-        deleteNoteOnDeleteDialogeBox={DELETE_NOTE}
-        screenType='shutdown'
       />
     </div>
   )
