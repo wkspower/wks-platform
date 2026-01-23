@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
@@ -43,6 +43,8 @@ const Norms = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+
+  const [calculateBtnEnabled, setCalculateBtnEnabled] = useState(false)
 
   // Column definitions
   const nestedColumns = [
@@ -137,7 +139,7 @@ const Norms = () => {
           field: 'apr.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -178,7 +180,7 @@ const Norms = () => {
           field: 'may.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -219,7 +221,7 @@ const Norms = () => {
           field: 'jun.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -260,7 +262,7 @@ const Norms = () => {
           field: 'jul.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -301,7 +303,7 @@ const Norms = () => {
           field: 'aug.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -342,7 +344,7 @@ const Norms = () => {
           field: 'sep.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -383,7 +385,7 @@ const Norms = () => {
           field: 'oct.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -424,7 +426,7 @@ const Norms = () => {
           field: 'nov.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -465,7 +467,7 @@ const Norms = () => {
           field: 'dec.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -506,7 +508,7 @@ const Norms = () => {
           field: 'jan.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -547,7 +549,7 @@ const Norms = () => {
           field: 'feb.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -588,7 +590,7 @@ const Norms = () => {
           field: 'mar.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -621,14 +623,14 @@ const Norms = () => {
         },
       ],
     },
-    {
-      field: 'remarks',
-      title: 'Remarks',
-      widthT: 250,
-      type: 'textarea',
-      editable: true,
-      minWidth: 250,
-    },
+    // {
+    //   field: 'remarks',
+    //   title: 'Remarks',
+    //   widthT: 250,
+    //   type: 'textarea',
+    //   editable: false,
+    //   minWidth: 250,
+    // },
   ]
 
   const [rows, setRows] = useState([])
@@ -666,6 +668,7 @@ const Norms = () => {
       })
 
       setRows(tempRes)
+      setCalculateBtnEnabled(true)
       setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
@@ -677,21 +680,24 @@ const Norms = () => {
   }
 
   // Permissions (adjust as needed)
-  const permissions = {
-    showAction: true,
-    addButton: false,
-    deleteButton: false,
-    editButton: true,
-    saveBtn: true,
-    allAction: true,
-    showTitleNameBusiness: true,
-    titleName: screenTitle?.title,
-    showImport: true,
-    showTitle: true,
-    showCalculate: true,
-    showExport: true,
-    ExcelName: `Norms - ${AOP_YEAR}`,
-  }
+  const permissions = useMemo(() => {
+    return {
+      showAction: true,
+      addButton: false,
+      deleteButton: false,
+      editButton: true,
+      saveBtn: false,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: screenTitle?.title,
+      showImport: false,
+      showTitle: true,
+      showCalculate: true,
+      enableCalculate: calculateBtnEnabled,
+      showExport: true,
+      ExcelName: `Norms - ${AOP_YEAR}`,
+    }
+  }, [calculateBtnEnabled])
 
   // Calculate Norms data via API
   const handleCalculate = async () => {

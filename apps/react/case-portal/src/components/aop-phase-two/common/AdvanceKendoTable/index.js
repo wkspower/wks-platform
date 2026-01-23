@@ -173,6 +173,7 @@ const AdvanceKendoTable = ({
   customItemChange = null,
   onApproveClick = null,
   customHeight = null,
+  customAddRow = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -640,6 +641,12 @@ const AdvanceKendoTable = ({
   }
 
   const handleAddRow = () => {
+    // Use custom add row handler if provided
+    if (customAddRow) {
+      customAddRow()
+      return
+    }
+
     if (isButtonDisabled) return
     setIsButtonDisabled(true)
     // Generate unique ID using timestamp to avoid NaN with non-numeric IDs

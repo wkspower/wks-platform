@@ -1,26 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import {
-  Box,
-  Tabs,
-  Tab,
-  Backdrop,
-  CircularProgress,
-  Stack,
-} from '@mui/material'
-import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
+import { Box, Tabs, Tab, Backdrop, CircularProgress } from '@mui/material'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import ImportPower from './ImportPower'
-import AssetAvailability from './AssetAvailability'
-import AssetCapacity from './AssetCapacity'
-import ShutdownAndOperational from './ShutdownAndOperational'
-import { generateMockData, getColumnsForTab } from './InputUtility'
-import ExportAvailability from './ExportAvailability'
-import HeatRate from './HeatRate'
-import FixedNorms from './FixedNorms'
+import AssetLoading from './AssetLoading'
 
-const Inputs = () => {
+const Summary = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantObject, siteObject, verticalObject, year } = dataGridStore
@@ -45,42 +29,17 @@ const Inputs = () => {
   useEffect(() => {
     const tabs = [
       {
-        id: 'purchase-power',
-        name: 'purchasePowerInput',
-        displayName: 'Purchase Power Input',
+        id: 'asset-loading',
+        name: 'Asset Loading',
+        displayName: 'Asset Loading',
         displaySequence: 1,
       },
       {
-        id: 'shutdown-operational',
-        name: 'shutdownOperationalHrs',
-        displayName: 'Shutdown and Operational Hrs.',
+        id: 'error-log',
+        name: 'Error Logs',
+        displayName: 'Error Logs',
         displaySequence: 2,
       },
-      {
-        id: 'asset-priority',
-        name: 'assetPriority',
-        displayName: 'Asset Priority',
-        displaySequence: 3,
-      },
-      {
-        id: 'asset-capacity',
-        name: 'assetCapacity',
-        displayName: 'Asset Capacity',
-        displaySequence: 4,
-      },
-      {
-        id: 'heat-rate',
-        name: 'heatRate',
-        displayName: 'Heat Rate',
-        displaySequence: 5,
-      },
-      {
-        id: 'fixed-norms',
-        name: 'Norms',
-        displayName: 'Norms',
-        displaySequence: 6,
-      },
-      // { id: 'export-availability',name:'exportAvailability', displayName: 'Export Availability', displaySequence: 6 },
     ]
     setTabObj(tabs)
   }, [])
@@ -102,16 +61,7 @@ const Inputs = () => {
       if (!tabId) return
       try {
         setLoading(true)
-        let transformedData = []
-
-        // Mock data for demonstration - replace with actual API call
-        const mockData = generateMockData(tabId)
-        transformedData = mockData.map((item, index) => ({
-          id: item.id || `row_${index}`,
-          ...item,
-        }))
-
-        setRowsForTab(tabId, transformedData)
+        setRowsForTab(tabId, [])
       } catch (err) {
         setSnackbarData({
           message: `Failed to load data. Please try again.`,
@@ -136,24 +86,8 @@ const Inputs = () => {
   // Render tab content based on tab ID
   const renderTabContent = () => {
     switch (currentTab.id) {
-      case 'purchase-power':
-        return <ImportPower />
-      case 'asset-priority':
-        return (
-          <Stack sx={{ mt: 2 }}>
-            <AssetAvailability />
-          </Stack>
-        )
-      case 'asset-capacity':
-        return <AssetCapacity />
-      case 'shutdown-operational':
-        return <ShutdownAndOperational />
-      case 'export-availability':
-        return <ExportAvailability />
-      case 'heat-rate':
-        return <HeatRate />
-      case 'fixed-norms':
-        return <FixedNorms />
+      case 'asset-loading':
+        return <AssetLoading />
       default:
         return null
     }
@@ -208,4 +142,4 @@ const Inputs = () => {
   )
 }
 
-export default Inputs
+export default Summary
