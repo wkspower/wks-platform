@@ -1106,8 +1106,9 @@ const NestedKendoTable = ({
                 variant='contained'
                 onClick={handleCalculateBtn}
                 className='btn-save'
-                disabled={isButtonDisabled || READ_ONLY}
-                // className='custom-btn-calculate'
+                disabled={
+                  !permissions.enableCalculate || isButtonDisabled || READ_ONLY
+                }
               >
                 Calculate
               </Button>
