@@ -616,8 +616,8 @@ const WorkFlowMerge = () => {
     'Annual Production Plan (T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
+    'Specific Consumption Norms (T-17)',
     'Norms Entry Sheet',
-    'Specific Consumption Norms II',
   ]
   const customPETabs = [
     'Annual AOP Cost',
@@ -628,8 +628,8 @@ const WorkFlowMerge = () => {
     'Annual Production Plan (T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
-    'Norms Entry Sheet',
     'Specific Consumption Norms (T-17)',
+    'Norms Entry Sheet',
   ]
   const PPTabs = [
     'Annual AOP Cost',
@@ -890,13 +890,13 @@ const WorkFlowMerge = () => {
             {tabIndex === 5 && <AnnualProductionPlan />}
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
+            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
+              <>{tabIndex === 8 && <SpecificConsumptionNormsII />}</>
+            )}
             {(lowerVertName === 'pe' ||
               lowerVertName === 'pp' ||
               lowerVertName === 'pet') && (
-              <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
-            )}
-            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
-              <>{tabIndex === 9 && <SpecificConsumptionNormsII />}</>
+              <>{tabIndex === 9 && <SpecificConsumptionNorm />}</>
             )}
 
             <Notification
