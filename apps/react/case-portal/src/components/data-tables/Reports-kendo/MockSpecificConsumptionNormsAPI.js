@@ -113,6 +113,7 @@ export const MockSpecificConsumptionNormsAPI = {
                   editable: false,
                   format: valueFormat,
                   type: 'number',
+                  hidden: true,
                 },
                 {
                   field: 'budgetProposed',
@@ -221,6 +222,7 @@ export const MockSpecificConsumptionNormsAPI = {
                   editable: false,
                   format: valueFormat,
                   type: 'number',
+                  hidden: true,
                 },
                 {
                   field: 'budgetProposed',
@@ -329,6 +331,7 @@ export const MockSpecificConsumptionNormsAPI = {
                   editable: false,
                   format: valueFormat,
                   type: 'number',
+                  hidden: true,
                 },
                 {
                   field: 'budgetProposed',
@@ -438,6 +441,7 @@ export const MockSpecificConsumptionNormsAPI = {
                   editable: false,
                   format: valueFormat,
                   type: 'number',
+                  hidden: true,
                 },
                 {
                   field: 'budgetProposed',
@@ -654,6 +658,7 @@ export const MockSpecificConsumptionNormsAPI = {
                   editable: false,
                   format: valueFormat,
                   type: 'number',
+                  hidden: true,
                 },
                 {
                   field: 'budgetProposed',
