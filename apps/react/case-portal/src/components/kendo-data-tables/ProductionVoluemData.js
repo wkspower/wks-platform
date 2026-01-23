@@ -18,8 +18,10 @@ import { DataService } from 'services/DataService'
 import {
   getColDefsDesignCapacity,
   getColDefsDesignCapacityPEPP,
+  getColDefsDesignCapacityPTA,
   getColDefsMaxAchievedCapacity,
   getColDefsMaxAchievedCapacityPEPP,
+  getColDefsMaxAchievedCapacityPTA,
   getColDefsNonEditable,
   getColDefsPercentageSummary,
   getColDefsPercentageSummaryPEPP,
@@ -80,6 +82,8 @@ const ProductionvolumeData = ({ permissions }) => {
   const IS_PE_PP =
     verticalObject?.name?.toLowerCase() == 'pe' ||
     verticalObject?.name?.toLowerCase() == 'pp'
+
+  const IS_PTA = verticalObject?.name?.toLowerCase() == 'pta'
 
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
   const SITE_NAME = siteObject?.name?.toLowerCase()
@@ -148,7 +152,7 @@ const ProductionvolumeData = ({ permissions }) => {
 
     const values = months.map((month) => row[month] || 0)
     const sum = values.reduce((acc, val) => acc + val, 0)
-    const avg = (sum / values.length).toFixed(2)
+    const avg = sum / values.length
 
     return avg === '0.00' ? null : avg
   }
@@ -444,36 +448,26 @@ const ProductionvolumeData = ({ permissions }) => {
             id: index,
 
             ...(isTPH && {
-              april: item.april
-                ? (item.april * 24).toFixed(2)
-                : item.april || null,
-              may: item.may ? (item.may * 24).toFixed(2) : item.may || null,
-              june: item.june ? (item.june * 24).toFixed(2) : item.june || null,
-              july: item.july ? (item.july * 24).toFixed(2) : item.july || null,
-              august: item.august
-                ? (item.august * 24).toFixed(2)
-                : item.august || null,
+              april: item.april ? item.april * 24 : item.april || null,
+              may: item.may ? item.may * 24 : item.may || null,
+              june: item.june ? item.june * 24 : item.june || null,
+              july: item.july ? item.july * 24 : item.july || null,
+              august: item.august ? item.august * 24 : item.august || null,
               september: item.september
-                ? (item.september * 24).toFixed(2)
+                ? item.september * 24
                 : item.september || null,
-              october: item.october
-                ? (item.october * 24).toFixed(2)
-                : item.october || null,
+              october: item.october ? item.october * 24 : item.october || null,
               november: item.november
-                ? (item.november * 24).toFixed(2)
+                ? item.november * 24
                 : item.november || null,
               december: item.december
-                ? (item.december * 24).toFixed(2)
+                ? item.december * 24
                 : item.december || null,
-              january: item.january
-                ? (item.january * 24).toFixed(2)
-                : item.january || null,
+              january: item.january ? item.january * 24 : item.january || null,
               february: item.february
-                ? (item.february * 24).toFixed(2)
+                ? item.february * 24
                 : item.february || null,
-              march: item.march
-                ? (item.march * 24).toFixed(2)
-                : item.march || null,
+              march: item.march ? item.march * 24 : item.march || null,
             }),
           }
         },
@@ -575,7 +569,7 @@ const ProductionvolumeData = ({ permissions }) => {
       monthKeys.forEach((key) => {
         const orig = Number(row[key] || 0)
         const pct = maxVal ? (orig / maxVal) * 100 : 0
-        newRow[key] = Number(pct.toFixed(2))
+        newRow[key] = Number(pct)
       })
 
       return newRow
@@ -591,12 +585,16 @@ const ProductionvolumeData = ({ permissions }) => {
   const colDefs_design_capacity =
     IS_PE_PP || IS_PET
       ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
-      : getColDefsDesignCapacity(headerMap, valueFormat)
+      : IS_PTA
+        ? getColDefsDesignCapacityPTA(headerMap, valueFormat)
+        : getColDefsDesignCapacity(headerMap, valueFormat)
 
   const colDefs_max_achieved_capacity =
     IS_PE_PP || IS_PET
       ? getColDefsMaxAchievedCapacityPEPP(headerMap, valueFormat)
-      : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
+      : IS_PTA
+        ? getColDefsMaxAchievedCapacityPTA(headerMap, valueFormat)
+        : getColDefsMaxAchievedCapacity(headerMap, valueFormat)
 
   const colDefs_non_editable = getColDefsNonEditable(headerMap, valueFormat)
 
@@ -661,54 +659,28 @@ const ProductionvolumeData = ({ permissions }) => {
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
           remark: item.remarks?.trim() || '',
-          isEditable: IS_PE_PP || IS_PET ? false : true,
+          isEditable: IS_PE_PP || IS_PET || IS_VCM ? false : true,
 
-          april:
-            isTPD && item.april
-              ? (item.april * 24).toFixed(2)
-              : item.april || null,
-          may:
-            isTPD && item.may ? (item.may * 24).toFixed(2) : item.may || null,
-          june:
-            isTPD && item.june
-              ? (item.june * 24).toFixed(2)
-              : item.june || null,
-          july:
-            isTPD && item.july
-              ? (item.july * 24).toFixed(2)
-              : item.july || null,
-          august:
-            isTPD && item.august
-              ? (item.august * 24).toFixed(2)
-              : item.august || null,
+          april: isTPD && item.april ? item.april * 24 : item.april || null,
+          may: isTPD && item.may ? item.may * 24 : item.may || null,
+          june: isTPD && item.june ? item.june * 24 : item.june || null,
+          july: isTPD && item.july ? item.july * 24 : item.july || null,
+          august: isTPD && item.august ? item.august * 24 : item.august || null,
           september:
             isTPD && item.september
-              ? (item.september * 24).toFixed(2)
+              ? item.september * 24
               : item.september || null,
           october:
-            isTPD && item.october
-              ? (item.october * 24).toFixed(2)
-              : item.october || null,
+            isTPD && item.october ? item.october * 24 : item.october || null,
           november:
-            isTPD && item.november
-              ? (item.november * 24).toFixed(2)
-              : item.november || null,
+            isTPD && item.november ? item.november * 24 : item.november || null,
           december:
-            isTPD && item.december
-              ? (item.december * 24).toFixed(2)
-              : item.december || null,
+            isTPD && item.december ? item.december * 24 : item.december || null,
           january:
-            isTPD && item.january
-              ? (item.january * 24).toFixed(2)
-              : item.january || null,
+            isTPD && item.january ? item.january * 24 : item.january || null,
           february:
-            isTPD && item.february
-              ? (item.february * 24).toFixed(2)
-              : item.february || null,
-          march:
-            isTPD && item.march
-              ? (item.march * 24).toFixed(2)
-              : item.march || null,
+            isTPD && item.february ? item.february * 24 : item.february || null,
+          march: isTPD && item.march ? item.march * 24 : item.march || null,
         }))
         setRowsDesignCapacity(formatted)
       } else {
@@ -883,7 +855,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: IS_PE_PP || IS_PET ? false : true,
+      saveBtn: IS_PE_PP || IS_PET || IS_VCM ? false : true,
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,

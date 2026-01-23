@@ -10,12 +10,12 @@ import { validateFields } from 'utils/validationUtils'
 import { verticalEnums } from 'enums/verticalEnums'
 import KendoDataTables from './index'
 
-import { InclusionDateColumns } from 'components/colums/ShutdownColumn'
+import { ExclusionDateColumns } from 'components/colums/ShutdownColumn'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import { getRoleName } from 'services/role-service'
 import ElastomerShutDown from './ElastomerShutDown'
 
-const InclusionDate = ({ permissions }) => {
+const ExclusionDate = ({ permissions }) => {
   const [_plantID, set_PlantID] = useState('')
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [allProducts, setAllProducts] = useState([])
@@ -614,9 +614,9 @@ const InclusionDate = ({ permissions }) => {
   const colDefs = useMemo(() => {
     switch (lowerVertName) {
       case verticalEnums.AROMATICS:
-        return InclusionDateColumns
+        return ExclusionDateColumns
       default:
-        return InclusionDateColumns
+        return ExclusionDateColumns
     }
   }, [lowerVertName, plantName])
 
@@ -805,7 +805,7 @@ const InclusionDate = ({ permissions }) => {
         IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
 
       showTitleNameBusiness: true,
-      titleName: 'inclusion Date',
+      titleName: 'Exclusion Date',
 
       uploadExcelBtn:
         lowerVertName === 'pe' ||
@@ -869,4 +869,4 @@ const InclusionDate = ({ permissions }) => {
   )
 }
 
-export default InclusionDate
+export default ExclusionDate

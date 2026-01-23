@@ -95,6 +95,7 @@ const BusinessDemand = ({ permissions }) => {
         inEdit: false,
         Particulars: item.normParameterTypeDisplayName,
         expanded: false,
+        UOM: IS_VCM_VERTICAL ? '%' : item?.UOM,
       }))
 
       setRows(formattedData)
@@ -221,7 +222,7 @@ const BusinessDemand = ({ permissions }) => {
 
             setSnackbarOpen(true)
             setSnackbarData({
-              message: `The production Sum should be exactly same - Current values (${parts.join(', ')})`,
+              message: `The production Sum should be exactly 100 - Current values (${parts.join(', ')})`,
               severity: 'error',
             })
             setLoading(false)
@@ -365,7 +366,7 @@ const BusinessDemand = ({ permissions }) => {
       ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
       isTotalFooterActive:
-        IS_VCM_VERTICAL ||
+        // IS_VCM_VERTICAL ||
         IS_PE_PP_VERTICAL ||
         IS_PTA_VERTICAL ||
         IS_PET_VERTICAL ||
@@ -519,8 +520,9 @@ const BusinessDemand = ({ permissions }) => {
               id='meg-grid-header'
             >
               <Typography component='span' className='accordian-title'>
-                Production Target (MT) (This is a reference for entering the
-                Business Demand value)
+                {IS_VCM_VERTICAL
+                  ? 'Production Target (This is a reference for entering the Business Demand value)'
+                  : 'Production Target (MT) (This is a reference for entering the Business Demand value)'}
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>

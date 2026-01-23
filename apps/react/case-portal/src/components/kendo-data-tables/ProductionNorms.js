@@ -50,6 +50,7 @@ const ProductionNorms = ({ permissions }) => {
   const lowerVertName = vertName?.toLowerCase()
   const plantName = plantObject?.name?.toLowerCase()
   const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
+  const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
 
   const [loading, setLoading] = useState(false)
   const [calculatebtnClicked, setCalculatebtnClicked] = useState(false)
@@ -765,7 +766,8 @@ const ProductionNorms = ({ permissions }) => {
     }
   }, [PLANT_ID, oldYear, yearChanged, keycloak, selectedUnit])
 
-  const valueFormat = ValueFormatterProduction()
+  const valueFormat_ = ValueFormatterProduction()
+  const valueFormat = IS_VCM ? '{0:0.000}' : valueFormat_
 
   const productionColumns = getEnhancedColDefs({
     headerMap,

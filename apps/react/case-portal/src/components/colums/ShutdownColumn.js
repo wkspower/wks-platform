@@ -1,25 +1,23 @@
-export const InclusionDateColumns = [
+export const ExclusionDateColumns = [
   {
-    field: 'maintenanceId',
-    title: 'Maintenance ID',
-    editable: false,
+    field: 'id',
     hidden: true,
   },
   {
-    field: 'inclusionStartDate',
+    field: 'exclusionStartDate',
     title: 'From Date',
     editable: true,
     fixedWidth: '200px',
   },
   {
-    field: 'inclusionEndDate',
+    field: 'exclusionEndDate',
     title: 'To Date',
     editable: true,
     fixedWidth: '200px',
   },
 
   {
-    field: 'remark',
+    field: 'remarks',
     title: 'Reason',
     editable: true,
     fixedWidth: '200px',

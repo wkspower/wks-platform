@@ -33,7 +33,7 @@ import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/ind
 import { getRoleName } from 'services/role-service'
 import { ButtonGroup } from '../../../node_modules/@progress/kendo-react-buttons/index'
 import QualityParameters from './QualityParameters'
-import InclusionDate from './InclusionDate'
+import ExclusionDate from './ExclusionDate'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
@@ -1510,8 +1510,8 @@ const ConfigurationTable = () => {
               case getTheId('Quality'):
                 return <QualityParameters />
 
-              case getTheId('InclusionDate'):
-                return <InclusionDate />
+              case getTheId('ExclusionDate'):
+                return <ExclusionDate />
 
               default:
                 return null

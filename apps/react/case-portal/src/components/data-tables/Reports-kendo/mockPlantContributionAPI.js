@@ -25,7 +25,7 @@ export const MockReportService = {
               field: 'SrNo',
               title: 'SL.No',
               editable: false,
-              widthT: 100,
+              widthT: 70,
               align: 'right',
               format: '{0:#.#}',
             },
@@ -107,7 +107,7 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              widthT: 100,
+              widthT: 70,
               format: '{0:#.#}',
               editable: false,
               align: 'right',
@@ -239,7 +239,7 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              widthT: 100,
+              widthT: 70,
               format: '{0:#.#}',
               editable: false,
               align: 'right',
@@ -370,7 +370,7 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              widthT: 100,
+              widthT: 70,
               format: '{0:#.#}',
               editable: false,
               align: 'right',
@@ -501,7 +501,7 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              widthT: 100,
+              widthT: 70,
               format: '{0:#.#}',
               editable: false,
               align: 'right',
@@ -633,7 +633,7 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'S.No',
-              widthT: 80,
+              widthT: 70,
               align: 'right',
               editable: false,
               format: '{0:#.#}',
@@ -701,7 +701,7 @@ export const MockReportService = {
             {
               field: 'SrNo',
               title: 'SL.No',
-              widthT: 100,
+              widthT: 70,
               format: '{0:#.#}',
               align: 'right',
               editable: false,
