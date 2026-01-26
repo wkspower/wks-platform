@@ -303,15 +303,22 @@ def _build_asset_status_json(calculation_result: dict) -> list:
     for asset in final_dispatch:
         asset_name = asset.get("AssetName", "")
         asset_type = _determine_asset_type(asset_name)
+        operating_hours = asset.get("OperatingHours", 0)
+        load_mw = asset.get("LoadMW", 0)
+        
+        # Calculate average loading (MW) if operating hours > 0
+        avg_loading_mw = load_mw if operating_hours > 0 else 0
         
         asset_data = {
             "asset": asset_name,
             "type": asset_type,
-            "isAvailable": asset.get("GrossMWh", 0) > 0 or asset.get("LoadMW", 0) > 0,
-            "operatingHours": asset.get("OperatingHours", 0),
+            "priority": asset.get("Priority"),  # Dispatch priority
+            "isAvailable": asset.get("GrossMWh", 0) > 0 or load_mw > 0,
+            "operatingHours": operating_hours,
             "minCapacityMW": asset.get("MinCapacityMW"),
             "maxCapacityMW": asset.get("MaxCapacityMW"),
-            "dispatchedLoadMW": asset.get("LoadMW"),
+            "dispatchedLoadMW": load_mw,  # Dispatched load in MW
+            "avgLoadingMW": avg_loading_mw,  # Average loading during operation
             "grossMWh": asset.get("GrossMWh"),
             "netMWh": asset.get("NetMWh"),
             "auxiliaryMWh": asset.get("AuxiliaryMWh"),
@@ -331,13 +338,21 @@ def _build_asset_status_json(calculation_result: dict) -> list:
             is_available = hrsg.get("is_available", False)
             operating_hours = hrsg.get("operating_hours", 0)
             dispatched_supp_mt = hrsg.get("dispatched_supp_mt", 0)  # SHP steam generation in MT
+            free_steam_mt = hrsg.get("free_steam_mt", 0)  # Free steam from GT exhaust
+            priority = hrsg.get("priority")  # HRSG priority if available
+            
+            # Calculate average steam generation rate (MT/hour)
+            avg_steam_generation_rate = (dispatched_supp_mt / operating_hours) if operating_hours > 0 else 0
             
             asset_data = {
                 "asset": hrsg_name,
                 "type": "HRSG",
+                "priority": priority,
                 "isAvailable": is_available,
                 "operatingHours": operating_hours,
-                "steamGenerationMT": dispatched_supp_mt,  # SHP steam generation
+                "steamGenerationMT": dispatched_supp_mt,  # Total supplementary firing steam
+                "freeSteamMT": free_steam_mt,  # Free steam from GT exhaust
+                "avgSteamGenRateMTPerHr": round(avg_steam_generation_rate, 2),  # Average rate
                 "status": "Running" if is_available and operating_hours > 0 else "Off"
             }
             

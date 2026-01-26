@@ -193,12 +193,8 @@ public class CPPModelCalculationLogService {
     /**
      * Parse Asset Status JSON
      * Python structure: Array directly (not wrapped)
-     * [
-     *   {"asset": "GT1", "type": "GT", "grossMWh": 18500.5, "netMWh": 18000.0, ...},
-     *   {"asset": "HRSG1", "type": "HRSG", "isAvailable": true, "operatingHours": 720, 
-     *    "steamGenerationMT": 1234.5, "status": "Running"},
-     *   ...
-     * ]
+     * GT/STG: {"asset": "GT1", "type": "GT", "priority": 1, "grossMWh": 18500.5, "avgLoadingMW": 68.5, ...}
+     * HRSG: {"asset": "HRSG1", "type": "HRSG", "steamGenerationMT": 1234.5, "freeSteamMT": 5678.9, ...}
      */
     private AssetStatusDTO parseAssetStatusJson(String json) {
         if (json == null || json.isEmpty()) {
@@ -216,30 +212,41 @@ public class CPPModelCalculationLogService {
             List<AssetStatusDTO.AssetLoadingDTO> assets = new ArrayList<>();
             for (JsonNode assetNode : root) {
                 String assetType = getStringOrNull(assetNode, "type");
-                Double loading = null;
-                String unit = null;
                 
-                // For GT/STG assets, use grossMWh or netMWh
-                if ("GT".equals(assetType) || "STG".equals(assetType) || "ImportPower".equals(assetType)) {
-                    loading = getDoubleOrNull(assetNode, "grossMWh");
-                    if (loading == null) {
-                        loading = getDoubleOrNull(assetNode, "netMWh");
-                    }
-                    unit = "MWh";
-                }
-                // For HRSG assets, use steamGenerationMT (SHP steam generation)
-                else if ("HRSG".equals(assetType)) {
-                    loading = getDoubleOrNull(assetNode, "steamGenerationMT");
-                    unit = "MT";  // Metric Tons of SHP steam
-                }
-                
-                AssetStatusDTO.AssetLoadingDTO asset = AssetStatusDTO.AssetLoadingDTO.builder()
+                // Common fields
+                AssetStatusDTO.AssetLoadingDTO.AssetLoadingDTOBuilder builder = AssetStatusDTO.AssetLoadingDTO.builder()
                         .assetName(getStringOrNull(assetNode, "asset"))
                         .assetType(assetType)
-                        .loading(loading)
-                        .unit(unit)
-                        .build();
-                assets.add(asset);
+                        .priority(getIntegerOrNull(assetNode, "priority"))
+                        .isAvailable(getBooleanOrNull(assetNode, "isAvailable"))
+                        .operatingHours(getDoubleOrNull(assetNode, "operatingHours"))
+                        .status(getStringOrNull(assetNode, "status"));
+                
+                // Type-specific fields
+                if ("GT".equals(assetType) || "STG".equals(assetType) || "ImportPower".equals(assetType)) {
+                    // GT/STG/ImportPower fields
+                    Double grossMWh = getDoubleOrNull(assetNode, "grossMWh");
+                    builder.minCapacityMW(getDoubleOrNull(assetNode, "minCapacityMW"))
+                           .maxCapacityMW(getDoubleOrNull(assetNode, "maxCapacityMW"))
+                           .dispatchedLoadMW(getDoubleOrNull(assetNode, "dispatchedLoadMW"))
+                           .avgLoadingMW(getDoubleOrNull(assetNode, "avgLoadingMW"))
+                           .grossMWh(grossMWh)
+                           .netMWh(getDoubleOrNull(assetNode, "netMWh"))
+                           .auxiliaryMWh(getDoubleOrNull(assetNode, "auxiliaryMWh"))
+                           .loading(grossMWh)  // Legacy field
+                           .unit("MWh");  // Legacy field
+                } 
+                else if ("HRSG".equals(assetType)) {
+                    // HRSG fields
+                    Double steamGenMT = getDoubleOrNull(assetNode, "steamGenerationMT");
+                    builder.steamGenerationMT(steamGenMT)
+                           .freeSteamMT(getDoubleOrNull(assetNode, "freeSteamMT"))
+                           .avgSteamGenRateMTPerHr(getDoubleOrNull(assetNode, "avgSteamGenRateMTPerHr"))
+                           .loading(steamGenMT)  // Legacy field
+                           .unit("MT");  // Legacy field
+                }
+                
+                assets.add(builder.build());
             }
 
             return AssetStatusDTO.builder()
@@ -371,5 +378,15 @@ public class CPPModelCalculationLogService {
     private String getStringOrNull(JsonNode node, String fieldName) {
         JsonNode field = node.get(fieldName);
         return (field != null && !field.isNull()) ? field.asText() : null;
+    }
+    
+    private Integer getIntegerOrNull(JsonNode node, String fieldName) {
+        JsonNode field = node.get(fieldName);
+        return (field != null && !field.isNull()) ? field.asInt() : null;
+    }
+    
+    private Boolean getBooleanOrNull(JsonNode node, String fieldName) {
+        JsonNode field = node.get(fieldName);
+        return (field != null && !field.isNull()) ? field.asBoolean() : null;
     }
 }
