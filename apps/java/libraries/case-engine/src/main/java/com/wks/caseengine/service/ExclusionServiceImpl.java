@@ -13,9 +13,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
-
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -197,19 +199,36 @@ public class ExclusionServiceImpl implements ExclusionService{
 
 	public byte[] exportExclusionDate(String year, String plantId, boolean isAfterSave, List<ExclusionDTO> dtoList) {
 	    try {   
+	      
 	        if (!isAfterSave) {
-	        	AOPMessageVM aopMessageVM = getExclusionDate(plantId,year);
-	        	Map<String, Object> innerMap = (Map<String, Object>) aopMessageVM.getData();
-
-		        if (innerMap != null) {
-		             dtoList = (List<ExclusionDTO>) innerMap.get("Data");
-		        }
+	            AOPMessageVM aopMessageVM = getExclusionDate(plantId, year);
+	            if (aopMessageVM != null && aopMessageVM.getData() != null) {
+	                
+	                Map<String, Object> innerMap = (Map<String, Object>) aopMessageVM.getData();
+	                if (innerMap != null && innerMap.get("Data") != null) {
+	                    dtoList = (List<ExclusionDTO>) innerMap.get("Data");
+	                }
+	            }
 	        }
 
+	       
+	        if (dtoList == null) dtoList = new ArrayList<>();
+
 	        Workbook workbook = new XSSFWorkbook();
-	        Sheet sheet = workbook.createSheet("Sheet1");
+	        Sheet sheet = workbook.createSheet("Exclusion Dates");
 	        int currentRow = 0;
 
+	      
+	        CellStyle dateCellStyle = workbook.createCellStyle();
+	        CreationHelper createHelper = workbook.getCreationHelper();
+	        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+	       
+	        dateCellStyle.setBorderBottom(BorderStyle.THIN);
+	        dateCellStyle.setBorderTop(BorderStyle.THIN);
+	        dateCellStyle.setBorderLeft(BorderStyle.THIN);
+	        dateCellStyle.setBorderRight(BorderStyle.THIN);
+
+	       
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("From Date");
 	        innerHeaders.add("To Date");
@@ -219,31 +238,41 @@ public class ExclusionServiceImpl implements ExclusionService{
 	            innerHeaders.add("Status");
 	            innerHeaders.add("Error Description");
 	        }
+
+	       
 	        Row headerRow = sheet.createRow(currentRow++);
 	        for (int col = 0; col < innerHeaders.size(); col++) {
 	            Cell cell = headerRow.createCell(col);
 	            cell.setCellValue(innerHeaders.get(col));
+	           
 	            cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 	        }
 
-	        int dataRowCount = dtoList.size();
-	        for (int i = 0; i < dataRowCount; i++) {
-	        	ExclusionDTO dto = dtoList.get(i);
+	      
+	        for (ExclusionDTO dto : dtoList) {
 	            Row row = sheet.createRow(currentRow++);
-	            List<Object> rowData = new ArrayList<>();
-	            rowData.add(dto.getStartDate());
-	            rowData.add(dto.getEndDate());
-	            rowData.add(dto.getRemark());
-	            rowData.add(dto.getId());
+	            
+	         
+	            Object[] dataValues = new Object[innerHeaders.size()];
+	            dataValues[0] = dto.getStartDate();
+	            dataValues[1] = dto.getEndDate();
+	            dataValues[2] = dto.getRemark();
+	            dataValues[3] = dto.getId();
+	            
 	            if (isAfterSave) {
-	                rowData.add(dto.getSaveStatus());
-	                rowData.add(dto.getErrDescription());
+	                dataValues[4] = dto.getSaveStatus();
+	                dataValues[5] = dto.getErrDescription();
 	            }
 
-	            for (int col = 0; col < rowData.size(); col++) {
+	            for (int col = 0; col < dataValues.length; col++) {
 	                Cell cell = row.createCell(col);
-	                Object value = rowData.get(col);
-	                if (value instanceof Number) {
+	                Object value = dataValues[col];
+
+	                if (value instanceof java.util.Date) {
+	                   
+	                    cell.setCellValue((java.util.Date) value);
+	                    cell.setCellStyle(dateCellStyle);
+	                } else if (value instanceof Number) {
 	                    cell.setCellValue(((Number) value).doubleValue());
 	                } else if (value instanceof Boolean) {
 	                    cell.setCellValue((Boolean) value);
@@ -251,20 +280,31 @@ public class ExclusionServiceImpl implements ExclusionService{
 	                    cell.setCellValue(value.toString());
 	                } else {
 	                    cell.setCellValue("");
-	                }  
+	                }
 	            }
 	        }
+
+	      
 	        sheet.setColumnHidden(3, true);
+	        
+	        
+	        for (int i = 0; i < innerHeaders.size(); i++) {
+	            sheet.autoSizeColumn(i);
+	        }
+
+	     
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
+	        
 	        return outputStream.toByteArray();
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-	    return null;
+	    return new byte[0]; 
 	}
-
+	
 	@Override
 	public AOPMessageVM importExclusionDate(String year,UUID plantId,MultipartFile file) {
 		try {
@@ -296,7 +336,7 @@ public class ExclusionServiceImpl implements ExclusionService{
 	
 	public List<ExclusionDTO> readExclusionDate(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ExclusionDTO> exclusionDTOs = new ArrayList<>();
-
+	    SimpleDateFormat displayFormat = new SimpleDateFormat("dd-MM-yyyy");
 	    AOPMessageVM configResp = configurationService.getConfigurationExecution(year, plantFKId.toString());
 	    Date boundaryStart = null;
 	    Date boundaryEnd = null;
@@ -315,7 +355,6 @@ public class ExclusionServiceImpl implements ExclusionService{
 	                    boundaryEnd = sdf.parse(val);
 	                }
 	            } catch (Exception e) {
-	                
 	            }
 	        }
 	    }
@@ -328,38 +367,38 @@ public class ExclusionServiceImpl implements ExclusionService{
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            ExclusionDTO dto = new ExclusionDTO();
-	            
+	            Date start = getDateCellValue(row.getCell(0), dto);
+	            Date end = getDateCellValue(row.getCell(1), dto);
+	            String remark = getStringCellValue(row.getCell(2), dto);
+	            String id = getStringCellValue(row.getCell(3), dto);
+
+	            dto.setStartDate(start);
+	            dto.setEndDate(end);
+	            dto.setRemark(remark);
+	            dto.setId(id);
+	            dto.setSaveStatus("Success");
+
 	            try {
-	                Date start = getDateCellValue(row.getCell(0), dto);
-	                Date end = getDateCellValue(row.getCell(1), dto);
-	                
-	                dto.setStartDate(start);
-	                dto.setEndDate(end);
-	                dto.setRemark(getStringCellValue(row.getCell(2), dto));
-	                dto.setId(getStringCellValue(row.getCell(3), dto));
-
-	               
-	                if (start != null && end != null) {
-	                    if (end.before(start)) {
-	                        dto.setSaveStatus("Failed");
-	                        dto.setErrDescription("End date cannot be before Start date.");
-	                    } 
-	                    
-	                    else if (boundaryStart != null && boundaryEnd != null) {
-	                        if (start.before(boundaryStart) || end.after(boundaryEnd)) {
-	                            dto.setSaveStatus("Failed");
-	                            dto.setErrDescription("Dates must be between " + boundaryStart + " and " + boundaryEnd);
-	                        }
-	                    }
-	                } else {
+	                if (start == null || end == null) {
 	                    dto.setSaveStatus("Failed");
-	                    dto.setErrDescription("Dates cannot be empty.");
+	                    dto.setErrDescription("Invalid or missing Date. Use format: dd-MM-yyyy.");
+	                } 
+	                else if (end.before(start)) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("End date (" + displayFormat.format(end) + ") cannot be before Start date (" + displayFormat.format(start) + ").");
+	                } 
+	                else if (boundaryStart != null && boundaryEnd != null) {
+	                    if (start.before(boundaryStart) || end.after(boundaryEnd)) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Dates must be within boundary: " + 
+	                            displayFormat.format(boundaryStart) + " to " + displayFormat.format(boundaryEnd));
+	                    }
 	                }
-
-	            } catch (Exception e) {
+	            } catch (Exception valEx) {
 	                dto.setSaveStatus("Failed");
-	                dto.setErrDescription("Error: " + e.getMessage());
+	                dto.setErrDescription("Validation error: " + valEx.getMessage());
 	            }
+
 	            exclusionDTOs.add(dto);
 	        }
 
@@ -368,8 +407,10 @@ public class ExclusionServiceImpl implements ExclusionService{
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
+	    
 	    return exclusionDTOs;
 	}
+
 	private void validateOverlaps(List<ExclusionDTO> list) {
 	    for (int i = 0; i < list.size(); i++) {
 	        ExclusionDTO current = list.get(i);
@@ -377,17 +418,17 @@ public class ExclusionServiceImpl implements ExclusionService{
 
 	        for (int j = i + 1; j < list.size(); j++) {
 	            ExclusionDTO other = list.get(j);
+	            
 	            if ("Failed".equals(other.getSaveStatus()) || other.getStartDate() == null || other.getEndDate() == null) continue;
-
 	            boolean isOverlapping = !current.getStartDate().after(other.getEndDate()) 
 	                                 && !current.getEndDate().before(other.getStartDate());
 
 	            if (isOverlapping) {
 	                current.setSaveStatus("Failed");
-	                current.setErrDescription("Row overlaps with another date range in the file.");
+	                current.setErrDescription("This date range overlaps with another row in the file.");
 	                
 	                other.setSaveStatus("Failed");
-	                other.setErrDescription("Row overlaps with another date range in the file.");
+	                other.setErrDescription("This date range overlaps with another row in the file.");
 	            }
 	        }
 	    }
@@ -401,7 +442,7 @@ public class ExclusionServiceImpl implements ExclusionService{
 	        cell.setCellType(CellType.STRING);
 	        String val = cell.getStringCellValue().trim();
 	        
-	        // Return null if the string is empty after trimming
+	        
 	        return val.isEmpty() ? null : val;
 	        
 	    } catch (Exception e) {
@@ -412,32 +453,27 @@ public class ExclusionServiceImpl implements ExclusionService{
 	    return null;
 	}
 	
-	private static java.util.Date getDateCellValue(Cell cell, ExclusionDTO dto) {
-	    if (cell == null || cell.getCellType() == CellType.BLANK) {
-	        return null;
-	    }
+	private Date getDateCellValue(Cell cell, ExclusionDTO dto) {
+	    try {
+	        if (cell == null || cell.getCellType() == CellType.BLANK) {
+	            return null;
+	        }
 
-	    if (cell.getCellType() == CellType.NUMERIC) {
-	        if (DateUtil.isCellDateFormatted(cell)) {
-	            return cell.getDateCellValue();
-	        } else {
-	            dto.setSaveStatus("Failed");
-	            dto.setErrDescription("Invalid date format in cell");
+	        if (cell.getCellType() == CellType.NUMERIC) {
+	            if (DateUtil.isCellDateFormatted(cell)) {
+	                return cell.getDateCellValue();
+	            }
 	        }
-	    } else if (cell.getCellType() == CellType.STRING) {
-	        String val = cell.getStringCellValue().trim();
-	        if (val.isEmpty()) {
-	            return null; 
+	        if (cell.getCellType() == CellType.STRING) {
+	            String val = cell.getStringCellValue().trim();
+	            if (val.isEmpty()) return null;
+	            
+	            SimpleDateFormat excelSdf = new SimpleDateFormat("dd-MM-yyyy");
+	            excelSdf.setLenient(false); // Strict parsing
+	            return excelSdf.parse(val);
 	        }
-	        try {
-	            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
-	            return sdf.parse(val);
-	        } catch (java.text.ParseException e) {
-	            dto.setSaveStatus("Failed");
-	            dto.setErrDescription("Please enter date in correct format (yyyy-MM-dd)");
-	        }
+	    } catch (Exception e) {
 	    }
 	    return null;
-	}
-	
+	}	
 }
