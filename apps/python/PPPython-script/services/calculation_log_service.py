@@ -6,9 +6,16 @@ Saves model execution logs to ModelCalculationLogs table
 import json
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from database.connection import get_connection
 
 
+class DecimalEncoder(json.JSONEncoder):
+    """Custom JSON encoder to handle Decimal types from database queries."""
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return float(obj)
+        return super(DecimalEncoder, self).default(obj)
 def create_parent_execution_log(year: int) -> dict:
     """
     Create parent execution log for full year run.
@@ -212,8 +219,8 @@ def save_calculation_log(
         # Extract iteration info
         iterations_used = calculation_result.get("iterations_used", 0) or usd_result.get("iterations_used", 0)
         
-        # Build Asset Status JSON
-        asset_status_json = _build_asset_status_json(calculation_result)
+        # Build Asset Status JSON (pass month and year for complete asset list)
+        asset_status_json = _build_asset_status_json(calculation_result, month, year)
         
         # Build Power Balance JSON
         power_balance_json = _build_power_balance_json(calculation_result)
@@ -263,9 +270,9 @@ def save_calculation_log(
             iterations_used,
             1 if overall_success else 0,  # ConvergenceAchieved: 1 if converged, 0 otherwise
             execution_time_seconds,
-            json.dumps(asset_status_json) if asset_status_json else None,
-            json.dumps(power_balance_json) if power_balance_json else None,
-            json.dumps(steam_balance_json) if steam_balance_json else None,
+            json.dumps(asset_status_json, cls=DecimalEncoder) if asset_status_json else None,
+            json.dumps(power_balance_json, cls=DecimalEncoder) if power_balance_json else None,
+            json.dumps(steam_balance_json, cls=DecimalEncoder) if steam_balance_json else None,
             'PythonModel',
             datetime.now()
         ))
@@ -289,90 +296,267 @@ def save_calculation_log(
         }
 
 
-def _build_asset_status_json(calculation_result: dict) -> list:
-    """Build asset status JSON array from calculation result."""
+def _build_asset_status_json(calculation_result: dict, month: int = None, year: int = None) -> list:
+    """
+    Build asset status JSON array from calculation result.
+    Includes ALL assets (GT, STG, HRSG) regardless of dispatch status.
+    """
     asset_list = []
     
     usd_result = calculation_result.get("usd_result", {})
     final_dispatch = usd_result.get("final_dispatch", [])
     
-    # Track which assets we've seen
+    # Get all assets for this month from database
+    all_power_assets = {}  # AssetName -> asset info
+    all_hrsg_assets = {}   # HRSG name -> info
+    
+    if month and year:
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Get FinancialYearMonth ID
+            cursor.execute("""
+                SELECT Id FROM FinancialYearMonth 
+                WHERE Month = ? AND Year = ?
+            """, (month, year))
+            fym_row = cursor.fetchone()
+            
+            if fym_row:
+                fym_id = fym_row[0]
+                
+                # Get all GT/STG assets with availability
+                cursor.execute("""
+                    SELECT 
+                        p.AssetName,
+                        p.AssetId,
+                        COALESCE(aa.Priority, 999) as Priority,
+                        COALESCE(aa.MinOperatingCapacity, 0) as MinCapacity,
+                        COALESCE(aa.MaxOperatingCapacity, 0) as MaxCapacity
+                    FROM PowerGenerationAssets p
+                    LEFT JOIN AssetAvailability aa ON p.AssetId = aa.AssetId 
+                        AND aa.FinancialYearMonthId = ?
+                    WHERE p.AssetType IN ('GT', 'STG')
+                    ORDER BY aa.Priority, p.AssetName
+                """, (fym_id,))
+                
+                for row in cursor.fetchall():
+                    all_power_assets[row[0]] = {
+                        "AssetName": row[0],
+                        "AssetId": row[1],
+                        "Priority": row[2],
+                        "MinCapacity": row[3],
+                        "MaxCapacity": row[4]
+                    }
+                
+                # Get all HRSG assets from HRSGConfig (if table exists)
+                try:
+                    cursor.execute("""
+                        SELECT Name, Priority
+                        FROM HRSGConfig
+                        ORDER BY Priority
+                    """)
+                    
+                    for row in cursor.fetchall():
+                        all_hrsg_assets[row[0]] = {
+                            "Name": row[0],
+                            "Priority": row[1]
+                        }
+                except Exception as hrsg_err:
+                    # HRSGConfig table doesn't exist - will use dispatch data as fallback
+                    pass
+        except Exception as e:
+            print(f"Warning: Could not fetch all assets: {e}")
+        finally:
+            cursor.close()
+    
+    # Create dispatch lookup for easy access
+    dispatch_lookup = {asset.get("AssetName", ""): asset for asset in final_dispatch}
+    
+    # Track which assets we've processed
     assets_seen = set()
     
-    # Process dispatched assets (GTs, STG, Import)
-    for asset in final_dispatch:
-        asset_name = asset.get("AssetName", "")
-        asset_type = _determine_asset_type(asset_name)
-        operating_hours = asset.get("OperatingHours", 0)
-        load_mw = asset.get("LoadMW", 0)
-        
-        # Calculate average loading (MW) if operating hours > 0
-        avg_loading_mw = load_mw if operating_hours > 0 else 0
-        
-        asset_data = {
-            "asset": asset_name,
-            "type": asset_type,
-            "priority": asset.get("Priority"),  # Dispatch priority
-            "isAvailable": asset.get("GrossMWh", 0) > 0 or load_mw > 0,
-            "operatingHours": operating_hours,
-            "minCapacityMW": asset.get("MinCapacityMW"),
-            "maxCapacityMW": asset.get("MaxCapacityMW"),
-            "dispatchedLoadMW": load_mw,  # Dispatched load in MW
-            "avgLoadingMW": avg_loading_mw,  # Average loading during operation
-            "grossMWh": asset.get("GrossMWh"),
-            "netMWh": asset.get("NetMWh"),
-            "auxiliaryMWh": asset.get("AuxiliaryMWh"),
-            "status": _determine_asset_status(asset)
-        }
-        
-        asset_list.append(asset_data)
-        assets_seen.add(asset_name.upper())
+    # Process ALL GT/STG assets (from database or dispatch)
+    if all_power_assets:
+        # Use database assets list (includes ALL assets)
+        for asset_name, asset_info in all_power_assets.items():
+            asset_type = _determine_asset_type(asset_name)
+            
+            # Check if this asset was dispatched
+            dispatched = dispatch_lookup.get(asset_name)
+            
+            if dispatched:
+                # Asset was dispatched - use actual values
+                load_mw = dispatched.get("LoadMW", 0)
+                gross_mwh = dispatched.get("GrossMWh", 0)
+                net_mwh = dispatched.get("NetMWh", 0)
+                aux_mwh = dispatched.get("AuxMWh", 0)
+                
+                # Calculate operating hours: GrossMWh / LoadMW (if LoadMW > 0)
+                if load_mw > 0:
+                    operating_hours = gross_mwh / load_mw
+                else:
+                    operating_hours = 0
+                
+                avg_loading_mw = load_mw
+                is_available = True
+                status = _determine_asset_status(dispatched)
+            else:
+                # Asset was NOT dispatched - all zeros
+                load_mw = 0
+                gross_mwh = 0
+                net_mwh = 0
+                aux_mwh = 0
+                operating_hours = 0
+                avg_loading_mw = 0
+                is_available = False
+                status = "Shutdown"
+            
+            asset_data = {
+                "asset": asset_name,
+                "type": asset_type,
+                "priority": asset_info.get("Priority"),
+                "isAvailable": is_available,
+                "operatingHours": round(operating_hours, 2),
+                "minCapacityMW": asset_info.get("MinCapacity"),
+                "maxCapacityMW": asset_info.get("MaxCapacity"),
+                "dispatchedLoadMW": load_mw,
+                "avgLoadingMW": avg_loading_mw,
+                "grossMWh": gross_mwh,
+                "netMWh": net_mwh,
+                "auxiliaryMWh": aux_mwh,
+                "status": status
+            }
+            
+            asset_list.append(asset_data)
+            assets_seen.add(asset_name.upper())
+    else:
+        # Fallback: use dispatch list only
+        for asset in final_dispatch:
+            asset_name = asset.get("AssetName", "")
+            asset_type = _determine_asset_type(asset_name)
+            load_mw = asset.get("LoadMW", 0)
+            gross_mwh = asset.get("GrossMWh", 0)
+            
+            # Calculate operating hours: GrossMWh / LoadMW (if LoadMW > 0)
+            if load_mw > 0:
+                operating_hours = gross_mwh / load_mw
+            else:
+                operating_hours = 0
+            
+            avg_loading_mw = load_mw
+            
+            asset_data = {
+                "asset": asset_name,
+                "type": asset_type,
+                "priority": asset.get("Priority"),
+                "isAvailable": gross_mwh > 0 or load_mw > 0,
+                "operatingHours": round(operating_hours, 2),
+                "minCapacityMW": asset.get("MinMW"),
+                "maxCapacityMW": asset.get("CapacityMW"),
+                "dispatchedLoadMW": load_mw,
+                "avgLoadingMW": avg_loading_mw,
+                "grossMWh": gross_mwh,
+                "netMWh": asset.get("NetMWh"),
+                "auxiliaryMWh": asset.get("AuxMWh"),
+                "status": _determine_asset_status(asset)
+            }
+            
+            asset_list.append(asset_data)
+            assets_seen.add(asset_name.upper())
     
-    # Add HRSG status
+    # Add HRSG status - Process ALL HRSGs
     hrsg_dispatch = usd_result.get("hrsg_dispatch", {})
     hrsg_dispatch_list = hrsg_dispatch.get("hrsg_dispatch", [])
     
-    if hrsg_dispatch_list:
+    # Create HRSG dispatch lookup
+    hrsg_dispatch_lookup = {hrsg.get("name", ""): hrsg for hrsg in hrsg_dispatch_list}
+    
+    if all_hrsg_assets:
+        # Use database HRSG list (includes ALL HRSGs)
+        for hrsg_name, hrsg_info in all_hrsg_assets.items():
+            # Check if this HRSG was dispatched
+            dispatched_hrsg = hrsg_dispatch_lookup.get(hrsg_name)
+            
+            if dispatched_hrsg:
+                # HRSG was dispatched - use actual values
+                operating_hours = dispatched_hrsg.get("operating_hours", 0)
+                dispatched_supp_mt = dispatched_hrsg.get("dispatched_supp_mt", 0)
+                free_steam_mt = dispatched_hrsg.get("free_steam_mt", 0)
+                
+                # Total steam generation (supplementary + free steam)
+                total_steam_mt = dispatched_supp_mt + free_steam_mt
+                
+                # HRSG is running if it has ANY steam generation
+                is_running = total_steam_mt > 0
+                is_available = is_running
+                
+                # Calculate average steam generation rate
+                if operating_hours > 0:
+                    avg_steam_generation_rate = dispatched_supp_mt / operating_hours
+                elif total_steam_mt > 0:
+                    operating_hours = 720.0
+                    avg_steam_generation_rate = dispatched_supp_mt / operating_hours if dispatched_supp_mt > 0 else 0
+                else:
+                    avg_steam_generation_rate = 0
+                
+                status = "Running" if is_running else "Off"
+            else:
+                # HRSG was NOT dispatched - all zeros
+                operating_hours = 0
+                dispatched_supp_mt = 0
+                free_steam_mt = 0
+                avg_steam_generation_rate = 0
+                is_available = False
+                status = "Off"
+            
+            asset_data = {
+                "asset": hrsg_name,
+                "type": "HRSG",
+                "priority": hrsg_info.get("Priority"),
+                "isAvailable": is_available,
+                "operatingHours": round(operating_hours, 2),
+                "steamGenerationMT": round(dispatched_supp_mt, 2),
+                "freeSteamMT": round(free_steam_mt, 2),
+                "avgSteamGenRateMTPerHr": round(avg_steam_generation_rate, 2),
+                "status": status
+            }
+            
+            asset_list.append(asset_data)
+            assets_seen.add(hrsg_name.upper())
+    elif hrsg_dispatch_list:
+        # Fallback: use dispatch list only
         for hrsg in hrsg_dispatch_list:
             hrsg_name = hrsg.get("name", "")
-            is_available = hrsg.get("is_available", False)
             operating_hours = hrsg.get("operating_hours", 0)
-            dispatched_supp_mt = hrsg.get("dispatched_supp_mt", 0)  # SHP steam generation in MT
-            free_steam_mt = hrsg.get("free_steam_mt", 0)  # Free steam from GT exhaust
-            priority = hrsg.get("priority")  # HRSG priority if available
+            dispatched_supp_mt = hrsg.get("dispatched_supp_mt", 0)
+            free_steam_mt = hrsg.get("free_steam_mt", 0)
+            priority = hrsg.get("priority")
             
-            # Calculate average steam generation rate (MT/hour)
-            avg_steam_generation_rate = (dispatched_supp_mt / operating_hours) if operating_hours > 0 else 0
+            total_steam_mt = dispatched_supp_mt + free_steam_mt
+            is_running = total_steam_mt > 0
+            is_available = is_running
+            
+            if operating_hours > 0:
+                avg_steam_generation_rate = dispatched_supp_mt / operating_hours
+            elif total_steam_mt > 0:
+                operating_hours = 720.0
+                avg_steam_generation_rate = dispatched_supp_mt / operating_hours if dispatched_supp_mt > 0 else 0
+            else:
+                avg_steam_generation_rate = 0
+            
+            status = "Running" if is_running else "Off"
             
             asset_data = {
                 "asset": hrsg_name,
                 "type": "HRSG",
                 "priority": priority,
                 "isAvailable": is_available,
-                "operatingHours": operating_hours,
-                "steamGenerationMT": dispatched_supp_mt,  # Total supplementary firing steam
-                "freeSteamMT": free_steam_mt,  # Free steam from GT exhaust
-                "avgSteamGenRateMTPerHr": round(avg_steam_generation_rate, 2),  # Average rate
-                "status": "Running" if is_available and operating_hours > 0 else "Off"
-            }
-            
-            asset_list.append(asset_data)
-            assets_seen.add(hrsg_name.upper())
-    else:
-        # Fallback: Add HRSG info from shp_capacity
-        shp_capacity = usd_result.get("final_shp_capacity", {})
-        hrsg_details = shp_capacity.get("hrsg_details", [])
-        
-        for hrsg in hrsg_details:
-            hrsg_name = hrsg.get("name", "")
-            is_available = hrsg.get("is_available", False)
-            
-            asset_data = {
-                "asset": hrsg_name,
-                "type": "HRSG",
-                "isAvailable": is_available,
-                "operatingHours": 0,
-                "status": "Running" if is_available else "Off"
+                "operatingHours": round(operating_hours, 2),
+                "steamGenerationMT": round(dispatched_supp_mt, 2),
+                "freeSteamMT": round(free_steam_mt, 2),
+                "avgSteamGenRateMTPerHr": round(avg_steam_generation_rate, 2),
+                "status": status
             }
             
             asset_list.append(asset_data)
