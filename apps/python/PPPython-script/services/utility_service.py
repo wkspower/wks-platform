@@ -589,6 +589,7 @@ def calculate_utilities_from_dispatch(
     gt2_gross_mwh: float = 0.0,
     gt3_gross_mwh: float = 0.0,
     stg_gross_mwh: float = 0.0,
+    import_power_mwh: float = 0.0,  # Import power from Rev Proc (MWh)
     # Steam balance results (MT)
     shp_from_hrsg1: float = 0.0,
     shp_from_hrsg2: float = 0.0,
@@ -614,6 +615,8 @@ def calculate_utilities_from_dispatch(
     gt1_free_steam_factor: float = None,   # GT1 Free Steam Factor
     gt2_free_steam_factor: float = None,   # GT2 Free Steam Factor
     gt3_free_steam_factor: float = None,   # GT3 Free Steam Factor
+    # Demand information for norms calculation
+    total_demand_mwh: float = 0.0,  # Total power demand including U4U
     # Flags
     gt1_available: bool = True,
     gt2_available: bool = True,
@@ -966,6 +969,9 @@ def calculate_utilities_from_dispatch(
         "shp_from_hrsg3": shp_from_hrsg3,
         "oxygen_mt": oxygen_mt,
         "effluent_m3": effluent_m3,
+        # Import Power (for norms calculation)
+        "import_power_mwh": import_power_mwh,
+        "total_demand_mwh": total_demand_mwh,
     }
 
 
@@ -2043,22 +2049,47 @@ def print_nmd_budget_format(
     # ========================================
     # NMD - Utility/Power Dist - Power_Dis
     # ========================================
-    total_net_power = gt1_net + gt2_net + gt3_net + stg_net
-    total_net_kwh = total_net_power * 1000
-    gt1_ratio = gt1_net / total_net_power if total_net_power > 0 else 0
-    gt2_ratio = gt2_net / total_net_power if total_net_power > 0 else 0
-    gt3_ratio = gt3_net / total_net_power if total_net_power > 0 else 0
-    stg_ratio = stg_net / total_net_power if total_net_power > 0 else 0
+    # Extract import power data
+    import_power_mwh = utilities.get("import_power_mwh", 0.0)
+    total_demand_mwh = utilities.get("total_demand_mwh", 0.0)
+    import_power_kwh = import_power_mwh * 1000
+    
+    # CRITICAL: Use total demand (includes process + fixed + U4U) for norms calculation
+    # NOT just the net generation
+    total_demand_kwh = total_demand_mwh * 1000 if total_demand_mwh > 0 else 0
+    
+    # Power quantities in KWh
     pp1_power_kwh = gt1_net * 1000
     pp2_power_kwh = gt2_net * 1000
     pp3_power_kwh = gt3_net * 1000
     stg_power_kwh = stg_net * 1000
+    
+    # Calculate norms (ratio of each source to TOTAL DEMAND including U4U)
+    # Norms should sum to 1.0
+    import_ratio = import_power_kwh / total_demand_kwh if total_demand_kwh > 0 else 0
+    gt1_ratio = pp1_power_kwh / total_demand_kwh if total_demand_kwh > 0 and pp1_power_kwh > 0 else 0
+    gt2_ratio = pp2_power_kwh / total_demand_kwh if total_demand_kwh > 0 and pp2_power_kwh > 0 else 0
+    gt3_ratio = pp3_power_kwh / total_demand_kwh if total_demand_kwh > 0 and pp3_power_kwh > 0 else 0
+    stg_ratio = stg_power_kwh / total_demand_kwh if total_demand_kwh > 0 and stg_power_kwh > 0 else 0
+    
+    # Verify norms sum to 1.0
+    total_norms = import_ratio + gt1_ratio + gt2_ratio + gt3_ratio + stg_ratio
+    
     print(f"\n{'NMD - Utility/Power Dist':<25} {'Power_Dis':<20} {'':<25} {'KWH':<8}")
+    
+    # Add Import Power (Power from MEL) line if import power is used
+    if import_power_kwh > 0:
+        import_ref_qty = 0.0  # No reference data for import power yet
+        print(f"{'':<25} {'':<20} {'Power from MEL':<25} {'KWH':<8} {fmt_qty(total_demand_kwh)} {import_ref_qty:>18,.2f} {import_ratio:>10.4f} {import_power_kwh:>20,.2f} {import_ref_qty:>20,.2f} {import_power_kwh - import_ref_qty:>18,.2f} {'N/A':>10}")
+    
     power_dis_ref_qty = calc_ref_qty(EXPECTED['power_pp1'], gt1_ratio) if gt1_ratio > 0 else 0
-    print(f"{'':<25} {'':<20} {'POWERGEN (PP1)':<25} {'KWH':<8} {fmt_qty(total_net_kwh)} {power_dis_ref_qty:>18,.2f} {gt1_ratio:>10.4f} {pp1_power_kwh:>20,.2f} {EXPECTED['power_pp1']:>20,.2f} {pp1_power_kwh - EXPECTED['power_pp1']:>18,.2f} {calc_pct(pp1_power_kwh, EXPECTED['power_pp1'])}")
-    print(f"{'':<25} {'':<20} {'POWERGEN (PP2)':<25} {'KWH':<8} {fmt_qty(total_net_kwh)} {power_dis_ref_qty:>18,.2f} {gt2_ratio:>10.4f} {pp2_power_kwh:>20,.2f} {EXPECTED['power_pp2']:>20,.2f} {pp2_power_kwh - EXPECTED['power_pp2']:>18,.2f} {calc_pct(pp2_power_kwh, EXPECTED['power_pp2'])}")
-    print(f"{'':<25} {'':<20} {'POWERGEN (PP3)':<25} {'KWH':<8} {fmt_qty(total_net_kwh)} {power_dis_ref_qty:>18,.2f} {gt3_ratio:>10.4f} {pp3_power_kwh:>20,.2f} {EXPECTED['power_pp3']:>20,.2f} {pp3_power_kwh - EXPECTED['power_pp3']:>18,.2f} {calc_pct(pp3_power_kwh, EXPECTED['power_pp3'])}")
-    print(f"{'':<25} {'':<20} {'POWERGEN (STG)':<25} {'KWH':<8} {fmt_qty(total_net_kwh)} {power_dis_ref_qty:>18,.2f} {stg_ratio:>10.4f} {stg_power_kwh:>20,.2f} {EXPECTED['power_stg']:>20,.2f} {stg_power_kwh - EXPECTED['power_stg']:>18,.2f} {calc_pct(stg_power_kwh, EXPECTED['power_stg'])}")
+    print(f"{'':<25} {'':<20} {'POWERGEN (PP1)':<25} {'KWH':<8} {fmt_qty(total_demand_kwh)} {power_dis_ref_qty:>18,.2f} {gt1_ratio:>10.4f} {pp1_power_kwh:>20,.2f} {EXPECTED['power_pp1']:>20,.2f} {pp1_power_kwh - EXPECTED['power_pp1']:>18,.2f} {calc_pct(pp1_power_kwh, EXPECTED['power_pp1'])}")
+    print(f"{'':<25} {'':<20} {'POWERGEN (PP2)':<25} {'KWH':<8} {fmt_qty(total_demand_kwh)} {power_dis_ref_qty:>18,.2f} {gt2_ratio:>10.4f} {pp2_power_kwh:>20,.2f} {EXPECTED['power_pp2']:>20,.2f} {pp2_power_kwh - EXPECTED['power_pp2']:>18,.2f} {calc_pct(pp2_power_kwh, EXPECTED['power_pp2'])}")
+    print(f"{'':<25} {'':<20} {'POWERGEN (PP3)':<25} {'KWH':<8} {fmt_qty(total_demand_kwh)} {power_dis_ref_qty:>18,.2f} {gt3_ratio:>10.4f} {pp3_power_kwh:>20,.2f} {EXPECTED['power_pp3']:>20,.2f} {pp3_power_kwh - EXPECTED['power_pp3']:>18,.2f} {calc_pct(pp3_power_kwh, EXPECTED['power_pp3'])}")
+    print(f"{'':<25} {'':<20} {'POWERGEN (STG)':<25} {'KWH':<8} {fmt_qty(total_demand_kwh)} {power_dis_ref_qty:>18,.2f} {stg_ratio:>10.4f} {stg_power_kwh:>20,.2f} {EXPECTED['power_stg']:>20,.2f} {stg_power_kwh - EXPECTED['power_stg']:>18,.2f} {calc_pct(stg_power_kwh, EXPECTED['power_stg'])}")
+    
+    # Verification: Print total norms (should be 1.0)
+    print(f"\n  {'TOTAL NORMS VERIFICATION:':<50} {total_norms:>10.4f} (should be 1.0000)")
     
     # ========================================
     # NMD - Utility/Power Dist - SHP Steam_Dis
