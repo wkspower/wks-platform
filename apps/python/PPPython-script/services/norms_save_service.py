@@ -5,9 +5,45 @@ Saves calculated budget values to NormsMonthDetail table after each calculation.
 Updates:
 - QTY: Generation quantity (same for all materials under same Plant+Utility)
 - Quantity: Material consumption = QTY * Norms
+- Syncs model-calculated norms to CPPNorms table via stored procedure
 """
 
 from database.connection import get_connection
+
+
+def _sync_to_cpp_norms(conn, norms_header_fk_id: str, fym_id: str, norms_value: float, modified_by: str = 'PythonModel'):
+    """
+    Sync updated norms from NormsMonthDetail to CPPNorms table.
+    Calls the CPP_UpdateNormsFromPythonModel stored procedure.
+    
+    Args:
+        conn: Database connection
+        norms_header_fk_id: NormsHeader FK ID (UUID)
+        fym_id: FinancialYearMonth FK ID (UUID)
+        norms_value: New norms value
+        modified_by: Who modified the norms (default: 'PythonModel')
+    
+    Returns:
+        True if sync succeeded, False otherwise
+    """
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            EXEC dbo.CPP_UpdateNormsFromPythonModel 
+                @NormsHeaderFkId = ?, 
+                @FinancialYearMonthFkId = ?, 
+                @Norms = ?, 
+                @ModifiedBy = ?
+        ''', (norms_header_fk_id, fym_id, norms_value, modified_by))
+        
+        # Fetch result
+        result = cur.fetchone()
+        if result and result[0] == 'Success':
+            return True
+        return False
+    except Exception as e:
+        print(f"Warning: CPPNorms sync failed for NormsHeader {norms_header_fk_id}: {str(e)}")
+        return False
 
 
 def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = False) -> dict:
@@ -60,7 +96,8 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
             nh.MaterialName,
             nmd.QTY,
             nmd.Quantity,
-            nmd.Norms
+            nmd.Norms,
+            nmd.NormsHeader_FK_Id
         FROM NormsMonthDetail nmd
         INNER JOIN NormsHeader nh ON nh.Id = nmd.NormsHeader_FK_Id
         INNER JOIN Plants p ON p.Id = nh.Plant_FK_Id
@@ -71,6 +108,7 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
     
     updated_count = 0
     same_count = 0
+    cpp_norms_synced = 0
     updates = []
     
     for row in records:
@@ -81,6 +119,7 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
         old_qty = float(row[4]) if row[4] else 0
         old_quantity = float(row[5]) if row[5] else 0
         old_norms = float(row[6]) if row[6] else 0
+        norms_header_fk_id = row[7]
         
         # Get new QTY from generation map
         key = (plant_name, utility_name)
@@ -123,12 +162,16 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
             
             if not dry_run:
                 if new_norms is not None:
-                    # Update QTY, Quantity, AND Norms
+                    # Update QTY, Quantity, AND Norms in NormsMonthDetail
                     cur.execute('''
                         UPDATE NormsMonthDetail 
                         SET QTY = ?, Quantity = ?, Norms = ?
                         WHERE Id = ?
                     ''', (new_qty, new_quantity, new_norms, record_id))
+                    
+                    # Sync model-calculated norms to CPPNorms table
+                    if _sync_to_cpp_norms(conn, norms_header_fk_id, fym_id, new_norms, 'PythonModel'):
+                        cpp_norms_synced += 1
                 else:
                     # Update only QTY and Quantity
                     cur.execute('''
@@ -144,11 +187,17 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
     
     conn.close()
     
+    # Build message with CPPNorms sync info
+    message = f'{"DRY RUN: " if dry_run else ""}Updated {updated_count} records, {same_count} unchanged'
+    if not dry_run and cpp_norms_synced > 0:
+        message += f', {cpp_norms_synced} synced to CPPNorms'
+    
     return {
         'success': True,
-        'message': f'{"DRY RUN: " if dry_run else ""}Updated {updated_count} records, {same_count} unchanged',
+        'message': message,
         'updated': updated_count,
         'same': same_count,
+        'cpp_norms_synced': cpp_norms_synced,
         'total': len(records),
         'dry_run': dry_run,
         'updates': updates if dry_run else []  # Only return details in dry run
@@ -372,6 +421,11 @@ def print_save_summary(save_result: dict):
         print(f"  Total records: {save_result.get('total', 0)}")
         print(f"  Updated: {save_result['updated']}")
         print(f"  Unchanged: {save_result['same']}")
+        
+        # Show CPPNorms sync count if available
+        cpp_synced = save_result.get('cpp_norms_synced', 0)
+        if cpp_synced > 0:
+            print(f"  CPPNorms synced: {cpp_synced}")
     else:
         print(f"  Status: FAILED")
         print(f"  Message: {save_result['message']}")
