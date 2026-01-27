@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
+
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
@@ -30,11 +31,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExclusionDTO;
-import com.wks.caseengine.dto.PeopleInitiativeDTO;
 import com.wks.caseengine.dto.PlantTeamDTO;
 import com.wks.caseengine.entity.ExclusionDate;
-import com.wks.caseengine.entity.PeopleInitiative;
-import com.wks.caseengine.entity.PlantTeam;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
@@ -42,7 +40,6 @@ import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.ExclusionDateRepository;
 import com.wks.caseengine.repository.PeopleInitiativeRepository;
-import com.wks.caseengine.repository.PlantTeamRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -60,9 +57,6 @@ public class ExclusionServiceImpl implements ExclusionService{
 	
 	@Autowired
 	private ExclusionDateRepository exclusionDateRepository;
-	
-	@Autowired
-	private PeopleInitiativeRepository peopleInitiativeRepository;
 	
 	@Autowired
 	private SiteRepository siteRepository;
@@ -92,8 +86,8 @@ public class ExclusionServiceImpl implements ExclusionService{
 			for (Object[] row : obj) {
 			    ExclusionDTO exclusionDTO = new ExclusionDTO();
 			    exclusionDTO.setId(row[0] != null ? row[0].toString() : "");
-			    exclusionDTO.setStartDate(row[1] != null ? ((java.sql.Date) row[1]).toLocalDate() : null);
-			    exclusionDTO.setEndDate(row[2] != null ? ((java.sql.Date) row[2]).toLocalDate() : null);
+			    exclusionDTO.setStartDate(row[1] != null ? new java.util.Date(((java.sql.Date) row[1]).getTime()) : null);
+			    exclusionDTO.setEndDate(row[2] != null ? new java.util.Date(((java.sql.Date) row[2]).getTime()) : null);
 			    
 			    exclusionDTO.setRemark(row[3] != null ? row[3].toString() : "");
 			    exclusionDTOs.add(exclusionDTO);
@@ -187,7 +181,7 @@ public class ExclusionServiceImpl implements ExclusionService{
 				exclusionDate.setEndDate(exclusionDTO.getEndDate());
 				exclusionDate.setRemarks(exclusionDTO.getRemark());
 				exclusionDate.setModifiedBy(Utility.getUserName());
-				exclusionDate.setModifiedOn(LocalDateTime.now());
+				exclusionDate.setModifiedOn(new Date());
 				exclusionDateRepository.save(exclusionDate);
 			}
 			
@@ -309,35 +303,68 @@ public class ExclusionServiceImpl implements ExclusionService{
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
 
-	        if (rowIterator.hasNext())
-	            rowIterator.next();  
+	        if (rowIterator.hasNext()) rowIterator.next(); 
 
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
-	            
 	            ExclusionDTO dto = new ExclusionDTO();
+	            
 	            try {
-	                dto.setStartDate(getLocalDateCellValue(row.getCell(0), dto));
-	                dto.setEndDate(getLocalDateCellValue(row.getCell(1), dto));
-	                dto.setRemark(getStringCellValue(row.getCell(2), dto));
+	                Date start = getDateCellValue(row.getCell(0), dto); // Should return java.util.Date
+	                Date end = getDateCellValue(row.getCell(1), dto);   // Should return java.util.Date
 	                
+	                dto.setStartDate(start);
+	                dto.setEndDate(end);
+	                dto.setRemark(getStringCellValue(row.getCell(2), dto));
 	                dto.setId(getStringCellValue(row.getCell(3), dto));
-	              } 
-	              catch (Exception e) {
-	                e.printStackTrace();
-	                dto.setErrDescription(e.getMessage());
+
+	                // --- 1. Basic Row Validation (java.util.Date syntax) ---
+	                if (start != null && end != null) {
+	                    if (end.before(start)) { // Changed from .isBefore()
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("End date cannot be before Start date.");
+	                    }
+	                } else {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Dates cannot be empty.");
+	                }
+
+	            } catch (Exception e) {
 	                dto.setSaveStatus("Failed");
+	                dto.setErrDescription("Row processing error: " + e.getMessage());
 	            }
 	            exclusionDTOs.add(dto);
 	        }
 
+	        validateOverlaps(exclusionDTOs);
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
-
 	    return exclusionDTOs;
 	}
+	private void validateOverlaps(List<ExclusionDTO> list) {
+	    for (int i = 0; i < list.size(); i++) {
+	        ExclusionDTO current = list.get(i);
+	        if ("Failed".equals(current.getSaveStatus()) || current.getStartDate() == null || current.getEndDate() == null) continue;
 
+	        for (int j = i + 1; j < list.size(); j++) {
+	            ExclusionDTO other = list.get(j);
+	            if ("Failed".equals(other.getSaveStatus()) || other.getStartDate() == null || other.getEndDate() == null) continue;
+
+	            boolean isOverlapping = !current.getStartDate().after(other.getEndDate()) 
+	                                 && !current.getEndDate().before(other.getStartDate());
+
+	            if (isOverlapping) {
+	                current.setSaveStatus("Failed");
+	                current.setErrDescription("Row overlaps with another date range in the file.");
+	                
+	                other.setSaveStatus("Failed");
+	                other.setErrDescription("Row overlaps with another date range in the file.");
+	            }
+	        }
+	    }
+	}
 	private static String getStringCellValue(Cell cell, ExclusionDTO dto) {
 	    try {
 	        if (cell == null || cell.getCellType() == CellType.BLANK) {
@@ -358,29 +385,30 @@ public class ExclusionServiceImpl implements ExclusionService{
 	    return null;
 	}
 	
-	private static LocalDate getLocalDateCellValue(Cell cell, ExclusionDTO dto) {
-	    try {
-	        if (cell == null || cell.getCellType() == CellType.BLANK) {
-	            return null;
-	        }
+	private static java.util.Date getDateCellValue(Cell cell, ExclusionDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
 
-	        if (cell.getCellType() == CellType.NUMERIC) {
-	            if (DateUtil.isCellDateFormatted(cell)) {
-	                return cell.getLocalDateTimeCellValue().toLocalDate();
-	            } else {
-	                throw new Exception("Cell is numeric but not a valid date format");
-	            }
-	        } 
-	        if (cell.getCellType() == CellType.STRING) {
-	            String val = cell.getStringCellValue().trim();
-	            if (val.isEmpty()) return null;
-	            return LocalDate.parse(val, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        if (DateUtil.isCellDateFormatted(cell)) {
+	            return cell.getDateCellValue();
+	        } else {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Invalid date format in cell");
 	        }
-
-	    } catch (Exception e) {
-	        dto.setSaveStatus("Failed");
-	        dto.setErrDescription("Invalid Date format in Excel. Please use YYYY-MM-DD or Excel Date format.");
-	        e.printStackTrace();
+	    } else if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; 
+	        }
+	        try {
+	            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+	            return sdf.parse(val);
+	        } catch (java.text.ParseException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter date in correct format (yyyy-MM-dd)");
+	        }
 	    }
 	    return null;
 	}

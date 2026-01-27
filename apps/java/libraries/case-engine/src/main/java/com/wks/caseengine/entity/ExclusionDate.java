@@ -6,9 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.hibernate.annotations.GenericGenerator;
 import jakarta.persistence.*;
+
+import java.util.Date;
 import java.util.UUID;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "ExclusionDate")
@@ -25,10 +26,10 @@ public class ExclusionDate {
     private UUID id;
 
     @Column(name = "startDate")
-    private LocalDate startDate;
+    private Date startDate;
 
     @Column(name = "endDate")
-    private LocalDate endDate;
+    private Date endDate;
 
     @Column(name = "remarks")
     private String remarks;
@@ -46,7 +47,7 @@ public class ExclusionDate {
     private String modifiedBy;
 
     @Column(name = "modifiedOn")
-    private LocalDateTime modifiedOn;
+    private Date modifiedOn;
 
 
 }

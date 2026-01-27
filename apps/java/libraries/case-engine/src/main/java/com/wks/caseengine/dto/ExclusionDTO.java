@@ -1,6 +1,8 @@
 package com.wks.caseengine.dto;
 
-import java.time.LocalDate;
+
+import java.util.Date;
+
 import org.springframework.context.annotation.Configuration;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,8 +17,8 @@ import lombok.NoArgsConstructor;
 public class ExclusionDTO {
 	
 	private String id;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private Date startDate;
+    private Date endDate;
     private String plantId;
     private String aopYear;
     private String remark;
