@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+import AddRowDialog from './AddRowDialog'
 
 const CrudBlendWindowGrid = ({
   tableKey,
@@ -31,6 +32,7 @@ const CrudBlendWindowGrid = ({
   const [currentRowId, setCurrentRowId] = useState(null)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
   const [selectedGroupType, setSelectedGroupType] = useState('')
+  const [addRowDialogOpen, setAddRowDialogOpen] = useState(false)
 
   // Process table data when it's provided
   useEffect(() => {
@@ -71,6 +73,7 @@ const CrudBlendWindowGrid = ({
   const groupTypes = useMemo(() => {
     if (tableKey !== 'CrudeBlendWindow') return []
     const types = [...new Set(rows.map((row) => row.type).filter(Boolean))]
+    console.log('groupTypes calculated:', types)
     return types
   }, [rows, tableKey])
 
@@ -96,6 +99,10 @@ const CrudBlendWindowGrid = ({
         editable: [
           'property',
           'type',
+          'stream',
+          'unit',
+          'crude',
+          'kbpsd',
           'minValue',
           'maxValue',
           'criticality',
@@ -327,6 +334,48 @@ const CrudBlendWindowGrid = ({
     [onRefresh, setSnackbarData, setSnackbarOpen],
   )
 
+  // Handle add row dialog submission
+  const handleAddRowSubmit = useCallback(
+    (formData) => {
+      // Generate unique ID using timestamp
+      const newRowId = `new_row_${Date.now()}`
+
+      // Extract all fields from columns
+      const extractFields = (cols) => {
+        const fields = []
+        cols.forEach((col) => {
+          if (col.field) {
+            fields.push(col.field)
+          }
+          if (col.children && Array.isArray(col.children)) {
+            fields.push(...extractFields(col.children))
+          }
+        })
+        return fields
+      }
+
+      const allFields = extractFields(columns)
+
+      // Create new row with form data
+      const newRow = {
+        id: newRowId,
+        isNew: true,
+        isEditable: true,
+        inEdit: true,
+        ...Object.fromEntries(allFields.map((field) => [field, ''])),
+        ...formData,
+      }
+
+      // Add to rows and modifiedCells
+      setRows((prevRows) => [newRow, ...prevRows])
+      setModifiedCells((prev) => ({
+        ...prev,
+        [newRowId]: newRow,
+      }))
+    },
+    [columns],
+  )
+
   // Dropdown config for group type selection (only for CrudeBlendWindow)
   const groupTypeDropdownConfig = useMemo(() => {
     if (tableKey !== 'CrudeBlendWindow' || groupTypes.length === 0) return null
@@ -396,7 +445,7 @@ const CrudBlendWindowGrid = ({
           modifiedCells={modifiedCells}
           setModifiedCells={setModifiedCells}
           permissions={permissions}
-          initialFieldValues={initialFieldValues}
+          customAddRow={() => setAddRowDialogOpen(true)}
           {...(groupTypeDropdownConfig && {
             dropdownConfig: groupTypeDropdownConfig,
             selectedDropdownValue: selectedGroupType,
@@ -410,6 +459,15 @@ const CrudBlendWindowGrid = ({
           {...(tableKey === 'CrudeBlendWindow' && { groupBy: 'type' })}
         />
       </Stack>
+
+      <AddRowDialog
+        open={addRowDialogOpen}
+        onClose={() => setAddRowDialogOpen(false)}
+        onSubmit={handleAddRowSubmit}
+        columns={columns}
+        groupTypes={groupTypes}
+        tableKey={tableKey}
+      />
     </Box>
   )
 }

@@ -38,10 +38,10 @@ public class TCSUnitCapacity {
     @Column(name = "May", precision = 18, scale = 4)
     private Double may;
 
-    @Column(name = "June", precision = 18, scale = 4)
+    @Column(name = "Jun", precision = 18, scale = 4)
     private Double jun;
 
-    @Column(name = "July", precision = 18, scale = 4)
+    @Column(name = "Jul", precision = 18, scale = 4)
     private Double jul;
 
     @Column(name = "Aug", precision = 18, scale = 4)
@@ -65,7 +65,7 @@ public class TCSUnitCapacity {
     @Column(name = "Feb", precision = 18, scale = 4)
     private Double feb;
 
-    @Column(name = "March", precision = 18, scale = 4)
+    @Column(name = "Mar", precision = 18, scale = 4)
     private Double mar;
 
     @Size(max = 1000)

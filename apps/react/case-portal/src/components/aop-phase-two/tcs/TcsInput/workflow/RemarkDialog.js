@@ -9,9 +9,12 @@ import {
   Typography,
   IconButton,
   Divider,
+  CircularProgress,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { TextArea } from '@progress/kendo-react-inputs'
+import { useSelector } from 'react-redux'
+import { TcsWorkflowApiService } from 'components/aop-phase-two/services/tcs/tcsWorkflowApiService'
 import { ROLES } from '../../utils/roleUtils'
 
 const RemarkDialog = ({
@@ -24,12 +27,36 @@ const RemarkDialog = ({
   maxLength = 1000,
   role = '',
   historyData = [],
+  keycloak,
+  snackbarData,
+  setSnackbarData,
+  setSnackbarOpen,
 }) => {
   const [remark, setRemark] = useState('')
-  const handleSubmit = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Get values from Redux store
+  const dataGridStore = useSelector((state) => state.dataGridStore)
+  const { plantObject, siteObject, verticalObject, year } = dataGridStore
+
+  const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
+  const AOP_YEAR = year?.selectedYear
+
+  const handleSubmit = async () => {
     if (remark.trim()) {
-      onSubmit(remark)
-      setRemark('')
+      setIsSubmitting(true)
+      try {
+        // Submit the remark (workflow trigger is handled in parent component)
+        onSubmit(remark)
+        setRemark('')
+        handleClose()
+      } catch (err) {
+        console.error('Error during remark submission:', err)
+      } finally {
+        setIsSubmitting(false)
+      }
     }
   }
 
@@ -38,7 +65,7 @@ const RemarkDialog = ({
       case ROLES.PLANT_MANAGER:
         return 'Plant Manager Remark Submission'
       case ROLES.EPS_ENGINEER:
-        return 'EPS Manager Remark Submission'
+        return 'EPS Engineer Remark Submission'
       case ROLES.CTS_HEAD:
         return 'CTS Head Remark Submission'
       case ROLES.EPS_HEAD:
@@ -132,12 +159,16 @@ const RemarkDialog = ({
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               onClick={handleSubmit}
-              disabled={disabled || !remark.trim()}
+              disabled={disabled || !remark.trim() || isSubmitting}
               variant='contained'
               className='btn-save'
               style={{ background: '#28a745', color: '#ffffff' }}
             >
-              Submit
+              {isSubmitting ? (
+                <CircularProgress size={20} color='inherit' />
+              ) : (
+                'Submit'
+              )}
             </Button>
           </Box>
         </DialogActions>

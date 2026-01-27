@@ -34,6 +34,31 @@ import valueFormatterByUOM, {
 } from '../commonUtilityFunctions'
 import { NoSpinnerNumericEditor } from '../utilities/numbericColumns'
 
+// Helper function to apply Kendo number format
+const applyKendoNumberFormat = (value, format) => {
+  if (!format || value === null || value === undefined) return value
+
+  // Parse Kendo format string like '{0:0.00}' or '{0:0.0000}'
+  const match = format.match(/\{0:([^}]+)\}/)
+  if (!match) return value
+
+  const formatSpec = match[1]
+  const numValue = parseFloat(value)
+
+  if (isNaN(numValue)) return value
+
+  // Handle decimal format like '0.00' or '0.0000'
+  if (formatSpec.match(/^0+\.0+$/)) {
+    const decimalPlaces = formatSpec.split('.')[1].length
+    // Truncate instead of rounding to preserve original precision
+    const factor = Math.pow(10, decimalPlaces)
+    const truncated = Math.trunc(numValue * factor) / factor
+    return truncated.toFixed(decimalPlaces)
+  }
+
+  return value
+}
+
 export const hiddenFields = [
   'maintenanceId',
   'id',
@@ -80,6 +105,7 @@ const NestedKendoTable = ({
   hoursRows = {},
   dateCalculationConfig = {},
   customHeight = null,
+  customItemChange = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -321,6 +347,15 @@ const NestedKendoTable = ({
         return
       }
 
+      // Call custom itemChange handler first for validation
+      if (customItemChange) {
+        const validationResult = customItemChange(e, setRows)
+        // If validation returns false, stop processing
+        if (validationResult === false) {
+          return
+        }
+      }
+
       const itemId = dataItem.id
 
       // Parse field path for nested properties (e.g., "apr.norms" or "apr.details.value")
@@ -533,6 +568,7 @@ const NestedKendoTable = ({
       setCustomModifiedCells,
       hoursRows,
       dateCalculationConfig,
+      customItemChange,
     ],
   )
 
@@ -666,15 +702,13 @@ const NestedKendoTable = ({
       tdProps,
       children,
       customModifiedCells,
-      isFormatByUOM = false,
+      format = null,
     } = props
 
     // Guard against undefined field
     if (!field) {
       return <td {...tdProps}>{children}</td>
     }
-
-    const uomType = dataItem?.uom
     const rowId = dataItem.id
 
     // Get value from nested structure at any depth
@@ -688,9 +722,15 @@ const NestedKendoTable = ({
       value = dataItem[field]
     }
 
-    const formattedValue = isFormatByUOM
-      ? valueFormatterByUOM(value, uomType)
-      : value
+    let formattedValue = value
+
+    // Apply Kendo number format if provided (before UOM formatting)
+    if (format && (typeof value === 'number' || typeof value === 'string')) {
+      const numValue = typeof value === 'string' ? parseFloat(value) : value
+      if (!isNaN(numValue)) {
+        formattedValue = applyKendoNumberFormat(numValue, format)
+      }
+    }
 
     const isEdited = Object.prototype.hasOwnProperty.call(
       customModifiedCells?.[rowId] || {},
@@ -700,13 +740,13 @@ const NestedKendoTable = ({
     return (
       <td
         {...tdProps}
-        title={formattedValue}
+        title={value}
         style={{
           color: isEdited ? 'orange' : undefined,
           fontWeight: isEdited ? 'bold' : undefined,
         }}
       >
-        {isFormatByUOM ? formattedValue : children}
+        {formattedValue}
       </td>
     )
   }
@@ -824,6 +864,14 @@ const NestedKendoTable = ({
         const hasMinMaxConstraints =
           col.minValue !== undefined || col.maxValue !== undefined
 
+        // Resolve minValue and maxValue from dataItem if they are string references
+        const getResolvedValue = (value, dataItem) => {
+          if (typeof value === 'string') {
+            return dataItem[value]
+          }
+          return value
+        }
+
         return (
           <GridColumn
             key={col.field}
@@ -841,8 +889,8 @@ const NestedKendoTable = ({
                     text: (cellProps) => (
                       <NumericEditorWithMinMax
                         {...cellProps}
-                        min={col.minValue}
-                        max={col.maxValue}
+                        min={getResolvedValue(col.minValue, cellProps.dataItem)}
+                        max={getResolvedValue(col.maxValue, cellProps.dataItem)}
                       />
                     ),
                   }
@@ -851,7 +899,7 @@ const NestedKendoTable = ({
                 <NestedHighlightCell
                   {...props}
                   customModifiedCells={customModifiedCells}
-                  isFormatByUOM={true}
+                  format={col.format}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,
@@ -902,7 +950,7 @@ const NestedKendoTable = ({
                 <NestedHighlightCell
                   {...props}
                   customModifiedCells={customModifiedCells}
-                  isFormatByUOM={true}
+                  format={col.format}
                 />
               ),
               headerCell: SimpleHeaderWithTooltip,
@@ -1058,8 +1106,9 @@ const NestedKendoTable = ({
                 variant='contained'
                 onClick={handleCalculateBtn}
                 className='btn-save'
-                disabled={isButtonDisabled || READ_ONLY}
-                // className='custom-btn-calculate'
+                disabled={
+                  !permissions.enableCalculate || isButtonDisabled || READ_ONLY
+                }
               >
                 Calculate
               </Button>
