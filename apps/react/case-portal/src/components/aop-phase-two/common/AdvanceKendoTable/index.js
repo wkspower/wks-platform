@@ -174,6 +174,7 @@ const AdvanceKendoTable = ({
   onApproveClick = null,
   customHeight = null,
   customAddRow = null,
+  customActionCell = null,
 }) => {
   const fileInputRef = useRef(null)
   const minGridWidth = useRef(0)
@@ -1865,6 +1866,21 @@ const AdvanceKendoTable = ({
                   editable={false}
                   cells={{
                     data: ActionsCell,
+                  }}
+                />
+              )}
+
+              {customActionCell && (
+                <GridColumn
+                  key='customActions'
+                  field='customActions'
+                  title='Action'
+                  width={80}
+                  className='k-text-center'
+                  filterable={false}
+                  editable={false}
+                  cells={{
+                    data: customActionCell,
                   }}
                 />
               )}
