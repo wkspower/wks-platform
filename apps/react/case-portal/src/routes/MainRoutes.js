@@ -75,6 +75,7 @@ import PimsOutput from 'components/aop-phase-two/tcs/PimsOutput/PimsOutput'
 import TcsInput from 'components/aop-phase-two/tcs/TcsInput/index'
 import AopDashboard from 'components/kendo-data-tables/AopDashboard'
 import ProposedConsumptionNorms from 'components/kendo-data-tables/ProposedConsumptionNorms'
+import Summary from 'components/aop-phase-two/cpp/Summary/index'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -587,6 +588,14 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='inputs'>
                 <Inputs />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'summary',
+            element: (
+              <PrivateRoute routeId='summary'>
+                <Summary />
               </PrivateRoute>
             ),
           },

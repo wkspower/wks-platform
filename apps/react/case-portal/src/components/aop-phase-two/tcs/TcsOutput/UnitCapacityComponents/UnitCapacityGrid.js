@@ -8,6 +8,7 @@ import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatt
 import { convertFromKBPSD, convertToKBPSD } from './uomConversionUtils'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import ApproveDialog from '../../TcsInput/workflow/ApproveDialog'
+import { ROLES } from '../../utils/roleUtils'
 
 const UnitCapacityGrid = ({
   capacityType,
@@ -20,6 +21,7 @@ const UnitCapacityGrid = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
+  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -141,10 +143,10 @@ const UnitCapacityGrid = ({
           transformedData = response.results.map((item, index) => {
             // Backend data is in KBPSD, create nested structure for each month with both KBPSD and KTPD
             const months = [
-              'april',
+              'apr',
               'may',
-              'june',
-              'july',
+              'jun',
+              'jul',
               'aug',
               'sep',
               'oct',
@@ -257,10 +259,10 @@ const UnitCapacityGrid = ({
 
     // Add monthly columns with KBPSD and KTPD sub-columns
     const months = [
-      'april',
+      'apr',
       'may',
-      'june',
-      'july',
+      'jun',
+      'jul',
       'aug',
       'sep',
       'oct',
@@ -321,10 +323,10 @@ const UnitCapacityGrid = ({
 
     // Group monthly columns with KBPSD and KTPD sub-columns
     const months = [
-      { key: 'april', headerKey: 4 },
+      { key: 'apr', headerKey: 4 },
       { key: 'may', headerKey: 5 },
-      { key: 'june', headerKey: 6 },
-      { key: 'july', headerKey: 7 },
+      { key: 'jun', headerKey: 6 },
+      { key: 'jul', headerKey: 7 },
       { key: 'aug', headerKey: 8 },
       { key: 'sep', headerKey: 9 },
       { key: 'oct', headerKey: 10 },
@@ -383,15 +385,18 @@ const UnitCapacityGrid = ({
     setRemarkDialogOpen(true)
   }
 
-  const permissions = {
-    customHeight: { mainBox: '32vh', otherBox: '100%' },
-    textAlignment: 'center',
-    allAction: true,
-    showExport: true,
-    showTitle: true,
-    showDropdown: false,
-    approveBtn: true,
-  }
+  const permissions = useMemo(
+    () => ({
+      customHeight: { mainBox: '32vh', otherBox: '100%' },
+      textAlignment: 'center',
+      allAction: true,
+      showExport: true,
+      showTitle: true,
+      showDropdown: false,
+      approveBtn: userRole === ROLES.EPS_ENGINEER,
+    }),
+    [userRole],
+  )
 
   return (
     <Box>

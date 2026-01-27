@@ -11,6 +11,7 @@ const UnitCapacity = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
+  userRole,
 }) => {
   const capacityTypes = [
     { key: 'design', title: 'Design Capacity' },
@@ -33,6 +34,7 @@ const UnitCapacity = ({
           setSnackbarData={setSnackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
+          userRole={userRole}
         />
       ))}
     </Box>

@@ -32,11 +32,41 @@ public class TCSUnitCapacity {
     // @Column(name = "UOM", length = 50, nullable = false)
     // private String uom;
 
-    @Column(name = "Summer", precision = 18, scale = 4)
-    private Double summer;
+    @Column(name = "Apr", precision = 18, scale = 4)
+    private Double apr;
 
-    @Column(name = "Winter", precision = 18, scale = 4)
-    private Double winter;
+    @Column(name = "May", precision = 18, scale = 4)
+    private Double may;
+
+    @Column(name = "Jun", precision = 18, scale = 4)
+    private Double jun;
+
+    @Column(name = "Jul", precision = 18, scale = 4)
+    private Double jul;
+
+    @Column(name = "Aug", precision = 18, scale = 4)
+    private Double aug;
+
+    @Column(name = "Sep", precision = 18, scale = 4)
+    private Double sep;
+
+    @Column(name = "Oct", precision = 18, scale = 4)
+    private Double oct;
+
+    @Column(name = "Nov", precision = 18, scale = 4)
+    private Double nov;
+
+    @Column(name = "Dec", precision = 18, scale = 4)
+    private Double dec;
+
+    @Column(name = "Jan", precision = 18, scale = 4)
+    private Double jan;
+
+    @Column(name = "Feb", precision = 18, scale = 4)
+    private Double feb;
+
+    @Column(name = "Mar", precision = 18, scale = 4)
+    private Double mar;
 
     @Size(max = 1000)
     @Column(name = "Remark", length = 1000)

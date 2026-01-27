@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
@@ -43,6 +43,8 @@ const Norms = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+
+  const [calculateBtnEnabled, setCalculateBtnEnabled] = useState(false)
 
   // Column definitions
   const nestedColumns = [
@@ -134,28 +136,10 @@ const Norms = () => {
       title: headerMap[4],
       children: [
         {
-          field: 'apr.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'apr.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'apr.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -174,6 +158,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'apr.price',
@@ -183,6 +168,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -191,28 +177,10 @@ const Norms = () => {
       title: headerMap[5],
       children: [
         {
-          field: 'may.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'may.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'may.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -231,6 +199,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'may.price',
@@ -240,6 +209,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -248,28 +218,10 @@ const Norms = () => {
       title: headerMap[6],
       children: [
         {
-          field: 'jun.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'jun.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'jun.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -288,6 +240,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'jun.price',
@@ -297,6 +250,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -305,28 +259,10 @@ const Norms = () => {
       title: headerMap[7],
       children: [
         {
-          field: 'jul.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'jul.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'jul.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -345,6 +281,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'jul.price',
@@ -354,6 +291,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -362,36 +300,18 @@ const Norms = () => {
       title: headerMap[8],
       children: [
         {
-          field: 'aug.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'aug.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'aug.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
         {
           field: 'aug.quantity',
           title: 'Quantity',
-          widthT: 80,
-          minWidth: 80,
+          widthT: 100,
+          minWidth: 100,
           type: 'number',
           format: valueFormat,
         },
@@ -402,6 +322,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'aug.price',
@@ -411,6 +332,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -419,28 +341,10 @@ const Norms = () => {
       title: headerMap[9],
       children: [
         {
-          field: 'sep.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'sep.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'sep.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -459,6 +363,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'sep.price',
@@ -468,6 +373,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -476,28 +382,10 @@ const Norms = () => {
       title: headerMap[10],
       children: [
         {
-          field: 'oct.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'oct.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'oct.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -516,6 +404,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'oct.price',
@@ -525,6 +414,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -533,28 +423,10 @@ const Norms = () => {
       title: headerMap[11],
       children: [
         {
-          field: 'nov.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'nov.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'nov.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -573,6 +445,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'nov.price',
@@ -582,36 +455,19 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
-    //Dec
+    // Dec
     {
       title: headerMap[12],
       children: [
         {
-          field: 'dec.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'dec.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'dec.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
         },
@@ -630,6 +486,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'dec.price',
@@ -639,6 +496,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -647,31 +505,12 @@ const Norms = () => {
       title: headerMap[1],
       children: [
         {
-          field: 'jan.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'jan.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'jan.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
-          minWidth: 80,
         },
         {
           field: 'jan.quantity',
@@ -688,6 +527,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'jan.price',
@@ -697,6 +537,7 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
@@ -705,31 +546,12 @@ const Norms = () => {
       title: headerMap[2],
       children: [
         {
-          field: 'feb.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'feb.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
           field: 'feb.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
-          minWidth: 80,
         },
         {
           field: 'feb.quantity',
@@ -746,6 +568,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'feb.price',
@@ -755,40 +578,21 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
     //Mar
     {
       title: headerMap[3],
-      minWidth: 320,
       children: [
-        {
-          field: 'mar.qty',
-          title: 'Qty',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
-        {
-          field: 'mar.generationUom',
-          title: 'Generation UOM',
-          widthT: 80,
-          editable: false,
-          type: 'number1',
-          format: valueFormat,
-          hidden: true,
-        },
         {
           field: 'mar.norms',
           title: 'Norms',
           widthT: 80,
-          editable: true,
+          editable: false,
           type: 'number1',
           format: valueFormat,
-          minWidth: 80,
         },
         {
           field: 'mar.quantity',
@@ -805,6 +609,7 @@ const Norms = () => {
           minWidth: 80,
           type: 'number',
           format: valueFormat,
+          hidden: true,
         },
         {
           field: 'mar.price',
@@ -814,17 +619,18 @@ const Norms = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          hidden: true,
         },
       ],
     },
-    {
-      field: 'remarks',
-      title: 'Remarks',
-      widthT: 250,
-      type: 'textarea',
-      editable: true,
-      minWidth: 250,
-    },
+    // {
+    //   field: 'remarks',
+    //   title: 'Remarks',
+    //   widthT: 250,
+    //   type: 'textarea',
+    //   editable: false,
+    //   minWidth: 250,
+    // },
   ]
 
   const [rows, setRows] = useState([])
@@ -862,6 +668,7 @@ const Norms = () => {
       })
 
       setRows(tempRes)
+      setCalculateBtnEnabled(true)
       setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
@@ -873,21 +680,24 @@ const Norms = () => {
   }
 
   // Permissions (adjust as needed)
-  const permissions = {
-    showAction: true,
-    addButton: false,
-    deleteButton: false,
-    editButton: true,
-    saveBtn: true,
-    allAction: true,
-    showTitleNameBusiness: true,
-    titleName: screenTitle?.title,
-    showImport: true,
-    showTitle: true,
-    showCalculate: true,
-    showExport: true,
-    ExcelName: `Norms - ${AOP_YEAR}`,
-  }
+  const permissions = useMemo(() => {
+    return {
+      showAction: true,
+      addButton: false,
+      deleteButton: false,
+      editButton: true,
+      saveBtn: false,
+      allAction: true,
+      showTitleNameBusiness: true,
+      titleName: screenTitle?.title,
+      showImport: false,
+      showTitle: true,
+      showCalculate: true,
+      enableCalculate: calculateBtnEnabled,
+      showExport: true,
+      ExcelName: `Norms - ${AOP_YEAR}`,
+    }
+  }, [calculateBtnEnabled])
 
   // Calculate Norms data via API
   const handleCalculate = async () => {

@@ -1,10 +1,9 @@
 import { Box, Tab, Tabs } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 import { TcsApiService } from 'components/aop-phase-two/services/tcs/tcsApiService'
 import { useSession } from 'SessionStoreContext'
-import RemarksAccordion from 'components/aop-phase-two/tcs/TcsInput/workflow/RemarksAccordion'
 import UnitCapacity from './UnitCapacity'
 import Shutdown from './Shutdown'
 import Slowdown from './Slowdown'
@@ -13,7 +12,11 @@ import CrudBlendWindow from './CrudBlendWindow'
 import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
 import NetUnitCapacity from './NetUnitCapacity'
-import StatusAccordian from './workflow/StatusAccordian'
+import RemarkDialog from './workflow/RemarkDialog'
+import HistoryDialog from './workflow/HistoryDialog'
+import SubmitSection from './workflow/SubmitSection'
+import { getUserRole } from '../utils/roleUtils'
+import { TcsWorkflowApiService } from 'components/aop-phase-two/services/tcs/tcsWorkflowApiService'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -70,11 +73,112 @@ const TcsInput = () => {
   const [tabObj, setTabObj] = useState([])
   const [tabIndex, setTabIndex] = useState(0)
 
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [isSubmitEligible, setIsSubmitEligible] = useState(true)
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false)
+  const [isWorkflowTriggered, setIsWorkflowTriggered] = useState(false)
+
+  // Check workflow status on mount
+  // useEffect(() => {
+  //   checkWorkflowTriggered()
+  //   checkSubmitEligibility()
+  // }, [PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID])
+
+  const checkSubmitEligibility = async () => {
+    try {
+      setIsCheckingEligibility(true)
+      if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) {
+        setIsSubmitEligible(false)
+        return
+      }
+
+      const response = await TcsWorkflowApiService.checkSubmitEligibility(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+
+      const eligible = response?.isEligible !== false
+      setIsSubmitEligible(eligible)
+
+      if (!eligible) {
+        setSnackbarData({
+          message: response?.message || 'Submit is not eligible at this time',
+          severity: 'warning',
+        })
+        setSnackbarOpen(true)
+      }
+    } catch (err) {
+      console.error('Error checking submit eligibility:', err)
+      setIsSubmitEligible(false)
+      setSnackbarData({
+        message: 'Failed to check submit eligibility',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+    } finally {
+      setIsSubmitEligible(true)
+      setIsCheckingEligibility(false)
+    }
+  }
+  const checkWorkflowTriggered = async () => {
+    try {
+      const response = await TcsWorkflowApiService.checkWorkflowStatus(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+
+      const isTriggered = response?.isTriggered === true
+
+      // If workflow is already triggered, disable submit button
+      setIsWorkflowTriggered(isTriggered)
+
+      if (isTriggered) {
+        setSnackbarData({
+          message:
+            response?.message ||
+            'Workflow has already been triggered for this submission',
+          severity: 'info',
+        })
+        setSnackbarOpen(true)
+      }
+
+      return { isTriggered, response }
+    } catch (err) {
+      console.error('Error checking workflow status:', err)
+      setSnackbarData({
+        message: 'Failed to check workflow status',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+    }
+  }
+
+  const handleViewHistory = () => {
+    setHistoryDialogOpen(true)
+  }
+
+  const handleCloseHistory = () => {
+    setHistoryDialogOpen(false)
+  }
+
   // Get current tab object (has id, displayName, displaySequence)
   const currentTab = tabObj[tabIndex] || {}
 
   // Console user roles
   console.log('User Roles:', keycloak?.realmAccess?.roles)
+
+  const userRole = useMemo(() => {
+    let allUsers = keycloak?.realmAccess?.roles
+    console.log('allUsers', allUsers)
+    return getUserRole(allUsers)
+  }, [keycloak?.realmAccess?.roles])
 
   // Fetch all tabs and visible tab IDs from backend
   useEffect(() => {
@@ -136,40 +240,102 @@ const TcsInput = () => {
     }
   }
 
-  // Handle remark submission
-  const handleRemarkSubmit = (remark) => {
-    console.log('Remark submitted:', remark)
-    // TODO: Add API call to save remark
-    setSnackbarData({
-      message: 'Remark submitted successfully!',
-      severity: 'success',
-    })
-    setSnackbarOpen(true)
+  // Handle workflow trigger
+  const handleTriggerWorkflow = async () => {
+    try {
+      if (!keycloak || !PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) {
+        setSnackbarData({
+          message: 'Missing required parameters to trigger workflow',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        return { success: false }
+      }
+
+      // Trigger workflow
+      await TcsWorkflowApiService.triggerWorkflow(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+
+      // Update workflow triggered state
+      setIsWorkflowTriggered(true)
+
+      setSnackbarData({
+        message: 'Workflow triggered successfully!',
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
+
+      return { success: true }
+    } catch (err) {
+      console.error('Error triggering workflow:', err)
+      setSnackbarData({
+        message: 'Failed to trigger workflow',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      return { success: false, error: err }
+    }
   }
 
+  // Handle remark submission
+  const handleRemarkSubmit = async (remark) => {
+    console.log('Remark submitted by:', userRole)
+    console.log('Remark:', remark)
+
+    try {
+      if (keycloak && PLANT_ID && AOP_YEAR && SITE_ID && VERTICAL_ID) {
+        if (!isWorkflowTriggered) {
+          await handleTriggerWorkflow()
+        }
+
+        // Always save remark first
+        await TcsWorkflowApiService.saveRemark(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+          VERTICAL_ID,
+          remark,
+        )
+      }
+    } catch (err) {
+      console.error('Error saving remark:', err)
+      setSnackbarData({
+        message: 'Failed to save remark',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      return
+    }
+
+    // Close the remark dialog
+    setRemarkDialogOpen(false)
+  }
   const data = [
     {
       id: 1,
+      submittedDate: '2022-01-15 14:30:00',
+      submittedBy: 'Plant Manager',
+      submittedRemark: 'Resubmitted after corrections',
+      verifiedDate: '2022-01-16 09:15:00',
+      verifiedBy: 'EPS Engineer',
+      verifiedRemark: 'Data looks good, approved for processing',
       status: 'Approved',
-      remarks: 'OK',
-      submittedBy: 'EPS Engineer',
-      submittedDate: '2022-01-10',
     },
     {
       id: 2,
+      submittedDate: '2022-01-10 10:45:00',
+      submittedBy: 'Plant Manager',
+      submittedRemark: 'Initial submission with all data validated',
+      verifiedDate: '2022-01-12 11:20:00',
+      verifiedBy: 'EPS Engineer',
+      verifiedRemark: 'Minor discrepancies found, needs revision',
       status: 'Rejected',
-      remarks:
-        'Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem mollitia distinctio officia possimus. Modi dolorum, quod doloribus, amet impedit adipisci suscipit ducimus sapiente maxime id laborum voluptatibus, incidunt perspiciatis deserunt.',
-      submittedBy: 'EPS Engineer',
-      submittedDate: '2022-01-05',
-    },
-    {
-      id: 3,
-      status: 'Rejected',
-      remarks:
-        'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Excepturi, a natus. Quasi consequatur amet pariatur eius saepe cum, qui itaque eos nobis aliquam. Provident dolores dicta repellendus! Soluta alias architecto, quos necessitatibus modi provident! Placeat odit eos exercitationem enim error itaque pariatur numquam ipsam at sequi corporis, maiores rerum aut labore reiciendis perferendis! Repellendus soluta, deserunt, quisquam omnis cumque, necessitatibus possimus ratione eos deleniti maxime in odit quae. Iure, quas dolore optio quo numquam illo eos voluptas, vero ab debitis delectus vel laudantium? Voluptatibus dignissimos ut sunt laboriosam, labore nostrum voluptatem nulla distinctio alias tenetur, id aspernatur corrupti expedita fugit sit quis quo consequuntur minus voluptates sint rerum. Harum optio aliquam veniam ut officia magnam quasi ea, similique eos, minus beatae? Saepe ratione ex explicabo magni at id magnam odio in suscipit pariatur provident facilis rem nulla harum praesentium porro molestiae, dolorem quam libero veniam asperiores excepturi vero! Unde exercitationem quidem quam eos soluta modi tempora fugit nemo velit voluptatem nihil, iste odio, aspernatur amet nulla obcaecati quae, accusamus expedita! Dignissimos quas ex molestias ratione sequi. Iusto iure impedit accusamus quibusdam nulla voluptatem magnam alias similique assumenda perferendis laboriosam sint, quam animi laborum possimus nihil, vel aspernatur doloremque quidem maiores?',
-      submittedBy: 'EPS Engineer',
-      submittedDate: '2022-01-01',
     },
   ]
 
@@ -182,62 +348,63 @@ const TcsInput = () => {
         backgroundColor: '#fff',
       }}
     >
-      {/*Workflow Status Accordion */}
-      <StatusAccordian title='Level One Status' data={data} />
+      {/* Tabs and Action Buttons in One Row */}
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}
+      >
+        {/* Tabs Section - Flex grow to fill available space */}
+        <Box sx={{ flex: 1, overflowX: 'auto' }}>
+          <Tabs
+            // sx={{
+            //   '& .MuiTabs-indicator': {
+            //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            //   },
+            //   '& .MuiTab-root.Mui-selected': {
+            //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            //     backgroundClip: 'text',
+            //     WebkitBackgroundClip: 'text',
+            //     WebkitTextFillColor: 'transparent',
+            //   },
+            // }}
+            sx={{
+              borderBottom: '0px solid #ccc',
+              '.MuiTabs-indicator': { display: 'none' },
+              margin: '0px 0px 0px 0px',
+              minHeight: '28px',
+            }}
+            textColor='primary'
+            indicatorColor='primary'
+            value={tabIndex}
+            onChange={(e, newIndex) => {
+              if (newIndex >= 0 && newIndex < tabObj.length) {
+                setTabIndex(newIndex)
+              }
+            }}
+          >
+            {tabObj &&
+              tabObj?.map((tab) => (
+                <Tab
+                  key={tab.id}
+                  sx={{
+                    border: '1px solid #ADD8E6',
+                    borderBottom: '1px solid #ADD8E6',
+                    fontSize: '0.75rem',
+                    padding: '9px',
+                    minHeight: '12px',
+                  }}
+                  label={tab.displayName || tab.name}
+                />
+              ))}
+          </Tabs>
+        </Box>
 
-      {/* Remarks Accordion */}
-      <RemarksAccordion
-        title='TCS Input Submission'
-        placeholder='Enter your remarks here...'
-        onSubmit={handleRemarkSubmit}
-        defaultExpanded={true}
-        maxLength={1000}
-      />
-
-      {/* Tabs */}
-      <Box sx={{ overflowX: 'auto', width: '100%' }}>
-        <Tabs
-          // sx={{
-          //   '& .MuiTabs-indicator': {
-          //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
-          //   },
-          //   '& .MuiTab-root.Mui-selected': {
-          //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
-          //     backgroundClip: 'text',
-          //     WebkitBackgroundClip: 'text',
-          //     WebkitTextFillColor: 'transparent',
-          //   },
-          // }}
-          sx={{
-            borderBottom: '0px solid #ccc',
-            '.MuiTabs-indicator': { display: 'none' },
-            margin: '0px 0px 0px 0px',
-            minHeight: '28px',
-          }}
-          textColor='primary'
-          indicatorColor='primary'
-          value={tabIndex}
-          onChange={(e, newIndex) => {
-            if (newIndex >= 0 && newIndex < tabObj.length) {
-              setTabIndex(newIndex)
-            }
-          }}
-        >
-          {tabObj &&
-            tabObj?.map((tab) => (
-              <Tab
-                key={tab.id}
-                sx={{
-                  border: '1px solid #ADD8E6',
-                  borderBottom: '1px solid #ADD8E6',
-                  fontSize: '0.75rem',
-                  padding: '9px',
-                  minHeight: '12px',
-                }}
-                label={tab.displayName || tab.name}
-              />
-            ))}
-        </Tabs>
+        {/* Submit button and History icon - Fixed on right */}
+        <SubmitSection
+          onSubmitClick={() => setRemarkDialogOpen(true)}
+          onViewHistory={handleViewHistory}
+          isEligible={isSubmitEligible}
+          isLoading={isCheckingEligibility}
+        />
       </Box>
 
       {/* Tab Content */}
@@ -254,6 +421,30 @@ const TcsInput = () => {
           setSnackbarOpen,
         })}
       </Box>
+
+      <RemarkDialog
+        open={remarkDialogOpen}
+        handleClose={() => setRemarkDialogOpen(false)}
+        title='TCS Input Submission'
+        placeholder='Enter your remarks here...'
+        onSubmit={handleRemarkSubmit}
+        maxLength={1000}
+        historyData={data}
+        role={userRole}
+        keycloak={keycloak}
+        snackbarData={snackbarData}
+        setSnackbarData={setSnackbarData}
+        setSnackbarOpen={setSnackbarOpen}
+      />
+
+      {/* History Dialog */}
+      <HistoryDialog
+        open={historyDialogOpen}
+        onClose={handleCloseHistory}
+        title='Audit Trail'
+        data={data}
+        role={userRole}
+      />
 
       <Notification
         open={snackbarOpen}

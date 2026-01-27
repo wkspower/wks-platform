@@ -5,6 +5,8 @@ import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOu
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import ApproveDialog from '../TcsInput/workflow/ApproveDialog'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
+import { ROLES } from '../utils/roleUtils'
 
 const Slowdown = ({
   SITE_ID,
@@ -16,6 +18,7 @@ const Slowdown = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
+  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -42,7 +45,6 @@ const Slowdown = ({
       severity: 'success',
     })
     setSnackbarOpen(true)
-    closeApproveDialogeBox()
   }
   const handleReject = (plantId, remark) => {
     console.log('Rejected plantId:', plantId, 'Remark:', remark)
@@ -52,7 +54,6 @@ const Slowdown = ({
       severity: 'error',
     })
     setSnackbarOpen(true)
-    closeApproveDialogeBox()
   }
 
   // Fetch Shutdown Data
@@ -206,15 +207,18 @@ const Slowdown = ({
     }
   }, [modifiedCells])
 
-  const permissions = {
-    customHeight: { mainBox: '32vh', otherBox: '100%' },
-    textAlignment: 'center',
-    allAction: true,
-    showExport: true,
-    showTitle: true,
-    filterable: false,
-    approveBtn: true,
-  }
+  const permissions = useMemo(
+    () => ({
+      customHeight: { mainBox: '32vh', otherBox: '100%' },
+      textAlignment: 'center',
+      allAction: true,
+      showExport: true,
+      showTitle: true,
+      filterable: false,
+      approveBtn: userRole === ROLES.EPS_ENGINEER,
+    }),
+    [userRole],
+  )
 
   return (
     <Box>
@@ -224,32 +228,33 @@ const Slowdown = ({
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <AdvanceKendoTable
-        title='TCS Slowdown'
-        loading={loading}
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchSlowdownData}
-        configType='tcs_slowdown'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columns}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-        readonly={true}
-        onApproveClick={() => setOpenApproveDialogeBox(true)}
-      />
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          title='TCS Slowdown'
+          loading={loading}
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchSlowdownData}
+          configType='tcs_slowdown'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columns}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          readonly={true}
+          onApproveClick={() => setOpenApproveDialogeBox(true)}
+        />
+      </Stack>
 
       {/* Approve Dialog */}
       <ApproveDialog

@@ -30,12 +30,14 @@ import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.model.spi.ProcessDefinition;
 import com.wks.bpm.engine.model.spi.ProcessInstance;
 import com.wks.bpm.engine.model.spi.ProcessVariable;
+import com.wks.bpm.engine.model.spi.Task;
 import com.wks.caseengine.exception.RestResourceNotFoundException;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("process-definition")
+//@RequestMapping("task")
 @Tag(name = "Process Definition", description = "Access information about processes definitions in Camunda")
 public class ProcessDefinitionController {
 
@@ -70,6 +72,36 @@ public class ProcessDefinitionController {
 	@GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<ProcessDefinition[]> find() {
 		return ResponseEntity.ok(processEngineClientFacade.findProcessDefinitions());
+	}
+
+	@GetMapping(value = "/find-process/{processDefinitionKey}/{businessKey}")
+	public ResponseEntity<ProcessInstance[]> findProcess(@PathVariable final String processDefinitionKey, @PathVariable final String businessKey) {
+		return ResponseEntity.ok(processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty()));
+	}
+
+	@GetMapping(value = "/process-exists/{processDefinitionKey}/{businessKey}")
+	public ResponseEntity<Boolean> processExists(@PathVariable final String processDefinitionKey, @PathVariable final String businessKey) {
+		
+		ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
+		return ResponseEntity.ok(processInstances.length > 0);
+	}
+
+	// find tasks
+
+	@GetMapping(value = "/find-tasks/{processInstanceBusinessKey}")
+	public ResponseEntity<Task[]> findTasks(@PathVariable final String processInstanceBusinessKey) {
+		return ResponseEntity.ok(processEngineClientFacade.findTasks(Optional.ofNullable(processInstanceBusinessKey)));
+	}
+
+	@PostMapping(value = "/complete-task/{taskId}")
+	public ResponseEntity<Void> completeTask(@PathVariable final String taskId, @RequestBody final List<ProcessVariable> variables) {
+		processEngineClientFacade.complete(taskId, variables);
+		return ResponseEntity.noContent().build();
+	}
+
+	@GetMapping(value = "/variables/{processInstanceId}")
+	public ResponseEntity<ProcessVariable[]> getVariables(@PathVariable final String processInstanceId) {
+		return ResponseEntity.ok(processEngineClientFacade.findVariables(processInstanceId));
 	}
 
 }

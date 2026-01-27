@@ -592,6 +592,7 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
             
         }
+
         normsMonthDetailRepository.saveAll(allNormsMonthDetailsToUpdate);
 
 
@@ -707,16 +708,17 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing UOM", boldStyle);
             col++;
             
-            // Month headers (each spans 7 columns: Qty, Gen UOM, Norms, Quantity, Amount, Price, financialYearMonthFkId)
+            // Month headers (each spans 5 columns: Norms, Quantity, Amount, Price, financialYearMonthFkId)
+            // Qty and Generation UOM removed
             String[] months = {"April", "May", "June", "July", "August", "September", 
                              "October", "November", "December", "January", "February", "March"};
             
             int monthStartCol = col;
             List<Integer> financialYearMonthFkIdColumns = new ArrayList<>();
             for (String month : months) {
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 6, month, boldStyle);
-                financialYearMonthFkIdColumns.add(col + 6); // Track the financialYearMonthFkId column position
-                col += 7;
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 4, month, boldStyle);
+                financialYearMonthFkIdColumns.add(col + 4); // Track the financialYearMonthFkId column position
+                col += 5;
             }
             
             createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", boldStyle);
@@ -739,17 +741,20 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             Row subHeaderRow = sheet.createRow(currentRow++);
             col = monthStartCol; // Start after static columns
             
-            // Sub-headers for each month (Qty, Gen UOM, Norms, Quantity, Amount, Price, financialYearMonthFkId)
+            // Sub-headers for each month (Norms, Quantity, Amount, Price, financialYearMonthFkId)
+            // Qty and Generation UOM headers commented out
             for (int i = 0; i < 12; i++) {
+                // Commented out Qty header
+                // Cell cell = subHeaderRow.createCell(col++);
+                // cell.setCellValue("Qty");
+                // cell.setCellStyle(boldStyle);
+                
+                // Commented out Generation UOM header
+                // cell = subHeaderRow.createCell(col++);
+                // cell.setCellValue("Generation UOM");
+                // cell.setCellStyle(boldStyle);
+                
                 Cell cell = subHeaderRow.createCell(col++);
-                cell.setCellValue("Qty");
-                cell.setCellStyle(boldStyle);
-                
-                cell = subHeaderRow.createCell(col++);
-                cell.setCellValue("Generation UOM");
-                cell.setCellStyle(boldStyle);
-                
-                cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Norms");
                 cell.setCellStyle(boldStyle);
                 
@@ -787,40 +792,40 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                 
                 // April
                 setMonthCellValues(row, col, dto.getApr());
-                col += 7;
+                col += 5;
                 // May
                 setMonthCellValues(row, col, dto.getMay());
-                col += 7;
+                col += 5;
                 // June
                 setMonthCellValues(row, col, dto.getJun());
-                col += 7;
+                col += 5;
                 // July
                 setMonthCellValues(row, col, dto.getJul());
-                col += 7;
+                col += 5;
                 // August
                 setMonthCellValues(row, col, dto.getAug());
-                col += 7;
+                col += 5;
                 // September
                 setMonthCellValues(row, col, dto.getSep());
-                col += 7;
+                col += 5;
                 // October
                 setMonthCellValues(row, col, dto.getOct());
-                col += 7;
+                col += 5;
                 // November
                 setMonthCellValues(row, col, dto.getNov());
-                col += 7;
+                col += 5;
                 // December
                 setMonthCellValues(row, col, dto.getDec());
-                col += 7;
+                col += 5;
                 // January
                 setMonthCellValues(row, col, dto.getJan());
-                col += 7;
+                col += 5;
                 // February
                 setMonthCellValues(row, col, dto.getFeb());
-                col += 7;
+                col += 5;
                 // March
                 setMonthCellValues(row, col, dto.getMar());
-                col += 7;
+                col += 5;
                 
                 row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
                 row.createCell(col++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
@@ -875,13 +880,14 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                 }
             }
 
-          
+          System.out.println("validRecords: " + validRecords);
 
             // Try to save valid records
             if (!validRecords.isEmpty()) {
                 try {
                     // Convert to update request DTOs and save
                     List<NormsMonthUpdateRequestDTO> updateRequests = convertToUpdateRequests(validRecords);
+                    System.out.println("updateRequests: " + updateRequests);
                     saveOrUpdateBulk(updateRequests, financialYear);
                 } catch (Exception e) {
                     System.out.println("error in import method: " + e.getMessage());
@@ -949,40 +955,40 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                     
                     // April
                     dto.setApr(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // May
                     dto.setMay(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // June
                     dto.setJun(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // July
                     dto.setJul(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // August
                     dto.setAug(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // September
                     dto.setSep(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // October
                     dto.setOct(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // November
                     dto.setNov(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // December
                     dto.setDec(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // January
                     dto.setJan(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // February
                     dto.setFeb(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     // March
                     dto.setMar(readMonthData(row, col));
-                    col += 7;
+                    col += 5;
                     
                     dto.setRemarks(getStringCellValue(row.getCell(col++)));
                     
@@ -1069,15 +1075,18 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
     private void setMonthCellValues(Row row, int startCol, NormBasedUtilityBudgetMonthDTO monthDTO) {
         if (monthDTO != null) {
-            setDoubleCellValue(row.createCell(startCol), monthDTO.getQty());
-            row.createCell(startCol + 1).setCellValue(monthDTO.getGenerationUom() != null ? monthDTO.getGenerationUom() : "");
-            setDoubleCellValue(row.createCell(startCol + 2), monthDTO.getNorms());
-            setDoubleCellValue(row.createCell(startCol + 3), monthDTO.getQuantity());
-            setDoubleCellValue(row.createCell(startCol + 4), monthDTO.getAmount());
-            setDoubleCellValue(row.createCell(startCol + 5), monthDTO.getPrice());
-            row.createCell(startCol + 6).setCellValue(monthDTO.getFinancialYearMonthFkId() != null ? monthDTO.getFinancialYearMonthFkId() : "");
+            // Commented out Qty column
+            // setDoubleCellValue(row.createCell(startCol), monthDTO.getQty());
+            // Commented out Generation UOM column
+            // row.createCell(startCol + 1).setCellValue(monthDTO.getGenerationUom() != null ? monthDTO.getGenerationUom() : "");
+            setDoubleCellValue(row.createCell(startCol), monthDTO.getNorms());
+            setDoubleCellValue(row.createCell(startCol + 1), monthDTO.getQuantity());
+            setDoubleCellValue(row.createCell(startCol + 2), monthDTO.getAmount());
+            setDoubleCellValue(row.createCell(startCol + 3), monthDTO.getPrice());
+            row.createCell(startCol + 4).setCellValue(monthDTO.getFinancialYearMonthFkId() != null ? monthDTO.getFinancialYearMonthFkId() : "");
         } else {
-            for (int i = 0; i < 7; i++) {
+            // Updated loop count from 7 to 5 columns
+            for (int i = 0; i < 5; i++) {
                 row.createCell(startCol + i).setCellValue("");
             }
         }
@@ -1085,13 +1094,15 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
     private NormBasedUtilityBudgetMonthDTO readMonthData(Row row, int startCol) {
         NormBasedUtilityBudgetMonthDTO monthDTO = new NormBasedUtilityBudgetMonthDTO();
-        monthDTO.setQty(getDoubleCellValue(row.getCell(startCol)));
-        monthDTO.setGenerationUom(getStringCellValue(row.getCell(startCol + 1)));
-        monthDTO.setNorms(getDoubleCellValue(row.getCell(startCol + 2)));
-        monthDTO.setQuantity(getDoubleCellValue(row.getCell(startCol + 3)));
-        monthDTO.setAmount(getDoubleCellValue(row.getCell(startCol + 4)));
-        monthDTO.setPrice(getDoubleCellValue(row.getCell(startCol + 5)));
-        monthDTO.setFinancialYearMonthFkId(getStringCellValue(row.getCell(startCol + 6)));
+        // Commented out Qty column reading
+        // monthDTO.setQty(getDoubleCellValue(row.getCell(startCol)));
+        // Commented out Generation UOM column reading
+        // monthDTO.setGenerationUom(getStringCellValue(row.getCell(startCol + 1)));
+        monthDTO.setNorms(getDoubleCellValue(row.getCell(startCol)));
+        monthDTO.setQuantity(getDoubleCellValue(row.getCell(startCol + 1)));
+        monthDTO.setAmount(getDoubleCellValue(row.getCell(startCol + 2)));
+        monthDTO.setPrice(getDoubleCellValue(row.getCell(startCol + 3)));
+        monthDTO.setFinancialYearMonthFkId(getStringCellValue(row.getCell(startCol + 4)));
         return monthDTO;
     }
 

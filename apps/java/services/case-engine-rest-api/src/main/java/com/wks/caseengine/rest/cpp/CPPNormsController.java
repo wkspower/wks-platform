@@ -1,0 +1,95 @@
+package com.wks.caseengine.rest.cpp;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.wks.caseengine.cpp.dto.norm.CPPNormsRequestDTO;
+import com.wks.caseengine.cpp.service.CPPNormsService;
+import com.wks.caseengine.exception.RestInvalidArgumentException;
+import com.wks.caseengine.message.vm.AOPMessageVM;
+
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("task")
+@Slf4j
+public class CPPNormsController {
+
+    @Autowired
+    private CPPNormsService cppNormsService;
+
+    @GetMapping("/cpp-norms")
+    public ResponseEntity<?> getCPPNorms(
+            @RequestParam UUID cppPlantId,
+            @RequestParam String financialYear
+    ) {
+        try {
+            log.info("=== GET CPPNorms Request ===");
+            log.info("CPPPlantId: {}, FinancialYear: {}", cppPlantId, financialYear);
+
+            AOPMessageVM result = cppNormsService.getCPPNorms(cppPlantId, financialYear);
+
+            log.info("=== CPPNorms Response ===");
+            log.info("Response Code: {}", result.getCode());
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("=== CONTROLLER EXCEPTION ===", e);
+
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(500);
+            errorResponse.setMessage("Error: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/cpp-norms/{financialYear}")
+    public ResponseEntity<?> saveOrUpdateCPPNorms(
+            @RequestBody List<CPPNormsRequestDTO> dtoList,
+            @PathVariable String financialYear,
+            @RequestParam(required = false, defaultValue = "SYSTEM") String modifiedBy
+    ) {
+        try {
+            log.info("=== POST CPPNorms Request ===");
+            log.info("FinancialYear: {}, ModifiedBy: {}", financialYear, modifiedBy);
+
+            if (dtoList == null || dtoList.isEmpty()) {
+                AOPMessageVM errorResponse = new AOPMessageVM();
+                errorResponse.setCode(400);
+                errorResponse.setMessage("Request body cannot be empty");
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+
+            log.info("Total records received: {}", dtoList.size());
+
+            AOPMessageVM response = cppNormsService.saveOrUpdateCPPNorms(dtoList, financialYear, modifiedBy);
+
+            if (response.getCode() == 200 || response.getCode() == 207) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(response.getCode()).body(response);
+            }
+
+        } catch (RestInvalidArgumentException e) {
+            log.error("Validation error: {}", e.getMessage());
+
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(400);
+            errorResponse.setMessage(e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+
+        } catch (Exception e) {
+            log.error("=== ERROR in saveOrUpdateCPPNorms ===", e);
+
+            AOPMessageVM errorResponse = new AOPMessageVM();
+            errorResponse.setCode(500);
+            errorResponse.setMessage("Error: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+}

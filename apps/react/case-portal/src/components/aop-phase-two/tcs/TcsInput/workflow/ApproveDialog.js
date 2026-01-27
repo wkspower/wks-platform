@@ -21,7 +21,7 @@ import {
 } from '@mui/material'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
-import VisibilityIcon from '@mui/icons-material/Visibility'
+import HistoryIcon from '@mui/icons-material/History'
 import HistoryDialog from './HistoryDialog'
 
 const ApproveDialog = ({
@@ -346,7 +346,7 @@ const ApproveDialog = ({
                                 },
                               }}
                             >
-                              <VisibilityIcon fontSize='small' />
+                              <HistoryIcon fontSize='small' />
                             </IconButton>
                           </Tooltip>
                         </Box>
@@ -369,7 +369,7 @@ const ApproveDialog = ({
           >
             Total Plants: {uniquePlants.length}
           </Typography>
-          <Button onClick={handleCancel} variant='outlined' color='secondary'>
+          <Button onClick={handleCancel} variant='outlined' color='error'>
             Close
           </Button>
         </DialogActions>

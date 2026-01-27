@@ -1,22 +1,27 @@
 package com.wks.caseengine.rest.cpp;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import java.io.IOException;
 
-import com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateLookupDTO;
-import com.wks.caseengine.cpp.dto.heatrate.HeatRateDTO;
-import com.wks.caseengine.cpp.dto.heatrate.HeatRateDropDownProjection;
-import com.wks.caseengine.cpp.dto.heatrate.HeatRateProjection;
-import com.wks.caseengine.cpp.dto.heatrate.STGExtractionLookupDTO;
-import com.wks.caseengine.cpp.service.HeatRateService;
-
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.wks.caseengine.cpp.dto.heatrate.HRSGHeatRateLookupDTO;
+import com.wks.caseengine.cpp.dto.heatrate.HeatRateDTO;
+import com.wks.caseengine.cpp.dto.heatrate.STGExtractionLookupDTO;
+import com.wks.caseengine.cpp.service.HeatRateService;
+
+import java.util.List;
 
 
 @RestController
@@ -84,6 +89,83 @@ public class HeatRateController {
     public ResponseEntity<Void> updateHRSGHeatRate(@RequestBody List<HRSGHeatRateLookupDTO> hrsgHeatRateLookupDTOs, @PathVariable String financialYear) {
         heatRateService.updateHRSGHeatRate(hrsgHeatRateLookupDTOs);
         return ResponseEntity.ok().build();
+    }
+
+    // ============================================================
+    // EXPORT ENDPOINTS
+    // ============================================================
+
+    @GetMapping("/hrsg-heat-rate-lookup/export")
+    public ResponseEntity<byte[]> exportHRSGHeatRateLookup() {
+        try {
+            byte[] excelData = heatRateService.exportHRSGHeatRateLookup();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "HRSG_Heat_Rate_Lookup.xlsx");
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/stg-extraction-lookup/export")
+    public ResponseEntity<byte[]> exportSTGExtractionLookup() {
+        try {
+            byte[] excelData = heatRateService.exportSTGExtractionLookup();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "STG_Extraction_Lookup.xlsx");
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/heat-rate/export/{assetId}")
+    public ResponseEntity<byte[]> exportHeatRate(@PathVariable String assetId) {
+        try {
+            byte[] excelData = heatRateService.exportHeatRate(assetId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "Heat_Rate.xlsx");
+            return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    // ============================================================
+    // IMPORT ENDPOINTS
+    // ============================================================
+
+    @PostMapping("/hrsg-heat-rate-lookup/import")
+    public ResponseEntity<Void> importHRSGHeatRateLookup(@RequestParam("file") MultipartFile file) {
+        try {
+            heatRateService.importHRSGHeatRateLookup(file);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/stg-extraction-lookup/import")
+    public ResponseEntity<Void> importSTGExtractionLookup(@RequestParam("file") MultipartFile file) {
+        try {
+            heatRateService.importSTGExtractionLookup(file);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/heat-rate/import")
+    public ResponseEntity<Void> importHeatRate(@RequestParam("file") MultipartFile file) {
+        try {
+            heatRateService.importHeatRate(file);
+            return ResponseEntity.ok().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 }

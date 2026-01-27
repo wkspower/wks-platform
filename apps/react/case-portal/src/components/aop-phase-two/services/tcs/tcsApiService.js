@@ -9,6 +9,7 @@ export const TcsApiService = {
   // TCS Unit Capacity Data APIs
   getTcsUnitCapacityUOM,
   getTcsUnitCapacityData,
+  getTcsNetCapacityData,
   saveUnitCapacityData,
 
   // TCS Crude Blend Window Data APIs
@@ -107,6 +108,27 @@ async function getTcsUnitCapacityData(
   selectedUOM,
 ) {
   const url = `${Config.CaseEngineUrl}/task/tcs-unit-capacity?plantId=${plantId}&year=${year}&capacityType=${capacityType}&uom=${selectedUOM}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function getTcsNetCapacityData(keycloak, plantId, year, capacityType) {
+  let url = `${Config.CaseEngineUrl}/task/tcs-net-capacity?year=${year}&capacityType=${capacityType}`
+  if (plantId) url += `&plantId=${plantId}`
+
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

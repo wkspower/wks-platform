@@ -6,6 +6,8 @@ import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOu
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import ApproveDialog from '../TcsInput/workflow/ApproveDialog'
+import { Stack } from '../../../../../node_modules/@mui/material/index'
+import { ROLES } from '../utils/roleUtils'
 
 const Shutdown = ({
   SITE_ID,
@@ -17,6 +19,7 @@ const Shutdown = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
+  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -191,16 +194,19 @@ const Shutdown = ({
     }
   }, [modifiedCells])
 
-  const permissions = {
-    customHeight: { mainBox: '32vh', otherBox: '100%' },
-    textAlignment: 'center',
-    allAction: true,
-    addButton: false,
-    showExport: true,
-    showTitle: true,
-    filterable: false,
-    approveBtn: true,
-  }
+  const permissions = useMemo(
+    () => ({
+      customHeight: { mainBox: '32vh', otherBox: '100%' },
+      textAlignment: 'center',
+      allAction: true,
+      addButton: false,
+      showExport: true,
+      showTitle: true,
+      filterable: false,
+      approveBtn: userRole === ROLES.EPS_ENGINEER,
+    }),
+    [userRole],
+  )
 
   return (
     <Box>
@@ -210,31 +216,31 @@ const Shutdown = ({
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
-      <AdvanceKendoTable
-        rows={rows}
-        setRows={setRows}
-        fetchData={fetchShutdownData}
-        configType='tcs_shutdown'
-        handleRemarkCellClick={handleRemarkCellClick}
-        columns={columns}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        permissions={permissions}
-        readonly={true}
-        onApproveClick={() => setOpenApproveDialogeBox(true)}
-      />
-
+      <Stack sx={{ mt: 2 }}>
+        <AdvanceKendoTable
+          rows={rows}
+          setRows={setRows}
+          fetchData={fetchShutdownData}
+          configType='tcs_shutdown'
+          handleRemarkCellClick={handleRemarkCellClick}
+          columns={columns}
+          remarkDialogOpen={remarkDialogOpen}
+          setRemarkDialogOpen={setRemarkDialogOpen}
+          currentRemark={currentRemark}
+          setCurrentRemark={setCurrentRemark}
+          currentRowId={currentRowId}
+          setCurrentRowId={() => {}}
+          snackbarData={snackbarData}
+          snackbarOpen={snackbarOpen}
+          setSnackbarOpen={setSnackbarOpen}
+          setSnackbarData={setSnackbarData}
+          modifiedCells={modifiedCells}
+          setModifiedCells={setModifiedCells}
+          permissions={permissions}
+          readonly={true}
+          onApproveClick={() => setOpenApproveDialogeBox(true)}
+        />
+      </Stack>
       {/* Approve Dialog */}
       <ApproveDialog
         open={openApproveDialogeBox}

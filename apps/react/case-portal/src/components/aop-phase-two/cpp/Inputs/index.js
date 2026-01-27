@@ -18,7 +18,7 @@ import ShutdownAndOperational from './ShutdownAndOperational'
 import { generateMockData, getColumnsForTab } from './InputUtility'
 import ExportAvailability from './ExportAvailability'
 import HeatRate from './HeatRate'
-import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
+import FixedNorms from './FixedNorms'
 
 const Inputs = () => {
   const keycloak = useSession()
@@ -34,16 +34,12 @@ const Inputs = () => {
   const [tabObj, setTabObj] = useState([])
   const [tabIndex, setTabIndex] = useState(0)
   const [tabsData, setTabsData] = useState({})
-  const [modifiedCells, setModifiedCells] = useState({})
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  const headerMap = generateHeaderNames(AOP_YEAR)
-  const valueFormat = ValueFormatterPhaseTwo()
 
   // Initialize tabs
   useEffect(() => {
@@ -78,6 +74,12 @@ const Inputs = () => {
         displayName: 'Heat Rate',
         displaySequence: 5,
       },
+      {
+        id: 'fixed-norms',
+        name: 'Norms',
+        displayName: 'Norms',
+        displaySequence: 6,
+      },
       // { id: 'export-availability',name:'exportAvailability', displayName: 'Export Availability', displaySequence: 6 },
     ]
     setTabObj(tabs)
@@ -85,7 +87,6 @@ const Inputs = () => {
 
   // Get current tab
   const currentTab = tabObj[tabIndex] || {}
-  const currentTabDisplay = currentTab.displayName || 'Purchase Power Input'
 
   // Store data for any tab dynamically
   const setRowsForTab = useCallback((tabId, data) => {
@@ -132,76 +133,6 @@ const Inputs = () => {
     }
   }, [tabIndex, currentTab.id, fetchTabData])
 
-  // Get rows for current tab
-  const getRows = useCallback(
-    (tabId) => {
-      return tabsData[tabId] || []
-    },
-    [tabsData],
-  )
-
-  // Setup rows and columns for current tab (outside conditional)
-  const rows = getRows(currentTab.id)
-  const setRowsForCurrent = useCallback(
-    (newRows) => setRowsForTab(currentTab.id, newRows),
-    [currentTab.id, setRowsForTab],
-  )
-  const columns = getColumnsForTab(currentTab.id, headerMap, valueFormat)
-
-  // Save changes
-  const saveChanges = useCallback(async () => {
-    try {
-      if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setLoading(false)
-        return
-      }
-
-      const rawData = Object.values(modifiedCells)
-      const data = rawData.filter((row) => row.inEdit)
-
-      if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setLoading(false)
-        return
-      }
-
-      setLoading(true)
-      // Replace with actual API call
-      // const response = await UtilityPlantApiServiceV2.saveImportPowerData(...)
-
-      // Mock response
-      const response = { code: 200 }
-
-      if (response.code === 200) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Changes saved successfully!',
-          severity: 'success',
-        })
-        setModifiedCells({})
-        fetchTabData(currentTab.id)
-      } else {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Error saving data!',
-          severity: 'error',
-        })
-      }
-    } catch (error) {
-      console.error('Error saving changes:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Error saving data!',
-        severity: 'error',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }, [modifiedCells, currentTab.id, fetchTabData])
-
   // Render tab content based on tab ID
   const renderTabContent = () => {
     switch (currentTab.id) {
@@ -221,26 +152,10 @@ const Inputs = () => {
         return <ExportAvailability />
       case 'heat-rate':
         return <HeatRate />
+      case 'fixed-norms':
+        return <FixedNorms />
       default:
-        return (
-          <Box key={currentTab.id}>
-            <AdvanceKendoTable
-              rows={rows}
-              setRows={setRowsForCurrent}
-              fetchData={() => fetchTabData(currentTab.id)}
-              configType='import_power'
-              columns={columns}
-              saveChanges={saveChanges}
-              snackbarData={snackbarData}
-              snackbarOpen={snackbarOpen}
-              setSnackbarOpen={setSnackbarOpen}
-              setSnackbarData={setSnackbarData}
-              modifiedCells={modifiedCells}
-              setModifiedCells={setModifiedCells}
-              permissions={{}}
-            />
-          </Box>
-        )
+        return null
     }
   }
 

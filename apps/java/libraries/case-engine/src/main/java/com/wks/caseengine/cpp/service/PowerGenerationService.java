@@ -1,9 +1,13 @@
 package com.wks.caseengine.cpp.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +15,18 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.cpp.dto.AssetMonthlyOperationalProjection;
 import com.wks.caseengine.dto.AssetOperationalResponseDTO;
@@ -22,8 +35,10 @@ import com.wks.caseengine.dto.MonthlyHoursDTO;
 import com.wks.caseengine.cpp.dto.PowerGenerationNormParametersProjection;
 import com.wks.caseengine.cpp.dto.PowerGenerationSteamResposeProject;
 import com.wks.caseengine.dto.MasterAssetOperationalResponseDTO;
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.cpp.repository.PowerGenerationRepository;
+import com.wks.caseengine.utility.Utility;
 
 @Service
 public class PowerGenerationService {
@@ -83,19 +98,19 @@ public class PowerGenerationService {
 
             Map<String, MonthlyHoursDTO> monthMap = new LinkedHashMap<>();
 
-            monthMap.put("April",     buildMonth(row.getApril(),     startYear, 4));
+            monthMap.put("April",     buildMonth(row.getApr(),     startYear, 4));
             monthMap.put("May",       buildMonth(row.getMay(),       startYear, 5));
-            monthMap.put("June",      buildMonth(row.getJune(),      startYear, 6));
-            monthMap.put("July",      buildMonth(row.getJuly(),      startYear, 7));
-            monthMap.put("August",    buildMonth(row.getAugust(),    startYear, 8));
-            monthMap.put("September", buildMonth(row.getSeptember(), startYear, 9));
-            monthMap.put("October",   buildMonth(row.getOctober(),   startYear,10));
-            monthMap.put("November",  buildMonth(row.getNovember(),  startYear,11));
-            monthMap.put("December",  buildMonth(row.getDecember(),  startYear,12));
+            monthMap.put("June",      buildMonth(row.getJun(),      startYear, 6));
+            monthMap.put("July",      buildMonth(row.getJul(),      startYear, 7));
+            monthMap.put("August",    buildMonth(row.getAug(),    startYear, 8));
+            monthMap.put("September", buildMonth(row.getSep(), startYear, 9));
+            monthMap.put("October",   buildMonth(row.getOct(),   startYear,10));
+            monthMap.put("November",  buildMonth(row.getNov(),  startYear,11));
+            monthMap.put("December",  buildMonth(row.getDec(),  startYear,12));
 
-            monthMap.put("January",   buildMonth(row.getJanuary(),   endYear, 1));
-            monthMap.put("February",  buildMonth(row.getFebruary(),  endYear, 2));
-            monthMap.put("March",     buildMonth(row.getMarch(),     endYear, 3));
+            monthMap.put("January",   buildMonth(row.getJan(),   endYear, 1));
+            monthMap.put("February",  buildMonth(row.getFeb(),  endYear, 2));
+            monthMap.put("March",     buildMonth(row.getMar(),     endYear, 3));
 
           
            
@@ -294,23 +309,25 @@ public class PowerGenerationService {
      List<AssetOperationalResponseDTO> nonEditableFields = new ArrayList<>();
 
            for(AssetMonthlyOperationalProjection operationalHour : operationalHours) {
+
+            System.out.println("getUtilityGenerated(): " + operationalHour.getUtilityGenerated() + "  " + "net operation hours: " + operationalHour.getJun());
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
             dto.setAssetName(operationalHour.getAssetName());
             dto.setAssetId(operationalHour.getAssetId());         // for post api
             dto.setAssetType(operationalHour.getAssetType());
             dto.setIsEditable(false);
-            dto.setApril(buildMonth(operationalHour.getApril(), startYear, 4));
+            dto.setApril(buildMonth(operationalHour.getApr(), startYear, 4));
             dto.setMay(buildMonth(operationalHour.getMay(), startYear, 5));
-            dto.setJune(buildMonth(operationalHour.getJune(), startYear, 6));
-            dto.setJuly(buildMonth(operationalHour.getJuly(), startYear, 7));
-            dto.setAug(buildMonth(operationalHour.getAugust(), startYear, 8));
-            dto.setSep(buildMonth(operationalHour.getSeptember(), startYear, 9));
-            dto.setOct(buildMonth(operationalHour.getOctober(), startYear, 10));
-            dto.setNov(buildMonth(operationalHour.getNovember(), startYear, 11));
-            dto.setDec(buildMonth(operationalHour.getDecember(), startYear, 12));
-            dto.setJan(buildMonth(operationalHour.getJanuary(), endYear, 1));
-            dto.setFeb(buildMonth(operationalHour.getFebruary(), endYear, 2));
-            dto.setMarch(buildMonth(operationalHour.getMarch(), endYear, 3));
+            dto.setJune(buildMonth(operationalHour.getJun(), startYear, 6));
+            dto.setJuly(buildMonth(operationalHour.getJul(), startYear, 7));
+            dto.setAug(buildMonth(operationalHour.getAug(), startYear, 8));
+            dto.setSep(buildMonth(operationalHour.getSep(), startYear, 9));
+            dto.setOct(buildMonth(operationalHour.getOct(), startYear, 10));
+            dto.setNov(buildMonth(operationalHour.getNov(), startYear, 11));
+            dto.setDec(buildMonth(operationalHour.getDec(), startYear, 12));
+            dto.setJan(buildMonth(operationalHour.getJan(), endYear, 1));
+            dto.setFeb(buildMonth(operationalHour.getFeb(), endYear, 2));
+            dto.setMarch(buildMonth(operationalHour.getMar(), endYear, 3));
           //  dto.setRemarks(operationalHour.getRemarks());
             dto.setUtilityGenerated(new AssetUtilityDTO(operationalHour.getUtilityGenerated(), operationalHour.getUtilityGeneratedSAPCode()));
             dto.setUtilityDistributed(new AssetUtilityDTO(operationalHour.getUtilityDistributed(), operationalHour.getUtilityDistributedSAPCode()));
@@ -340,6 +357,7 @@ public class PowerGenerationService {
 
                 dto.setIndex(7);
             }
+            System.out.println("dto utility generated: " + dto.getUtilityGenerated().getName() + "  " + "net operation hours: " + dto.getJune().getNetOperationHrs() + "  " + "shutdown hours: " + dto.getJune().getShutdownHrs());
             nonEditableFields.add(dto);
            }
     
@@ -390,7 +408,7 @@ public class PowerGenerationService {
            String remarks = asset.getRemarks();
              if(asset.getRemarks() != null) {   
                
-                for(UUID financialMonthId : financialMonthIds.values()) {
+                for(UUID financialMonthId : financialMonthIds.values()) {   
 
                     remarksUpdates.add(new Object[] { remarks, assetId, financialMonthId });
              }
@@ -465,9 +483,8 @@ public class PowerGenerationService {
             UUID utilityPlantAssetId = asset.getUtilityPlantAssetId();
 
             if(utilityPlantAssetId == null) {  
-                throw new IllegalArgumentException("UtilityPlantAssetId is required");
+             //   throw new IllegalArgumentException("UtilityPlantAssetId is required");
             }
-            String remarks = asset.getRemarks();
 
               Updates.add(new Object[] { asset.getApril().getNetOperationHrs(), asset.getMay().getNetOperationHrs(), asset.getJune().getNetOperationHrs(), asset.getJuly().getNetOperationHrs(), asset.getAug().getNetOperationHrs(), asset.getSep().getNetOperationHrs(), asset.getOct().getNetOperationHrs(), asset.getNov().getNetOperationHrs(), asset.getDec().getNetOperationHrs(), asset.getJan().getNetOperationHrs(), asset.getFeb().getNetOperationHrs(), asset.getMarch().getNetOperationHrs(), asset.getRemarks(), utilityPlantAssetId });
             
@@ -537,6 +554,578 @@ public class PowerGenerationService {
         if (shutdownHours < 0) shutdownHours = 0;
 
         return new MonthlyHoursDTO(operationalHours, shutdownHours);
+    }
+
+    // ========================================
+    // EXCEL EXPORT METHODS
+    // ========================================
+
+    public byte[] exportPowerResponse(UUID cppPlantId, String financialYear, boolean isAfterSave, List<AssetOperationalResponseDTO> dataList) {
+        try {
+            if (!isAfterSave) {
+                MasterAssetOperationalResponseDTO result = getAssetOperationalHours(cppPlantId, financialYear);
+                dataList = result.getPowerResponse();
+            }
+
+            if (dataList == null) {
+                dataList = new ArrayList<>();
+            }
+
+            return generateExcel(dataList, "Power Generation", isAfterSave);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public byte[] exportSteamResponse(UUID cppPlantId, String financialYear, boolean isAfterSave, List<AssetOperationalResponseDTO> dataList) {
+        try {
+            if (!isAfterSave) {
+                MasterAssetOperationalResponseDTO result = getAssetOperationalHours(cppPlantId, financialYear);
+                dataList = result.getSteamResponse();
+            }
+
+            if (dataList == null) {
+                dataList = new ArrayList<>();
+            }
+
+            System.out.println("steam export dataList: " + dataList);
+
+            return generateExcel(dataList, "Steam Generation", isAfterSave);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private byte[] generateExcel(List<AssetOperationalResponseDTO> dataList, String sheetName, boolean isAfterSave) throws Exception {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet(sheetName);
+        CellStyle boldStyle = Utility.createBoldBorderedStyle(workbook);
+        
+        int currentRow = 0;
+        int col = 0;
+
+        // Create top header row (Row 0) with merged cells for months
+        Row topHeaderRow = sheet.createRow(currentRow++);
+        col = 0;
+        
+        // Static columns that span both rows
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Asset Name", boldStyle);
+        col++;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility Distributed", boldStyle);
+        col++;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Distributed SAP Code", boldStyle);
+        col++;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility Generated", boldStyle);
+        col++;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Generated SAP Code", boldStyle);
+        col++;
+        
+        // Month headers (each spans 2 columns: Shut Down Hrs, Operational Hrs)
+        String[] months = {"April", "May", "June", "July", "August", "September", 
+                         "October", "November", "December", "January", "February", "March"};
+        
+        int monthStartCol = col;
+        for (String month : months) {
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, month, boldStyle);
+            col += 2;
+        }
+        
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", boldStyle);
+        col++;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "assetId", boldStyle);
+        int assetIdCol = col;
+        col++;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "utilityPlantAssetId", boldStyle);
+        int utilityPlantAssetIdCol = col;
+        col++;
+        
+        if (isAfterSave) {
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", boldStyle);
+            col++;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", boldStyle);
+            col++;
+        }
+        
+        // Create sub-header row (Row 1) for month details
+        Row subHeaderRow = sheet.createRow(currentRow++);
+        col = monthStartCol; // Start after static columns
+        
+        // Sub-headers for each month (Shut Down Hrs, Operational Hrs)
+        for (int i = 0; i < 12; i++) {
+            Cell cell = subHeaderRow.createCell(col++);
+            cell.setCellValue("Shut Down Hrs");
+            cell.setCellStyle(boldStyle);
+            
+            cell = subHeaderRow.createCell(col++);
+            cell.setCellValue("Operational Hrs");
+            cell.setCellStyle(boldStyle);
+        }
+
+        // Data rows
+        for (AssetOperationalResponseDTO dto : dataList) {
+            Row row = sheet.createRow(currentRow++);
+            col = 0;
+
+            row.createCell(col++).setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
+            row.createCell(col++).setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getName() != null ? dto.getUtilityDistributed().getName() : "");
+            row.createCell(col++).setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getSapCode() != null ? dto.getUtilityDistributed().getSapCode() : "");
+            row.createCell(col++).setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getName() != null ? dto.getUtilityGenerated().getName() : "");
+            row.createCell(col++).setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getSapCode() != null ? dto.getUtilityGenerated().getSapCode() : "");
+            
+            // April
+            setMonthCellValues(row, col, dto.getApril());
+            col += 2;
+            // May
+            setMonthCellValues(row, col, dto.getMay());
+            col += 2;
+            // June
+            setMonthCellValues(row, col, dto.getJune());
+            col += 2;
+            // July
+            setMonthCellValues(row, col, dto.getJuly());
+            col += 2;
+            // August
+            setMonthCellValues(row, col, dto.getAug());
+            col += 2;
+            // September
+            setMonthCellValues(row, col, dto.getSep());
+            col += 2;
+            // October
+            setMonthCellValues(row, col, dto.getOct());
+            col += 2;
+            // November
+            setMonthCellValues(row, col, dto.getNov());
+            col += 2;
+            // December
+            setMonthCellValues(row, col, dto.getDec());
+            col += 2;
+            // January
+            setMonthCellValues(row, col, dto.getJan());
+            col += 2;
+            // February
+            setMonthCellValues(row, col, dto.getFeb());
+            col += 2;
+            // March
+            setMonthCellValues(row, col, dto.getMarch());
+            col += 2;
+            
+            row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+            row.createCell(col++).setCellValue(dto.getAssetId() != null ? dto.getAssetId().toString() : "");
+            row.createCell(col++).setCellValue(dto.getUtilityPlantAssetId() != null ? dto.getUtilityPlantAssetId().toString() : "");
+
+            if (isAfterSave) {
+                row.createCell(col++).setCellValue("");
+                row.createCell(col++).setCellValue("");
+            }
+        }
+
+        // Hide assetId and utilityPlantAssetId columns
+        sheet.setColumnHidden(assetIdCol, true);
+        sheet.setColumnHidden(utilityPlantAssetIdCol, true);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        return outputStream.toByteArray();
+    }
+
+    private void setMonthCellValues(Row row, int startCol, MonthlyHoursDTO monthDTO) {
+        if (monthDTO != null) {
+            setDoubleCellValue(row.createCell(startCol), monthDTO.getShutdownHrs());
+            setDoubleCellValue(row.createCell(startCol + 1), monthDTO.getNetOperationHrs());
+        } else {
+            for (int i = 0; i < 2; i++) {
+                row.createCell(startCol + i).setCellValue("");
+            }
+        }
+    }
+
+    private void createMergedHeaderCell(Sheet sheet, Row row, int rowStart, int rowEnd, 
+                                       int colStart, int colEnd, String value, CellStyle style) {
+        if (rowStart != rowEnd || colStart != colEnd) {
+            sheet.addMergedRegion(new CellRangeAddress(rowStart, rowEnd, colStart, colEnd));
+        }
+        
+        Cell cell = row.createCell(colStart);
+        cell.setCellValue(value);
+        cell.setCellStyle(style);
+        
+        for (int r = rowStart; r <= rowEnd; r++) {
+            Row currentRow = sheet.getRow(r);
+            if (currentRow == null) {
+                currentRow = sheet.createRow(r);
+            }
+            for (int c = colStart; c <= colEnd; c++) {
+                Cell currentCell = currentRow.getCell(c);
+                if (currentCell == null) {
+                    currentCell = currentRow.createCell(c);
+                }
+                currentCell.setCellStyle(style);
+            }
+        }
+    }
+
+    private void setDoubleCellValue(Cell cell, Double value) {
+        if (value != null) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+    }
+
+    // ========================================
+    // EXCEL IMPORT METHODS
+    // ========================================
+
+    public AOPMessageVM importPowerResponseExcel(UUID cppPlantId, String financialYear, MultipartFile file) {
+        try {
+            List<AssetOperationalResponseDTO> data = readOperationalHoursExcel(file.getInputStream(), financialYear);
+            
+            // Separate failed records from successful ones
+            List<AssetOperationalResponseDTO> validRecords = new ArrayList<>();
+            List<AssetOperationalResponseDTO> failedRecords = new ArrayList<>();
+
+            for (AssetOperationalResponseDTO dto : data) {
+                String validation = validateAssetOperationalDTO(dto, financialYear);
+                if (validation != null) {
+                    failedRecords.add(dto);
+                } else {
+                    validRecords.add(dto);
+                }
+            }
+
+            // Try to save valid records
+            if (!validRecords.isEmpty()) {
+                try {
+                    MasterAssetOperationalResponseDTO masterDTO = new MasterAssetOperationalResponseDTO();
+                    masterDTO.setPowerResponse(validRecords);
+                    setAssetOperationalHours(financialYear, masterDTO);
+                } catch (Exception e) {
+                    System.out.println("error in import method: " + e.getMessage());
+                    // Mark all valid records as failed if save fails
+                    for (AssetOperationalResponseDTO dto : validRecords) {
+                        failedRecords.add(dto);
+                    }
+                }
+            }
+
+            AOPMessageVM aopMessageVM = new AOPMessageVM();
+            if (!failedRecords.isEmpty()) {
+                byte[] fileByteArray = exportPowerResponse(cppPlantId, financialYear, true, failedRecords);
+                String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+                aopMessageVM.setData(base64File);
+                aopMessageVM.setCode(400);
+                aopMessageVM.setMessage("Partial data has been saved");
+            } else {
+                aopMessageVM.setCode(200);
+                aopMessageVM.setMessage("All data has been saved");
+            }
+
+            return aopMessageVM;
+        } catch (Exception e) {
+            e.printStackTrace();
+            AOPMessageVM errorVM = new AOPMessageVM();
+            errorVM.setCode(500);
+            errorVM.setMessage("Error importing file: " + e.getMessage());
+            return errorVM;
+        }
+    }
+
+    public AOPMessageVM importSteamResponseExcel(UUID cppPlantId, String financialYear, MultipartFile file) {
+        try {
+            List<AssetOperationalResponseDTO> data = readOperationalHoursExcel(file.getInputStream(), financialYear);
+            System.out.println("steam import dataList: " + data);
+            // Separate failed records from successful ones
+            List<AssetOperationalResponseDTO> validRecords = new ArrayList<>();
+            List<AssetOperationalResponseDTO> failedRecords = new ArrayList<>();
+
+            for (AssetOperationalResponseDTO dto : data) {
+                String validation = validateAssetOperationalDTO(dto, financialYear);
+                if (validation != null) {
+                    failedRecords.add(dto);
+                } else {
+                    validRecords.add(dto);
+                }
+            }
+
+            // Try to save valid records
+            if (!validRecords.isEmpty()) {
+                try {
+                    MasterAssetOperationalResponseDTO masterDTO = new MasterAssetOperationalResponseDTO();
+                    masterDTO.setSteamResponse(validRecords);
+                    setAssetOperationalHours(financialYear, masterDTO);
+                } catch (Exception e) {
+                    System.out.println("error in import method: " + e.getMessage());
+                    // Mark all valid records as failed if save fails
+                    for (AssetOperationalResponseDTO dto : validRecords) {
+                        failedRecords.add(dto);
+                    }
+                }
+            }
+
+            AOPMessageVM aopMessageVM = new AOPMessageVM();
+            if (!failedRecords.isEmpty()) {
+                byte[] fileByteArray = exportSteamResponse(cppPlantId, financialYear, true, failedRecords);
+                String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+                aopMessageVM.setData(base64File);
+                aopMessageVM.setCode(400);
+                aopMessageVM.setMessage("Partial data has been saved");
+            } else {
+                aopMessageVM.setCode(200);
+                aopMessageVM.setMessage("All data has been saved");
+            }
+
+            return aopMessageVM;
+        } catch (Exception e) {
+            e.printStackTrace();
+            AOPMessageVM errorVM = new AOPMessageVM();
+            errorVM.setCode(500);
+            errorVM.setMessage("Error importing file: " + e.getMessage());
+            return errorVM;
+        }
+    }
+
+    private List<AssetOperationalResponseDTO> readOperationalHoursExcel(InputStream inputStream, String financialYear) {
+        List<AssetOperationalResponseDTO> dataList = new ArrayList<>();
+
+        int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        int endYear = startYear + 1;
+
+        try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowIterator = sheet.iterator();
+
+            // Skip both header rows (top header and sub-header)
+            if (rowIterator.hasNext()) {
+                rowIterator.next(); // Skip top header row
+            }
+            if (rowIterator.hasNext()) {
+                rowIterator.next(); // Skip sub-header row
+            }
+
+            while (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
+                
+                try {
+                    int col = 0;
+                    dto.setAssetName(getStringCellValue(row.getCell(col++)));
+                    
+                    // Utility Distributed
+                    String utilityDistName = getStringCellValue(row.getCell(col++));
+                    String utilityDistSapCode = getStringCellValue(row.getCell(col++));
+                    if (utilityDistName != null || utilityDistSapCode != null) {
+                        dto.setUtilityDistributed(new AssetUtilityDTO(utilityDistName, utilityDistSapCode));
+                    }
+                    
+                    // Utility Generated
+                    String utilityGenName = getStringCellValue(row.getCell(col++));
+                    String utilityGenSapCode = getStringCellValue(row.getCell(col++));
+                    if (utilityGenName != null || utilityGenSapCode != null) {
+                        dto.setUtilityGenerated(new AssetUtilityDTO(utilityGenName, utilityGenSapCode));
+                    }
+                    
+                    // April
+                    dto.setApril(readMonthData(row, col, startYear, 4));
+                    col += 2;
+                    // May
+                    dto.setMay(readMonthData(row, col, startYear, 5));
+                    col += 2;
+                    // June
+                    dto.setJune(readMonthData(row, col, startYear, 6));
+                    col += 2;
+                    // July
+                    dto.setJuly(readMonthData(row, col, startYear, 7));
+                    col += 2;
+                    // August
+                    dto.setAug(readMonthData(row, col, startYear, 8));
+                    col += 2;
+                    // September
+                    dto.setSep(readMonthData(row, col, startYear, 9));
+                    col += 2;
+                    // October
+                    dto.setOct(readMonthData(row, col, startYear, 10));
+                    col += 2;
+                    // November
+                    dto.setNov(readMonthData(row, col, startYear, 11));
+                    col += 2;
+                    // December
+                    dto.setDec(readMonthData(row, col, startYear, 12));
+                    col += 2;
+                    // January
+                    dto.setJan(readMonthData(row, col, endYear, 1));
+                    col += 2;
+                    // February
+                    dto.setFeb(readMonthData(row, col, endYear, 2));
+                    col += 2;
+                    // March
+                    dto.setMarch(readMonthData(row, col, endYear, 3));
+                    col += 2;
+                    
+                    dto.setRemarks(getStringCellValue(row.getCell(col++)));
+                    
+                    String assetIdStr = getStringCellValue(row.getCell(col++));
+                    if (assetIdStr != null && !assetIdStr.isEmpty()) {
+                        dto.setAssetId(UUID.fromString(assetIdStr));
+                    }
+                    
+                    String utilityPlantAssetIdStr = getStringCellValue(row.getCell(col++));
+                    if (utilityPlantAssetIdStr != null && !utilityPlantAssetIdStr.isEmpty()) {
+                        dto.setUtilityPlantAssetId(UUID.fromString(utilityPlantAssetIdStr));
+                    }
+
+                } catch (Exception e) {
+                    System.out.println("error while reading row: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                
+                dataList.add(dto);
+            }
+
+        } catch (Exception e) {
+            System.out.println("error while reading file: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return dataList;
+    }
+
+    private MonthlyHoursDTO readMonthData(Row row, int startCol, int year, int month) {
+
+
+        // private void validateMonthDTO(MonthlyHoursDTO dto, int year, int month, String assetName) {
+
+        // validateMonthDTO(dto.getApril(), startYear, 4, dto.getAssetName());
+
+        // int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        // int endYear = startYear + 1;
+
+        Double shutdownHrs = getDoubleCellValue(row.getCell(startCol));
+        Double operationalHrs = getDoubleCellValue(row.getCell(startCol + 1));
+
+    
+
+        YearMonth ym = YearMonth.of(year, month);
+        int totalHours = ym.lengthOfMonth() * 24;
+
+        
+        if (operationalHrs == null) operationalHrs = 0.0;
+        if (shutdownHrs == null) shutdownHrs = 0.0;
+
+        if(shutdownHrs > totalHours) {  
+            throw new IllegalArgumentException(
+                String.format(
+                    "Shutdown hours cannot be greater than total hours for %d-%02d",
+                    year, month
+                )
+            );
+        }
+
+        operationalHrs = totalHours - shutdownHrs;
+        
+        return new MonthlyHoursDTO(operationalHrs, shutdownHrs);
+    }
+
+    private String validateAssetOperationalDTO(AssetOperationalResponseDTO dto, String financialYear) {
+        if (dto.getAssetId() == null && dto.getUtilityPlantAssetId() == null) {
+            return "AssetId or UtilityPlantAssetId is required";
+        }
+
+        int startYear = Integer.parseInt(financialYear.substring(0, 4));
+        int endYear = startYear + 1;
+
+        // Validate each month
+        try {
+            validateMonthDTO(dto.getApril(), startYear, 4, dto.getAssetName());
+            validateMonthDTO(dto.getMay(), startYear, 5, dto.getAssetName());
+            validateMonthDTO(dto.getJune(), startYear, 6, dto.getAssetName());
+            validateMonthDTO(dto.getJuly(), startYear, 7, dto.getAssetName());
+            validateMonthDTO(dto.getAug(), startYear, 8, dto.getAssetName());
+            validateMonthDTO(dto.getSep(), startYear, 9, dto.getAssetName());
+            validateMonthDTO(dto.getOct(), startYear, 10, dto.getAssetName());
+            validateMonthDTO(dto.getNov(), startYear, 11, dto.getAssetName());
+            validateMonthDTO(dto.getDec(), startYear, 12, dto.getAssetName());
+            validateMonthDTO(dto.getJan(), endYear, 1, dto.getAssetName());
+            validateMonthDTO(dto.getFeb(), endYear, 2, dto.getAssetName());
+            validateMonthDTO(dto.getMarch(), endYear, 3, dto.getAssetName());
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
+
+        return null;
+    }
+
+    private void validateMonthDTO(MonthlyHoursDTO dto, int year, int month, String assetName) {
+        if (dto == null) {
+            return;
+        }
+
+        double net = dto.getNetOperationHrs();
+        double shutdown = dto.getShutdownHrs();
+
+        YearMonth ym = YearMonth.of(year, month);
+        int totalHours = ym.lengthOfMonth() * 24;
+
+        if (Double.compare(net + shutdown, totalHours) != 0) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "Validation failed for Asset [%s], %d-%02d → " +
+                    "Net (%s) + Shutdown (%s) ≠ Total (%s)",
+                    assetName, year, month, net, shutdown, totalHours
+                )
+            );
+        }
+    }
+
+    private String getStringCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            String value;
+            if (cell.getCellType() == CellType.NUMERIC) {
+                value = String.valueOf((long) cell.getNumericCellValue());
+            } else if (cell.getCellType() == CellType.STRING) {
+                value = cell.getStringCellValue();
+            } else if (cell.getCellType() == CellType.FORMULA) {
+                value = cell.getStringCellValue();
+            } else {
+                return null;
+            }
+            
+            if (value == null || value.trim().isEmpty()) {
+                return null;
+            }
+            return value.trim();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private Double getDoubleCellValue(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+
+        try {
+            if (cell.getCellType() == CellType.NUMERIC) {
+                return cell.getNumericCellValue();
+            } else if (cell.getCellType() == CellType.STRING) {
+                String value = cell.getStringCellValue().trim();
+                if (value.isEmpty()) {
+                    return null;
+                }
+                return Double.parseDouble(value);
+            }
+        } catch (NumberFormatException e) {
+            // Return null for invalid numbers
+        }
+        return null;
     }
 }
 

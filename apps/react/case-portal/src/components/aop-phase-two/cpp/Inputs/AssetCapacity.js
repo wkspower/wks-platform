@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
@@ -112,7 +112,7 @@ const AssetCapacity = () => {
       title: 'Fixed Min',
       widthT: 100,
       minWidth: 100,
-      editable: true,
+      editable: false,
       type: 'number1',
       format: valueFormat,
     },
@@ -121,7 +121,7 @@ const AssetCapacity = () => {
       title: 'Fixed Max',
       widthT: 100,
       minWidth: 100,
-      editable: true,
+      editable: false,
       type: 'number1',
       format: valueFormat,
     },
@@ -136,6 +136,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'april.max',
@@ -145,6 +147,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -159,6 +163,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'may.max',
@@ -168,6 +174,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -182,6 +190,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'june.max',
@@ -191,6 +201,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -205,6 +217,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'july.max',
@@ -214,6 +228,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -228,6 +244,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'aug.max',
@@ -237,6 +255,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -251,6 +271,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'sep.max',
@@ -260,6 +282,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -274,6 +298,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'oct.max',
@@ -283,6 +309,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -297,6 +325,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'nov.max',
@@ -306,6 +336,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -320,6 +352,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'dec.max',
@@ -329,6 +363,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -343,6 +379,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'jan.max',
@@ -352,6 +390,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -366,6 +406,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'feb.max',
@@ -375,6 +417,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -389,6 +433,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
         {
           field: 'march.max',
@@ -398,6 +444,8 @@ const AssetCapacity = () => {
           editable: true,
           type: 'number1',
           format: valueFormat,
+          minValue: 'fixedMin',
+          maxValue: 'fixedMax',
         },
       ],
     },
@@ -447,6 +495,73 @@ const AssetCapacity = () => {
     } finally {
       setLoading(false)
     }
+  }
+
+  const debounceTimerRef = useRef(null)
+
+  const customItemChange = (e, setRows) => {
+    const { dataItem, field, value } = e
+
+    // Clear previous debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+
+    // Only validate min vs max for monthly fields
+    // Check if field ends with '.min' or '.max'
+    const isMonthlyField = field.includes('.')
+    const fieldParts = field.split('.')
+    const fieldType = fieldParts[fieldParts.length - 1] // 'min' or 'max'
+    const monthName = fieldParts[0] // 'april', 'may', etc.
+
+    if (!isMonthlyField || (fieldType !== 'min' && fieldType !== 'max')) {
+      return true
+    }
+
+    const numValue = parseFloat(value)
+
+    // Skip validation if value is empty or NaN
+    if (value === '' || isNaN(numValue)) {
+      return true
+    }
+
+    // Get the corresponding min or max field
+    const correspondingValue =
+      dataItem[monthName]?.[fieldType === 'min' ? 'max' : 'min']
+
+    // Validate: min should not be greater than max
+    if (
+      fieldType === 'min' &&
+      correspondingValue !== undefined &&
+      numValue > correspondingValue
+    ) {
+      const monthCapitalized =
+        monthName.charAt(0).toUpperCase() + monthName.slice(1)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `${monthCapitalized} min capacity cannot be greater than ${monthCapitalized} max capacity`,
+        severity: 'error',
+      })
+      return false
+    }
+
+    // Validate: max should not be less than min
+    if (
+      fieldType === 'max' &&
+      correspondingValue !== undefined &&
+      numValue < correspondingValue
+    ) {
+      const monthCapitalized =
+        monthName.charAt(0).toUpperCase() + monthName.slice(1)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `${monthCapitalized} max capacity cannot be less than ${monthCapitalized} min capacity`,
+        severity: 'error',
+      })
+      return false
+    }
+
+    return true
   }
 
   const permissions = {
@@ -694,6 +809,7 @@ const AssetCapacity = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        customItemChange={customItemChange}
       />
     </Box>
   )

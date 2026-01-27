@@ -67,6 +67,7 @@ const HRSGHeatRate = () => {
       title: 'HRSG Load',
       width: 100,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 80,
     },
@@ -75,6 +76,7 @@ const HRSGHeatRate = () => {
       title: 'Heat Rate',
       width: 120,
       type: 'number1',
+      format: valueFormat,
       editable: true,
       minWidth: 100,
     },
@@ -138,7 +140,7 @@ const HRSGHeatRate = () => {
     showTitleNameBusiness: true,
     titleName: screenTitle?.title,
     showImport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `HRSG Heat Rate - ${AOP_YEAR}`,
     showTitle: true,
     showDropdown: false,
@@ -224,21 +226,28 @@ const HRSGHeatRate = () => {
 
     setLoading(true)
     try {
-      await InputApiService.saveHRSGHeatRateExcel(
+      const response = await InputApiService.saveHRSGHeatRateExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Excel file imported successfully!',
-        severity: 'success',
-      })
-
-      // Refresh data after import
-      await fetchHRSGHeatRateData()
+      if (response?.success) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        await fetchHeatRateData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
       setSnackbarOpen(true)
@@ -248,6 +257,28 @@ const HRSGHeatRate = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await InputApiService.exportHRSGHeatRateExcel(keycloak)
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting HRSG Heat Rate data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
     }
   }
 
@@ -284,6 +315,7 @@ const HRSGHeatRate = () => {
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
+        handleExport={handleExport}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}

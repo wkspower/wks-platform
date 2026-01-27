@@ -574,7 +574,7 @@ const ShutdownAndOperational = () => {
     saveBtn: true,
     allAction: true,
     showImport: true,
-    downloadExcelBtnFromUI: true,
+    showExport: true,
     ExcelName: `Shutdown and Operational - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
@@ -688,21 +688,57 @@ const ShutdownAndOperational = () => {
 
     setLoading(true)
     try {
-      await InputApiService.saveOperationHoursExcel(
+      const response = await InputApiService.savePowerResponseExcel(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      setSnackbarOpen(true)
-      setSnackbarData({
-        message: 'Excel file imported successfully!',
-        severity: 'success',
-      })
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        await fetchShutdownAndOperationalData()
+      } else if (response?.code === 400 && response?.data) {
+        const byteCharacters = atob(response.data)
+        const byteNumbers = Array.from(byteCharacters, (char) =>
+          char.charCodeAt(0),
+        )
+        const byteArray = new Uint8Array(byteNumbers)
 
-      // Refresh data after import
-      await fetchShutdownAndOperationalData()
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute(
+          'download',
+          `Error File - Shutdown and Operational.xlsx`,
+        )
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+        await fetchShutdownAndOperationalData()
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Upload Failed!',
+          severity: 'error',
+        })
+      }
     } catch (error) {
       console.error('Error uploading Excel file:', error)
       setSnackbarOpen(true)
@@ -712,6 +748,32 @@ const ShutdownAndOperational = () => {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await InputApiService.exportPowerResponseExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting Power Response data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
     }
   }
 
@@ -759,6 +821,7 @@ const ShutdownAndOperational = () => {
           setCurrentRowId={() => {}}
           saveChanges={saveChanges}
           handleExcelUpload={handleExcelUpload}
+          handleExport={handleExport}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
