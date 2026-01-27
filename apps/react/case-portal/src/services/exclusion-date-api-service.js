@@ -66,13 +66,13 @@ async function exportExclusionDate(
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `${EXCEL_EXPORT_TITLE}_Shutdown Activities.xlsx`
+    a.download = `${EXCEL_EXPORT_TITLE}_Exclusion_Date.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
-    console.error('Error exporting Shutdown Excel:', e)
+    console.error('Error exporting Exclusion_Date Excel:', e)
     return Promise.reject(e)
   }
 }
@@ -97,7 +97,7 @@ async function importExclusionDate(file, keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 async function deleteExclusionDate(deleteId, keycloak) {
-  const url = `${Config.CaseEngineUrl}/task/exclusion-date/${deleteId}`
+  const url = `${Config.CaseEngineUrl}/task/exclusion-date?id=${deleteId}`
   const headers = {
     Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,

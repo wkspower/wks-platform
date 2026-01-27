@@ -17,10 +17,15 @@ export const ExclusionDateColumns = [
   },
 
   {
-    field: 'remarks',
+    field: 'remark',
     title: 'Reason',
     editable: true,
     fixedWidth: '200px',
+  },
+
+  {
+    field: 'originalRemark',
+    hidden: true,
   },
 ]
 

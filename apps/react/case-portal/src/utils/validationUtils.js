@@ -29,6 +29,7 @@ export const validateFields = (data, requiredFields) => {
     recommendation: 'Recommendation',
     targetDate: 'Target Date',
     responsible: 'Responsible',
+    reason: 'Reason',
   }
 
   const invalidRows = data.filter((row) => {
@@ -36,6 +37,7 @@ export const validateFields = (data, requiredFields) => {
     const hasMissingField = requiredFields.some((field) => {
       const value = row[field]
       if (
+        field === 'reason' ||
         field === 'remark' ||
         field === 'aopRemarks' ||
         field === 'remarks' ||
@@ -71,6 +73,7 @@ export const validateFields = (data, requiredFields) => {
           const value = row[field]
 
           if (
+            field === 'reason' ||
             field === 'remark' ||
             field === 'aopRemarks' ||
             field === 'remarks' ||

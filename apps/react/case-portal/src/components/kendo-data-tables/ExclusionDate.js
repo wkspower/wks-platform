@@ -8,6 +8,8 @@ import KendoDataTables from './index'
 import { ExclusionDateColumns } from 'components/colums/ShutdownColumn'
 import { ExclusionDateApiDataService } from 'services/exclusion-date-api-service'
 import { getRoleName } from 'services/role-service'
+import { DataService } from 'services/DataService'
+import { validateFields } from 'utils/validationUtils'
 
 const ExclusionDate = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = useState({})
@@ -40,6 +42,8 @@ const ExclusionDate = ({ permissions }) => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const keycloak = useSession()
@@ -56,6 +60,7 @@ const ExclusionDate = ({ permissions }) => {
 
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
+    setModifiedCells({})
     try {
       setLoading(true)
       const data = await ExclusionDateApiDataService.getExclusionDate(
@@ -64,17 +69,14 @@ const ExclusionDate = ({ permissions }) => {
         AOP_YEAR,
       )
 
-      const modifiedData = data.map((item, index) => ({
+      const modifiedData = data?.data?.Data?.map((item, index) => ({
         ...item,
         idFromApi: item?.id,
         id: index,
         originalRemark: item.remark,
-        exclusionEndDate: item?.exclusionEndDate
-          ? new Date(item.exclusionEndDate)
-          : null,
-        exclusionStartDate: item?.exclusionStartDate
-          ? new Date(item.exclusionStartDate)
-          : null,
+        reason: item.remark,
+        exclusionEndDate: item?.endDate ? new Date(item.endDate) : null,
+        exclusionStartDate: item?.startDate ? new Date(item.startDate) : null,
       }))
 
       setRows(modifiedData)
@@ -85,8 +87,39 @@ const ExclusionDate = ({ permissions }) => {
     }
   }
 
+  const getConfigurationExecutionDetails = async () => {
+    try {
+      const response = await DataService.getConfigurationExecutionDetails(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      const details = response?.data || []
+      if (details.length === 0) {
+        console.warn(
+          'getConfigurationExecutionDetails returned an empty array:',
+          response,
+        )
+      }
+      // const hasNoModifiedOn = details.length && !details[0]?.ModifiedOn
+      const hasNoModifiedOn = true
+      if (hasNoModifiedOn) {
+        const startDateObj = details.find((item) => item.Name === 'StartDate')
+        const endDateObj = details.find((item) => item.Name === 'EndDate')
+
+        setStartDate(startDateObj?.AttributeValue)
+        setEndDate(endDateObj?.AttributeValue)
+      }
+    } catch (error) {
+      console.error('Error fetching getConfigurationExecutionDetails:', error)
+    } finally {
+      // setLoading1(false)
+    }
+  }
+
   useEffect(() => {
     fetchData()
+    getConfigurationExecutionDetails()
   }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
 
   const deleteRowData = async (paramsForDelete) => {
@@ -124,6 +157,12 @@ const ExclusionDate = ({ permissions }) => {
   const downloadExcelForConfiguration = async () => {
     try {
       let response
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Excel download started!',
+        severity: 'success',
+      })
 
       response = await ExclusionDateApiDataService.exportExclusionDate(
         keycloak,
@@ -179,7 +218,7 @@ const ExclusionDate = ({ permissions }) => {
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', 'Error File - Shutdown.xlsx')
+        link.setAttribute('download', 'Error File - Exclusion Date.xlsx')
         document.body.appendChild(link)
         link.click()
         link.remove()
@@ -251,14 +290,89 @@ const ExclusionDate = ({ permissions }) => {
   )
 
   const saveAPI = async (newRows) => {
-    try {
-      const payloadData = newRows.map((row) => ({
-        id: row?.id || null,
-        exclusionEndDate: row?.exclusionEndDate,
-        exclusionStartDate: row?.exclusionStartDate,
-        remarks: row?.remark || row?.remarks,
-      }))
+    // --- 1. Basic Structure Validation ---
+    if (!newRows || newRows.length === 0) return
 
+    // Convert limit states to Date objects for comparison
+    const limitStart = new Date(startDate)
+    const limitEnd = new Date(endDate)
+
+    try {
+      const payloadData = []
+
+      for (let i = 0; i < newRows.length; i++) {
+        const row = newRows[i]
+        const rowStart = new Date(row.exclusionStartDate)
+        const rowEnd = new Date(row.exclusionEndDate)
+
+        // --- 2. Validation: Start Date < End Date ---
+        if (rowStart > rowEnd) {
+          setSnackbarData({
+            message: `Row ${i + 1}: Start date cannot be after end date.`,
+            severity: 'error',
+          })
+          setSnackbarOpen(true)
+          return // Stop execution
+        }
+
+        // --- 3. Validation: Within Global Range (Inclusive) ---
+        if (rowStart < limitStart || rowEnd > limitEnd) {
+          setSnackbarData({
+            message: `Row ${i + 1}: Dates must be between ${startDate} and ${endDate}.`,
+            severity: 'error',
+          })
+          setSnackbarOpen(true)
+          return
+        }
+
+        // --- 4. Validation: No Overlapping with other rows ---
+        for (let j = i + 1; j < newRows.length; j++) {
+          const otherStart = new Date(newRows[j].exclusionStartDate)
+          const otherEnd = new Date(newRows[j].exclusionEndDate)
+
+          // Logic: Two ranges overlap if (StartA <= EndB) AND (EndA >= StartB)
+          if (rowStart <= otherEnd && rowEnd >= otherStart) {
+            setSnackbarData({
+              message: `Row ${i + 1} and Row ${j + 1} have overlapping dates.`,
+              severity: 'error',
+            })
+            setSnackbarOpen(true)
+            return
+          }
+        }
+
+        // --- 5. Validation: reason must be non-empty and different from originalRemark ---
+        const reason = (row?.remark ?? '').trim()
+        const originalRemark = (row?.originalRemark ?? '').trim()
+
+        if (!reason) {
+          setSnackbarData({
+            message: `Please add the Reason`,
+            severity: 'error',
+          })
+          setSnackbarOpen(true)
+          return
+        }
+
+        if (reason === originalRemark) {
+          setSnackbarData({
+            message: `Please update the Reason`,
+            severity: 'error',
+          })
+          setSnackbarOpen(true)
+          return
+        }
+
+        // If valid, push to payload
+        payloadData.push({
+          id: row?.idFromApi || null,
+          endDate: row?.exclusionEndDate,
+          startDate: row?.exclusionStartDate,
+          remark: row?.remark || row?.remarks,
+        })
+      }
+
+      // --- 5. Proceed to API Call ---
       const response = await ExclusionDateApiDataService.postExclusionDate(
         payloadData,
         keycloak,
@@ -269,12 +383,12 @@ const ExclusionDate = ({ permissions }) => {
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
       setModifiedCells({})
-
-      // intentionally not tracking unsavedChangesRef here (was undefined in original code)
       await fetchData()
       return response
     } catch (error) {
       console.error('Error in saving data!', error)
+      setSnackbarData({ message: 'Failed to save data.', severity: 'error' })
+      setSnackbarOpen(true)
     }
   }
 

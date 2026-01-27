@@ -1780,6 +1780,7 @@ const KendoDataTables = ({
                       key={col.field}
                       field={col.field}
                       title={col.title || col.headerName}
+                      width={col.fixedWidth || undefined}
                       cells={{
                         edit: {
                           date: [
