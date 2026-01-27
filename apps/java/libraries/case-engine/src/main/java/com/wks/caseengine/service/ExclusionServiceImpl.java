@@ -2,6 +2,7 @@ package com.wks.caseengine.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
@@ -11,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import org.apache.poi.ss.usermodel.Cell;
 
@@ -31,7 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.dto.ConfigurationVersionDTO;
 import com.wks.caseengine.dto.ExclusionDTO;
-import com.wks.caseengine.dto.PlantTeamDTO;
+
 import com.wks.caseengine.entity.ExclusionDate;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.Sites;
@@ -39,7 +37,7 @@ import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.ExclusionDateRepository;
-import com.wks.caseengine.repository.PeopleInitiativeRepository;
+
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -299,10 +297,32 @@ public class ExclusionServiceImpl implements ExclusionService{
 	public List<ExclusionDTO> readExclusionDate(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ExclusionDTO> exclusionDTOs = new ArrayList<>();
 
+	    AOPMessageVM configResp = configurationService.getConfigurationExecution(year, plantFKId.toString());
+	    Date boundaryStart = null;
+	    Date boundaryEnd = null;
+
+	    if (configResp != null && configResp.getData() != null) {
+	        List<Map<String, Object>> configData = (List<Map<String, Object>>) configResp.getData();
+	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	        
+	        for (Map<String, Object> map : configData) {
+	            try {
+	                String name = String.valueOf(map.get("Name"));
+	                String val = String.valueOf(map.get("AttributeValue"));
+	                if ("StartDate".equalsIgnoreCase(name)) {
+	                    boundaryStart = sdf.parse(val);
+	                } else if ("EndDate".equalsIgnoreCase(name)) {
+	                    boundaryEnd = sdf.parse(val);
+	                }
+	            } catch (Exception e) {
+	                
+	            }
+	        }
+	    }
+
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
 	        Iterator<Row> rowIterator = sheet.iterator();
-
 	        if (rowIterator.hasNext()) rowIterator.next(); 
 
 	        while (rowIterator.hasNext()) {
@@ -310,19 +330,26 @@ public class ExclusionServiceImpl implements ExclusionService{
 	            ExclusionDTO dto = new ExclusionDTO();
 	            
 	            try {
-	                Date start = getDateCellValue(row.getCell(0), dto); // Should return java.util.Date
-	                Date end = getDateCellValue(row.getCell(1), dto);   // Should return java.util.Date
+	                Date start = getDateCellValue(row.getCell(0), dto);
+	                Date end = getDateCellValue(row.getCell(1), dto);
 	                
 	                dto.setStartDate(start);
 	                dto.setEndDate(end);
 	                dto.setRemark(getStringCellValue(row.getCell(2), dto));
 	                dto.setId(getStringCellValue(row.getCell(3), dto));
 
-	                // --- 1. Basic Row Validation (java.util.Date syntax) ---
+	               
 	                if (start != null && end != null) {
-	                    if (end.before(start)) { // Changed from .isBefore()
+	                    if (end.before(start)) {
 	                        dto.setSaveStatus("Failed");
 	                        dto.setErrDescription("End date cannot be before Start date.");
+	                    } 
+	                    
+	                    else if (boundaryStart != null && boundaryEnd != null) {
+	                        if (start.before(boundaryStart) || end.after(boundaryEnd)) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Dates must be between " + boundaryStart + " and " + boundaryEnd);
+	                        }
 	                    }
 	                } else {
 	                    dto.setSaveStatus("Failed");
@@ -331,7 +358,7 @@ public class ExclusionServiceImpl implements ExclusionService{
 
 	            } catch (Exception e) {
 	                dto.setSaveStatus("Failed");
-	                dto.setErrDescription("Row processing error: " + e.getMessage());
+	                dto.setErrDescription("Error: " + e.getMessage());
 	            }
 	            exclusionDTOs.add(dto);
 	        }
