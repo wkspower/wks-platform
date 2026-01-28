@@ -144,117 +144,93 @@ public class ExclusionServiceImpl implements ExclusionService{
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
-	public AOPMessageVM saveExclusionDate(String year, String plantFKId, List<ExclusionDTO> exclusionDTOs) {
-	    List<ExclusionDTO> failedList = new ArrayList<>();
-	    
-	    
-	    if (exclusionDTOs == null) {
-	        return new AOPMessageVM(200, "No data provided", new ArrayList<>());
-	    }
+	public AOPMessageVM saveExclusionDate(String year, String plantFKId,
+			List<ExclusionDTO> exclusionDTOs) {
+		try {
+			List<ExclusionDTO> failedList = new ArrayList<>();
+			UUID plantId = UUID.fromString(plantFKId);
 
-	    try {
-	        UUID plantId = (plantFKId != null) ? UUID.fromString(plantFKId) : null;
+			for (ExclusionDTO exclusionDTO : exclusionDTOs) {
+				if (exclusionDTO.getSaveStatus() != null
+						&& exclusionDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(exclusionDTO);
+					continue;
+				}
+				boolean changed=false;
+				ExclusionDate exclusionDate =null;
+				if(exclusionDTO.getId()!=null) {
+					Optional<ExclusionDate> exclusionDTOOpt=exclusionDateRepository.findById(UUID.fromString(exclusionDTO.getId()));
+					if(exclusionDTOOpt.isPresent()) {
+						exclusionDate=exclusionDTOOpt.get();
+						SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+						String dtoStartDate = formatter.format(exclusionDTO.getStartDate());
+						String dtoEndDate=formatter.format(exclusionDTO.getEndDate());
+						String entityStartDate = formatter.format(exclusionDate.getStartDate());
+						String entityEndDate=formatter.format(exclusionDate.getEndDate());
+						String dtoRemark=null;
+						String entityRemark=null;
+						if(!dtoStartDate.equalsIgnoreCase(entityStartDate)) {
+							changed=true;
+						}
+						if(!dtoEndDate.equalsIgnoreCase(entityEndDate)) {
+							changed=true;
+						}
+						if(exclusionDTO.getRemark()!=null) {
+							dtoRemark=exclusionDTO.getRemark();
+						}
+						if(exclusionDate.getRemarks()!=null) {
+							entityRemark=exclusionDate.getRemarks();
+						}
+						if(dtoRemark!=null && entityRemark!=null && changed && (dtoRemark.equalsIgnoreCase(entityRemark))) {
+							exclusionDTO.setSaveStatus("Failed");
+							exclusionDTO.setErrDescription("Please update reason");
+							failedList.add(exclusionDTO);
+							continue;
+						}
+					}
+				}else {
+					exclusionDate=new ExclusionDate();
+					exclusionDate.setAopYear(year);
+					exclusionDate.setPlantId(plantId);
+					if(exclusionDTO.getRemark()==null || exclusionDTO.getRemark().trim().equalsIgnoreCase("")) {
+						exclusionDTO.setSaveStatus("Failed");
+						exclusionDTO.setErrDescription("Please add reason");
+						failedList.add(exclusionDTO);
+						continue;
+					}
+				}
+				AOPMessageVM response = configurationService.getConfigurationVersion(year, plantId.toString());
 
-	        for (ExclusionDTO dto : exclusionDTOs) {
-	            // Null check for individual DTO
-	            if (dto == null) continue;
-
-	            if ("Failed".equalsIgnoreCase(dto.getSaveStatus())) {
-	                failedList.add(dto);
-	                continue;
-	            }
-
-	            try {
-	                ExclusionDate entity;
-	                boolean isUpdate = dto.getId() != null && !dto.getId().trim().isEmpty();
-
-	                if (isUpdate) {
-	                    Optional<ExclusionDate> existingOpt = exclusionDateRepository.findById(UUID.fromString(dto.getId()));
-	                    if (existingOpt.isPresent()) {
-	                        entity = existingOpt.get();
-	                        
-	                        // Check if dates have changed
-	                        boolean datesChanged = isDateChanged(entity.getStartDate(), dto.getStartDate()) || 
-	                                               isDateChanged(entity.getEndDate(), dto.getEndDate());
-	                        
-	                        // Business Rule: If dates changed, new remark cannot be null or blank
-	                        String newRemark = dto.getRemark();
-	                        if (datesChanged && (newRemark == null || newRemark.trim().isEmpty())) {
-	                            dto.setSaveStatus("Failed");
-	                            dto.setErrDescription("Please add or update remark");
-	                            failedList.add(dto);
-	                            continue; 
-	                        }
-	                    } else {
-	                        dto.setSaveStatus("Failed");
-	                        failedList.add(dto);
-	                        continue;
-	                    }
-	                } else {
-	                    entity = new ExclusionDate();
-	                    entity.setAopYear(year);
-	                    entity.setPlantId(plantId);
-	                }
-
-	                // Safety check for Revision Service
-	                updateRevisionSafely(entity, year, plantFKId);
-
-	                // Map fields with null-safe handling
-	                entity.setStartDate(dto.getStartDate());
-	                entity.setEndDate(dto.getEndDate());
-	                entity.setRemarks(dto.getRemark() != null ? dto.getRemark().trim() : "");
-	                entity.setModifiedBy(Utility.getUserName());
-	                entity.setModifiedOn(new Date());
-
-	                exclusionDateRepository.save(entity);
-
-	            } catch (Exception e) {
-	                // Catching inner exception so one bad row doesn't kill the batch
-	                dto.setSaveStatus("Failed");
-	                failedList.add(dto);
-	            }
-	        }
-
-	        AOPMessageVM response = new AOPMessageVM();
-	        response.setCode(200);
-	        response.setData(failedList);
-	        response.setMessage("Data processed successfully");
-	        return response;
-
-	    } catch (Exception ex) {
-	        // Log error and throw to ensure transaction integrity
-	        throw new RuntimeException("Global failure in saveExclusionDate", ex);
-	    }
+				if (response != null && response.getData() != null && !((List<?>) response.getData()).isEmpty()) {
+				    
+				    List<ConfigurationVersionDTO> dataList = (List<ConfigurationVersionDTO>) response.getData();
+				    
+				    String attributeValue = dataList.get(0).getAttributeValue();
+				    
+				    exclusionDate.setRevision(Integer.parseInt(attributeValue));	
+				}
+				
+				
+				exclusionDate.setStartDate(exclusionDTO.getStartDate());
+				exclusionDate.setEndDate(exclusionDTO.getEndDate());
+				exclusionDate.setRemarks(exclusionDTO.getRemark());
+				exclusionDate.setModifiedBy(Utility.getUserName());
+				exclusionDate.setModifiedOn(new Date());
+				exclusionDateRepository.save(exclusionDate);
+			}
+			
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(failedList);
+			aopMessageVM.setMessage("Data updated successfully");
+			return aopMessageVM;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			
+			throw new RuntimeException("Failed to save data", ex);
+		}
 	}
 
-	/**
-	 * Compares two dates safely, even if one or both are null.
-	 */
-	private boolean isDateChanged(Date d1, Date d2) {
-	    if (d1 == null && d2 == null) return false;
-	    if (d1 == null || d2 == null) return true;
-	    return d1.getTime() != d2.getTime();
-	}
-
-	/**
-	 * Handles the configuration service call with deep null-checking.
-	 */
-	private void updateRevisionSafely(ExclusionDate entity, String year, String plantId) {
-	    try {
-	        AOPMessageVM response = configurationService.getConfigurationVersion(year, plantId);
-	        if (response != null && response.getData() instanceof List) {
-	            List<?> data = (List<?>) response.getData();
-	            if (!data.isEmpty() && data.get(0) instanceof ConfigurationVersionDTO) {
-	                String val = ((ConfigurationVersionDTO) data.get(0)).getAttributeValue();
-	                if (val != null && !val.isEmpty()) {
-	                    entity.setRevision(Integer.parseInt(val));
-	                }
-	            }
-	        }
-	    } catch (Exception e) {
-	        // Silently fail or log; prevents crashing the main save logic
-	    }
-	}
 	public byte[] exportExclusionDate(String year, String plantId, boolean isAfterSave, List<ExclusionDTO> dtoList) {
 	    try {   
 	      
@@ -522,16 +498,21 @@ public class ExclusionServiceImpl implements ExclusionService{
 	                return cell.getDateCellValue();
 	            }
 	        }
+
 	        if (cell.getCellType() == CellType.STRING) {
 	            String val = cell.getStringCellValue().trim();
 	            if (val.isEmpty()) return null;
 	            
 	            SimpleDateFormat excelSdf = new SimpleDateFormat("dd-MM-yyyy");
-	            excelSdf.setLenient(false); // Strict parsing
+	            excelSdf.setLenient(false);
 	            return excelSdf.parse(val);
 	        }
 	    } catch (Exception e) {
+	        if (dto != null) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Invalid date format in Excel. Please use dd-MM-yyyy.");
+	        }
 	    }
 	    return null;
-	}	
+	}
 }
