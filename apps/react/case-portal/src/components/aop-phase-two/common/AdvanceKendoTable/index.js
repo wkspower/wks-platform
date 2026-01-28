@@ -578,16 +578,21 @@ const AdvanceKendoTable = ({
     [setRows, setModifiedCells, setCustomModifiedCells, customItemChange],
   )
 
+  const prevModifiedCellsRef = useRef(modifiedCells)
+
   useEffect(() => {
     const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
     const isCustomModifiedCellsEmpty =
       Object.keys(customModifiedCells).length === 0
+    const wasPreviouslyNotEmpty =
+      Object.keys(prevModifiedCellsRef.current).length > 0
 
     if (isModifiedCellsEmpty && !isCustomModifiedCellsEmpty) {
       setCustomModifiedCells({})
     }
 
-    if (isModifiedCellsEmpty) {
+    // Only update if we're transitioning from non-empty to empty
+    if (isModifiedCellsEmpty && wasPreviouslyNotEmpty) {
       setEdit({})
       setRows((prev) =>
         prev.map((r) => ({
@@ -596,6 +601,8 @@ const AdvanceKendoTable = ({
         })),
       )
     }
+
+    prevModifiedCellsRef.current = modifiedCells
   }, [modifiedCells, customModifiedCells])
 
   const handleRemarkSave = () => {
