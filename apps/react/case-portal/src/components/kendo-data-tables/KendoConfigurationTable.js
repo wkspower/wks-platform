@@ -1069,7 +1069,10 @@ const ConfigurationTable = () => {
       >
         <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
           </DialogContentText>
         </DialogContent>
@@ -1094,8 +1097,11 @@ const ConfigurationTable = () => {
       >
         <DialogTitle id='alert-dialog-title'>{'Change?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            {`Are you sure you want to change the Revision`}
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
+            Are you sure you want to change the Revision?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -1511,11 +1517,11 @@ const ConfigurationTable = () => {
                   />
                 )
 
-              case getTheId('Quality'):
-                return <QualityParameters />
+              // case getTheId('Quality'):
+              //   return <QualityParameters />
 
               case getTheId('ExclusionDate'):
-                return <ExclusionDate />
+                return <ExclusionDate revision={revision} />
 
               default:
                 return null
