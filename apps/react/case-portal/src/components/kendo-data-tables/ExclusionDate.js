@@ -46,7 +46,7 @@ const ExclusionDate = ({ permissions, revision }) => {
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
   const keycloak = useSession()
-  const IS_OLD_YEAR = oldYear?.oldYear
+  const IS_OLD_YEAR = false
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
   const colDefs = ExclusionDateColumns
 
@@ -286,7 +286,6 @@ const ExclusionDate = ({ permissions, revision }) => {
       showTitleNameBusiness: true,
       titleName: 'Exclusion Date',
       uploadExcelBtn: true,
-
       reasonText: true,
     },
     IS_OLD_YEAR,
