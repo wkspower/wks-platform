@@ -305,6 +305,17 @@ const ExclusionDate = ({ permissions, revision }) => {
 
       for (let i = 0; i < newRows.length; i++) {
         const row = newRows[i]
+
+        // --- 0. Validation: Both dates must be present ---
+        if (!row.exclusionStartDate || !row.exclusionEndDate) {
+          setSnackbarData({
+            message: 'Both From date and To date are required.',
+            severity: 'error',
+          })
+          setSnackbarOpen(true)
+          return // Stop execution
+        }
+
         const rowStart = new Date(row.exclusionStartDate)
         const rowEnd = new Date(row.exclusionEndDate)
 
