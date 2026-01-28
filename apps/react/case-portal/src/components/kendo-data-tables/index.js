@@ -2769,7 +2769,10 @@ const KendoDataTables = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Delete ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             {permissions?.showNoteWhileDeleting
               ? `Are you sure you want to delete this row?   ${deleteNoteOnDeleteDialogeBox}`
               : 'Are you sure you want to delete this row?'}{' '}
@@ -2795,7 +2798,10 @@ const KendoDataTables = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             {permissions?.showNoteWhileSaving
               ? `Are you sure you want to save these changes?   ${noteOnSaveDialogeBox}`
               : 'Are you sure you want to save these changes?'}{' '}
@@ -2818,7 +2824,10 @@ const KendoDataTables = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Reset ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             Are you sure you want to reset these changes?
           </DialogContentText>
         </DialogContent>
@@ -2838,13 +2847,16 @@ const KendoDataTables = ({
           backdrop: { disableScrollLock: true },
         }}
       >
-        <DialogTitle>Add Remark</DialogTitle>
+        <DialogTitle>
+          {permissions?.reasonText ? 'Add Reason' : 'Add Remark'}
+        </DialogTitle>
+
         <DialogContent>
           <TextField
             autoFocus
             margin='dense'
             id='remark'
-            label='Remark'
+            label='Add'
             type='text'
             fullWidth
             variant='outlined'

@@ -1,17 +1,16 @@
-import { useGridApiRef } from '@mui/x-data-grid'
-import { useCallback, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
-import { useSession } from 'SessionStoreContext'
 import Backdrop from '@mui/material/Backdrop'
 import CircularProgress from '@mui/material/CircularProgress'
-import KendoDataTables from './index'
+import { useGridApiRef } from '@mui/x-data-grid'
 import { ExclusionDateColumns } from 'components/colums/ShutdownColumn'
+import { useCallback, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { DataService } from 'services/DataService'
 import { ExclusionDateApiDataService } from 'services/exclusion-date-api-service'
 import { getRoleName } from 'services/role-service'
-import { DataService } from 'services/DataService'
-import { validateFields } from 'utils/validationUtils'
+import { useSession } from 'SessionStoreContext'
+import KendoDataTables from './index'
 
-const ExclusionDate = ({ permissions }) => {
+const ExclusionDate = ({ permissions, revision }) => {
   const [modifiedCells, setModifiedCells] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
@@ -120,7 +119,9 @@ const ExclusionDate = ({ permissions }) => {
   useEffect(() => {
     fetchData()
     getConfigurationExecutionDetails()
-  }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR])
+
+    console.log('ExclusionDate rendered', revision)
+  }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR, revision])
 
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
@@ -285,6 +286,8 @@ const ExclusionDate = ({ permissions }) => {
       showTitleNameBusiness: true,
       titleName: 'Exclusion Date',
       uploadExcelBtn: true,
+
+      reasonText: true,
     },
     IS_OLD_YEAR,
   )
@@ -308,7 +311,7 @@ const ExclusionDate = ({ permissions }) => {
         // --- 2. Validation: Start Date < End Date ---
         if (rowStart > rowEnd) {
           setSnackbarData({
-            message: `Row ${i + 1}: Start date cannot be after end date.`,
+            message: `From date cannot be after To date.`,
             severity: 'error',
           })
           setSnackbarOpen(true)
@@ -316,28 +319,91 @@ const ExclusionDate = ({ permissions }) => {
         }
 
         // --- 3. Validation: Within Global Range (Inclusive) ---
-        if (rowStart < limitStart || rowEnd > limitEnd) {
+        const normalizeDate = (date) => {
+          const d = new Date(date)
+          d.setHours(0, 0, 0, 0)
+          return d
+        }
+
+        const rs = normalizeDate(rowStart)
+        const re = normalizeDate(rowEnd)
+        const ls = normalizeDate(limitStart)
+        const le = normalizeDate(limitEnd)
+
+        const formatDDMMYYYY = (date) => {
+          if (!date) return ''
+          const d = new Date(date)
+          const day = String(d.getDate()).padStart(2, '0')
+          const month = String(d.getMonth() + 1).padStart(2, '0')
+          const year = d.getFullYear()
+          return `${day}-${month}-${year}`
+        }
+
+        if (rs < ls || re > le) {
           setSnackbarData({
-            message: `Row ${i + 1}: Dates must be between ${startDate} and ${endDate}.`,
+            message: `Dates must be between ${formatDDMMYYYY(startDate)} and ${formatDDMMYYYY(endDate)}.`,
             severity: 'error',
           })
           setSnackbarOpen(true)
           return
         }
 
-        // --- 4. Validation: No Overlapping with other rows ---
-        for (let j = i + 1; j < newRows.length; j++) {
-          const otherStart = new Date(newRows[j].exclusionStartDate)
-          const otherEnd = new Date(newRows[j].exclusionEndDate)
+        const allRows = [...rows, ...newRows]
 
-          // Logic: Two ranges overlap if (StartA <= EndB) AND (EndA >= StartB)
-          if (rowStart <= otherEnd && rowEnd >= otherStart) {
-            setSnackbarData({
-              message: `Row ${i + 1} and Row ${j + 1} have overlapping dates.`,
-              severity: 'error',
-            })
-            setSnackbarOpen(true)
-            return
+        const parseDateSafe = (value) => {
+          if (!value) return null
+
+          // Case 1: Already a Date object
+          if (value instanceof Date) {
+            const d = new Date(value)
+            d.setHours(0, 0, 0, 0)
+            return d
+          }
+
+          // Case 2: String in DD-MM-YYYY
+          if (typeof value === 'string' && value.includes('-')) {
+            const parts = value.split('-')
+
+            // DD-MM-YYYY
+            if (parts[0].length === 2) {
+              const [dd, mm, yyyy] = parts
+              const d = new Date(yyyy, mm - 1, dd)
+              d.setHours(0, 0, 0, 0)
+              return d
+            }
+
+            // YYYY-MM-DD
+            if (parts[0].length === 4) {
+              const [yyyy, mm, dd] = parts
+              const d = new Date(yyyy, mm - 1, dd)
+              d.setHours(0, 0, 0, 0)
+              return d
+            }
+          }
+
+          return null
+        }
+
+        // --- Validation: No overlapping with existing + new rows ---
+        for (let i = 0; i < allRows.length; i++) {
+          const rowStart = parseDateSafe(allRows[i].exclusionStartDate)
+          const rowEnd = parseDateSafe(allRows[i].exclusionEndDate)
+
+          for (let j = i + 1; j < allRows.length; j++) {
+            // Skip same row (important when editing)
+            if (allRows[i].id === allRows[j].id) continue
+
+            const otherStart = parseDateSafe(allRows[j].exclusionStartDate)
+            const otherEnd = parseDateSafe(allRows[j].exclusionEndDate)
+
+            if (rowStart <= otherEnd && rowEnd >= otherStart) {
+              setSnackbarData({
+                message: 'Overlapping dates not allowed.',
+                severity: 'error',
+              })
+              setSnackbarOpen(true)
+              return
+            }
           }
         }
 
@@ -364,10 +430,22 @@ const ExclusionDate = ({ permissions }) => {
         }
 
         // If valid, push to payload
+        const toLocalDateOnly = (date) => {
+          if (!date) return null
+
+          const d = new Date(date)
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, '0')
+          const day = String(d.getDate()).padStart(2, '0')
+
+          return `${year}-${month}-${day}` // YYYY-MM-DD (LOCAL)
+        }
+
+        // If valid, push to payload
         payloadData.push({
           id: row?.idFromApi || null,
-          endDate: row?.exclusionEndDate,
-          startDate: row?.exclusionStartDate,
+          startDate: toLocalDateOnly(row?.exclusionStartDate),
+          endDate: toLocalDateOnly(row?.exclusionEndDate),
           remark: row?.remark || row?.remarks,
         })
       }

@@ -44,7 +44,7 @@ export const RemarkCell = ({
       id={id}
       role={role}
       data-testid={dataTestId}
-      title={rawValue || 'Add remark'}
+      title={rawValue || 'Add'}
       // title={rawValue}
       style={{
         cursor: 'pointer',
@@ -65,7 +65,7 @@ export const RemarkCell = ({
         setEdit?.({})
       }}
     >
-      {displayText || 'Add remark'}
+      {displayText || 'Add'}
       {/* {displayText} */}
     </td>
   )
