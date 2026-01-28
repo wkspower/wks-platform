@@ -111,6 +111,7 @@ const KendoDataTables = ({
   setRows,
   columns,
   summaryEdited,
+  revision,
   loading = false,
   supressGridHeight = false,
   typeRank = {},
@@ -1202,6 +1203,10 @@ const KendoDataTables = ({
   useEffect(() => {
     setEdit({})
   }, [PLANT_ID, AOP_YEAR])
+
+  useEffect(() => {
+    setEdit({})
+  }, [revision])
 
   useEffect(() => {
     if (

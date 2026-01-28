@@ -10,7 +10,14 @@ import { getRoleName } from 'services/role-service'
 import { useSession } from 'SessionStoreContext'
 import KendoDataTables from './index'
 
-const ExclusionDate = ({ permissions, revision }) => {
+const ExclusionDate = ({
+  permissions,
+  revision,
+  loadBtnClicked,
+  summary,
+  summaryEdited,
+  setSummaryEdited,
+}) => {
   const [modifiedCells, setModifiedCells] = useState({})
   const dataGridStore = useSelector((state) => state.dataGridStore)
 
@@ -117,11 +124,21 @@ const ExclusionDate = ({ permissions, revision }) => {
   }
 
   useEffect(() => {
+    setModifiedCells({})
     fetchData()
     getConfigurationExecutionDetails()
 
-    console.log('ExclusionDate rendered', revision)
-  }, [oldYear, yearChanged, keycloak, PLANT_ID, AOP_YEAR, revision])
+    // console.log('ExclusionDate rendered', revision)
+    // console.log('loadBtnClicked', loadBtnClicked)
+  }, [
+    oldYear,
+    yearChanged,
+    keycloak,
+    PLANT_ID,
+    AOP_YEAR,
+    revision,
+    loadBtnClicked,
+  ])
 
   const deleteRowData = async (paramsForDelete) => {
     setLoading(true)
@@ -291,8 +308,40 @@ const ExclusionDate = ({ permissions, revision }) => {
     IS_OLD_YEAR,
   )
 
+  const saveSummary = async (summary) => {
+    try {
+      const response = await DataService.saveSummaryAOPConsumptionNorm(
+        PLANT_ID,
+        AOP_YEAR,
+        summary,
+        keycloak,
+      )
+
+      if (response?.code == 200) {
+        setSnackbarData({
+          message: 'Saved Successfully!',
+          severity: 'success',
+        })
+
+        setSnackbarOpen(true)
+        // setIsEdited(false)
+      } else {
+        setSnackbarData({
+          message: 'Saved Failed!',
+          severity: 'error',
+        })
+      }
+      return response
+    } catch (error) {
+      console.error('Error saving Summary!', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const saveAPI = async (newRows) => {
     // --- 1. Basic Structure Validation ---
+
     if (!newRows || newRows.length === 0) return
 
     // Convert limit states to Date objects for comparison
@@ -468,6 +517,11 @@ const ExclusionDate = ({ permissions, revision }) => {
         AOP_YEAR,
       )
 
+      if (summaryEdited) {
+        await saveSummary(summary)
+        setSummaryEdited(false)
+      }
+
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Saved Successfully!', severity: 'success' })
       setModifiedCells({})
@@ -484,18 +538,19 @@ const ExclusionDate = ({ permissions, revision }) => {
     setLoading(true)
 
     try {
+      // CASE 1: only summary edited
       if (Object.keys(modifiedCells).length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
-        setLoading(false)
+        if (summaryEdited) {
+          await saveSummary(summary)
+          setModifiedCells({})
+          setSummaryEdited(false)
+        }
         return
       }
 
       const rawData = Object.values(modifiedCells)
       const data = rawData.filter((row) => row.inEdit)
       if (data.length === 0) {
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
         setLoading(false)
         return
       }
@@ -506,7 +561,7 @@ const ExclusionDate = ({ permissions, revision }) => {
     } finally {
       setLoading(false)
     }
-  }, [modifiedCells])
+  }, [modifiedCells, summaryEdited, summary])
 
   return (
     <div>
@@ -545,6 +600,8 @@ const ExclusionDate = ({ permissions, revision }) => {
         permissions={adjustedPermissions}
         handleExcelUpload={handleExcelUpload}
         downloadExcelForConfiguration={downloadExcelForConfiguration}
+        summaryEdited={summaryEdited}
+        revision={revision}
       />
     </div>
   )
