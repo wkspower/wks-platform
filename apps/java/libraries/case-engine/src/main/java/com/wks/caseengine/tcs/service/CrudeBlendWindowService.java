@@ -55,7 +55,9 @@ public class CrudeBlendWindowService {
         List<CrudeBlendDTO> crudeBlend = new ArrayList<>();
 
         if(plantId != null) {
-      crudeBlend = crudeRepo.findCrudeBlendByPlantIdAndSiteId(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+    // Ignore Plant Id for first and third grid (Crude Blend Window and Crude Specific Constraints)
+   //   crudeBlend = crudeRepo.findCrudeBlendByPlantIdAndSiteId(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+    crudeBlend = crudeRepo.findCrudeBlendBySiteId(java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
             CrudeBlendDTO dto = new CrudeBlendDTO();
             dto.setId(proj.getId());
             dto.setProperty(proj.getProperty());
@@ -109,8 +111,10 @@ public class CrudeBlendWindowService {
 
         List<CrudeSpecificConstraintsDTO> crudeSpecificConstraints = new ArrayList<>();
         if(plantId != null) {
-        crudeSpecificConstraints = crudeRepo.findCrudeSpecificConstraintsByPlant_FK_IdAndSite_FK_Id(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
-            CrudeSpecificConstraintsDTO dto = new CrudeSpecificConstraintsDTO();
+    //    crudeSpecificConstraints = crudeRepo.findCrudeSpecificConstraintsByPlant_FK_IdAndSite_FK_Id(java.util.UUID.fromString(plantId), java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {
+        crudeSpecificConstraints = crudeRepo.findCrudeSpecificConstraintsBySite_FK_Id(java.util.UUID.fromString(siteId), financialYear).stream().map(proj -> {  
+    
+    CrudeSpecificConstraintsDTO dto = new CrudeSpecificConstraintsDTO();
             dto.setId(proj.getId());
             dto.setCrude(proj.getCrude());
             dto.setMaxBlendLimit(proj.getMaxBlendLimit());

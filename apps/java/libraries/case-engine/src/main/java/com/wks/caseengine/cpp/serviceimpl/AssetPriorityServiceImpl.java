@@ -15,8 +15,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -34,7 +38,6 @@ import com.wks.caseengine.entity.FinancialYearMonth;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.ExistingAssetAvailabilityProjection;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
-import com.wks.caseengine.utility.Utility;
 
 @Service
 public class AssetPriorityServiceImpl implements AssetPriorityService {
@@ -269,21 +272,30 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
             Sheet sheet = workbook.createSheet("Asset Priority");
             int currentRow = 0;
 
-            // Header row
+            // Parse financial year (e.g., "2025-26")
+            String startYearSuffix = financialYear.substring(2, 4); // "25"
+            String endYearSuffix = financialYear.substring(5, 7);   // "26"
+
+            // Create cell styles
+            CellStyle headerStyle = createHeaderStyle(workbook);
+            CellStyle dataStyle = createDataStyle(workbook);
+            CellStyle remarksStyle = createRemarksStyle(workbook);
+
+            // Header row with formatted month names
             List<String> headers = new ArrayList<>();
             headers.add("Asset Name");
-            headers.add("April");
-            headers.add("May");
-            headers.add("June");
-            headers.add("July");
-            headers.add("August");
-            headers.add("September");
-            headers.add("October");
-            headers.add("November");
-            headers.add("December");
-            headers.add("January");
-            headers.add("February");
-            headers.add("March");
+            headers.add("Apr-" + startYearSuffix);
+            headers.add("May-" + startYearSuffix);
+            headers.add("Jun-" + startYearSuffix);
+            headers.add("Jul-" + startYearSuffix);
+            headers.add("Aug-" + startYearSuffix);
+            headers.add("Sep-" + startYearSuffix);
+            headers.add("Oct-" + startYearSuffix);
+            headers.add("Nov-" + startYearSuffix);
+            headers.add("Dec-" + startYearSuffix);
+            headers.add("Jan-" + endYearSuffix);
+            headers.add("Feb-" + endYearSuffix);
+            headers.add("Mar-" + endYearSuffix);
             headers.add("Remarks");
             headers.add("AssetId"); // Hidden column
 
@@ -296,7 +308,7 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
             for (int col = 0; col < headers.size(); col++) {
                 Cell cell = headerRow.createCell(col);
                 cell.setCellValue(headers.get(col));
-                cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+                cell.setCellStyle(headerStyle);
             }
 
             // Data rows
@@ -304,25 +316,50 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
                 Row row = sheet.createRow(currentRow++);
                 int col = 0;
 
-                row.createCell(col++).setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
-                setCellValue(row.createCell(col++), dto.getApril());
-                setCellValue(row.createCell(col++), dto.getMay());
-                setCellValue(row.createCell(col++), dto.getJune());
-                setCellValue(row.createCell(col++), dto.getJuly());
-                setCellValue(row.createCell(col++), dto.getAug());
-                setCellValue(row.createCell(col++), dto.getSep());
-                setCellValue(row.createCell(col++), dto.getOct());
-                setCellValue(row.createCell(col++), dto.getNov());
-                setCellValue(row.createCell(col++), dto.getDec());
-                setCellValue(row.createCell(col++), dto.getJan());
-                setCellValue(row.createCell(col++), dto.getFeb());
-                setCellValue(row.createCell(col++), dto.getMar());
-                row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-                row.createCell(col++).setCellValue(dto.getAssetId() != null ? dto.getAssetId().toString() : "");
+                Cell assetNameCell = row.createCell(col++);
+                assetNameCell.setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
+                assetNameCell.setCellStyle(dataStyle);
+
+                setCellValueWithStyle(row.createCell(col++), dto.getApril(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getMay(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getJune(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getJuly(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getAug(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getSep(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getOct(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getNov(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getDec(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getJan(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getFeb(), dataStyle);
+                setCellValueWithStyle(row.createCell(col++), dto.getMar(), dataStyle);
+
+                Cell remarksCell = row.createCell(col++);
+                remarksCell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                remarksCell.setCellStyle(remarksStyle);
+
+                Cell assetIdCell = row.createCell(col++);
+                assetIdCell.setCellValue(dto.getAssetId() != null ? dto.getAssetId().toString() : "");
+                assetIdCell.setCellStyle(dataStyle);
 
                 if (isAfterSave) {
-                    row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
-                    row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    Cell statusCell = row.createCell(col++);
+                    statusCell.setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    statusCell.setCellStyle(dataStyle);
+
+                    Cell errorCell = row.createCell(col++);
+                    errorCell.setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    errorCell.setCellStyle(dataStyle);
+                }
+            }
+
+            // Auto-size all columns except Remarks (column 13)
+            int totalColumns = headers.size();
+            for (int col = 0; col < totalColumns; col++) {
+                if (col == 13) {
+                    // Set fixed width for Remarks column (width in units of 1/256th of a character width)
+                    sheet.setColumnWidth(col, 8000); // approximately 31 characters
+                } else {
+                    sheet.autoSizeColumn(col);
                 }
             }
 
@@ -338,6 +375,63 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private CellStyle createHeaderStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        
+        // Set borders
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+
+        // Header background color
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        
+        // Set font to bold
+        org.apache.poi.ss.usermodel.Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        
+        return style;
+    }
+
+    private CellStyle createDataStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        
+        // Set borders
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        
+        return style;
+    }
+
+    private CellStyle createRemarksStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        
+        // Set borders
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        
+        // Enable text wrapping
+        style.setWrapText(true);
+        
+        return style;
+    }
+
+    private void setCellValueWithStyle(Cell cell, Integer value, CellStyle style) {
+        if (value != null) {
+            cell.setCellValue(value);
+        } else {
+            cell.setCellValue("");
+        }
+        cell.setCellStyle(style);
     }
 
     @Override
@@ -447,14 +541,6 @@ public class AssetPriorityServiceImpl implements AssetPriorityService {
         }
 
         return assetList;
-    }
-
-    private void setCellValue(Cell cell, Integer value) {
-        if (value != null) {
-            cell.setCellValue(value);
-        } else {
-            cell.setCellValue("");
-        }
     }
 
     private String getStringCellValue(Cell cell) {

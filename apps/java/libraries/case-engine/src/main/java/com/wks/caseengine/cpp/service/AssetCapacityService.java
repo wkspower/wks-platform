@@ -13,10 +13,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -34,7 +37,6 @@ import com.wks.caseengine.cpp.dto.AssetCapacityProjection;
 import com.wks.caseengine.cpp.repository.AssetCapacityRepository;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
-import com.wks.caseengine.utility.Utility;
 
 @Service
 public class AssetCapacityService {
@@ -315,7 +317,12 @@ public class AssetCapacityService {
 
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Asset Capacity");
-            CellStyle boldStyle = Utility.createBoldBorderedStyle(workbook);
+            CellStyle headerStyle = createHeaderStyle(workbook);
+            CellStyle dataStyle = createDataStyle(workbook);
+            CellStyle remarksStyle = createRemarksStyle(workbook);
+
+            String startYearSuffix = financialYear.substring(2, 4);
+            String endYearSuffix = financialYear.substring(5, 7);
             
             int currentRow = 0;
             int col = 0;
@@ -325,48 +332,51 @@ public class AssetCapacityService {
             col = 0;
             
             // Static columns that span both rows
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Asset Name", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Asset Name", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Plant Code", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Plant Code", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "UOM", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "UOM", headerStyle);
             col++;
             
             // Utility Distributed columns
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, "Utility Distributed", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, "Utility Distributed", headerStyle);
             col += 2;
             
             // Utility Generated columns
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, "Utility Generated", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, "Utility Generated", headerStyle);
             col += 2;
             
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Fixed Min", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Fixed Min", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Fixed Max", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Fixed Max", headerStyle);
             col++;
             
             // Month headers (each spans 2 columns for Min and Max)
-            String[] months = {"April", "May", "June", "July", "August", "September", 
-                             "October", "November", "December", "January", "February", "March"};
+            String[] months = {"Apr-" + startYearSuffix, "May-" + startYearSuffix, "Jun-" + startYearSuffix, "Jul-" + startYearSuffix,
+                    "Aug-" + startYearSuffix, "Sep-" + startYearSuffix, "Oct-" + startYearSuffix, "Nov-" + startYearSuffix,
+                    "Dec-" + startYearSuffix, "Jan-" + endYearSuffix, "Feb-" + endYearSuffix, "Mar-" + endYearSuffix};
             
             int monthStartCol = col;
             for (String month : months) {
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, month, boldStyle);
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, month, headerStyle);
                 col += 2;
             }
             
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", boldStyle);
+            int remarksCol = col;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "AssetId", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "AssetId", headerStyle);
             int assetIdCol = col;
             col++;
             
             if (isAfterSave) {
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", boldStyle);
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", headerStyle);
                 col++;
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", boldStyle);
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", headerStyle);
                 col++;
             }
+            int totalColumns = col;
             
             // Create sub-header row (Row 1) for Min/Max capacity under each month
             Row subHeaderRow = sheet.createRow(currentRow++);
@@ -375,20 +385,20 @@ public class AssetCapacityService {
             // Utility Distributed sub-headers
             Cell cell = subHeaderRow.createCell(col++);
             cell.setCellValue("Name");
-            cell.setCellStyle(boldStyle);
+            cell.setCellStyle(headerStyle);
             
             cell = subHeaderRow.createCell(col++);
             cell.setCellValue("SAP Code");
-            cell.setCellStyle(boldStyle);
+            cell.setCellStyle(headerStyle);
             
             // Utility Generated sub-headers
             cell = subHeaderRow.createCell(col++);
             cell.setCellValue("Name");
-            cell.setCellStyle(boldStyle);
+            cell.setCellStyle(headerStyle);
             
             cell = subHeaderRow.createCell(col++);
             cell.setCellValue("SAP Code");
-            cell.setCellStyle(boldStyle);
+            cell.setCellStyle(headerStyle);
             
             col = monthStartCol; // Skip Fixed Min and Fixed Max (already set)
             
@@ -396,11 +406,11 @@ public class AssetCapacityService {
             for (int i = 0; i < 12; i++) {
                 cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Min Capacity");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
                 
                 cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Max Capacity");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
             }
 
             // Data rows
@@ -408,73 +418,105 @@ public class AssetCapacityService {
                 Row row = sheet.createRow(currentRow++);
                 col = 0;
 
-                row.createCell(col++).setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
-                row.createCell(col++).setCellValue(dto.getPlantCode() != null ? dto.getPlantCode() : "");
-                row.createCell(col++).setCellValue(dto.getUom() != null ? dto.getUom() : "");
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getPlantCode() != null ? dto.getPlantCode() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUom() != null ? dto.getUom() : "");
+                cell.setCellStyle(dataStyle);
                 
                 // Utility Distributed
-                row.createCell(col++).setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getName() != null 
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getName() != null 
                     ? dto.getUtilityDistributed().getName() : "");
-                row.createCell(col++).setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getSapCode() != null 
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getSapCode() != null 
                     ? dto.getUtilityDistributed().getSapCode() : "");
+                cell.setCellStyle(dataStyle);
                 
                 // Utility Generated
-                row.createCell(col++).setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getName() != null 
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getName() != null 
                     ? dto.getUtilityGenerated().getName() : "");
-                row.createCell(col++).setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getSapCode() != null 
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getSapCode() != null 
                     ? dto.getUtilityGenerated().getSapCode() : "");
+                cell.setCellStyle(dataStyle);
                 
-                setDoubleCellValue(row.createCell(col++), dto.getFixedMin());
-                setDoubleCellValue(row.createCell(col++), dto.getFixedMax());
+                setDoubleCellValue(row.createCell(col++), dto.getFixedMin(), dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getFixedMax(), dataStyle);
                 
                 // April
-                setDoubleCellValue(row.createCell(col++), dto.getApril() != null ? dto.getApril().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getApril() != null ? dto.getApril().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getApril() != null ? dto.getApril().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getApril() != null ? dto.getApril().getMax() : null, dataStyle);
                 // May
-                setDoubleCellValue(row.createCell(col++), dto.getMay() != null ? dto.getMay().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getMay() != null ? dto.getMay().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getMay() != null ? dto.getMay().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getMay() != null ? dto.getMay().getMax() : null, dataStyle);
                 // June
-                setDoubleCellValue(row.createCell(col++), dto.getJune() != null ? dto.getJune().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getJune() != null ? dto.getJune().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getJune() != null ? dto.getJune().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getJune() != null ? dto.getJune().getMax() : null, dataStyle);
                 // July
-                setDoubleCellValue(row.createCell(col++), dto.getJuly() != null ? dto.getJuly().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getJuly() != null ? dto.getJuly().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getJuly() != null ? dto.getJuly().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getJuly() != null ? dto.getJuly().getMax() : null, dataStyle);
                 // August
-                setDoubleCellValue(row.createCell(col++), dto.getAug() != null ? dto.getAug().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getAug() != null ? dto.getAug().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getAug() != null ? dto.getAug().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getAug() != null ? dto.getAug().getMax() : null, dataStyle);
                 // September
-                setDoubleCellValue(row.createCell(col++), dto.getSep() != null ? dto.getSep().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getSep() != null ? dto.getSep().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getSep() != null ? dto.getSep().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getSep() != null ? dto.getSep().getMax() : null, dataStyle);
                 // October
-                setDoubleCellValue(row.createCell(col++), dto.getOct() != null ? dto.getOct().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getOct() != null ? dto.getOct().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getOct() != null ? dto.getOct().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getOct() != null ? dto.getOct().getMax() : null, dataStyle);
                 // November
-                setDoubleCellValue(row.createCell(col++), dto.getNov() != null ? dto.getNov().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getNov() != null ? dto.getNov().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getNov() != null ? dto.getNov().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getNov() != null ? dto.getNov().getMax() : null, dataStyle);
                 // December
-                setDoubleCellValue(row.createCell(col++), dto.getDec() != null ? dto.getDec().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getDec() != null ? dto.getDec().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getDec() != null ? dto.getDec().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getDec() != null ? dto.getDec().getMax() : null, dataStyle);
                 // January
-                setDoubleCellValue(row.createCell(col++), dto.getJan() != null ? dto.getJan().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getJan() != null ? dto.getJan().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getJan() != null ? dto.getJan().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getJan() != null ? dto.getJan().getMax() : null, dataStyle);
                 // February
-                setDoubleCellValue(row.createCell(col++), dto.getFeb() != null ? dto.getFeb().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getFeb() != null ? dto.getFeb().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getFeb() != null ? dto.getFeb().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getFeb() != null ? dto.getFeb().getMax() : null, dataStyle);
                 // March
-                setDoubleCellValue(row.createCell(col++), dto.getMarch() != null ? dto.getMarch().getMin() : null);
-                setDoubleCellValue(row.createCell(col++), dto.getMarch() != null ? dto.getMarch().getMax() : null);
+                setDoubleCellValue(row.createCell(col++), dto.getMarch() != null ? dto.getMarch().getMin() : null, dataStyle);
+                setDoubleCellValue(row.createCell(col++), dto.getMarch() != null ? dto.getMarch().getMax() : null, dataStyle);
                 
-                row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-                row.createCell(col++).setCellValue(dto.getAssetId() != null ? dto.getAssetId() : "");
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                cell.setCellStyle(remarksStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getAssetId() != null ? dto.getAssetId() : "");
+                cell.setCellStyle(dataStyle);
 
                 if (isAfterSave) {
-                    row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
-                    row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    cell = row.createCell(col++);
+                    cell.setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    cell.setCellStyle(dataStyle);
+                    cell = row.createCell(col++);
+                    cell.setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    cell.setCellStyle(dataStyle);
                 }
             }
 
             // Hide AssetId column (now at column index 33)
             sheet.setColumnHidden(assetIdCol, true);
+
+            for (int i = 0; i < totalColumns; i++) {
+                if (i == remarksCol) {
+                    sheet.setColumnWidth(i, 8000);
+                    continue;
+                }
+                sheet.autoSizeColumn(i);
+                String headerText = getHeaderText(sheet, i);
+                applyHeaderMinWidth(sheet, i, headerText);
+            }
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
@@ -659,11 +701,80 @@ public class AssetCapacityService {
         return assetList;
     }
 
-    private void setDoubleCellValue(Cell cell, Double value) {
+    private void setDoubleCellValue(Cell cell, Double value, CellStyle style) {
         if (value != null) {
             cell.setCellValue(value);
         } else {
             cell.setCellValue("");
+        }
+        cell.setCellStyle(style);
+    }
+
+    private CellStyle createHeaderStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        return style;
+    }
+
+    private CellStyle createDataStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        return style;
+    }
+
+    private CellStyle createRemarksStyle(Workbook workbook) {
+        CellStyle style = createDataStyle(workbook);
+        style.setWrapText(true);
+        return style;
+    }
+
+    private String getHeaderText(Sheet sheet, int col) {
+        String subHeader = getCellText(sheet, 1, col);
+        if (subHeader != null && !subHeader.isBlank()) {
+            return subHeader;
+        }
+        return getCellText(sheet, 0, col);
+    }
+
+    private String getCellText(Sheet sheet, int rowIndex, int col) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null) {
+            return null;
+        }
+        Cell cell = row.getCell(col);
+        if (cell == null) {
+            return null;
+        }
+        if (cell.getCellType() == CellType.STRING) {
+            return cell.getStringCellValue();
+        }
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return String.valueOf(cell.getNumericCellValue());
+        }
+        if (cell.getCellType() == CellType.FORMULA) {
+            return cell.getStringCellValue();
+        }
+        return null;
+    }
+
+    private void applyHeaderMinWidth(Sheet sheet, int col, String headerText) {
+        if (headerText == null || headerText.isBlank()) {
+            return;
+        }
+        int headerWidth = Math.min(255 * 256, (headerText.length() + 2) * 256);
+        if (sheet.getColumnWidth(col) < headerWidth) {
+            sheet.setColumnWidth(col, headerWidth);
         }
     }
 
