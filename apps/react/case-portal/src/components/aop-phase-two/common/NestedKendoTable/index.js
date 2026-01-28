@@ -614,10 +614,15 @@ const NestedKendoTable = ({
     setRemarkDialogOpen(false)
   }
 
+  const prevModifiedCellsRef = useRef(modifiedCells)
+
   useEffect(() => {
     const isModifiedCellsEmpty = Object.keys(modifiedCells).length === 0
+    const wasPreviouslyNotEmpty =
+      Object.keys(prevModifiedCellsRef.current).length > 0
 
-    if (isModifiedCellsEmpty) {
+    // Only update if we're transitioning from non-empty to empty
+    if (isModifiedCellsEmpty && wasPreviouslyNotEmpty) {
       setCustomModifiedCells({})
       setEdit({})
       setRows((prev) =>
@@ -627,6 +632,8 @@ const NestedKendoTable = ({
         })),
       )
     }
+
+    prevModifiedCellsRef.current = modifiedCells
   }, [modifiedCells])
 
   const saveConfirmation = async () => {

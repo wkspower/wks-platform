@@ -334,18 +334,18 @@ const FixedNorms = () => {
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = [
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'mar',
+      'aprNorms',
+      'mayNorms',
+      'junNorms',
+      'julNorms',
+      'augNorms',
+      'sepNorms',
+      'octNorms',
+      'novNorms',
+      'decNorms',
+      'janNorms',
+      'febNorms',
+      'marNorms',
     ]
     const validationError = validateNestedRowDataWithRemarks(
       data,
