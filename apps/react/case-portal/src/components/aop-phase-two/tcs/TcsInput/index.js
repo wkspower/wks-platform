@@ -1,5 +1,4 @@
-import { Box, Tab, Tabs, IconButton, Tooltip } from '@mui/material'
-import HistoryIcon from '@mui/icons-material/History'
+import { Box, Tab, Tabs } from '@mui/material'
 import Notification from 'components/Utilities/Notification'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -14,9 +13,10 @@ import ROGC from './ROGC'
 import PCGOutlook from './PCGOutlook'
 import NetUnitCapacity from './NetUnitCapacity'
 import RemarkDialog from './workflow/RemarkDialog'
-import { Button } from '../../../../../node_modules/@mui/material/index'
 import HistoryDialog from './workflow/HistoryDialog'
+import SubmitSection from './workflow/SubmitSection'
 import { getUserRole } from '../utils/roleUtils'
+import { TcsWorkflowApiService } from 'components/aop-phase-two/services/tcs/tcsWorkflowApiService'
 
 // Handler to render tab component based on displayName
 const renderTabComponent = (tabDisplayName, props) => {
@@ -75,6 +75,90 @@ const TcsInput = () => {
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
+  const [isSubmitEligible, setIsSubmitEligible] = useState(true)
+  const [isCheckingEligibility, setIsCheckingEligibility] = useState(false)
+  const [isWorkflowTriggered, setIsWorkflowTriggered] = useState(false)
+
+  // Check workflow status on mount
+  // useEffect(() => {
+  //   checkWorkflowTriggered()
+  //   checkSubmitEligibility()
+  // }, [PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID])
+
+  const checkSubmitEligibility = async () => {
+    try {
+      setIsCheckingEligibility(true)
+      if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) {
+        setIsSubmitEligible(false)
+        return
+      }
+
+      const response = await TcsWorkflowApiService.checkSubmitEligibility(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+
+      const eligible = response?.isEligible !== false
+      setIsSubmitEligible(eligible)
+
+      if (!eligible) {
+        setSnackbarData({
+          message: response?.message || 'Submit is not eligible at this time',
+          severity: 'warning',
+        })
+        setSnackbarOpen(true)
+      }
+    } catch (err) {
+      console.error('Error checking submit eligibility:', err)
+      setIsSubmitEligible(false)
+      setSnackbarData({
+        message: 'Failed to check submit eligibility',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+    } finally {
+      setIsSubmitEligible(true)
+      setIsCheckingEligibility(false)
+    }
+  }
+  const checkWorkflowTriggered = async () => {
+    try {
+      const response = await TcsWorkflowApiService.checkWorkflowStatus(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+
+      const isTriggered = response?.isTriggered === true
+
+      // If workflow is already triggered, disable submit button
+      setIsWorkflowTriggered(isTriggered)
+
+      if (isTriggered) {
+        setSnackbarData({
+          message:
+            response?.message ||
+            'Workflow has already been triggered for this submission',
+          severity: 'info',
+        })
+        setSnackbarOpen(true)
+      }
+
+      return { isTriggered, response }
+    } catch (err) {
+      console.error('Error checking workflow status:', err)
+      setSnackbarData({
+        message: 'Failed to check workflow status',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+    }
+  }
 
   const handleViewHistory = () => {
     setHistoryDialogOpen(true)
@@ -156,18 +240,82 @@ const TcsInput = () => {
     }
   }
 
-  // Handle remark submission
-  const handleRemarkSubmit = (remark) => {
-    console.log('Remark submitted submitted by:', userRole)
-    console.log('Remark submitted:', remark)
-    // TODO: Add API call to save remark
-    setSnackbarData({
-      message: 'Remark submitted successfully!',
-      severity: 'success',
-    })
-    setSnackbarOpen(true)
+  // Handle workflow trigger
+  const handleTriggerWorkflow = async () => {
+    try {
+      if (!keycloak || !PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) {
+        setSnackbarData({
+          message: 'Missing required parameters to trigger workflow',
+          severity: 'error',
+        })
+        setSnackbarOpen(true)
+        return { success: false }
+      }
+
+      // Trigger workflow
+      await TcsWorkflowApiService.triggerWorkflow(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+
+      // Update workflow triggered state
+      setIsWorkflowTriggered(true)
+
+      setSnackbarData({
+        message: 'Workflow triggered successfully!',
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
+
+      return { success: true }
+    } catch (err) {
+      console.error('Error triggering workflow:', err)
+      setSnackbarData({
+        message: 'Failed to trigger workflow',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      return { success: false, error: err }
+    }
   }
 
+  // Handle remark submission
+  const handleRemarkSubmit = async (remark) => {
+    console.log('Remark submitted by:', userRole)
+    console.log('Remark:', remark)
+
+    try {
+      if (keycloak && PLANT_ID && AOP_YEAR && SITE_ID && VERTICAL_ID) {
+        if (!isWorkflowTriggered) {
+          await handleTriggerWorkflow()
+        }
+
+        // Always save remark first
+        await TcsWorkflowApiService.saveRemark(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+          VERTICAL_ID,
+          remark,
+        )
+      }
+    } catch (err) {
+      console.error('Error saving remark:', err)
+      setSnackbarData({
+        message: 'Failed to save remark',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
+      return
+    }
+
+    // Close the remark dialog
+    setRemarkDialogOpen(false)
+  }
   const data = [
     {
       id: 1,
@@ -251,36 +399,12 @@ const TcsInput = () => {
         </Box>
 
         {/* Submit button and History icon - Fixed on right */}
-        <Box
-          sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}
-        >
-          <Button
-            className='btn-save'
-            style={{ background: '#28a745', color: '#ffffff' }}
-            onClick={() => setRemarkDialogOpen(true)}
-          >
-            Submit
-          </Button>
-          <Tooltip title='View History'>
-            <Button
-              variant='outlined'
-              onClick={handleViewHistory}
-              sx={{
-                textTransform: 'none',
-                borderColor: '#1976d2',
-                color: '#1976d2',
-                padding: '6px 16px',
-                maxHeight: '1.8rem',
-                '&:hover': {
-                  borderColor: '#1565c0',
-                  backgroundColor: '#e3f2fd',
-                },
-              }}
-            >
-              <HistoryIcon />
-            </Button>
-          </Tooltip>
-        </Box>
+        <SubmitSection
+          onSubmitClick={() => setRemarkDialogOpen(true)}
+          onViewHistory={handleViewHistory}
+          isEligible={isSubmitEligible}
+          isLoading={isCheckingEligibility}
+        />
       </Box>
 
       {/* Tab Content */}
@@ -307,6 +431,10 @@ const TcsInput = () => {
         maxLength={1000}
         historyData={data}
         role={userRole}
+        keycloak={keycloak}
+        snackbarData={snackbarData}
+        setSnackbarData={setSnackbarData}
+        setSnackbarOpen={setSnackbarOpen}
       />
 
       {/* History Dialog */}

@@ -109,10 +109,18 @@ def _dispatch_once(
     4. Only dispatch available assets
     5. If demand < total MIN load, all assets still run at MIN (excess power generated)
     
+    PRIORITY NORMALIZATION:
+    =======================
+    - NULL → 999 (dispatch last)
+    - 0 or negative → 1 (convert to minimum valid priority)
+    - > 100 → 100 (cap at maximum)
+    - Valid range: 1-100 (1 = highest priority)
+    
     This ensures:
     - No asset runs below its minimum operating capacity
     - Assets are increased in priority order (not jumped to MAX)
     - Demand is met incrementally, not by maxing out assets
+    - Invalid priorities are handled gracefully
     """
     avail = avail_df.copy()
     dispatch = []
@@ -168,12 +176,28 @@ def _dispatch_once(
     
     for idx, r in avail.iterrows():
         min_energy = float(r["minEnergy"])
+        
+        # NORMALIZE PRIORITY (handle 0, NULL, negative, out-of-range)
+        # Business Rule: Valid priority range is 1-100
+        # - NULL → 999 (dispatch last)
+        # - 0 or negative → 1 (convert to minimum valid priority)
+        # - > 100 → 100 (cap at maximum)
+        raw_priority = r["Priority"]
+        if pd.isna(raw_priority) or raw_priority is None:
+            normalized_priority = 999.0  # NULL → Dispatch last
+        elif raw_priority <= 0:
+            normalized_priority = 1.0     # 0 or negative → Minimum valid priority
+        elif raw_priority > 100:
+            normalized_priority = 100.0   # Cap at maximum
+        else:
+            normalized_priority = float(raw_priority)
+        
         asset_dispatch[idx] = {
             "row": r,
             "gross": min_energy,  # Start at MIN load
             "min_energy": min_energy,
             "max_energy": float(r["maxEnergy"]),
-            "priority": float(r["Priority"]),
+            "priority": normalized_priority,  # Use normalized priority
         }
         total_gross += min_energy
     
@@ -361,10 +385,12 @@ def distribute_by_priority(
     #   - PowerGenerationAssets for base asset info (AssetId, AssetName)
     # Note: AssetCapacity is derived from MaxOperatingCapacity or FixedMax
     # =========================================================
+    # Fetch ALL power generation assets including IMPORT type
     cur.execute("""
         SELECT 
             p.AssetId,
             p.AssetName,
+            p.AssetType,
             COALESCE(aa.MaxOperatingCapacity, aa.FixedMax, 22.0) AS AssetCapacity,
             COALESCE(oh.OperationalHours, 0) AS OperationalHours,
             aa.Priority,
@@ -389,7 +415,7 @@ def distribute_by_priority(
                 AND aa2.FinancialYearMonthId = ?
             ORDER BY CASE WHEN aa2.Priority IS NULL THEN 1 ELSE 0 END, aa2.Priority ASC
         ) aa
-        WHERE p.AssetType IN ('GT', 'STG')
+        WHERE p.AssetType IN ('GT', 'STG', 'IMPORT')
         ORDER BY aa.Priority ASC
     """, (fym_id, fym_id))
     cols = [c[0] for c in cur.description]
@@ -401,9 +427,15 @@ def distribute_by_priority(
 
     df = pd.DataFrame.from_records(rows, columns=cols)
     
-    # Asset is available if OperationalHours > 0
+    # Add IsAvailable column to all assets (needed for display)
     df["IsAvailable"] = df["OperationalHours"].apply(lambda x: 1 if x is not None and float(x) > 0 else 0)
-    avail = df[df["IsAvailable"] == 1].copy()
+    
+    # Separate IMPORT assets from GT/STG assets
+    import_assets = df[df["AssetType"] == "IMPORT"].copy()
+    plant_assets = df[df["AssetType"].isin(["GT", "STG"])].copy()
+    
+    # Filter available plant assets (GT/STG only)
+    avail = plant_assets[plant_assets["IsAvailable"] == 1].copy()
 
     if avail.empty:
         conn.close()
@@ -571,47 +603,76 @@ def distribute_by_priority(
                 remaining_reduction -= (group_reduction - temp_remaining)
 
     # =========================================================
-    # IMPORT POWER - From PlantImportMapping Table
+    # IMPORT POWER - From PowerGenerationAssets (AssetType = 'IMPORT')
     # =========================================================
-    # Get import capacity from PlantImportMapping for this month
-    # Import MWh = Value (MW) × Operational Hours
+    # Check if import power assets exist with operational hours tracked
+    # Import MWh = Capacity (MW) × Operational Hours
     # =========================================================
-    operating_hours = float(avail["opHours"].iloc[0]) if not avail.empty else 720.0
-    
-    cur.execute("""
-        SELECT pim.Value, pim.UOM
-        FROM PlantImportMapping pim
-        WHERE pim.FinancialMonthId = ?
-    """, (fym_id,))
-    import_row = cur.fetchone()
-    
-    if import_row and import_row[0]:
-        import_capacity_mw = float(import_row[0])
-        max_import_mwh = import_capacity_mw * operating_hours
+    if not import_assets.empty:
+        # Import assets found in PowerGenerationAssets with operational hours
+        import_capacity_mw = 0.0
+        import_hours = 0.0
+        
         if verbose:
-            print(f"\n  [IMPORT] From PlantImportMapping:")
-            print(f"    Capacity: {import_capacity_mw:,.2f} MW")
-            print(f"    Hours: {operating_hours:,.0f} hrs")
+            print(f"\n  [IMPORT] From PowerGenerationAssets (AssetType='IMPORT'):")
+        
+        for idx, import_asset in import_assets.iterrows():
+            asset_name = import_asset["AssetName"]
+            capacity = float(import_asset["AssetCapacity"]) if pd.notna(import_asset["AssetCapacity"]) else 0.0
+            hours = float(import_asset["OperationalHours"]) if pd.notna(import_asset["OperationalHours"]) else 0.0
+            
+            if hours > 0:
+                import_capacity_mw += capacity
+                import_hours = max(import_hours, hours)  # Use max hours if multiple import assets
+                
+                if verbose:
+                    print(f"    {asset_name}: {capacity:.2f} MW × {hours:.0f} hrs = {capacity * hours:,.2f} MWh")
+        
+        max_import_mwh = import_capacity_mw * import_hours
+        
+        if verbose:
+            print(f"    Total Capacity: {import_capacity_mw:.2f} MW")
+            print(f"    Operating Hours: {import_hours:.0f} hrs")
             print(f"    Available: {max_import_mwh:,.2f} MWh")
         
-        # =========================================================
-        # RULE: USE IMPORT POWER FIRST
-        # But ensure assets run at MINIMUM for steam generation
-        # Import = Total Demand - Min Plant Capacity (but not more than available import)
-        # =========================================================
-        # Assets MUST generate at least their minimum (for HRSG/steam)
-        # Import covers the rest
-        demand_after_min_plant = max(0, total_demand - total_min_energy)
-        actual_import_used_mwh = min(max_import_mwh, demand_after_min_plant)
+        # Use all available import power
+        actual_import_used_mwh = max_import_mwh
+        
         if verbose:
-            print(f"    Plant MIN: {total_min_energy:,.2f} MWh (must run for steam)")
             print(f"    Using: {actual_import_used_mwh:,.2f} MWh")
     else:
-        import_capacity_mw = 0.0
-        actual_import_used_mwh = 0.0
-        max_import_mwh = 0.0
-        if verbose:
-            print(f"\n  [IMPORT] No import record found in PlantImportMapping for FYM_Id: {fym_id}")
+        # Fallback: Check PlantImportMapping table (legacy approach)
+        cur.execute("""
+            SELECT pim.Value, pim.UOM
+            FROM PlantImportMapping pim
+            WHERE pim.FinancialMonthId = ?
+        """, (fym_id,))
+        import_row = cur.fetchone()
+        
+        if import_row and import_row[0]:
+            import_capacity_mw = float(import_row[0])
+            # Use full month hours as fallback since operational hours not tracked
+            import calendar
+            days_in_month = calendar.monthrange(year, month)[1]
+            operating_hours = days_in_month * 24.0
+            max_import_mwh = import_capacity_mw * operating_hours
+            
+            if verbose:
+                print(f"\n  [IMPORT] From PlantImportMapping (fallback):")
+                print(f"    Capacity: {import_capacity_mw:,.2f} MW")
+                print(f"    Hours: {operating_hours:,.0f} hrs (full month)")
+                print(f"    Available: {max_import_mwh:,.2f} MWh")
+            
+            actual_import_used_mwh = max_import_mwh
+            
+            if verbose:
+                print(f"    Using: {actual_import_used_mwh:,.2f} MWh")
+        else:
+            import_capacity_mw = 0.0
+            actual_import_used_mwh = 0.0
+            max_import_mwh = 0.0
+            if verbose:
+                print(f"\n  [IMPORT] No import power found in PowerGenerationAssets or PlantImportMapping")
     
     # =========================================================
     # NET DEMAND FOR DISPATCH = Total Demand - Import Used

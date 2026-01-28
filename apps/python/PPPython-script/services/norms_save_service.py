@@ -5,9 +5,45 @@ Saves calculated budget values to NormsMonthDetail table after each calculation.
 Updates:
 - QTY: Generation quantity (same for all materials under same Plant+Utility)
 - Quantity: Material consumption = QTY * Norms
+- Syncs model-calculated norms to CPPNorms table via stored procedure
 """
 
 from database.connection import get_connection
+
+
+def _sync_to_cpp_norms(conn, norms_header_fk_id: str, fym_id: str, norms_value: float, modified_by: str = 'PythonModel'):
+    """
+    Sync updated norms from NormsMonthDetail to CPPNorms table.
+    Calls the CPP_UpdateNormsFromPythonModel stored procedure.
+    
+    Args:
+        conn: Database connection
+        norms_header_fk_id: NormsHeader FK ID (UUID)
+        fym_id: FinancialYearMonth FK ID (UUID)
+        norms_value: New norms value
+        modified_by: Who modified the norms (default: 'PythonModel')
+    
+    Returns:
+        True if sync succeeded, False otherwise
+    """
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            EXEC dbo.CPP_UpdateNormsFromPythonModel 
+                @NormsHeaderFkId = ?, 
+                @FinancialYearMonthFkId = ?, 
+                @Norms = ?, 
+                @ModifiedBy = ?
+        ''', (norms_header_fk_id, fym_id, norms_value, modified_by))
+        
+        # Fetch result
+        result = cur.fetchone()
+        if result and result[0] == 'Success':
+            return True
+        return False
+    except Exception as e:
+        print(f"Warning: CPPNorms sync failed for NormsHeader {norms_header_fk_id}: {str(e)}")
+        return False
 
 
 def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = False) -> dict:
@@ -58,9 +94,11 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
             p.Name as PlantName,
             nh.UtilityName,
             nh.MaterialName,
+            nh.IssuingPlantName,
             nmd.QTY,
             nmd.Quantity,
-            nmd.Norms
+            nmd.Norms,
+            nmd.NormsHeader_FK_Id
         FROM NormsMonthDetail nmd
         INNER JOIN NormsHeader nh ON nh.Id = nmd.NormsHeader_FK_Id
         INNER JOIN Plants p ON p.Id = nh.Plant_FK_Id
@@ -71,6 +109,7 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
     
     updated_count = 0
     same_count = 0
+    cpp_norms_synced = 0
     updates = []
     
     for row in records:
@@ -78,16 +117,32 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
         plant_name = row[1]
         utility_name = row[2]
         material_name = row[3]
-        old_qty = float(row[4]) if row[4] else 0
-        old_quantity = float(row[5]) if row[5] else 0
-        old_norms = float(row[6]) if row[6] else 0
+        issueing_plant = row[4]  # IssueingPlant column
+        old_qty = float(row[5]) if row[5] else 0
+        old_quantity = float(row[6]) if row[6] else 0
+        old_norms = float(row[7]) if row[7] else 0
         
         # Get new QTY from generation map
         key = (plant_name, utility_name)
         new_qty = generation_map.get(key, None)
         
         # Check if there's a new norm value for this record
-        norms_key = (plant_name, utility_name, material_name)
+        # For POWERGEN records, use IssueingPlant to identify which plant (PP1, PP2, PP3, STG)
+        if material_name == 'POWERGEN' and issueing_plant:
+            # Map IssueingPlant to the material name format used in norms_map
+            if 'Power Plant 1' in issueing_plant or 'Power Plant-1' in issueing_plant:
+                norms_key = (plant_name, utility_name, 'POWERGEN (PP1)')
+            elif 'Power Plant 2' in issueing_plant or 'Power Plant-2' in issueing_plant:
+                norms_key = (plant_name, utility_name, 'POWERGEN (PP2)')
+            elif 'Power Plant 3' in issueing_plant or 'Power Plant-3' in issueing_plant:
+                norms_key = (plant_name, utility_name, 'POWERGEN (PP3)')
+            elif 'STG' in issueing_plant:
+                norms_key = (plant_name, utility_name, 'POWERGEN (STG)')
+            else:
+                norms_key = (plant_name, utility_name, material_name)
+        else:
+            norms_key = (plant_name, utility_name, material_name)
+        
         new_norms = norms_map.get(norms_key, None)
         
         # Use new norms if available, otherwise keep old
@@ -98,8 +153,8 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
             same_count += 1
             continue
         
-        # Calculate new Quantity = QTY * Norms
-        new_quantity = new_qty * norms_to_use if norms_to_use != 0 else old_quantity
+        # Calculate new Quantity = QTY * Norms (even if norm is 0, calculate 0)
+        new_quantity = new_qty * norms_to_use
         
         # Check if changed
         qty_changed = abs(new_qty - old_qty) > 0.01
@@ -123,12 +178,16 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
             
             if not dry_run:
                 if new_norms is not None:
-                    # Update QTY, Quantity, AND Norms
+                    # Update QTY, Quantity, AND Norms in NormsMonthDetail
                     cur.execute('''
                         UPDATE NormsMonthDetail 
                         SET QTY = ?, Quantity = ?, Norms = ?
                         WHERE Id = ?
                     ''', (new_qty, new_quantity, new_norms, record_id))
+                    
+                    # Sync model-calculated norms to CPPNorms table
+                    if _sync_to_cpp_norms(conn, norms_header_fk_id, fym_id, new_norms, 'PythonModel'):
+                        cpp_norms_synced += 1
                 else:
                     # Update only QTY and Quantity
                     cur.execute('''
@@ -144,11 +203,17 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
     
     conn.close()
     
+    # Build message with CPPNorms sync info
+    message = f'{"DRY RUN: " if dry_run else ""}Updated {updated_count} records, {same_count} unchanged'
+    if not dry_run and cpp_norms_synced > 0:
+        message += f', {cpp_norms_synced} synced to CPPNorms'
+    
     return {
         'success': True,
-        'message': f'{"DRY RUN: " if dry_run else ""}Updated {updated_count} records, {same_count} unchanged',
+        'message': message,
         'updated': updated_count,
         'same': same_count,
+        'cpp_norms_synced': cpp_norms_synced,
         'total': len(records),
         'dry_run': dry_run,
         'updates': updates if dry_run else []  # Only return details in dry run
@@ -181,40 +246,49 @@ def _build_generation_map(result: dict) -> dict:
     # ============================================================
     dispatch_plan = power_result.get('dispatchPlan', [])
     
-    # Track which plants are operational
-    gt1_kwh = 0
-    gt2_kwh = 0
-    gt3_kwh = 0
-    stg_kwh = 0
+    # Track which plants are operational (use GROSS for POWERGEN QTY, NET for Power_Dis norms)
+    gt1_gross_kwh = 0
+    gt2_gross_kwh = 0
+    gt3_gross_kwh = 0
+    stg_gross_kwh = 0
+    gt1_net_kwh = 0
+    gt2_net_kwh = 0
+    gt3_net_kwh = 0
+    stg_net_kwh = 0
     
     for asset in dispatch_plan:
         asset_name = asset.get('AssetName', '')
         gross_kwh = asset.get('GrossMWh', 0) * 1000
+        net_kwh = asset.get('NetMWh', 0) * 1000
         
         if 'Plant-1' in asset_name:
-            gt1_kwh = gross_kwh
+            gt1_gross_kwh = gross_kwh
+            gt1_net_kwh = net_kwh
         elif 'Plant-2' in asset_name:
-            gt2_kwh = gross_kwh
+            gt2_gross_kwh = gross_kwh
+            gt2_net_kwh = net_kwh
         elif 'Plant-3' in asset_name:
-            gt3_kwh = gross_kwh
+            gt3_gross_kwh = gross_kwh
+            gt3_net_kwh = net_kwh
         elif 'STG' in asset_name:
-            stg_kwh = gross_kwh
+            stg_gross_kwh = gross_kwh
+            stg_net_kwh = net_kwh
     
     # Power Plant 1 (GT1) - All UtilityName categories share same QTY (gross generation)
     # UtilityName values: POWERGEN, Utilities
-    generation_map[('NMD - Power Plant 1', 'POWERGEN')] = gt1_kwh
-    generation_map[('NMD - Power Plant 1', 'Utilities')] = gt1_kwh
+    generation_map[('NMD - Power Plant 1', 'POWERGEN')] = gt1_gross_kwh
+    generation_map[('NMD - Power Plant 1', 'Utilities')] = gt1_gross_kwh
     
     # Power Plant 2 (GT2) - All UtilityName categories share same QTY
-    generation_map[('NMD - Power Plant 2', 'POWERGEN')] = gt2_kwh
-    generation_map[('NMD - Power Plant 2', 'Utilities')] = gt2_kwh
+    generation_map[('NMD - Power Plant 2', 'POWERGEN')] = gt2_gross_kwh
+    generation_map[('NMD - Power Plant 2', 'Utilities')] = gt2_gross_kwh
     
     # Power Plant 3 (GT3) - All UtilityName categories share same QTY
-    generation_map[('NMD - Power Plant 3', 'POWERGEN')] = gt3_kwh
-    generation_map[('NMD - Power Plant 3', 'Utilities')] = gt3_kwh
+    generation_map[('NMD - Power Plant 3', 'POWERGEN')] = gt3_gross_kwh
+    generation_map[('NMD - Power Plant 3', 'Utilities')] = gt3_gross_kwh
     
     # STG Power Plant - POWERGEN only
-    generation_map[('NMD - STG Power Plant', 'POWERGEN')] = stg_kwh
+    generation_map[('NMD - STG Power Plant', 'POWERGEN')] = stg_gross_kwh
     
     # ============================================================
     # HRSG STEAM GENERATION - in MT
@@ -296,12 +370,22 @@ def _build_generation_map(result: dict) -> dict:
     # ============================================================
     shp_balance = steam_result.get('shp_balance', {}) if steam_result else {}
     total_power_mwh = power_result.get('totalNetGeneration', 0) + power_result.get('importUnits', 0)
+    total_demand_mwh = power_result.get('totalDemandUnits', 0)
     
-    generation_map[('NMD - Utility/Power Dist', 'Power_Dis')] = total_power_mwh * 1000  # KWH
+    generation_map[('NMD - Utility/Power Dist', 'Power_Dis')] = total_demand_mwh * 1000  # Use total demand as QTY for Power_Dis
     generation_map[('NMD - Utility/Power Dist', 'SHP Steam_Dis')] = shp_balance.get('shp_total_demand', 0)
     generation_map[('NMD - Utility/Power Dist', 'LP Steam_Dis')] = lp_balance.get('lp_total', 0)
     generation_map[('NMD - Utility/Power Dist', 'MP Steam_Dis')] = mp_balance.get('mp_total', 0)
     generation_map[('NMD - Utility/Power Dist', 'HP Steam_Dis')] = hp_balance.get('hp_total', 0)
+    
+    # ============================================================
+    # SHP STEAM DISTRIBUTION RATIOS
+    # Calculate distribution ratios for SHP Steam_Dis
+    # ============================================================
+    total_shp_supply = hrsg1_shp + hrsg2_shp + hrsg3_shp
+    shp_hrsg1_ratio = (hrsg1_shp / total_shp_supply) if total_shp_supply > 0 else 0
+    shp_hrsg2_ratio = (hrsg2_shp / total_shp_supply) if total_shp_supply > 0 else 0
+    shp_hrsg3_ratio = (hrsg3_shp / total_shp_supply) if total_shp_supply > 0 else 0
     
     # ============================================================
     # CALCULATED NORMS (Ratios) - for updating Norms column
@@ -327,7 +411,35 @@ def _build_generation_map(result: dict) -> dict:
     gt2_ng_norm = natural_gas.get('gt2_ng_norm', 0.0101463)  # Default to legacy GT2 norm
     gt3_ng_norm = natural_gas.get('gt3_ng_norm', 0.0094715)  # Default to legacy GT3 norm
     
+    # ============================================================
+    # POWER DISTRIBUTION NORMS (Import Power + POWERGEN)
+    # Norms = Power Source NET KWh / Total Demand KWh (including U4U)
+    # Use NET generation (after auxiliary consumption) for norms calculation
+    # ============================================================
+    import_power_kwh = power_result.get('mandatoryImportUsed', 0) * 1000
+    total_demand_kwh = total_demand_mwh * 1000 if total_demand_mwh > 0 else 1
+    
+    # Calculate power distribution norms using NET generation
+    # Set norm to 0 if plant is not generating (net_kwh <= 0)
+    import_power_norm = import_power_kwh / total_demand_kwh if total_demand_kwh > 0 else 0
+    pp1_norm = (gt1_net_kwh / total_demand_kwh) if total_demand_kwh > 0 and gt1_net_kwh > 0 else 0
+    pp2_norm = (gt2_net_kwh / total_demand_kwh) if total_demand_kwh > 0 and gt2_net_kwh > 0 else 0
+    pp3_norm = (gt3_net_kwh / total_demand_kwh) if total_demand_kwh > 0 and gt3_net_kwh > 0 else 0
+    stg_norm = (stg_net_kwh / total_demand_kwh) if total_demand_kwh > 0 and stg_net_kwh > 0 else 0
+    
     norms_map = {
+        # Power Distribution - calculated norms (Import + POWERGEN)
+        ('NMD - Utility/Power Dist', 'Power_Dis', 'Power from MEL'): import_power_norm,
+        ('NMD - Utility/Power Dist', 'Power_Dis', 'POWERGEN (PP1)'): pp1_norm,
+        ('NMD - Utility/Power Dist', 'Power_Dis', 'POWERGEN (PP2)'): pp2_norm,
+        ('NMD - Utility/Power Dist', 'Power_Dis', 'POWERGEN (PP3)'): pp3_norm,
+        ('NMD - Utility/Power Dist', 'Power_Dis', 'POWERGEN (STG)'): stg_norm,
+        
+        # SHP Steam Distribution - calculated ratios
+        ('NMD - Utility/Power Dist', 'SHP Steam_Dis', 'HRSG1_SHP STEAM'): shp_hrsg1_ratio,
+        ('NMD - Utility/Power Dist', 'SHP Steam_Dis', 'HRSG2_SHP STEAM'): shp_hrsg2_ratio,
+        ('NMD - Utility/Power Dist', 'SHP Steam_Dis', 'HRSG3_SHP STEAM'): shp_hrsg3_ratio,
+        
         # LP Steam Distribution - calculated ratios
         ('NMD - Utility/Power Dist', 'LP Steam_Dis', 'STG1_LP STEAM'): lp_stg_ratio,
         ('NMD - Utility/Power Dist', 'LP Steam_Dis', 'LP Steam PRDS'): lp_prds_ratio,
@@ -372,6 +484,11 @@ def print_save_summary(save_result: dict):
         print(f"  Total records: {save_result.get('total', 0)}")
         print(f"  Updated: {save_result['updated']}")
         print(f"  Unchanged: {save_result['same']}")
+        
+        # Show CPPNorms sync count if available
+        cpp_synced = save_result.get('cpp_norms_synced', 0)
+        if cpp_synced > 0:
+            print(f"  CPPNorms synced: {cpp_synced}")
     else:
         print(f"  Status: FAILED")
         print(f"  Message: {save_result['message']}")

@@ -3,14 +3,16 @@ import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
-import { UtilityPlantApiServiceV2 } from 'components/aop-phase-two/services/cpp/utilityPlantApiServiceV2'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
-import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
-import AdvanceKendoTable from '../common/AdvanceKendoTable/index'
+import { validateNestedRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
+import { UtilityPlantApiServiceV2 } from 'components/aop-phase-two/services/cpp/utilityPlantApiServiceV2'
+import NestedKendoTable from 'components/aop-phase-two/common/NestedKendoTable/index'
+import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 
-const FixedConsumption = () => {
+const FixedNorms = () => {
   const keycloak = useSession()
   // State management
+
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -36,194 +38,202 @@ const FixedConsumption = () => {
   const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const [rows, setRows] = useState([])
-  const [originalRows, setOriginalRows] = useState([])
   const valueFormat = ValueFormatterPhaseTwo()
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
+
   // Column definitions
-  const columns = [
-    { field: 'id', title: 'ID', hidden: true },
+  const nestedColumns = [
+    //Generating Plant
     {
-      field: 'plant',
-      title: 'Plant',
+      field: 'generatingPlantName',
+      title: 'Generating Plant',
       widthT: 150,
       type: 'text',
       editable: false,
-      hidden: false,
+      locked: true,
+      minWidth: 150,
     },
+    //Utility
     {
-      field: 'plantId',
-      title: 'Plant ID',
+      field: 'utilityName',
+      title: 'Utility',
       widthT: 120,
       type: 'text',
       editable: false,
-      hidden: false,
+      locked: true,
+      minWidth: 100,
     },
+    // Utility ID
     {
-      field: 'costCenter',
-      title: 'Cost Center',
+      field: 'utilityId',
+      title: 'Utility ID',
       widthT: 120,
       type: 'text',
       editable: false,
-      hidden: false,
+      locked: true,
+      minWidth: 100,
     },
+    //UOM
     {
-      field: 'costCenterId',
-      title: 'Cost Center ID',
-      widthT: 120,
+      field: 'uom',
+      title: 'Generation UOM',
+      widthT: 130,
       type: 'text',
       editable: false,
-      hidden: false,
+      minWidth: 130,
     },
+    // Account
     {
-      field: 'cppUtility',
-      title: 'CPP Utilities',
+      field: 'accountName',
+      title: 'Account',
       widthT: 100,
       type: 'text',
       editable: false,
+      minWidth: 100,
     },
+    // Material
     {
-      field: 'cppUtilityId',
-      title: 'CPP Utility IDs',
+      field: 'materialName',
+      title: 'Material',
+      widthT: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
+    // SAP Code
+    {
+      field: 'materialId',
+      title: 'SAP Code',
+      widthT: 100,
+      type: 'text',
+      editable: false,
+      minWidth: 100,
+    },
+    // Issuing Plant
+    {
+      field: 'issuingPlantName',
+      title: 'Issuing Plant',
       widthT: 120,
       type: 'text',
       editable: false,
+      minWidth: 120,
     },
     {
-      field: 'cppPlant',
-      title: 'CPP Plant',
-      widthT: 110,
-      type: 'text',
-      editable: false,
-    },
-    {
-      field: 'cppPlantId',
-      title: 'CPP Plant ID',
+      field: 'issuingUom',
+      title: 'Issuing UOM',
       widthT: 120,
       type: 'text',
       editable: false,
+      minWidth: 120,
     },
-    { field: 'uom', title: 'UOM', widthT: 60, type: 'text', editable: false },
+    // Apr
     {
-      field: 'april',
-      title: headerMap[4], // will be 'Apr-25' if AOP_YEAR is 2025-26
+      field: 'aprNorms',
+      title: headerMap[4],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // May
     {
-      field: 'may',
+      field: 'mayNorms',
       title: headerMap[5],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Jun
     {
-      field: 'june',
+      field: 'junNorms',
       title: headerMap[6],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Jul
     {
-      field: 'july',
+      field: 'julNorms',
       title: headerMap[7],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Aug
     {
-      field: 'aug',
+      field: 'augNorms',
       title: headerMap[8],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Sep
     {
-      field: 'sep',
+      field: 'sepNorms',
       title: headerMap[9],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Oct
     {
-      field: 'oct',
+      field: 'octNorms',
       title: headerMap[10],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Nov
     {
-      field: 'nov',
+      field: 'novNorms',
       title: headerMap[11],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    // Dec
     {
-      field: 'dec',
+      field: 'decNorms',
       title: headerMap[12],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    //Jan
     {
-      field: 'jan',
+      field: 'janNorms',
       title: headerMap[1],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    //Feb
     {
-      field: 'feb',
+      field: 'febNorms',
       title: headerMap[2],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
+    //Mar
     {
-      field: 'mar',
+      field: 'marNorms',
       title: headerMap[3],
+      widthT: 80,
       editable: true,
-      widthT: 100,
-      align: 'left',
-      headerAlign: 'left',
       type: 'number1',
       format: valueFormat,
     },
@@ -237,38 +247,40 @@ const FixedConsumption = () => {
     },
   ]
 
+  const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
+  const [calculationLoading, setCaculationLoading] = useState(false)
+
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchFixedConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+      fetchNormsData()
       setModifiedCells({})
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  const fetchFixedConsumptionData = async (keycloak, PLANT_ID, AOP_YEAR) => {
+  const fetchNormsData = async () => {
     setLoading(true)
     try {
-      const res = await UtilityPlantApiServiceV2.getFixedConsumptionData(
+      const res = await InputApiService.getNormBasedUtilityBudget(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
-      if (res?.length === 0) {
+
+      if (res?.data?.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-
-      const formattedData = res.map((item, index) => ({
+      let tempRes = res?.data?.map((item, index) => ({
         ...item,
-        remarks: item.remarks || '',
         id: item.id || index + 1,
+        remarks: item.remarks || '',
       }))
-      // Process and set the fetched data to rows
-      console.log('*** fixed consumption data', formattedData)
 
-      setRows(formattedData)
-      setOriginalRows(formattedData)
+      setRows(tempRes)
+      setOriginalRows(tempRes)
     } catch (error) {
       console.error('Error fetching fixed consumption data:', error)
       setSnackbarOpen(true)
@@ -286,17 +298,17 @@ const FixedConsumption = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
-    showExport: true,
-    ExcelName: `Fixed Consumption - ${AOP_YEAR}`,
-    showImport: true,
     showTitleNameBusiness: true,
+    titleName: screenTitle?.title,
+    showImport: true,
     showTitle: true,
+    showExport: true,
+    ExcelName: `Norms - ${AOP_YEAR}`,
   }
 
-  // Dummy save handler
+  // Save handler with API call
   const saveChanges = async () => {
     setLoading(true)
-
     const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length == 0) {
       setSnackbarOpen(true)
@@ -322,24 +334,24 @@ const FixedConsumption = () => {
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = [
-      'april',
-      'may',
-      'june',
-      'july',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'mar',
+      'aprNorms',
+      'mayNorms',
+      'junNorms',
+      'julNorms',
+      'augNorms',
+      'sepNorms',
+      'octNorms',
+      'novNorms',
+      'decNorms',
+      'janNorms',
+      'febNorms',
+      'marNorms',
     ]
-    const validationError = validateRowDataWithRemarks(
+    const validationError = validateNestedRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'plant',
+      'generatingPlantName',
     )
 
     if (validationError) {
@@ -352,27 +364,30 @@ const FixedConsumption = () => {
       return
     }
 
-    console.log('modifiedData', modifiedData)
-    // const payload = JSON.stringify(modifiedData)
     const payload = modifiedData
+    const tempPayload = payload?.map((item) => {
+      const { id, inEdit, ...rest } = item
+      return {
+        ...rest,
+      }
+    })
 
     try {
       // Transform modifiedCells into the format expected by the API
 
-      // Call the API to save changes
-      const response = await UtilityPlantApiServiceV2.saveFixedConsumptionData(
+      console.log('payload', tempPayload)
+
+      const response = await InputApiService.saveNormsData(
         keycloak,
-        PLANT_ID,
-        payload,
+        tempPayload,
         AOP_YEAR,
       )
-      console.log('response', response)
+
       // Update the local state with the saved data
-      // setRows(updatedRows)
       setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
-        message: `Successfully saved ${modifiedData.length} rows changes!`,
+        message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
     } catch (error) {
@@ -392,7 +407,7 @@ const FixedConsumption = () => {
 
     setLoading(true)
     try {
-      const response = await UtilityPlantApiServiceV2.saveFixedConsumptionExcel(
+      const response = await UtilityPlantApiServiceV2.saveNormsExcel(
         file,
         keycloak,
         PLANT_ID,
@@ -406,7 +421,7 @@ const FixedConsumption = () => {
           severity: 'success',
         })
         // Refresh data after import
-        await fetchFixedConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+        await fetchNormsData()
       } else if (response?.code === 400 && response?.data) {
         // Handle error response with Excel file download
         try {
@@ -422,7 +437,7 @@ const FixedConsumption = () => {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `Fixed_Consumption_Errors_${new Date().getTime()}.xlsx`
+          link.download = `Norms_Errors_${new Date().getTime()}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -436,7 +451,7 @@ const FixedConsumption = () => {
             severity: 'error',
           })
           // Refresh data after import
-          await fetchFixedConsumptionData(keycloak, PLANT_ID, AOP_YEAR)
+          await fetchNormsData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -472,7 +487,7 @@ const FixedConsumption = () => {
     })
 
     try {
-      await UtilityPlantApiServiceV2.exportFixedConsumptionExcel(
+      await UtilityPlantApiServiceV2.exportNormsExcel(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -482,7 +497,7 @@ const FixedConsumption = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting Fixed Consumption data:', error)
+      console.error('Error exporting Norms data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -501,20 +516,15 @@ const FixedConsumption = () => {
     <Box>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={!!loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
-      {/* <KendoDataTables */}
-
-      <AdvanceKendoTable
-        columns={columns}
+        open={!!loading || calculationLoading}
+      ></Backdrop>
+      <NestedKendoTable
+        columns={nestedColumns}
         rows={rows}
         setRows={setRows}
         modifiedCells={modifiedCells}
         setModifiedCells={setModifiedCells}
-        // title='Fixed Consumption'
-        title={screenTitle?.title}
+        title='Norms'
         permissions={permissions}
         handleRemarkCellClick={handleRemarkCellClick}
         remarkDialogOpen={remarkDialogOpen}
@@ -531,11 +541,10 @@ const FixedConsumption = () => {
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
         customHeight={80}
-        groupBy='plant'
-        // groupBy={['plant', 'plantId']}
+        groupBy={['generatingPlantName', 'accountName']}
       />
     </Box>
   )
 }
 
-export default FixedConsumption
+export default FixedNorms

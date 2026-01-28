@@ -59,6 +59,8 @@ const defs = {
     fixedConsumption: 'Fixed Consumption',
     norms: 'Norms',
     inputs: 'Inputs',
+    summary: 'Summary',
+    senderReceiverMapping: 'Sender Receiver Mapping',
     importPower: 'Import Power',
     productionVolumeDataBasis: 'Production Target Data',
     normsHistorianBasis: 'Norms Historian',
