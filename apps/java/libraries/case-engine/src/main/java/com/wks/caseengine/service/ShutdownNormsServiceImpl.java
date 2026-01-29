@@ -618,7 +618,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	    Map<String, String> nameIdMap = new HashMap<>();
 	    for (Map<String, String> info : gradeInfoList) {
-	        String sanitizedName = Utility.sanitizeSheetName(info.get("displayName"));
+			String sanitizedName = Utility.sanitizeSheetName(info.get("name"));
 	        nameIdMap.put(sanitizedName, info.get("gradeId"));
 	    }
 	    return nameIdMap;
