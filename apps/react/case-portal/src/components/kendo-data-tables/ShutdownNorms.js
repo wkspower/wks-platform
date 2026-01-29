@@ -580,6 +580,7 @@ const ShutdownNorms = () => {
           PLANT_ID,
           AOP_YEAR,
           gradeId,
+          gradeName == 'All Grade',
         )
 
       if (response?.code === 200) {

@@ -439,9 +439,10 @@ async function saveShutdownNormsExcel(
   PLANT_ID,
   AOP_YEAR,
   GRADE_ID,
+  ALL_GRADE_FLAG,
 ) {
   let url = ''
-  url = `${Config.CaseEngineUrl}/task/shutdown-consumption-import?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  url = `${Config.CaseEngineUrl}/task/shutdown-consumption-import?plantId=${PLANT_ID}&year=${AOP_YEAR}&allGrade=${ALL_GRADE_FLAG}`
 
   if (GRADE_ID) {
     url += `&gradeId=${GRADE_ID}`
