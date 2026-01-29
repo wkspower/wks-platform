@@ -22,6 +22,7 @@ import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.service.MaintenanceCalculatedDataNMDService;
 import com.wks.caseengine.service.MaintenanceCalculatedDataService;
 
 @RestController
@@ -30,6 +31,9 @@ public class MaintenanceCalculatedDataController {
 	
 	@Autowired
 	private MaintenanceCalculatedDataService maintenanceCalculatedDataService;
+	
+	@Autowired
+	private MaintenanceCalculatedDataNMDService maintenanceCalculatedDataNMDService;
 	
 	@GetMapping(value="/maintenance-details")
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(@RequestParam String plantId, @RequestParam String year){
@@ -71,6 +75,10 @@ public class MaintenanceCalculatedDataController {
 	@PostMapping(value="/maintenance")
 	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year, @RequestBody List<Map<String, Object>> payloadList){
 		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,payloadList);		
+	}
+	@PostMapping(value="/maintenance-nmd")
+	public AOPMessageVM updateMaintenanceDataNMDForCracker(@RequestParam String plantId, @RequestParam String year,@RequestBody List<DecokePlanningDTO> decokePlanningDTOList){
+		return maintenanceCalculatedDataNMDService.updateMaintenanceDataForCracker(plantId,year,decokePlanningDTOList);		
 	}
 	
 	@PostMapping(value = "/maintenance-import", consumes = "multipart/form-data")
@@ -129,4 +137,3 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataService.getMacroData(value,year,plantId);		
 	}
 }
-
