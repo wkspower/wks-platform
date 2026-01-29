@@ -1178,7 +1178,7 @@ public class DecokingActivitiesNMDServiceImpl implements DecokingActivitiesNMDSe
 		try {
 			// 2. Construct SQL with dynamic view name
 						String sql = "SELECT * FROM " + viewName +
-								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear and StartDate = :StartDate";
+								" WHERE Plant_FK_Id = :plantId and aopYear = :aopYear and Date = :StartDate";
 
 						// 3. Create and parameterize the native query
 						Query query = entityManager.createNativeQuery(sql);
