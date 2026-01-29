@@ -50,7 +50,7 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
   }, [localValue, dataItem, field, onChange, initialValue])
 
   return (
-    <>
+    <td>
       <Input
         value={localValue}
         onChange={handleChange}
@@ -67,6 +67,6 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
         severity={snackbarData?.severity || 'info'}
         onClose={() => setSnackbarOpen(false)}
       />
-    </>
+    </td>
   )
 }
