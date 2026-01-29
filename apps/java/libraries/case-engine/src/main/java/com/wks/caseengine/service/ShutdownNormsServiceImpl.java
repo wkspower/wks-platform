@@ -476,7 +476,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	}
 	
 	@Override
-	public AOPMessageVM importExcel(String year, UUID plantFKId, String gradeId, MultipartFile file) {
+	public AOPMessageVM importExcel(String year, UUID plantFKId, String gradeId, MultipartFile file,boolean allGrade) {
 		// TODO Auto-generated method stub
 		try {
 			Plants plant = plantsRepository.findById(plantFKId).get();
@@ -504,7 +504,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 							plantFKId,
 							true,
 							failedRecords,
-							false);
+							allGrade);
 
 				}
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);

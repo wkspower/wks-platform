@@ -72,9 +72,9 @@ public class ShutdownNormsController {
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
             @RequestParam(required = false) String gradeId,
-			@RequestParam("file") MultipartFile file
+			@RequestParam("file") MultipartFile file,@RequestParam(required = false) boolean allGrade
 	        ) {
-			return	shutdownNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
+			return	shutdownNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file,allGrade); 
 	}
 
 	@GetMapping(value="/shutdown-consumption-history-data")

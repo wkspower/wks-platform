@@ -20,7 +20,7 @@ public interface ShutdownNormsService {
 			List<ShutdownNormsValueDTO> dtoList,
 			boolean allGrade);
 
-	public AOPMessageVM importExcel(String year, UUID fromString,String gradeId, MultipartFile file);
+	public AOPMessageVM importExcel(String year, UUID fromString,String gradeId, MultipartFile file,boolean allGrade);
 	public AOPMessageVM saveShutDownNorms(String plantId,List<ShutdownNormsValueDTO> shutdownNormsValueDTOList);
 	public AOPMessageVM getShutdownNormsSPData(String year, String plantId);
 	public AOPMessageVM getUniqueGrades(String year, String plantId);
