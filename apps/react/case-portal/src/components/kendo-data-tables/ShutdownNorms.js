@@ -549,13 +549,14 @@ const ShutdownNorms = () => {
     try {
       let response
       if (IS_PE_PP_VERTICAL) {
-        response = await NormalOperationNormsApiService.shutdownnormsppExport(
+        response = await NormalOperationNormsApiService.shutdownNormsExport(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
           PLANT_NAME,
           SITE_NAME,
           VERTICAL_NAME,
+          gradeName == 'All Grade',
         )
       }
     } catch (error) {

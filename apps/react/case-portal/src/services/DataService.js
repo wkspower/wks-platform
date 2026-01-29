@@ -1695,7 +1695,13 @@ async function importSpyroOutputExcelYield(
   }
 }
 
-async function exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
+async function exportSpyroOutputExcel(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  ExcelName,
+) {
   const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
@@ -1718,7 +1724,7 @@ async function exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `Optimizer_Output_${mode || 'Export'}.xlsx`
+    a.download = `${ExcelName}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1729,7 +1735,13 @@ async function exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function exportSpyroOutputExcelYield(keycloak, mode, PLANT_ID, AOP_YEAR) {
+async function exportSpyroOutputExcelYield(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/yield-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
@@ -1752,7 +1764,7 @@ async function exportSpyroOutputExcelYield(keycloak, mode, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `SpyroOutput_${mode || 'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1784,7 +1796,13 @@ async function importSpyroInputExcel(file, keycloak, mode, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
+async function exportSpyroInputExcel(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/spyro-input-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
@@ -1807,7 +1825,7 @@ async function exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `Optimizer_Input_${mode || 'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1843,7 +1861,7 @@ async function getConfigurationExcel(
 
   try {
     const resp = await fetch(url, {
-      method: 'POST', // changed from GET to POST since we�re sending a body
+      method: 'POST', // changed from GET to POST since we?re sending a body
       headers,
       body,
     })
@@ -2129,7 +2147,12 @@ async function saveCrackerRunLength(PLANT_ID, data, keycloak, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR) {
+async function getRunLengthExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  RUN_LENGTH_EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/run-length-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=RunLength`
   const headers = {
     'Content-Type': 'application/json',
@@ -2148,7 +2171,7 @@ async function getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Run-Length.xlsx' // Filename to save
+    a.download = `${RUN_LENGTH_EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

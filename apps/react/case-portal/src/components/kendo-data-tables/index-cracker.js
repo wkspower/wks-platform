@@ -913,7 +913,10 @@ const KendoDataTablesCracker = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             Are you sure you want to save these changes?
           </DialogContentText>
         </DialogContent>

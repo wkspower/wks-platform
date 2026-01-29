@@ -190,7 +190,12 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		}
 	}
 	
-	public byte[] exportShutdownNorms(String year, UUID plantFKId, boolean isAfterSave, List<ShutdownNormsValueDTO> dtoList) {
+	public byte[] exportShutdownNorms(
+			String year,
+			UUID plantFKId,
+			boolean isAfterSave,
+			List<ShutdownNormsValueDTO> dtoList,
+			boolean allGrade) {
 		try {
 			AOPMessageVM gradesVM = getUniqueGrades(year, plantFKId.toString());
 			List<Map<String, String>> gradeInfoList = extractGradeInfo(gradesVM);
@@ -198,123 +203,263 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			CellStyle lockedStyle = Utility.createLockedStyle(workbook);
 			CellStyle unlockedStyle = Utility.createUnlockedStyle(workbook);
 
-			for (Map<String, String> gradeInfo : gradeInfoList) {
-				
-				String currentGradeId = gradeInfo.get("gradeId");
-				String sheetName = Utility.sanitizeSheetName(gradeInfo.get("displayName"));
-				
-				AOPMessageVM aopMessageVM =null;
-				List<ShutdownNormsValueDTO> currentDtoList = new ArrayList<>();
-				List<Boolean> isEditable = new ArrayList<>();
-				if(!isAfterSave){
-					 aopMessageVM = getShutdownNormsData(year, plantFKId.toString(), currentGradeId);
-				}
-				if (aopMessageVM!=null && aopMessageVM.getData() != null) {
-					
-					Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
-					currentDtoList = (List<ShutdownNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
-				} else if (isAfterSave) {
-					currentDtoList = dtoList.stream()
-				            .filter(dto -> currentGradeId.equals(dto.getGradeFkId()))
-				            .collect(Collectors.toList()); 
+			if (allGrade) {
+				Map<String, String> allGradeInfo = gradeInfoList.stream()
+						.filter(g -> {
+							String dn = g.get("name");
+							return dn != null && "All Grade".equalsIgnoreCase(dn.trim());
+						})
+						.findFirst()
+						.orElse(null);
+
+				if (allGradeInfo != null) {
+					String currentGradeId = allGradeInfo.get("gradeId");
+					List<ShutdownNormsValueDTO> currentDtoList = new ArrayList<>();
+					List<Boolean> isEditable = new ArrayList<>();
+					AOPMessageVM aopMessageVM = null;
+
+					if (!isAfterSave) {
+						aopMessageVM = getShutdownNormsData(year, plantFKId.toString(), currentGradeId);
+					}
+
+					if (aopMessageVM != null && aopMessageVM.getData() != null) {
+						Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+						List<ShutdownNormsValueDTO> fetched = (List<ShutdownNormsValueDTO>) responseMap
+								.get("mcuNormsValueDTOList");
+						if (fetched != null) {
+							currentDtoList.addAll(fetched);
+						}
+					} else if (isAfterSave) {
+						currentDtoList = dtoList.stream()
+								.filter(dto -> currentGradeId.equals(dto.getGradeFkId()))
+								.collect(Collectors.toList());
+					}
+
+					// If nothing to write, skip creation
+					if (!currentDtoList.isEmpty()) {
+						String sheetName = Utility.sanitizeSheetName("All Grade");
+						Sheet sheet = workbook.createSheet(sheetName);
+						int currentRow = 0;
+
+						List<List<Object>> rows = new ArrayList<>();
+						for (ShutdownNormsValueDTO dto : currentDtoList) {
+							List<Object> list = new ArrayList<>();
+							list.add(dto.getNormParameterTypeDisplayName());
+							list.add(dto.getProductName());
+							list.add(dto.getUOM());
+							list.add(dto.getApril());
+							list.add(dto.getMay());
+							list.add(dto.getJune());
+							list.add(dto.getJuly());
+							list.add(dto.getAugust());
+							list.add(dto.getSeptember());
+							list.add(dto.getOctober());
+							list.add(dto.getNovember());
+							list.add(dto.getDecember());
+							list.add(dto.getJanuary());
+							list.add(dto.getFebruary());
+							list.add(dto.getMarch());
+							list.add(dto.getRemarks());
+							list.add(dto.getId());
+							list.add(dto.getMaterialFkId());
+							isEditable.add(dto.getIsEditable());
+							if (isAfterSave) {
+								list.add(dto.getSaveStatus());
+								list.add(dto.getErrDescription());
+							}
+							rows.add(list);
+						}
+
+						List<String> innerHeaders = new ArrayList<>();
+						innerHeaders.add("Type");
+						innerHeaders.add("Particulars");
+						innerHeaders.add("UOM");
+						List<String> monthsList = Utility.getAcademicYearMonths(year);
+						innerHeaders.addAll(monthsList);
+						innerHeaders.add("Remarks");
+						innerHeaders.add("Id");
+						innerHeaders.add("Material Id");
+						if (isAfterSave) {
+							innerHeaders.add("Status");
+							innerHeaders.add("Error Description");
+						}
+						List<List<String>> headers = new ArrayList<>();
+						headers.add(innerHeaders);
+
+						for (List<String> headerRowData : headers) {
+							Row headerRow = sheet.createRow(currentRow++);
+							for (int col = 0; col < headerRowData.size(); col++) {
+								Cell cell = headerRow.createCell(col);
+								cell.setCellValue(headerRowData.get(col));
+								cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+							}
+						}
+
+						for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+							List<Object> rowData = rows.get(rowIndex);
+							boolean isRowEditable = true;
+
+							if (rowIndex < isEditable.size() && isEditable.get(rowIndex) != null) {
+								isRowEditable = isEditable.get(rowIndex);
+							}
+
+							Row row = sheet.createRow(currentRow++);
+							for (int col = 0; col < rowData.size(); col++) {
+								Cell cell = row.createCell(col);
+								Object value = rowData.get(col);
+
+								if (value instanceof Number) {
+									cell.setCellValue(((Number) value).doubleValue());
+								} else if (value instanceof Boolean) {
+									cell.setCellValue((Boolean) value);
+								} else if (value != null) {
+									cell.setCellValue(value.toString());
+								} else {
+									cell.setCellValue("");
+								}
+
+								if (isRowEditable) {
+									cell.setCellStyle(unlockedStyle);
+								} else {
+									cell.setCellStyle(lockedStyle);
+								}
+							}
+						}
+
+						// hide internal id/material columns
+						sheet.setColumnHidden(16, true);
+						sheet.setColumnHidden(17, true);
+					}
 				} else {
-                    continue; 
-                }
-                
-				Sheet sheet = workbook.createSheet(sheetName);
-				int currentRow = 0;
+					// no grade named "All Grade" found — do not aggregate everything accidentally.
+					// Optionally: you could fall back to aggregated behavior here if desired.
+				}
 
-				List<List<Object>> rows = new ArrayList<>();
-				for (ShutdownNormsValueDTO dto : currentDtoList) {
-					List<Object> list = new ArrayList<>();
-					list.add(dto.getNormParameterTypeDisplayName());
-					list.add(dto.getProductName());
-					list.add(dto.getUOM());
-					list.add(dto.getApril());
-					list.add(dto.getMay());
-					list.add(dto.getJune());
-					list.add(dto.getJuly());
-					list.add(dto.getAugust());
-					list.add(dto.getSeptember());
-					list.add(dto.getOctober());
-					list.add(dto.getNovember());
-					list.add(dto.getDecember());
-					list.add(dto.getJanuary());
-					list.add(dto.getFebruary());
-					list.add(dto.getMarch());
-					list.add(dto.getRemarks());
-					list.add(dto.getId()); 
-					list.add(dto.getMaterialFkId()); 
-					isEditable.add(dto.getIsEditable());
-					
+			} else {
+				// allGrade == false -> create a sheet per grade, but skip the grade named "All
+				// Grade"
+				for (Map<String, String> gradeInfo : gradeInfoList) {
+
+					String currentGradeId = gradeInfo.get("gradeId");
+					String displayName = gradeInfo.get("displayName");
+					if (displayName != null && "All Grade".equalsIgnoreCase(displayName.trim())) {
+						// skip the "All Grade" sheet when not requesting allGrade
+						continue;
+					}
+
+					String sheetName = Utility.sanitizeSheetName(displayName);
+
+					AOPMessageVM aopMessageVM = null;
+					List<ShutdownNormsValueDTO> currentDtoList = new ArrayList<>();
+					List<Boolean> isEditable = new ArrayList<>();
+					if (!isAfterSave) {
+						aopMessageVM = getShutdownNormsData(year, plantFKId.toString(), currentGradeId);
+					}
+					if (aopMessageVM != null && aopMessageVM.getData() != null) {
+						Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+						currentDtoList = (List<ShutdownNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+					} else if (isAfterSave) {
+						currentDtoList = dtoList.stream()
+								.filter(dto -> currentGradeId.equals(dto.getGradeFkId()))
+								.collect(Collectors.toList());
+					} else {
+						continue;
+					}
+
+					Sheet sheet = workbook.createSheet(sheetName);
+					int currentRow = 0;
+
+					List<List<Object>> rows = new ArrayList<>();
+					for (ShutdownNormsValueDTO dto : currentDtoList) {
+						List<Object> list = new ArrayList<>();
+						list.add(dto.getNormParameterTypeDisplayName());
+						list.add(dto.getProductName());
+						list.add(dto.getUOM());
+						list.add(dto.getApril());
+						list.add(dto.getMay());
+						list.add(dto.getJune());
+						list.add(dto.getJuly());
+						list.add(dto.getAugust());
+						list.add(dto.getSeptember());
+						list.add(dto.getOctober());
+						list.add(dto.getNovember());
+						list.add(dto.getDecember());
+						list.add(dto.getJanuary());
+						list.add(dto.getFebruary());
+						list.add(dto.getMarch());
+						list.add(dto.getRemarks());
+						list.add(dto.getId());
+						list.add(dto.getMaterialFkId());
+						isEditable.add(dto.getIsEditable());
+
+						if (isAfterSave) {
+							list.add(dto.getSaveStatus());
+							list.add(dto.getErrDescription());
+						}
+						rows.add(list);
+					}
+
+					List<String> innerHeaders = new ArrayList<>();
+					innerHeaders.add("Type");
+					innerHeaders.add("Particulars");
+					innerHeaders.add("UOM");
+					List<String> monthsList = Utility.getAcademicYearMonths(year);
+					innerHeaders.addAll(monthsList);
+					innerHeaders.add("Remarks");
+					innerHeaders.add("Id");
+					innerHeaders.add("Material Id");
 					if (isAfterSave) {
-						list.add(dto.getSaveStatus());
-						list.add(dto.getErrDescription());
+						innerHeaders.add("Status");
+						innerHeaders.add("Error Description");
 					}
-					rows.add(list);
-				}
+					List<List<String>> headers = new ArrayList<>();
+					headers.add(innerHeaders);
 
-				
-				List<String> innerHeaders = new ArrayList<>();
-				innerHeaders.add("Type");
-				innerHeaders.add("Particulars");
-				innerHeaders.add("UOM");
-				List<String> monthsList = Utility.getAcademicYearMonths(year);
-				innerHeaders.addAll(monthsList);
-				innerHeaders.add("Remarks");
-				innerHeaders.add("Id");
-				innerHeaders.add("Material Id");
-				if (isAfterSave) {
-					innerHeaders.add("Status");
-					innerHeaders.add("Error Description");
-				}
-				List<List<String>> headers = new ArrayList<>();
-				headers.add(innerHeaders);
-
-				for (List<String> headerRowData : headers) {
-					Row headerRow = sheet.createRow(currentRow++);
-					for (int col = 0; col < headerRowData.size(); col++) {
-						Cell cell = headerRow.createCell(col);
-						cell.setCellValue(headerRowData.get(col));
-						cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
-					}
-				}
-				
-				for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
-					List<Object> rowData = rows.get(rowIndex);
-					boolean isRowEditable = true;
-					
-					if (rowIndex < isEditable.size() && isEditable.get(rowIndex) != null) {
-						isRowEditable = isEditable.get(rowIndex);
-					}
-					
-					Row row = sheet.createRow(currentRow++);
-					for (int col = 0; col < rowData.size(); col++) {
-						Cell cell = row.createCell(col);
-						Object value = rowData.get(col);
-
-						if (value instanceof Number) {
-							cell.setCellValue(((Number) value).doubleValue());
-						} else if (value instanceof Boolean) {
-							cell.setCellValue((Boolean) value);
-						} else if (value != null) {
-							cell.setCellValue(value.toString());
-						} else {
-							cell.setCellValue("");
-						}
-						
-						if (isRowEditable) {
-							cell.setCellStyle(unlockedStyle);
-						} else {
-							cell.setCellStyle(lockedStyle);
+					for (List<String> headerRowData : headers) {
+						Row headerRow = sheet.createRow(currentRow++);
+						for (int col = 0; col < headerRowData.size(); col++) {
+							Cell cell = headerRow.createCell(col);
+							cell.setCellValue(headerRowData.get(col));
+							cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
 						}
 					}
-				}
-				sheet.setColumnHidden(16, true);
-				sheet.setColumnHidden(17, true);
-				
-			} 
-			
+
+					for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
+						List<Object> rowData = rows.get(rowIndex);
+						boolean isRowEditable = true;
+
+						if (rowIndex < isEditable.size() && isEditable.get(rowIndex) != null) {
+							isRowEditable = isEditable.get(rowIndex);
+						}
+
+						Row row = sheet.createRow(currentRow++);
+						for (int col = 0; col < rowData.size(); col++) {
+							Cell cell = row.createCell(col);
+							Object value = rowData.get(col);
+
+							if (value instanceof Number) {
+								cell.setCellValue(((Number) value).doubleValue());
+							} else if (value instanceof Boolean) {
+								cell.setCellValue((Boolean) value);
+							} else if (value != null) {
+								cell.setCellValue(value.toString());
+							} else {
+								cell.setCellValue("");
+							}
+
+							if (isRowEditable) {
+								cell.setCellStyle(unlockedStyle);
+							} else {
+								cell.setCellStyle(lockedStyle);
+							}
+						}
+					}
+					sheet.setColumnHidden(16, true);
+					sheet.setColumnHidden(17, true);
+
+				} // end for gradeInfoList
+			} // end else(allGrade)
+
 			try {
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				workbook.write(outputStream);
@@ -351,9 +496,16 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			if (failedRecords != null && failedRecords.size() > 0) {
-				byte[] fileByteArray =null;
-				if(vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP") || vertical.getName().equalsIgnoreCase("PET")) {
-					 fileByteArray = exportShutdownNorms(year, plantFKId, true, failedRecords);
+				byte[] fileByteArray = null;
+				if (vertical.getName().equalsIgnoreCase("PE") || vertical.getName().equalsIgnoreCase("PP")
+						|| vertical.getName().equalsIgnoreCase("PET")) {
+					fileByteArray = exportShutdownNorms(
+							year,
+							plantFKId,
+							true,
+							failedRecords,
+							false);
+
 				}
 				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
 				aopMessageVM.setData(base64File);
@@ -484,15 +636,17 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	            
 	            for (Map<String, Object> gradeMap : gradeList) {
 	                Object gradeIdObj = gradeMap.get("gradeId");
-	                Object displayNameObj = gradeMap.get("displayName");
-	                
-	                if (gradeIdObj != null && displayNameObj != null) {
-	                    Map<String, String> infoMap = new HashMap<>();
-	                    infoMap.put("gradeId", gradeIdObj.toString());
-	                    infoMap.put("displayName", displayNameObj.toString());
-	                    gradeInfoList.add(infoMap);
-	                }
-	            }
+					Object displayNameObj = gradeMap.get("displayName");
+					Object nameObj = gradeMap.get("name");
+
+					if (gradeIdObj != null && displayNameObj != null && nameObj != null) {
+						Map<String, String> infoMap = new HashMap<>();
+						infoMap.put("gradeId", gradeIdObj.toString());
+						infoMap.put("displayName", displayNameObj.toString());
+						infoMap.put("name", nameObj.toString());
+						gradeInfoList.add(infoMap);
+					}
+				}
 	        } catch (ClassCastException e) {
 	            System.err.println("Error casting data to List<Map<String, Object>>: " + e.getMessage());
 	        }
