@@ -11,8 +11,7 @@ import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 import crackercolumnsDMD from '../../assets/CrackerMaintenanceColumn_DMD.json'
 import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
-import MaintenanceProcessTableNMD from './processTableNMD'
-const MaintenanceProcessTable = ({ viewOnly }) => {
+const MaintenanceProcessTableNMD = ({ viewOnly }) => {
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
 
@@ -53,7 +52,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   )
 
   const headerMap = generateHeaderNames(AOP_YEAR)
-  const [columns, setColumns] = useState([])
+
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
@@ -73,7 +72,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     if (READ_ONLY) return
     // if (!row?.isEditable) return
 
-    setCurrentRemark(row.Remarks || '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -138,7 +137,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       // }
       // --- END VALIDATION ---
 
-      const validationMessage = validateFields(data, ['Remarks'])
+      const validationMessage = validateFields(data, ['remarks'])
       if (validationMessage) {
         setSnackbarOpen(true)
         setSnackbarData({ message: validationMessage, severity: 'error' })
@@ -157,50 +156,32 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const saveCrackerMaintenanceData = async (newRows) => {
     setLoading(true)
     try {
-      // const payload = newRows.map((row) => ({
-      //   fourFD: row.fourFD,
-      //   AOPYear: AOP_YEAR,
-      //   TotalSAD: row.TotalSAD,
-      //   MonthName: row.MonthName ?? null,
-      //   PlantId: PLANT_ID,
-      //   NumberOfDays: row.NumberOfDays,
-      //   DemoBBU: row.DemoBBU,
-      //   CoilReplacement: row.CoilReplacement,
-      //   ibr: row.coilReplacement,
-      //   DemoSAD: row.DemoSAD,
-      //   DemoSD: row.DemoSD,
-      //   fourF: row.fourF,
-      //   MNT: row.MNT,
-      //   Total: row.Total,
-      //   fourFHours: row.fourFHours,
-      //   BBU: row.BBU,
-      //   BBD: row.BBD,
-      //   SAD: row.SAD,
-      //   DemoHSS: row.DemoHSS,
-      //   fiveF: row.fiveF,
-      //   Id: row.IdFromApi || row.Id,
-      //   Shoutdown: row.Shoutdown,
-      //   Slowdown: row.Slowdown,
-      //   Remarks: row.Remarks ?? row.remark ?? '',
-      // }))
-      const excludeFields = [
-        'id',
-        'idFromApi',
-        'isEditable',
-        'originalRemark',
-        'inEdit',
-      ]
-
-      // Dynamically build payload for each row
-      const payload = newRows.map((row) => {
-        const obj = {}
-        Object.keys(row).forEach((key) => {
-          if (!excludeFields.includes(key)) {
-            obj[key] = row[key]
-          }
-        })
-        return obj
-      })
+      const payload = newRows.map((row) => ({
+        fourFD: row.fourFD,
+        aopYear: AOP_YEAR,
+        totalSAD: row.totalSAD,
+        monthName: row.monthName ?? null,
+        plantId: PLANT_ID,
+        numberOfDays: row.numberOfDays,
+        demoBBU: row.demoBBU,
+        coilReplacement: row.coilReplacement,
+        ibr: row.coilReplacement,
+        demoSAD: row.demoSAD,
+        demoSD: row.demoSD,
+        fourF: row.fourF,
+        mnt: row.mnt,
+        total: row.total,
+        fourFHours: row.fourFHours,
+        bbu: row.bbu,
+        bbd: row.bbd,
+        sad: row.sad,
+        demoHSS: row.demoHSS,
+        fiveF: row.fiveF,
+        id: row.idFromApi || row.id,
+        shutdown: row.shutdown,
+        slowdown: row.slowdown,
+        remarks: row.remarks ?? row.remark ?? '',
+      }))
 
       const response =
         await MaintenanceDetailsApiService.saveCrackerMaintenance(
@@ -246,25 +227,16 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       const resp = await dataConfig.serviceFn(keycloak)
       const raw = resp.data?.data
       setCalculationObject(resp?.data?.aopCalculation)
-      const hiddenKeys = ['Id', 'AOPYear', 'PlantId']
-      const dynamicColumns = (resp.data?.columns || columns).map((col) => ({
-        ...col,
-        editable: col.type === 'number' || col.field === 'Remarks',
-        hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
-        widthT: 120,
-      }))
-      setColumns(dynamicColumns)
-
       const formatted = (raw || []).map((item, idx, arr) => ({
         ...item,
-        idFromApi: item.Id,
+        idFromApi: item.id,
         id: idx,
         isEditable: viewOnly
           ? false
           : idx === arr.length - 1
             ? false
             : item?.isEditable,
-        originalRemark: item?.Remarks?.trim(),
+        originalRemark: item.remarks,
       }))
 
       const finalData = [...formatted]
@@ -437,14 +409,14 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     hidden: true,
   }
 
-  // let basecols
-  // if (siteName === 'dmd') {
-  //   basecols = crackercolumnsDMD
-  // } else if (siteName === 'nmd') {
-  //   basecols = crackercolumns
-  // } else {
-  //   basecols = crackercolumns
-  // }
+  let basecols
+  if (siteName === 'dmd') {
+    basecols = crackercolumnsDMD
+  } else if (siteName === 'nmd') {
+    basecols = crackercolumns
+  } else {
+    basecols = crackercolumns
+  }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
@@ -492,10 +464,6 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     [isOldYear],
   )
 
-  if (siteName == 'nmd') {
-    return <MaintenanceProcessTableNMD />
-  }
-
   return (
     <div>
       <Backdrop
@@ -505,7 +473,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         <CircularProgress color='inherit' />
       </Backdrop>
       <KendoDataTables
-        columns={columns}
+        columns={basecols}
         rows={rows}
         setRows={setRows}
         fetchData={fetchData}
@@ -536,4 +504,4 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
     </div>
   )
 }
-export default MaintenanceProcessTable
+export default MaintenanceProcessTableNMD
