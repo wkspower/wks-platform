@@ -181,28 +181,31 @@ const DecokingConfigNMD = () => {
       try {
         if (currentTab === 'IBR Plan') {
           // Screen 1
-          if (!screen || screen === 1) {
-            const data1 = await DataService.getIbr(keycloak, PLANT_ID, AOP_YEAR)
-            if (data1?.code === 200) {
-              const processedData = data1.data
-                .map((item, index) => ({
-                  ...item,
-                  idFromApi: item.id,
-                  id: index,
-                  month:
-                    item?.month === 'Invalid month'
-                      ? 'N/A'
-                      : item?.month || 'N/A',
-                }))
-                .sort((a, b) => b?.isMonthAdd - a?.isMonthAdd)
-              setRowsForTab(currentTab, processedData, 1)
-            } else {
-              setRowsForTab(currentTab, [], 1)
-            }
-          }
+
+          //THIS SCREEN IS HIDDEN
+          // if (!screen || screen === 1) {
+          //   const data1 = await DataService.getIbr(keycloak, PLANT_ID, AOP_YEAR)
+          //   if (data1?.code === 200) {
+          //     const processedData = data1.data
+          //       .map((item, index) => ({
+          //         ...item,
+          //         idFromApi: item.id,
+          //         id: index,
+          //         month:
+          //           item?.month === 'Invalid month'
+          //             ? 'N/A'
+          //             : item?.month || 'N/A',
+          //       }))
+          //       .sort((a, b) => b?.isMonthAdd - a?.isMonthAdd)
+          //     setRowsForTab(currentTab, processedData, 1)
+          //   } else {
+          //     setRowsForTab(currentTab, [], 1)
+          //   }
+          // }
           // Screen 2
           if (!screen || screen === 2) {
-            const data2 = await DataService.getIbrSdTa(
+            if (siteName != 'nmd') return
+            const data2 = await DataService.getIbrSdTaNMD(
               keycloak,
               PLANT_ID,
               AOP_YEAR,
@@ -246,7 +249,8 @@ const DecokingConfigNMD = () => {
 
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
-            const data3 = await DataService.getIbrScreen3(
+            if (siteName != 'nmd') return
+            const data3 = await DataService.getIbrScreen3NMD(
               keycloak,
               PLANT_ID,
               AOP_YEAR,
@@ -622,7 +626,7 @@ const DecokingConfigNMD = () => {
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
-      const response = await DataService.postIbr(
+      const response = await DataService.postIbrNMD(
         PLANT_ID,
         payload,
         keycloak,
@@ -691,7 +695,7 @@ const DecokingConfigNMD = () => {
         reduction: row?.reduction ? Number(row.reduction) : null,
       }))
 
-      const response = await DataService.postIbr(
+      const response = await DataService.postIbrNMD(
         PLANT_ID,
         payload,
         keycloak,
@@ -742,7 +746,7 @@ const DecokingConfigNMD = () => {
           ? `${row.date.getFullYear()}-${String(row.date.getMonth() + 1).padStart(2, '0')}-${String(row.date.getDate()).padStart(2, '0')}`
           : null,
       }))
-      const response = await DataService.saveCrackerRunLength(
+      const response = await DataService.saveCrackerRunLengthNMD(
         PLANT_ID,
         payload,
         keycloak,
@@ -840,7 +844,7 @@ const DecokingConfigNMD = () => {
       severity: 'success',
     })
     try {
-      await DataService.getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR)
+      await DataService.getRunLengthExcelNMD(keycloak, PLANT_ID, AOP_YEAR)
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -860,7 +864,7 @@ const DecokingConfigNMD = () => {
     setLoading(true)
     try {
       var response
-      response = await DataService.saveRunLengthExcel(
+      response = await DataService.saveRunLengthExcelNMD(
         rawFile,
         keycloak,
         PLANT_ID,

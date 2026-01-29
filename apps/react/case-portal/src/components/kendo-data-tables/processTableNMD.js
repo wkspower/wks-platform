@@ -42,7 +42,7 @@ const MaintenanceProcessTableNMD = ({ viewOnly }) => {
   const dataConfig = useMemo(
     () => ({
       serviceFn: () =>
-        MaintenanceDetailsApiService.getCrackerMaintenanceData(
+        MaintenanceDetailsApiService.getCrackerMaintenanceDataNMD(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
@@ -184,7 +184,7 @@ const MaintenanceProcessTableNMD = ({ viewOnly }) => {
       }))
 
       const response =
-        await MaintenanceDetailsApiService.saveCrackerMaintenance(
+        await MaintenanceDetailsApiService.saveCrackerMaintenanceNMD(
           PLANT_ID,
           AOP_YEAR,
           payload,
@@ -287,7 +287,7 @@ const MaintenanceProcessTableNMD = ({ viewOnly }) => {
 
     try {
       let response
-      response = await MaintenanceDetailsApiService.CrackerMaintenanceExport(
+      response = await MaintenanceDetailsApiService.CrackerMaintenanceExportNMD(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -309,7 +309,7 @@ const MaintenanceProcessTableNMD = ({ viewOnly }) => {
     try {
       let response
 
-      response = await MaintenanceDetailsApiService.CrackerMaintenanceImport(
+      response = await MaintenanceDetailsApiService.CrackerMaintenanceImportNMD(
         rawFile,
         keycloak,
         PLANT_ID,

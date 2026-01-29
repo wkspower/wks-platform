@@ -1072,7 +1072,7 @@ const KendoDataTablesCrackerRunLengthNMD = ({
         },
       ]
 
-      const response = await DataService.saveCrackerRunLength(
+      const response = await DataService.saveCrackerRunLengthNMD(
         PLANT_ID,
         payload,
         keycloak,
@@ -1106,7 +1106,7 @@ const KendoDataTablesCrackerRunLengthNMD = ({
     async (date) => {
       setLoading1(true)
       try {
-        const res = await DataService.getCrackerNextYearParameters(
+        const res = await DataService.getCrackerNextYearParametersNMD(
           keycloak,
           moment(date).format('YYYY-MM-DD'),
           PLANT_ID,
@@ -1155,7 +1155,7 @@ const KendoDataTablesCrackerRunLengthNMD = ({
           startDate: moment(startDateParam).format('YYYY-MM-DD'),
         }
 
-        const res = await DataService.getCrackerNextYearData(
+        const res = await DataService.getCrackerNextYearDataNMD(
           keycloak,
           queryParams,
           PLANT_ID,

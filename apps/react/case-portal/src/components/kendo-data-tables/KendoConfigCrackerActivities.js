@@ -221,6 +221,7 @@ const DecokingConfig = () => {
 
           // Screen 2
           if (!screen || screen === 2) {
+            if (siteName === 'nmd') return
             const data2 = await DataService.getIbrSdTa(
               keycloak,
               PLANT_ID,
@@ -296,6 +297,7 @@ const DecokingConfig = () => {
 
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
+            if (siteName === 'nmd') return
             const data3 = await DataService.getIbrScreen3(
               keycloak,
               PLANT_ID,
