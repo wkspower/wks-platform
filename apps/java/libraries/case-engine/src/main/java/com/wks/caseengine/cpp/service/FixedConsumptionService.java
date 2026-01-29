@@ -349,6 +349,8 @@ public class FixedConsumptionService {
             List<String> headers = new ArrayList<>();
             headers.add("Plant");
             headers.add("Plant Id");
+            headers.add("Cost Center");
+            headers.add("Cost Center Id");
             headers.add("CPP Utilities");
             headers.add("CPP Utility Ids");
             headers.add("CPP Plant");
@@ -371,7 +373,6 @@ public class FixedConsumptionService {
             // Hidden columns
             headers.add("remarkId");
             headers.add("costCenter_FK_Id");
-            headers.add("costCenterId");
             headers.add("normParameter_FK_Id");
             headers.add("normParameterId");
 
@@ -392,11 +393,17 @@ public class FixedConsumptionService {
                 Row row = sheet.createRow(currentRow++);
                 int col = 0;
 
-                Cell cell = row.createCell(col++);
+Cell cell = row.createCell(col++);
                 cell.setCellValue(dto.getPlant() != null ? dto.getPlant() : "");
                 cell.setCellStyle(dataStyle);
                 cell = row.createCell(col++);
                 cell.setCellValue(dto.getPlantId() != null ? dto.getPlantId() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getCostCenter() != null ? dto.getCostCenter() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getCostCenterId() != null ? dto.getCostCenterId() : "");
                 cell.setCellStyle(dataStyle);
                 cell = row.createCell(col++);
                 cell.setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
@@ -440,9 +447,6 @@ public class FixedConsumptionService {
                 cell.setCellValue(dto.getCostCenter_FK_Id() != null ? dto.getCostCenter_FK_Id().toString() : "");
                 cell.setCellStyle(dataStyle);
                 cell = row.createCell(col++);
-                cell.setCellValue(dto.getCostCenterId() != null ? dto.getCostCenterId() : "");
-                cell.setCellStyle(dataStyle);
-                cell = row.createCell(col++);
                 cell.setCellValue(dto.getNormParameter_FK_Id() != null ? dto.getNormParameter_FK_Id().toString() : "");
                 cell.setCellStyle(dataStyle);
                 cell = row.createCell(col++);
@@ -459,12 +463,11 @@ public class FixedConsumptionService {
                 }
             }
 
-            // Hide specified columns (21-25: remarkId, costCenter_FK_Id, costCenterId, normParameter_FK_Id, normParameterId)
-            sheet.setColumnHidden(21, true); // remarkId
-            sheet.setColumnHidden(22, true); // costCenter_FK_Id
-            sheet.setColumnHidden(23, true); // costCenterId
-            sheet.setColumnHidden(24, true); // normParameter_FK_Id
-            sheet.setColumnHidden(25, true); // normParameterId
+            // Hide specified columns (23-26: remarkId, costCenter_FK_Id, normParameter_FK_Id, normParameterId)
+            sheet.setColumnHidden(23, true); // remarkId
+            sheet.setColumnHidden(24, true); // costCenter_FK_Id
+            sheet.setColumnHidden(25, true); // normParameter_FK_Id
+            sheet.setColumnHidden(26, true); // normParameterId
 
             int totalColumns = headers.size();
             for (int col = 0; col < totalColumns; col++) {
@@ -565,6 +568,8 @@ public class FixedConsumptionService {
                     int col = 0;
                     dto.setPlant(getStringCellValue(row.getCell(col++)));
                     dto.setPlantId(getStringCellValue(row.getCell(col++)));
+                    dto.setCostCenter(getStringCellValue(row.getCell(col++)));
+                    dto.setCostCenterId(getStringCellValue(row.getCell(col++)));
                     dto.setCppUtility(getStringCellValue(row.getCell(col++)));
                     dto.setCppUtilityId(getStringCellValue(row.getCell(col++)));
                     dto.setCppPlant(getStringCellValue(row.getCell(col++)));
@@ -599,8 +604,6 @@ public class FixedConsumptionService {
                     if (costCenterFKIdStr != null && !costCenterFKIdStr.isEmpty()) {
                         dto.setCostCenter_FK_Id(UUID.fromString(costCenterFKIdStr));
                     }
-                    
-                    dto.setCostCenterId(getStringCellValue(row.getCell(col++)));
                     
                     String normParameterFKIdStr = getStringCellValue(row.getCell(col++));
                     if (normParameterFKIdStr != null && !normParameterFKIdStr.isEmpty()) {
