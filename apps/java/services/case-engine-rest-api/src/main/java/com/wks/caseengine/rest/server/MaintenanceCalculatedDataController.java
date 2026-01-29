@@ -50,6 +50,11 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataService.getMaintenanceDataForCracker(plantId,year);		
 	}
 	
+	@GetMapping(value="/maintenance-nmd")
+	public AOPMessageVM getMaintenanceDataNMDForCracker(@RequestParam String plantId, @RequestParam String year){
+		return maintenanceCalculatedDataNMDService.getMaintenanceDataForCracker(plantId,year);		
+	}
+	
 	@GetMapping(value = "/maintenance-export")
 	public ResponseEntity<byte[]> maintenanceExport(
 	         @RequestParam String year,@RequestParam String plantId) {
