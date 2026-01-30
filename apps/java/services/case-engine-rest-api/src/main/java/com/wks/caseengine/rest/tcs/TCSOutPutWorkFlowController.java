@@ -223,12 +223,9 @@ public class TCSOutPutWorkFlowController {
 		
 	}
 
-	@PostMapping(value = "ebs-submission/{plantName}/{siteId}/{finacialYear}")
-	public ResponseEntity<String> ebsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+	@PostMapping(value = "ebs-submission/{siteId}/{finacialYear}")
+	public ResponseEntity<String> ebsSubmission(@PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
 
-		if(plantName == null || plantName.isEmpty()) { 
-			throw new RestResourceNotFoundException("Plant name is required to complete EBS approval");
-		}
 		if(siteId == null || siteId.isEmpty()) {
 			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
 		}
@@ -240,12 +237,12 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
 		}
 
-		tcsWorkFlowService.ebsApproval(plantName, siteId, plantSubmissionAuditTrailDTO, finacialYear);
+		tcsWorkFlowService.ebsApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("EBS approval completed successfully");
 
 	}
 
-	@PostMapping(value = "cts-submission/{plantName}/{siteId}/{finacialYear}")
+	@PostMapping(value = "cts-submission/{siteId}/{finacialYear}")
 	public ResponseEntity<String> ctsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
 		if(plantName == null || plantName.isEmpty()) { 
 			throw new RestResourceNotFoundException("Plant name is required to complete CTS approval");
@@ -258,7 +255,7 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
 		}
 		
-		tcsWorkFlowService.CTSApproval(plantName, siteId, plantSubmissionAuditTrailDTO, finacialYear);
+		tcsWorkFlowService.CTSApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("CTS approval completed successfully");
 	}
 

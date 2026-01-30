@@ -4,14 +4,16 @@ import java.util.Date;
 
 public interface PlantSubmissionAuditTrailProjection {
     
-    String getPlantId();
+    //Plant_Id, PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate,
+  //  SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Tab, Status, Type
+    String getPlant_Id();
     String getPlantName();
-    String getSiteId();
-    String getVerticalId();
+    String getSite_Id();
+    String getVertical_Id();
     String getSubmittedBy();
-    Date getSubmissionDateTime();
+    Date getSubmissionDate();
     String getSubmissionRemark();
-    Date getVerifiedDateTime();
+    Date getVerifiedDate();
     String getVerifiedBy();
     String getVerifiedRemark();
     String getTab();

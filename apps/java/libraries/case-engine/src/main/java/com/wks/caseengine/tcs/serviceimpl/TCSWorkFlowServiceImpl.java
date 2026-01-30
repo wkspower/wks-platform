@@ -252,7 +252,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
     // ebs submit buttons 
     @Override
-    public void ebsApproval(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {  
+    public void ebsApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {  
 
         String businessKey = siteId + "-" + finacialYear;
 
@@ -409,7 +409,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
             plantSubmissionAuditTrailDTO.setVerifiedDateTime(new Date());
 
-            plantSubmissionAuditTrailDTO.setSubmissionDateTime(existingAuditTrail.getSubmissionDateTime());
+            plantSubmissionAuditTrailDTO.setSubmissionDateTime(existingAuditTrail.getSubmissionDate());
             plantSubmissionAuditTrailDTO.setSubmissionRemark(existingAuditTrail.getSubmissionRemark());
             plantSubmissionAuditTrailDTO.setSubmittedBy(existingAuditTrail.getSubmittedBy());
             plantSubmissionAuditTrailDTO.setType("PLANT");
@@ -422,7 +422,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
     }
     @Override
-    public void CTSApproval(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
+    public void CTSApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
 
         String businessKey = siteId + "-" + finacialYear;
 
@@ -566,13 +566,13 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
          
 
          return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
-         .plantId(UUID.fromString(auditTrail.getPlantId()))
-         .siteId(UUID.fromString(auditTrail.getSiteId()))
-         .verticalId(UUID.fromString(auditTrail.getVerticalId()))
+         .plantId(UUID.fromString(auditTrail.getPlant_Id()))
+         .siteId(UUID.fromString(auditTrail.getSite_Id()))
+         .verticalId(UUID.fromString(auditTrail.getVertical_Id()))
          .submittedBy(auditTrail.getSubmittedBy())
-         .submissionDateTime(auditTrail.getSubmissionDateTime())
+         .submissionDateTime(auditTrail.getSubmissionDate())
          .submissionRemark(auditTrail.getSubmissionRemark())
-         .verifiedDateTime(auditTrail.getVerifiedDateTime())
+         .verifiedDateTime(auditTrail.getVerifiedDate())
          .verifiedBy(auditTrail.getVerifiedBy())
          .verifiedRemark(auditTrail.getVerifiedRemark())
          .tab(auditTrail.getTab())
@@ -590,14 +590,14 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
        
 
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
-        .plantId(UUID.fromString(auditTrail.getPlantId()))
+        .plantId(UUID.fromString(auditTrail.getPlant_Id()))
         .plantName(auditTrail.getPlantName())
-        .siteId(UUID.fromString(auditTrail.getSiteId()))
-        .verticalId(UUID.fromString(auditTrail.getVerticalId()))
+        .siteId(UUID.fromString(auditTrail.getSite_Id()))
+        .verticalId(UUID.fromString(auditTrail.getVertical_Id()))
         .submittedBy(auditTrail.getSubmittedBy())
-        .submissionDateTime(auditTrail.getSubmissionDateTime())
+        .submissionDateTime(auditTrail.getSubmissionDate())
         .submissionRemark(auditTrail.getSubmissionRemark())
-        .verifiedDateTime(auditTrail.getVerifiedDateTime())
+        .verifiedDateTime(auditTrail.getVerifiedDate())
         .verifiedBy(auditTrail.getVerifiedBy())
         .verifiedRemark(auditTrail.getVerifiedRemark())
         .tab(auditTrail.getTab())
@@ -612,14 +612,14 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
        
 
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
-        .plantId(UUID.fromString(auditTrail.getPlantId()))
+        .plantId(UUID.fromString(auditTrail.getPlant_Id()))
         .plantName(auditTrail.getPlantName())
-        .siteId(UUID.fromString(auditTrail.getSiteId()))
-        .verticalId(UUID.fromString(auditTrail.getVerticalId()))
+        .siteId(UUID.fromString(auditTrail.getSite_Id()))
+        .verticalId(UUID.fromString(auditTrail.getVertical_Id()))
         .submittedBy(auditTrail.getSubmittedBy())
-        .submissionDateTime(auditTrail.getSubmissionDateTime())
+        .submissionDateTime(auditTrail.getSubmissionDate())
         .submissionRemark(auditTrail.getSubmissionRemark())
-        .verifiedDateTime(auditTrail.getVerifiedDateTime())
+        .verifiedDateTime(auditTrail.getVerifiedDate())
         .verifiedBy(auditTrail.getVerifiedBy())
         .verifiedRemark(auditTrail.getVerifiedRemark())
         .tab(auditTrail.getTab())
