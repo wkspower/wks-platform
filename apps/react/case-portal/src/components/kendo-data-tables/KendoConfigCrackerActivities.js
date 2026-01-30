@@ -1234,7 +1234,9 @@ const DecokingConfig = () => {
       ? ibrGridThree.filter((col) => col.field !== 'demo')
       : ibrGridThree
 
-  if (siteName === 'nmd') return <DecokingConfigNMD />
+  if (siteName === 'nmd') {
+    return <DecokingConfigNMD pid={PLANT_ID} />
+  }
 
   return (
     <Box>

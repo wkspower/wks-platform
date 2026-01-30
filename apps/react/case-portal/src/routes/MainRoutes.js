@@ -76,6 +76,7 @@ import TcsInput from 'components/aop-phase-two/tcs/TcsInput/index'
 import AopDashboard from 'components/kendo-data-tables/AopDashboard'
 import ProposedConsumptionNorms from 'components/kendo-data-tables/ProposedConsumptionNorms'
 import Summary from 'components/aop-phase-two/cpp/Summary/index'
+import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -652,6 +653,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='plant-budget-summary'>
                 <PlantBudgetSummary />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'site-budget-summary',
+            element: (
+              <PrivateRoute routeId='site-budget-summary'>
+                <SiteBudgetSummary />
               </PrivateRoute>
             ),
           },

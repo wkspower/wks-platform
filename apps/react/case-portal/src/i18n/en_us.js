@@ -94,6 +94,7 @@ const defs = {
     maintenanceSummary: 'Plant Maintenance Summary',
     siteMaintenanceSummary: 'Site Maintenance Summary',
     plantBudgetSummary: 'Plant Budget Summary',
+    siteBudgetSummary: 'Site Budget Summary',
 
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
@@ -294,6 +295,7 @@ const defs = {
         maintenanceSummary: 'Plant Maintenance Summary',
         siteMaintenanceSummary: 'Site Maintenance Summary',
         plantBudgetSummary: 'Plant Budget Summary',
+        siteBudgetSummary: 'Site Budget Summary',
 
         functionalReports: 'Reports',
         aopDesignBasis: 'AOP Basis',

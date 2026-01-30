@@ -117,13 +117,16 @@ const KendoDataTablesCrackerRunLengthNMD = ({
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const SCREEN_NAME = screenTitle?.title
+
+  const PLANT_NAME = plantObject?.name?.toUpperCase()
+  const SITE_NAME = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME = verticalObject?.name?.toUpperCase()
 
   const startYear = parseInt(AOP_YEAR?.split('-')[0], 10)
 
@@ -828,7 +831,7 @@ const KendoDataTablesCrackerRunLengthNMD = ({
       <ExcelExport
         data={rowsPopUp}
         ref={_export}
-        fileName={`Cracker-runlength.xlsx`}
+        fileName={`${RUN_LENGTH_EXCEL_NAME}.xlsx`}
       >
         <Grid
           style={{ height: 630 }}
@@ -1054,6 +1057,7 @@ const KendoDataTablesCrackerRunLengthNMD = ({
   }
 
   const NEXT_AOP_YEAR = getNextAopYear(AOP_YEAR)
+  const RUN_LENGTH_EXCEL_NAME = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_Run_Length_${NEXT_AOP_YEAR}`
 
   const saveCrackerRunLength = async (singleRow) => {
     setLoading1(true)

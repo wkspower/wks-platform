@@ -48,11 +48,16 @@ const DecokingConfigNMD = () => {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
+  const PLANT_NAME = plantObject?.name?.toUpperCase()
+  const SITE_NAME = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME = verticalObject?.name?.toUpperCase()
+
+  const RUN_LENGTH_EXCEL_NAME = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_Run_Length_${AOP_YEAR}`
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
@@ -293,8 +298,12 @@ const DecokingConfigNMD = () => {
   )
 
   useEffect(() => {
-    fetchData()
-  }, [PLANT_ID, AOP_YEAR, oldYear, yearChanged, keycloak, fetchData])
+    const timer = setTimeout(() => {
+      fetchData()
+    }, 1000) // 2 seconds delay
+
+    return () => clearTimeout(timer)
+  }, [PLANT_ID, AOP_YEAR])
 
   function validateAllDateOverlaps(rows) {
     const pairs = [['ibrStartDate', 'ibrEndDate', 'IBR']]
@@ -844,7 +853,12 @@ const DecokingConfigNMD = () => {
       severity: 'success',
     })
     try {
-      await DataService.getRunLengthExcelNMD(keycloak, PLANT_ID, AOP_YEAR)
+      await DataService.getRunLengthExcelNMD(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        RUN_LENGTH_EXCEL_NAME,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -1055,7 +1069,7 @@ const DecokingConfigNMD = () => {
         columns={ibrPlanColumns}
         rows={getRows('IBR Plan')[2]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 2)}
-        fetchData={fetchData}
+        // fetchData={fetchData}
         handleRemarkCellClick={handleRemarkCellClick2}
         remarkDialogOpen={remarkDialogOpenSdTa}
         currentRemark={currentRemarkSdTa}
@@ -1079,7 +1093,7 @@ const DecokingConfigNMD = () => {
         columns={filteredIbrGridThree}
         rows={getRows('IBR Plan')[3]}
         setRows={(data) => setRowsForTab('IBR Plan', data, 3)}
-        fetchData={fetchData}
+        // fetchData={fetchData}
         handleRemarkCellClick={handleRemarkCellClickRunLength}
         remarkDialogOpen={remarkDialogOpenRunLength}
         currentRemark={currentRemarkRunLength}
