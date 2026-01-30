@@ -438,9 +438,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						cell.setCellValue((Date) value);
 						cell.setCellStyle(dateTimeStyle);
 					} else if (value instanceof Number) {
-						if (col == 2) {
-	                        cell.setCellStyle(decimalStyle);
-	                    }
+						if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+							if (col == 2) {
+		                        cell.setCellStyle(decimalStyle);
+		                    }
+						}
+						
 						cell.setCellValue(((Number) value).doubleValue());
 					} else if (value instanceof Boolean) {
 						cell.setCellValue((Boolean) value);
