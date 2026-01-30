@@ -88,6 +88,7 @@ const ProductionvolumeData = ({ permissions }) => {
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
   const SITE_NAME = siteObject?.name?.toLowerCase()
   const IS_PET = verticalObject?.name?.toLowerCase() == 'pet'
+  const IS_VCM_DMD_VCM = IS_VCM && SITE_NAME == 'dmd' && PLANT_NAME == 'vcm'
 
   const headerMap = generateHeaderNames(AOP_YEAR)
   const [rows, setRows] = useState()
@@ -911,6 +912,8 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Proposed Operating Capacity (Ethylene)'
+          :IS_VCM_DMD_VCM
+          ? 'Steady state Operating Capacity'
           : 'Proposed Operating Capacity',
     },
     isOldYear,
