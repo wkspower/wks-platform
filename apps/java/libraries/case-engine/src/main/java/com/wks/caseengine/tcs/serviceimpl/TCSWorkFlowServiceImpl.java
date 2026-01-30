@@ -534,4 +534,14 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
         .build()).toList();
     }
 
+
+
+
+    @Override
+    public List<PlantSubmissionAuditTrailDTO> getEBSSubmissionAuditTrail(String plantName, String siteId,
+            String verticalId, String type) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getEBSSubmissionAuditTrail'");
+    }
+
 }
