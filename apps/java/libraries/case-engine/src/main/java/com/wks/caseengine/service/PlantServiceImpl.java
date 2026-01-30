@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.rest.entity.Plant;
@@ -65,7 +66,10 @@ public class PlantServiceImpl implements PlantService {
 	    	  	
    }
 
-	
+	@Override
+	public List<Plants> findUniqueNamesPlantsByVerticalAndSite(UUID verticalId, UUID siteId) {
+		return plantsRepository.findUniqueNamesPlantsByVerticalAndSite(verticalId, siteId);
+	}
 
 }
 

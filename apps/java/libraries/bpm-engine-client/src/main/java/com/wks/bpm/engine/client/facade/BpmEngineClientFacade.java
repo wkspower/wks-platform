@@ -14,6 +14,9 @@ package com.wks.bpm.engine.client.facade;
 import java.util.List;
 import java.util.Optional;
 
+import org.camunda.community.rest.client.dto.TaskDto;
+import org.camunda.community.rest.client.dto.VariableValueDto;
+
 import com.wks.bpm.engine.exception.ProcessDefinitionNotFoundException;
 import com.wks.bpm.engine.exception.ProcessInstanceNotFoundException;
 import com.wks.bpm.engine.model.spi.ActivityInstance;
@@ -68,5 +71,11 @@ public interface BpmEngineClientFacade {
 	ProcessVariable[] findVariables(String processInstanceId);
 
 	void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> messageCorrelateKeys);
+
+	void completeTaskByTaskDefinitionKey(String businessKey, String taskDefinitionKey, List<ProcessVariable> variables);
+
+ List<TaskDto> findTasksByBusinessKeyAndProcessDefinitionKey(final Optional<String> processInstanceBusinessKey, final Optional<String> processDefinitionKey);
+
+	void updateProcessVariable(final String processInstanceId, String variableName, VariableValueDto variable);
 
 }

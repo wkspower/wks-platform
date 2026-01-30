@@ -34,10 +34,19 @@ public class C7VariablesMapper implements VariablesMapper<Map<String, VariableVa
 			VariableValueDto variableValueDto = new VariableValueDto();
 			variableValueDto.setValue(processVariable.getValue());
 			variableValueDto.setType(processVariable.getType());
+			
+			if (processVariable.getValueInfo() != null) {
+				variableValueDto.setValueInfo(processVariable.getValueInfo());
+			}
+			
 			variableValueMap.put(processVariable.getName(), variableValueDto);
+			
 		}
 
 		return variableValueMap;
 	}
+
+
+
 
 }
