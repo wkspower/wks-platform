@@ -421,7 +421,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
          // *************** finished saving audit trail for submission history *************************
 
     }
-
+    @Override
     public void CTSApproval(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
 
         String businessKey = siteId + "-" + finacialYear;
@@ -558,13 +558,12 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
     }
   
     @Override
-    public List<PlantSubmissionAuditTrailDTO> getSubmissionAuditTrail(String plantName, String siteId, String verticalId, String type) { 
+    public List<PlantSubmissionAuditTrailDTO> getSubmissionAuditTrail(String plantId, String siteId, String verticalId, String type) { 
 
-         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrail(UUID.fromString(plantName), UUID.fromString(siteId), UUID.fromString(verticalId), type);
 
-         if(auditTrails.isEmpty()) { 
-            throw new RuntimeException("No audit trail found for given plant, site and vertical");
-         }
+         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrail(UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId), type);
+
+         
 
          return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
          .plantId(UUID.fromString(auditTrail.getPlantId()))
@@ -588,9 +587,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getLatestPlantSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), type);
 
-        if(auditTrails.isEmpty()) { 
-            throw new RuntimeException("No audit trail found for given site and vertical");
-        }
+       
 
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
         .plantId(UUID.fromString(auditTrail.getPlantId()))
@@ -612,10 +609,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
     @Override
     public List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrailByTab(String plantId, String siteId, String verticalId, String type, String tab) { 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrailByTab(UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId), type, tab);
-        if(auditTrails.isEmpty()) {   
-            throw new RuntimeException("No audit trail found for given plant, site and vertical");
-
-        }
+       
 
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
         .plantId(UUID.fromString(auditTrail.getPlantId()))
