@@ -23,6 +23,10 @@ tmp/
 *~.nib
 local.properties
 .settings/
+
+# Archive files
+*.7z
+*.zip
 .loadpath
 .recommenders
 
@@ -141,10 +145,7 @@ apps/python/PPPython-script/
 !apps/python/PPPython-script/
 apps/python/PPPython-script/**
 !apps/python/PPPython-script/**/*.py
-apps/python/PPPython-script.7z
-apps/python/PPPython-script.zip
 script1createandinsert.sql
-sql.zip
 scripts/linux/build-specific-services.sh
 formulaDocument.md
 
