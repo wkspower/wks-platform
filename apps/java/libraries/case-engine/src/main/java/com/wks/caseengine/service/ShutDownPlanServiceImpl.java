@@ -1183,7 +1183,16 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							dto.setErrDescription("Please add month");
 							alreadyFailed = true;
 						}
-						dto.setDurationInHrs(Double.parseDouble(getCellAsString(row.getCell(2), dto, evaluator)));
+						String timeStr = getCellAsString(row.getCell(2), dto, evaluator); 
+
+						if (timeStr != null && timeStr.contains(":")) {
+						    String[] parts = timeStr.split(":");
+						    double hours = Double.parseDouble(parts[0]);
+						    double minutes = Double.parseDouble(parts[1]);
+						    
+						    double formattedValue = hours + (minutes / 100); 
+						    dto.setDurationInHrs(formattedValue);
+						}
 					}else {
 						String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
 						String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
