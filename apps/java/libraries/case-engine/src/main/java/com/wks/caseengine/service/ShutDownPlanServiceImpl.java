@@ -332,6 +332,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			SimpleDateFormat formatter = new SimpleDateFormat(pattern);
 			Workbook workbook = new XSSFWorkbook();
 			CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm");
+			CellStyle decimalStyle = workbook.createCellStyle();
+	        decimalStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
 			Sheet sheet = workbook.createSheet("Sheet1");
 			int currentRow = 0;
 			List<List<Object>> rows = new ArrayList<>();
@@ -362,8 +364,12 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		            	list.add(startDate != null ? formatter.format(startDate) : null);
 						list.add(endDate != null ? formatter.format(endDate) : null);
 		            }
+					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+						list.add(dto.getDurationInHrs());
+					}else {
+						list.add(formattedDuration);
+					}
 					
-					list.add(formattedDuration);
 					list.add(dto.getRemark());
 					list.add(dto.getId());
 					// list.add(productString);
@@ -432,6 +438,9 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						cell.setCellValue((Date) value);
 						cell.setCellStyle(dateTimeStyle);
 					} else if (value instanceof Number) {
+						if (col == 2) {
+	                        cell.setCellStyle(decimalStyle);
+	                    }
 						cell.setCellValue(((Number) value).doubleValue());
 					} else if (value instanceof Boolean) {
 						cell.setCellValue((Boolean) value);
@@ -1183,16 +1192,8 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 							dto.setErrDescription("Please add month");
 							alreadyFailed = true;
 						}
-						String timeStr = getCellAsString(row.getCell(2), dto, evaluator); 
-
-						if (timeStr != null && timeStr.contains(":")) {
-						    String[] parts = timeStr.split(":");
-						    double hours = Double.parseDouble(parts[0]);
-						    double minutes = Double.parseDouble(parts[1]);
-						    
-						    double formattedValue = hours + (minutes / 100); 
-						    dto.setDurationInHrs(formattedValue);
-						}
+						dto.setDurationInHrs(Double.parseDouble(getCellAsString(row.getCell(2), dto, evaluator))); 
+		
 					}else {
 						String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
 						String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
