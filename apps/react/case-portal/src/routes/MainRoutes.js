@@ -77,6 +77,9 @@ import AopDashboard from 'components/kendo-data-tables/AopDashboard'
 import ProposedConsumptionNorms from 'components/kendo-data-tables/ProposedConsumptionNorms'
 import Summary from 'components/aop-phase-two/cpp/Summary/index'
 import SenderReceiverMapping from 'components/aop-phase-two/cpp/SenderReceiverMapping'
+import ProductionNormsBasis from 'components/aop-phase-two/vgoht/production-norms-basis/index'
+import ShutdownActivities from 'components/aop-phase-two/vgoht/shutdown-activities/index'
+import SlowdownActivities from 'components/aop-phase-two/vgoht/slowdown-activities/index'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -218,6 +221,7 @@ export const MainRoutes = (
             ),
           },
 
+          //TCS Started
           {
             path: 'tcs-input',
             element: (
@@ -242,6 +246,7 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+          //TCS Ended
 
           {
             path: 'aop-design-basis',
@@ -401,6 +406,33 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+
+          //Vertical VGOHT Started
+          {
+            path: 'production-norms-basis',
+            element: (
+              <PrivateRoute routeId='production-norms-basis'>
+                <ProductionNormsBasis />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'shutdown-activities',
+            element: (
+              <PrivateRoute routeId='shutdown-activities'>
+                <ShutdownActivities />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'slowdown-activities',
+            element: (
+              <PrivateRoute routeId='slowdown-activities'>
+                <SlowdownActivities />
+              </PrivateRoute>
+            ),
+          },
+          //Vertical VGOHT Ended
         ],
       },
 
