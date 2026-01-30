@@ -6,13 +6,15 @@ import com.wks.caseengine.tcs.dto.camundadto.PlantSubmissionAuditTrailDTO;
 
 public interface TCSWorkFlowService {
     
-    void completePlantSubmissionTask(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO);
+    void completePlantSubmissionTask(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
-    void ebsApproval(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO);
+    void ebsApproval(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
-    void ebsApproveReject(String plantName, String siteId, boolean approvalStatus, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO);
+    void ebsApproveReject(String plantName, String siteId, boolean approvalStatus, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
-    void startProcess(String verticalId, String siteId);
+    void startProcess(String verticalId, String siteId, String finacialYear);
+
+    void CTSApproval(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
     List<PlantSubmissionAuditTrailDTO> getSubmissionAuditTrail(String plantName, String siteId, String verticalId, String type);
 
