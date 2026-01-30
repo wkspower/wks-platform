@@ -78,6 +78,7 @@ public class PowerGenerationService {
                 continue;
             }
 
+            
             // get the norm parameters for the current asset Id
             List<PowerGenerationNormParametersProjection> normParameters = repository.getNormParametersByAssetIds(Arrays.asList(row.getAssetId()));
 
@@ -116,9 +117,9 @@ public class PowerGenerationService {
            
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
             dto.setRemarks(row.getRemarks());
-             dto.setAssetName(row.getAssetName());
-             dto.setAssetId(row.getAssetId());
-             dto.setAssetType(row.getAssetType());
+            dto.setAssetName(row.getAssetName());
+            dto.setAssetId(row.getAssetId());
+            dto.setAssetType(row.getAssetType());
              dto.setApril(monthMap.get("April"));
              dto.setMay(monthMap.get("May"));
              dto.setJune(monthMap.get("June"));
@@ -440,6 +441,7 @@ public class PowerGenerationService {
 
         // Execute UPSERT operations for all assets and months
         // This uses MERGE statement (single operation per record - no check-then-act)
+        
         for (AssetOperationalResponseDTO asset : payload) {
             Map<Integer, MonthlyHoursDTO> monthlyData = buildAssetMonthlyData(asset);
 
@@ -909,11 +911,34 @@ public class PowerGenerationService {
 
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
+                
+                // Skip completely empty rows
+                boolean isRowEmpty = true;
+                for (int i = 0; i < row.getLastCellNum(); i++) {
+                    Cell cell = row.getCell(i);
+                    if (cell != null && !cell.toString().trim().isEmpty()) {
+                        isRowEmpty = false;
+                        break;
+                    }
+                }
+                if (isRowEmpty) {
+                    System.out.println("Skipping empty row: " + row.getRowNum());
+                    continue;
+                }
+                
                 AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
                 
                 try {
                     int col = 0;
-                    dto.setAssetName(getStringCellValue(row.getCell(col++)));
+                    String assetName = getStringCellValue(row.getCell(col++));
+                    
+                    // Skip rows with no asset name (data quality issue)
+                    if (assetName == null || assetName.trim().isEmpty()) {
+                        System.out.println("Skipping row with no asset name: " + row.getRowNum());
+                        continue;
+                    }
+                    
+                    dto.setAssetName(assetName);
                     
                     // Utility Distributed
                     String utilityDistName = getStringCellValue(row.getCell(col++));

@@ -48,7 +48,7 @@ const ImportPower = () => {
   const columns = [
     { field: 'id', title: 'ID', hidden: true },
     {
-      field: 'plant',
+      field: 'plantName',
       title: 'Plant',
       width: 150,
       minWidth: 150,
@@ -56,9 +56,34 @@ const ImportPower = () => {
       editable: false,
     },
     {
+      field: 'sourceName',
+      title: 'Utility/Material',
+      width: 150,
+      minWidth: 150,
+      type: 'text',
+      editable: false,
+    },
+    {
+      field: 'sapCode',
+      title: 'SAP Code',
+      width: 120,
+      minWidth: 120,
+      type: 'text',
+      editable: false,
+    },
+    {
+      field: 'materialCode',
+      title: 'Material Code',
+      width: 120,
+      minWidth: 120,
+      type: 'text',
+      editable: false,
+      hidden: true,
+    },
+    {
       field: 'uom',
       title: 'UOM',
-      widthT: 60,
+      width: 80,
       minWidth: 80,
       type: 'text',
       editable: false,
@@ -215,7 +240,7 @@ const ImportPower = () => {
   const fetchImportConsumptionData = async (keycloak, PLANT_ID, AOP_YEAR) => {
     setLoading(true)
     try {
-      const res = await InputApiService.getImportPowerData(
+      const res = await InputApiService.getImportPowerCapacity(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -230,8 +255,26 @@ const ImportPower = () => {
 
       let tempRes = res.map((item, index) => {
         const transformed = {
-          id: item?.id || index + 1,
-          ...item,
+          sourceId: item?.sourceId,
+          sourceName: item?.sourceName,
+          plantName: item?.plantName,
+          sapCode: item?.sapCode,
+          materialCode: item?.materialCode,
+          uom: item?.uom,
+          april: item?.april,
+          may: item?.may,
+          june: item?.june,
+          july: item?.july,
+          aug: item?.august,
+          sept: item?.september,
+          oct: item?.october,
+          nov: item?.november,
+          dec: item?.december,
+          jan: item?.january,
+          feb: item?.february,
+          mar: item?.march,
+          remarks: item?.remarks,
+          id: item?.sourceId || index + 1,
         }
         return transformed
       })
@@ -257,7 +300,7 @@ const ImportPower = () => {
     allAction: true,
     showImport: true,
     showExport: true,
-    ExcelName: `Import Power - ${AOP_YEAR}`,
+    ExcelName: `Import Power Capacity - ${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: screenTitle?.title,
@@ -308,7 +351,7 @@ const ImportPower = () => {
       data,
       originalRows,
       fieldsToCheck,
-      'plant',
+      'sourceName',
     )
 
     if (validationError) {
@@ -321,12 +364,28 @@ const ImportPower = () => {
       return
     }
 
-    const payload = modifiedData?.map(({ id, inEdit, ...rest }) => rest)
+    const payload = modifiedData?.map(({ id, inEdit, sourceId, sourceName, plantName, sapCode, materialCode, uom, aug, sept, oct, nov, dec, jan, feb, mar, ...rest }) => ({
+      sourceId,
+      sourceName,
+      plantName,
+      sapCode,
+      materialCode,
+      uom,
+      august: aug,
+      september: sept,
+      october: oct,
+      november: nov,
+      december: dec,
+      january: jan,
+      february: feb,
+      march: mar,
+      ...rest,
+    }))
 
     try {
       console.log('payload', payload)
 
-      const response = await InputApiService.saveImportPower(
+      const response = await InputApiService.saveImportPowerCapacity(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -357,7 +416,7 @@ const ImportPower = () => {
 
     setLoading(true)
     try {
-      const response = await InputApiService.saveImportPowerExcel(
+      const response = await InputApiService.saveImportPowerCapacityExcel(
         file,
         keycloak,
         PLANT_ID,
@@ -425,7 +484,7 @@ const ImportPower = () => {
     })
 
     try {
-      await InputApiService.exportImportPowerExcel(keycloak, PLANT_ID, AOP_YEAR)
+      await InputApiService.exportImportPowerCapacityExcel(keycloak, PLANT_ID, AOP_YEAR)
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
