@@ -131,7 +131,7 @@ async function deleteBusinessDemandData(maintenanceId, keycloak) {
   }
 }
 
-async function businessDemandExport(keycloak, PLANT_ID, AOP_YEAR) {
+async function businessDemandExport(keycloak, PLANT_ID, AOP_YEAR, EXCEL_NAME) {
   const url = `${Config.CaseEngineUrl}/task/business-demand-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
@@ -154,7 +154,7 @@ async function businessDemandExport(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `BusinessDemand_${'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

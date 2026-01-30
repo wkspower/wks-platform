@@ -40,7 +40,7 @@ const BusinessDemand = ({ permissions }) => {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
+
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
@@ -55,8 +55,20 @@ const BusinessDemand = ({ permissions }) => {
   const IS_PTA_VERTICAL = lowerVertName === 'pta'
   const IS_PET_VERTICAL = lowerVertName === 'pet'
   const IS_VCM_VERTICAL = lowerVertName === 'vcm'
+  const IS_CRACKER_VERTICAL = lowerVertName == 'cracker'
+  const PRODUCTION_TARGET_LABEL = IS_VCM_VERTICAL
+    ? 'Production Target (This is a reference for entering the Business Demand value)'
+    : 'Production Target (MT) (This is a reference for entering the Business Demand value)'
 
   const SCREEN_NAME = screenTitle?.title
+
+  const PLANT_NAME = plantObject?.name?.toUpperCase()
+  const SITE_NAME = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_NAME = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_Business_Demand_${AOP_YEAR}`
+  const EXCEL_NAME_GRID2 = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${SCREEN_NAME}_${AOP_YEAR}`
+
   const apiRef = useGridApiRef()
   const [rows, setRows] = useState()
   const headerMap = generateHeaderNames(AOP_YEAR)
@@ -363,7 +375,7 @@ const BusinessDemand = ({ permissions }) => {
       units: ['TPH', 'TPD'],
       showTitleNameBusiness: true,
       titleName: percentageTitle,
-      ExcelName: `${VERTICAL_NAME}_${SCREEN_NAME}`,
+      ExcelName: `${EXCEL_NAME_GRID2}`,
       isHeight: lowerVertName !== 'meg' && rows?.length > 10,
       isTotalFooterActive:
         // IS_VCM_VERTICAL ||
@@ -375,16 +387,16 @@ const BusinessDemand = ({ permissions }) => {
           : false,
 
       downloadExcelBtn:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
+        IS_CRACKER_VERTICAL || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? true
           : false,
       uploadExcelBtn:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
+        IS_CRACKER_VERTICAL || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? true
           : false,
 
       downloadExcelBtnFromUI:
-        lowerVertName == 'cracker' || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
+        IS_CRACKER_VERTICAL || IS_PE_PP_VERTICAL || IS_PET_VERTICAL
           ? false
           : true,
     },
@@ -491,6 +503,7 @@ const BusinessDemand = ({ permissions }) => {
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        EXCEL_NAME,
       )
     } catch (error) {
       console.error('Error downloading Excel:', error)
@@ -520,9 +533,7 @@ const BusinessDemand = ({ permissions }) => {
               id='meg-grid-header'
             >
               <Typography component='span' className='accordian-title'>
-                {IS_VCM_VERTICAL
-                  ? 'Production Target (This is a reference for entering the Business Demand value)'
-                  : 'Production Target (MT) (This is a reference for entering the Business Demand value)'}
+                {PRODUCTION_TARGET_LABEL}
               </Typography>
             </CustomAccordionSummary>
             <CustomAccordionDetails>
@@ -582,7 +593,7 @@ const BusinessDemand = ({ permissions }) => {
         totalRowConfiguration={totalRowConfiguration}
       />
 
-      {lowerVertName == 'cracker' && (
+      {IS_CRACKER_VERTICAL && (
         <>
           <Box sx={{ width: '100%', margin: 0 }}>
             <PropaneBusiness permissions={adjustedPermissions} />
