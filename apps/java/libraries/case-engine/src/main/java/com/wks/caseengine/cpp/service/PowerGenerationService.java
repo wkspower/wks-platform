@@ -3,6 +3,7 @@ package com.wks.caseengine.cpp.service;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.YearMonth;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -38,6 +39,8 @@ import com.wks.caseengine.dto.MasterAssetOperationalResponseDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.FinancialYearMonthRepository;
 import com.wks.caseengine.cpp.repository.PowerGenerationRepository;
+import com.wks.caseengine.cpp.repository.ImportPowerHoursRepository;
+import com.wks.caseengine.entity.CPPImportPowerOperationalHours;
 import com.wks.caseengine.utility.Utility;
 
 @Service
@@ -48,6 +51,9 @@ public class PowerGenerationService {
 
     @Autowired
     private FinancialYearMonthRepository financialYearMonthRepo;
+
+    @Autowired
+    private ImportPowerHoursRepository importPowerHoursRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -112,7 +118,6 @@ public class PowerGenerationService {
             monthMap.put("January",   buildMonth(row.getJan(),   endYear, 1));
             monthMap.put("February",  buildMonth(row.getFeb(),  endYear, 2));
             monthMap.put("March",     buildMonth(row.getMar(),     endYear, 3));
-
           
            
             AssetOperationalResponseDTO dto = new AssetOperationalResponseDTO();
@@ -370,30 +375,70 @@ public class PowerGenerationService {
      }
       
 
-    public void setAssetOperationalHours(String financialYear, MasterAssetOperationalResponseDTO masterAssetOperationalResponseDTO) {
+    public void setAssetOperationalHours(String financialYear, MasterAssetOperationalResponseDTO masterAssetOperationalResponseDTO, UUID cppPlantId) {
 
         List<Object[]> updates = new ArrayList<>();
 
-        List<AssetOperationalResponseDTO> payload = new ArrayList<>();
+        List<AssetOperationalResponseDTO> powerPayload = new ArrayList<>();
+        List<AssetOperationalResponseDTO> importPowerPayload = new ArrayList<>();
 
+        System.out.println("[setAssetOperationalHours] Starting save for FY: " + financialYear);
+        System.out.println("[setAssetOperationalHours] Total power response items: " + (masterAssetOperationalResponseDTO.getPowerResponse() != null ? masterAssetOperationalResponseDTO.getPowerResponse().size() : 0));
+
+        // Separate PowerGen and ImportPower sources
         if(masterAssetOperationalResponseDTO.getPowerResponse() != null) {  
-            payload.addAll(masterAssetOperationalResponseDTO.getPowerResponse());
-
+            for(AssetOperationalResponseDTO asset : masterAssetOperationalResponseDTO.getPowerResponse()) {
+                // First check if assetType indicates ImportPower (Rev Proc)
+                if("Rev Proc".equals(asset.getAssetType())) {
+                    importPowerPayload.add(asset);
+                    System.out.println("[setAssetOperationalHours] Added to ImportPower: " + asset.getAssetName() + " (Type: " + asset.getAssetType() + ")");
+                } 
+                // If assetType is not set, check if assetId exists in CPPImportPowerOperationalHours table
+                else if(asset.getAssetId() != null) {
+                    // Query to check if this assetId already has data in ImportPower table
+                    var existingImportPowerRecord = importPowerHoursRepository.findByImportPowerSourceFkIdAndFinancialYear(
+                        asset.getAssetId(), 
+                        financialYear
+                    );
+                    if(existingImportPowerRecord.isPresent()) {
+                        importPowerPayload.add(asset);
+                        System.out.println("[setAssetOperationalHours] Added to ImportPower: " + asset.getAssetName() + " (AssetId: " + asset.getAssetId() + " found in CPPImportPowerOperationalHours)");
+                    } else {
+                        powerPayload.add(asset);
+                        System.out.println("[setAssetOperationalHours] Added to PowerGen: " + asset.getAssetName() + " (Type: " + asset.getAssetType() + ")");
+                    }
+                } else {
+                    powerPayload.add(asset);
+                    System.out.println("[setAssetOperationalHours] Added to PowerGen: " + asset.getAssetName() + " (Type: " + asset.getAssetType() + ")");
+                }
+            }
         }
-      else { 
+        
+        System.out.println("[setAssetOperationalHours] Separated - PowerGen: " + powerPayload.size() + ", ImportPower: " + importPowerPayload.size());
+      
+        // Handle SteamResponse separately
         if(masterAssetOperationalResponseDTO.getSteamResponse() != null) {  
-            payload.addAll(masterAssetOperationalResponseDTO.getSteamResponse());
-            updateLinkedOperationalHours(payload);
-            return;
+            updateLinkedOperationalHours(masterAssetOperationalResponseDTO.getSteamResponse());
+            // Only return early if there's no powerPayload to process
+            if(powerPayload.isEmpty() && importPowerPayload.isEmpty()) {
+                return;
+            }
         }
-      }
 
         int startYear = Integer.parseInt(financialYear.substring(0, 4));
         int endYear = startYear + 1;
 
+        // ===== SAVE IMPORT POWER OPERATIONAL HOURS =====
+        if(!importPowerPayload.isEmpty()) {
+            saveImportPowerOperationalHours(importPowerPayload, financialYear);
+        }
 
-        
-        // Fetch all financial month IDs in for a given financial year
+        // ===== SAVE POWER GENERATION OPERATIONAL HOURS =====
+        if(powerPayload.isEmpty()) {
+            return;  // No PowerGen data to save
+        }
+
+        // Fetch all financial month IDs for a given financial year
         Map<Integer, UUID> financialMonthIds = new LinkedHashMap<>();
         List<Object[]> fyMonths = financialYearMonthRepo.findFinancialYearMonths(startYear, endYear);
         for (Object[] row : fyMonths) {
@@ -404,7 +449,7 @@ public class PowerGenerationService {
 
         // *** Logic to Update Remarks ***
         List<Object[]> remarksUpdates = new ArrayList<>();
-        for (AssetOperationalResponseDTO asset : payload) {  
+        for (AssetOperationalResponseDTO asset : powerPayload) {  
            UUID assetId = asset.getAssetId();
            String remarks = asset.getRemarks();
              if(asset.getRemarks() != null) {   
@@ -423,10 +468,8 @@ public class PowerGenerationService {
       }
            // *** End of Remarks Update Logic ***
 
-
-
         // Validate all data first before any database operations (fail-fast)
-        for (AssetOperationalResponseDTO asset : payload) {
+        for (AssetOperationalResponseDTO asset : powerPayload) {
             Map<Integer, MonthlyHoursDTO> monthlyData = buildAssetMonthlyData(asset);
             for (Map.Entry<Integer, MonthlyHoursDTO> entry : monthlyData.entrySet()) {
                 Integer month = entry.getKey();
@@ -442,7 +485,7 @@ public class PowerGenerationService {
         // Execute UPSERT operations for all assets and months
         // This uses MERGE statement (single operation per record - no check-then-act)
         
-        for (AssetOperationalResponseDTO asset : payload) {
+        for (AssetOperationalResponseDTO asset : powerPayload) {
             Map<Integer, MonthlyHoursDTO> monthlyData = buildAssetMonthlyData(asset);
 
            
@@ -475,6 +518,78 @@ public class PowerGenerationService {
             String sql = "UPDATE PowerGenerationAssets SET Remarks = ? WHERE AssetId = ?";
             jdbcTemplate.batchUpdate(sql, updates);
         }
+    }
+
+    /**
+     * Save ImportPower operational hours to CPPImportPowerOperationalHours table
+     * Stores monthly data directly in the table (Apr, May, Jun, etc.)
+     * Uses assetId directly as the ImportPowerSourceFk_Id
+     */
+    private void saveImportPowerOperationalHours(List<AssetOperationalResponseDTO> importPowerAssets, String financialYear) {
+        System.out.println("[ImportPower] saveImportPowerOperationalHours called with " + importPowerAssets.size() + " assets for FY: " + financialYear);
+        
+        for(AssetOperationalResponseDTO asset : importPowerAssets) {
+            try {
+                // Use assetId directly as the ImportPowerSourceFk_Id
+                if(asset.getAssetId() == null) {
+                    System.err.println("[ImportPower] WARNING: AssetId is null for " + asset.getAssetName());
+                    continue;  // Skip this asset if assetId is missing
+                }
+                
+                UUID importPowerSourceId = asset.getAssetId();
+                System.out.println("[ImportPower] Processing asset: " + asset.getAssetName() + " (AssetId: " + importPowerSourceId + ")");
+                
+                // Build operational hours entity with monthly data
+                CPPImportPowerOperationalHours opHours = new CPPImportPowerOperationalHours();
+                opHours.setImportPowerSourceFkId(importPowerSourceId);
+                opHours.setFinancialYear(financialYear);
+                opHours.setRemarks(asset.getRemarks());
+                opHours.setCreatedDate(LocalDateTime.now());
+                opHours.setUpdatedDate(LocalDateTime.now());
+                
+                // Set monthly hours from the asset response
+                if(asset.getApril() != null) opHours.setApr(asset.getApril().getNetOperationHrs());
+                if(asset.getMay() != null) opHours.setMay(asset.getMay().getNetOperationHrs());
+                if(asset.getJune() != null) opHours.setJun(asset.getJune().getNetOperationHrs());
+                if(asset.getJuly() != null) opHours.setJul(asset.getJuly().getNetOperationHrs());
+                if(asset.getAug() != null) opHours.setAug(asset.getAug().getNetOperationHrs());
+                if(asset.getSep() != null) opHours.setSep(asset.getSep().getNetOperationHrs());
+                if(asset.getOct() != null) opHours.setOct(asset.getOct().getNetOperationHrs());
+                if(asset.getNov() != null) opHours.setNov(asset.getNov().getNetOperationHrs());
+                if(asset.getDec() != null) opHours.setDec(asset.getDec().getNetOperationHrs());
+                if(asset.getJan() != null) opHours.setJan(asset.getJan().getNetOperationHrs());
+                if(asset.getFeb() != null) opHours.setFeb(asset.getFeb().getNetOperationHrs());
+                if(asset.getMarch() != null) opHours.setMar(asset.getMarch().getNetOperationHrs());
+                
+                System.out.println("[ImportPower] Monthly hours set - Apr:" + opHours.getApr() + " May:" + opHours.getMay() + " Jun:" + opHours.getJun());
+                
+                // Check if record already exists for this source and year
+                var existingRecord = importPowerHoursRepository.findByImportPowerSourceFkIdAndFinancialYear(
+                    importPowerSourceId, 
+                    financialYear
+                );
+                
+                if(existingRecord.isPresent()) {
+                    // Update existing record
+                    CPPImportPowerOperationalHours existing = existingRecord.get();
+                    opHours.setId(existing.getId());  // Preserve ID for update
+                    System.out.println("[ImportPower] Updating existing record with ID: " + existing.getId());
+                } else {
+                    System.out.println("[ImportPower] Creating new record for import power source: " + importPowerSourceId);
+                }
+                
+                // Save (INSERT or UPDATE)
+                CPPImportPowerOperationalHours saved = importPowerHoursRepository.save(opHours);
+                System.out.println("[ImportPower] Successfully saved record with ID: " + saved.getId());
+                
+            } catch(Exception e) {
+                System.err.println("[ImportPower] ERROR saving asset " + asset.getAssetName() + ": " + e.getMessage());
+                e.printStackTrace();
+                throw new RuntimeException("Failed to save ImportPower operational hours for " + asset.getAssetName(), e);
+            }
+        }
+        
+        System.out.println("[ImportPower] Successfully completed saving all ImportPower operational hours");
     }
 
     public void updateLinkedOperationalHours(List<AssetOperationalResponseDTO> payload) {  
@@ -805,7 +920,7 @@ public class PowerGenerationService {
                 try {
                     MasterAssetOperationalResponseDTO masterDTO = new MasterAssetOperationalResponseDTO();
                     masterDTO.setPowerResponse(validRecords);
-                    setAssetOperationalHours(financialYear, masterDTO);
+                    setAssetOperationalHours(financialYear, masterDTO, cppPlantId);
                 } catch (Exception e) {
                     System.out.println("error in import method: " + e.getMessage());
                     // Mark all valid records as failed if save fails
@@ -859,7 +974,7 @@ public class PowerGenerationService {
                 try {
                     MasterAssetOperationalResponseDTO masterDTO = new MasterAssetOperationalResponseDTO();
                     masterDTO.setSteamResponse(validRecords);
-                    setAssetOperationalHours(financialYear, masterDTO);
+                    setAssetOperationalHours(financialYear, masterDTO, cppPlantId);
                 } catch (Exception e) {
                     System.out.println("error in import method: " + e.getMessage());
                     // Mark all valid records as failed if save fails

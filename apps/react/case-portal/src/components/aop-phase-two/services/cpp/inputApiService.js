@@ -78,8 +78,8 @@ async function getOperationHoursData(keycloak, plantId, year) {
   }
 }
 
-async function saveOperationHours(keycloak, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/assets/operational-hours/${AOP_YEAR}`
+async function saveOperationHours(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/assets/operational-hours/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
