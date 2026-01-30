@@ -148,9 +148,34 @@ public class TCSOutPutWorkFlowController {
 	// 	return ResponseEntity.noContent().build();
 	// }
 
-	@GetMapping(value = "/variables/{processInstanceId}")
-	public ResponseEntity<ProcessVariable[]> getVariables(@PathVariable final String processInstanceId) {
-		return ResponseEntity.ok(processEngineClientFacade.findVariables(processInstanceId));
+	@GetMapping(value = "/variables/{siteId}/{finacialYear}")
+	public ResponseEntity<ProcessVariable[]> getVariables(@PathVariable final String siteId, @PathVariable final String finacialYear) {
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to get variables");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to get variables");
+		}
+		String businessKey = siteId + "-" + finacialYear;
+
+		
+		if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
+			throw new RestResourceNotFoundException("TCS Output Workflow Process Definition Key is not set");
+		   }
+			
+			ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(tcsOutputWorkflowProcessDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
+
+			if(processInstances.length > 1) {
+				throw new RestResourceNotFoundException("Multiple process instances found for business key: " + businessKey + " and process definition key: " + tcsOutputWorkflowProcessDefinitionKey);
+			}
+
+		if(processInstances.length == 0) {  
+
+			return ResponseEntity.ok(new ProcessVariable[0]);
+		}
+
+			
+		return ResponseEntity.ok(processEngineClientFacade.findVariables(processInstances[0].getId()));
 	}
 
 	//get process instance by business key
