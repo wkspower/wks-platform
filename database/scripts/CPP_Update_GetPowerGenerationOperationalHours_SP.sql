@@ -8,7 +8,7 @@
 USE [RIL.AOP]
 GO
 
-ALTER PROCEDURE [dbo].[CPP_NMD_GetPowerGenerationOperationalHoursv1]
+ALTER PROCEDURE [dbo].[CPP_NMD_GetPowerGenerationOperationalHours]
 (
     @CPPPlantId UNIQUEIDENTIFIER,
     @FinancialYear VARCHAR(7)   -- example: '2025-26'
@@ -25,6 +25,8 @@ BEGIN
     SET @EndYear   = @StartYear + 1;
 
     -- ===== UNION: PowerGenerationAssets + ImportPower Sources =====
+    
+    WITH CombinedOperationalHours AS (
     
     -- Part 1: PowerGenerationAssets (existing logic - UNCHANGED)
     SELECT
@@ -56,7 +58,7 @@ BEGIN
              OR (fym.Year = @EndYear   AND fym.Month BETWEEN 1 AND 3)
            )
     WHERE pga.CPPPLANT_FK_Id = @CPPPlantId
-      AND pga.AssetName NOT IN ('NMD-Rev-Proc')
+      AND pga.AssetType != 'PROC'
     GROUP BY pga.AssetName
 
     UNION ALL
@@ -88,6 +90,11 @@ BEGIN
         AND ipoh.FinancialYear = @FinancialYear
     WHERE ips.CPPPlant_FK_Id = @CPPPlantId
       AND ips.IsActive = 1
-    ORDER BY AssetName;
+    )
+    
+    -- Select from CTE with proper ordering to keep PowerGen and ImportPower sequential
+    SELECT *
+    FROM CombinedOperationalHours
+    ORDER BY AssetType ASC, AssetName ASC;
 
 END;

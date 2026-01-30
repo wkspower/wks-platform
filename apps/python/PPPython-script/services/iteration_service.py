@@ -434,6 +434,7 @@ def calculate_stg_extraction_requirements_load_based(
 def usd_iterate(
     month: int,
     year: int,
+    cpp_plant_id: str,
     lp_process: float,
     lp_fixed: float,
     mp_process: float,
@@ -520,7 +521,7 @@ def usd_iterate(
             heat_rate = hrsg_data['HeatRate'].iloc[0]
             from database.power_asset_queries import BTU_LB_TO_MMBTU_MT
             ng_norm = heat_rate * BTU_LB_TO_MMBTU_MT
-            print(f"    {hrsg_name}: Heat Rate = {heat_rate:.2f} BTU/lb → NG Norm = {ng_norm:.7f} MMBTU/MT")
+            print(f"    {hrsg_name}: Heat Rate = {heat_rate:.2f} BTU/lb -> NG Norm = {ng_norm:.7f} MMBTU/MT")
     
     # =========================================================
     # STEP 1: CALCULATE FIXED STEAM DEMANDS
@@ -627,8 +628,8 @@ def usd_iterate(
     # Power (from database)
     from services.demand_service import fetch_fixed_process_demands
     db_demands = fetch_fixed_process_demands(month, year)
-    power_fixed = db_demands["power"]["fixed"] if db_demands else 0.0
-    power_process = db_demands["power"]["process"] if db_demands else 0.0
+    power_fixed = db_demands.get("power", {}).get("fixed", 0.0) if db_demands and isinstance(db_demands, dict) else 0.0
+    power_process = db_demands.get("power", {}).get("process", 0.0) if db_demands and isinstance(db_demands, dict) else 0.0
     power_u4u_est = 15850.0  # Rough estimate for initial display
     power_total_est = power_fixed + power_process + power_u4u_est
     print(f"  | Power                | MWH    | {power_fixed:>13,.2f} | {power_process:>13,.2f} | {power_u4u_est:>13,.2f} | {power_total_est:>13,.2f} |")
@@ -766,7 +767,7 @@ def usd_iterate(
             print(f"  [Input] GT Reduction (power balance):    {gt_reduction_for_balance_mwh:>12.2f} MWh")
         
         power_result = distribute_by_priority(
-            month, year, 
+            month, year, cpp_plant_id,
             additional_demand_mwh=previous_utility_aux_mwh,
             stg_max_mwh=stg_limit_mwh,
             stg_min_override_mwh=stg_min_override_mwh,
@@ -1773,6 +1774,7 @@ if __name__ == "__main__":
     result = usd_iterate(
         month=4,
         year=2025,
+        cpp_plant_id="23BCA1B3-56DD-4C15-A3D6-3C2C9A62E653",  # Example plant ID
         lp_process=20109.57,
         lp_fixed=5169.51,
         mp_process=14030.00,
@@ -1811,6 +1813,7 @@ if __name__ == "__main__":
     result2 = usd_iterate(
         month=4,
         year=2025,
+        cpp_plant_id="23BCA1B3-56DD-4C15-A3D6-3C2C9A62E653",  # Example plant ID
         lp_process=20109.57,
         lp_fixed=5169.51,
         mp_process=14030.00,
