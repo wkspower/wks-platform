@@ -60,12 +60,12 @@ public class TCSOutPutWorkFlowController {
 	private TCSWorkFlowService tcsWorkFlowService;
 
     @Value("${camunda.process.id.tcs.output.workflow}")
-    private String tcsOutputWorkflowProcessId;
+    private String tcsOutputWorkflowProcessDefinitionKey;
 
-	@PostMapping(value = "/start/{verticalId}/{siteId}")
-	public ResponseEntity<String> start(@PathVariable final String verticalId, @PathVariable final String siteId) {
+	@PostMapping(value = "/start/{verticalId}/{siteId}/{finacialYear}")
+	public ResponseEntity<String> start(@PathVariable final String verticalId, @PathVariable final String siteId, @PathVariable final String finacialYear) {
 
-        if (tcsOutputWorkflowProcessId == null || tcsOutputWorkflowProcessId.isEmpty()) {
+        if (tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
             throw new RestResourceNotFoundException("TCS Output Workflow Process ID is not set");
         }
 
@@ -77,8 +77,12 @@ public class TCSOutPutWorkFlowController {
             throw new RestResourceNotFoundException("Site ID is required to start TCS Output Workflow");
         }
 
+        if(finacialYear == null || finacialYear.isEmpty()) {
+            throw new RestResourceNotFoundException("Financial Year is required to start TCS Output Workflow");
+        }
+
       
-     tcsWorkFlowService.startProcess(verticalId, siteId);
+     tcsWorkFlowService.startProcess(verticalId, siteId, finacialYear);
 		return ResponseEntity.ok("TCS Output Workflow started successfully");
 	}
 
@@ -103,10 +107,31 @@ public class TCSOutPutWorkFlowController {
 	// 	return ResponseEntity.ok(processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty()));
 	// }
 
-	@GetMapping(value = "/process-exists/{processDefinitionKey}/{businessKey}")
-	public ResponseEntity<Boolean> processExists(@PathVariable final String processDefinitionKey, @PathVariable final String businessKey) {
+	// @GetMapping(value = "/process-exists/{processDefinitionKey}/{businessKey}")
+	// public ResponseEntity<Boolean> processExists(@PathVariable final String processDefinitionKey, @PathVariable final String businessKey) {
 		
-		ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
+	// 	ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
+	// 	return ResponseEntity.ok(processInstances.length > 0);
+	// }
+
+	@GetMapping(value = "/process-exists/{siteId}/{finacialYear}")
+	public ResponseEntity<Boolean> processExists( @PathVariable final String siteId, @PathVariable final String finacialYear) {
+
+	   if(siteId == null || siteId.isEmpty()) {
+		throw new RestResourceNotFoundException("Site ID is required to check if process exists");
+	   }
+
+	   if(finacialYear == null || finacialYear.isEmpty()) {
+		throw new RestResourceNotFoundException("Financial Year is required to check if process exists");
+	   }
+
+	   String businessKey = siteId + "-" + finacialYear;
+
+	   if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
+		throw new RestResourceNotFoundException("TCS Output Workflow Process Definition Key is not set");
+	   }
+		
+		ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(tcsOutputWorkflowProcessDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
 		return ResponseEntity.ok(processInstances.length > 0);
 	}
 
@@ -117,11 +142,11 @@ public class TCSOutPutWorkFlowController {
 		return ResponseEntity.ok(processEngineClientFacade.findTasks(Optional.ofNullable(processInstanceBusinessKey)));
 	}
 
-	@PostMapping(value = "/complete-task/{taskId}")
-	public ResponseEntity<Void> completeTask(@PathVariable final String taskId, @RequestBody final List<ProcessVariable> variables) {
-		processEngineClientFacade.complete(taskId, variables);
-		return ResponseEntity.noContent().build();
-	}
+	// @PostMapping(value = "/complete-task/{taskId}")
+	// public ResponseEntity<Void> completeTask(@PathVariable final String taskId, @RequestBody final List<ProcessVariable> variables) {
+	// 	processEngineClientFacade.complete(taskId, variables);
+	// 	return ResponseEntity.noContent().build();
+	// }
 
 	@GetMapping(value = "/variables/{processInstanceId}")
 	public ResponseEntity<ProcessVariable[]> getVariables(@PathVariable final String processInstanceId) {
@@ -154,49 +179,77 @@ public class TCSOutPutWorkFlowController {
 		return ResponseEntity.noContent().build();
 	}
 
-	@PostMapping(value = "/complete-plant-submission-task/{plantName}/{siteId}")
-	public ResponseEntity<String> completePlantSubmissionTask(@PathVariable final String plantName, @PathVariable final String siteId, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) {
+	@PostMapping(value = "/complete-plant-submission-task/{plantName}/{siteId}/{finacialYear}")
+	public ResponseEntity<String> completePlantSubmissionTask(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) {
 		if(plantName == null || plantName.isEmpty()) { 
 			throw new RestResourceNotFoundException("Plant name is required to complete plant submission task");
 		}
 		if(siteId == null || siteId.isEmpty()) {
 			throw new RestResourceNotFoundException("Site ID is required to complete plant submission task");
 		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete plant submission task");
+		}
 
-		tcsWorkFlowService.completePlantSubmissionTask(plantName, siteId, plantSubmissionAuditTrailDTO);
+		tcsWorkFlowService.completePlantSubmissionTask(plantName, siteId, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("Plant submission task completed successfully");
 
 		
 		
 	}
 
-	@PostMapping(value = "ebs-submission/{plantName}/{siteId}")
-	public ResponseEntity<String> ebsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+	@PostMapping(value = "ebs-submission/{plantName}/{siteId}/{finacialYear}")
+	public ResponseEntity<String> ebsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
 
 		if(plantName == null || plantName.isEmpty()) { 
 			throw new RestResourceNotFoundException("Plant name is required to complete EBS approval");
-
+		}
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete EBS approval");
 		}
 
 		if(siteId == null || siteId.isEmpty()) {  
 			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
 		}
 
-		tcsWorkFlowService.ebsApproval(plantName, siteId, plantSubmissionAuditTrailDTO);
+		tcsWorkFlowService.ebsApproval(plantName, siteId, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("EBS approval completed successfully");
 
 	}
 
-	@PostMapping(value = "ebs-approve-reject/{plantName}/{siteId}/{approvalStatus}")
-	public ResponseEntity<String> ebsApproveReject(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final boolean approvalStatus, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+	@PostMapping(value = "cts-submission/{plantName}/{siteId}/{finacialYear}")
+	public ResponseEntity<String> ctsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		if(plantName == null || plantName.isEmpty()) { 
+			throw new RestResourceNotFoundException("Plant name is required to complete CTS approval");
+		}
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to complete CTS approval");
+		}
+
+		if(finacialYear == null || finacialYear.isEmpty()) { 
+			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
+		}
+		
+		tcsWorkFlowService.CTSApproval(plantName, siteId, plantSubmissionAuditTrailDTO, finacialYear);
+		return ResponseEntity.ok("CTS approval completed successfully");
+	}
+
+	@PostMapping(value = "ebs-approve-reject/{plantName}/{siteId}/{approvalStatus}/{finacialYear}")
+	public ResponseEntity<String> ebsApproveReject(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
 		if(plantName == null || plantName.isEmpty()) { 
 			throw new RestResourceNotFoundException("Plant name is required to complete EBS approval");
 		}
 		if(siteId == null || siteId.isEmpty()) {  
 			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
 		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete EBS approval");
+		}
 
-		tcsWorkFlowService.ebsApproveReject(plantName, siteId, approvalStatus, plantSubmissionAuditTrailDTO);
+		tcsWorkFlowService.ebsApproveReject(plantName, siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("EBS approval completed successfully");
 
 	}
