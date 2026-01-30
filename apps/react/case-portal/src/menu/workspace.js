@@ -133,47 +133,63 @@ const workspace = {
         },
       ],
     },
-    {
-      id: 'utilityPlant',
-      title: i18n.t('menu.utilityPlant'),
-      type: 'collapse',
-      icon: icons.IconReport, // You can choose an appropriate icon
-      children: [
-        {
-          id: 'inputs',
-          title: i18n.t('menu.inputs'),
-          type: 'item',
-          url: '/utilityPlant/inputs',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-        {
-          id: 'plant-requirement',
-          title: i18n.t('menu.plantRequirement'),
-          type: 'item',
-          url: '/utilityPlant/plant-requirement',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
+    // {
+    //   id: 'utilityPlant',
+    //   title: i18n.t('menu.utilityPlant'),
+    //   type: 'collapse',
+    //   icon: icons.IconReport, // You can choose an appropriate icon
+    //   children: [
+    //     {
+    //       id: 'inputs',
+    //       title: i18n.t('menu.inputs'),
+    //       type: 'item',
+    //       url: '/utilityPlant/inputs',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'plant-requirement',
+    //       title: i18n.t('menu.plantRequirement'),
+    //       type: 'item',
+    //       url: '/utilityPlant/plant-requirement',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
 
-        {
-          id: 'fixed-consumption',
-          title: i18n.t('menu.fixedConsumption'),
-          type: 'item',
-          url: '/utilityPlant/fixed-consumption',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-        {
-          id: 'norms',
-          title: i18n.t('menu.norms'),
-          type: 'item',
-          url: '/utilityPlant/norms',
-          icon: icons.IconReport,
-          breadcrumbs: true,
-        },
-      ],
-    },
+    //     {
+    //       id: 'fixed-consumption',
+    //       title: i18n.t('menu.fixedConsumption'),
+    //       type: 'item',
+    //       url: '/utilityPlant/fixed-consumption',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'norms',
+    //       title: i18n.t('menu.norms'),
+    //       type: 'item',
+    //       url: '/utilityPlant/norms',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'summary',
+    //       title: i18n.t('menu.summary'),
+    //       type: 'item',
+    //       url: '/utilityPlant/summary',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
+    //     {
+    //       id: 'sender-receiverMapping',
+    //       title: i18n.t('menu.senderReceiverMapping'),
+    //       type: 'item',
+    //       url: '/utilityPlant/sender-receiverMapping',
+    //       icon: icons.IconReport,
+    //       breadcrumbs: true,
+    //     },
+    //   ],
+    // },
 
     // {
     //   id: 'manufacturing-division',

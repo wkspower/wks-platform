@@ -9,7 +9,7 @@ import {
 } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 
-const SlowdownActivities = () => {
+const ShutdownActivities = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -19,25 +19,25 @@ const SlowdownActivities = () => {
     severity: 'info',
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
-  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
-  const [currentRemark, setCurrentRemark] = useState('')
-  const [currentRowId, setCurrentRowId] = useState(null)
-  const [rows, setRows] = useState([])
-  const [originalRows, setOriginalRows] = useState([])
-
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantObject, year } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
+  const [rows, setRows] = useState([])
+  const [originalRows, setOriginalRows] = useState([])
+  const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
+  const [currentRemark, setCurrentRemark] = useState('')
+  const [currentRowId, setCurrentRowId] = useState(null)
 
   const columns = [
     {
       field: 'discription',
-      title: 'Slowdown Desc',
-      editable: true,
-      widthT: 200,
-      minWidth: 150,
+      title: 'Shutdown Desc',
+      widthT: 250,
+      minWidth: 200,
       type: 'text',
+      editable: true,
+      hidden: false,
     },
     {
       field: 'maintenanceId',
@@ -73,26 +73,56 @@ const SlowdownActivities = () => {
       align: 'left',
       headerAlign: 'left',
       type: 'number1',
-    },
-    {
-      field: 'rate',
-      title: 'Rate (%)',
-      editable: true,
-      widthT: 120,
-      minWidth: 100,
-      align: 'left',
-      headerAlign: 'left',
-      type: 'number1',
+      format: '{0:0.00}',
     },
     {
       field: 'remark',
-      title: 'Slowdown Basis',
-      editable: true,
+      title: 'Shutdown Basis',
       widthT: 250,
-      minWidth: 200,
       type: 'textarea',
+      editable: true,
+      minWidth: 200,
     },
   ]
+
+  useEffect(() => {
+    if (PLANT_ID && AOP_YEAR) {
+      // fetchShutdownActivitiesData()
+    }
+  }, [PLANT_ID, AOP_YEAR])
+
+  const fetchShutdownActivitiesData = async () => {
+    setLoading(true)
+    try {
+      const res = await DataService.getShutdownActivities(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+
+      if (res?.length === 0) {
+        setRows([])
+        setSnackbarOpen(true)
+        setSnackbarData({ message: 'No data found', severity: 'info' })
+        return
+      }
+
+      console.log('Shutdown Activities data:', res)
+      const formattedData = res?.map((item, index) => ({
+        ...item,
+        remark: item.remark || '',
+        id: item?.id || item?.maintenanceId || index + 1,
+      }))
+      setRows(formattedData)
+      setOriginalRows(formattedData)
+    } catch (error) {
+      console.error('Error fetching shutdown activities data:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Error fetching data', severity: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const permissions = {
     showAction: true,
@@ -101,78 +131,18 @@ const SlowdownActivities = () => {
     editButton: true,
     saveBtn: true,
     allAction: true,
-    showTitleNameBusiness: true,
-    titleName: 'Slowdown Activities',
-    showImport: false,
     showExport: true,
-    ExcelName: `Slowdown Activities - ${AOP_YEAR}`,
+    ExcelName: `Shutdown_Activities_${AOP_YEAR}`,
+    showImport: false,
+    showTitleNameBusiness: true,
     showTitle: true,
-  }
-
-  useEffect(() => {
-    if (PLANT_ID && AOP_YEAR) {
-      // fetchSlowdownActivitiesData()
-    }
-  }, [PLANT_ID, AOP_YEAR])
-
-  const fetchSlowdownActivitiesData = async () => {
-    setLoading(true)
-    try {
-      const res = await DataService.getSlowdownActivities(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
-      const data = res?.data || res
-
-      if (!data || data.length === 0) {
-        setRows([])
-        setOriginalRows([])
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No data found', severity: 'info' })
-        return
-      }
-
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        id: item?.id || item?.maintenanceId || index + 1,
-        maintenanceId: item?.maintenanceId || item?.id,
-        discription: item?.discription || '',
-        maintStartDateTime: item?.maintStartDateTime
-          ? new Date(item.maintStartDateTime)
-          : null,
-        maintEndDateTime: item?.maintEndDateTime
-          ? new Date(item.maintEndDateTime)
-          : null,
-        durationInHrs: item?.durationInHrs || null,
-        rate: item?.rate || null,
-        remark: item?.remark || '',
-        originalRemark: item?.remark || '',
-      }))
-
-      setRows(formattedData)
-      setOriginalRows(formattedData)
-    } catch (error) {
-      console.error('Error fetching slowdown data:', error)
-      setSnackbarOpen(true)
-      setSnackbarData({ message: 'Error fetching data', severity: 'error' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const addTimeOffset = (dateTime) => {
-    if (!dateTime) return null
-    const date = new Date(dateTime)
-    date.setUTCHours(date.getUTCHours() + 5)
-    date.setUTCMinutes(date.getUTCMinutes() + 30)
-    return date
+    titleName: 'Shutdown Activities',
   }
 
   const saveChanges = async () => {
     setLoading(true)
-    const modifiedData = Object.values(modifiedCells)
 
+    const modifiedData = Object.values(modifiedCells)
     if (modifiedData.length === 0) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -184,7 +154,6 @@ const SlowdownActivities = () => {
     }
 
     const data = modifiedData.filter((row) => row.inEdit)
-
     if (data.length === 0) {
       setSnackbarOpen(true)
       setSnackbarData({
@@ -195,45 +164,17 @@ const SlowdownActivities = () => {
       return
     }
 
-    // Validate required fields
-    const requiredFields = [
+    const fieldsToCheck = [
       'discription',
       'maintStartDateTime',
       'maintEndDateTime',
       'durationInHrs',
-      'rate',
-    ]
-    for (const record of data) {
-      for (const field of requiredFields) {
-        const value = record[field]
-        if (
-          value === null ||
-          value === undefined ||
-          (typeof value === 'string' && value.trim() === '')
-        ) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Required field "${field}" is missing for "${record.discription || 'this record'}".`,
-            severity: 'error',
-          })
-          setLoading(false)
-          return
-        }
-      }
-    }
-
-    // Validate remarks when data is updated
-    const fieldsToCheck = [
-      'maintStartDateTime',
-      'maintEndDateTime',
-      'durationInHrs',
-      'rate',
     ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'discription',
+      'remark',
     )
 
     if (validationError) {
@@ -246,53 +187,28 @@ const SlowdownActivities = () => {
       return
     }
 
-    // Validate start date < end date
-    for (const record of data) {
-      const startDate = new Date(record.maintStartDateTime)
-      const endDate = new Date(record.maintEndDateTime)
-
-      if (startDate >= endDate) {
-        setSnackbarOpen(true)
-        setSnackbarData({
-          message: `Start time must be before end time for "${record.discription || 'this record'}".`,
-          severity: 'error',
-        })
-        setLoading(false)
-        return
-      }
-    }
-
+    const payload = modifiedData
     try {
-      const payload = data.map((item) => ({
-        id: item.id && !String(item.id).startsWith('new_') ? item.id : null,
-        discription: item.discription,
-        maintStartDateTime: addTimeOffset(item.maintStartDateTime),
-        maintEndDateTime: addTimeOffset(item.maintEndDateTime),
-        durationInHrs: item.durationInHrs,
-        rate: item.rate,
-        remark: item.remark,
-      }))
+      console.log('Saving shutdown activities data:', payload)
 
-      console.log('Saving slowdown activities data:', payload)
-
-      const response = await DataService.saveSlowdownActivities(
+      const response = await DataService.saveShutdownActivities(
         keycloak,
         AOP_YEAR,
         payload,
       )
 
+      setModifiedCells({})
       setSnackbarOpen(true)
       setSnackbarData({
-        message: `Successfully saved ${data.length} changes!`,
+        message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
-      setModifiedCells({})
-      await fetchSlowdownActivitiesData()
+      await fetchShutdownActivitiesData()
     } catch (error) {
-      console.error('Error saving slowdown data:', error)
+      console.error('Error saving shutdown activities data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: `Failed to save changes. Error: ${error?.message || 'Unknown error'}`,
+        message: 'Failed to save changes. Please try again.',
         severity: 'error',
       })
     } finally {
@@ -305,21 +221,20 @@ const SlowdownActivities = () => {
 
     setLoading(true)
     try {
-      const response = await DataService.importSlowdownActivities(
+      const response = await DataService.importShutdownActivities(
         file,
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
 
-      if (response?.success || response?.code === 200) {
+      if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
           message: response?.message || 'Excel file imported successfully!',
           severity: 'success',
         })
-        setModifiedCells({})
-        await fetchSlowdownActivitiesData()
+        await fetchShutdownActivitiesData()
       } else if (response?.code === 400 && response?.data) {
         try {
           const base64Data = response.data
@@ -334,7 +249,7 @@ const SlowdownActivities = () => {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `Slowdown_Import_Errors_${Date.now()}.xlsx`
+          link.download = `Shutdown_Activities_Errors_${new Date().getTime()}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -343,22 +258,23 @@ const SlowdownActivities = () => {
           setSnackbarOpen(true)
           setSnackbarData({
             message:
+              response?.message ||
               'Import failed with errors. Please check the downloaded file.',
             severity: 'error',
           })
-          await fetchSlowdownActivitiesData()
+          await fetchShutdownActivitiesData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
           setSnackbarData({
-            message: 'Import failed. Unable to download error file.',
+            message: 'Import failed but could not download error file.',
             severity: 'error',
           })
         }
       } else {
         setSnackbarOpen(true)
         setSnackbarData({
-          message: response?.message || 'Upload Failed!',
+          message: response?.message || 'Failed to import Excel file.',
           severity: 'error',
         })
       }
@@ -382,13 +298,13 @@ const SlowdownActivities = () => {
     })
 
     try {
-      await DataService.exportSlowdownActivities(keycloak, PLANT_ID, AOP_YEAR)
+      await DataService.exportShutdownActivities(keycloak, PLANT_ID, AOP_YEAR)
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting slowdown data:', error)
+      console.error('Error exporting Shutdown Activities data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -460,33 +376,32 @@ const SlowdownActivities = () => {
       maintStartDateTime: null,
       maintEndDateTime: null,
       durationInHrs: null,
-      rate: null,
       remark: '',
       inEdit: true,
+      isNew: true,
     }
-
-    setRows((prevRows) => [...prevRows, newRow])
-    setModifiedCells((prev) => ({
-      ...prev,
+    setRows([...rows, newRow])
+    setModifiedCells({
+      ...modifiedCells,
       [newRow.id]: newRow,
-    }))
+    })
   }
 
   const deleteRowData = async (dataItem) => {
     setLoading(true)
     try {
-      await DataService.deleteSlowdownActivity(keycloak, dataItem.id)
+      await DataService.deleteShutdownActivity(keycloak, dataItem.id)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Record deleted successfully!',
         severity: 'success',
       })
-      await fetchSlowdownActivitiesData()
+      await fetchShutdownActivitiesData()
     } catch (error) {
-      console.error('Error deleting record:', error)
+      console.error('Error deleting shutdown activity:', error)
       setSnackbarOpen(true)
       setSnackbarData({
-        message: 'Error deleting record!',
+        message: 'Failed to delete record. Please try again.',
         severity: 'error',
       })
     } finally {
@@ -502,7 +417,6 @@ const SlowdownActivities = () => {
       >
         <CircularProgress color='inherit' />
       </Backdrop>
-
       <AdvanceKendoTable
         columns={columns}
         rows={rows}
@@ -524,12 +438,6 @@ const SlowdownActivities = () => {
         handleAddRow={handleAddRow}
         deleteRowData={deleteRowData}
         customItemChange={customItemChange}
-        dateCalculationConfig={{
-          dateField1: 'maintStartDateTime',
-          dateField2: 'maintEndDateTime',
-          daysField: 'durationInHrs',
-          requiredInHr: true,
-        }}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
@@ -545,4 +453,4 @@ const SlowdownActivities = () => {
   )
 }
 
-export default SlowdownActivities
+export default ShutdownActivities
