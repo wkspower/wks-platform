@@ -190,6 +190,13 @@ const ShutDown = ({ permissions }) => {
         } else {
           requiredFields = ['discription', 'remark']
         }
+      } else if (IS_PTA_DMD) {
+        requiredFields = [
+          'discriptionDrpdwn',
+          'remark',
+          'monthly',
+          'durationInHrs',
+        ]
       } else if (lowerVertName === 'pta') {
         requiredFields = ['discriptionDrpdwn', 'remark']
       } else if (lowerVertName === 'pp') {
@@ -320,7 +327,7 @@ const ShutDown = ({ permissions }) => {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
 
-        if (lowerVertName != 'vcm') {
+        if (lowerVertName != 'vcm' && !IS_PTA_DMD) {
           for (const row of allRecords) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)
@@ -350,31 +357,33 @@ const ShutDown = ({ permissions }) => {
           }
         }
 
-        //Shutdown timeframe overlapping of same time
-        for (let i = 0; i < allRecords.length; i++) {
-          const a = allRecords[i]
-          const aStart = new Date(a.maintStartDateTime).getTime()
-          const aEnd = new Date(a.maintEndDateTime).getTime()
+        //Shutdown timeframe overlapping of same time.
+        if (!IS_PTA_DMD) {
+          for (let i = 0; i < allRecords.length; i++) {
+            const a = allRecords[i]
+            const aStart = new Date(a.maintStartDateTime).getTime()
+            const aEnd = new Date(a.maintEndDateTime).getTime()
 
-          if (isNaN(aStart) || isNaN(aEnd)) continue
+            if (isNaN(aStart) || isNaN(aEnd)) continue
 
-          for (let j = 0; j < allRecords.length; j++) {
-            if (i === j) continue
-            const b = allRecords[j]
-            const bStart = new Date(b.maintStartDateTime).getTime()
-            const bEnd = new Date(b.maintEndDateTime).getTime()
+            for (let j = 0; j < allRecords.length; j++) {
+              if (i === j) continue
+              const b = allRecords[j]
+              const bStart = new Date(b.maintStartDateTime).getTime()
+              const bEnd = new Date(b.maintEndDateTime).getTime()
 
-            if (isNaN(bStart) || isNaN(bEnd)) continue
+              if (isNaN(bStart) || isNaN(bEnd)) continue
 
-            if (aStart < bEnd && bStart < aEnd) {
-              a.isError = true
-              b.isError = true
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: `The shutdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
-                severity: 'error',
-              })
-              return
+              if (aStart < bEnd && bStart < aEnd) {
+                a.isError = true
+                b.isError = true
+                setSnackbarOpen(true)
+                setSnackbarData({
+                  message: `The shutdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+                  severity: 'error',
+                })
+                return
+              }
             }
           }
         }
