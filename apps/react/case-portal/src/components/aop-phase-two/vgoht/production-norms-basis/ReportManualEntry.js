@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
-import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
+import { ProductionNormsApiService } from 'components/aop-phase-two/services/vgoht/productionNormsApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 
-const FuelAvailability = () => {
+const ReportManualEntry = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -19,10 +19,14 @@ const FuelAvailability = () => {
   })
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantObject, year, screenTitle } = dataGridStore
+  const { plantObject, year } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
-  const headerMap = generateHeaderNames(AOP_YEAR)
+
+  const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]
+  const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
+
+  const headerMap = generateHeaderNames(prevYearFormatted)
   const valueFormat = ValueFormatterPhaseTwo()
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
@@ -32,8 +36,8 @@ const FuelAvailability = () => {
 
   const columns = [
     {
-      field: 'fuel',
-      title: 'Fuel',
+      field: 'particulars',
+      title: 'Particulars',
       widthT: 250,
       minWidth: 200,
       type: 'text',
@@ -45,14 +49,6 @@ const FuelAvailability = () => {
       title: 'UOM',
       widthT: 80,
       minWidth: 60,
-      type: 'text',
-      editable: false,
-    },
-    {
-      field: 'fuelCategory',
-      title: 'Fuel Category',
-      widthT: 150,
-      minWidth: 120,
       type: 'text',
       editable: false,
     },
@@ -200,176 +196,18 @@ const FuelAvailability = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchFuelAvailabilityData()
+      // fetchReportManualEntryData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  const fetchFuelAvailabilityData = async () => {
+  const fetchReportManualEntryData = async () => {
     setLoading(true)
     try {
-      // Default mock data based on Excel structure
-      const defaultData = [
-        {
-          id: 1,
-          fuel: '300001591 - Fuel gas',
-          uom: 'MT',
-          fuelCategory: 'INTERNAL_LNG',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 2,
-          fuel: 'HSD - High Speed Diesel-HSD',
-          uom: 'K15',
-          fuelCategory: 'LNG',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 3,
-          fuel: 'LSHS - Low Sulfur Heavy Stock',
-          uom: 'MT',
-          fuelCategory: 'LNG',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 4,
-          fuel: 'MIXED OIL - MIXED OIL',
-          uom: 'MT',
-          fuelCategory: 'LNG',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 5,
-          fuel: 'RFOMVG - FURNACE OIL ( MEDIUM VISCOSITY GRADE )',
-          uom: 'MT',
-          fuelCategory: 'FO',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 6,
-          fuel: 'NGASRG01 - NATURAL GAS',
-          uom: 'GBT',
-          fuelCategory: 'R-GAS',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 7,
-          fuel: 'AMBIENT-ETHANE - AMBIENT ETHANE',
-          uom: 'MT',
-          fuelCategory: 'ETHANE',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-        {
-          id: 8,
-          fuel: 'CBMGAS_1 - COAL BED METHANE GAS',
-          uom: 'GBT',
-          fuelCategory: 'CBM',
-          apr: null,
-          may: null,
-          jun: null,
-          jul: null,
-          aug: null,
-          sep: null,
-          oct: null,
-          nov: null,
-          dec: null,
-          jan: null,
-          feb: null,
-          mar: null,
-          remarks: '',
-        },
-      ]
-
-      //   const res = await InputApiService.getFuelAvailabilityData(
-      //     keycloak,
-      //     PLANT_ID,
-      //     AOP_YEAR,
-      //   )
-      // Fallback to default data if API returns empty
-      const res = defaultData
+      const res = await ProductionNormsApiService.getReportManualEntryData(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -378,7 +216,7 @@ const FuelAvailability = () => {
         return
       }
 
-      console.log('Fuel Availability data:', res)
+      console.log('Report Manual Entry data:', res)
       const formattedData = res?.map((item, index) => ({
         ...item,
         remarks: item.remarks || '',
@@ -387,7 +225,7 @@ const FuelAvailability = () => {
       setRows(formattedData)
       setOriginalRows(formattedData)
     } catch (error) {
-      console.error('Error fetching fuel availability data:', error)
+      console.error('Error fetching report manual entry data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -403,11 +241,11 @@ const FuelAvailability = () => {
     saveBtn: true,
     allAction: true,
     showExport: true,
-    ExcelName: `Fuel Availability - ${AOP_YEAR}`,
+    ExcelName: `Production_Norms_Report_Manual_Entry_${prevYearFormatted}`,
     showImport: true,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Fuel Availability',
+    titleName: `Report Manual Entry (${prevYearFormatted})`,
   }
 
   const saveChanges = async () => {
@@ -453,7 +291,7 @@ const FuelAvailability = () => {
       data,
       originalRows,
       fieldsToCheck,
-      'fuel',
+      'particulars',
     )
 
     if (validationError) {
@@ -468,13 +306,14 @@ const FuelAvailability = () => {
 
     const payload = modifiedData
     try {
-      console.log('Saving fuel availability data:', payload)
+      console.log('Saving report manual entry data:', payload)
 
-      const response = await InputApiService.saveFuelAvailabilityData(
-        keycloak,
-        AOP_YEAR,
-        payload,
-      )
+      const response =
+        await ProductionNormsApiService.saveReportManualEntryData(
+          keycloak,
+          AOP_YEAR,
+          payload,
+        )
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -483,7 +322,7 @@ const FuelAvailability = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error saving fuel availability data:', error)
+      console.error('Error saving report manual entry data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -499,12 +338,13 @@ const FuelAvailability = () => {
 
     setLoading(true)
     try {
-      const response = await InputApiService.saveFuelAvailabilityExcel(
-        file,
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      const response =
+        await ProductionNormsApiService.importReportManualEntryExcel(
+          file,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -512,7 +352,7 @@ const FuelAvailability = () => {
           message: response?.message || 'Excel file imported successfully!',
           severity: 'success',
         })
-        await fetchFuelAvailabilityData()
+        await fetchReportManualEntryData()
       } else if (response?.code === 400 && response?.data) {
         try {
           const base64Data = response.data
@@ -527,7 +367,7 @@ const FuelAvailability = () => {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `Fuel_Availability_Errors_${new Date().getTime()}.xlsx`
+          link.download = `ReportManualEntry_Errors_${new Date().getTime()}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -540,7 +380,7 @@ const FuelAvailability = () => {
               'Import failed with errors. Please check the downloaded file.',
             severity: 'error',
           })
-          await fetchFuelAvailabilityData()
+          await fetchReportManualEntryData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -576,7 +416,7 @@ const FuelAvailability = () => {
     })
 
     try {
-      await InputApiService.exportFuelAvailabilityExcel(
+      await ProductionNormsApiService.exportReportManualEntryExcel(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -586,7 +426,7 @@ const FuelAvailability = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting Fuel Availability data:', error)
+      console.error('Error exporting Report Manual Entry data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -630,7 +470,6 @@ const FuelAvailability = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        customHeight={60}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,
@@ -642,4 +481,4 @@ const FuelAvailability = () => {
   )
 }
 
-export default FuelAvailability
+export default ReportManualEntry

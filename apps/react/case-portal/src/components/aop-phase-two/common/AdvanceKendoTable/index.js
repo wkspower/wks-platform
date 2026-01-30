@@ -104,8 +104,6 @@ export const hiddenFields = [
   'period',
 ]
 export const dateFields = [
-  'maintStartDateTime',
-  'maintEndDateTime',
   'endDateTA',
   'startDateTA',
   'endDateSD',
@@ -830,8 +828,22 @@ const AdvanceKendoTable = ({
       : dataItem[field]
     let formattedValue = value
 
+    // Format Date objects as strings
+    if (value instanceof Date) {
+      formattedValue = value.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+    }
     // Apply Kendo number format if provided
-    if (format && (typeof value === 'number' || typeof value === 'string')) {
+    else if (
+      format &&
+      (typeof value === 'number' || typeof value === 'string')
+    ) {
       const numValue = typeof value === 'string' ? parseFloat(value) : value
       if (!isNaN(numValue)) {
         formattedValue = applyKendoNumberFormat(numValue, format)

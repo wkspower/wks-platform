@@ -540,7 +540,7 @@ const FixedNorms = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        customHeight={80}
+        customHeight={70}
         groupBy={['generatingPlantName', 'accountName']}
       />
     </Box>
