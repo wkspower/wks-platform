@@ -17,7 +17,7 @@ export default function ValueFormatterConsumption() {
   if (VERTICAL_NAME === 'pta') {
     return '{0:0.00000}'
   }
-  if(VERTICAL_NAME === 'vcm' && SITE_NAME === 'dmd' && PLANT_NAME === 'vcm') {
+  if (VERTICAL_NAME === 'vcm' && SITE_NAME === 'dmd' && PLANT_NAME === 'vcm') {
     return '{0:0.0000}'
   }
 

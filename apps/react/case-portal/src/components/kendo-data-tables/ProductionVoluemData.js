@@ -912,9 +912,9 @@ const ProductionvolumeData = ({ permissions }) => {
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Proposed Operating Capacity (Ethylene)'
-          :IS_VCM_DMD_VCM
-          ? 'Steady state Operating Capacity'
-          : 'Proposed Operating Capacity',
+          : IS_VCM_DMD_VCM
+            ? 'Steady state Operating Capacity'
+            : 'Proposed Operating Capacity',
     },
     isOldYear,
   )
