@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateNestedRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
-import { UtilityPlantApiServiceV2 } from 'components/aop-phase-two/services/cpp/utilityPlantApiServiceV2'
 import NestedKendoTable from 'components/aop-phase-two/common/NestedKendoTable/index'
 import { InputApiService } from 'components/aop-phase-two/services/cpp/inputApiService'
 
@@ -334,18 +333,18 @@ const FixedNorms = () => {
 
     // Custom validation: If any row data is updated, remarks must be filled and different from original
     const fieldsToCheck = [
-      'apr',
-      'may',
-      'jun',
-      'jul',
-      'aug',
-      'sep',
-      'oct',
-      'nov',
-      'dec',
-      'jan',
-      'feb',
-      'mar',
+      'aprNorms',
+      'mayNorms',
+      'junNorms',
+      'julNorms',
+      'augNorms',
+      'sepNorms',
+      'octNorms',
+      'novNorms',
+      'decNorms',
+      'janNorms',
+      'febNorms',
+      'marNorms',
     ]
     const validationError = validateNestedRowDataWithRemarks(
       data,
@@ -407,7 +406,7 @@ const FixedNorms = () => {
 
     setLoading(true)
     try {
-      const response = await UtilityPlantApiServiceV2.saveNormsExcel(
+      const response = await InputApiService.saveCPPNormsExcel(
         file,
         keycloak,
         PLANT_ID,
@@ -487,11 +486,7 @@ const FixedNorms = () => {
     })
 
     try {
-      await UtilityPlantApiServiceV2.exportNormsExcel(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      await InputApiService.exportCPPNormsExcel(keycloak, PLANT_ID, AOP_YEAR)
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -540,7 +535,7 @@ const FixedNorms = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        customHeight={80}
+        customHeight={70}
         groupBy={['generatingPlantName', 'accountName']}
       />
     </Box>

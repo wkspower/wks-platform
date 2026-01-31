@@ -50,4 +50,8 @@ public class CPPNormsResponseDTO {
     private String remarks;
     private String modifiedBy;
     private String modifiedDate;
+
+    // Fields for import/export tracking
+    private String saveStatus;
+    private String errDescription;
 }

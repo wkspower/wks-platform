@@ -15,6 +15,14 @@ export const InputApiService = {
   saveImportPower,
   saveImportPowerExcel,
   exportImportPowerExcel,
+  getImportPowerCapacity,
+  saveImportPowerCapacity,
+  saveImportPowerCapacityExcel,
+  exportImportPowerCapacityExcel,
+  getImportPowerOperationalHours,
+  saveImportPowerOperationalHours,
+  saveImportPowerOperationalHoursExcel,
+  exportImportPowerOperationalHoursExcel,
 
   getAssetPriority,
   saveAssetPriority,
@@ -44,6 +52,13 @@ export const InputApiService = {
 
   getNormBasedUtilityBudget,
   saveNormsData,
+  exportCPPNormsExcel,
+  saveCPPNormsExcel,
+
+  getFuelAvailabilityData,
+  saveFuelAvailabilityData,
+  saveFuelAvailabilityExcel,
+  exportFuelAvailabilityExcel,
 
   // Generic Excel Import/Export
   saveExcelData,
@@ -70,8 +85,51 @@ async function getOperationHoursData(keycloak, plantId, year) {
   }
 }
 
-async function saveOperationHours(keycloak, AOP_YEAR, payload) {
-  const url = `${Config.CaseEngineUrl}/task/assets/operational-hours/${AOP_YEAR}`
+async function exportCPPNormsExcel(keycloak, PLANT_ID, financialYear) {
+  return exportExcelData(keycloak, {
+    endpoint: `cpp-norms/export`,
+    queryParams: { cppPlantId: PLANT_ID, financialYear },
+    fileName: `CPPNorms_${financialYear}.xlsx`,
+    method: 'GET',
+  })
+}
+
+async function saveCPPNormsExcel(file, keycloak, PLANT_ID, financialYear) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-norms/import?cppPlantId=${PLANT_ID}&financialYear=${financialYear}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    const responseData = await json(keycloak, resp)
+
+    if (resp.status === 400 || resp.status === 200) {
+      return responseData
+    }
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return responseData
+  } catch (e) {
+    console.error(`Error importing CPP Norms Excel:`, e)
+    return Promise.reject(e)
+  }
+}
+
+async function saveOperationHours(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/assets/operational-hours/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -180,6 +238,147 @@ async function saveImportPower(keycloak, PLANT_ID, AOP_YEAR, payload) {
     console.log(e)
     return await Promise.reject(e)
   }
+}
+
+async function getImportPowerCapacity(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/import-power/capacity/${plantId}/${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveImportPowerCapacity(keycloak, PLANT_ID, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/import-power/capacity/${PLANT_ID}/${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveImportPowerCapacityExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  return saveExcelData(
+    file,
+    keycloak,
+    'import-power/capacity/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
+}
+
+async function exportImportPowerCapacityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `import-power/capacity/export/${PLANT_ID}/${AOP_YEAR}`,
+    fileName: `Import Power Capacity - ${PLANT_ID} - ${AOP_YEAR}.xlsx`,
+  })
+}
+
+async function getImportPowerOperationalHours(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/import-power/operational-hours/${plantId}/${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveImportPowerOperationalHours(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  payload,
+) {
+  const url = `${Config.CaseEngineUrl}/task/import-power/operational-hours/${PLANT_ID}/${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveImportPowerOperationalHoursExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  return saveExcelData(
+    file,
+    keycloak,
+    'import-power/operational-hours/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
+}
+
+async function exportImportPowerOperationalHoursExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  return exportExcelData(keycloak, {
+    endpoint: `import-power/operational-hours/export/${PLANT_ID}/${AOP_YEAR}`,
+    fileName: `Import Power Operational Hours - ${PLANT_ID} - ${AOP_YEAR}.xlsx`,
+  })
 }
 
 // ========================|| Asset Priority APIs ||=====================================//
@@ -793,6 +992,70 @@ async function exportHRSGHeatRateExcel(keycloak) {
     endpoint: `hrsg-heat-rate-lookup/export`,
     queryParams: {},
     fileName: `HRSG_Heat_Rate_Lookup.xlsx`,
+    method: 'GET',
+  })
+}
+
+// ========================|| Fuel Availability APIs ||=====================================//
+async function getFuelAvailabilityData(keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/fuel-availability/${plantId}/${year}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveFuelAvailabilityData(keycloak, AOP_YEAR, payload) {
+  const url = `${Config.CaseEngineUrl}/task/fuel-availability/${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    const result = await json(keycloak, resp)
+    return result || { success: true }
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveFuelAvailabilityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+  return saveExcelData(
+    file,
+    keycloak,
+    'fuel-availability/import',
+    PLANT_ID,
+    AOP_YEAR,
+  )
+}
+
+async function exportFuelAvailabilityExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(keycloak, {
+    endpoint: `fuel-availability/export/${PLANT_ID}/${AOP_YEAR}`,
+    queryParams: {},
+    fileName: `Fuel_Availability_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
 }

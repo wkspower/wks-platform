@@ -20,7 +20,7 @@ import com.wks.caseengine.entity.DummyEntity;
 public interface PowerGenerationRepository extends JpaRepository<DummyEntity, Long> {
 
     @Query(
-        value = "EXEC dbo.CPP_NMD_GetPowerGenerationOperationalHours :cppPlantId, :financialYear",
+        value = "EXEC dbo.CPP_NMD_GetPowerGenerationOperationalHoursv1 :cppPlantId, :financialYear",
         nativeQuery = true
     )
     List<AssetMonthlyOperationalProjection> getOperationalHours(

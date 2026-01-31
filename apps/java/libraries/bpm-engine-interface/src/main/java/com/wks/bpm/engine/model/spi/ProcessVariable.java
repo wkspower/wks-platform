@@ -11,6 +11,8 @@
  */
 package com.wks.bpm.engine.model.spi;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,11 +33,12 @@ public class ProcessVariable {
 	private String name;
 	private Object value;
 	private String type;
+	private Map<String, Object> valueInfo;
 
 	
 	@Override
 	public String toString() {
-		return "ProcessVariable [name=" + name + ", value=" + value + ", type=" + type + "]";
+		return "ProcessVariable [name=" + name + ", value=" + value + ", type=" + type + ", valueInfo=" + valueInfo + "]";
 	}
 
 

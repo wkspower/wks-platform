@@ -10,15 +10,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import com.wks.caseengine.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -669,7 +672,10 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             if (!isAfterSave) {
                 AOPMessageVM result = getNormBasedUtilityBudget(cppPlantId, financialYear);
                 if (result.getData() instanceof List) {
-                    dtoList = (List<NormBasedUtilityBudgetResponseDTO>) result.getData();
+                    @SuppressWarnings("unchecked")
+                    List<NormBasedUtilityBudgetResponseDTO> data =
+                            (List<NormBasedUtilityBudgetResponseDTO>) result.getData();
+                    dtoList = data;
                 }
             }
 
@@ -679,7 +685,11 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
 
             Workbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Norm Based Utility Budget");
-            CellStyle boldStyle = Utility.createBoldBorderedStyle(workbook);
+            CellStyle headerStyle = createHeaderStyle(workbook);
+            CellStyle dataStyle = createDataStyle(workbook);
+            CellStyle remarksStyle = createRemarksStyle(workbook);
+            String startYearSuffix = financialYear.substring(2, 4);
+            String endYearSuffix = financialYear.substring(5, 7);
             
             int currentRow = 0;
             int col = 0;
@@ -689,53 +699,60 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             col = 0;
             
             // Static columns that span both rows
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Generating Plant", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Generating Plant", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility ID", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility ID", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "UOM", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "UOM", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Account", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Account", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Material", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Material", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "SAP Code", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "SAP Code", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing Plant", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing Plant", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing UOM", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Issuing UOM", headerStyle);
             col++;
             
             // Month headers (each spans 5 columns: Norms, Quantity, Amount, Price, financialYearMonthFkId)
             // Qty and Generation UOM removed
-            String[] months = {"April", "May", "June", "July", "August", "September", 
-                             "October", "November", "December", "January", "February", "March"};
+            String[] months = {"Apr-" + startYearSuffix, "May-" + startYearSuffix, "Jun-" + startYearSuffix, "Jul-" + startYearSuffix,
+                    "Aug-" + startYearSuffix, "Sep-" + startYearSuffix, "Oct-" + startYearSuffix, "Nov-" + startYearSuffix,
+                    "Dec-" + startYearSuffix, "Jan-" + endYearSuffix, "Feb-" + endYearSuffix, "Mar-" + endYearSuffix};
             
             int monthStartCol = col;
             List<Integer> financialYearMonthFkIdColumns = new ArrayList<>();
+            List<Integer> amountColumns = new ArrayList<>();
+            List<Integer> priceColumns = new ArrayList<>();
             for (String month : months) {
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 4, month, boldStyle);
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 4, month, headerStyle);
+                amountColumns.add(col + 2);
+                priceColumns.add(col + 3);
                 financialYearMonthFkIdColumns.add(col + 4); // Track the financialYearMonthFkId column position
                 col += 5;
             }
             
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", boldStyle);
+            int remarksCol = col;
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "id", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "id", headerStyle);
             int idCol = col;
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "normHeaderId", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "normHeaderId", headerStyle);
             int normHeaderIdCol = col;
             col++;
             
             if (isAfterSave) {
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", boldStyle);
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", headerStyle);
                 col++;
-                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", boldStyle);
+                createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", headerStyle);
                 col++;
             }
+            int totalColumns = col;
             
             // Create sub-header row (Row 1) for month details
             Row subHeaderRow = sheet.createRow(currentRow++);
@@ -756,23 +773,23 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                 
                 Cell cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Norms");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
                 
                 cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Quantity");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
                 
                 cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Amount");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
                 
                 cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("Price");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
                 
                 cell = subHeaderRow.createCell(col++);
                 cell.setCellValue("financialYearMonthFkId");
-                cell.setCellStyle(boldStyle);
+                cell.setCellStyle(headerStyle);
             }
 
             // Data rows
@@ -780,60 +797,88 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
                 Row row = sheet.createRow(currentRow++);
                 col = 0;
 
-                row.createCell(col++).setCellValue(dto.getGeneratingPlantName() != null ? dto.getGeneratingPlantName() : "");
-                row.createCell(col++).setCellValue(dto.getUtilityName() != null ? dto.getUtilityName() : "");
-                row.createCell(col++).setCellValue(dto.getUtilityId() != null ? dto.getUtilityId() : "");
-                row.createCell(col++).setCellValue(dto.getUom() != null ? dto.getUom() : "");
-                row.createCell(col++).setCellValue(dto.getAccountName() != null ? dto.getAccountName() : "");
-                row.createCell(col++).setCellValue(dto.getMaterialName() != null ? dto.getMaterialName() : "");
-                row.createCell(col++).setCellValue(dto.getMaterialId() != null ? dto.getMaterialId() : "");
-                row.createCell(col++).setCellValue(dto.getIssuingPlantName() != null ? dto.getIssuingPlantName() : "");
-                row.createCell(col++).setCellValue(dto.getIssuingUom() != null ? dto.getIssuingUom() : "");
+                Cell cell = row.createCell(col++);
+                cell.setCellValue(dto.getGeneratingPlantName() != null ? dto.getGeneratingPlantName() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUtilityName() != null ? dto.getUtilityName() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUtilityId() != null ? dto.getUtilityId() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getUom() != null ? dto.getUom() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getAccountName() != null ? dto.getAccountName() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getMaterialName() != null ? dto.getMaterialName() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getMaterialId() != null ? dto.getMaterialId() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getIssuingPlantName() != null ? dto.getIssuingPlantName() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getIssuingUom() != null ? dto.getIssuingUom() : "");
+                cell.setCellStyle(dataStyle);
                 
                 // April
-                setMonthCellValues(row, col, dto.getApr());
+                setMonthCellValues(row, col, dto.getApr(), dataStyle);
                 col += 5;
                 // May
-                setMonthCellValues(row, col, dto.getMay());
+                setMonthCellValues(row, col, dto.getMay(), dataStyle);
                 col += 5;
                 // June
-                setMonthCellValues(row, col, dto.getJun());
+                setMonthCellValues(row, col, dto.getJun(), dataStyle);
                 col += 5;
                 // July
-                setMonthCellValues(row, col, dto.getJul());
+                setMonthCellValues(row, col, dto.getJul(), dataStyle);
                 col += 5;
                 // August
-                setMonthCellValues(row, col, dto.getAug());
+                setMonthCellValues(row, col, dto.getAug(), dataStyle);
                 col += 5;
                 // September
-                setMonthCellValues(row, col, dto.getSep());
+                setMonthCellValues(row, col, dto.getSep(), dataStyle);
                 col += 5;
                 // October
-                setMonthCellValues(row, col, dto.getOct());
+                setMonthCellValues(row, col, dto.getOct(), dataStyle);
                 col += 5;
                 // November
-                setMonthCellValues(row, col, dto.getNov());
+                setMonthCellValues(row, col, dto.getNov(), dataStyle);
                 col += 5;
                 // December
-                setMonthCellValues(row, col, dto.getDec());
+                setMonthCellValues(row, col, dto.getDec(), dataStyle);
                 col += 5;
                 // January
-                setMonthCellValues(row, col, dto.getJan());
+                setMonthCellValues(row, col, dto.getJan(), dataStyle);
                 col += 5;
                 // February
-                setMonthCellValues(row, col, dto.getFeb());
+                setMonthCellValues(row, col, dto.getFeb(), dataStyle);
                 col += 5;
                 // March
-                setMonthCellValues(row, col, dto.getMar());
+                setMonthCellValues(row, col, dto.getMar(), dataStyle);
                 col += 5;
                 
-                row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-                row.createCell(col++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
-                row.createCell(col++).setCellValue(dto.getNormHeaderId() != null ? dto.getNormHeaderId() : "");
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+                cell.setCellStyle(remarksStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue(dto.getNormHeaderId() != null ? dto.getNormHeaderId() : "");
+                cell.setCellStyle(dataStyle);
 
                 if (isAfterSave) {
-                    row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
-                    row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    cell = row.createCell(col++);
+                    cell.setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+                    cell.setCellStyle(dataStyle);
+                    cell = row.createCell(col++);
+                    cell.setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+                    cell.setCellStyle(dataStyle);
                 }
             }
 
@@ -844,6 +889,24 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             // Hide financialYearMonthFkId columns for all months
             for (Integer fymCol : financialYearMonthFkIdColumns) {
                 sheet.setColumnHidden(fymCol, true);
+            }
+
+            // Hide Amount and Price columns for all months
+            for (Integer amountCol : amountColumns) {
+                sheet.setColumnHidden(amountCol, true);
+            }
+            for (Integer priceCol : priceColumns) {
+                sheet.setColumnHidden(priceCol, true);
+            }
+
+            for (int i = 0; i < totalColumns; i++) {
+                if (i == remarksCol) {
+                    sheet.setColumnWidth(i, 8000);
+                    continue;
+                }
+                sheet.autoSizeColumn(i);
+                String headerText = getHeaderText(sheet, i);
+                applyHeaderMinWidth(sheet, i, headerText);
             }
 
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -1073,21 +1136,25 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         return valueDTO;
     }
 
-    private void setMonthCellValues(Row row, int startCol, NormBasedUtilityBudgetMonthDTO monthDTO) {
+    private void setMonthCellValues(Row row, int startCol, NormBasedUtilityBudgetMonthDTO monthDTO, CellStyle dataStyle) {
         if (monthDTO != null) {
             // Commented out Qty column
             // setDoubleCellValue(row.createCell(startCol), monthDTO.getQty());
             // Commented out Generation UOM column
             // row.createCell(startCol + 1).setCellValue(monthDTO.getGenerationUom() != null ? monthDTO.getGenerationUom() : "");
-            setDoubleCellValue(row.createCell(startCol), monthDTO.getNorms());
-            setDoubleCellValue(row.createCell(startCol + 1), monthDTO.getQuantity());
-            setDoubleCellValue(row.createCell(startCol + 2), monthDTO.getAmount());
-            setDoubleCellValue(row.createCell(startCol + 3), monthDTO.getPrice());
-            row.createCell(startCol + 4).setCellValue(monthDTO.getFinancialYearMonthFkId() != null ? monthDTO.getFinancialYearMonthFkId() : "");
+            setDoubleCellValue(row.createCell(startCol), monthDTO.getNorms(), dataStyle);
+            setDoubleCellValue(row.createCell(startCol + 1), monthDTO.getQuantity(), dataStyle);
+            setDoubleCellValue(row.createCell(startCol + 2), monthDTO.getAmount(), dataStyle);
+            setDoubleCellValue(row.createCell(startCol + 3), monthDTO.getPrice(), dataStyle);
+            Cell cell = row.createCell(startCol + 4);
+            cell.setCellValue(monthDTO.getFinancialYearMonthFkId() != null ? monthDTO.getFinancialYearMonthFkId() : "");
+            cell.setCellStyle(dataStyle);
         } else {
             // Updated loop count from 7 to 5 columns
             for (int i = 0; i < 5; i++) {
-                row.createCell(startCol + i).setCellValue("");
+                Cell cell = row.createCell(startCol + i);
+                cell.setCellValue("");
+                cell.setCellStyle(dataStyle);
             }
         }
     }
@@ -1131,11 +1198,80 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
         }
     }
 
-    private void setDoubleCellValue(Cell cell, Double value) {
+    private void setDoubleCellValue(Cell cell, Double value, CellStyle style) {
         if (value != null) {
             cell.setCellValue(value);
         } else {
             cell.setCellValue("");
+        }
+        cell.setCellStyle(style);
+    }
+
+    private CellStyle createHeaderStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        return style;
+    }
+
+    private CellStyle createDataStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        return style;
+    }
+
+    private CellStyle createRemarksStyle(Workbook workbook) {
+        CellStyle style = createDataStyle(workbook);
+        style.setWrapText(true);
+        return style;
+    }
+
+    private String getHeaderText(Sheet sheet, int col) {
+        String subHeader = getCellText(sheet, 1, col);
+        if (subHeader != null && !subHeader.isBlank()) {
+            return subHeader;
+        }
+        return getCellText(sheet, 0, col);
+    }
+
+    private String getCellText(Sheet sheet, int rowIndex, int col) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null) {
+            return null;
+        }
+        Cell cell = row.getCell(col);
+        if (cell == null) {
+            return null;
+        }
+        if (cell.getCellType() == CellType.STRING) {
+            return cell.getStringCellValue();
+        }
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return String.valueOf(cell.getNumericCellValue());
+        }
+        if (cell.getCellType() == CellType.FORMULA) {
+            return cell.getStringCellValue();
+        }
+        return null;
+    }
+
+    private void applyHeaderMinWidth(Sheet sheet, int col, String headerText) {
+        if (headerText == null || headerText.isBlank()) {
+            return;
+        }
+        int headerWidth = Math.min(255 * 256, (headerText.length() + 2) * 256);
+        if (sheet.getColumnWidth(col) < headerWidth) {
+            sheet.setColumnWidth(col, headerWidth);
         }
     }
 

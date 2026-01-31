@@ -434,6 +434,7 @@ def calculate_stg_extraction_requirements_load_based(
 def usd_iterate(
     month: int,
     year: int,
+    cpp_plant_id: str,
     lp_process: float,
     lp_fixed: float,
     mp_process: float,
@@ -520,7 +521,7 @@ def usd_iterate(
             heat_rate = hrsg_data['HeatRate'].iloc[0]
             from database.power_asset_queries import BTU_LB_TO_MMBTU_MT
             ng_norm = heat_rate * BTU_LB_TO_MMBTU_MT
-            print(f"    {hrsg_name}: Heat Rate = {heat_rate:.2f} BTU/lb → NG Norm = {ng_norm:.7f} MMBTU/MT")
+            print(f"    {hrsg_name}: Heat Rate = {heat_rate:.2f} BTU/lb -> NG Norm = {ng_norm:.7f} MMBTU/MT")
     
     # =========================================================
     # STEP 1: CALCULATE FIXED STEAM DEMANDS
@@ -627,8 +628,8 @@ def usd_iterate(
     # Power (from database)
     from services.demand_service import fetch_fixed_process_demands
     db_demands = fetch_fixed_process_demands(month, year)
-    power_fixed = db_demands["power"]["fixed"] if db_demands else 0.0
-    power_process = db_demands["power"]["process"] if db_demands else 0.0
+    power_fixed = db_demands.get("power", {}).get("fixed", 0.0) if db_demands and isinstance(db_demands, dict) else 0.0
+    power_process = db_demands.get("power", {}).get("process", 0.0) if db_demands and isinstance(db_demands, dict) else 0.0
     power_u4u_est = 15850.0  # Rough estimate for initial display
     power_total_est = power_fixed + power_process + power_u4u_est
     print(f"  | Power                | MWH    | {power_fixed:>13,.2f} | {power_process:>13,.2f} | {power_u4u_est:>13,.2f} | {power_total_est:>13,.2f} |")
@@ -766,7 +767,7 @@ def usd_iterate(
             print(f"  [Input] GT Reduction (power balance):    {gt_reduction_for_balance_mwh:>12.2f} MWh")
         
         power_result = distribute_by_priority(
-            month, year, 
+            month, year, cpp_plant_id,
             additional_demand_mwh=previous_utility_aux_mwh,
             stg_max_mwh=stg_limit_mwh,
             stg_min_override_mwh=stg_min_override_mwh,
@@ -1502,9 +1503,25 @@ def usd_iterate(
                 print(f"       SHP Demand:     {shp_demand:>14.2f} MT")
                 print(f"       Max SHP Cap:    {max_shp_capacity:>14.2f} MT")
                 print(f"       Shortfall:      {shp_deficit:>14.2f} MT")
+                print(f"\n       POSSIBLE CAUSES:")
+                print(f"       1. Process SHP demand too high ({shp_process:.2f} MT)")
+                print(f"       2. GTs not running (Priority too low?)")
+                print(f"       3. HRSG supplementary firing at maximum capacity")
+                print(f"\n       RECOMMENDATIONS:")
+                print(f"       - Check asset priorities (GTs should have priority 1-3)")
+                print(f"       - Verify GT operational hours are set correctly")
+                print(f"       - Consider reducing process SHP demand")
                 
                 iteration_record["action"] = "SHP_IMPOSSIBLE"
                 iteration_record["status"] = "FAILED"
+                iteration_record["failure_reason"] = "SHP_DEFICIT_UNSOLVABLE"
+                iteration_record["diagnostic_info"] = {
+                    "shp_demand": shp_demand,
+                    "shp_capacity": max_shp_capacity,
+                    "shp_deficit": shp_deficit,
+                    "stg_gross_mwh": stg_gross_mwh,
+                    "gt_total_gross_mwh": sum(gt["gross_mwh"] for gt in gt_details),
+                }
                 iteration_history.append(iteration_record)
                 
                 # Store final values and exit
@@ -1613,10 +1630,94 @@ def usd_iterate(
             print(f"  Export Status:           NOT AVAILABLE")
             print(f"  WARNING: Excess power generated but export not available!")
     
+    # Generate diagnostic message for failed convergence
+    failure_diagnostic = None
+    if not converged and iteration_history:
+        last_iter = iteration_history[-1]
+        failure_status = last_iter.get("status", "UNKNOWN")
+        
+        if failure_status == "FAILED":
+            # Check for specific failure reason
+            failure_reason = last_iter.get("failure_reason", "UNKNOWN")
+            diagnostic_info = last_iter.get("diagnostic_info", {})
+            
+            if failure_reason == "SHP_DEFICIT_UNSOLVABLE":
+                failure_diagnostic = {
+                    "type": "SHP_CAPACITY_EXCEEDED",
+                    "message": "Steam (SHP) demand exceeds maximum HRSG capacity. Cannot balance steam even with STG at zero.",
+                    "details": {
+                        "shp_demand_mt": diagnostic_info.get("shp_demand", 0),
+                        "shp_capacity_mt": diagnostic_info.get("shp_capacity", 0),
+                        "shp_deficit_mt": diagnostic_info.get("shp_deficit", 0),
+                        "stg_generation_mwh": diagnostic_info.get("stg_gross_mwh", 0),
+                        "gt_total_generation_mwh": diagnostic_info.get("gt_total_gross_mwh", 0),
+                    },
+                    "possible_causes": [
+                        "Process SHP demand is too high for available HRSG capacity",
+                        "Gas Turbines (GTs) not running or have low priority (check GT operational hours)",
+                        "HRSG supplementary firing already at maximum capacity",
+                        "Asset priorities misconfigured (STG dispatched before GTs)"
+                    ],
+                    "recommendations": [
+                        "Check asset priorities: GTs should have priority 1-3, STG should have priority 10+",
+                        "Verify GT operational hours are set correctly in database",
+                        "Consider reducing process SHP demand if possible",
+                        "Ensure HRSG supplementary firing capacity is sufficient"
+                    ]
+                }
+        elif failure_status == "EXCESS_STEAM_LIMIT_REACHED":
+            # STG at MAX or GTs at MIN, cannot absorb excess steam
+            last_dispatch = final_dispatch if final_dispatch else []
+            stg_info = next((a for a in last_dispatch if "STG" in str(a.get("AssetName", "")).upper()), {})
+            
+            failure_diagnostic = {
+                "type": "EXCESS_STEAM_UNABSORBED",
+                "message": "Excess steam generated but cannot be absorbed. STG at maximum capacity or GTs at minimum load.",
+                "details": {
+                    "excess_steam_mt": last_iter.get("excess_steam_mt", 0),
+                    "equivalent_power_mwh": last_iter.get("excess_power_mwh", 0),
+                    "stg_current_mwh": stg_info.get("GrossMWh", 0),
+                    "stg_max_mw": stg_info.get("CapacityMW", 0),
+                },
+                "possible_causes": [
+                    "STG has higher priority than GTs (dispatches first, reaches MAX before GTs load)",
+                    "GTs running at minimum load (cannot reduce further to decrease free steam)",
+                    "HRSG minimum supplementary firing (60 MT/hr rule) creates excess steam"
+                ],
+                "recommendations": [
+                    "Adjust asset priorities: GTs should dispatch BEFORE STG (lower priority numbers)",
+                    "Example: GT1=1, GT2=2, GT3=3, STG=10",
+                    "This allows GTs to load first (generate free steam), then STG loads (consumes steam)",
+                    "Consider exporting excess power if export is available"
+                ]
+            }
+        else:
+            # Generic convergence failure
+            failure_diagnostic = {
+                "type": "CONVERGENCE_TIMEOUT",
+                "message": f"USD iteration did not converge after {len(iteration_history)} iterations",
+                "details": {
+                    "iterations_used": len(iteration_history),
+                    "final_aux_error_mwh": last_iter.get("aux_power_error_mwh", 0),
+                    "tolerance_mwh": USD_TOLERANCE,
+                },
+                "possible_causes": [
+                    "Power auxiliary consumption oscillating between iterations",
+                    "Steam balance not stabilizing",
+                    "Asset priority configuration causing dispatch instability"
+                ],
+                "recommendations": [
+                    "Review iteration history to identify oscillation patterns",
+                    "Check asset priorities are set correctly",
+                    "Verify operational hours and capacity limits are reasonable"
+                ]
+            }
+    
     return {
         "success": converged,
         "error_type": None if converged else "USD_NOT_CONVERGED",
         "message": "USD iteration converged successfully" if converged else "USD iteration did not converge",
+        "failure_diagnostic": failure_diagnostic,  # NEW: Detailed diagnostic information
         "converged": converged,
         "iterations_used": len(iteration_history),
         "final_power_aux_mwh": round(final_aux_power, 4),
@@ -1673,6 +1774,7 @@ if __name__ == "__main__":
     result = usd_iterate(
         month=4,
         year=2025,
+        cpp_plant_id="23BCA1B3-56DD-4C15-A3D6-3C2C9A62E653",  # Example plant ID
         lp_process=20109.57,
         lp_fixed=5169.51,
         mp_process=14030.00,
@@ -1711,6 +1813,7 @@ if __name__ == "__main__":
     result2 = usd_iterate(
         month=4,
         year=2025,
+        cpp_plant_id="23BCA1B3-56DD-4C15-A3D6-3C2C9A62E653",  # Example plant ID
         lp_process=20109.57,
         lp_fixed=5169.51,
         mp_process=14030.00,

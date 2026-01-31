@@ -23,6 +23,10 @@ tmp/
 *~.nib
 local.properties
 .settings/
+
+# Archive files
+*.7z
+*.zip
 .loadpath
 .recommenders
 
@@ -125,3 +129,23 @@ override.tf.json
 terraform.rc
 
 .history
+
+# Local development files - not to be pushed
+01_StoredProcedures.sql
+IMPLEMENTATION_SUMMARY.md
+IMPLEMENTATION_SUMMARY_ImportPower.md
+NormParameter.sql
+RIL.AOP_GenerateScriptReport_*.html
+SQL_STORED_PROCEDURES_LIST.md
+database/scripts/CPPImportPower_*.sql
+database/scripts/CPPNorms_*.sql
+database/scripts/CPPNorms_*.md
+database/scripts/CPP_*.sql
+apps/python/PPPython-script/
+!apps/python/PPPython-script/
+apps/python/PPPython-script/**
+!apps/python/PPPython-script/**/*.py
+script1createandinsert.sql
+scripts/linux/build-specific-services.sh
+formulaDocument.md
+

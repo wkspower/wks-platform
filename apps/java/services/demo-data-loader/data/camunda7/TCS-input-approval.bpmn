@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions
+    xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+    xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+    xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+    id="Definitions_1"
+    targetNamespace="http://example.com/eps">
+  <bpmn:process id="TCS_APPROVAL_PROCESS"
+                name="EPS Multi-Form Approval"
+                isExecutable="true"
+                camunda:historyTimeToLive="180">
+    <!-- START -->
+    <bpmn:startEvent id="StartEvent" name="Process Initiated"/>
+    
+    <!-- MULTI-INSTANCE SUBMISSION TASK -->
+    <bpmn:userTask id="SubmitPlantData"
+                   name="Submit Plant Data">
+    
+      <bpmn:multiInstanceLoopCharacteristics 
+          camunda:collection="${plantList}"
+          camunda:elementVariable="plant">
+      </bpmn:multiInstanceLoopCharacteristics>
+    </bpmn:userTask>
+    
+    <!-- SINGLE EBS APPROVAL -->
+    <bpmn:userTask id="EBS_Approval"
+                   name="EBS Approval"
+                   camunda:candidateGroups="EBS_ENGINEER"/>
+    
+    <!-- CTS APPROVAL -->
+    <bpmn:userTask id="CTS_APPROVAL"
+                   name="CTS Approval"
+                   camunda:candidateGroups="CTS_ENGINEER"/>
+    
+    <!-- END -->
+    <bpmn:endEvent id="EndEvent" name="Process Completed"/>
+    
+    <!-- SEQUENCE FLOWS -->
+    <bpmn:sequenceFlow id="flow1"
+                       sourceRef="StartEvent"
+                       targetRef="SubmitPlantData"/>
+    <bpmn:sequenceFlow id="flow2"
+                       sourceRef="SubmitPlantData"
+                       targetRef="EBS_Approval"/>
+    <bpmn:sequenceFlow id="flow3"
+                       sourceRef="EBS_Approval"
+                       targetRef="CTS_APPROVAL"/>
+    <bpmn:sequenceFlow id="flow4"
+                       sourceRef="CTS_APPROVAL"
+                       targetRef="EndEvent"/>
+  </bpmn:process>
+</bpmn:definitions>

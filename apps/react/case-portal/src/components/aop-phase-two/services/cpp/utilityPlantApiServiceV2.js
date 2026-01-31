@@ -24,6 +24,12 @@ export const UtilityPlantApiServiceV2 = {
   exportNormsExcel,
   calculateNormsData,
 
+  // SR Mapping APIs
+  getSRMapping,
+  saveSRMapping,
+  importSRMappingExcel,
+  exportSRMappingExcel,
+
   // Generic Excel Import/Export
   saveExcelData,
   exportExcelData,
@@ -403,4 +409,91 @@ async function exportNormsExcel(keycloak, PLANT_ID, AOP_YEAR) {
     fileName: `Norms_${AOP_YEAR}.xlsx`,
     method: 'GET',
   })
+}
+
+//====================|| SR Mapping APIs ||====================//
+async function getSRMapping(keycloak, plantFkId, aopYear) {
+  const url = `${Config.CaseEngineUrl}/task/sr-mapping?aopYear=${aopYear}&plantFkId=${plantFkId}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveSRMapping(keycloak, payload) {
+  const url = `${Config.CaseEngineUrl}/task/sr-mapping`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  const body = JSON.stringify(payload)
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body,
+    })
+    if (!resp.ok) {
+      throw new Error(`HTTP error! Status: ${resp.status}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function exportSRMappingExcel(keycloak, plantFkId, aopYear) {
+  return exportExcelData(keycloak, {
+    endpoint: `sr-mapping/export?aopYear=${aopYear}&plantFkId=${plantFkId}`,
+    queryParams: {},
+    fileName: `CPP_SRMapping_${aopYear}.xlsx`,
+    method: 'GET',
+  })
+}
+
+async function importSRMappingExcel(file, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/sr-mapping/import`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    const responseData = await json(keycloak, resp)
+
+    if (resp.status === 400 || resp.status === 200) {
+      return responseData
+    }
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return responseData
+  } catch (e) {
+    console.error(`Error importing SR Mapping Excel:`, e)
+    return Promise.reject(e)
+  }
 }

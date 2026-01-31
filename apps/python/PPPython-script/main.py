@@ -92,6 +92,15 @@ if __name__ == "__main__":
     year = int(input("Enter Year: "))
     
     # -----------------------------------------------------------
+    # STEP 1.2: GET CPP PLANT ID
+    # -----------------------------------------------------------
+    print("\n--- CPP PLANT ID ---")
+    print("Enter CPP Plant UUID (required for import power multi-source)")
+    cpp_plant_id_input = input("CPP Plant ID [23BCA1B3-56DD-4C15-A3D6-3C2C9A62E653]: ").strip()
+    cpp_plant_id = cpp_plant_id_input if cpp_plant_id_input else "23BCA1B3-56DD-4C15-A3D6-3C2C9A62E653"
+    print(f"Using Plant ID: {cpp_plant_id}")
+    
+    # -----------------------------------------------------------
     # STEP 1.5: CHOOSE DATA SOURCE
     # -----------------------------------------------------------
     print("\n--- DATA SOURCE ---")
@@ -243,6 +252,7 @@ if __name__ == "__main__":
         result = calculate_budget_with_iteration(
             month=month,
             year=year,
+            cpp_plant_id=cpp_plant_id,
             lp_process=lp_process,
             lp_fixed=lp_fixed,
             mp_process=mp_process,
@@ -263,6 +273,7 @@ if __name__ == "__main__":
         result = calculate_budget(
             month=month,
             year=year,
+            cpp_plant_id=cpp_plant_id,
             lp_process=lp_process,
             lp_fixed=lp_fixed,
             mp_process=mp_process,

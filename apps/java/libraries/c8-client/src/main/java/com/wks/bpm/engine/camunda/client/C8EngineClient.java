@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.camunda.community.rest.client.dto.TaskDto;
+import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -149,6 +151,24 @@ public class C8EngineClient implements BpmEngineClient {
 	public void sendMessage(final ProcessMessage processMesage, final Optional<List<ProcessVariable>> variables,
 			final BpmEngine bpmEngine) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void completeTaskByTaskDefinitionKey(String businessKey, String taskDefinitionKey,
+			List<ProcessVariable> variables) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'completeTaskByTaskDefinitionKey'");
+	}
+
+	@Override
+	public List<TaskDto> findTasksByBusinessKeyAndProcessDefinitionKey(final Optional<String> processInstanceBusinessKey, final Optional<String> processDefinitionKey, final BpmEngine bpmEngine) {
+		
+		throw new UnsupportedOperationException("Unimplemented method 'findTasksByBusinessKeyAndProcessDefinitionKey'");
+	}
+
+	@Override
+	public void updateProcessVariable(final String processInstanceId, String variableName, VariableValueDto variable) {
+		throw new UnsupportedOperationException("Unimplemented method 'updateProcessVariable'");
 	}
 
 }
