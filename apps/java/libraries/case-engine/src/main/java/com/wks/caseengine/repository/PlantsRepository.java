@@ -29,5 +29,14 @@ public interface PlantsRepository extends JpaRepository<Plants, UUID>{
       @Query(value = "Exec dbo.CPP_NMD_GetPlantConsumptionByMaterial @CPPPlantId = :plantId, @AOPYear = :year", nativeQuery = true)
       List<PlantConsumpProjection> findPlantConsumptionByMaterial(@Param("plantId") UUID plantId, @Param("year") String year);
 	
+      //get all the plants for given vertical and site
+      @Query(
+         value = "SELECT * FROM Plants p " +
+                 "WHERE p.Vertical_FK_Id = :verticalId " +
+                 "AND p.Site_FK_Id = :siteId ",
+         nativeQuery = true
+       )
+       
+      List<Plants> findUniqueNamesPlantsByVerticalAndSite(@Param("verticalId") UUID verticalId, @Param("siteId") UUID siteId);
 
 }

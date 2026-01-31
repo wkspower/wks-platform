@@ -7,9 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -27,7 +31,6 @@ import com.wks.caseengine.cpp.entity.STGExtractionLookup;
 import com.wks.caseengine.cpp.repository.HRSGHeatRateLookupRepository;
 import com.wks.caseengine.cpp.repository.HeatRateRepository;
 import com.wks.caseengine.cpp.repository.STGExtractionLookupRepository;
-import com.wks.caseengine.utility.Utility;
 
 
 @Service
@@ -187,7 +190,9 @@ public byte[] exportHRSGHeatRateLookup() throws IOException {
     
     Workbook workbook = new XSSFWorkbook();
     Sheet sheet = workbook.createSheet("HRSG Heat Rate Lookup");
-    CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+    CellStyle headerStyle = createHeaderStyle(workbook);
+    CellStyle dataStyle = createDataStyle(workbook);
+    CellStyle remarksStyle = createRemarksStyle(workbook);
     
     int rowNum = 0;
     
@@ -208,17 +213,34 @@ public byte[] exportHRSGHeatRateLookup() throws IOException {
         Row row = sheet.createRow(rowNum++);
         int colNum = 0;
         
-        row.createCell(colNum++).setCellValue(dto.getEquipmentName() != null ? dto.getEquipmentName() : "");
-        row.createCell(colNum++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
-        row.createCell(colNum++).setCellValue(dto.getHrsgLoad() != null ? dto.getHrsgLoad().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getHeatRate() != null ? dto.getHeatRate().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-        row.createCell(colNum++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        Cell cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getEquipmentName() != null ? dto.getEquipmentName() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getHrsgLoad() != null ? dto.getHrsgLoad().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getHeatRate() != null ? dto.getHeatRate().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        cell.setCellStyle(remarksStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        cell.setCellStyle(dataStyle);
     }
     
-    // Auto-size columns
+    // Auto-size columns (header + content aware)
     for (int i = 0; i < headers.length; i++) {
+        if (i == 4) {
+            sheet.setColumnWidth(i, 8000);
+            continue;
+        }
         sheet.autoSizeColumn(i);
+        applyHeaderMinWidth(sheet, i, headers[i]);
     }
     
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -236,7 +258,9 @@ public byte[] exportSTGExtractionLookup() throws IOException {
     
     Workbook workbook = new XSSFWorkbook();
     Sheet sheet = workbook.createSheet("STG Extraction Lookup");
-    CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+    CellStyle headerStyle = createHeaderStyle(workbook);
+    CellStyle dataStyle = createDataStyle(workbook);
+    CellStyle remarksStyle = createRemarksStyle(workbook);
     
     int rowNum = 0;
     
@@ -258,19 +282,40 @@ public byte[] exportSTGExtractionLookup() throws IOException {
         Row row = sheet.createRow(rowNum++);
         int colNum = 0;
         
-        row.createCell(colNum++).setCellValue(dto.getLoadMW() != null ? dto.getLoadMW().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getSvhInletTPH() != null ? dto.getSvhInletTPH().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getSmBleedFlowTPH() != null ? dto.getSmBleedFlowTPH().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getSlExtFlowTPH() != null ? dto.getSlExtFlowTPH().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getCondensingLoadM3Hr() != null ? dto.getCondensingLoadM3Hr().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getHeatRateKcalKWH() != null ? dto.getHeatRateKcalKWH().doubleValue() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-        row.createCell(colNum++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        Cell cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getLoadMW() != null ? dto.getLoadMW().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getSvhInletTPH() != null ? dto.getSvhInletTPH().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getSmBleedFlowTPH() != null ? dto.getSmBleedFlowTPH().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getSlExtFlowTPH() != null ? dto.getSlExtFlowTPH().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getCondensingLoadM3Hr() != null ? dto.getCondensingLoadM3Hr().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getHeatRateKcalKWH() != null ? dto.getHeatRateKcalKWH().doubleValue() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        cell.setCellStyle(remarksStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        cell.setCellStyle(dataStyle);
     }
     
-    // Auto-size columns
+    // Auto-size columns (header + content aware)
     for (int i = 0; i < headers.length; i++) {
+        if (i == 6) {
+            sheet.setColumnWidth(i, 8000);
+            continue;
+        }
         sheet.autoSizeColumn(i);
+        applyHeaderMinWidth(sheet, i, headers[i]);
     }
     
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -288,7 +333,9 @@ public byte[] exportHeatRate(String assetId) throws IOException {
     
     Workbook workbook = new XSSFWorkbook();
     Sheet sheet = workbook.createSheet("Heat Rate");
-    CellStyle headerStyle = Utility.createBoldBorderedStyle(workbook);
+    CellStyle headerStyle = createHeaderStyle(workbook);
+    CellStyle dataStyle = createDataStyle(workbook);
+    CellStyle remarksStyle = createRemarksStyle(workbook);
     
     int rowNum = 0;
     
@@ -309,18 +356,37 @@ public byte[] exportHeatRate(String assetId) throws IOException {
         Row row = sheet.createRow(rowNum++);
         int colNum = 0;
         
-        row.createCell(colNum++).setCellValue(dto.getEquipType() != null ? dto.getEquipType() : "");
-        row.createCell(colNum++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
-        row.createCell(colNum++).setCellValue(dto.getGtLoad() != null ? dto.getGtLoad() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getHeatRate() != null ? dto.getHeatRate() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getFreeSteamFactor() != null ? dto.getFreeSteamFactor() : 0.0);
-        row.createCell(colNum++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-        row.createCell(colNum++).setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        Cell cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getEquipType() != null ? dto.getEquipType() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getGtLoad() != null ? dto.getGtLoad() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getHeatRate() != null ? dto.getHeatRate() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getFreeSteamFactor() != null ? dto.getFreeSteamFactor() : 0.0);
+        cell.setCellStyle(dataStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+        cell.setCellStyle(remarksStyle);
+        cell = row.createCell(colNum++);
+        cell.setCellValue(dto.getId() != null ? dto.getId().toString() : "");
+        cell.setCellStyle(dataStyle);
     }
     
-    // Auto-size columns
+    // Auto-size columns (header + content aware)
     for (int i = 0; i < headers.length; i++) {
+        if (i == 5) {
+            sheet.setColumnWidth(i, 8000);
+            continue;
+        }
         sheet.autoSizeColumn(i);
+        applyHeaderMinWidth(sheet, i, headers[i]);
     }
     
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -517,6 +583,45 @@ private Double getCellValueAsDouble(Row row, int cellIndex) {
         }
     } catch (Exception e) {
         return null;
+    }
+}
+
+private CellStyle createHeaderStyle(Workbook workbook) {
+    CellStyle style = workbook.createCellStyle();
+    style.setBorderTop(BorderStyle.THIN);
+    style.setBorderBottom(BorderStyle.THIN);
+    style.setBorderLeft(BorderStyle.THIN);
+    style.setBorderRight(BorderStyle.THIN);
+    style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+    style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    Font font = workbook.createFont();
+    font.setBold(true);
+    style.setFont(font);
+    return style;
+}
+
+private CellStyle createDataStyle(Workbook workbook) {
+    CellStyle style = workbook.createCellStyle();
+    style.setBorderTop(BorderStyle.THIN);
+    style.setBorderBottom(BorderStyle.THIN);
+    style.setBorderLeft(BorderStyle.THIN);
+    style.setBorderRight(BorderStyle.THIN);
+    return style;
+}
+
+private CellStyle createRemarksStyle(Workbook workbook) {
+    CellStyle style = createDataStyle(workbook);
+    style.setWrapText(true);
+    return style;
+}
+
+private void applyHeaderMinWidth(Sheet sheet, int col, String headerText) {
+    if (headerText == null || headerText.isBlank()) {
+        return;
+    }
+    int headerWidth = Math.min(255 * 256, (headerText.length() + 2) * 256);
+    if (sheet.getColumnWidth(col) < headerWidth) {
+        sheet.setColumnWidth(col, headerWidth);
     }
 }
 }

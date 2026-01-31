@@ -98,3 +98,6 @@ case.engine.swagger.enabled: true
 
 # Python Budget Calculator Service URL
 pp.budget.calculator.url: ${PP_BUDGET_CALCULATOR_URL:http://pp-budget-calculator:5000}
+
+# camuda process Id for TCS Output Workflow
+camunda.process.id.tcs.output.workflow: ${CAMUNDA_PROCESS_ID_TCS_OUTPUT_WORKFLOW:TCS_APPROVAL_PROCESS}

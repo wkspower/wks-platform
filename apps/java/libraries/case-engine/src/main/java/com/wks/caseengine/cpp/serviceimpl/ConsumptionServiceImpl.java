@@ -10,8 +10,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -36,7 +41,6 @@ import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.repository.CalculatedProcessDemandRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ProcessDemandMasterRepository;
-import com.wks.caseengine.utility.Utility;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -332,6 +336,12 @@ System.out.println("total results: " + results.size());
 			Sheet sheet = workbook.createSheet("Consumption");
 			int currentRow = 0;
 
+			CellStyle headerStyle = createHeaderStyle(workbook);
+			CellStyle dataStyle = createDataStyle(workbook);
+			CellStyle remarksStyle = createRemarksStyle(workbook);
+			String startYearSuffix = financialYear.substring(2, 4);
+			String endYearSuffix = financialYear.substring(5, 7);
+
 		// Header row
 		List<String> headers = new ArrayList<>();
 		headers.add("Process Plant");
@@ -339,18 +349,18 @@ System.out.println("total results: " + results.size());
 		headers.add("CPP Utility Ids");
 		headers.add("CPP Plant");
 		headers.add("UOM");
-		headers.add("April");
-		headers.add("May");
-		headers.add("June");
-		headers.add("July");
-		headers.add("August");
-		headers.add("September");
-		headers.add("October");
-		headers.add("November");
-		headers.add("December");
-		headers.add("January");
-		headers.add("February");
-		headers.add("March");
+		headers.add("Apr-" + startYearSuffix);
+		headers.add("May-" + startYearSuffix);
+		headers.add("Jun-" + startYearSuffix);
+		headers.add("Jul-" + startYearSuffix);
+		headers.add("Aug-" + startYearSuffix);
+		headers.add("Sep-" + startYearSuffix);
+		headers.add("Oct-" + startYearSuffix);
+		headers.add("Nov-" + startYearSuffix);
+		headers.add("Dec-" + startYearSuffix);
+		headers.add("Jan-" + endYearSuffix);
+		headers.add("Feb-" + endYearSuffix);
+		headers.add("Mar-" + endYearSuffix);
 		headers.add("Remarks");
 		headers.add("Plant Code");
 
@@ -363,7 +373,7 @@ System.out.println("total results: " + results.size());
 		for (int col = 0; col < headers.size(); col++) {
 			Cell cell = headerRow.createCell(col);
 			cell.setCellValue(headers.get(col));
-			cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+			cell.setCellStyle(headerStyle);
 		}
 		
 		// Hide Plant Code column (index 18)
@@ -374,34 +384,66 @@ System.out.println("total results: " + results.size());
 			Row row = sheet.createRow(currentRow++);
 			int col = 0;
 
-			row.createCell(col++).setCellValue(dto.getProcessPlant() != null ? dto.getProcessPlant() : "");
-			row.createCell(col++).setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
-			row.createCell(col++).setCellValue(dto.getCppUtilityId() != null ? dto.getCppUtilityId() : "");
-			row.createCell(col++).setCellValue(dto.getCppPlant() != null ? dto.getCppPlant() : "");
-			row.createCell(col++).setCellValue(dto.getUom() != null ? dto.getUom() : "");
+			Cell cell = row.createCell(col++);
+			cell.setCellValue(dto.getProcessPlant() != null ? dto.getProcessPlant() : "");
+			cell.setCellStyle(dataStyle);
+			cell = row.createCell(col++);
+			cell.setCellValue(dto.getCppUtility() != null ? dto.getCppUtility() : "");
+			cell.setCellStyle(dataStyle);
+			cell = row.createCell(col++);
+			cell.setCellValue(dto.getCppUtilityId() != null ? dto.getCppUtilityId() : "");
+			cell.setCellStyle(dataStyle);
+			cell = row.createCell(col++);
+			cell.setCellValue(dto.getCppPlant() != null ? dto.getCppPlant() : "");
+			cell.setCellStyle(dataStyle);
+			cell = row.createCell(col++);
+			cell.setCellValue(dto.getUom() != null ? dto.getUom() : "");
+			cell.setCellStyle(dataStyle);
 			
-			setDoubleCellValue(row.createCell(col++), dto.getApr());
-			setDoubleCellValue(row.createCell(col++), dto.getMay());
-			setDoubleCellValue(row.createCell(col++), dto.getJun());
-			setDoubleCellValue(row.createCell(col++), dto.getJul());
-			setDoubleCellValue(row.createCell(col++), dto.getAug());
-			setDoubleCellValue(row.createCell(col++), dto.getSep());
-			setDoubleCellValue(row.createCell(col++), dto.getOct());
-			setDoubleCellValue(row.createCell(col++), dto.getNov());
-			setDoubleCellValue(row.createCell(col++), dto.getDec());
-			setDoubleCellValue(row.createCell(col++), dto.getJan());
-			setDoubleCellValue(row.createCell(col++), dto.getFeb());
-			setDoubleCellValue(row.createCell(col++), dto.getMar());
+			setDoubleCellValue(row.createCell(col++), dto.getApr(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getMay(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getJun(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getJul(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getAug(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getSep(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getOct(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getNov(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getDec(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getJan(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getFeb(), dataStyle);
+			setDoubleCellValue(row.createCell(col++), dto.getMar(), dataStyle);
 			
-			row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-			row.createCell(col++).setCellValue(dto.getProcessPlantId() != null ? dto.getProcessPlantId() : ""); // Hidden column
+			cell = row.createCell(col++);
+			cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+			cell.setCellStyle(remarksStyle);
+			cell = row.createCell(col++);
+			cell.setCellValue(dto.getProcessPlantId() != null ? dto.getProcessPlantId() : "");
+			cell.setCellStyle(dataStyle); // Hidden column
 
 			if (isAfterSave) {
-				row.createCell(col++).setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
-				row.createCell(col++).setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+				cell = row.createCell(col++);
+				cell.setCellValue(dto.getSaveStatus() != null ? dto.getSaveStatus() : "");
+				cell.setCellStyle(dataStyle);
+				cell = row.createCell(col++);
+				cell.setCellValue(dto.getErrDescription() != null ? dto.getErrDescription() : "");
+				cell.setCellStyle(dataStyle);
 			}
 
 			
+		}
+
+		int totalColumns = headers.size();
+		for (int col = 0; col < totalColumns; col++) {
+			if (col == 17) {
+				sheet.setColumnWidth(col, 8000);
+				continue;
+			}
+			sheet.autoSizeColumn(col);
+			String headerText = headers.get(col);
+			int headerWidth = Math.min(255 * 256, (headerText.length() + 2) * 256);
+			if (sheet.getColumnWidth(col) < headerWidth) {
+				sheet.setColumnWidth(col, headerWidth);
+			}
 		}
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -589,12 +631,42 @@ System.out.println("total results: " + results.size());
 		return requests;
 	}
 
-	private void setDoubleCellValue(Cell cell, Double value) {
+	private void setDoubleCellValue(Cell cell, Double value, CellStyle style) {
 		if (value != null) {
 			cell.setCellValue(value);
 		} else {
 			cell.setCellValue("");
 		}
+		cell.setCellStyle(style);
+	}
+
+	private CellStyle createHeaderStyle(Workbook workbook) {
+		CellStyle style = workbook.createCellStyle();
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+		style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		Font font = workbook.createFont();
+		font.setBold(true);
+		style.setFont(font);
+		return style;
+	}
+
+	private CellStyle createDataStyle(Workbook workbook) {
+		CellStyle style = workbook.createCellStyle();
+		style.setBorderTop(BorderStyle.THIN);
+		style.setBorderBottom(BorderStyle.THIN);
+		style.setBorderLeft(BorderStyle.THIN);
+		style.setBorderRight(BorderStyle.THIN);
+		return style;
+	}
+
+	private CellStyle createRemarksStyle(Workbook workbook) {
+		CellStyle style = createDataStyle(workbook);
+		style.setWrapText(true);
+		return style;
 	}
 
 	private String getStringCellValue(Cell cell) {
