@@ -1,8 +1,11 @@
 package com.wks.caseengine.rest.cpp;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.wks.caseengine.cpp.dto.norm.CPPNormsRequestDTO;
 import com.wks.caseengine.cpp.service.CPPNormsService;
@@ -91,5 +94,32 @@ public class CPPNormsController {
             errorResponse.setMessage("Error: " + e.getMessage());
             return ResponseEntity.status(500).body(errorResponse);
         }
+    }
+
+    @GetMapping(value = "/cpp-norms/export")
+    public ResponseEntity<byte[]> exportCPPNorms(
+            @RequestParam UUID cppPlantId,
+            @RequestParam String financialYear) {
+
+        byte[] excelFile = cppNormsService.exportCPPNorms(cppPlantId, financialYear, false, null);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "CPPNorms_" + financialYear + ".xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(excelFile);
+    }
+
+    @PostMapping(value = "/cpp-norms/import")
+    public ResponseEntity<AOPMessageVM> importCPPNorms(
+            @RequestParam UUID cppPlantId,
+            @RequestParam String financialYear,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = false, defaultValue = "SYSTEM") String modifiedBy) {
+
+        AOPMessageVM result = cppNormsService.importExcel(cppPlantId, financialYear, file, modifiedBy);
+        return ResponseEntity.ok(result);
     }
 }

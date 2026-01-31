@@ -52,6 +52,8 @@ export const InputApiService = {
 
   getNormBasedUtilityBudget,
   saveNormsData,
+  exportCPPNormsExcel,
+  saveCPPNormsExcel,
 
   getFuelAvailabilityData,
   saveFuelAvailabilityData,
@@ -80,6 +82,49 @@ async function getOperationHoursData(keycloak, plantId, year) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+
+async function exportCPPNormsExcel(keycloak, PLANT_ID, financialYear) {
+  return exportExcelData(keycloak, {
+    endpoint: `cpp-norms/export`,
+    queryParams: { cppPlantId: PLANT_ID, financialYear },
+    fileName: `CPPNorms_${financialYear}.xlsx`,
+    method: 'GET',
+  })
+}
+
+async function saveCPPNormsExcel(file, keycloak, PLANT_ID, financialYear) {
+  const url = `${Config.CaseEngineUrl}/task/cpp-norms/import?cppPlantId=${PLANT_ID}&financialYear=${financialYear}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+
+    const responseData = await json(keycloak, resp)
+
+    if (resp.status === 400 || resp.status === 200) {
+      return responseData
+    }
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    return responseData
+  } catch (e) {
+    console.error(`Error importing CPP Norms Excel:`, e)
+    return Promise.reject(e)
   }
 }
 
