@@ -234,7 +234,12 @@ async function saveImportPowerCapacity(keycloak, PLANT_ID, AOP_YEAR, payload) {
   }
 }
 
-async function saveImportPowerCapacityExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+async function saveImportPowerCapacityExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   return saveExcelData(
     file,
     keycloak,
@@ -270,7 +275,12 @@ async function getImportPowerOperationalHours(keycloak, plantId, year) {
   }
 }
 
-async function saveImportPowerOperationalHours(keycloak, PLANT_ID, AOP_YEAR, payload) {
+async function saveImportPowerOperationalHours(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  payload,
+) {
   const url = `${Config.CaseEngineUrl}/task/import-power/operational-hours/${PLANT_ID}/${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
@@ -295,7 +305,12 @@ async function saveImportPowerOperationalHours(keycloak, PLANT_ID, AOP_YEAR, pay
   }
 }
 
-async function saveImportPowerOperationalHoursExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
+async function saveImportPowerOperationalHoursExcel(
+  file,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   return saveExcelData(
     file,
     keycloak,
@@ -305,7 +320,11 @@ async function saveImportPowerOperationalHoursExcel(file, keycloak, PLANT_ID, AO
   )
 }
 
-async function exportImportPowerOperationalHoursExcel(keycloak, PLANT_ID, AOP_YEAR) {
+async function exportImportPowerOperationalHoursExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
   return exportExcelData(keycloak, {
     endpoint: `import-power/operational-hours/export/${PLANT_ID}/${AOP_YEAR}`,
     fileName: `Import Power Operational Hours - ${PLANT_ID} - ${AOP_YEAR}.xlsx`,

@@ -364,23 +364,43 @@ const ImportPower = () => {
       return
     }
 
-    const payload = modifiedData?.map(({ id, inEdit, sourceId, sourceName, plantName, sapCode, materialCode, uom, aug, sept, oct, nov, dec, jan, feb, mar, ...rest }) => ({
-      sourceId,
-      sourceName,
-      plantName,
-      sapCode,
-      materialCode,
-      uom,
-      august: aug,
-      september: sept,
-      october: oct,
-      november: nov,
-      december: dec,
-      january: jan,
-      february: feb,
-      march: mar,
-      ...rest,
-    }))
+    const payload = modifiedData?.map(
+      ({
+        id,
+        inEdit,
+        sourceId,
+        sourceName,
+        plantName,
+        sapCode,
+        materialCode,
+        uom,
+        aug,
+        sept,
+        oct,
+        nov,
+        dec,
+        jan,
+        feb,
+        mar,
+        ...rest
+      }) => ({
+        sourceId,
+        sourceName,
+        plantName,
+        sapCode,
+        materialCode,
+        uom,
+        august: aug,
+        september: sept,
+        october: oct,
+        november: nov,
+        december: dec,
+        january: jan,
+        february: feb,
+        march: mar,
+        ...rest,
+      }),
+    )
 
     try {
       console.log('payload', payload)
@@ -484,7 +504,11 @@ const ImportPower = () => {
     })
 
     try {
-      await InputApiService.exportImportPowerCapacityExcel(keycloak, PLANT_ID, AOP_YEAR)
+      await InputApiService.exportImportPowerCapacityExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
