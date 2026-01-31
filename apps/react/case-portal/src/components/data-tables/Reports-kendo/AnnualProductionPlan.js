@@ -42,6 +42,7 @@ const AnnualProductionPlan = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const IS_PE_PP_VERTICAL = lowerVertName === 'pe' || lowerVertName === 'pp'
   const IS_PTA_VERTICAL = lowerVertName === 'pta'
+  const IS_VCM_VERTICAL = lowerVertName === 'vcm'
 
   let oldYear1 = ''
   if (thisYear && thisYear.includes('-')) {
@@ -86,7 +87,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      widthT: 80,
+      widthT: 70,
       align: 'right',
     },
     {
@@ -106,7 +107,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      widthT: 80,
+      widthT: 70,
       align: 'right',
     },
     {
@@ -137,7 +138,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      widthT: 100,
+      widthT: 70,
       align: 'right',
     },
     {
@@ -175,7 +176,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       headerName: 'SL.No',
       editable: false,
-      widthT: 100,
+      widthT: 70,
       align: 'right',
     },
     {
@@ -226,7 +227,7 @@ const AnnualProductionPlan = () => {
       field: 'sno',
       title: 'SL.No',
       editable: false,
-      widthT: 80,
+      widthT: 70,
       format: '{0:#.#}',
       align: 'right',
     },
@@ -339,6 +340,7 @@ const AnnualProductionPlan = () => {
           ...item,
           idFromApi: item?.id,
           id: index,
+          sno: index + 1,
           isEditable: true,
           inEdit: false,
           periodFrom: item?.periodFrom
@@ -768,8 +770,14 @@ const AnnualProductionPlan = () => {
           saveBtn: !isOldYear,
           allAction: true,
           showReportTitle: true,
-          addButton: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
-          deleteButton: IS_PE_PP_VERTICAL || IS_PTA_VERTICAL ? true : false,
+          addButton:
+            IS_PE_PP_VERTICAL || IS_PTA_VERTICAL || IS_VCM_VERTICAL
+              ? true
+              : false,
+          deleteButton:
+            IS_PE_PP_VERTICAL || IS_PTA_VERTICAL || IS_VCM_VERTICAL
+              ? true
+              : false,
         }}
       />
 

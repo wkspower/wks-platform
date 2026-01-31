@@ -90,18 +90,26 @@ export const DataService = {
   getIbr,
   //saveAnnualProduction,
   getIbrSdTa,
+  getIbrSdTaNMD,
   getIbrScreen3,
+  getIbrScreen3NMD,
   saveCrackerRunLength,
+  saveCrackerRunLengthNMD,
   getRunLengthExcel,
+  getRunLengthExcelNMD,
   saveRunLengthExcel,
+  saveRunLengthExcelNMD,
   handleCalculateDecokingActivities,
   handleCalculateSdTaActivities,
   getSlowDownPlantDataTab,
   postIbr,
+  postIbrNMD,
   getSpyroOutputDataYield,
   saveSpyroOutputYield,
   getCrackerNextYearParameters,
+  getCrackerNextYearParametersNMD,
   getCrackerNextYearData,
+  getCrackerNextYearDataNMD,
   calculateNormsHistorianValues,
 
   plantContributionPlanLastFourYears,
@@ -133,6 +141,16 @@ export const DataService = {
   slowdownconsumptionExport,
   getRevision,
   updateRevision,
+  getDataTeamPlant,
+  getPeopleInitiative,
+  savePlantTeam,
+  savePeopleInitiative,
+  deletePlantTeam,
+  deletePeopleInitiative,
+  PlantTeamExport,
+  ExportPeopleInitiative,
+  ImportPlantTeamExcel,
+  ImportPeopleInitiativeExcel,
 }
 
 async function handleRefresh(year, plantId, keycloak) {
@@ -1685,7 +1703,13 @@ async function importSpyroOutputExcelYield(
   }
 }
 
-async function exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
+async function exportSpyroOutputExcel(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  ExcelName,
+) {
   const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
@@ -1708,7 +1732,7 @@ async function exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `Optimizer_Output_${mode || 'Export'}.xlsx`
+    a.download = `${ExcelName}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1719,7 +1743,13 @@ async function exportSpyroOutputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function exportSpyroOutputExcelYield(keycloak, mode, PLANT_ID, AOP_YEAR) {
+async function exportSpyroOutputExcelYield(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/yield-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
@@ -1742,7 +1772,7 @@ async function exportSpyroOutputExcelYield(keycloak, mode, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `SpyroOutput_${mode || 'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1774,7 +1804,13 @@ async function importSpyroInputExcel(file, keycloak, mode, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
+async function exportSpyroInputExcel(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/spyro-input-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
@@ -1797,7 +1833,7 @@ async function exportSpyroInputExcel(keycloak, mode, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `Optimizer_Input_${mode || 'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1833,7 +1869,7 @@ async function getConfigurationExcel(
 
   try {
     const resp = await fetch(url, {
-      method: 'POST', // changed from GET to POST since we’re sending a body
+      method: 'POST', // changed from GET to POST since we?re sending a body
       headers,
       body,
     })
@@ -2066,8 +2102,45 @@ async function getIbrSdTa(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
+
+async function getIbrSdTaNMD(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr-nmd?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
 async function postIbr(PLANT_ID, data, keycloak, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function postIbrNMD(PLANT_ID, data, keycloak, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/decoking-activities/ibr-nmd?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -2100,6 +2173,22 @@ async function getIbrScreen3(keycloak, PLANT_ID, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
+
+async function getIbrScreen3NMD(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/decoking-activities-nmd?plantId=${PLANT_ID}&year=${AOP_YEAR}&reportType=RunLength`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
 async function saveCrackerRunLength(PLANT_ID, data, keycloak, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/decoking-activities/run-length?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
@@ -2119,7 +2208,32 @@ async function saveCrackerRunLength(PLANT_ID, data, keycloak, AOP_YEAR) {
     return await Promise.reject(e)
   }
 }
-async function getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR) {
+
+async function saveCrackerRunLengthNMD(PLANT_ID, data, keycloak, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/decoking-activities/run-length-nmd?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+async function getRunLengthExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  RUN_LENGTH_EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/run-length-export-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=RunLength`
   const headers = {
     'Content-Type': 'application/json',
@@ -2138,7 +2252,42 @@ async function getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = 'Run-Length.xlsx' // Filename to save
+    a.download = `${RUN_LENGTH_EXCEL_NAME}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error Editing Config data:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function getRunLengthExcelNMD(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  RUN_LENGTH_EXCEL_NAME,
+) {
+  const url = `${Config.CaseEngineUrl}/task/run-length-export-excel-nmd?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=RunLength`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `${RUN_LENGTH_EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -2150,6 +2299,30 @@ async function getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR) {
 }
 async function saveRunLengthExcel(file, keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/run-length-import-excel?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=RunLength`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    if (!resp.ok) {
+      throw new Error(`Failed to edit data: ${resp.status} ${resp.statusText}`)
+    }
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Error Editing RunlLength data:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function saveRunLengthExcelNMD(file, keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/run-length-import-excel-nmd?year=${AOP_YEAR}&plantId=${PLANT_ID}&reportType=RunLength`
   const formData = new FormData()
   formData.append('file', file)
   const headers = {
@@ -2303,6 +2476,33 @@ async function getCrackerNextYearParameters(
     return Promise.reject(e)
   }
 }
+
+async function getCrackerNextYearParametersNMD(
+  keycloak,
+  date,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const url =
+    `${Config.CaseEngineUrl}/task/next-year/configuration-nmd` +
+    `?year=${encodeURIComponent(AOP_YEAR)}` +
+    `&plantId=${encodeURIComponent(PLANT_ID)}` +
+    `&startDate=${encodeURIComponent(date)}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Failed to fetch spyro-output data', e)
+    return Promise.reject(e)
+  }
+}
 async function getCrackerNextYearData(keycloak, qParams, PLANT_ID, AOP_YEAR) {
   const NEXT_AOP_YEAR = AOP_YEAR?.replace(
     /(\d{4})-(\d{2})/,
@@ -2318,6 +2518,44 @@ async function getCrackerNextYearData(keycloak, qParams, PLANT_ID, AOP_YEAR) {
 
   const url =
     `${Config.CaseEngineUrl}/task/next-year/entry` +
+    `?year=${encodeURIComponent(NEXT_AOP_YEAR)}` +
+    `&plantId=${encodeURIComponent(PLANT_ID)}` +
+    extraQueryString
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Failed to fetch next-year data', e)
+    return Promise.reject(e)
+  }
+}
+async function getCrackerNextYearDataNMD(
+  keycloak,
+  qParams,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const NEXT_AOP_YEAR = AOP_YEAR?.replace(
+    /(\d{4})-(\d{2})/,
+    (_, a, b) => `${+a + 1}-${String((+b + 1) % 100).padStart(2, '0')}`,
+  )
+
+  const extraQueryString = Object.entries(qParams)
+    .map(
+      ([key, value]) =>
+        `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
+    .join('')
+
+  const url =
+    `${Config.CaseEngineUrl}/task/next-year/entry-nmd` +
     `?year=${encodeURIComponent(NEXT_AOP_YEAR)}` +
     `&plantId=${encodeURIComponent(PLANT_ID)}` +
     extraQueryString
@@ -3045,5 +3283,233 @@ async function updateRevision(keycloak, payload, PLANT_ID, AOP_YEAR) {
   } catch (e) {
     console.log(e)
     return await Promise.reject(e)
+  }
+}
+export async function getDataTeamPlant(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error fetching Plant Team data:', e)
+    return Promise.reject(e)
+  }
+}
+export async function getPeopleInitiative(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error fetching Plant Team data:', e)
+    return Promise.reject(e)
+  }
+}
+export async function savePlantTeam(keycloak, PLANT_ID, AOP_YEAR, data) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error saving Plant Team data:', e)
+    return Promise.reject(e)
+  }
+}
+
+export async function savePeopleInitiative(keycloak, PLANT_ID, AOP_YEAR, data) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data),
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error saving People Initiative data:', e)
+    return Promise.reject(e)
+  }
+}
+async function deletePlantTeam(plantTeamId, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team?id=${encodeURIComponent(plantTeamId)}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+async function deletePeopleInitiative(peopleInitiativeId, keycloak) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative?id=${encodeURIComponent(peopleInitiativeId)}`
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'DELETE',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to delete data: ${resp.status} ${resp.statusText}`,
+      )
+    }
+    return await resp.text() // Handle text response from the backend
+  } catch (e) {
+    console.error('Error deleting slowdown data:', e)
+    return Promise.reject(e)
+  }
+}
+export async function PlantTeamExport(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
+  const maintenanceTypeName = 'Slowdown'
+  const url = `${Config.CaseEngineUrl}/task/plant-team-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `${EXCEL_EXPORT_TITLE || 'plant_team'}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function ExportPeopleInitiative(
+  keycloak,
+  plantId,
+  year,
+  EXCEL_EXPORT_TITLE,
+) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative-export?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `${EXCEL_EXPORT_TITLE || 'People_Initiative'}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Slowdown Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function ImportPlantTeamExcel(file, keycloak, plantId, year) {
+  const url = `${Config.CaseEngineUrl}/task/plant-team-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error importing Plant Team Excel:', e)
+    return Promise.reject(e)
+  }
+}
+
+export async function ImportPeopleInitiativeExcel(
+  file,
+  keycloak,
+  plantId,
+  year,
+) {
+  const url = `${Config.CaseEngineUrl}/task/people-initiative-import?plantId=${encodeURIComponent(plantId)}&year=${encodeURIComponent(year)}`
+  const formData = new FormData()
+  formData.append('file', file)
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error importing People Initiative Excel:', e)
+    return Promise.reject(e)
   }
 }

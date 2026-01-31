@@ -27,7 +27,7 @@ import Loadable from 'components/Loadable'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
-
+import QualityPackagingNorms from 'components/kendo-data-tables/QualityPackagingNorms'
 import MainLayout from 'layout/MainLayout'
 import { lazy } from 'react'
 import { CaseList } from 'views/caseList/caseList'
@@ -87,6 +87,7 @@ import SteadyStateConsumption from 'components/aop-phase-two/vgoht/steady-state-
 import ShutdownConsumption from 'components/aop-phase-two/vgoht/shutdown-consumption/index'
 import SlowdownConsumption from 'components/aop-phase-two/vgoht/slowdown-consumption/index'
 import OverallAopConsumption from 'components/aop-phase-two/vgoht/overall-aop-consumption/index'
+import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -496,6 +497,14 @@ export const MainRoutes = (
             ),
           },
           //Vertical VGOHT Ended
+          {
+            path: 'quality-packaging-norms',
+            element: (
+              <PrivateRoute routeId='quality-packaging-norms'>
+                <QualityPackagingNorms />
+              </PrivateRoute>
+            ),
+          },
         ],
       },
 
@@ -748,6 +757,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='plant-budget-summary'>
                 <PlantBudgetSummary />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'site-budget-summary',
+            element: (
+              <PrivateRoute routeId='site-budget-summary'>
+                <SiteBudgetSummary />
               </PrivateRoute>
             ),
           },

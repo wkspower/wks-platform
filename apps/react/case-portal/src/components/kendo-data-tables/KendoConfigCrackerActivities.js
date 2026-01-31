@@ -27,6 +27,7 @@ import { DatePicker } from '../../../node_modules/@progress/kendo-react-dateinpu
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { getRoleName } from 'services/role-service.js'
+import DecokingConfigNMD from './KendoConfigCrackerActivitiesNMD.js'
 const DecokingConfig = () => {
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
@@ -47,11 +48,16 @@ const DecokingConfig = () => {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
+
+  const PLANT_NAME = plantObject?.name?.toUpperCase()
+  const SITE_NAME = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME = verticalObject?.name?.toUpperCase()
+
+  const RUN_LENGTH_EXCEL_NAME = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_Run_Length_${AOP_YEAR}`
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
@@ -181,6 +187,10 @@ const DecokingConfig = () => {
   const fetchData = useCallback(
     async (screen = null) => {
       if (!PLANT_ID || !AOP_YEAR) return
+
+      // setModifiedCellsRunLength({})
+      // setModifiedCellsSdTa({})
+
       const currentTab = tabs[activeTabIndex]
       setLoading(true)
       try {
@@ -211,6 +221,7 @@ const DecokingConfig = () => {
 
           // Screen 2
           if (!screen || screen === 2) {
+            if (siteName === 'nmd') return
             const data2 = await DataService.getIbrSdTa(
               keycloak,
               PLANT_ID,
@@ -286,6 +297,7 @@ const DecokingConfig = () => {
 
           // Screen 3 (sample/static)
           if (!screen || screen === 3) {
+            if (siteName === 'nmd') return
             const data3 = await DataService.getIbrScreen3(
               keycloak,
               PLANT_ID,
@@ -297,9 +309,15 @@ const DecokingConfig = () => {
             if (data3?.code === 200) {
               setCalculationObject(data3?.data?.aopCalculation)
               const hiddenKeys = ['Id', 'Plant_FK_Id', 'AOPYear']
-              const dynamiccolumnDeckoking = (data3?.data?.columns || []).map(
+              const dynamicColumnDeckoking = (data3?.data?.columns || []).map(
                 (col) => ({
                   ...col,
+                  isDisabled:
+                    ['Id', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(
+                      col.field,
+                    ) ||
+                    col.field === 'Date' ||
+                    col.field.toLowerCase().includes('actual'),
                   editable: !(
                     ['Id', 'Month', 'AOPYear', 'Plant_FK_Id'].includes(
                       col.field,
@@ -310,7 +328,7 @@ const DecokingConfig = () => {
                   hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
                 }),
               )
-              setRunLengthColumns(dynamiccolumnDeckoking)
+              setRunLengthColumns(dynamicColumnDeckoking)
 
               // Use correct date format from API
               const toDateObject = (value) =>
@@ -319,7 +337,7 @@ const DecokingConfig = () => {
               const processedData = (data3.data?.data || []).map(
                 (item, index) => {
                   const row = { id: index }
-                  dynamiccolumnDeckoking.forEach((col) => {
+                  dynamicColumnDeckoking.forEach((col) => {
                     // Convert date fields if needed
                     if (col.type === 'date') {
                       const dateObj = toDateObject(item[col.field])
@@ -807,32 +825,145 @@ const DecokingConfig = () => {
     }
   }
 
+  // helper: validate one payload object against reference rows
+  function validateProposedForDate(payloadObj, referenceRows) {
+    const result = { valid: true, errors: [] }
+
+    // ---- FIX 1: normalize date (string OR Date) ----
+    const dateVal = payloadObj.Date ?? payloadObj.date
+    if (!dateVal) return result
+
+    const d = dateVal instanceof Date ? dateVal : new Date(dateVal)
+    if (Number.isNaN(d.getTime())) return result
+
+    // check date is 1st April
+    const isFirstApril = d.getUTCDate() === 1 && d.getUTCMonth() === 3 // April = 3
+    if (!isFirstApril) return result
+
+    // ---- FIX 2: correct key match (H10_Proposed etc.) ----
+    Object.keys(payloadObj)
+      .filter((k) => /^H\d+_Proposed$/i.test(k))
+      .forEach((key) => {
+        const name = key.match(/^(H\d+)_/i)?.[1] // e.g. "H10"
+        const raw = (payloadObj[key] ?? '').toString().trim()
+        const value = raw === '' ? 0 : Number(raw)
+
+        if (!name) {
+          result.valid = false
+          result.errors.push(`${key}: invalid name format`)
+          return
+        }
+
+        const refRow = referenceRows?.find(
+          (r) => r.Name?.toString().toUpperCase() === name.toUpperCase(),
+        )
+
+        if (!refRow) {
+          result.valid = false
+          result.errors.push(`${key}: no reference row found for ${name}`)
+          return
+        }
+
+        const maxDays = refRow.Pre_CR_Days
+        if (maxDays === undefined || maxDays === null) {
+          result.valid = false
+          result.errors.push(
+            `${key}: reference row ${name} missing Pre_CR_Days`,
+          )
+          return
+        }
+
+        if (Number.isNaN(value)) {
+          result.valid = false
+          result.errors.push(`${key}: proposed value '${raw}' is not a number`)
+          return
+        }
+
+        if (value > Number(maxDays)) {
+          result.valid = false
+          result.errors.push(`${name} Proposed value is exceeding ${maxDays}`)
+          return
+        }
+      })
+
+    return result
+  }
+
   const saveCrackerRunLength = async (newRow) => {
     setLoading(true)
     try {
-      const apiFields = runLengthColumns.map((col) => col.field)
+      console.log('--- saveCrackerRunLength START ---')
+      console.log('newRow:', newRow)
 
-      // Build payload using only those fields
-      const payload = newRow.map((row) => {
+      // get reference rows (where Pre_CR_Days exist)
+      const referenceRows = getRows('IBR Plan')[2]
+      console.log('referenceRows (IBR Plan [2]):', referenceRows)
+
+      // build payload like you already do
+      const apiFields = runLengthColumns.map((col) => col.field)
+      console.log('apiFields:', apiFields)
+
+      const payload = newRow.map((row, idx) => {
         const obj = {}
         apiFields.forEach((field) => {
           let value = row[field]
           const colDef = runLengthColumns.find((col) => col.field === field)
           if (colDef?.type === 'date' && value instanceof Date) {
-            // Pass the Date object directly
             obj[field] = value
           } else {
             obj[field] = value ?? null
           }
         })
+        console.log(`payload row [${idx}]:`, obj)
         return obj
       })
+
+      console.log('FINAL payload:', payload)
+
+      // VALIDATION
+      const allErrors = []
+      payload.forEach((p, idx) => {
+        console.log(`--- VALIDATION START row [${idx}] ---`)
+        console.log('payload row:', p)
+        console.log('payload.Date:', p.Date, 'type:', typeof p.Date)
+        console.log('referenceRows length:', referenceRows?.length)
+
+        const res = validateProposedForDate(p, referenceRows)
+
+        console.log('validateProposedForDate result:', res)
+
+        if (!res.valid) {
+          console.log('? validation failed, errors:', res.errors)
+          allErrors.push(...res.errors.map((e) => `${p.Date ?? 'row'}: ${e}`))
+        } else {
+          console.log('? validation passed')
+        }
+      })
+
+      console.log('allErrors:', allErrors)
+
+      if (allErrors.length) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: `Validation failed: ${allErrors[0]}`,
+          severity: 'error',
+        })
+        setLoading(false)
+        console.log('--- EXIT due to validation error ---')
+        return
+      }
+
+      console.log('--- CALLING SAVE API ---')
+
       const response = await DataService.saveCrackerRunLength(
         PLANT_ID,
         payload,
         keycloak,
         AOP_YEAR,
       )
+
+      console.log('saveCrackerRunLength API response:', response)
+
       if (response?.code == 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -840,23 +971,22 @@ const DecokingConfig = () => {
           severity: 'success',
         })
         setModifiedCellsRunLength({})
-        setLoading(false)
       } else {
         setSnackbarOpen(true)
-        setSnackbarData({
-          message: 'Data Saved Falied!',
-          severity: 'error',
-        })
+        setSnackbarData({ message: 'Data Save Failed!', severity: 'error' })
       }
       return response
     } catch (error) {
       console.error('Error saving data:', error)
-      setLoading(false)
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'Error saving data', severity: 'error' })
     } finally {
+      console.log('--- FINALLY BLOCK ---')
       fetchData(3)
       setLoading(false)
     }
   }
+
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -904,8 +1034,14 @@ const DecokingConfig = () => {
       // showCalculateVisibility:
       //   Object.keys(calculationObject || {}).length > 0 ? true : false,
 
-      //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
-      showCalculateVisibility: false,
+      //verion1 = BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
+      //verion2 = BUTTON SHOULD BE DISABLED FOR NOW (ONLY FOR NMD)
+      showCalculateVisibility:
+        siteName == 'nmd'
+          ? false
+          : Object.keys(calculationObject || {}).length > 0
+            ? true
+            : false,
       downloadExcelBtn: true,
       uploadExcelBtn: true,
       byDefCollaps: false,
@@ -926,7 +1062,12 @@ const DecokingConfig = () => {
       severity: 'success',
     })
     try {
-      await DataService.getRunLengthExcel(keycloak, PLANT_ID, AOP_YEAR)
+      await DataService.getRunLengthExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        RUN_LENGTH_EXCEL_NAME,
+      )
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
@@ -1093,6 +1234,10 @@ const DecokingConfig = () => {
       ? ibrGridThree.filter((col) => col.field !== 'demo')
       : ibrGridThree
 
+  if (siteName === 'nmd') {
+    return <DecokingConfigNMD pid={PLANT_ID} />
+  }
+
   return (
     <Box>
       <Backdrop
@@ -1103,7 +1248,9 @@ const DecokingConfig = () => {
       </Backdrop>
 
       <LocalizationProvider dateAdapter={AdapterMoment}>
-        <Box sx={{ display: 'flex', gap: 1, mb: 0, alignItems: 'center' }}>
+        <Box
+          sx={{ display: 'flex', gap: 1, mb: 0, mt: 1, alignItems: 'center' }}
+        >
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography className='grid-title' sx={{ whiteSpace: 'nowrap' }}>
               TA Start Date

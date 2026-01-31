@@ -12,6 +12,8 @@ import colDefsShutdownRate from '../../../assets/kendo_config_pe3.json'
 import productionColumnsPE5 from '../../../assets/kendo_config_pe5.json'
 import pioImpactColumns from '../../../assets/kendo_config_pio_impact.json'
 
+import reportManualEntry from '../../../assets/kendo_config_report_mannual_entry.json'
+
 const getConfigByType = (configType) => {
   switch (configType) {
     case 'meg':
@@ -60,7 +62,7 @@ const getConfigByType = (configType) => {
       return disContineGradeChange
 
     case 'Report Manual Entry':
-      return disContineGradeChange
+      return reportManualEntry
 
     default:
       return productionColumns
@@ -74,8 +76,6 @@ const getEnhancedAOPColDefs = ({
   FORMATE_VALUE,
 }) => {
   var config = []
-
-  // console.log('configType', configType)
 
   if (configType == 'grades') {
     config = [

@@ -1,0 +1,68 @@
+import React from 'react'
+import { Box } from '@mui/material'
+import KendoDataTablesCracker from './index-cracker.js'
+import KendoDataTablesCrackerNMD from './index-cracker-nmd.js'
+const CustomRow = ({ dataItem, className, ...rest }) => {
+  let rowClassName = className || ''
+  if (dataItem.isError) rowClassName += ' error-row'
+  return (
+    <tr {...rest?.trProps} className={rowClassName.trim()}>
+      {rest.children}
+    </tr>
+  )
+}
+const SDTAActivitiesGridNMD = ({
+  columns,
+  rows,
+  setRows,
+  fetchData,
+  handleRemarkCellClick,
+  remarkDialogOpen,
+  currentRemark,
+  setCurrentRemark,
+  currentRowId,
+  snackbarData,
+  snackbarOpen,
+  setSnackbarOpen,
+  setSnackbarData,
+  modifiedCells,
+  allMonths,
+  setModifiedCells,
+  permissions,
+  saveChanges,
+  setRemarkDialogOpen,
+  handleCalculate,
+}) => {
+  return (
+    <Box sx={{ mt: 1 }}>
+      <KendoDataTablesCrackerNMD
+        columns={columns}
+        rows={rows}
+        setRows={setRows}
+        editable={true}
+        editField='inEdit'
+        fetchData={fetchData}
+        handleRemarkCellClick={handleRemarkCellClick}
+        remarkDialogOpen={remarkDialogOpen}
+        currentRemark={currentRemark}
+        setCurrentRemark={setCurrentRemark}
+        currentRowId={currentRowId}
+        snackbarData={snackbarData}
+        snackbarOpen={snackbarOpen}
+        setSnackbarOpen={setSnackbarOpen}
+        setSnackbarData={setSnackbarData}
+        modifiedCells={modifiedCells}
+        allMonths={allMonths}
+        setModifiedCells={setModifiedCells}
+        permissions={permissions}
+        saveChanges={saveChanges}
+        setRemarkDialogOpen={setRemarkDialogOpen}
+        titleName='SD / TA Activities'
+        rowRender={CustomRow}
+        handleCalculate={handleCalculate}
+      />
+    </Box>
+  )
+}
+
+export default SDTAActivitiesGridNMD

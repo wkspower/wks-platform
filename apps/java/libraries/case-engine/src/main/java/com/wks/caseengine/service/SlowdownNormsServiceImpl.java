@@ -105,9 +105,6 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		this.dataSource = dataSource;
 	}
 
-
-	
-
 	@Override
 	@Transactional
 	public AOPMessageVM getSlowdownNormsData(String year, String plantId,String gradeId) {
@@ -622,12 +619,16 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		String verticalName = plantsRepository.findVerticalNameByPlantId((plantId));
 		
 		try {
-			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP")) {
+			if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
 				UUID grade=null;
 				if(gradeId!=null) {
 					 grade=UUID.fromString(gradeId);
 				}
 				return	slowdownNormsRepository.getSlowdownMonthsWithGrades(plantId,maintenanceName,year,grade);
+			}else if(verticalName.equalsIgnoreCase("VCM")){
+				return	slowdownNormsRepository.getVCMSlowdownMonths(plantId,maintenanceName,year);
+			}else if(verticalName.equalsIgnoreCase("PTA")){
+				return	slowdownNormsRepository.getPTASlowdownMonths(plantId,maintenanceName,year);
 			}else {
 				return	slowdownNormsRepository.getSlowdownMonths(plantId,maintenanceName,year);
 			}

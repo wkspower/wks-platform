@@ -187,7 +187,7 @@ export default function SpecificConsumptionNorm() {
       </Backdrop>
 
       <Typography component='div' className='grid-title' sx={{ mb: 0 }}>
-        {'Specific Consumption Norms'}
+        {'Norms Entry Sheet'}
       </Typography>
 
       {specificConsumptionCategories().map(({ key, title }) => {
@@ -212,7 +212,7 @@ export default function SpecificConsumptionNorm() {
 
       {/* Section title for norms grids */}
       <Typography component='div' className='grid-title' sx={{ mt: 0, mb: 0 }}>
-        {'Grade Wise Specific Consumption Norms'}
+        {`Grade wise Norms(${AOP_YEAR})`}
       </Typography>
 
       {/* Then, render all norms grids */}

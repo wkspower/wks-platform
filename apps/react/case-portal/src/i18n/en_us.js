@@ -95,6 +95,7 @@ const defs = {
     maintenanceSummary: 'Plant Maintenance Summary',
     siteMaintenanceSummary: 'Site Maintenance Summary',
     plantBudgetSummary: 'Plant Budget Summary',
+    siteBudgetSummary: 'Site Budget Summary',
 
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
@@ -107,6 +108,7 @@ const defs = {
     packagingConsumables: 'Packaging Consumables',
     dashboard: 'AOP Dashboard',
     proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
+    qualitypackaging: 'Quality & Packaging Norms',
   },
   pages: {
     dashboard: {
@@ -294,6 +296,7 @@ const defs = {
         maintenanceSummary: 'Plant Maintenance Summary',
         siteMaintenanceSummary: 'Site Maintenance Summary',
         plantBudgetSummary: 'Plant Budget Summary',
+        siteBudgetSummary: 'Site Budget Summary',
 
         functionalReports: 'Reports',
         aopDesignBasis: 'AOP Basis',
@@ -305,6 +308,7 @@ const defs = {
         packagingConsumables: 'Packaging Consumables',
         dashboard: 'AOP Dashboard',
         proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
+        qualitypackaging: 'Quality & Packaging Norms',
       },
     },
   },

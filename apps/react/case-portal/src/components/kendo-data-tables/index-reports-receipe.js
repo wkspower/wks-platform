@@ -382,7 +382,8 @@ const KendoDataTablesReciepe = ({
   const CustomRow = useCallback(
     ({ dataItem, className, ...rest }) => {
       const isDisabled =
-        !dataItem.isEditable && dataItem?.isEditable !== undefined
+        READ_ONLY ||
+        (!dataItem.isEditable && dataItem?.isEditable !== undefined)
       const rowClassName = isDisabled ? `custom-disabled-row` : className
       return (
         <tr {...rest?.trProps} className={rowClassName}>
@@ -626,7 +627,7 @@ const KendoDataTablesReciepe = ({
                     variant='contained'
                     component='span'
                     className='btn-save'
-                    disabled={isButtonDisabled}
+                    disabled={isButtonDisabled || READ_ONLY}
                   >
                     Import
                   </Button>
@@ -777,7 +778,10 @@ const KendoDataTablesReciepe = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Delete ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             Are you sure you want to delete this row?
           </DialogContentText>
         </DialogContent>
@@ -801,7 +805,10 @@ const KendoDataTablesReciepe = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             Are you sure you want to save these changes?
           </DialogContentText>
         </DialogContent>

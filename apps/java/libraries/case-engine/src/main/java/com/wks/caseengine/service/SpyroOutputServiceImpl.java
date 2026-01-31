@@ -598,36 +598,47 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	}
 	
 	private static String getStringCellValue(Cell cell, YieldDTO dto) {
-		try {
-			if (cell == null)
-				return null;
-			cell.setCellType(CellType.STRING);
-			return cell.getStringCellValue().trim();
-		} catch (Exception e) {
-			dto.setSaveStatus("Failed");
-			dto.setErrDescription("Please enter correct values");
-			e.printStackTrace();
-		}
-		return null;
-
+	    try {
+	        if (cell == null || cell.getCellType() == CellType.BLANK) {
+	            return null;
+	        }
+	        
+	        cell.setCellType(CellType.STRING);
+	        String val = cell.getStringCellValue().trim();
+	        
+	        // Return null if the string is empty after trimming
+	        return val.isEmpty() ? null : val;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
 	}
-
 	private static Double getNumericCellValue(Cell cell, YieldDTO dto) {
-		if (cell == null)
-			return null;
-		if (cell.getCellType() == CellType.NUMERIC) {
-			return cell.getNumericCellValue();
-		} else if (cell.getCellType() == CellType.STRING) {
-			try {
-				return Double.parseDouble(cell.getStringCellValue().trim());
-			} catch (NumberFormatException e) {
-				dto.setSaveStatus("Failed");
-				dto.setErrDescription("Please enter numeric values");
-			}
-		}
-		return null;
-	}
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
 
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; // Return null for blank strings
+	        }
+	        try {
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    return null;
+	}
 	public static Boolean getBooleanCellValue(Cell cell, YieldDTO dto) {
 		if (cell == null)
 			return null;

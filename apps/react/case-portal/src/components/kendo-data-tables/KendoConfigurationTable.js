@@ -33,6 +33,7 @@ import { TextArea } from '../../../node_modules/@progress/kendo-react-inputs/ind
 import { getRoleName } from 'services/role-service'
 import { ButtonGroup } from '../../../node_modules/@progress/kendo-react-buttons/index'
 import QualityParameters from './QualityParameters'
+import ExclusionDate from './ExclusionDate'
 
 const ConfigurationTable = () => {
   const hasExecutedRef = useRef(false)
@@ -68,6 +69,7 @@ const ConfigurationTable = () => {
   const lowerVertName = vertName?.toLowerCase()
 
   const [tabIndex, setTabIndex] = useState(0)
+  const [loadBtnClicked, setLoadBtnClicked] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
   const [dateEdited, setDateEdited] = useState(false)
@@ -851,6 +853,7 @@ const ConfigurationTable = () => {
         })
       }
       getAopSummary()
+      setLoadBtnClicked(true)
       return response
     } catch (error) {
       console.error('Execution Falied!', error)
@@ -1068,7 +1071,10 @@ const ConfigurationTable = () => {
       >
         <DialogTitle id='alert-dialog-title'>{'Load?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             {`Are you sure you want to load data for the period from ${formatDateForText(startDate)} to ${formatDateForText(endDate)}?`}
           </DialogContentText>
         </DialogContent>
@@ -1093,8 +1099,11 @@ const ConfigurationTable = () => {
       >
         <DialogTitle id='alert-dialog-title'>{'Change?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            {`Are you sure you want to change the Revision`}
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
+            Are you sure you want to change the Revision?
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -1270,65 +1279,69 @@ const ConfigurationTable = () => {
           flexDirection: 'column',
         }}
       >
-        <AopTabs
-          tabIndex={tabIndex}
-          setTabIndex={setTabIndex}
-          tabs={tabs.map((tabId) => {
-            const tabInfo = availableTabs.find(
-              (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
-            )
+        <Box display='flex' alignItems='center'>
+          <AopTabs
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={tabs.map((tabId) => {
+              const tabInfo = availableTabs.find(
+                (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+              )
 
-            if (tabInfo) {
-              const originalName = tabInfo.displayName
-              if (
-                lowerVertName === 'aromatics' &&
-                ['constant', 'constants'].includes(originalName?.toLowerCase())
-              ) {
-                return 'User Input'
+              if (tabInfo) {
+                const originalName = tabInfo.displayName
+                if (
+                  lowerVertName === 'aromatics' &&
+                  ['constant', 'constants'].includes(
+                    originalName?.toLowerCase(),
+                  )
+                ) {
+                  return 'User Input'
+                }
+                return originalName
               }
-              return originalName
-            }
-          })}
-        />
+            })}
+          />
 
-        {lowerVertName === 'aromatics' && tabs?.length > 0 && (
-          <Box mt={0.5}>
-            <ButtonGroup aria-label='revision group'>
-              {['1', '2', '3'].map((num) => {
-                const selected = revision === num
+          {lowerVertName === 'aromatics' && tabs?.length > 0 && (
+            <Box ml='auto'>
+              <ButtonGroup aria-label='revision group'>
+                {['1', '2', '3'].map((num) => {
+                  const selected = revision === num
 
-                return (
-                  <Button
-                    key={num}
-                    onClick={() => handleOpenDialogRev(num)}
-                    variant={selected ? 'contained' : 'outlined'}
-                    size='small'
-                    sx={{
-                      textTransform: 'none',
-                      fontSize: '0.75rem',
-                      padding: '1px 7px',
-                      minWidth: '36px',
-                      mr: 0.5,
-                      ...(selected && {
-                        bgcolor: '#0100cb',
-                        color: '#fff',
-                        borderColor: '#0100cb',
-                        fontWeight: 'bold',
-                      }),
-                      ...(!selected && {
-                        borderColor: '#000000ff',
-                        color: '#000000ff',
-                        fontWeight: 'bold',
-                      }),
-                    }}
-                  >
-                    {`Rev ${num}`}
-                  </Button>
-                )
-              })}
-            </ButtonGroup>
-          </Box>
-        )}
+                  return (
+                    <Button
+                      key={num}
+                      onClick={() => handleOpenDialogRev(num)}
+                      variant={selected ? 'contained' : 'outlined'}
+                      size='small'
+                      sx={{
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        padding: '1px 7px',
+                        minWidth: '36px',
+                        mr: 0.5,
+                        ...(selected && {
+                          bgcolor: '#0100cb',
+                          color: '#fff',
+                          borderColor: '#0100cb',
+                          fontWeight: 'bold',
+                        }),
+                        ...(!selected && {
+                          borderColor: '#000000ff',
+                          color: '#000000ff',
+                          fontWeight: 'bold',
+                        }),
+                      }}
+                    >
+                      {`Rev ${num}`}
+                    </Button>
+                  )
+                })}
+              </ButtonGroup>
+            </Box>
+          )}
+        </Box>
 
         <Box>
           {(() => {
@@ -1506,8 +1519,19 @@ const ConfigurationTable = () => {
                   />
                 )
 
-              case getTheId('Quality'):
-                return <QualityParameters />
+              // case getTheId('Quality'):
+              //   return <QualityParameters />
+
+              case getTheId('ExclusionDate'):
+                return (
+                  <ExclusionDate
+                    revision={revision}
+                    loadBtnClicked={loadBtnClicked}
+                    summary={debouncedSummary}
+                    summaryEdited={summaryEdited}
+                    setSummaryEdited={setSummaryEdited}
+                  />
+                )
 
               default:
                 return null
