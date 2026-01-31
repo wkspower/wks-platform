@@ -22,6 +22,6 @@ public interface TCSWorkFlowService {
 
     List<PlantSubmissionAuditTrailDTO> getLatestPlantSubmissionAuditTrail(String siteId, String verticalId, String type);
 
-    List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrailByTab(String plantId, String siteId, String verticalId, String type, String tab);
+    List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrailByVerfiedDate(String plantId, String siteId, String verticalId, String type);
 
 }
