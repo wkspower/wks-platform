@@ -172,8 +172,25 @@ const workspace = {
           icon: icons.IconReport,
           breadcrumbs: true,
         },
+        {
+          id: 'summary',
+          title: i18n.t('menu.summary'),
+          type: 'item',
+          url: '/utilityPlant/summary',
+          icon: icons.IconReport,
+          breadcrumbs: true,
+        },
+        {
+          id: 'sender-receiverMapping',
+          title: i18n.t('menu.senderReceiverMapping'),
+          type: 'item',
+          url: '/utilityPlant/sender-receiverMapping',
+          icon: icons.IconReport,
+          breadcrumbs: true,
+        },
       ],
     },
+
 
     // {
     //   id: 'manufacturing-division',

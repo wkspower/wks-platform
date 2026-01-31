@@ -2,387 +2,8 @@ import { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { UtilityPlantApiServiceV2 } from 'components/aop-phase-two/services/cpp/utilityPlantApiServiceV2'
-import { Box, Backdrop, CircularProgress } from '@mui/material'
+import { Box, Backdrop, CircularProgress, Stack } from '@mui/material'
 import AdvanceKendoTable from '../common/AdvanceKendoTable/index'
-import { Stack } from '../../../../node_modules/@mui/material/index'
-
-const data = [
-  {
-    id: 1,
-    receiverUtility: 'Boiler Feed Water',
-    receiverUtilityId: '310027927',
-    receiverCostCenter: 'NG-Boiler Feed Water',
-    receiverCostCenterId: 'RIL_10708017',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Boiler Feed Water',
-    senderCostCenterId: 'RIL_10708017',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Boiler Feed Water',
-    utilityId: '310027927',
-  },
-  {
-    id: 2,
-    receiverUtility: 'COMPRESSED AIR',
-    receiverUtilityId: '310027904',
-    receiverCostCenter: 'NG-Compressed Air',
-    receiverCostCenterId: 'RIL_10708018',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Compressed Air',
-    senderCostCenterId: 'RIL_10708018',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'COMPRESSED AIR',
-    utilityId: '310027904',
-  },
-  {
-    id: 3,
-    receiverUtility: 'Cooling Water 1',
-    receiverUtilityId: '310028005',
-    receiverCostCenter: 'NG-Cooling Water - 1',
-    receiverCostCenterId: 'RIL_10708014',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Cooling Water - 1',
-    senderCostCenterId: 'RIL_10708014',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Cooling Water 1',
-    utilityId: '310028005',
-  },
-  {
-    id: 4,
-    receiverUtility: 'Cooling Water 2',
-    receiverUtilityId: '310028004',
-    receiverCostCenter: 'NG-Cooling Water - 2',
-    receiverCostCenterId: 'RIL_10708016',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Cooling Water - 2',
-    senderCostCenterId: 'RIL_10708016',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Cooling Water 2',
-    utilityId: '310028004',
-  },
-  {
-    id: 5,
-    receiverUtility: 'D M Water',
-    receiverUtilityId: '310027966',
-    receiverCostCenter: 'NG-DM Water',
-    receiverCostCenterId: 'RIL_10708015',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-DM Water',
-    senderCostCenterId: 'RIL_10708015',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'D M Water',
-    utilityId: '310027966',
-  },
-  {
-    id: 6,
-    receiverUtility: 'D M Water',
-    receiverUtilityId: '310027966',
-    receiverCostCenter: 'NG-Steam Clearing',
-    receiverCostCenterId: 'RIL_10713002',
-    receiverPlant: 'NMD - Utility/Power Dist',
-    receiverPlantId: '40NG',
-    senderCostCenter: 'NG-Steam Clearing',
-    senderCostCenterId: 'RIL_10713002',
-    senderPlant: 'NMD - Utility/Power Dist',
-    senderPlantId: '40NG',
-    utility: 'D M Water',
-    utilityId: '310027966',
-  },
-  {
-    id: 7,
-    receiverUtility: 'Effluent Treated',
-    receiverUtilityId: '310027994',
-    receiverCostCenter: 'NG-ETP',
-    receiverCostCenterId: 'RIL_10708019',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-ETP',
-    senderCostCenterId: 'RIL_10708019',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Effluent Treated',
-    utilityId: '310027994',
-  },
-  {
-    id: 8,
-    receiverUtility: 'HP Steam_Dis',
-    receiverUtilityId: '310027939',
-    receiverCostCenter: 'NG-HP Steam',
-    receiverCostCenterId: 'RIL_10708010',
-    receiverPlant: 'NMD - Utility/Power Dist',
-    receiverPlantId: '40NG',
-    senderCostCenter: 'NG-HP Steam',
-    senderCostCenterId: 'RIL_10708010',
-    senderPlant: 'NMD - Utility/Power Dist',
-    senderPlantId: '40NG',
-    utility: 'HP Steam_Dis',
-    utilityId: '310027939',
-  },
-  {
-    id: 9,
-    receiverUtility: 'HRSG1_SHP STEAM',
-    receiverUtilityId: '310027926',
-    receiverCostCenter: 'NG-HRSG 1-Steam',
-    receiverCostCenterId: 'RIL_10708005',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-HRSG 1-Steam',
-    senderCostCenterId: 'RIL_10708005',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'HRSG1_SHP STEAM',
-    utilityId: '310027926',
-  },
-  {
-    id: 10,
-    receiverUtility: 'HRSG2_SHP STEAM',
-    receiverUtilityId: '310027929',
-    receiverCostCenter: 'NG-HRSG 2-Steam',
-    receiverCostCenterId: 'RIL_10708006',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-HRSG 2-Steam',
-    senderCostCenterId: 'RIL_10708006',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'HRSG2_SHP STEAM',
-    utilityId: '310027929',
-  },
-  {
-    id: 11,
-    receiverUtility: 'HRSG3_SHP STEAM',
-    receiverUtilityId: '310027930',
-    receiverCostCenter: 'NG-HRSG 3-Steam',
-    receiverCostCenterId: 'RIL_10708007',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-HRSG 3-Steam',
-    senderCostCenterId: 'RIL_10708007',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'HRSG3_SHP STEAM',
-    utilityId: '310027930',
-  },
-  {
-    id: 12,
-    receiverUtility: 'LP Steam_Dis',
-    receiverUtilityId: '310027965',
-    receiverCostCenter: 'NG-LP Steam',
-    receiverCostCenterId: 'RIL_10708012',
-    receiverPlant: 'NMD - Utility/Power Dist',
-    receiverPlantId: '40NG',
-    senderCostCenter: 'NG-LP Steam',
-    senderCostCenterId: 'RIL_10708012',
-    senderPlant: 'NMD - Utility/Power Dist',
-    senderPlantId: '40NG',
-    utility: 'LP Steam_Dis',
-    utilityId: '310027965',
-  },
-  {
-    id: 13,
-    receiverUtility: 'MP Steam_Dis',
-    receiverUtilityId: '310027940',
-    receiverCostCenter: 'NG-MP Steam',
-    receiverCostCenterId: 'RIL_10708011',
-    receiverPlant: 'NMD - Utility/Power Dist',
-    receiverPlantId: '40NG',
-    senderCostCenter: 'NG-MP Steam',
-    senderCostCenterId: 'RIL_10708011',
-    senderPlant: 'NMD - Utility/Power Dist',
-    senderPlantId: '40NG',
-    utility: 'MP Steam_Dis',
-    utilityId: '310027940',
-  },
-  {
-    id: 14,
-    receiverUtility: 'Nitrogen Gas',
-    receiverUtilityId: 'NITROGENG',
-    receiverCostCenter: 'NG-Nitrogen/ Oxygen',
-    receiverCostCenterId: 'RIL_10708020',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Nitrogen/ Oxygen',
-    senderCostCenterId: 'RIL_10708020',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Nitrogen Gas',
-    utilityId: 'NITROGENG',
-  },
-  {
-    id: 15,
-    receiverUtility: 'Oxygen',
-    receiverUtilityId: 'OXYGEN',
-    receiverCostCenter: 'NG-Nitrogen/ Oxygen',
-    receiverCostCenterId: 'RIL_10708020',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Nitrogen/ Oxygen',
-    senderCostCenterId: 'RIL_10708020',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Oxygen',
-    utilityId: 'OXYGEN',
-  },
-  {
-    id: 16,
-    receiverUtility: 'Power',
-    receiverUtilityId: 'POWER',
-    receiverCostCenter: 'NG-Power Purchase',
-    receiverCostCenterId: 'RIL_10708000',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-Power Purchase',
-    senderCostCenterId: 'RIL_10708000',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'Power',
-    utilityId: 'POWER',
-  },
-  {
-    id: 17,
-    receiverUtility: 'Power_Dis',
-    receiverUtilityId: '310027910',
-    receiverCostCenter: 'NG-Power Clearing',
-    receiverCostCenterId: 'RIL_10713000',
-    receiverPlant: 'NMD - Utility/Power Dist',
-    receiverPlantId: '40NG',
-    senderCostCenter: 'NG-Power Clearing',
-    senderCostCenterId: 'RIL_10713000',
-    senderPlant: 'NMD - Utility/Power Dist',
-    senderPlantId: '40NG',
-    utility: 'Power_Dis',
-    utilityId: '310027910',
-  },
-  {
-    id: 18,
-    receiverUtility: 'POWERGEN',
-    receiverUtilityId: '310027907',
-    receiverCostCenter: 'NG-GT1-Process',
-    receiverCostCenterId: 'RIL_10709000',
-    receiverPlant: 'NMD - Power Plant 1',
-    receiverPlantId: '40NB',
-    senderCostCenter: 'NG-GT1-Process',
-    senderCostCenterId: 'RIL_10709000',
-    senderPlant: 'NMD - Power Plant 1',
-    senderPlantId: '40NB',
-    utility: 'POWERGEN',
-    utilityId: '310027907',
-  },
-  {
-    id: 19,
-    receiverUtility: 'POWERGEN',
-    receiverUtilityId: '310027907',
-    receiverCostCenter: 'NG-GT2-Process',
-    receiverCostCenterId: 'RIL_10710000',
-    receiverPlant: 'NMD - Power Plant 2',
-    receiverPlantId: '40NC',
-    senderCostCenter: 'NG-GT2-Process',
-    senderCostCenterId: 'RIL_10710000',
-    senderPlant: 'NMD - Power Plant 2',
-    senderPlantId: '40NC',
-    utility: 'POWERGEN',
-    utilityId: '310027907',
-  },
-  {
-    id: 20,
-    receiverUtility: 'POWERGEN',
-    receiverUtilityId: '310027907',
-    receiverCostCenter: 'NG-GT3-Process',
-    receiverCostCenterId: 'RIL_10711000',
-    receiverPlant: 'NMD - Power Plant 3',
-    receiverPlantId: '40ND',
-    senderCostCenter: 'NG-GT3-Process',
-    senderCostCenterId: 'RIL_10711000',
-    senderPlant: 'NMD - Power Plant 3',
-    senderPlantId: '40ND',
-    utility: 'POWERGEN',
-    utilityId: '310027907',
-  },
-  {
-    id: 21,
-    receiverUtility: 'POWERGEN',
-    receiverUtilityId: '310027907',
-    receiverCostCenter: 'NG-STG 1-Process',
-    receiverCostCenterId: 'RIL_10712000',
-    receiverPlant: 'NMD - STG Power Plant',
-    receiverPlantId: '40NE',
-    senderCostCenter: 'NG-STG 1-Process',
-    senderCostCenterId: 'RIL_10712000',
-    senderPlant: 'NMD - STG Power Plant',
-    senderPlantId: '40NE',
-    utility: 'POWERGEN',
-    utilityId: '310027907',
-  },
-  {
-    id: 22,
-    receiverUtility: 'SHP Steam_Dis',
-    receiverUtilityId: '310027924',
-    receiverCostCenter: 'NG-Steam Clearing',
-    receiverCostCenterId: 'RIL_10713002',
-    receiverPlant: 'NMD - Utility/Power Dist',
-    receiverPlantId: '40NG',
-    senderCostCenter: 'NG-Steam Clearing',
-    senderCostCenterId: 'RIL_10713002',
-    senderPlant: 'NMD - Utility/Power Dist',
-    senderPlantId: '40NG',
-    utility: 'SHP Steam_Dis',
-    utilityId: '310027924',
-  },
-  {
-    id: 23,
-    receiverUtility: 'STG1_LP STEAM',
-    receiverUtilityId: '310028010',
-    receiverCostCenter: 'NG-STG 1-Steam',
-    receiverCostCenterId: 'RIL_10708008',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-STG 1-Steam',
-    senderCostCenterId: 'RIL_10708008',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'STG1_LP STEAM',
-    utilityId: '310028010',
-  },
-  {
-    id: 24,
-    receiverUtility: 'STG1_MP STEAM',
-    receiverUtilityId: '310027952',
-    receiverCostCenter: 'NG-STG 1-Steam',
-    receiverCostCenterId: 'RIL_10708008',
-    receiverPlant: 'NMD - Utility Plant',
-    receiverPlantId: '40NF',
-    senderCostCenter: 'NG-STG 1-Steam',
-    senderCostCenterId: 'RIL_10708008',
-    senderPlant: 'NMD - Utility Plant',
-    senderPlantId: '40NF',
-    utility: 'STG1_MP STEAM',
-    utilityId: '310027952',
-  },
-  {
-    id: 25,
-    receiverUtility: 'Water',
-    receiverUtilityId: 'RAW WATER',
-    receiverCostCenter: 'NG-Site Common',
-    receiverCostCenterId: 'RIL_10799000',
-    receiverPlant: 'NMD-Rev Proc',
-    receiverPlantId: '40N0',
-    senderCostCenter: 'NG-Site Common',
-    senderCostCenterId: 'RIL_10799000',
-    senderPlant: 'NMD-Rev Proc',
-    senderPlantId: '40N0',
-    utility: 'Water',
-    utilityId: 'RAW WATER',
-  },
-]
 const SenderReceiverMapping = () => {
   const [modifiedCells, setModifiedCells] = useState({})
   const [loading, setLoading] = useState(false)
@@ -413,25 +34,24 @@ const SenderReceiverMapping = () => {
   const fetchPlantRequirementData = async () => {
     setLoading(true)
     try {
-      /*
-      const res = await UtilityPlantApiServiceV2.getPlantRequirementData(
+      const res = await UtilityPlantApiServiceV2.getSRMapping(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
       )
-      if (res?.length === 0) {
+
+      const apiRows = Array.isArray(res) ? res : res?.data
+
+      if (!apiRows || apiRows.length === 0) {
         setRows([])
         setSnackbarOpen(true)
         setSnackbarData({ message: 'No data found', severity: 'info' })
         return
       }
-      */
-      const res = data
 
-      console.log('res', res)
-      const formattedData = res?.map((item, index) => ({
+      const formattedData = apiRows.map((item, index) => ({
         ...item,
-        remarks: item.remarks || '',
+        remarks: item?.remarks || '',
         id: item?.id || index + 1,
       }))
       setRows(formattedData)
@@ -557,18 +177,144 @@ const SenderReceiverMapping = () => {
 
   // Permissions
   const permissions = {
-    showAction: false,
-    addButton: false,
+    showAction: true,
+    addButton: true,
     deleteButton: false,
-    editButton: false,
-    saveBtn: false,
+    editButton: true,
+    saveBtn: true,
     allAction: true,
-    downloadExcelBtnFromUI: true,
+    downloadExcelBtnFromUI: false,
     ExcelName: 'Sender Receiver Mapping',
-    showImport: false,
+    showImport: true,
+    showExport: true,
     showTitleNameBusiness: true,
     showTitle: true,
     titleName: 'Sender Receiver Mapping (Utility for Utility)',
+  }
+
+  const saveChanges = async () => {
+    setLoading(true)
+
+    const modifiedData = Object.values(modifiedCells)
+    const dataToSave = modifiedData.filter((row) => row.inEdit || row.isNew)
+
+    if (!dataToSave || dataToSave.length === 0) {
+      setSnackbarOpen(true)
+      setSnackbarData({ message: 'No Records to Save!', severity: 'info' })
+      setLoading(false)
+      return
+    }
+
+    const payload = dataToSave.map((item) => {
+      const { inEdit, isNew, saveStatus, errDescription, ...rest } = item
+      return {
+        ...rest,
+        aopYear: AOP_YEAR,
+        plantFkId: PLANT_ID,
+      }
+    })
+
+    try {
+      const response = await UtilityPlantApiServiceV2.saveSRMapping(
+        keycloak,
+        payload,
+      )
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Successfully saved changes!',
+        severity: 'success',
+      })
+      setModifiedCells({})
+      await fetchPlantRequirementData()
+      return response
+    } catch (error) {
+      console.error('Error saving SR mapping:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to save changes. Please try again.',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await UtilityPlantApiServiceV2.importSRMappingExcel(
+        file,
+        keycloak,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        await fetchPlantRequirementData()
+        return
+      }
+
+      if (response?.code === 400 && response?.data) {
+        try {
+          const base64Data = response.data
+          const binaryString = window.atob(base64Data)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `SRMapping_Errors_${new Date().getTime()}.xlsx`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message ||
+              'Import failed with errors. Please check the downloaded file.',
+            severity: 'error',
+          })
+          await fetchPlantRequirementData()
+          return
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+          return
+        }
+      }
+
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: response?.message || 'Failed to import Excel file.',
+        severity: 'error',
+      })
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleExport = async () => {
@@ -577,7 +323,24 @@ const SenderReceiverMapping = () => {
       message: 'Excel download started!',
       severity: 'info',
     })
-    // Add export logic here
+
+    try {
+      await UtilityPlantApiServiceV2.exportSRMappingExcel(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting SR mapping:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
   }
 
   // Handle remark cell click
@@ -605,6 +368,9 @@ const SenderReceiverMapping = () => {
           title={permissions.showTitle ? permissions.titleName : ''}
           permissions={permissions}
           handleExport={handleExport}
+          handleExcelUpload={handleExcelUpload}
+          saveChanges={saveChanges}
+          fetchData={fetchPlantRequirementData}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}

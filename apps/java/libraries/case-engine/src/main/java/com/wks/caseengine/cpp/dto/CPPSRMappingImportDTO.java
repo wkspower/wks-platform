@@ -3,7 +3,9 @@ package com.wks.caseengine.cpp.dto;
 import lombok.Data;
 
 @Data
-public class CPPSRMappingExportDTO {
+public class CPPSRMappingImportDTO {
+
+    private String id;
 
     private String receiverUtility;
     private String receiverUtilityId;
