@@ -309,7 +309,8 @@ def _dispatch_once(
 # -------------------------------------------------------------
 def distribute_by_priority(
     month: int, 
-    year: int, 
+    year: int,
+    cpp_plant_id: str,
     additional_demand_mwh: float = 0.0, 
     stg_max_mwh: float = None,
     stg_min_override_mwh: float = None,
@@ -321,6 +322,7 @@ def distribute_by_priority(
     
     Args:
         month, year: Financial period
+        cpp_plant_id: CPP Plant UUID (required for fetching import power sources)
         additional_demand_mwh: Additional demand to add (e.g., utility auxiliary power)
                                This enables the USD iteration loop to converge.
         stg_max_mwh: Maximum STG generation allowed (for SHP balance iteration).
@@ -351,14 +353,14 @@ def distribute_by_priority(
     # Fetch process plant demand from CalculatedProcessDemand
     from services.process_demand_service import get_process_demand_for_month
     process_demands = get_process_demand_for_month(month, year)
-    power_process_kwh = process_demands.get("power_process", 0.0)
+    power_process_kwh = process_demands.get("power_process", 0.0) if process_demands else 0.0
     # Convert KWH to MWh
     plant_demand = power_process_kwh / 1000.0
     
     # Fetch fixed consumption from UtilityFixedConsumption table via fixed_consumption_service
     from services.fixed_consumption_service import get_fixed_consumption_for_month
     fixed_consumption = get_fixed_consumption_for_month(month, year)
-    fixed_demand_kwh = fixed_consumption.get("power_fixed_kwh", 0.0)
+    fixed_demand_kwh = fixed_consumption.get("power_fixed_kwh", 0.0) if fixed_consumption else 0.0
     # Convert KWH to MWh
     fixed_demand = fixed_demand_kwh / 1000.0
     
@@ -603,76 +605,50 @@ def distribute_by_priority(
                 remaining_reduction -= (group_reduction - temp_remaining)
 
     # =========================================================
-    # IMPORT POWER - From PowerGenerationAssets (AssetType = 'IMPORT')
+    # IMPORT POWER - From NEW Multi-Source Tables (CPP*)
     # =========================================================
-    # Check if import power assets exist with operational hours tracked
-    # Import MWh = Capacity (MW) × Operational Hours
+    # Fetch import power from CPPImportPowerSourceMapping → CPPImportPowerCapacity → CPPImportPowerOperationalHours
+    # Supports multiple import sources (MEL, Power_Dis, SIEL, MSEDCL, RPPL, etc.)
+    # Total Import MWh = SUM(Capacity_MW × OperationalHours) for all sources
     # =========================================================
-    if not import_assets.empty:
-        # Import assets found in PowerGenerationAssets with operational hours
-        import_capacity_mw = 0.0
-        import_hours = 0.0
-        
+    from database.import_queries import fetch_total_import_power_for_month
+    
+    import_result = fetch_total_import_power_for_month(cpp_plant_id, month, year)
+    
+    # Handle None or missing result
+    if import_result is None or not isinstance(import_result, dict):
         if verbose:
-            print(f"\n  [IMPORT] From PowerGenerationAssets (AssetType='IMPORT'):")
-        
-        for idx, import_asset in import_assets.iterrows():
-            asset_name = import_asset["AssetName"]
-            capacity = float(import_asset["AssetCapacity"]) if pd.notna(import_asset["AssetCapacity"]) else 0.0
-            hours = float(import_asset["OperationalHours"]) if pd.notna(import_asset["OperationalHours"]) else 0.0
-            
-            if hours > 0:
-                import_capacity_mw += capacity
-                import_hours = max(import_hours, hours)  # Use max hours if multiple import assets
-                
-                if verbose:
-                    print(f"    {asset_name}: {capacity:.2f} MW × {hours:.0f} hrs = {capacity * hours:,.2f} MWh")
-        
-        max_import_mwh = import_capacity_mw * import_hours
-        
+            print(f"\n  [IMPORT] Error: Invalid response from import power query")
+        actual_import_used_mwh = 0.0
+        max_import_mwh = 0.0
+    elif not import_result.get("success", False):
+        # Log error but continue with 0 import power
         if verbose:
-            print(f"    Total Capacity: {import_capacity_mw:.2f} MW")
-            print(f"    Operating Hours: {import_hours:.0f} hrs")
-            print(f"    Available: {max_import_mwh:,.2f} MWh")
-        
-        # Use all available import power
+            print(f"\n  [IMPORT] Error: {import_result.get('message', 'Unknown error')}")
+        actual_import_used_mwh = 0.0
+        max_import_mwh = 0.0
+    elif import_result.get("source_count", 0) == 0:
+        # No import sources found for this plant
+        if verbose:
+            print(f"\n  [IMPORT] No import power sources found for plant {cpp_plant_id}")
+        actual_import_used_mwh = 0.0
+        max_import_mwh = 0.0
+    else:
+        # Import power available
+        max_import_mwh = import_result.get("total_import_mwh", 0.0)
         actual_import_used_mwh = max_import_mwh
         
         if verbose:
-            print(f"    Using: {actual_import_used_mwh:,.2f} MWh")
-    else:
-        # Fallback: Check PlantImportMapping table (legacy approach)
-        cur.execute("""
-            SELECT pim.Value, pim.UOM
-            FROM PlantImportMapping pim
-            WHERE pim.FinancialMonthId = ?
-        """, (fym_id,))
-        import_row = cur.fetchone()
-        
-        if import_row and import_row[0]:
-            import_capacity_mw = float(import_row[0])
-            # Use full month hours as fallback since operational hours not tracked
-            import calendar
-            days_in_month = calendar.monthrange(year, month)[1]
-            operating_hours = days_in_month * 24.0
-            max_import_mwh = import_capacity_mw * operating_hours
+            print(f"\n  [IMPORT] Multi-Source Import Power (from CPP* tables):")
+            print(f"    Plant ID: {cpp_plant_id}")
+            print(f"    Sources Found: {import_result.get('source_count', 0)}")
             
-            if verbose:
-                print(f"\n  [IMPORT] From PlantImportMapping (fallback):")
-                print(f"    Capacity: {import_capacity_mw:,.2f} MW")
-                print(f"    Hours: {operating_hours:,.0f} hrs (full month)")
-                print(f"    Available: {max_import_mwh:,.2f} MWh")
+            for source in import_result.get("per_source", []):
+                print(f"      {source.get('source_name', 'Unknown'):<20} {source.get('capacity_mw', 0):>8.2f} MW × {source.get('hours', 0):>6.0f} hrs = {source.get('mwh', 0):>12,.2f} MWh")
             
-            actual_import_used_mwh = max_import_mwh
-            
-            if verbose:
-                print(f"    Using: {actual_import_used_mwh:,.2f} MWh")
-        else:
-            import_capacity_mw = 0.0
-            actual_import_used_mwh = 0.0
-            max_import_mwh = 0.0
-            if verbose:
-                print(f"\n  [IMPORT] No import power found in PowerGenerationAssets or PlantImportMapping")
+            print(f"    {'-'*70}")
+            print(f"    {'TOTAL IMPORT':>28} = {actual_import_used_mwh:>12,.2f} MWh")
+
     
     # =========================================================
     # NET DEMAND FOR DISPATCH = Total Demand - Import Used

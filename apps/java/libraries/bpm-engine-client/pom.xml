@@ -45,6 +45,12 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.camunda.community</groupId>
+			<artifactId>camunda-engine-rest-client-openapi-springboot</artifactId>
+			<version>${camunda7.version}</version>
+		</dependency>
+
 	</dependencies>
 
 </project>

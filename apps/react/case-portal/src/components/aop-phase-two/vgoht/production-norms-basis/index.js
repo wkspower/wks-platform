@@ -22,15 +22,20 @@ import {
 import Notification from 'components/aop-phase-two/common/utilities/Notification'
 import Configuration from './Configuration'
 import Constants from './Constants'
+import ReportManualEntry from './ReportManualEntry'
+import TabAccessApiService from 'components/aop-phase-two/services/common/tabAccessApiService'
 
 const ProductionNormsBasis = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { oldYear, plantObject, year } = dataGridStore
+  const { oldYear, plantObject, siteObject, verticalObject, year } =
+    dataGridStore
 
   const hasExecutedRef = useRef(false)
 
   const PLANT_ID = plantObject?.id
+  const SITE_ID = siteObject?.id
+  const VERTICAL_ID = verticalObject?.id
   const AOP_YEAR = year?.selectedYear
   const IS_OLD_YEAR = oldYear?.oldYear
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -52,6 +57,8 @@ const ProductionNormsBasis = () => {
     message: '',
     severity: 'info',
   })
+  const [tabs, setTabs] = useState([])
+  const [availableTabs, setAvailableTabs] = useState([])
 
   const handleOpenDialog = () => {
     setOpenConfirmDialog(true)
@@ -81,6 +88,49 @@ const ProductionNormsBasis = () => {
     const summaryData = await getAopSummary(keycloak, PLANT_ID, AOP_YEAR)
     setSummary(summaryData || '')
   }, [keycloak, PLANT_ID, AOP_YEAR])
+
+  const getConfigurationTabsMatrix = useCallback(async () => {
+    if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) return
+    setLoading(true)
+    try {
+      const response = await TabAccessApiService.getConfigurationTabsMatrix(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
+      )
+      if (response?.code === 200) {
+        const parsedData = JSON.parse(response?.data)
+        setTabs(parsedData)
+      } else {
+        setTabs([])
+      }
+    } catch (error) {
+      console.error('Error fetching configuration tabs matrix:', error)
+      setTabs([])
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak, PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID])
+
+  const getConfigurationAvailableTabs = useCallback(async () => {
+    setLoading(true)
+    try {
+      const response =
+        await TabAccessApiService.getConfigurationAvailableTabs(keycloak)
+      if (response?.code === 200) {
+        setAvailableTabs(response?.data?.configurationTypeList)
+      } else {
+        setAvailableTabs([])
+      }
+    } catch (error) {
+      console.error('Error fetching configuration available tabs:', error)
+      setAvailableTabs([])
+    } finally {
+      setLoading(false)
+    }
+  }, [keycloak])
 
   const onLoad = async () => {
     // Validate dates
@@ -153,18 +203,73 @@ const ProductionNormsBasis = () => {
     setTabIndex(0)
     fetchConfigurationDetails()
     fetchSummary()
+    getConfigurationTabsMatrix()
+    getConfigurationAvailableTabs()
     setSummaryEdited(false)
     setDateEdited(false)
-  }, [PLANT_ID, AOP_YEAR, fetchConfigurationDetails, fetchSummary])
+  }, [
+    PLANT_ID,
+    AOP_YEAR,
+    fetchConfigurationDetails,
+    fetchSummary,
+    getConfigurationTabsMatrix,
+    getConfigurationAvailableTabs,
+  ])
 
-  const tablist = ['Configuration', 'Constants']
+  const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]
+  const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
+
+  // Hardcoded tabs (commented - now using API)
+  // const tablist = [
+  //   'Configuration',
+  //   'Constants',
+  //   `Report Manual Entry (${prevYearFormatted})`,
+  // ]
+
+  // Helper function to get tab display name by matching the UUID from tabs array
+  const getTabName = (tabId) => {
+    if (!tabId || !availableTabs.length) return null
+    const tab = availableTabs.find(
+      (t) => t.id.toLowerCase() === tabId.toLowerCase(),
+    )
+    return tab ? tab.displayName : null
+  }
+
+  // Dynamic tab list from API
+  const tablist = tabs.map((tabId) => {
+    if (!tabId || !availableTabs.length) return ''
+    const tabInfo = availableTabs.find(
+      (tab) => tab.id.toLowerCase() === tabId.toLowerCase(),
+    )
+
+    if (tabInfo) {
+      const originalName = tabInfo.displayName
+      // Add year suffix for Report Manual Entry
+      if (originalName === 'Report Manual Entry') {
+        return `${originalName} (${prevYearFormatted})`
+      }
+      return originalName
+    }
+    return tabId
+  })
 
   const renderTab = () => {
-    switch (tabIndex) {
-      case 0:
+    if (!tabs.length || !availableTabs.length) {
+      return null
+    }
+
+    const currentTabId = tabs[tabIndex]
+    if (!currentTabId) return null
+
+    const currentTabName = getTabName(currentTabId)
+
+    switch (currentTabName) {
+      case 'Configuration':
         return <Configuration />
-      case 1:
+      case 'Constants':
         return <Constants />
+      case 'Report Manual Entry':
+        return <ReportManualEntry />
       default:
         return null
     }
@@ -196,13 +301,15 @@ const ProductionNormsBasis = () => {
         />
       </Stack>
 
-      <Box>
-        <TabSection
-          tabIndex={tabIndex}
-          setTabIndex={setTabIndex}
-          tabs={tablist}
-        />
-      </Box>
+      {tabs.length > 0 && availableTabs.length > 0 && (
+        <Box>
+          <TabSection
+            tabIndex={tabIndex}
+            setTabIndex={setTabIndex}
+            tabs={tablist}
+          />
+        </Box>
+      )}
 
       {/* Tab Content */}
       <Box sx={{ mt: 2 }}>{renderTab()}</Box>

@@ -14,6 +14,8 @@ package com.wks.bpm.engine.client.facade;
 import java.util.List;
 import java.util.Optional;
 
+import org.camunda.community.rest.client.dto.TaskDto;
+import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -143,6 +145,21 @@ public class DefaultBpmEngineClientFacade implements BpmEngineClientFacade {
 	@Override
 	public void sendMessage(ProcessMessage processMesage, Optional<List<ProcessVariable>> correlateKeys) {
 		getEngineClient().sendMessage(processMesage, correlateKeys, getBpmEngine());
+	}
+
+	@Override
+	public void completeTaskByTaskDefinitionKey(String businessKey, String taskDefinitionKey, List<ProcessVariable> variables) {
+		getEngineClient().completeTaskByTaskDefinitionKey(businessKey, taskDefinitionKey, variables);
+	}
+
+	@Override
+	public List<TaskDto> findTasksByBusinessKeyAndProcessDefinitionKey(final Optional<String> processInstanceBusinessKey, final Optional<String> processDefinitionKey) {
+		return getEngineClient().findTasksByBusinessKeyAndProcessDefinitionKey(processInstanceBusinessKey, processDefinitionKey, getBpmEngine());
+	}
+
+	@Override
+	public void updateProcessVariable(final String processInstanceId, String variableName, VariableValueDto variable) {
+		getEngineClient().updateProcessVariable(processInstanceId, variableName, variable);
 	}
 
 	public class DefaultC7BpmEngine extends BpmEngine {

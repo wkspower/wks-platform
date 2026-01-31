@@ -155,7 +155,6 @@ const workspace = {
     //       icon: icons.IconReport,
     //       breadcrumbs: true,
     //     },
-
     //     {
     //       id: 'fixed-consumption',
     //       title: i18n.t('menu.fixedConsumption'),
@@ -190,8 +189,6 @@ const workspace = {
     //     },
     //   ],
     // },
-
-
     // {
     //   id: 'manufacturing-division',
     //   title: i18n.t('menu.manufacturingDivision'),

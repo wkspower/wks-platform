@@ -726,8 +726,12 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             
             int monthStartCol = col;
             List<Integer> financialYearMonthFkIdColumns = new ArrayList<>();
+            List<Integer> amountColumns = new ArrayList<>();
+            List<Integer> priceColumns = new ArrayList<>();
             for (String month : months) {
                 createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 4, month, headerStyle);
+                amountColumns.add(col + 2);
+                priceColumns.add(col + 3);
                 financialYearMonthFkIdColumns.add(col + 4); // Track the financialYearMonthFkId column position
                 col += 5;
             }
@@ -885,6 +889,14 @@ public class NormBasedUtilityBudgetServiceImpl implements NormBasedUtilityBudget
             // Hide financialYearMonthFkId columns for all months
             for (Integer fymCol : financialYearMonthFkIdColumns) {
                 sheet.setColumnHidden(fymCol, true);
+            }
+
+            // Hide Amount and Price columns for all months
+            for (Integer amountCol : amountColumns) {
+                sheet.setColumnHidden(amountCol, true);
+            }
+            for (Integer priceCol : priceColumns) {
+                sheet.setColumnHidden(priceCol, true);
             }
 
             for (int i = 0; i < totalColumns; i++) {

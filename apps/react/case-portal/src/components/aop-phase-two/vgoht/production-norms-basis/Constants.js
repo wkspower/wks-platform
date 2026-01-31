@@ -67,7 +67,7 @@ const Constants = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchConstantsData()
+      // fetchConstantsData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
