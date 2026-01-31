@@ -19,6 +19,7 @@ import { generateMockData, getColumnsForTab } from './InputUtility'
 import ExportAvailability from './ExportAvailability'
 import HeatRate from './HeatRate'
 import FixedNorms from './FixedNorms'
+import FuelAvailability from './FuelAvailability'
 
 const Inputs = () => {
   const keycloak = useSession()
@@ -79,6 +80,12 @@ const Inputs = () => {
         name: 'Norms',
         displayName: 'Norms',
         displaySequence: 6,
+      },
+      {
+        id: 'fuel-availability',
+        name: 'fuelAvailability',
+        displayName: 'Fuel Availability',
+        displaySequence: 7,
       },
       // { id: 'export-availability',name:'exportAvailability', displayName: 'Export Availability', displaySequence: 6 },
     ]
@@ -154,6 +161,8 @@ const Inputs = () => {
         return <HeatRate />
       case 'fixed-norms':
         return <FixedNorms />
+      case 'fuel-availability':
+        return <FuelAvailability />
       default:
         return null
     }

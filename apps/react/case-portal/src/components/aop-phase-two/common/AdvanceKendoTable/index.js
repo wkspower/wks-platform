@@ -104,8 +104,6 @@ export const hiddenFields = [
   'period',
 ]
 export const dateFields = [
-  'maintStartDateTime',
-  'maintEndDateTime',
   'endDateTA',
   'startDateTA',
   'endDateSD',
@@ -236,23 +234,18 @@ const AdvanceKendoTable = ({
   }, [rows?.length])
 
   // Get the default page size from config
-  const getDefaultTake = () => {
+  const defaultTake = useMemo(() => {
     const defaults = {
       threshold: 100,
       buttonCount: 4,
       pageSizes: [10, 20, 50, 100],
-      defaultPageSize: 10,
+      defaultPageSize: 50,
     }
     const config = { ...defaults, ...paginationConfig }
 
-    // Only apply defaultTake if pagination is enabled
-    // If rows.length <= threshold, pagination is disabled, so return undefined to show all rows
-    if (rows?.length <= config.threshold) {
-      return undefined
-    }
-
+    // Always return defaultPageSize - let the pageable prop control if pagination shows
     return config.defaultPageSize
-  }
+  }, [paginationConfig])
 
   // Helper function to extract all fields from columns including nested ones
   const extractAllColumns = useCallback((cols) => {
@@ -835,8 +828,22 @@ const AdvanceKendoTable = ({
       : dataItem[field]
     let formattedValue = value
 
+    // Format Date objects as strings
+    if (value instanceof Date) {
+      formattedValue = value.toLocaleString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      })
+    }
     // Apply Kendo number format if provided
-    if (format && (typeof value === 'number' || typeof value === 'string')) {
+    else if (
+      format &&
+      (typeof value === 'number' || typeof value === 'string')
+    ) {
       const numValue = typeof value === 'string' ? parseFloat(value) : value
       if (!isNaN(numValue)) {
         formattedValue = applyKendoNumberFormat(numValue, format)
@@ -1846,7 +1853,7 @@ const AdvanceKendoTable = ({
               resizable={true}
               defaultSkip={0}
               defaultGroup={initialGroup}
-              defaultTake={getDefaultTake()}
+              defaultTake={defaultTake}
               contextMenu={true}
               filterable={
                 permissions.filterable &&

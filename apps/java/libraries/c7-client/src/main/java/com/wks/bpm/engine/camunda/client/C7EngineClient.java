@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.camunda.community.rest.client.api.DeploymentApi;
 import org.camunda.community.rest.client.api.MessageApi;
@@ -31,9 +32,13 @@ import org.camunda.community.rest.client.api.VariableInstanceApi;
 import org.camunda.community.rest.client.dto.ActivityInstanceDto;
 import org.camunda.community.rest.client.dto.CompleteTaskDto;
 import org.camunda.community.rest.client.dto.CorrelationMessageDto;
+import org.camunda.community.rest.client.dto.PatchVariablesDto;
+import org.camunda.community.rest.client.dto.ProcessInstanceDto;
+import org.camunda.community.rest.client.dto.ProcessInstanceQueryDto;
 import org.camunda.community.rest.client.dto.ProcessInstanceWithVariablesDto;
 import org.camunda.community.rest.client.dto.StartProcessInstanceDto;
 import org.camunda.community.rest.client.dto.TaskDto;
+import org.camunda.community.rest.client.dto.TaskQueryDto;
 import org.camunda.community.rest.client.dto.UserIdDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.camunda.community.rest.client.invoker.ApiException;
@@ -164,13 +169,13 @@ public class C7EngineClient implements BpmEngineClient {
 		try {
 			return processInstanceApi
 					.getProcessInstances(null, null, null, null, null, businessKey.orElse(null), null, null,
-							processDefinitionKey.orElse(null), null, null, null, null, null, null, null, null, null,
+							null, processDefinitionKey.orElse(null), null, null, null, null, null, null, null, null,
 							null, null, null, null, null, null, null, null, null, activityIdIn.orElse(null), null, null,
 							null, null, null)
 					.stream()
 					.map(o -> ProcessInstance.builder().businessKey(o.getBusinessKey())
 							.caseInstanceId(o.getCaseInstanceId()).definitionId(o.getDefinitionId()).ended(o.getEnded())
-							.id(o.getId()).suspended(o.getSuspended()).tenantId(o.getTenantId()))
+							.id(o.getId()).suspended(o.getSuspended()).tenantId(o.getTenantId()).build())
 					.toArray(ProcessInstance[]::new);
 		} catch (ApiException e) {
 			log.error("Error getting camunda process instances", e);
@@ -191,7 +196,7 @@ public class C7EngineClient implements BpmEngineClient {
 			final List<ProcessVariable> processVariables, final BpmEngine bpmEngine) {
 
 		try {
-             System.out.println("In C7Engine Client "+processDefinitionKey+bpmEngine.toString()+" process variable "+processVariables+" businessKey "+businessKey );
+             System.out.println("In C7Engine Client1 "+processDefinitionKey+bpmEngine.toString()+" process variable "+processVariables+" businessKey "+businessKey );
 			StartProcessInstanceDto requestDto = new StartProcessInstanceDto();
 			requestDto.businessKey(businessKey.orElse(null));
 			requestDto.setCaseInstanceId(businessKey.orElse(null));
@@ -200,15 +205,28 @@ public class C7EngineClient implements BpmEngineClient {
 			ProcessInstanceWithVariablesDto responseDto = processDefinitionApi.startProcessInstanceByKeyAndTenantId(
 					processDefinitionKey, tenantHolder.getTenantId().get(), requestDto);
 
+			System.out.println("c7EngineClient Process Instance Response: "+responseDto.toString());
+
 			return ProcessInstance.builder().businessKey(responseDto.getBusinessKey())
 					.caseInstanceId(responseDto.getCaseInstanceId()).definitionId(responseDto.getDefinitionId())
 					.ended(responseDto.getEnded()).id(responseDto.getId()).suspended(responseDto.getSuspended())
 					.tenantId(responseDto.getTenantId()).build();
 		} catch (ApiException e) {
-			log.error("Error starting process", e);
-			e.printStackTrace();
+			log.error("Error1 starting process", e);
+		
+           System.out.println("HTTP Status: "+ e.getCode());
+		   System.out.println("Message: "+ e.getMessage());
+          System.out.println("Response Body: "+ e.getResponseBody());
+          System.out.println("Response Headers: "+ e.getResponseHeaders());
 			return null;
 		}
+
+		catch(Exception e) {
+			log.error("Error2 starting process", e);
+			System.out.println("Message2: "+ e.getMessage());
+			return null;
+		}
+		
 	}
 
 	@Override
@@ -306,6 +324,34 @@ public class C7EngineClient implements BpmEngineClient {
 			return new Task[0];
 		}
 	}
+	
+  @Override
+	public List<TaskDto> findTasksByBusinessKeyAndProcessDefinitionKey(final Optional<String> processInstanceBusinessKey, final Optional<String> processDefinitionKey, final BpmEngine bpmEngine) {
+		try {
+
+			String processInstanceBusinessKeyString = processInstanceBusinessKey.orElseThrow(() -> new UnsupportedOperationException("Process instance business key is required"));
+			
+			String processDefinitionKeyString = processDefinitionKey.orElseThrow(() -> new UnsupportedOperationException("Process definition key is required"));
+
+			return taskApi
+					.getTasks(null, null, null, null, processInstanceBusinessKeyString, null, null, null, null, null, processDefinitionKeyString, null, null, null, null,
+							null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+							null, null, null, null, null, null, null, null, null, null, null, null, null);
+				//	.stream().map(o -> o).collect(Collectors.toList());
+		} catch (ApiException e) {
+			log.error("Error1 getting camunda tasks", e);
+			System.out.println("findTasksByBusinessKeyAndProcessDefinitionKey Error getting camunda tasks: " + e.getMessage());
+			System.out.println("findTasksByBusinessKeyAndProcessDefinitionKey HTTP body: " + e.getResponseBody());
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
+	
+	}
+
 
 	private Task convertFromTaskDto(TaskDto reponseDto) {
 
@@ -369,14 +415,24 @@ public class C7EngineClient implements BpmEngineClient {
 			requestDto.variables(c7VariablesMapper.toEngineFormat(variables));
 			taskApi.complete(taskId, requestDto);
 		} catch (ApiException e) {
-			log.error("Error completing camunda task", e);
-			e.printStackTrace();
+			log.error("Error1 completing camunda task", e);
+			System.out.println("Error1 completing camunda task: " + e.getMessage());
+			System.out.println("HTTP body: " + e.getResponseBody());
+		//	e.printStackTrace();
+		}
+
+		catch(Exception e) {
+			log.error("Error2 completing camunda task", e);
+			System.out.println("Error2 completing camunda task: " + e.getMessage());
+		//	System.out.println("Http body: " + e.getResponseBody());
+			return;
 		}
 	}
 
 	@Override
 	public ProcessVariable[] findVariables(final String processInstanceId, final BpmEngine bpmEngine) {
 		try {
+			System.out.println("fetching process variables");
 			return variableInstanceApi
 					.getVariableInstances(null, null, processInstanceId, null, null, null, null, null, null,
 							tenantHolder.getTenantId().orElse(null), null, null, null, null, null, null, null, null,
@@ -389,9 +445,12 @@ public class C7EngineClient implements BpmEngineClient {
 			e.printStackTrace();
 			return new ProcessVariable[0];
 		}
+		
 
 	}
 
+	
+	
 	@Override
 	public void sendMessage(final ProcessMessage processMessage, final Optional<List<ProcessVariable>> correlateKeys,
 			final BpmEngine bpmEngine) {
@@ -414,5 +473,81 @@ public class C7EngineClient implements BpmEngineClient {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void completeTaskByTaskDefinitionKey(String businessKey, String taskDefinitionKey, 
+                            List<ProcessVariable> variables) {
+
+    // 1. Find running process instance for the businessKey
+    ProcessInstanceQueryDto piQuery = new ProcessInstanceQueryDto();
+    piQuery.setBusinessKey(businessKey);
+
+    List<ProcessInstanceDto> instances = new ArrayList<>();
+	try {
+		instances = processInstanceApi.queryProcessInstances(null, null, piQuery);
+	} catch (ApiException e) {
+		log.error(" completeTaskWithbusinessKey Error querying process instances", e);
+		e.printStackTrace();
+	}
+
+    if (instances.isEmpty()) {
+        log.warn(" CompleteTaskWithBusinessKey: No active process found for businessKey={}", businessKey);
+        return;
+    }
+
+    String processInstanceId = instances.get(0).getId();
+
+    // 2. Find the active task with the given taskDefinitionKey
+    TaskQueryDto tQuery = new TaskQueryDto();
+    tQuery.setProcessInstanceId(processInstanceId);
+    tQuery.setTaskDefinitionKey(taskDefinitionKey);
+
+    List<TaskDto> tasks = new ArrayList<>();
+	try {
+		tasks = taskApi.queryTasks(null, null, tQuery);
+	} catch (ApiException e) {
+		log.error(" CompleteTaskWithBusinessKey: Error querying tasks", e);
+		e.printStackTrace();
+	}
+
+    if (tasks.isEmpty()) {
+        log.warn(" CompleteTaskWithBusinessKey: Task with definitionKey={} not active for businessKey={}",
+                 taskDefinitionKey, businessKey);
+        return;
+    }
+
+    TaskDto task = tasks.get(0);
+
+    // 3. Prepare complete request
+    CompleteTaskDto completeDto = new CompleteTaskDto();
+   
+	 if (variables != null && !variables.isEmpty()) {
+    completeDto.variables(c7VariablesMapper.toEngineFormat(variables));  
+
+         }
+
+    // 4. Complete the task
+    try {
+        taskApi.complete(task.getId(), completeDto);
+        log.info(" CompleteTaskWithBusinessKey: Completed task {} (definitionKey={}) for businessKey={}",
+                 task.getId(), taskDefinitionKey, businessKey);
+       
+
+    } catch (ApiException ex) {
+        log.error(" CompleteTaskWithBusinessKey: Error completing task {} for businessKey={}", task.getId(), businessKey, ex);
+       
+    }
+}
+
+public void updateProcessVariable(final String processInstanceId, String variableName, VariableValueDto variable) {
+	try {
+		
+		processInstanceApi.setProcessInstanceVariable(processInstanceId, variableName, variable);
+	} catch (ApiException e) {
+		log.error("Error updating process variable", e);
+		System.out.println("Error updating process variable: " + e.getMessage());
+		e.printStackTrace();
+	}
+}
 
 }

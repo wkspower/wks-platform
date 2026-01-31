@@ -16,9 +16,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -688,7 +692,7 @@ public class PowerGenerationService {
                 dataList = new ArrayList<>();
             }
 
-            return generateExcel(dataList, "Power Generation", isAfterSave);
+            return generateExcel(dataList, "Power Generation", isAfterSave, financialYear);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -709,7 +713,7 @@ public class PowerGenerationService {
 
             System.out.println("steam export dataList: " + dataList);
 
-            return generateExcel(dataList, "Steam Generation", isAfterSave);
+            return generateExcel(dataList, "Steam Generation", isAfterSave, financialYear);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -717,10 +721,15 @@ public class PowerGenerationService {
         return null;
     }
 
-    private byte[] generateExcel(List<AssetOperationalResponseDTO> dataList, String sheetName, boolean isAfterSave) throws Exception {
+    private byte[] generateExcel(List<AssetOperationalResponseDTO> dataList, String sheetName, boolean isAfterSave, String financialYear) throws Exception {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet(sheetName);
-        CellStyle boldStyle = Utility.createBoldBorderedStyle(workbook);
+        CellStyle headerStyle = createHeaderStyle(workbook);
+        CellStyle dataStyle = createDataStyle(workbook);
+        CellStyle remarksStyle = createRemarksStyle(workbook);
+
+        String startYearSuffix = financialYear.substring(2, 4);
+        String endYearSuffix = financialYear.substring(5, 7);
         
         int currentRow = 0;
         int col = 0;
@@ -730,42 +739,45 @@ public class PowerGenerationService {
         col = 0;
         
         // Static columns that span both rows
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Asset Name", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Asset Name", headerStyle);
         col++;
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility Distributed", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility Distributed", headerStyle);
         col++;
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Distributed SAP Code", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Distributed SAP Code", headerStyle);
         col++;
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility Generated", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Utility Generated", headerStyle);
         col++;
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Generated SAP Code", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Generated SAP Code", headerStyle);
         col++;
         
         // Month headers (each spans 2 columns: Shut Down Hrs, Operational Hrs)
-        String[] months = {"April", "May", "June", "July", "August", "September", 
-                         "October", "November", "December", "January", "February", "March"};
+        String[] months = {"Apr-" + startYearSuffix, "May-" + startYearSuffix, "Jun-" + startYearSuffix, "Jul-" + startYearSuffix,
+                "Aug-" + startYearSuffix, "Sep-" + startYearSuffix, "Oct-" + startYearSuffix, "Nov-" + startYearSuffix,
+                "Dec-" + startYearSuffix, "Jan-" + endYearSuffix, "Feb-" + endYearSuffix, "Mar-" + endYearSuffix};
         
         int monthStartCol = col;
         for (String month : months) {
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, month, boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 0, col, col + 1, month, headerStyle);
             col += 2;
         }
         
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", boldStyle);
+        int remarksCol = col;
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Remarks", headerStyle);
         col++;
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "assetId", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "assetId", headerStyle);
         int assetIdCol = col;
         col++;
-        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "utilityPlantAssetId", boldStyle);
+        createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "utilityPlantAssetId", headerStyle);
         int utilityPlantAssetIdCol = col;
         col++;
         
         if (isAfterSave) {
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Status", headerStyle);
             col++;
-            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", boldStyle);
+            createMergedHeaderCell(sheet, topHeaderRow, 0, 1, col, col, "Error Description", headerStyle);
             col++;
         }
+        int totalColumns = col;
         
         // Create sub-header row (Row 1) for month details
         Row subHeaderRow = sheet.createRow(currentRow++);
@@ -775,11 +787,11 @@ public class PowerGenerationService {
         for (int i = 0; i < 12; i++) {
             Cell cell = subHeaderRow.createCell(col++);
             cell.setCellValue("Shut Down Hrs");
-            cell.setCellStyle(boldStyle);
+            cell.setCellStyle(headerStyle);
             
             cell = subHeaderRow.createCell(col++);
             cell.setCellValue("Operational Hrs");
-            cell.setCellStyle(boldStyle);
+            cell.setCellStyle(headerStyle);
         }
 
         // Data rows
@@ -787,56 +799,76 @@ public class PowerGenerationService {
             Row row = sheet.createRow(currentRow++);
             col = 0;
 
-            row.createCell(col++).setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
-            row.createCell(col++).setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getName() != null ? dto.getUtilityDistributed().getName() : "");
-            row.createCell(col++).setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getSapCode() != null ? dto.getUtilityDistributed().getSapCode() : "");
-            row.createCell(col++).setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getName() != null ? dto.getUtilityGenerated().getName() : "");
-            row.createCell(col++).setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getSapCode() != null ? dto.getUtilityGenerated().getSapCode() : "");
+            Cell cell = row.createCell(col++);
+            cell.setCellValue(dto.getAssetName() != null ? dto.getAssetName() : "");
+            cell.setCellStyle(dataStyle);
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getName() != null ? dto.getUtilityDistributed().getName() : "");
+            cell.setCellStyle(dataStyle);
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getUtilityDistributed() != null && dto.getUtilityDistributed().getSapCode() != null ? dto.getUtilityDistributed().getSapCode() : "");
+            cell.setCellStyle(dataStyle);
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getName() != null ? dto.getUtilityGenerated().getName() : "");
+            cell.setCellStyle(dataStyle);
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getUtilityGenerated() != null && dto.getUtilityGenerated().getSapCode() != null ? dto.getUtilityGenerated().getSapCode() : "");
+            cell.setCellStyle(dataStyle);
             
             // April
-            setMonthCellValues(row, col, dto.getApril());
+            setMonthCellValues(row, col, dto.getApril(), dataStyle);
             col += 2;
             // May
-            setMonthCellValues(row, col, dto.getMay());
+            setMonthCellValues(row, col, dto.getMay(), dataStyle);
             col += 2;
             // June
-            setMonthCellValues(row, col, dto.getJune());
+            setMonthCellValues(row, col, dto.getJune(), dataStyle);
             col += 2;
             // July
-            setMonthCellValues(row, col, dto.getJuly());
+            setMonthCellValues(row, col, dto.getJuly(), dataStyle);
             col += 2;
             // August
-            setMonthCellValues(row, col, dto.getAug());
+            setMonthCellValues(row, col, dto.getAug(), dataStyle);
             col += 2;
             // September
-            setMonthCellValues(row, col, dto.getSep());
+            setMonthCellValues(row, col, dto.getSep(), dataStyle);
             col += 2;
             // October
-            setMonthCellValues(row, col, dto.getOct());
+            setMonthCellValues(row, col, dto.getOct(), dataStyle);
             col += 2;
             // November
-            setMonthCellValues(row, col, dto.getNov());
+            setMonthCellValues(row, col, dto.getNov(), dataStyle);
             col += 2;
             // December
-            setMonthCellValues(row, col, dto.getDec());
+            setMonthCellValues(row, col, dto.getDec(), dataStyle);
             col += 2;
             // January
-            setMonthCellValues(row, col, dto.getJan());
+            setMonthCellValues(row, col, dto.getJan(), dataStyle);
             col += 2;
             // February
-            setMonthCellValues(row, col, dto.getFeb());
+            setMonthCellValues(row, col, dto.getFeb(), dataStyle);
             col += 2;
             // March
-            setMonthCellValues(row, col, dto.getMarch());
+            setMonthCellValues(row, col, dto.getMarch(), dataStyle);
             col += 2;
             
-            row.createCell(col++).setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
-            row.createCell(col++).setCellValue(dto.getAssetId() != null ? dto.getAssetId().toString() : "");
-            row.createCell(col++).setCellValue(dto.getUtilityPlantAssetId() != null ? dto.getUtilityPlantAssetId().toString() : "");
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getRemarks() != null ? dto.getRemarks() : "");
+            cell.setCellStyle(remarksStyle);
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getAssetId() != null ? dto.getAssetId().toString() : "");
+            cell.setCellStyle(dataStyle);
+            cell = row.createCell(col++);
+            cell.setCellValue(dto.getUtilityPlantAssetId() != null ? dto.getUtilityPlantAssetId().toString() : "");
+            cell.setCellStyle(dataStyle);
 
             if (isAfterSave) {
-                row.createCell(col++).setCellValue("");
-                row.createCell(col++).setCellValue("");
+                cell = row.createCell(col++);
+                cell.setCellValue("");
+                cell.setCellStyle(dataStyle);
+                cell = row.createCell(col++);
+                cell.setCellValue("");
+                cell.setCellStyle(dataStyle);
             }
         }
 
@@ -844,19 +876,31 @@ public class PowerGenerationService {
         sheet.setColumnHidden(assetIdCol, true);
         sheet.setColumnHidden(utilityPlantAssetIdCol, true);
 
+        for (int i = 0; i < totalColumns; i++) {
+            if (i == remarksCol) {
+                sheet.setColumnWidth(i, 8000);
+                continue;
+            }
+            sheet.autoSizeColumn(i);
+            String headerText = getHeaderText(sheet, i);
+            applyHeaderMinWidth(sheet, i, headerText);
+        }
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         workbook.write(outputStream);
         workbook.close();
         return outputStream.toByteArray();
     }
 
-    private void setMonthCellValues(Row row, int startCol, MonthlyHoursDTO monthDTO) {
+    private void setMonthCellValues(Row row, int startCol, MonthlyHoursDTO monthDTO, CellStyle dataStyle) {
         if (monthDTO != null) {
-            setDoubleCellValue(row.createCell(startCol), monthDTO.getShutdownHrs());
-            setDoubleCellValue(row.createCell(startCol + 1), monthDTO.getNetOperationHrs());
+            setDoubleCellValue(row.createCell(startCol), monthDTO.getShutdownHrs(), dataStyle);
+            setDoubleCellValue(row.createCell(startCol + 1), monthDTO.getNetOperationHrs(), dataStyle);
         } else {
             for (int i = 0; i < 2; i++) {
-                row.createCell(startCol + i).setCellValue("");
+                Cell cell = row.createCell(startCol + i);
+                cell.setCellValue("");
+                cell.setCellStyle(dataStyle);
             }
         }
     }
@@ -886,12 +930,81 @@ public class PowerGenerationService {
         }
     }
 
-    private void setDoubleCellValue(Cell cell, Double value) {
+    private void setDoubleCellValue(Cell cell, Double value, CellStyle style) {
         if (value != null) {
             cell.setCellValue(value);
         } else {
             cell.setCellValue("");
         }
+        cell.setCellStyle(style);
+    }
+
+    private String getHeaderText(Sheet sheet, int col) {
+        String subHeader = getCellText(sheet, 1, col);
+        if (subHeader != null && !subHeader.isBlank()) {
+            return subHeader;
+        }
+        return getCellText(sheet, 0, col);
+    }
+
+    private String getCellText(Sheet sheet, int rowIndex, int col) {
+        Row row = sheet.getRow(rowIndex);
+        if (row == null) {
+            return null;
+        }
+        Cell cell = row.getCell(col);
+        if (cell == null) {
+            return null;
+        }
+        if (cell.getCellType() == CellType.STRING) {
+            return cell.getStringCellValue();
+        }
+        if (cell.getCellType() == CellType.NUMERIC) {
+            return String.valueOf(cell.getNumericCellValue());
+        }
+        if (cell.getCellType() == CellType.FORMULA) {
+            return cell.getStringCellValue();
+        }
+        return null;
+    }
+
+    private void applyHeaderMinWidth(Sheet sheet, int col, String headerText) {
+        if (headerText == null || headerText.isBlank()) {
+            return;
+        }
+        int headerWidth = Math.min(255 * 256, (headerText.length() + 2) * 256);
+        if (sheet.getColumnWidth(col) < headerWidth) {
+            sheet.setColumnWidth(col, headerWidth);
+        }
+    }
+
+    private CellStyle createHeaderStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        return style;
+    }
+
+    private CellStyle createDataStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        return style;
+    }
+
+    private CellStyle createRemarksStyle(Workbook workbook) {
+        CellStyle style = createDataStyle(workbook);
+        style.setWrapText(true);
+        return style;
     }
 
     // ========================================
