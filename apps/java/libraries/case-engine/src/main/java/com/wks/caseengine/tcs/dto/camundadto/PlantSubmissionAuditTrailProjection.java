@@ -16,7 +16,7 @@ public interface PlantSubmissionAuditTrailProjection {
     Date getVerifiedDate();
     String getVerifiedBy();
     String getVerifiedRemark();
-    String getTab();
+   // String getTab();
     String getStatus();
     String getType();
 }

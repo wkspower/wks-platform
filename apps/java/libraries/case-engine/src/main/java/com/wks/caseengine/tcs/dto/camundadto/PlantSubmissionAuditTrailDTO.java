@@ -26,7 +26,7 @@ public class PlantSubmissionAuditTrailDTO {
     private String verifiedBy;
     private String verifiedRemark;
 
-    private String tab;
+  //  private String tab;
     private String status;
     private String type;
 }
