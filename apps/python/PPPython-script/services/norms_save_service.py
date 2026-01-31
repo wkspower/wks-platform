@@ -121,6 +121,7 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
         old_qty = float(row[5]) if row[5] else 0
         old_quantity = float(row[6]) if row[6] else 0
         old_norms = float(row[7]) if row[7] else 0
+        norms_header_fk_id = str(row[8]) if len(row) > 8 and row[8] else None  # NormsHeader_FK_Id for CPPNorms sync
         
         # Get new QTY from generation map
         key = (plant_name, utility_name)
@@ -186,7 +187,7 @@ def save_calculated_norms(month: int, year: int, result: dict, dry_run: bool = F
                     ''', (new_qty, new_quantity, new_norms, record_id))
                     
                     # Sync model-calculated norms to CPPNorms table
-                    if _sync_to_cpp_norms(conn, norms_header_fk_id, fym_id, new_norms, 'PythonModel'):
+                    if norms_header_fk_id and _sync_to_cpp_norms(conn, norms_header_fk_id, fym_id, new_norms, 'PythonModel'):
                         cpp_norms_synced += 1
                 else:
                     # Update only QTY and Quantity

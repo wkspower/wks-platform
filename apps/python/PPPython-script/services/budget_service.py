@@ -34,9 +34,14 @@ from services.norms_save_service import save_calculated_norms, print_save_summar
 # ============================================================
 # STEP 1: POWER DEMAND & CAPACITY CHECK
 # ============================================================
-def check_power_demand_and_dispatch(month: int, year: int) -> dict:
+def check_power_demand_and_dispatch(month: int, year: int, cpp_plant_id: str) -> dict:
     """
     Execute power demand check and dispatch.
+    
+    Args:
+        month: Month number (1-12)
+        year: Financial year
+        cpp_plant_id: CPP Plant UUID (required for fetching import power)
     
     Returns:
         dict with:
@@ -46,7 +51,7 @@ def check_power_demand_and_dispatch(month: int, year: int) -> dict:
         - dispatch_plan: list (if successful)
         - power_result: full result from power_service
     """
-    result = distribute_by_priority(month, year)
+    result = distribute_by_priority(month, year, cpp_plant_id)
     
     # Case 1: FYM not found or no assets
     if "dispatchPlan" not in result and \
@@ -181,6 +186,7 @@ def check_steam_demand_and_capacity(
 def calculate_budget(
     month: int,
     year: int,
+    cpp_plant_id: str,
     lp_process: float,
     lp_fixed: float,
     mp_process: float,
@@ -206,6 +212,7 @@ def calculate_budget(
     
     Args:
         month, year: Financial period
+        cpp_plant_id: CPP Plant UUID (required for fetching import power)
         lp/mp/hp/shp_process/fixed: Steam demands (MT)
         bfw_ufu: BFW for UFU (M3)
         cw1_process: Cooling Water 1 process demand (KM3)
@@ -230,7 +237,7 @@ def calculate_budget(
     print("STEP 1: POWER DEMAND & CAPACITY CHECK")
     print("="*60)
     
-    power_check = check_power_demand_and_dispatch(month, year)
+    power_check = check_power_demand_and_dispatch(month, year, cpp_plant_id)
     result["power_check"] = power_check
     
     if not power_check["success"]:
@@ -440,6 +447,7 @@ def print_detailed_results(result: dict):
 def calculate_budget_with_iteration(
     month: int,
     year: int,
+    cpp_plant_id: str,
     lp_process: float,
     lp_fixed: float,
     mp_process: float,
@@ -472,6 +480,7 @@ def calculate_budget_with_iteration(
     
     Args:
         month, year: Financial period
+        cpp_plant_id: CPP Plant UUID (required for fetching import power)
         lp/mp/hp/shp_process/fixed: Steam demands (MT)
         bfw_ufu: BFW for UFU (M3)
         export_available: Whether export power is available
@@ -490,12 +499,14 @@ def calculate_budget_with_iteration(
         print("  BUDGET CALCULATION")
         print("="*100)
         print(f"  Period: {month}/{year}")
+        print(f"  Plant ID: {cpp_plant_id}")
         print(f"  Export: {'YES' if export_available else 'NO'}")
     
     # Execute USD Iteration
     usd_result = usd_iterate(
         month=month,
         year=year,
+        cpp_plant_id=cpp_plant_id,
         lp_process=lp_process,
         lp_fixed=lp_fixed,
         mp_process=mp_process,

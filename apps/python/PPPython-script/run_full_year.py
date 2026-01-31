@@ -239,7 +239,7 @@ def save_month_log(output_text: str, month: int, year: int, log_folder: str) -> 
     return filepath
 
 
-def run_single_month(month, year, demands, save_to_db=True, save_calculation_log_enabled=True, parent_execution_id=None):
+def run_single_month(month, year, cpp_plant_id, demands, save_to_db=True, save_calculation_log_enabled=True, parent_execution_id=None):
     """
     Run the model for a single month.
     
@@ -250,6 +250,7 @@ def run_single_month(month, year, demands, save_to_db=True, save_calculation_log
     Args:
         month: Month number (1-12)
         year: Year
+        cpp_plant_id: CPP Plant UUID
         demands: Demand dictionary
         save_to_db: Save norms to database
         save_calculation_log_enabled: Save execution log to ModelCalculationLogs table
@@ -264,6 +265,7 @@ def run_single_month(month, year, demands, save_to_db=True, save_calculation_log
         result = calculate_budget_with_iteration(
             month=month,
             year=year,
+            cpp_plant_id=cpp_plant_id,
             lp_process=demands["lp_process"],
             lp_fixed=demands["lp_fixed"],
             mp_process=demands["mp_process"],
@@ -496,7 +498,7 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
             
             # Run the model (pass parent_execution_id for logging)
             result = run_single_month(
-                month, year, month_demands, save_to_db, 
+                month, year, cpp_plant_id, month_demands, save_to_db, 
                 save_calculation_log_enabled=(save_calculation_logs and not is_single_month),
                 parent_execution_id=parent_execution_id
             )
@@ -563,7 +565,7 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
             month_result["records_saved"] = records_saved
             
             if success:
-                print(f"\n✓ {month_name} {year}: SUCCESS (Converged)")
+                print(f"\n[OK] {month_name} {year}: SUCCESS (Converged)")
                 print(f"  Iterations: {month_result['iterations']}")
                 print(f"  Total Power: {total_power:,.0f} KWH")
                 print(f"  Total SHP: {total_shp:,.2f} MT")
@@ -573,7 +575,7 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
                 converged = result.get("converged", False)
                 
                 # Still show results even if not converged
-                print(f"\n⚠ {month_name} {year}: {'PARTIAL' if final_dispatch else 'FAILED'}")
+                print(f"\n[WARN] {month_name} {year}: {'PARTIAL' if final_dispatch else 'FAILED'}")
                 print(f"  Converged: {converged}")
                 print(f"  Total Power: {total_power:,.0f} KWH")
                 print(f"  Records Saved: {records_saved}")
@@ -602,7 +604,7 @@ def run_full_financial_year(financial_year: int, cpp_plant_id: str = None,
                 "success": False,
                 "error": str(e)
             }
-            print(f"\n✗ {month_name} {year}: EXCEPTION - {str(e)}")
+            print(f"\n[ERR] {month_name} {year}: EXCEPTION - {str(e)}")
         
         print()
     
