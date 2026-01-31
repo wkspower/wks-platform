@@ -38,12 +38,13 @@ public class PowerGenerationController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/assets/operational-hours/{financialYear}")
+    @PostMapping("/assets/operational-hours/{plantId}/{financialYear}")
     public ResponseEntity<Void> saveOperationalHours(
+        @PathVariable UUID plantId,
         @PathVariable String financialYear,
         @RequestBody MasterAssetOperationalResponseDTO payload) {
 
-        powerGenerationService.setAssetOperationalHours(financialYear, payload);
+        powerGenerationService.setAssetOperationalHours(financialYear, payload, plantId);
         return ResponseEntity.ok().build();
     }
 

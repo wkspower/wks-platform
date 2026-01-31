@@ -72,6 +72,33 @@ export function getColDefsDesignCapacity(headerMap = {}, valueFormat) {
     },
   ]
 }
+
+export function getColDefsDesignCapacityPTA(headerMap = {}, valueFormat) {
+  return [
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      widthT: 100,
+      editable: true,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
+    ...generateMonthColumnsPTA(headerMap, true, valueFormat),
+    {
+      field: 'remarks',
+      title: 'Remark',
+      editable: true,
+      align: 'left',
+      headerAlign: 'left',
+      widthT: 90,
+    },
+  ]
+}
 export function getColDefsDesignCapacityAROMATICS(headerMap = {}, valueFormat) {
   return [
     {
@@ -172,6 +199,25 @@ export function getColDefsMaxAchievedCapacity(headerMap = {}, valueFormat) {
       editable: false,
     },
     ...generateMonthColumnsFixedWidth(headerMap, true, valueFormat),
+  ]
+}
+
+export function getColDefsMaxAchievedCapacityPTA(headerMap = {}, valueFormat) {
+  return [
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      widthT: 100,
+      editable: true,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
+    ...generateMonthColumnsFixedWidthPTA(headerMap, true, valueFormat),
   ]
 }
 
@@ -309,6 +355,32 @@ function generateMonthColumns(
   })
 }
 
+function generateMonthColumnsPTA(
+  headerMap = {},
+  editable = true,
+  valueFormat,
+  isPEPP,
+) {
+  const monthOrder = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
+
+  return monthOrder.map((month) => {
+    const fullMonthName = getMonthName(month)
+    const monthName = getMonthName(month)
+    const monthNameTitle = fullMonthName.slice(0, 3) // Jan, Feb, Mar...
+
+    return {
+      field: getMonthName(month).toLowerCase(),
+      title: monthNameTitle,
+      format: valueFormat,
+      editable,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+      widthT: monthName === 'March' ? (isPEPP ? 200 : 110) : undefined,
+    }
+  })
+}
+
 function generateMonthColumnsForPEPP(
   headerMap = {},
   editable = true,
@@ -348,6 +420,31 @@ function generateMonthColumnsFixedWidth(
     return {
       field: monthName.toLowerCase(),
       title: headerMap[month],
+      format: valueFormat,
+      editable,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number',
+      widthT: monthName === 'March' ? 200 : undefined,
+    }
+  })
+}
+
+function generateMonthColumnsFixedWidthPTA(
+  headerMap = {},
+  editable = true,
+  valueFormat,
+) {
+  const monthOrder = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]
+
+  return monthOrder.map((month) => {
+    const fullMonthName = getMonthName(month)
+    const monthName = getMonthName(month)
+    const monthNameTitle = fullMonthName.slice(0, 3) // Jan, Feb, Mar...
+
+    return {
+      field: monthName.toLowerCase(),
+      title: monthNameTitle,
       format: valueFormat,
       editable,
       align: 'left',

@@ -435,7 +435,7 @@ const KendoDataTablesReports = ({
             key={col.field}
             field={col.field}
             title={col.title || col.headerName}
-            width={220}
+            width={col.fixedWidth || undefined}
             cells={{
               data: (cellProps) => (
                 <RemarkCell
@@ -822,7 +822,10 @@ const KendoDataTablesReports = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Delete ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             Are you sure you want to delete this row?
           </DialogContentText>
         </DialogContent>
@@ -846,7 +849,10 @@ const KendoDataTablesReports = ({
       >
         <DialogTitle id='alert-dialog-title'>{'Save ?'}</DialogTitle>
         <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
+          <DialogContentText
+            id='alert-dialog-description'
+            sx={{ color: 'text.primary' }}
+          >
             Are you sure you want to save these changes?
           </DialogContentText>
         </DialogContent>

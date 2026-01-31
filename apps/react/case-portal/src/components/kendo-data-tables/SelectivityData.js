@@ -558,6 +558,7 @@ const SelectivityData = (props) => {
       // marginTop: props?.configType === 'cracker_configuration' ? true : false,
       marginTop: false,
       isHeight: lowerVertName !== 'meg' && props?.rows?.length > 10,
+      titleNameExtra: props?.configType === 'ContineGradeChange' ? true : false,
     },
     isOldYear,
   )

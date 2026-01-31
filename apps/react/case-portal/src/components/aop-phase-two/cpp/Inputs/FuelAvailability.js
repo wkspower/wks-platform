@@ -33,7 +33,7 @@ const FuelAvailability = () => {
   const columns = [
     {
       field: 'fuel',
-      title: 'FUEL',
+      title: 'Fuel',
       widthT: 250,
       minWidth: 200,
       type: 'text',

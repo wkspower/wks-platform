@@ -11,6 +11,7 @@ import crackercolumns from '../../assets/CrackerMaintenanceColumn.json'
 import crackercolumnsDMD from '../../assets/CrackerMaintenanceColumn_DMD.json'
 import KendoDataTables from './index'
 import { getRoleName } from 'services/role-service'
+import MaintenanceProcessTableNMD from './processTableNMD'
 const MaintenanceProcessTable = ({ viewOnly }) => {
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
@@ -479,10 +480,10 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
           uploadExcelBtn: viewOnly ? false : true,
           showRefresh: false,
           showCalculate: viewOnly ? false : true,
-          // showCalculateVisibility: true,
+          showCalculateVisibility: true,
 
           //BUTTON SHOULD BE DISABLED FOR NOW , LATER WE NEED TO CHANGE THE LOGIC
-          showCalculateVisibility: false,
+          // showCalculateVisibility: false,
 
           showNote: true,
         },
@@ -490,6 +491,10 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       ),
     [isOldYear],
   )
+
+  if (siteName == 'nmd') {
+    return <MaintenanceProcessTableNMD />
+  }
 
   return (
     <div>

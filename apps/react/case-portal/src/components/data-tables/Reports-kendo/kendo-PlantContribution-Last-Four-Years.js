@@ -70,15 +70,27 @@ export default function PlantContributionLastFourYears() {
     ? '{0:0.0000}'
     : lowerVertName === 'elastomer'
       ? '{0:0.000}'
-      : '{0:0.00}'
+      : lowerVertName === 'pta'
+        ? '{0:0.00000}'
+        : '{0:0.00}'
 
-  const FORMAT_VALUES_2_DECIMAL = IS_CRACKER ? '{0:0.0000}' : '{0:0.00}'
+  const FORMAT_VALUES_2_DECIMAL = IS_CRACKER
+    ? '{0:0.0000}'
+    : lowerVertName === 'vcm'
+      ? '{0:0.000}'
+      : lowerVertName === 'pta'
+        ? '{0:0.00000}'
+        : '{0:0.00}'
 
   const FORMAT_VALUES_COST = IS_CRACKER
     ? '{0:0.0000}'
     : lowerVertName === 'elastomer'
       ? '{0:0}'
-      : '{0:0.00}'
+      : lowerVertName === 'vcm'
+        ? '{0:0.000}'
+        : lowerVertName === 'pta'
+          ? '{0:0.00000}'
+          : '{0:0.00}'
 
   const FORMAT_VALUES_PRICE = '{0:0}'
 
@@ -86,7 +98,11 @@ export default function PlantContributionLastFourYears() {
     ? '{0:0.0000}'
     : lowerVertName === 'meg' || lowerVertName === 'elastomer'
       ? '{0:0.00000}'
-      : '{0:0.00}'
+      : lowerVertName === 'vcm'
+        ? '{0:0.000}'
+        : lowerVertName === 'pta'
+          ? '{0:0.00000}'
+          : '{0:0.00}'
 
   const loadAll = async () => {
     setLoading(true)

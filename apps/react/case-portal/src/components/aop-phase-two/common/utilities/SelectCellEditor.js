@@ -63,9 +63,11 @@ export const SelectCellEditor = ({
         valueField={valueField}
         placeholder={placeholder}
         style={{
-          fontSize: '0.8rem',
-          height: '22px',
+          fontSize: '1rem',
+          fontWeight: 'normal',
+          height: '2rem',
           width: '100%',
+          backgroundColor: 'lightGrey',
         }}
       />
     </td>

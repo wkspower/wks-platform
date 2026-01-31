@@ -27,7 +27,7 @@ import Loadable from 'components/Loadable'
 import TextSubmitComponent from 'components/user-management/TextSubmitComponent'
 import UserForm from 'components/user-management/UserForm'
 import UserManagementTable from 'components/user-management/UserManagementTable'
-
+import QualityPackagingNorms from 'components/kendo-data-tables/QualityPackagingNorms'
 import MainLayout from 'layout/MainLayout'
 import { lazy } from 'react'
 import { CaseList } from 'views/caseList/caseList'
@@ -80,6 +80,14 @@ import SenderReceiverMapping from 'components/aop-phase-two/cpp/SenderReceiverMa
 import ProductionNormsBasis from 'components/aop-phase-two/vgoht/production-norms-basis/index'
 import ShutdownActivities from 'components/aop-phase-two/vgoht/shutdown-activities/index'
 import SlowdownActivities from 'components/aop-phase-two/vgoht/slowdown-activities/index'
+import ProductionTarget from 'components/aop-phase-two/vgoht/production-target/index'
+import NetProductionHours from 'components/aop-phase-two/vgoht/net-production-hours/index'
+import MonthwiseProductionPlan from 'components/aop-phase-two/vgoht/monthwise-production-plan/index'
+import SteadyStateConsumption from 'components/aop-phase-two/vgoht/steady-state-consumption/index'
+import ShutdownConsumption from 'components/aop-phase-two/vgoht/shutdown-consumption/index'
+import SlowdownConsumption from 'components/aop-phase-two/vgoht/slowdown-consumption/index'
+import OverallAopConsumption from 'components/aop-phase-two/vgoht/overall-aop-consumption/index'
+import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -432,7 +440,71 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
+          {
+            path: 'production-target',
+            element: (
+              <PrivateRoute routeId='production-target'>
+                <ProductionTarget />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'net-production-hrs',
+            element: (
+              <PrivateRoute routeId='net-production-hrs'>
+                <NetProductionHours />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'monthwise-production-plan',
+            element: (
+              <PrivateRoute routeId='monthwise-production-plan'>
+                <MonthwiseProductionPlan />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'steady-state-consumption',
+            element: (
+              <PrivateRoute routeId='steady-state-consumption'>
+                <SteadyStateConsumption />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'shutdown-consumption',
+            element: (
+              <PrivateRoute routeId='shutdown-consumption'>
+                <ShutdownConsumption />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'slowdown-consumption',
+            element: (
+              <PrivateRoute routeId='slowdown-consumption'>
+                <SlowdownConsumption />
+              </PrivateRoute>
+            ),
+          },
+          {
+            path: 'overall-aop-consumption',
+            element: (
+              <PrivateRoute routeId='overall-aop-consumption'>
+                <OverallAopConsumption />
+              </PrivateRoute>
+            ),
+          },
           //Vertical VGOHT Ended
+          {
+            path: 'quality-packaging-norms',
+            element: (
+              <PrivateRoute routeId='quality-packaging-norms'>
+                <QualityPackagingNorms />
+              </PrivateRoute>
+            ),
+          },
         ],
       },
 
@@ -685,6 +757,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='plant-budget-summary'>
                 <PlantBudgetSummary />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'site-budget-summary',
+            element: (
+              <PrivateRoute routeId='site-budget-summary'>
+                <SiteBudgetSummary />
               </PrivateRoute>
             ),
           },

@@ -28,9 +28,11 @@ const CrackerConfig = () => {
 
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
-  const SITE_NAME = siteObject?.name?.toLowerCase()
+
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
+  const PLANT_NAME = plantObject?.name?.toUpperCase()
+  const SITE_NAME = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME = verticalObject?.name?.toUpperCase()
   const AOP_YEAR = year?.selectedYear
 
   const isOldYear = false
@@ -286,7 +288,6 @@ const CrackerConfig = () => {
       constantsRows,
     ],
   )
-
   const setRowsForTab = useCallback((tabId, data) => {
     switch (tabId) {
       case 'Feed':
@@ -397,7 +398,9 @@ const CrackerConfig = () => {
               remarks: item.remarks ?? item.Remarks ?? '',
               originalRemark: item.remarks ?? item.Remarks ?? '',
               ParticularsType: item.normParameterTypeName,
+
               NormParameterFKID: item.NormParameterFKID,
+
               ...item,
             }))
           }
@@ -597,6 +600,7 @@ const CrackerConfig = () => {
     })
 
     const mode = selectMode
+    const EXCEL_NAME = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Input_${AOP_YEAR}`
 
     try {
       const response = await DataService.exportSpyroInputExcel(
@@ -604,6 +608,7 @@ const CrackerConfig = () => {
         mode,
         PLANT_ID,
         AOP_YEAR,
+        EXCEL_NAME,
       )
 
       if (response?.code === 200) {

@@ -46,6 +46,7 @@ import OptimizerReport from '../Reports/OptimizerReport'
 import TurnaroundReportCracker from '../Reports/TurnaroundReportCracker'
 import ValueFormatterProduction from 'utils/ValueFormatterProduction'
 import SpecificConsumptionNorm from '../Reports-kendo/SpecificConsumptionnorm'
+import SpecificConsumptionNormsII from '../Reports-kendo/specificConsumptionNormsII'
 import { getRoleName } from 'services/role-service'
 const WorkFlowMerge = () => {
   const keycloak = useSession()
@@ -595,40 +596,41 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary (T-22)',
   ]
-  const customPETabs = [
+  const customPETTabs = [
     'Annual AOP Cost',
     'Plant Production Summary (T-14)',
     'Month Wise Production Plan (T-16)',
-    'Month Wise Raw Data(T-18)',
-    'Turnaround Report(T-19A)',
-    'Annual Production Plan(T-15)',
-    'Plant Contribution(T-21)',
+    'Month Wise Raw Data (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
+    'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
     'Specific Consumption Norms',
   ]
-
   const customPPTabs = [
     'Annual AOP Cost',
     'Plant Production Summary (T-14)',
     'Month Wise Production Plan (T-16)',
-    'Month Wise Raw Data(T-18)',
-    'Turnaround Report(T-19A)',
-    'Annual Production Plan(T-15)',
+    'Month Wise Raw Data (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
     'Plant Contribution(T-21)',
     'Plant Contribution Summary (T-22)',
-    'Specific Consumption Norms',
+    'Specific Consumption Norms (T-17)',
+    'Norms Entry Sheet',
   ]
-  const PETabs = [
+  const customPETabs = [
     'Annual AOP Cost',
-    'Plant Production Summary',
-    'Month Wise Production Plan',
-    'Month Wise Raw Data',
-    'Turnaround Report',
-    'Annual Production Plan',
-    'Plant Contribution',
-    'Plant Contribution Summary ',
+    'Plant Production Summary (T-14)',
+    'Month Wise Production Plan (T-16)',
+    'Month Wise Raw Data (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
+    'Plant Contribution(T-21)',
+    'Plant Contribution Summary (T-22)',
+    'Specific Consumption Norms (T-17)',
+    'Norms Entry Sheet',
   ]
-
   const PPTabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
@@ -639,7 +641,6 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary',
   ]
-
   const crackerTabs = [
     'Optimizer Input / Output',
     'Month Wise Production Plan',
@@ -649,7 +650,6 @@ const WorkFlowMerge = () => {
     'Plant Contribution (T-21)',
     'Plant Contribution Summary (T-22)',
   ]
-
   const elastomerTabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
@@ -685,7 +685,9 @@ const WorkFlowMerge = () => {
     lowerVertName === 'pta'
   ) {
     activeTabs = elastomerTabs
-  } else if (lowerVertName === 'pe' || lowerVertName === 'pet') {
+  } else if (lowerVertName === 'pet') {
+    activeTabs = customPETTabs
+  } else if (lowerVertName === 'pe') {
     activeTabs = customPETabs
   } else if (lowerVertName === 'pp') {
     activeTabs = customPPTabs
@@ -888,10 +890,13 @@ const WorkFlowMerge = () => {
             {tabIndex === 5 && <AnnualProductionPlan />}
             {tabIndex === 6 && <PlantContribution />}
             {tabIndex === 7 && <PlantContributionLastFourYears />}
+            {(lowerVertName === 'pe' || lowerVertName === 'pp') && (
+              <>{tabIndex === 8 && <SpecificConsumptionNormsII />}</>
+            )}
             {(lowerVertName === 'pe' ||
               lowerVertName === 'pp' ||
               lowerVertName === 'pet') && (
-              <>{tabIndex === 8 && <SpecificConsumptionNorm />}</>
+              <>{tabIndex === 9 && <SpecificConsumptionNorm />}</>
             )}
 
             <Notification
@@ -906,13 +911,6 @@ const WorkFlowMerge = () => {
         {/* For CRACKER */}
         {lowerVertName === 'cracker' && (
           <>
-            {/* {tabIndex === 0 && <BestAchievedReport />}
-            {tabIndex === 1 && <MonthWiseRawData />}
-            {tabIndex === 2 && <FurnaceRawData />}
-            {tabIndex === 3 && <PlantContribution />}
-            {tabIndex === 4 && <PlantContributionLastFourYears />}
- */}
-
             {tabIndex === 0 && <OptimizerReport />}
             {tabIndex === 1 && <BestAchievedReport />}
             {tabIndex === 2 && <MonthWiseRawData />}

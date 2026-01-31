@@ -13,7 +13,10 @@ import { ShutDownPeColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownPeColumnsldpe12 } from 'components/colums/ShutdownColumn'
 import { ShutDownPpColumns } from 'components/colums/ShutdownColumn'
 import { ShutDownAllColumns } from 'components/colums/ShutdownColumn'
-import { ShutDownPTAColumns } from 'components/colums/ShutdownColumn'
+import {
+  ShutDownPTAColumns,
+  ShutDownPTADMDColumns,
+} from 'components/colums/ShutdownColumn'
 import { MaintenanceDetailsApiService } from 'services/maintenance-details-api-service'
 import { getRoleName } from 'services/role-service'
 import ElastomerShutDown from './ElastomerShutDown'
@@ -73,15 +76,15 @@ const ShutDown = ({ permissions }) => {
     lowerVertName === 'meg' ||
     lowerVertName === 'pe' ||
     lowerVertName === 'pp'
-
+  const IS_PTA_DMD = lowerVertName === 'pta' && lowerSiteName === 'dmd'
   const DELETE_NOTE =
     'Warning: Please verify the shutdown consumption quantity before deleting the shutdown activity.'
 
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
   const apiRef = useGridApiRef()
-  const [rows, setRows] = useState()
-  const [rowsSlowdown, setRowsSlowdown] = useState()
+  const [rows, setRows] = useState([])
+  const [rowsSlowdown, setRowsSlowdown] = useState([])
 
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
@@ -155,25 +158,27 @@ const ShutDown = ({ permissions }) => {
             : new Date(record.maintEndDateTime)
 
         // Validate date format: dd/mm/yyyy (by parsing and checking)
-        if (
-          startLimit &&
-          endLimit &&
-          (!startDate ||
-            !endDate ||
-            isNaN(startDate) ||
-            isNaN(endDate) ||
-            startDate < startLimit ||
-            startDate > endLimit ||
-            endDate < startLimit ||
-            endDate > endLimit)
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
-            severity: 'error',
-          })
-          return
+        if (!IS_PTA_DMD) {
+          if (
+            startLimit &&
+            endLimit &&
+            (!startDate ||
+              !endDate ||
+              isNaN(startDate) ||
+              isNaN(endDate) ||
+              startDate < startLimit ||
+              startDate > endLimit ||
+              endDate < startLimit ||
+              endDate > endLimit)
+          ) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `Dates must be between ${formatDateDDMMYYYY(startLimit)} and ${formatDateDDMMYYYY(endLimit)} for selected year. `,
+              severity: 'error',
+            })
+            return
+          }
         }
       }
 
@@ -185,6 +190,13 @@ const ShutDown = ({ permissions }) => {
         } else {
           requiredFields = ['discription', 'remark']
         }
+      } else if (IS_PTA_DMD) {
+        requiredFields = [
+          'discriptionDrpdwn',
+          'remark',
+          'monthly',
+          'durationInHrs',
+        ]
       } else if (lowerVertName === 'pta') {
         requiredFields = ['discriptionDrpdwn', 'remark']
       } else if (lowerVertName === 'pp') {
@@ -201,6 +213,14 @@ const ShutDown = ({ permissions }) => {
           if (!record[field] || record[field].trim() === '') {
             record.isError = true
             rowsWithErrors.add(record.id)
+            setRows((prevRows) =>
+              prevRows.map((row) => {
+                if (row.id === record.id) {
+                  return { ...row, isError: true }
+                }
+                return row
+              }),
+            )
             break // Exit inner loop once we find one missing field
           }
         }
@@ -212,6 +232,11 @@ const ShutDown = ({ permissions }) => {
         if (IS_PE_PP_VERTICAL && validationMessage.includes('Remark')) {
           message = 'Please update the field: Shutdown Basis'
         }
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            data.some((d) => d.id === row.id) ? { ...row, isError: true } : row,
+          ),
+        )
         setSnackbarOpen(true)
         setSnackbarData({
           message: message,
@@ -248,42 +273,43 @@ const ShutDown = ({ permissions }) => {
       //5 START DATE END DATE MANDATORY
       const allRecords = [...rows]
       const timeErrorRows = new Set() // Add this line
-
-      for (const record of data) {
-        // Date required validation (before checking time order)
-        const dateRequiredRows = new Set()
+      if (!IS_PTA_DMD) {
         for (const record of data) {
-          const startMissing = !record.maintStartDateTime
-          const endMissing = !record.maintEndDateTime
+          // Date required validation (before checking time order)
+          const dateRequiredRows = new Set()
+          for (const record of data) {
+            const startMissing = !record.maintStartDateTime
+            const endMissing = !record.maintEndDateTime
 
-          if (startMissing || endMissing) {
-            record.isError = true
-            dateRequiredRows.add(record.id)
+            if (startMissing || endMissing) {
+              record.isError = true
+              dateRequiredRows.add(record.id)
+            }
           }
-        }
 
-        if (dateRequiredRows.size > 0) {
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: 'Start Date and End Date are required for all records.',
-            severity: 'error',
-          })
-          return
-        }
+          if (dateRequiredRows.size > 0) {
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: 'Start Date and End Date are required for all records.',
+              severity: 'error',
+            })
+            return
+          }
 
-        if (
-          record.maintStartDateTime &&
-          record.maintEndDateTime &&
-          record.maintStartDateTime.getTime() >=
-            record.maintEndDateTime.getTime()
-        ) {
-          record.isError = true
-          setSnackbarOpen(true)
-          setSnackbarData({
-            message: `Start time must be before end time for "${record.discription || 'this record'}".`,
-            severity: 'error',
-          })
-          return
+          if (
+            record.maintStartDateTime &&
+            record.maintEndDateTime &&
+            record.maintStartDateTime.getTime() >=
+              record.maintEndDateTime.getTime()
+          ) {
+            record.isError = true
+            setSnackbarOpen(true)
+            setSnackbarData({
+              message: `Start time must be before end time for "${record.discription || 'this record'}".`,
+              severity: 'error',
+            })
+            return
+          }
         }
       }
 
@@ -300,58 +326,64 @@ const ShutDown = ({ permissions }) => {
       ) {
         // Check for shutdown timeframe spanning multiple months
         const monthSpanRows = new Set() // Add this line
-        for (const row of allRecords) {
-          const start = new Date(row.maintStartDateTime)
-          const end = new Date(row.maintEndDateTime)
-          //shutdown timeframe for Multiple months
-          if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
 
-          const formatDate = (date) =>
-            date.toLocaleDateString('en-GB', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            })
+        if (lowerVertName != 'vcm' && !IS_PTA_DMD) {
+          for (const row of allRecords) {
+            const start = new Date(row.maintStartDateTime)
+            const end = new Date(row.maintEndDateTime)
+            //shutdown timeframe for Multiple months
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) continue
 
-          const isSameMonth =
-            start.getMonth() === end.getMonth() &&
-            start.getFullYear() === end.getFullYear()
+            const formatDate = (date) =>
+              date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+              })
 
-          if (!isSameMonth) {
-            row.isError = true
-            setSnackbarOpen(true)
-            setSnackbarData({
-              message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
-              severity: 'error',
-            })
-            return
-          }
-        }
-        //Shutdown timeframe overlapping of same time
-        for (let i = 0; i < allRecords.length; i++) {
-          const a = allRecords[i]
-          const aStart = new Date(a.maintStartDateTime).getTime()
-          const aEnd = new Date(a.maintEndDateTime).getTime()
+            const isSameMonth =
+              start.getMonth() === end.getMonth() &&
+              start.getFullYear() === end.getFullYear()
 
-          if (isNaN(aStart) || isNaN(aEnd)) continue
-
-          for (let j = 0; j < allRecords.length; j++) {
-            if (i === j) continue
-            const b = allRecords[j]
-            const bStart = new Date(b.maintStartDateTime).getTime()
-            const bEnd = new Date(b.maintEndDateTime).getTime()
-
-            if (isNaN(bStart) || isNaN(bEnd)) continue
-
-            if (aStart < bEnd && bStart < aEnd) {
-              a.isError = true
-              b.isError = true
+            if (!isSameMonth) {
+              row.isError = true
               setSnackbarOpen(true)
               setSnackbarData({
-                message: `The shutdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+                message: `The shutdown timeframe for '${row.discription}' spans multiple months (from ${formatDate(start, 'dd MMM yyyy')} to ${formatDate(end, 'dd MMM yyyy')}). Please split it into separate entries for each month.`,
                 severity: 'error',
               })
               return
+            }
+          }
+        }
+
+        //Shutdown timeframe overlapping of same time.
+        if (!IS_PTA_DMD) {
+          for (let i = 0; i < allRecords.length; i++) {
+            const a = allRecords[i]
+            const aStart = new Date(a.maintStartDateTime).getTime()
+            const aEnd = new Date(a.maintEndDateTime).getTime()
+
+            if (isNaN(aStart) || isNaN(aEnd)) continue
+
+            for (let j = 0; j < allRecords.length; j++) {
+              if (i === j) continue
+              const b = allRecords[j]
+              const bStart = new Date(b.maintStartDateTime).getTime()
+              const bEnd = new Date(b.maintEndDateTime).getTime()
+
+              if (isNaN(bStart) || isNaN(bEnd)) continue
+
+              if (aStart < bEnd && bStart < aEnd) {
+                a.isError = true
+                b.isError = true
+                setSnackbarOpen(true)
+                setSnackbarData({
+                  message: `The shutdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping timeframes.`,
+                  severity: 'error',
+                })
+                return
+              }
             }
           }
         }
@@ -361,7 +393,7 @@ const ShutDown = ({ permissions }) => {
 
         if (
           lowerVertName != 'elastomer' &&
-          lowerVertName != 'vcm' &&
+          // lowerVertName != 'vcm' &&
           lowerVertName != 'pvc'
         ) {
           for (let i = 0; i < rows.length; i++) {
@@ -410,37 +442,58 @@ const ShutDown = ({ permissions }) => {
   const saveShutdownData = async (newRow) => {
     setLoading(true)
     try {
-      const shutdownDetails = newRow.map((row) => ({
-        productId: (() => {
-          if (
+      let shutdownDetails
+
+      if (IS_PTA_DMD) {
+        // PTA DMD: Use month instead of dates
+        shutdownDetails = newRow.map((row) => ({
+          discription: row.discription || row.discriptionDrpdwn,
+          rate: row.rate,
+          durationInHrs: (() => {
+            const v = findDuration('1', row)
+            if (!v) return null
+            const [h = '00', m = '00'] = String(v).split('.')
+            return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+          })(),
+          month: row.monthly || row.month, // Use month field
+          audityear: AOP_YEAR,
+          id: row.idFromApi || null,
+          remark: row.remark || 'null',
+        }))
+      } else {
+        // Default: Use start/end date
+        shutdownDetails = newRow.map((row) => ({
+          productId: (() => {
+            if (
+              lowerVertName === verticalEnums.PE ||
+              lowerVertName === verticalEnums.PP
+            ) {
+              const matched = allProducts.find(
+                (p) => p.displayName === row.productName1,
+              )
+              return matched?.realId || null
+            }
+            return null
+          })(),
+          productName:
             lowerVertName === verticalEnums.PE ||
             lowerVertName === verticalEnums.PP
-          ) {
-            const matched = allProducts.find(
-              (p) => p.displayName === row.productName1,
-            )
-            return matched?.realId || null
-          }
-          return null
-        })(),
-        productName:
-          lowerVertName === verticalEnums.PE ||
-          lowerVertName === verticalEnums.PP
-            ? row.productName1
-            : null,
-        discription: row.discription || row.discriptionDrpdwn,
-        durationInHrs: (() => {
-          const v = findDuration('1', row)
-          if (!v) return null
-          const [h = '00', m = '00'] = String(v).split('.')
-          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
-        })(),
-        maintEndDateTime: addTimeOffset(row.maintEndDateTime),
-        maintStartDateTime: addTimeOffset(row.maintStartDateTime),
-        audityear: AOP_YEAR,
-        id: row.idFromApi || null,
-        remark: row.remark || 'null',
-      }))
+              ? row.productName1
+              : null,
+          discription: row.discription || row.discriptionDrpdwn,
+          durationInHrs: (() => {
+            const v = findDuration('1', row)
+            if (!v) return null
+            const [h = '00', m = '00'] = String(v).split('.')
+            return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+          })(),
+          maintEndDateTime: addTimeOffset(row.maintEndDateTime),
+          maintStartDateTime: addTimeOffset(row.maintStartDateTime),
+          audityear: AOP_YEAR,
+          id: row.idFromApi || null,
+          remark: row.remark || 'null',
+        }))
+      }
 
       const response = await DataService.saveShutdownData(
         PLANT_ID,
@@ -510,6 +563,7 @@ const ShutDown = ({ permissions }) => {
 
   const fetchData = async () => {
     if (!PLANT_ID || !AOP_YEAR) return
+    setModifiedCells({})
     try {
       setLoading(true)
       const data = await DataService.getShutDownPlantData(
@@ -535,6 +589,20 @@ const ShutDown = ({ permissions }) => {
       }))
 
       setRowsSlowdown(formattedDataSlowDown)
+      const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ]
 
       const formattedData = data.map((item, index) => {
         const productObj = allProducts.find((p) => p.realId === item.product)
@@ -552,6 +620,12 @@ const ShutDown = ({ permissions }) => {
             maintStartDateTime: new Date(item?.maintStartDateTime),
             maintEndDateTime: new Date(item?.maintEndDateTime),
             discriptionDrpdwn: descriptionObj ? descriptionObj.displayName : '',
+            monthly:
+              item?.monthly ||
+              item?.month ||
+              (item?.maintStartDateTime
+                ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
+                : ''),
           }
         }
 
@@ -734,7 +808,7 @@ const ShutDown = ({ permissions }) => {
         return ShutDownPpColumns
 
       case verticalEnums.PTA:
-        return ShutDownPTAColumns
+        return IS_PTA_DMD ? ShutDownPTADMDColumns : ShutDownPTAColumns
 
       default:
         return ShutDownAllColumns
@@ -938,6 +1012,14 @@ const ShutDown = ({ permissions }) => {
         lowerVertName === 'pet'
           ? true
           : false,
+      highlightDiscription:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightRate:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightDate:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
+      highlightDuration:
+        lowerVertName === 'pp' || lowerVertName === 'pe' ? true : false,
     },
     isOldYear,
   )

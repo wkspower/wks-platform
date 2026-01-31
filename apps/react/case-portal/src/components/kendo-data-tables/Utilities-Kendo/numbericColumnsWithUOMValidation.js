@@ -16,7 +16,7 @@ export const NoSpinnerNumericEditorWithUOMValidation = ({
     // Allow only numeric (including decimal)
     if (val === '' || /^\d*(\.\d*)?$/.test(val)) {
       // If UOM is '%', enforce range 1–100
-      if (dataItem?.uom === '%') {
+      if (dataItem?.uom === '%' || dataItem?.unit === '%') {
         const num = parseFloat(val)
         if (val === '' || (num >= 0 && num <= 100)) {
           setLocalValue(val)

@@ -29,8 +29,13 @@ const CrackerConfig = () => {
   const PLANT_ID = plantObject?.id
   const SITE_ID = siteObject?.id
   const VERTICAL_ID = verticalObject?.id
-  const VERTICAL_NAME = verticalObject?.name
   const AOP_YEAR = year?.selectedYear
+
+  const PLANT_NAME = plantObject?.name?.toUpperCase()
+  const SITE_NAME = siteObject?.name?.toUpperCase()
+  const VERTICAL_NAME = verticalObject?.name?.toUpperCase()
+
+  const EXCEL_NAME = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_Optimizer_Output_${AOP_YEAR}`
 
   const isOldYear = false
   const IS_OLD_YEAR = oldYear?.oldYear
@@ -673,18 +678,23 @@ const CrackerConfig = () => {
     try {
       let response
       if (currentTabDisplay === 'Yield') {
+        const YieldExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_Yield_${AOP_YEAR}`
         response = await DataService.exportSpyroOutputExcelYield(
           keycloak,
           mode,
           PLANT_ID,
           AOP_YEAR,
+          YieldExcelName,
         )
       } else {
+        const ExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_${AOP_YEAR}`
+
         response = await DataService.exportSpyroOutputExcel(
           keycloak,
           mode,
           PLANT_ID,
           AOP_YEAR,
+          ExcelName,
         )
       }
 

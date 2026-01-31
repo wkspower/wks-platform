@@ -646,7 +646,7 @@ export default function BestAchievedNorms() {
           variant='contained'
           onClick={exportAllGrids}
           className='btn-save'
-          disabled={READ_ONLY}
+          //disabled={READ_ONLY}
         >
           Export
         </Button>

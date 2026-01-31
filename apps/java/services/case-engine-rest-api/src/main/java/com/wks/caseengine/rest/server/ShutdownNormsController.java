@@ -28,31 +28,43 @@ public class ShutdownNormsController {
 	@Autowired
 	private ShutdownNormsService shutdownNormsService;
 	
-	@GetMapping(value="/shutdown-consumption")
-	public AOPMessageVM getShutdownNormsData(@RequestParam String year,@RequestParam String plantId,@RequestParam(required=false) String gradeId){
-		return	shutdownNormsService.getShutdownNormsData(year,plantId,gradeId);
+	@GetMapping(value = "/shutdown-consumption")
+	public AOPMessageVM getShutdownNormsData(@RequestParam String year, @RequestParam String plantId,
+			@RequestParam(required = false) String gradeId) {
+		return shutdownNormsService.getShutdownNormsData(year, plantId, gradeId);
 	}
-	
+
 	@GetMapping(value = "/shutdown-consumption-export")
 	public ResponseEntity<byte[]> exportShutdownNorms(
-	         @RequestParam("plantId") String plantId,
-            @RequestParam("year") String year) {
-	    try {
-			
-	        byte[] excelBytes = shutdownNormsService.exportShutdownNorms(year,UUID.fromString(plantId),false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+			@RequestParam("plantId") String plantId,
+			@RequestParam("year") String year,
+			@RequestParam(value = "allGrade", required = false, defaultValue = "false") boolean allGrade
 
-	        HttpHeaders headers = new HttpHeaders();
-	        headers.setContentType(MediaType.parseMediaType(
-	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-	        headers.setContentDisposition(ContentDisposition.builder("attachment")
-	                .filename("ShutdownNorms.xlsx")
-	                .build());
-	        headers.setContentLength(excelBytes.length);
+	) {
+		try {
 
-	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
-	    } catch (Exception e) {
-	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-	    }
+			byte[] excelBytes = shutdownNormsService.exportShutdownNorms(
+					year,
+					UUID.fromString(plantId),
+					false,
+					null,
+					allGrade);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(
+					MediaType.parseMediaType(
+							"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+			headers.setContentDisposition(
+					ContentDisposition.builder("attachment")
+							.filename("ShutdownNorms.xlsx")
+							.build());
+			headers.setContentLength(excelBytes.length);
+
+			return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@PostMapping(value = "/shutdown-consumption-import", consumes = "multipart/form-data")
@@ -60,9 +72,9 @@ public class ShutdownNormsController {
 	         @RequestParam("plantId") String plantId,
             @RequestParam("year") String year,
             @RequestParam(required = false) String gradeId,
-			@RequestParam("file") MultipartFile file
+			@RequestParam("file") MultipartFile file,@RequestParam(required = false) boolean allGrade
 	        ) {
-			return	shutdownNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file); 
+			return	shutdownNormsService.importExcel(year,UUID.fromString(plantId),gradeId, file,allGrade); 
 	}
 
 	@GetMapping(value="/shutdown-consumption-history-data")

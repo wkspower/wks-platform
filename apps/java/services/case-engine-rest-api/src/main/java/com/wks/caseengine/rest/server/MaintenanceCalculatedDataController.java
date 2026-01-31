@@ -22,6 +22,7 @@ import com.wks.caseengine.dto.BudgetMaintenanceDto;
 import com.wks.caseengine.dto.DecokePlanningDTO;
 import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
+import com.wks.caseengine.service.MaintenanceCalculatedDataNMDService;
 import com.wks.caseengine.service.MaintenanceCalculatedDataService;
 
 @RestController
@@ -30,6 +31,9 @@ public class MaintenanceCalculatedDataController {
 	
 	@Autowired
 	private MaintenanceCalculatedDataService maintenanceCalculatedDataService;
+	
+	@Autowired
+	private MaintenanceCalculatedDataNMDService maintenanceCalculatedDataNMDService;
 	
 	@GetMapping(value="/maintenance-details")
 	public List<MaintenanceDetailsDTO> getMaintenanceCalculatedData(@RequestParam String plantId, @RequestParam String year){
@@ -44,6 +48,11 @@ public class MaintenanceCalculatedDataController {
 	@GetMapping(value="/maintenance")
 	public AOPMessageVM getMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year){
 		return maintenanceCalculatedDataService.getMaintenanceDataForCracker(plantId,year);		
+	}
+	
+	@GetMapping(value="/maintenance-nmd")
+	public AOPMessageVM getMaintenanceDataNMDForCracker(@RequestParam String plantId, @RequestParam String year){
+		return maintenanceCalculatedDataNMDService.getMaintenanceDataForCracker(plantId,year);		
 	}
 	
 	@GetMapping(value = "/maintenance-export")
@@ -67,10 +76,35 @@ public class MaintenanceCalculatedDataController {
 	    }
 	}
 
+	@GetMapping(value = "/maintenance-export-nmd")
+	public ResponseEntity<byte[]> maintenanceExportNMD(
+	         @RequestParam String year,@RequestParam String plantId) {
+	    try {
+			
+	        byte[] excelBytes = maintenanceCalculatedDataNMDService.maintenanceExport(year, plantId, false, null);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("maintenance.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	
 	@PostMapping(value="/maintenance")
 	public AOPMessageVM updateMaintenanceDataForCracker(@RequestParam String plantId, @RequestParam String year, @RequestBody List<Map<String, Object>> payloadList){
 		return maintenanceCalculatedDataService.updateMaintenanceDataForCracker(plantId,year,payloadList);		
+	}
+	@PostMapping(value="/maintenance-nmd")
+	public AOPMessageVM updateMaintenanceDataNMDForCracker(@RequestParam String plantId, @RequestParam String year,@RequestBody List<DecokePlanningDTO> decokePlanningDTOList){
+		return maintenanceCalculatedDataNMDService.updateMaintenanceDataForCracker(plantId,year,decokePlanningDTOList);		
 	}
 	
 	@PostMapping(value = "/maintenance-import", consumes = "multipart/form-data")
@@ -80,6 +114,14 @@ public class MaintenanceCalculatedDataController {
 			@RequestParam("file") MultipartFile file
 	        ) {
 			return	maintenanceCalculatedDataService.maintenanceImport(year,UUID.fromString(plantId), file); 
+	}
+	@PostMapping(value = "/maintenance-import-nmd", consumes = "multipart/form-data")
+	public AOPMessageVM maintenanceImportNMD(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	maintenanceCalculatedDataNMDService.maintenanceImport(year,UUID.fromString(plantId), file); 
 	}
 	
 	@GetMapping(value="/budget-maintenance")
@@ -129,4 +171,3 @@ public class MaintenanceCalculatedDataController {
 		return maintenanceCalculatedDataService.getMacroData(value,year,plantId);		
 	}
 }
-

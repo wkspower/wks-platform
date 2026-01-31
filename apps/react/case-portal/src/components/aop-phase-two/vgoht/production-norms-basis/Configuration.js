@@ -192,7 +192,7 @@ const Configuration = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchConfigurationData()
+      // fetchConfigurationData()
     }
   }, [PLANT_ID, AOP_YEAR])
 

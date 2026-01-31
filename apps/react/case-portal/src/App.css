@@ -131,6 +131,13 @@ header {
   font-size: 0.8rem;
 }
 
+.grid-title-extra {
+  font-family: 'Roboto', sans-serif !important;
+  font-weight: bold;
+  text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);
+  font-size: 0.7rem;
+}
+
 .button-title {
   font-family: 'Roboto', sans-serif !important;
   text-shadow: 0.5px 0.5px 0px rgba(0, 0, 0, 0.1);

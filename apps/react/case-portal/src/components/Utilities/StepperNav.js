@@ -116,39 +116,67 @@ export default function StepperNav() {
     return text.length <= 12 ? text : `${text.slice(0, 12)}…`
   }
 
-  // shared Stepper element so we don't duplicate mapping logic
   const StepperElement = (
     <Stepper
       nonLinear
       alternativeLabel
       activeStep={activeStep >= 0 ? activeStep : 0}
       sx={{
+        display: 'flex', // prevent wrapping so horizontal scroll is used
+        flexWrap: 'nowrap',
+        alignItems: 'center', // <-- ensure vertical centering
+        minHeight: 64, // stable height
+        px: 1,
+        '& .MuiStepLabel-root': {
+          padding: 0,
+        },
         '& .MuiStepLabel-label': {
           fontWeight: 'normal',
+          marginTop: '6px !important', // small label spacing
+          lineHeight: 1,
         },
         '& .MuiStepLabel-label.Mui-active': {
-          fontWeight: 'bold',
+          fontWeight: '700',
           color: '#000',
         },
-        '& .MuiStepLabel-alternativeLabel': {
-          marginTop: '2px !important',
+        // Connector root is absolutely positioned; move it to icon center
+        '& .MuiStepConnector-root': {
+          top: '20px', // adjust if your icons are thicker
         },
-        '& .MuiStepConnector-alternativeLabel': {
-          top: '16px',
+        // connector line thickness
+        '& .MuiStepConnector-line': {
+          height: 2,
+        },
+        // Icon base — make it visually consistent and vertically aligned
+        '& .MuiStepIcon-root': {
+          zIndex: 2,
+          backgroundColor: '#fff',
+          borderRadius: '50%',
+          width: 28,
+          height: 28,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative', // allow top nudging
+          top: 2, // small nudge to align with connector
+        },
+        // active icon color (keeps your color)
+        '& .MuiStepIcon-root.Mui-active': {
+          color: '#0100cb',
         },
       }}
     >
       {steps.map((step) => {
-        const abbrev = getAbbrev(step.label)
         return (
           <Step
             key={step.key}
             onClick={() => navigate(step.url)}
             sx={{
               cursor: 'pointer',
-              '& .MuiStepIcon-root.Mui-active': {
-                color: '#0100cb',
-              },
+              display: 'inline-flex', // keep each step inline for nowrap layout
+              flexDirection: 'column', // stack icon above label consistently
+              alignItems: 'center',
+              px: 0.5,
             }}
             aria-label={step.label}
           >
@@ -162,13 +190,14 @@ export default function StepperNav() {
                     maxWidth: 80,
                     display: 'inline-block',
                     textAlign: 'center',
-                    whiteSpace: 'nowrap', // *** Prevent wrapping ***
-                    overflow: 'hidden', // *** Hide overflow text ***
-                    textOverflow: 'ellipsis', // *** Show "…" automatically ***
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                     fontWeight: (theme) =>
                       activeStep === steps.findIndex((s) => s.key === step.key)
                         ? '700'
                         : '500',
+                    fontSize: '0.75rem',
                   }}
                 >
                   {step.label}
@@ -205,7 +234,32 @@ export default function StepperNav() {
               maxHeight: '70px',
             }}
           >
-            <Box>{StepperElement}</Box>
+            {/* HORIZONTAL SCROLL WRAPPER - thin scrollbar only when needed */}
+            <Box
+              sx={{
+                overflowX: 'auto',
+                overflowY: 'hidden',
+                whiteSpace: 'nowrap',
+                WebkitOverflowScrolling: 'touch',
+                px: 0.5,
+                // Thin webkit scrollbar
+                '&::-webkit-scrollbar': {
+                  height: '6px',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  borderRadius: 3,
+                  backgroundColor: 'rgba(0,0,0,0.22)',
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: 'transparent',
+                },
+                // Firefox
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(0,0,0,0.22) transparent',
+              }}
+            >
+              {StepperElement}
+            </Box>
           </Box>
 
           {/* Spacer so fixed element doesn't cover content */}
@@ -214,7 +268,30 @@ export default function StepperNav() {
           />
         </>
       ) : (
-        <Box>{StepperElement}</Box>
+        // same thin-scroll wrapper for non-fixed mode
+        <Box
+          sx={{
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            whiteSpace: 'nowrap',
+            WebkitOverflowScrolling: 'touch',
+            px: 0.5,
+            '&::-webkit-scrollbar': {
+              height: '6px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              borderRadius: 3,
+              backgroundColor: 'rgba(0,0,0,0.22)',
+            },
+            '&::-webkit-scrollbar-track': {
+              backgroundColor: 'transparent',
+            },
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(0,0,0,0.22) transparent',
+          }}
+        >
+          {StepperElement}
+        </Box>
       )}
     </>
   )

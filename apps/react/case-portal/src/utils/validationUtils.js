@@ -19,6 +19,17 @@ export const validateFields = (data, requiredFields) => {
     productName: 'Particulars',
     discriptionDrpdwn: 'Description',
     monthly: 'Month',
+    functions: 'Function',
+    jobRole: 'Job Role',
+    name: 'Name',
+    age: 'Age',
+    teamSize: 'Team Size',
+    initiative: 'Initiative',
+    outcome: 'Outcome',
+    recommendation: 'Recommendation',
+    targetDate: 'Target Date',
+    responsible: 'Responsible',
+    reason: 'Reason',
   }
 
   const invalidRows = data.filter((row) => {
@@ -26,6 +37,7 @@ export const validateFields = (data, requiredFields) => {
     const hasMissingField = requiredFields.some((field) => {
       const value = row[field]
       if (
+        field === 'reason' ||
         field === 'remark' ||
         field === 'aopRemarks' ||
         field === 'remarks' ||
@@ -61,6 +73,7 @@ export const validateFields = (data, requiredFields) => {
           const value = row[field]
 
           if (
+            field === 'reason' ||
             field === 'remark' ||
             field === 'aopRemarks' ||
             field === 'remarks' ||

@@ -99,6 +99,7 @@ const SlowdownNorms = () => {
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
+  const IS_EDC_PLANT = lowerVertName === 'vcm' && plantName === 'edc'
   const saveChanges = React.useCallback(async () => {
     try {
       var data = Object.values(modifiedCells)
@@ -524,7 +525,8 @@ const SlowdownNorms = () => {
         lowerVertName == 'elastomer' ||
         lowerVertName == 'aromatics' ||
         lowerVertName == 'pta' ||
-        IS_PE_PP
+        IS_PE_PP ||
+        IS_EDC_PLANT
           ? false
           : true,
 

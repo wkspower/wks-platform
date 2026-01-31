@@ -103,7 +103,7 @@ const SlowdownActivities = () => {
     allAction: true,
     showTitleNameBusiness: true,
     titleName: 'Slowdown Activities',
-    showImport: true,
+    showImport: false,
     showExport: true,
     ExcelName: `Slowdown Activities - ${AOP_YEAR}`,
     showTitle: true,
@@ -111,7 +111,7 @@ const SlowdownActivities = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchSlowdownActivitiesData()
+      // fetchSlowdownActivitiesData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
