@@ -155,7 +155,6 @@ const workspace = {
     //       icon: icons.IconReport,
     //       breadcrumbs: true,
     //     },
-
     //     {
     //       id: 'fixed-consumption',
     //       title: i18n.t('menu.fixedConsumption'),
