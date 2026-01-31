@@ -388,7 +388,7 @@ const SenderReceiverMapping = () => {
           currentRemark={currentRemark}
           setCurrentRemark={setCurrentRemark}
           currentRowId={currentRowId}
-          setCurrentRowId={() => { }}
+          setCurrentRowId={() => {}}
         />
       </Stack>
     </Box>
