@@ -660,6 +660,7 @@ const ShutdownAndOperational = () => {
 
       const response = await InputApiService.saveOperationHours(
         keycloak,
+        PLANT_ID,
         AOP_YEAR,
         tempPayload,
       )
