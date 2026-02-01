@@ -891,17 +891,18 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
 	            .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
 	            
-	    // Fetch and prepare slowdown ranges
 	    List<ShutDownPlanDTO> listOfSite = slowdownPlanService.findSlowdownDetailsByPlantIdAndType(plantFKId, "Slowdown", year);
 	    List<LocalDateTime[]> slowdownTimeRanges = new ArrayList<>();
 	    if (listOfSite != null) {
 	        for (ShutDownPlanDTO slowdown : listOfSite) {
 	            if (slowdown.getMaintStartDateTime() != null && slowdown.getMaintEndDateTime() != null) {
 
-	                LocalDateTime slowdownStart = slowdown.getMaintStartDateTime()
-	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-	                LocalDateTime slowdownEnd = slowdown.getMaintEndDateTime()
-	                        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	            	LocalDateTime slowdownStart = slowdown.getMaintStartDateTime()
+	            	        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+	            	        .withSecond(0).withNano(0); // Truncate here
+	            	LocalDateTime slowdownEnd = slowdown.getMaintEndDateTime()
+	            	        .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+	            	        .withSecond(0).withNano(0); // Truncate here
 	                slowdownTimeRanges.add(new LocalDateTime[]{slowdownStart, slowdownEnd});
 	            }
 	        }
@@ -952,7 +953,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                if (mantStartStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt);
+	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt).withSecond(0).withNano(0);
 	                        
 	                        if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
 	                            dto.setSaveStatus("Failed");
@@ -978,7 +979,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                if (mantEndStr != null) {
 	                    try {
 	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
+	                        ldtEnd = LocalDateTime.parse(mantEndStr, fmt).withSecond(0).withNano(0);
 
 	                        Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 	                        dto.setMaintEndDateTime(endDate);

@@ -91,11 +91,18 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			withGrade=true;
 		}
 		try {
+			List<Object[]> resultList =null;
 			 if(vertical.getName().equalsIgnoreCase("CRACKER")) {
 				List<Object[]> obj=getOverallConsumptionData(plantId,year);
 				return getData(obj, plantId, year);
 			}
-			List<Object[]> resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId),gradeId);
+			 if(vertical.getName().equalsIgnoreCase("VCM")){
+				 String procedureName = vertical.getName()+"_"+site.getName()+"_"+"GetAOPConsumptionNorms";
+				 resultList= findByYearAndPlantId(year, UUID.fromString(plantId) ,  procedureName);
+			}else {
+				resultList = getAOPConsumptionNormDataFromView(year, UUID.fromString(plantId),gradeId);
+			}
+			 
 			List<AOPConsumptionNormDTO> aOPConsumptionNormDTOList = new ArrayList<>();
 
 			for (Object[] row : resultList) {
@@ -148,6 +155,9 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 					dto.setUOM(row[22] != null ? row[22].toString() : null);
 					dto.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
 					dto.setProductName(row[24] != null ? row[24].toString() : null);
+					if(vertical.getName().equalsIgnoreCase("VCM")) {
+						dto.setWtAverage(row[25] != null ? Double.parseDouble(row[25].toString()) : null);
+					}
 				}
 				
 				aOPConsumptionNormDTOList.add(dto);
@@ -163,6 +173,24 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 			return aopMessageVM;
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	
+	public List<Object[]> findByYearAndPlantId(String aopYear, UUID plantId, String procedureName) {
+		try {
+
+			String sql = "EXEC " + procedureName
+					+ " @PlantId = :plantId, @FinYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
 		} catch (Exception ex) {
 			throw new RuntimeException("Failed to fetch data", ex);

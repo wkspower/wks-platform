@@ -7,12 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-
-import com.wks.caseengine.repository.ScreenMappingRepository;
-import com.wks.caseengine.repository.SiteRepository;
-import com.wks.caseengine.repository.VerticalsRepository;
-import com.wks.caseengine.repository.PlantsRepository;
-import com.wks.caseengine.rest.entity.Plant;
 import com.wks.caseengine.repository.MCUMaxCapacityRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
@@ -137,6 +131,8 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 	        
 	        if (vertical.getName().equalsIgnoreCase("PTA")) {
 	            view = "vw" + vertical.getName() + "_" + site.getName() + "_AOPMCValues";
+	        }else if(vertical.getName().equalsIgnoreCase("CRACKER")) {
+	        	String procedureName=vertical.getName()+"_GetAOPMCValues";
 	        } else {
 	            view = "vwAOPMCValues";
 	        }

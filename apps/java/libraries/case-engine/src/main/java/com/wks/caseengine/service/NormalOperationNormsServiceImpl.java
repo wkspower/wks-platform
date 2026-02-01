@@ -123,7 +123,14 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 			withGrade=true;
 		}
 		try {
-			List<Object[]> obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId), gradeId,mode);
+			List<Object[]> obj=null;
+			if(vertical.getName().equalsIgnoreCase("VCM")){
+				 String procedureName = vertical.getName()+"_"+site.getName()+"_"+"GetNormalOperationNorms";
+				 obj= findByYearAndPlantId(year, UUID.fromString(plantId) ,  procedureName);
+			}else {
+				 obj = getNormalOperationNormsDataFromView(year, UUID.fromString(plantId), gradeId,mode);
+			}
+			
 			List<MCUNormsValueDTO> mCUNormsValueDTOList = new ArrayList<>();
 
 			for (Object[] row : obj) {
@@ -189,6 +196,9 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 					mCUNormsValueDTO.setUOM(row[26] != null ? row[26].toString() : null);
 					mCUNormsValueDTO.setIsEditable(row[27] != null ? Boolean.valueOf(row[27].toString()) : null);
 					mCUNormsValueDTO.setProductName(row[28] != null ? row[28].toString() : null);
+					if(vertical.getName().equalsIgnoreCase("VCM")) {
+						mCUNormsValueDTO.setWtAverage(row[29] != null ? Double.parseDouble(row[29].toString()) : null);
+					}
 				}
 				mCUNormsValueDTOList.add(mCUNormsValueDTO);
 			}
@@ -209,6 +219,23 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 		}
 	}
 
+	public List<Object[]> findByYearAndPlantId(String aopYear, UUID plantId, String procedureName) {
+		try {
+
+			String sql = "EXEC " + procedureName
+					+ " @PlantId = :plantId, @FinYear = :aopYear";
+
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("plantId", plantId);
+			query.setParameter("aopYear", aopYear);
+
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 	
 	@Override
 	public List<MCUNormsValueDTO> saveNormalOperationNormsData(List<MCUNormsValueDTO> mCUNormsValueDTOList,
