@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -19,11 +20,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.sql.Connection;
 import jakarta.persistence.Query;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -31,6 +36,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.dto.ShutdownConsumptionDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -331,7 +338,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 						sheet.setColumnHidden(17, true);
 					}
 				} else {
-					// no grade named "All Grade" found — do not aggregate everything accidentally.
+					// no grade named "All Grade" found â€” do not aggregate everything accidentally.
 					// Optionally: you could fall back to aggregated behavior here if desired.
 				}
 
@@ -729,8 +736,14 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		String year=null;
 		UUID plantId=null;
 		List<ShutdownNormsValue> shutdownNormsValueList = new ArrayList<>();
+		List<ShutdownNormsValueDTO> failedList = new ArrayList<>();
 		try {
 			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
+				if (shutdownNormsValueDTO.getSaveStatus() != null
+						&& shutdownNormsValueDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(shutdownNormsValueDTO);
+					continue;
+				}
 				year=shutdownNormsValueDTO.getFinancialYear();
 				plantId=UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
 				ShutdownNormsValue shutdownNormsValue = null;
@@ -815,7 +828,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 				aopCalculationRepository.save(aopCalculation);
 			}
 			Map<String,Object> map=new HashMap<>();
-			map.put("data", shutdownNormsValueList);
+			map.put("data", failedList);
 			// TODO Auto-generated method stub
 			return map;
 		} catch (Exception ex) {
@@ -1355,7 +1368,314 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 		return aopMessageVM;
 	}
 
+	public byte[] exportShutdownConsumption(String year, UUID plantFKId, boolean isAfterSave, List<ShutdownNormsValueDTO> dtoList,String gradeId) {
+		try {
+			AOPMessageVM aopMessageVM = getShutdownNormsData( year,  plantFKId.toString(), gradeId);
+					
+			List<Boolean> isEditable = new ArrayList<>();
 
+			if (!isAfterSave) {
+				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+				dtoList = (List<ShutdownNormsValueDTO>) responseMap.get("mcuNormsValueDTOList");
+			}
+
+			Workbook workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			
+			// Create styles for locking/unlocking cells
+			CellStyle lockedStyle = workbook.createCellStyle();
+			lockedStyle.setLocked(true);
+			lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+			CellStyle unlockedStyle = workbook.createCellStyle();
+			unlockedStyle.setLocked(false);
+			// Data rows
+			for (ShutdownNormsValueDTO dto : dtoList) {
+				//if (isAfterSave) {
+					List<Object> list = new ArrayList<>();
+					list.add(dto.getNormParameterTypeDisplayName());
+					list.add(dto.getProductName());
+					list.add(dto.getUOM());
+					list.add(dto.getApril());
+					list.add(dto.getMay());
+					list.add(dto.getJune());
+					list.add(dto.getJuly());
+					list.add(dto.getAugust());
+					list.add(dto.getSeptember());
+					list.add(dto.getOctober());
+					list.add(dto.getNovember());
+					list.add(dto.getDecember());
+					list.add(dto.getJanuary());
+					list.add(dto.getFebruary());
+					list.add(dto.getMarch());
+					list.add(dto.getRemarks());
+					list.add(dto.getId());
+					list.add(dto.getMaterialFkId());
+					isEditable.add(dto.getIsEditable());
+					// list.add(dto.getMaterialFkId());
+					 //list.add(dto.getIsEditable());
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				//}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			innerHeaders.add("Type");
+			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
+			List<String> monthsList = getAcademicYearMonths(year);
+			innerHeaders.addAll(monthsList);
+			innerHeaders.add("Remarks");
+			innerHeaders.add("Id");
+			innerHeaders.add("Material Id");
+			// innerHeaders.add("NormParamterId");
+			 //innerHeaders.add("IsEditable");
+			if (isAfterSave) {
+				innerHeaders.add("Status");
+				innerHeaders.add("Error Description");
+			}
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				boolean isRowEditable=true;
+				if(isEditable.get(currentRow-1)!=null) {
+					isRowEditable = isEditable.get(currentRow-1);
+				}
+				 
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+					if (isRowEditable) {
+                        cell.setCellStyle(unlockedStyle);
+                    } else {
+                        cell.setCellStyle(lockedStyle);
+                    }
+
+				}
+			}
+			sheet.setColumnHidden(16, true);
+			sheet.setColumnHidden(17, true);
+			//sheet.setColumnHidden(18, true);
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+
+	public static List<String> getAcademicYearMonths(String year) {
+		List<String> months = new ArrayList<>();
+		int startYear = Integer.parseInt(year.substring(0, 4));
+		int nextYear = startYear + 1;
+
+		// Apr to Dec of startYear
+		for (int month = 4; month <= 12; month++) {
+			String label = formatMonthYear(month, startYear);
+			months.add(label);
+		}
+
+		// Jan to Mar of nextYear
+		for (int month = 1; month <= 3; month++) {
+			String label = formatMonthYear(month, nextYear);
+			months.add(label);
+		}
+
+		return months;
+	}
+	private static String formatMonthYear(int month, int year) {
+		LocalDate date = LocalDate.of(year, month, 1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+		return date.format(formatter);
+	}
+	
+	@Override
+	public AOPMessageVM importShutdownConsumption(String year, UUID plantFKId, String gradeId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			Plants plant = plantsRepository.findById(plantFKId).get();
+			List<ShutdownNormsValueDTO> data=null;
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+				data = readShutdownConsumptions(file.getInputStream(), plantFKId, year);
+			
+			 
+				Map<String,Object> map = saveShutdownNormsData(data);
+				List<ShutdownNormsValueDTO> retrievedList = (List<ShutdownNormsValueDTO>) map.get("data");
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (retrievedList != null && retrievedList.size() > 0) {
+				byte[] fileByteArray =null;
+				
+					 fileByteArray = exportShutdownConsumption(year, plantFKId, true, retrievedList,gradeId);
+				
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+
+	public List<ShutdownNormsValueDTO> readShutdownConsumptions(InputStream inputStream, UUID plantFKId, String year) {
+	    List<ShutdownNormsValueDTO> configList = new ArrayList<>();
+	    Plants plant = plantsRepository.findById(plantFKId).get();
+	    Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	    
+	    Map<String, String> gradeMap = getGradeNameIdMap(year, plantFKId);
+	    Set<Integer> activeMonths = new HashSet<>();
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
+	            Sheet sheet = workbook.getSheetAt(i);
+	            if (sheet == null) continue;
+	            
+	            String sheetName = sheet.getSheetName();
+	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
+	            
+	            List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown", year, gradeId);
+	            List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown", year, gradeId);
+	            
+	            if (shutdown != null) activeMonths.addAll(shutdown);
+	            if (slowdown != null) activeMonths.addAll(slowdown);
+	        }
+
+	        Sheet sheet = workbook.getSheetAt(0);
+	        if (sheet != null) {
+	            String sheetName = sheet.getSheetName();
+	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
+	            Iterator<Row> rowIterator = sheet.iterator();
+
+	            if (rowIterator.hasNext()) rowIterator.next(); // Skip header
+
+	            while (rowIterator.hasNext()) {
+	                Row row = rowIterator.next();
+	                if (row.getPhysicalNumberOfCells() == 0) continue;
+
+	                ShutdownNormsValueDTO dto = new ShutdownNormsValueDTO();
+	                try {
+	                    dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+	                    dto.setProductName(getStringCellValue(row.getCell(1), dto));
+	                    dto.setUOM(getStringCellValue(row.getCell(2), dto));
+	                    dto.setFinancialYear(year);
+
+	                    if (activeMonths.contains(4)) dto.setApril(getNumericCellValue(row.getCell(3), dto));
+	                    if (activeMonths.contains(5)) dto.setMay(getNumericCellValue(row.getCell(4), dto));
+	                    if (activeMonths.contains(6)) dto.setJune(getNumericCellValue(row.getCell(5), dto));
+	                    if (activeMonths.contains(7)) dto.setJuly(getNumericCellValue(row.getCell(6), dto));
+	                    if (activeMonths.contains(8)) dto.setAugust(getNumericCellValue(row.getCell(7), dto));
+	                    if (activeMonths.contains(9)) dto.setSeptember(getNumericCellValue(row.getCell(8), dto));
+	                    if (activeMonths.contains(10)) dto.setOctober(getNumericCellValue(row.getCell(9), dto));
+	                    if (activeMonths.contains(11)) dto.setNovember(getNumericCellValue(row.getCell(10), dto));
+	                    if (activeMonths.contains(12)) dto.setDecember(getNumericCellValue(row.getCell(11), dto));
+	                    if (activeMonths.contains(1)) dto.setJanuary(getNumericCellValue(row.getCell(12), dto));
+	                    if (activeMonths.contains(2)) dto.setFebruary(getNumericCellValue(row.getCell(13), dto));
+	                    if (activeMonths.contains(3)) dto.setMarch(getNumericCellValue(row.getCell(14), dto));
+
+	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
+	                    dto.setId(getStringCellValue(row.getCell(16), dto));
+	                    dto.setPlantFkId(plantFKId.toString());
+	                    dto.setSiteFkId(site.getId().toString());
+	                    dto.setVerticalFkId(vertical.getId().toString());
+	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
+	                    dto.setGradeFkId(gradeId);
+
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                    dto.setErrDescription(e.getMessage());
+	                    dto.setSaveStatus("Failed");
+	                }
+	                configList.add(dto);
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return configList;
+	}
+	
+	public static Boolean getBooleanCellValue(Cell cell, ShutdownNormsValueDTO dto) {
+		if (cell == null)
+			return null;
+
+		CellType type = cell.getCellType();
+		if (type == CellType.FORMULA) {
+			type = cell.getCachedFormulaResultType();
+		}
+
+		switch (type) {
+			case BOOLEAN:
+				return cell.getBooleanCellValue();
+			case STRING:
+				String text = cell.getStringCellValue().trim().toLowerCase();
+				if ("true".equals(text))
+					return true;
+				if ("false".equals(text))
+					return false;
+				return null;
+			case NUMERIC:
+				double num = cell.getNumericCellValue();
+				if (num == 1.0)
+					return true;
+				if (num == 0.0)
+					return false;
+				return null;
+			case BLANK:
+			case _NONE:
+			default:
+				return null;
+		}
+	}
 
 
 }
