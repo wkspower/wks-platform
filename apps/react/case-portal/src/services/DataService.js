@@ -74,7 +74,7 @@ export const DataService = {
   importSpyroOutputExcelYield,
   importSpyroOutputExcelYieldNONNMD,
   exportSpyroOutputExcel,
-  exportSpyroOutputExcelNONNMD,
+  exportSpyroOutputExcelYieldNONNMD,
   exportSpyroOutputExcelYield,
 
   importSpyroInputExcel,
@@ -1776,14 +1776,14 @@ async function exportSpyroOutputExcel(
   }
 }
 
-async function exportSpyroOutputExcelNONNMD(
+async function exportSpyroOutputExcelYield(
   keycloak,
   mode,
   PLANT_ID,
   AOP_YEAR,
-  ExcelName,
+  EXCEL_NAME,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel-dmd?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
+  const url = `${Config.CaseEngineUrl}/task/yield-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -1805,7 +1805,7 @@ async function exportSpyroOutputExcelNONNMD(
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `${ExcelName}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -1816,7 +1816,7 @@ async function exportSpyroOutputExcelNONNMD(
   }
 }
 
-async function exportSpyroOutputExcelYield(
+async function exportSpyroOutputExcelYieldNONNMD(
   keycloak,
   mode,
   PLANT_ID,
