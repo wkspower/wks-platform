@@ -42,6 +42,7 @@ import '../../kendo-data-grid.css'
 import BudgetConstrainsCellEditor from './Utilities-Kendo/BudgetConstrainsCellEditor'
 import DateOnlyPicker from './Utilities-Kendo/DatePicker'
 import DateTimePickerEditor from './Utilities-Kendo/DatePickeronSelectedYr'
+
 import { descLimit } from './Utilities-Kendo/descLimit'
 import {
   recalcDuration,
@@ -61,6 +62,7 @@ import { NoSpinnerNumericEditorWithUOMValidation } from './Utilities-Kendo/numbe
 import { useSession } from 'SessionStoreContext'
 import { getRoleName } from 'services/role-service'
 import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
+import DateTimePickerEditor24HourFormat from './Utilities-Kendo/DatePickeronSelectedYr24HourFomat'
 
 export const dateFields = [
   'maintStartDateTime',
@@ -1804,51 +1806,29 @@ const KendoDataTables = ({
                       field={col.field}
                       title={col.title || col.headerName}
                       cells={{
-                        data: (props) => {
-                          const date = props.dataItem[col.field]
-                          // For VCM: format as dd-MM-yyyy HH:mm (24-hour)
-                          const formatTo24Hour = (date) => {
-                            if (!date) return ''
-                            const d = new Date(date)
-                            if (isNaN(d)) return ''
-                            const day = d.getDate().toString().padStart(2, '0')
-                            const month = (d.getMonth() + 1)
-                              .toString()
-                              .padStart(2, '0')
-                            const year = d.getFullYear()
-                            const hours = d
-                              .getHours()
-                              .toString()
-                              .padStart(2, '0')
-                            const mins = d
-                              .getMinutes()
-                              .toString()
-                              .padStart(2, '0')
-                            return `${day}-${month}-${year} ${hours}:${mins}`
-                          }
-                          const formattedDate = formatTo24Hour(date)
-
-                          return (
-                            <td {...props.tdProps} title={formattedDate}>
-                              {formattedDate}
-                            </td>
-                          )
-                        },
                         edit: {
-                          date: (props) => (
-                            <DateTimePickerEditor
-                              {...props}
-                              format='dd-MM-yyyy HH:mm'
-                            />
-                          ),
+                          date: DateTimePickerEditor24HourFormat,
                         },
+                        data: (props) => (
+                          <SimpleHighlightCell
+                            {...props}
+                            customModifiedCells={customModifiedCells}
+                            highlight={permissions?.highlightDate || false}
+                          />
+                        ),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
+                      format={'{0:dd-MM-yyyy HH:mm}'}
                       editor='date'
                       hidden={col.hidden}
                       filter='date'
                       columnMenu={ColumnMenuCheckboxFilterDate}
                       width={col?.widthT}
+                      headerClassName={
+                        isDateFilterActive.includes(col.field)
+                          ? 'active-column'
+                          : ''
+                      }
                     />
                   )
                 }
