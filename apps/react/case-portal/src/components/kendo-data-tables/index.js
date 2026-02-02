@@ -231,6 +231,7 @@ const KendoDataTables = ({
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
+  const IS_VCM_VERTICAL = ['vcm'].includes(lowerVertName)
 
   const initialGroup = groupBy
     ? [
@@ -1793,7 +1794,7 @@ const KendoDataTables = ({
                 }
                 const isActive = isColumnActive(col?.field, filter, sort)
                 if (
-                  isVCM &&
+                  IS_VCM_VERTICAL &&
                   (col.field === 'maintStartDateTime' ||
                     col.field === 'maintEndDateTime')
                 ) {
@@ -1871,30 +1872,38 @@ const KendoDataTables = ({
                             ? DateOnlyPicker
                             : DateTimePickerEditor,
                         },
-                        data: (props) => {
-                          const date = props.dataItem[col.field]
-                          const formattedDate = date
-                            ? formatToDDMMYYYY_HHMM(date)
-                            : ''
-
-                          return (
-                            <SimpleHighlightCell
-                              {...props}
-                              customModifiedCells={customModifiedCells}
-                              highlight={permissions?.highlightDate || false}
-                            >
-                              {formattedDate}
-                            </SimpleHighlightCell>
-                          )
-                        },
+                        data: (props) => (
+                          <SimpleHighlightCell
+                            {...props}
+                            customModifiedCells={customModifiedCells}
+                            highlight={permissions?.highlightDate || false} // Add this permission
+                          />
+                        ),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
+                      format={
+                        [
+                          'fromDate',
+                          'toDate',
+                          'periodFrom',
+                          'periodTo',
+                          'toDateReport',
+                          'fromDateReport',
+                        ].includes(col.field)
+                          ? '{0:dd-MM-yyyy}'
+                          : '{0:dd-MM-yyyy hh:mm a}'
+                      }
                       editor='date'
                       hidden={col.hidden}
                       // columnMenu={DateColumnMenu}
                       filter='date'
                       columnMenu={ColumnMenuCheckboxFilterDate}
                       width={col?.widthT}
+                      headerClassName={
+                        isDateFilterActive.includes(col.field)
+                          ? 'active-column'
+                          : ''
+                      }
                     />
                   )
                 }
