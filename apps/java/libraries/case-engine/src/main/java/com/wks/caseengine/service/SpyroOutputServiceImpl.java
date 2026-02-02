@@ -516,9 +516,9 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    dto.setFourFC2C3(v[12]);
 	    dto.setFourFPropane(v[13]);
 	    dto.setFourFEthane(v[14]);
-	    dto.setFourFDC2C3(v[15]);
-	    dto.setFourFDPropane(v[16]);
-	    dto.setFourFDEthane(v[17]);
+	    dto.setSevenFC2C3(v[15]);
+	    dto.setSevenFPropane(v[16]);
+	    dto.setSevenFEthane(v[17]);
 	}	
 	public byte[] exportYieldReport(String year, String plantId, boolean isAfterSave, List<YieldDTO> dtoList) {
 	    try {
@@ -1111,9 +1111,9 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        addToList(yieldParticularDTOs, "4F_" + part + "_C2C3", dto.getFourFC2C3());
 	        addToList(yieldParticularDTOs, "4F_" + part + "_Propane", dto.getFourFPropane());
 	        addToList(yieldParticularDTOs, "4F_" + part + "_Ethane", dto.getFourFEthane());
-	        addToList(yieldParticularDTOs, "4FD_" + part + "_C2C3", dto.getFourFDC2C3());
-	        addToList(yieldParticularDTOs, "4FD_" + part + "_Propane", dto.getFourFDPropane());
-	        addToList(yieldParticularDTOs, "4FD_" + part + "_Ethane", dto.getFourFDEthane());
+	        addToList(yieldParticularDTOs, "7F_" + part + "_C2C3", dto.getFourFC2C3());
+	        addToList(yieldParticularDTOs, "7F_" + part + "_Propane", dto.getFourFPropane());
+	        addToList(yieldParticularDTOs, "7F_" + part + "_Ethane", dto.getFourFEthane());
 	    }
 	    
 	    return yieldParticularDTOs;

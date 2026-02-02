@@ -48,7 +48,11 @@ public class YieldDMDDTO {
     private Double fourFDC2C3;
     private Double fourFDPropane;
     private Double fourFDEthane;
-
+    
+    
+    private Double sevenFC2C3;
+    private Double sevenFPropane;
+    private Double sevenFEthane;
   
 	
 	
