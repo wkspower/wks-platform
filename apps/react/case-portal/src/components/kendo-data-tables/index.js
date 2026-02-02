@@ -355,6 +355,31 @@ const KendoDataTables = ({
         prev.map((r) => {
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
+          if (
+            screenType === 'slowdown' &&
+            lowerVertName === 'pta' &&
+            lowerSiteName === 'dmd'
+          ) {
+            updated.rate = 154
+          }
+
+          if (
+            screenType === 'slowdown' &&
+            lowerVertName === 'vcm' &&
+            field === 'discription'
+          ) {
+            const desc = (value || '').trim()
+            if (
+              desc === 'Furnace Decoking H-210' ||
+              desc === 'Furnace Decoking H-220'
+            ) {
+              updated.rate = 27
+            } else if (desc === 'Furnace Decoking H-1220') {
+              updated.rate = 26.458
+            } else if (desc === 'Furnace Decoking') {
+              updated.rate = ''
+            }
+          }
 
           // percentChange logic: adjust months if enabled and percentChange field changed
           if (field === 'percentChange' && permissions?.percentChangeLogic) {
@@ -395,15 +420,26 @@ const KendoDataTables = ({
           }
           if (
             lowerVertName === 'vcm' &&
-            (r.discription || '').trim() === 'Furnace Decoking'
+            [
+              'Furnace Decoking',
+              'Furnace Decoking H-210',
+              'Furnace Decoking H-220',
+              'Furnace Decoking H-1220',
+            ].includes((updated.discription || '').trim())
           ) {
             if (field === 'maintStartDateTime' && value) {
               const start = new Date(value)
               if (!isNaN(start)) {
                 const end = new Date(start)
                 end.setHours(end.getHours() + 192)
-                updated.maintEndDateTime = end
-                updated.durationInHrs = '192.00'
+                // Only update if different to avoid triggering another change
+                if (
+                  !updated.maintEndDateTime ||
+                  new Date(updated.maintEndDateTime).getTime() !== end.getTime()
+                ) {
+                  updated.maintEndDateTime = end
+                  updated.durationInHrs = '192.00'
+                }
               }
             }
           }

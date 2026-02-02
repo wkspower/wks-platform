@@ -62,6 +62,7 @@ const SlowDown = ({ permissions }) => {
   const IS_OLD_YEAR = oldYear?.oldYear
   const [errorRows, setErrorRows] = useState(new Set())
   const lowerVertName = vertName?.toLowerCase()
+  const lowerSiteName = SITE_NAME_LOWER
   const [rowModesModel, setRowModesModel] = useState({})
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCells2, setModifiedCells2] = React.useState({})
@@ -556,9 +557,17 @@ const SlowDown = ({ permissions }) => {
         }
       }
       if (lowerVertName === 'vcm') {
+        const furnaceDecokingDescriptions = [
+          'Furnace Decoking',
+          'Furnace Decoking H-210',
+          'Furnace Decoking H-220',
+          'Furnace Decoking H-1220',
+        ]
         for (const row of rows) {
           if (
-            (row.discription || '').trim() === 'Furnace Decoking' &&
+            furnaceDecokingDescriptions.includes(
+              (row.discription || '').trim(),
+            ) &&
             row.maintStartDateTime &&
             row.maintEndDateTime
           ) {
@@ -570,7 +579,7 @@ const SlowDown = ({ permissions }) => {
               row.isError = true
               setSnackbarOpen(true)
               setSnackbarData({
-                message: `For "Furnace Decoking", the duration between Start Date and End Date must be exactly 192 hours (8 days).`,
+                message: `For "${row.discription}", the duration between Start Date and End Date must be exactly 192 hours (8 days).`,
                 severity: 'error',
               })
               return
@@ -579,6 +588,32 @@ const SlowDown = ({ permissions }) => {
         }
       }
 
+      if (lowerVertName === 'vcm') {
+        const furnaceDecokingRates = {
+          'Furnace Decoking H-210': 27,
+          'Furnace Decoking H-220': 27,
+          'Furnace Decoking H-1220': 26.458,
+        }
+        for (const record of data) {
+          const desc = (record.discription || '').trim()
+          if (Object.keys(furnaceDecokingRates).includes(desc)) {
+            // Validate rate for H-210, H-220, H-1220
+            if (
+              desc !== 'Furnace Decoking' &&
+              Number(record.rate) !== Number(furnaceDecokingRates[desc])
+            ) {
+              record.isError = true
+              setSnackbarOpen(true)
+              setSnackbarData({
+                message: `For "${desc}", the rate must be ${furnaceDecokingRates[desc]} TPH.`,
+                severity: 'error',
+              })
+              return
+            }
+          }
+        }
+      }
+      //----------------------------------
       // MEG specific checks
       if (
         lowerVertName === 'meg' ||
