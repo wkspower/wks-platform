@@ -273,7 +273,7 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
 		}
 		
-		tcsWorkFlowService.CTSApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
+		tcsWorkFlowService.ctsApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("CTS approval completed successfully");
 	}
 
@@ -291,6 +291,36 @@ public class TCSOutPutWorkFlowController {
 
 		tcsWorkFlowService.ebsApproveReject(plantName, siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("EBS approval completed successfully");
+
+	}
+
+	@PostMapping(value = "cts-approve-reject/{siteId}/{approvalStatus}/{finacialYear}")
+	public ResponseEntity<String> ebsApproveReject(@PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
+		if(siteId == null || siteId.isEmpty()) {  
+			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete EBS approval");
+		}
+
+		tcsWorkFlowService.ctsApproveReject(siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
+		return ResponseEntity.ok("EBS approval completed successfully");
+
+	}
+
+	@PostMapping(value = "cluster-head-approve-reject/{siteId}/{approvalStatus}/{finacialYear}")
+	public ResponseEntity<String> clusterHeadApproveReject(@PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
+		if(siteId == null || siteId.isEmpty()) {  
+			throw new RestResourceNotFoundException("Site ID is required to complete CTS approval");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
+		}
+
+		tcsWorkFlowService.clusterHeadApproveReject(siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
+		return ResponseEntity.ok("CTS approval completed successfully");
 
 	}
 
@@ -422,7 +452,7 @@ public class TCSOutPutWorkFlowController {
 	
 
 	@GetMapping(value = "plant-submission-audit-trail-by-tab/{plantId}/{siteId}/{verticalId}")
-	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> plantSubmissionAuditTrailByTab(@PathVariable final String plantId, @PathVariable final String siteId, @PathVariable final String verticalId, @PathVariable final String tab) {
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> plantSubmissionAuditTrailByTab(@PathVariable final String plantId, @PathVariable final String siteId, @PathVariable final String verticalId) {
 		if(plantId == null || plantId.isEmpty()) {
 			throw new RestResourceNotFoundException("Plant ID is required to create plant submission audit trail by tab");
 		}

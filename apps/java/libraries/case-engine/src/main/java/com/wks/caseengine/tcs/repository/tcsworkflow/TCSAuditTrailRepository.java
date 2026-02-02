@@ -101,7 +101,7 @@ public interface TCSAuditTrailRepository extends JpaRepository<DummyEntity, Long
 
     @Query(value = """
     SELECT TOP 1 
-           Plant_Id, PlantName, Site_Id, Vertical_Id,
+        Id, Plant_Id, PlantName, Site_Id, Vertical_Id,
            SubmittedBy, SubmissionDate, SubmissionRemark,
            VerifiedDate, VerifiedBy, VerifiedRemark,
            Status, Type
@@ -122,7 +122,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
 
         @Query(value = """
             SELECT TOP 1 
-                   Site_Id, Vertical_Id,
+                  Id, Site_Id, Vertical_Id,
                    SubmittedBy, SubmissionDate, SubmissionRemark,
                    VerifiedDate, VerifiedBy, VerifiedRemark,
                    Status, Type
