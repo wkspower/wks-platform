@@ -834,11 +834,17 @@ const ProductionvolumeData = ({ permissions }) => {
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       titleName: percentageTitle,
 
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
       titleAndInformation:
-        'Maximum Ethylene Production achieved in the last 05 years historical data for 05 consecutive days in different furnace mode of operation.',
+        VERTICAL_NAME == 'cracker'
+          ? 'Maximum Ethylene Production achieved in the last 05 years historical data for 05 consecutive days in different furnace mode of operation.'
+          : VERTICAL_NAME == 'vcm'
+            ? ''
+            : '',
 
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
 
       downloadExcelBtnFromUI: IS_PE_PP ? false : true,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Max Achieved Capacity`,
@@ -865,11 +871,17 @@ const ProductionvolumeData = ({ permissions }) => {
       uploadExcelBtn: IS_PE_PP ? true : false,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Design Capacity`,
 
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
       titleAndInformation:
-        'Design plant capacity for different furnace mode of operation as per licensor provided data.',
+        VERTICAL_NAME == 'cracker'
+          ? 'Design plant capacity for different furnace mode of operation as per licensor provided data.'
+          : VERTICAL_NAME == 'vcm'
+            ? ''
+            : '',
 
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
 
       titleName:
         VERTICAL_NAME === 'cracker'
@@ -902,18 +914,24 @@ const ProductionvolumeData = ({ permissions }) => {
       downloadExcelBtn: IS_PE_PP ? false : true,
       uploadExcelBtn: IS_PE_PP ? false : true,
 
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
 
       //TEXT NOTE CHANGED TO 01 YEARS
       titleAndInformation:
-        'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.',
+        VERTICAL_NAME == 'cracker'
+          ? 'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.'
+          : VERTICAL_NAME == 'vcm'
+            ? ''
+            : '',
 
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Proposed Operating Capacity (Ethylene)'
-          : IS_VCM_DMD_VCM
-            ? 'Steady state Operating Capacity'
+          : IS_VCM
+            ? 'Steady State Operating Capacity'
             : 'Proposed Operating Capacity',
     },
     isOldYear,
@@ -922,9 +940,16 @@ const ProductionvolumeData = ({ permissions }) => {
   const adjustedPermissionsLast = getAdjustedPermissions(
     {
       allAction: true,
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
-      titleAndInformation: 'Percentage Summary (Ethylene)',
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
+      titleAndInformation:
+        VERTICAL_NAME == 'cracker'
+          ? 'Percentage Summary (Ethylene)'
+          : VERTICAL_NAME == 'vcm'
+            ? ''
+            : '',
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Percentage Summary (Ethylene)'
