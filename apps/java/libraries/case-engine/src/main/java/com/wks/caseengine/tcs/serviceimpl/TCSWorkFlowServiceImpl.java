@@ -900,12 +900,35 @@ tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailD
         .build()).toList();
     }
 
+    @Override
+    public List<PlantSubmissionAuditTrailDTO> getEbsSubmissionAuditTrailByVerfiedDate(String siteId, String verticalId, String type) {
+
+        List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrailByVerfiedDate(UUID.fromString(siteId), UUID.fromString(verticalId), type);
+
+        return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
+        .plantName(auditTrail.getPlantName())
+        .siteId(UUID.fromString(auditTrail.getSite_Id()))
+        .verticalId(UUID.fromString(auditTrail.getVertical_Id()))
+        .build()).toList();
+    }
+
+    
+
 
 
 
     @Override
-    public PlantSubmissionAuditTrailDTO getLatestEBSSubmissionAuditTrail(String siteId, String verticalId) {
-        return getLatestPlantWiseSubmissionAuditTrail(siteId, verticalId, "EBS");
+    public PlantSubmissionAuditTrailDTO getLatestEBSSubmissionAuditTrail(String siteId, String verticalId, String type) {
+
+        PlantSubmissionAuditTrailProjection auditTrail = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), type);
+        return PlantSubmissionAuditTrailDTO.builder()
+        .plantName(auditTrail.getPlantName())
+        .siteId(UUID.fromString(auditTrail.getSite_Id()))
+        .verticalId(UUID.fromString(auditTrail.getVertical_Id()))
+        .submittedBy(auditTrail.getSubmittedBy())
+        .submissionDateTime(auditTrail.getSubmissionDate())
+        .submissionRemark(auditTrail.getSubmissionRemark())
+        .build();
     }
 
     @Override
