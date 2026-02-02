@@ -234,10 +234,10 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
 	        for (Object[] row : obj) {
 	            AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
-	            dto.setId(row[0] != null ? row[0].toString() : null);
-	            dto.setSiteFKId(row[1] != null ? row[1].toString() : null);
-	            dto.setPlantFKId(row[2] != null ? row[2].toString() : null);
-	            dto.setMaterialFKId(row[3] != null ? row[3].toString() : null);
+	            dto.setId(row[0] != null ? row[0].toString() : "");
+	            dto.setSiteFKId(row[1] != null ? row[1].toString() : "");
+	            dto.setPlantFKId(row[2] != null ? row[2].toString() : "");
+	            dto.setMaterialFKId(row[3] != null ? row[3].toString() : "");
 	            double[] months = new double[12];
 	            for (int i = 0; i < 12; i++) {
 	                months[i] = (row[4 + i] != null) ? Double.parseDouble(row[4 + i].toString()) : 0.0;
@@ -344,9 +344,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
             for (Object[] row : obj) {
                 AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
-                dto.setId(row[0] != null ? row[0].toString() : null);
-                dto.setMaterialFKId(row[1] != null ? row[1].toString() : null);
-                dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
+                dto.setId(row[0] != null ? row[0].toString() : "");
+                dto.setMaterialFKId(row[1] != null ? row[1].toString() : "");
+                dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : "");
                 dto.setApril(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
                 dto.setMay(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
                 dto.setJune(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
@@ -416,9 +416,9 @@ public class AOPMCCalculatedDataServiceImpl implements AOPMCCalculatedDataServic
 
             for (Object[] row : obj) {
                 AOPMCCalculatedDataDTO dto = new AOPMCCalculatedDataDTO();
-                dto.setId(row[0] != null ? row[0].toString() : null);
-                dto.setMaterialFKId(row[1] != null ? row[1].toString() : null);
-                dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : null);
+                dto.setId(row[0] != null ? row[0].toString() : "");
+                dto.setMaterialFKId(row[1] != null ? row[1].toString() : "");
+                dto.setMaterialDisplayName(row[2] != null ? row[2].toString() : "");
                 dto.setApril(row[3] != null ? Double.parseDouble(row[3].toString()) : 0.0);
                 dto.setMay(row[4] != null ? Double.parseDouble(row[4].toString()) : 0.0);
                 dto.setJune(row[5] != null ? Double.parseDouble(row[5].toString()) : 0.0);
