@@ -6,6 +6,7 @@ public interface PlantSubmissionAuditTrailProjection {
     
     //Plant_Id, PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate,
   //  SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Tab, Status, Type
+  String getId();
     String getPlant_Id();
     String getPlantName();
     String getSite_Id();

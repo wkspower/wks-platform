@@ -16,12 +16,20 @@ public interface TCSWorkFlowService {
 
     void CTSApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
-    List<PlantSubmissionAuditTrailDTO> getSubmissionAuditTrail(String plantName, String siteId, String verticalId, String type);
+    List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrail(String plantName, String siteId, String verticalId, String type);
 
-    List<PlantSubmissionAuditTrailDTO> getEBSSubmissionAuditTrail(String plantName, String siteId, String verticalId, String type);
+    List<PlantSubmissionAuditTrailDTO> getEBSSubmissionAuditTrail(String siteId, String verticalId, String type);
 
-    List<PlantSubmissionAuditTrailDTO> getLatestPlantSubmissionAuditTrail(String siteId, String verticalId, String type);
+    List<PlantSubmissionAuditTrailDTO> getLatestPlantWiseSubmissionAuditTrail(String siteId, String verticalId, String type);
 
     List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrailByVerfiedDate(String plantId, String siteId, String verticalId, String type);
+
+    List<PlantSubmissionAuditTrailDTO> getEbsSubmissionAuditTrailByVerfiedDate(String siteId, String verticalId, String type);
+
+    PlantSubmissionAuditTrailDTO getLatestEBSSubmissionAuditTrail(String siteId, String verticalId, String type);
+
+    void CtsApproveReject(String siteId, boolean approvalStatus, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
+
+    void clusterHeadApproveReject(String siteId, boolean approvalStatus, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
 }
