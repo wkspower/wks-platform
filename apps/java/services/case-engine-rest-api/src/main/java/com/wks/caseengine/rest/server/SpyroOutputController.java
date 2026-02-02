@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import com.wks.caseengine.dto.SpyroOutputDTO;
+import com.wks.caseengine.dto.YieldDMDDTO;
 import com.wks.caseengine.dto.YieldDTO;
 import com.wks.caseengine.message.vm.AOPMessageVM;
 
@@ -47,6 +48,11 @@ public class SpyroOutputController {
 		return	spyroOutputService.getSpyroOutputYieldData(year, plantId);
 	}
 	
+	@GetMapping(value="/spyro-output/yield-dmd")
+	public AOPMessageVM getSpyroOutputYieldDMD(@RequestParam String year,@RequestParam String plantId){
+		return	spyroOutputService.getSpyroOutputYieldDMD(year, plantId);
+	}
+	
 	@GetMapping(value = "/yield-export")
 	public ResponseEntity<byte[]> exportYieldReport(
 	         @RequestParam("plantId") String plantId,
@@ -69,7 +75,30 @@ public class SpyroOutputController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
-	
+
+	@GetMapping(value = "/yield-export-dmd")
+	public ResponseEntity<byte[]> exportYieldDMD(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year
+	        ) {
+	    try {
+			
+	        byte[] excelBytes = spyroOutputService.exportYieldDMD(year,plantId,false,null); //excelService.generateFlexibleExcel(data, plantId, year);//productionVolumeDataReportExportService.getReportForPlantProductionPlanData(plantId, year, reportType);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("Yield_Report.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 	@PostMapping(value="/spyro-output/yield")
 	public AOPMessageVM updateSpyroOutputYieldData(
 	    @RequestParam String plantId,
@@ -78,6 +107,16 @@ public class SpyroOutputController {
 	) {
 	    
 	    return spyroOutputService.updateSpyroOutputYieldData(plantId, year, payload);
+	}
+	
+	@PostMapping(value="/spyro-output/yield-dmd")
+	public AOPMessageVM updateSpyroOutputYieldDMD(
+	    @RequestParam String plantId,
+	    @RequestParam String year,
+	    @RequestBody List<YieldDMDDTO> payload
+	) {
+	    
+	    return spyroOutputService.updateSpyroOutputYieldDMD(plantId, year, payload);
 	}
 	
 	@GetMapping(value = "/spyro-output-export-excel")
@@ -123,4 +162,3 @@ public class SpyroOutputController {
 
 
 }
-
