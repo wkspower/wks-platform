@@ -16,6 +16,7 @@ import org.camunda.community.rest.client.dto.TaskDto;
 import org.camunda.community.rest.client.dto.VariableValueDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -69,6 +70,9 @@ public class TCSWorkFlowServiceImpl implements TCSWorkFlowService {
 
     @Autowired
 	private VariablesMapper<Map<String, VariableValueDto>> c7VariablesMapper;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
 
     @Override
@@ -174,6 +178,20 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
     @Override
         public void completePlantSubmissionTask(String plantName, String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {
         
+            if(plantName == null || plantName.isEmpty()) {  
+
+                throw new RuntimeException("Plant name is required");
+            }
+
+            if(siteId == null || siteId.isEmpty()) {  
+                
+                throw new RuntimeException("Site id is required");
+            }
+        
+            if(finacialYear == null || finacialYear.isEmpty()) {   
+                
+                throw new RuntimeException("Financial year is required");
+            }
         String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -355,6 +373,11 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
       plantSubmissionAuditTrailDTO.setType("EBS");
       plantSubmissionAuditTrailDTO.setStatus("PENDING");
 
+      if(plantSubmissionAuditTrailDTO.getSiteId() == null ||  plantSubmissionAuditTrailDTO.getVerticalId() == null) {  
+        
+        throw new RuntimeException(" missing Site id and vertical id in the request body");
+      }
+
       // plantName is null for ebs submission
       tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getPlantId(), plantSubmissionAuditTrailDTO.getPlantName(), plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), plantSubmissionAuditTrailDTO.getSubmittedBy(), plantSubmissionAuditTrailDTO.getSubmissionDateTime(), plantSubmissionAuditTrailDTO.getSubmissionRemark(), plantSubmissionAuditTrailDTO.getVerifiedDateTime(), plantSubmissionAuditTrailDTO.getVerifiedBy(), plantSubmissionAuditTrailDTO.getVerifiedRemark(), plantSubmissionAuditTrailDTO.getStatus(), plantSubmissionAuditTrailDTO.getType());
 
@@ -498,7 +521,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
     }
     @Override
-    public void CTSApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
+    public void ctsApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
 
         String businessKey = siteId + "-" + finacialYear;
 
@@ -595,7 +618,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 }
 
     @Override
-    public void CtsApproveReject(String siteId, boolean approvalStatus, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {  
+    public void ctsApproveReject(String siteId, boolean approvalStatus, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {  
 
         String businessKey = siteId + "-" + finacialYear;
 
@@ -665,6 +688,23 @@ tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailD
   }
   tcsAuditTrailRepository.updateSubmissionStatusById(UUID.fromString(latestPlantSubmission.getId()), approvalStatus ? "APPROVED" : "REJECTED");
 
+  // reset the status to PENDING for all plant submissions
+  List<PlantSubmissionAuditTrailProjection> plantWiseLatestSubmissions = tcsAuditTrailRepository.getLatestPlantWiseSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), "PLANT");
+
+  List<Object[]> statusUpdates = new ArrayList<>();
+  for(PlantSubmissionAuditTrailProjection plantSubmission : plantWiseLatestSubmissions) {  
+
+statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
+
+
+  }
+
+  if(!statusUpdates.isEmpty()) {
+    String updateSql = "UPDATE TCS_Submission_History SET Status = ? WHERE Id = ?";
+    jdbcTemplate.batchUpdate(updateSql, statusUpdates);
+  }
+
+   
 
 
 // *************** finished saving audit trail for submission history *************************
@@ -740,6 +780,18 @@ tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailD
             throw new RuntimeException("No latest plant submission found for given site and vertical");
         }
         tcsAuditTrailRepository.updateSubmissionStatusById(UUID.fromString(latestPlantSubmission.getId()), approvalStatus ? "APPROVED" : "REJECTED");
+
+        // reset the status for type EBS to PENDING
+
+        PlantSubmissionAuditTrailProjection latestEbsSubmission = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), "EBS");
+
+        if(latestEbsSubmission == null) {
+
+            throw new RuntimeException("No latest ebs submission found for given site and vertical");
+        }
+        tcsAuditTrailRepository.updateSubmissionStatusById(UUID.fromString(latestEbsSubmission.getId()), "PENDING");
+
+
 
     }
 
@@ -842,6 +894,7 @@ tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailD
 
          return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
          .plantId(UUID.fromString(auditTrail.getPlant_Id()))
+         .plantName(auditTrail.getPlantName())
          .siteId(UUID.fromString(auditTrail.getSite_Id()))
          .verticalId(UUID.fromString(auditTrail.getVertical_Id()))
          .submittedBy(auditTrail.getSubmittedBy())
