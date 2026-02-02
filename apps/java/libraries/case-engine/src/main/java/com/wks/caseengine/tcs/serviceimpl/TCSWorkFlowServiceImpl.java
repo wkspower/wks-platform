@@ -486,14 +486,14 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
         // *************** save audit trail for submission history *************************
 
-   List<PlantSubmissionAuditTrailProjection> existingAuditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getPlantId(), plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(),"PLANT");
+   PlantSubmissionAuditTrailProjection existingAuditTrail = tcsAuditTrailRepository.getLatestPlantSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getPlantId(), plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(),"PLANT");
     
-            if(existingAuditTrails.isEmpty()) { 
+            if(existingAuditTrail == null) { 
 
                 throw new RuntimeException("No audit trail found for given plant, site and vertical");
             }
     // pick any audit history to get remark as it is comman for all
-            PlantSubmissionAuditTrailProjection existingAuditTrail = existingAuditTrails.get(0);
+          
 
             plantSubmissionAuditTrailDTO.setVerifiedDateTime(new Date());
 
@@ -660,14 +660,14 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
 
            // *************** save audit trail for eps submission history *************************
 
-   List<PlantSubmissionAuditTrailProjection> existingAuditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(),"EBS");
+   PlantSubmissionAuditTrailProjection existingAuditTrail = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(),"EBS");
     
-   if(existingAuditTrails.isEmpty()) { 
+   if(existingAuditTrail == null) { 
 
        throw new RuntimeException("No audit trail found for given site and vertical");
    }
 // pick any audit history to get remark as it is comman for all
-   PlantSubmissionAuditTrailProjection existingAuditTrail = existingAuditTrails.get(0);
+   
 
    plantSubmissionAuditTrailDTO.setVerifiedDateTime(new Date());
 
@@ -756,13 +756,14 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
 
         // *************** save audit trail for cts head approval history *************************
         
-        List<PlantSubmissionAuditTrailProjection> existingAuditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(),"CTS");
+        PlantSubmissionAuditTrailProjection existingAuditTrail = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(),"CTS");
 
-        if(existingAuditTrails.isEmpty()) { 
-            throw new RuntimeException("No audit trail found for given site and vertical");
-        }
+       if(existingAuditTrail == null) {
+           
+        throw new RuntimeException("No audit trail found for given site and vertical");
+       }
 
-        PlantSubmissionAuditTrailProjection existingAuditTrail = existingAuditTrails.get(0);
+        
 
         plantSubmissionAuditTrailDTO.setVerifiedDateTime(new Date());
 
