@@ -72,8 +72,11 @@ export const DataService = {
   saveConfigurationExcelConstants,
   importSpyroOutputExcel,
   importSpyroOutputExcelYield,
+  importSpyroOutputExcelYieldNONNMD,
   exportSpyroOutputExcel,
+  exportSpyroOutputExcelNONNMD,
   exportSpyroOutputExcelYield,
+
   importSpyroInputExcel,
   exportSpyroInputExcel,
   getConfigurationExcel,
@@ -105,6 +108,8 @@ export const DataService = {
   postIbr,
   postIbrNMD,
   getSpyroOutputDataYield,
+  getSpyroOutputDataYieldNONNMD,
+  saveSpyroOutputYieldNONNMD,
   saveSpyroOutputYield,
   getCrackerNextYearParameters,
   getCrackerNextYearParametersNMD,
@@ -1703,6 +1708,34 @@ async function importSpyroOutputExcelYield(
   }
 }
 
+async function importSpyroOutputExcelYieldNONNMD(
+  file,
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const url = `${Config.CaseEngineUrl}/task/yield-import-dmd?plantId=${PLANT_ID}&year=${AOP_YEAR}&mode=${encodeURIComponent(mode)}`
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    })
+    return json(keycloak, resp) // assuming `json()` handles response properly
+  } catch (e) {
+    console.error('Error importing Optimizer Input Excel:', e)
+    return await Promise.reject(e)
+  }
+}
+
 async function exportSpyroOutputExcel(
   keycloak,
   mode,
@@ -1711,6 +1744,46 @@ async function exportSpyroOutputExcel(
   ExcelName,
 ) {
   const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers,
+    })
+
+    if (!resp.ok) {
+      throw new Error(`Export failed: ${resp.status} ${resp.statusText}`)
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+    a.download = `${ExcelName}.xlsx`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+  } catch (e) {
+    console.error('Error exporting Optimizer Input Excel:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function exportSpyroOutputExcelNONNMD(
+  keycloak,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+  ExcelName,
+) {
+  const url = `${Config.CaseEngineUrl}/task/spyro-output-export-excel-dmd?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
     'Content-Type': 'application/json',
@@ -2430,8 +2503,60 @@ async function getSpyroOutputDataYield(
   }
 }
 
+async function getSpyroOutputDataYieldNONNMD(
+  keycloak,
+  mode,
+  type,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const url =
+    `${Config.CaseEngineUrl}/task/spyro-output/yield-dmd` +
+    `?year=${encodeURIComponent(AOP_YEAR)}` +
+    `&plantId=${encodeURIComponent(PLANT_ID)}`
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.error('Failed to fetch spyro-output data', e)
+    return Promise.reject(e)
+  }
+}
+
 async function saveSpyroOutputYield(payload, keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/spyro-output/yield?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
+  }
+}
+
+async function saveSpyroOutputYieldNONNMD(
+  payload,
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  const url = `${Config.CaseEngineUrl}/task/spyro-output/yield-dmd?plantId=${PLANT_ID}&year=${AOP_YEAR}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

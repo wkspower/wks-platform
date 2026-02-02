@@ -104,7 +104,9 @@ const CrackerConfig = () => {
         : currentTabDisplay === 'Constant'
           ? 'cracker_constants'
           : currentTabDisplay === 'Yield'
-            ? 'cracker_yield'
+            ? SITE_NAME == 'NMD'
+              ? 'cracker_yield'
+              : 'cracker_yield_dmd'
             : 'cracker'
 
     return getEnhancedAOPColDefs({
@@ -336,13 +338,23 @@ const CrackerConfig = () => {
         setLoading(true)
         var spyroVMYield1 = []
         if (currentTabDisplay == 'Yield') {
-          spyroVMYield1 = await DataService.getSpyroOutputDataYield(
-            keycloak,
-            mode,
-            currentTabDisplay,
-            PLANT_ID,
-            AOP_YEAR,
-          )
+          if (SITE_NAME == 'NMD') {
+            spyroVMYield1 = await DataService.getSpyroOutputDataYield(
+              keycloak,
+              mode,
+              currentTabDisplay,
+              PLANT_ID,
+              AOP_YEAR,
+            )
+          } else {
+            spyroVMYield1 = await DataService.getSpyroOutputDataYieldNONNMD(
+              keycloak,
+              mode,
+              currentTabDisplay,
+              PLANT_ID,
+              AOP_YEAR,
+            )
+          }
         }
         let transformedData1 = (spyroVMYield1.data || []).map(
           (item, index) => ({
@@ -353,17 +365,67 @@ const CrackerConfig = () => {
         )
 
         if (transformedData1.length > 0 && currentTabDisplay === 'Yield') {
-          const numericColumns = [
-            'fourFPropane',
-            'fiveFC2C3',
-            'fiveFEthane',
-            'fiveFPropane',
-            'fourFC2C3',
-            'fourFDC2C3',
-            'fourFDEthane',
-            'fourFDPropane',
-            'fourFEthane',
-          ]
+          var numericColumns = []
+
+          var a = {
+            particulars: 'Acetylene',
+            fiveFC2C3: 0,
+            fiveFPropane: 0,
+            fiveFEthane: 0,
+            fiveFDSC2C3: 0,
+            fiveFDSPropane: 0,
+            fiveFDSEthane: 0,
+            sixFSFDC2C3: 0,
+            sixFSFDPropane: 0,
+            sixFSFDEthane: 0,
+            sixFBFDC2C3: 0,
+            sixFBFDPropane: 0,
+            sixFBFDEthane: 0,
+            fourFC2C3: 0,
+            fourFPropane: 0,
+            fourFEthane: 0,
+            fourFDC2C3: 0,
+            fourFDPropane: 0,
+            fourFDEthane: 0,
+          }
+
+          if (SITE_NAME != 'NMD') {
+            numericColumns = [
+              'fiveFC2C',
+              'fiveFPropane',
+              'fiveFEthane',
+              'fiveFDSC2C',
+              'fiveFDSPropane',
+              'fiveFDSEthane',
+              'sixFSFDC2C',
+              'sixFSFDPropane',
+              'sixFSFDEthane',
+              'sixFBFDC2C',
+              'sixFBFDPropane',
+              'sixFBFDEthane',
+              'fourFC2C',
+              'fourFPropane',
+              'fourFEthane',
+              'sevenFC2C3',
+              'sevenFPropane',
+              'sevenFEthane',
+            ]
+          } else {
+            numericColumns = [
+              // 4F
+              'fourFC2C3',
+              'fourFEthane',
+              'fourFPropane',
+              'fourFDC2C3',
+              'fourFDEthane',
+              'fourFDPropane',
+
+              // 5F
+              'fiveFC2C3',
+              'fiveFEthane',
+              'fiveFPropane',
+            ]
+          }
 
           const totalRow = {
             id: 'total_row',
@@ -523,25 +585,68 @@ const CrackerConfig = () => {
 
     try {
       const dataToSave = newRows.filter((row) => !row.isTotal)
-      const SpyroOutputYield = newRows.map((row) => ({
-        particulars: row.particulars,
-        fourFPropane: row.fourFPropane || 0,
-        fiveFC2C3: row.fiveFC2C3 || 0,
-        fiveFEthane: row.fiveFEthane || 0,
-        fiveFPropane: row.fiveFPropane || 0,
-        fourFC2C3: row.fourFC2C3 || 0,
-        fourFDC2C3: row.fourFDC2C3 || 0,
-        fourFDEthane: row.fourFDEthane || 0,
-        fourFDPropane: row.fourFDPropane || 0,
-        fourFEthane: row.fourFEthane || 0,
-      }))
 
-      const response = await DataService.saveSpyroOutputYield(
-        SpyroOutputYield,
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      var SpyroOutputYield = []
+      if (SITE_NAME === 'NMD') {
+        SpyroOutputYield = newRows.map((row) => ({
+          particulars: row.particulars,
+          fourFPropane: row.fourFPropane || 0,
+          fiveFC2C3: row.fiveFC2C3 || 0,
+          fiveFEthane: row.fiveFEthane || 0,
+          fiveFPropane: row.fiveFPropane || 0,
+          fourFC2C3: row.fourFC2C3 || 0,
+          fourFDC2C3: row.fourFDC2C3 || 0,
+          fourFDEthane: row.fourFDEthane || 0,
+          fourFDPropane: row.fourFDPropane || 0,
+          fourFEthane: row.fourFEthane || 0,
+        }))
+      } else {
+        // PAYLOAD FOR NON-NMD (Includes 5FDS, 6FSF, and 6FBF fields)
+        SpyroOutputYield = newRows.map((row) => ({
+          particulars: row.particulars,
+          fiveFC2C3: row.fiveFC2C3 || 0,
+          fiveFPropane: row.fiveFPropane || 0,
+          fiveFEthane: row.fiveFEthane || 0,
+
+          fiveFDSC2C3: row.fiveFDSC2C3 || 0,
+          fiveFDSPropane: row.fiveFDSPropane || 0,
+          fiveFDSEthane: row.fiveFDSEthane || 0,
+
+          sixFSFDC2C3: row.sixFSFDC2C3 || 0,
+          sixFSFDPropane: row.sixFSFDPropane || 0,
+          sixFSFDEthane: row.sixFSFDEthane || 0,
+
+          sixFBFDC2C3: row.sixFBFDC2C3 || 0,
+          sixFBFDPropane: row.sixFBFDPropane || 0,
+          sixFBFDEthane: row.sixFBFDEthane || 0,
+
+          fourFC2C3: row.fourFC2C3 || 0,
+          fourFPropane: row.fourFPropane || 0,
+          fourFEthane: row.fourFEthane || 0,
+
+          fourFDC2C3: row.fourFDC2C3 || 0,
+          fourFDPropane: row.fourFDPropane || 0,
+          fourFDEthane: row.fourFDEthane || 0,
+        }))
+      }
+
+      var response = []
+
+      if (SITE_NAME == 'NMD') {
+        response = await DataService.saveSpyroOutputYield(
+          SpyroOutputYield,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else {
+        response = await DataService.saveSpyroOutputYieldNONNMD(
+          SpyroOutputYield,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      }
       if (response?.code === 200) {
         setSnackbarOpen(true)
         setSnackbarData({
@@ -582,13 +687,23 @@ const CrackerConfig = () => {
       let response
 
       if (currentTabDisplay === 'Yield') {
-        response = await DataService.importSpyroOutputExcelYield(
-          rawFile,
-          keycloak,
-          mode,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+        if (SITE_NAME == 'NMD') {
+          response = await DataService.importSpyroOutputExcelYield(
+            rawFile,
+            keycloak,
+            mode,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        } else {
+          response = await DataService.importSpyroOutputExcelYieldNONNMD(
+            rawFile,
+            keycloak,
+            mode,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        }
       } else {
         response = await DataService.importSpyroOutputExcel(
           rawFile,
@@ -678,14 +793,25 @@ const CrackerConfig = () => {
     try {
       let response
       if (currentTabDisplay === 'Yield') {
-        const YieldExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_Yield_${AOP_YEAR}`
-        response = await DataService.exportSpyroOutputExcelYield(
-          keycloak,
-          mode,
-          PLANT_ID,
-          AOP_YEAR,
-          YieldExcelName,
-        )
+        if (SITE_NAME == 'NMD') {
+          const YieldExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_Yield_${AOP_YEAR}`
+          response = await DataService.exportSpyroOutputExcelYield(
+            keycloak,
+            mode,
+            PLANT_ID,
+            AOP_YEAR,
+            YieldExcelName,
+          )
+        } else {
+          const YieldExcelName1 = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_Yield_${AOP_YEAR}`
+          response = await DataService.exportSpyroOutputExcelYieldNONNMD(
+            keycloak,
+            mode,
+            PLANT_ID,
+            AOP_YEAR,
+            YieldExcelName1,
+          )
+        }
       } else {
         const ExcelName = `${VERTICAL_NAME}_${SITE_NAME}_${PLANT_NAME}_${mode}_Optimizer_Output_${AOP_YEAR}`
 

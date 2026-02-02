@@ -1,0 +1,145 @@
+[
+  {
+    "field": "particulars",
+    "title": "Particulars",
+    "editable": false
+  },
+
+  {
+    "field": "fiveFC2C3",
+    "title": "5F-C2C3",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "fiveFPropane",
+    "title": "5F-Propane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "fiveFEthane",
+    "title": "5F-Ethane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+
+  {
+    "field": "fiveFDSC2C3",
+    "title": "5F D/S-C2C3",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "fiveFDSPropane",
+    "title": "5F D/S-Propane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "fiveFDSEthane",
+    "title": "5F D/S-Ethane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+
+  {
+    "field": "fourFC2C3",
+    "title": "4F-C2C3",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "fourFPropane",
+    "title": "4F-Propane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "fourFEthane",
+    "title": "4F-Ethane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+
+  {
+    "field": "sevenFC2C3",
+    "title": "7F-C2C3",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "sevenFPropane",
+    "title": "7F-Propane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "sevenFEthane",
+    "title": "7F-Ethane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+
+  {
+    "field": "sixFSFDC2C3",
+    "title": "6F+SFD-C2C3",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "sixFSFDPropane",
+    "title": "6F+SFD-Propane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "sixFSFDEthane",
+    "title": "6F+SFD-Ethane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+
+  {
+    "field": "sixFBFDC2C3",
+    "title": "6F+BFD-C2C3",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "sixFBFDPropane",
+    "title": "6F+BFD-Propane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+  {
+    "field": "sixFBFDEthane",
+    "title": "6F+BFD-Ethane",
+    "type": "number",
+    "format": "{0:#.##}",
+    "editable": true
+  },
+
+  {
+    "field": "NormParameterFKID",
+    "title": "NormParameterFKID",
+    "hidden": true
+  }
+]
