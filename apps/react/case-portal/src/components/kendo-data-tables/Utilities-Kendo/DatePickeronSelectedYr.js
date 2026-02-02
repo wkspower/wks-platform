@@ -1,6 +1,7 @@
 import { DateTimePicker } from '@progress/kendo-react-dateinputs'
 import { useSelector } from 'react-redux'
-const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
+
+const DateTimePickerEditor = ({ dataItem, field, onChange, format = 'dd-MM-yyyy hh:mm a' }) => {
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { year } = dataGridStore
   const AOP_YEAR = year?.selectedYear
@@ -56,13 +57,20 @@ const DateTimePickerEditor = ({ dataItem, field, onChange }) => {
     )
   }
 
+  // Determine format placeholder based on the format string
+  const is24Hour = format.includes('HH')
+  const formatPlaceholder = is24Hour
+    ? { year: 'yyyy', month: 'MM', day: 'dd', hour: 'HH', minute: 'mm' }
+    : { year: 'yyyy', month: 'MM', day: 'dd', hour: 'hh', minute: 'mm', dayperiod: 'a' }
+
   return (
     <td>
       <DateTimePicker
         value={currentDate}
         min={dynamicMin}
         max={dynamicMax}
-        format='dd-MM-yyyy hh:mm a'
+        format={format}
+        formatPlaceholder={formatPlaceholder}
         onChange={handleChange}
         width='100%'
         size='small'

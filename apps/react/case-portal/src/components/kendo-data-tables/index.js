@@ -97,6 +97,38 @@ export const monthMap = {
   november: 11,
   december: 12,
 }
+const formatToDDMMYYYY_HHMM_12HR = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d)) return ''
+
+  const day = d.getDate().toString().padStart(2, '0')
+  const month = (d.getMonth() + 1).toString().padStart(2, '0')
+  const year = d.getFullYear()
+
+  let hours = d.getHours()
+  const mins = d.getMinutes().toString().padStart(2, '0')
+  const ampm = hours >= 12 ? 'PM' : 'AM'
+
+  hours = hours % 12
+  hours = hours ? hours : 12 // the hour '0' should be '12'
+  const hoursStr = hours.toString().padStart(2, '0')
+
+  return `${day}-${month}-${year} ${hoursStr}:${mins} ${ampm}`
+}
+
+// For 24-hour format (VCM vertical)
+const formatToDDMMYYYY_HHMM_24HR = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  if (isNaN(d)) return ''
+  const day = d.getDate().toString().padStart(2, '0')
+  const month = (d.getMonth() + 1).toString().padStart(2, '0')
+  const year = d.getFullYear()
+  const hours = d.getHours().toString().padStart(2, '0')
+  const mins = d.getMinutes().toString().padStart(2, '0')
+  return `${day}-${month}-${year} ${hours}:${mins}`
+}
 
 const KendoDataTables = ({
   showCatChemUtilityCheckbox = false,
@@ -1760,6 +1792,65 @@ const KendoDataTables = ({
                   )
                 }
                 const isActive = isColumnActive(col?.field, filter, sort)
+                if (
+                  isVCM &&
+                  (col.field === 'maintStartDateTime' ||
+                    col.field === 'maintEndDateTime')
+                ) {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      cells={{
+                        data: (props) => {
+                          const date = props.dataItem[col.field]
+                          // For VCM: format as dd-MM-yyyy HH:mm (24-hour)
+                          const formatTo24Hour = (date) => {
+                            if (!date) return ''
+                            const d = new Date(date)
+                            if (isNaN(d)) return ''
+                            const day = d.getDate().toString().padStart(2, '0')
+                            const month = (d.getMonth() + 1)
+                              .toString()
+                              .padStart(2, '0')
+                            const year = d.getFullYear()
+                            const hours = d
+                              .getHours()
+                              .toString()
+                              .padStart(2, '0')
+                            const mins = d
+                              .getMinutes()
+                              .toString()
+                              .padStart(2, '0')
+                            return `${day}-${month}-${year} ${hours}:${mins}`
+                          }
+                          const formattedDate = formatTo24Hour(date)
+
+                          return (
+                            <td {...props.tdProps} title={formattedDate}>
+                              {formattedDate}
+                            </td>
+                          )
+                        },
+                        edit: {
+                          date: (props) => (
+                            <DateTimePickerEditor
+                              {...props}
+                              format='dd-MM-yyyy HH:mm'
+                            />
+                          ),
+                        },
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      editor='date'
+                      hidden={col.hidden}
+                      filter='date'
+                      columnMenu={ColumnMenuCheckboxFilterDate}
+                      width={col?.widthT}
+                    />
+                  )
+                }
 
                 if (dateFields.includes(col.field)) {
                   return (
@@ -1780,41 +1871,34 @@ const KendoDataTables = ({
                             ? DateOnlyPicker
                             : DateTimePickerEditor,
                         },
-                        data: (props) => (
-                          <SimpleHighlightCell
-                            {...props}
-                            customModifiedCells={customModifiedCells}
-                            highlight={permissions?.highlightDate || false} // Add this permission
-                          />
-                        ),
+                        data: (props) => {
+                          const date = props.dataItem[col.field]
+                          const formattedDate = date
+                            ? formatToDDMMYYYY_HHMM(date)
+                            : ''
+
+                          return (
+                            <SimpleHighlightCell
+                              {...props}
+                              customModifiedCells={customModifiedCells}
+                              highlight={permissions?.highlightDate || false}
+                            >
+                              {formattedDate}
+                            </SimpleHighlightCell>
+                          )
+                        },
                         headerCell: SimpleHeaderWithTooltip,
                       }}
-                      format={
-                        [
-                          'fromDate',
-                          'toDate',
-                          'periodFrom',
-                          'periodTo',
-                          'toDateReport',
-                          'fromDateReport',
-                        ].includes(col.field)
-                          ? '{0:dd-MM-yyyy}'
-                          : '{0:dd-MM-yyyy hh:mm a}'
-                      }
                       editor='date'
                       hidden={col.hidden}
                       // columnMenu={DateColumnMenu}
                       filter='date'
                       columnMenu={ColumnMenuCheckboxFilterDate}
                       width={col?.widthT}
-                      headerClassName={
-                        isDateFilterActive.includes(col.field)
-                          ? 'active-column'
-                          : ''
-                      }
                     />
                   )
                 }
+
                 if (dateFields1.includes(col.field)) {
                   return (
                     <GridColumn
