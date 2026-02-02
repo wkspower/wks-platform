@@ -1011,16 +1011,11 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                                }
 	                            }
 
-	                            boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
-	                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
-
 	                            if (overlapsFile) {
-	                                if (!isVcmSeasonalImpact) {
 	                                    dto.setSaveStatus("Failed");
 	                                    dto.setErrDescription(
 	                                        "The maintenance period overlaps with an already validated period in the file.");
 	                                    alreadyFailed = true;
-	                                } 
 	                            }
 	                            if (!alreadyFailed && !(vertical.getName().equalsIgnoreCase("Elastomer") || vertical.getName().equalsIgnoreCase("PVC"))) {
 	                                boolean overlapsSlowdown = false;

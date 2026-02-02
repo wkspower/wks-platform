@@ -1562,7 +1562,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					if (mantStartStr != null) {
 						try {
 							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-							ldtStart = LocalDateTime.parse(mantStartStr, fmt);
+							ldtStart = LocalDateTime.parse(mantStartStr, fmt).withSecond(0).withNano(0);
 							
 							Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
 							dto.setMaintStartDateTime(startDate);
@@ -1591,7 +1591,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 					if (mantEndStr != null) {
 						try {
 							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-							ldtEnd = LocalDateTime.parse(mantEndStr, fmt);
+							ldtEnd = LocalDateTime.parse(mantEndStr, fmt).withSecond(0).withNano(0);
 							
 							Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
 							dto.setMaintEndDateTime(endDate);
@@ -1621,10 +1621,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 											break;
 										}
 									}
+									boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
+			                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
 									if (overlaps) {
-										dto.setSaveStatus("Failed");
-										dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
-										alreadyFailed = true;
+										 if (!isVcmSeasonalImpact) {
+											dto.setSaveStatus("Failed");
+											dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
+											alreadyFailed = true;
+										 }
 									}
 								}
 							}
