@@ -1011,14 +1011,17 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 	                                }
 	                            }
 
+	                            boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
+	                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
+
 	                            if (overlapsFile) {
-	                                dto.setSaveStatus("Failed");
-	                                dto.setErrDescription(
+	                                if (!isVcmSeasonalImpact) {
+	                                    dto.setSaveStatus("Failed");
+	                                    dto.setErrDescription(
 	                                        "The maintenance period overlaps with an already validated period in the file.");
-	                                alreadyFailed = true;
+	                                    alreadyFailed = true;
+	                                } 
 	                            }
-	                            
-	                            // Check for overlap with existing slowdowns
 	                            if (!alreadyFailed && !(vertical.getName().equalsIgnoreCase("Elastomer") || vertical.getName().equalsIgnoreCase("PVC"))) {
 	                                boolean overlapsSlowdown = false;
 	                                for (LocalDateTime[] slowdownPeriod : slowdownTimeRanges) {
