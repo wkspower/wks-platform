@@ -1823,7 +1823,7 @@ async function exportSpyroOutputExcelYieldNONNMD(
   AOP_YEAR,
   EXCEL_NAME,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/yield-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
+  const url = `${Config.CaseEngineUrl}/task/yield-export-dmd?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}&mode=${encodeURIComponent(mode)}`
 
   const headers = {
     'Content-Type': 'application/json',

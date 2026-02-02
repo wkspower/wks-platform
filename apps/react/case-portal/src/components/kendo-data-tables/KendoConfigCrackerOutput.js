@@ -624,9 +624,9 @@ const CrackerConfig = () => {
           fourFPropane: row.fourFPropane || 0,
           fourFEthane: row.fourFEthane || 0,
 
-          fourFDC2C3: row.fourFDC2C3 || 0,
-          fourFDPropane: row.fourFDPropane || 0,
-          fourFDEthane: row.fourFDEthane || 0,
+          sevenFC2C3: row.sevenFC2C3 || 0,
+          sevenFPropane: row.sevenFPropane || 0,
+          sevenFEthane: row.sevenFEthane || 0,
         }))
       }
 
