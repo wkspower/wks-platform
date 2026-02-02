@@ -612,7 +612,7 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 
 	public byte[] exportYieldDMD(String year, String plantId, boolean isAfterSave, List<YieldDMDDTO> dtoList) {
 	    try {
-	        AOPMessageVM aopMessageVM = getSpyroOutputYieldData(year,plantId);
+	        AOPMessageVM aopMessageVM = getSpyroOutputYieldDMD(year,plantId);
 	        if (!isAfterSave) {
 	            dtoList = (List<YieldDMDDTO>) aopMessageVM.getData();
 	        }
@@ -666,15 +666,25 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	            Row row = sheet.createRow(currentRow++);
 	            List<Object> rowData = new ArrayList<>();
 	            rowData.add(dto.getParticulars());
+
 	            rowData.add(dto.getFiveFC2C3());
 	            rowData.add(dto.getFiveFPropane());
 	            rowData.add(dto.getFiveFEthane());
+	            rowData.add(dto.getFiveFDSC2C3());
+	            rowData.add(dto.getFiveFDSPropane());
+	            rowData.add(dto.getFiveFDSEthane());
 	            rowData.add(dto.getFourFC2C3());
 	            rowData.add(dto.getFourFPropane());
 	            rowData.add(dto.getFourFEthane());
-	            rowData.add(dto.getFourFDC2C3());
-	            rowData.add(dto.getFourFDPropane());
-	            rowData.add(dto.getFourFDEthane());
+	            rowData.add(dto.getSevenFC2C3());
+	            rowData.add(dto.getSevenFPropane());
+	            rowData.add(dto.getSevenFEthane());
+	            rowData.add(dto.getSixFSFDC2C3());
+	            rowData.add(dto.getSixFSFDPropane());
+	            rowData.add(dto.getSixFSFDEthane());
+	            rowData.add(dto.getSixFBFDC2C3());
+	            rowData.add(dto.getSixFBFDPropane());
+	            rowData.add(dto.getSixFBFDEthane());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
 	                rowData.add(dto.getErrDescription());
