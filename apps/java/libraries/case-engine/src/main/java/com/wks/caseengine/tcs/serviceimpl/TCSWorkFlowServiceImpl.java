@@ -800,7 +800,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
 
 
     @Override
-    public void ctsApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
+    public void clusterHeadApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
 
         String businessKey = siteId + "-" + finacialYear;
 
