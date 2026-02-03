@@ -16,6 +16,8 @@ public interface TCSWorkFlowService {
 
     void ctsApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
 
+    void clusterHeadApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear);
+
     List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrail(String plantName, String siteId, String verticalId, String type);
 
     List<PlantSubmissionAuditTrailDTO> getEBSSubmissionAuditTrail(String siteId, String verticalId, String type);

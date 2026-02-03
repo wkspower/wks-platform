@@ -46,7 +46,9 @@ public class TCSWorkFlowServiceImpl implements TCSWorkFlowService {
 
     private static final String EBS_APPROVAL_TASK_DEFINITION_KEY = "EBS_Approval";
 
-    private static final String CTS_APPROVAL_TASK_DEFINITION_KEY = "CTS_Approval";
+    private static final String CTS_APPROVAL_TASK_DEFINITION_KEY = "CTS_APPROVAL";
+
+    private static final String CLUSTER_HEAD_APPROVAL_TASK_DEFINITION_KEY = "Cluster_Head_APPROVAL";
 
     private static final String EBS_SUBMISSION_VARIABLE_NAME = "ebs_approved";
     private static final String TOTAL_PLANTS_VARIABLE_NAME = "total_plants";
@@ -782,9 +784,9 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         }
         tcsAuditTrailRepository.updateSubmissionStatusById(UUID.fromString(latestPlantSubmission.getId()), approvalStatus ? "APPROVED" : "REJECTED");
 
-        // reset the status for type EBS to PENDING
+        // reset the status for type CTS to PENDING
 
-        PlantSubmissionAuditTrailProjection latestEbsSubmission = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), "EBS");
+        PlantSubmissionAuditTrailProjection latestEbsSubmission = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), "CTS");
 
         if(latestEbsSubmission == null) {
 
@@ -795,6 +797,106 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
 
 
     }
+
+
+    @Override
+    public void ctsApproval(String siteId, PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO, String finacialYear) {    
+
+        String businessKey = siteId + "-" + finacialYear;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // get process Instance for given business key and process definition key
+        ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(PROCESS_DEFINITION_KEY), Optional.ofNullable(businessKey), Optional.empty());
+
+        if(processInstances.length == 0) {
+            throw new RuntimeException("No process instance found for business key: " + businessKey + " and process definition key: " + PROCESS_DEFINITION_KEY);
+        }
+
+        if(processInstances.length > 1) {
+            throw new RuntimeException("Multiple process instances found for business key: " + businessKey + " and process definition key: " + PROCESS_DEFINITION_KEY);
+        }
+
+        ProcessInstance processInstance = processInstances[0];
+
+        // get tasks for given business key and process definition key
+        List<TaskDto> tasks = processEngineClientFacade.findTasksByBusinessKeyAndProcessDefinitionKey(Optional.ofNullable(businessKey), Optional.ofNullable(PROCESS_DEFINITION_KEY));
+
+        if(tasks.isEmpty()) {  
+            throw new RuntimeException("No task found for business key: " + businessKey + " and process definition key: " + PROCESS_DEFINITION_KEY);
+        }
+
+
+
+      List<TaskDto> taskForPlant = tasks.stream()
+        .filter(t -> CLUSTER_HEAD_APPROVAL_TASK_DEFINITION_KEY.equals(t.getTaskDefinitionKey()))
+        .toList();
+        
+     // compelete one of the pending multi-instance task
+      if(taskForPlant.isEmpty()) {  
+            // ******* logic for resubmission
+
+            List<ProcessVariable> submissionStatusVariables = Arrays.stream(processEngineClientFacade.findVariables(processInstance.getId())).filter(v -> v.getName().equals("approvalStatus")).toList();
+
+            if(submissionStatusVariables.isEmpty()) {
+                throw new RuntimeException("No submission status variables found for given process instance");
+            }
+    
+            if(submissionStatusVariables.size() > 1) {
+                throw new RuntimeException("Multiple submission status variables found for given process instance");
+            }
+    
+            updatesubmissionStatusVariable(submissionStatusVariables, CLUSTER_HEAD_APPROVAL_VARIABLE_NAME, objectMapper, true);
+    
+            Map<String, VariableValueDto> variablesMap = c7VariablesMapper.toEngineFormat(submissionStatusVariables);
+    
+            // get variable with name "submissionStatus"
+            VariableValueDto submissionStatusVariable = variablesMap.get("approvalStatus");
+    
+            processEngineClientFacade.updateProcessVariable(processInstance.getId(), "approvalStatus", submissionStatusVariable);
+    
+            plantSubmissionAuditTrailDTO.setSubmissionDateTime(new Date());
+          plantSubmissionAuditTrailDTO.setType("CLUSTER_HEAD");
+          plantSubmissionAuditTrailDTO.setStatus("PENDING");
+    
+          // plantName is null for cts submission
+          tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getPlantId(), plantSubmissionAuditTrailDTO.getPlantName(), plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), plantSubmissionAuditTrailDTO.getSubmittedBy(), plantSubmissionAuditTrailDTO.getSubmissionDateTime(), plantSubmissionAuditTrailDTO.getSubmissionRemark(), plantSubmissionAuditTrailDTO.getVerifiedDateTime(), plantSubmissionAuditTrailDTO.getVerifiedBy(), plantSubmissionAuditTrailDTO.getVerifiedRemark(), plantSubmissionAuditTrailDTO.getStatus(), plantSubmissionAuditTrailDTO.getType());
+    
+            return;
+
+    }
+
+    if(taskForPlant.size() > 1) {  
+        throw new RuntimeException("Multiple tasks found for business key: " + businessKey + " and process definition key: " + PROCESS_DEFINITION_KEY);
+      }
+
+      TaskDto taskToComplete = taskForPlant.get(0);
+
+      System.out.println(" Cluster Head Approval taskToComplete Id: " + taskToComplete.getId() + "name: " + taskToComplete.getName());
+
+      // update process variable corresponding to given Plant 
+      List<ProcessVariable> submissionStatusVariables = Arrays.stream(processEngineClientFacade.findVariables(processInstance.getId())).filter(v -> v.getName().equals(CLUSTER_HEAD_APPROVAL_VARIABLE_NAME)).toList();
+
+    
+      updatesubmissionStatusVariable(submissionStatusVariables, CLUSTER_HEAD_APPROVAL_VARIABLE_NAME, objectMapper, true);
+    
+    
+      System.out.println("submissionStatusVariables: " + submissionStatusVariables);
+
+      processEngineClientFacade.complete(taskToComplete.getId(), submissionStatusVariables);
+
+      // *************** save audit trail for cts approval history *************************
+
+      plantSubmissionAuditTrailDTO.setSubmissionDateTime(new Date());
+      plantSubmissionAuditTrailDTO.setType("CLUSTER_HEAD");
+      plantSubmissionAuditTrailDTO.setStatus("PENDING");
+
+      tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailDTO.getPlantId(), plantSubmissionAuditTrailDTO.getPlantName(), plantSubmissionAuditTrailDTO.getSiteId(), plantSubmissionAuditTrailDTO.getVerticalId(), plantSubmissionAuditTrailDTO.getSubmittedBy(), plantSubmissionAuditTrailDTO.getSubmissionDateTime(), plantSubmissionAuditTrailDTO.getSubmissionRemark(), plantSubmissionAuditTrailDTO.getVerifiedDateTime(), plantSubmissionAuditTrailDTO.getVerifiedBy(), plantSubmissionAuditTrailDTO.getVerifiedRemark(), plantSubmissionAuditTrailDTO.getStatus(), plantSubmissionAuditTrailDTO.getType());
+
+
+}
+
+
 
 
 
