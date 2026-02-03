@@ -24,11 +24,11 @@ public interface TCSAuditTrailRepository extends JpaRepository<DummyEntity, Long
         value = """
             INSERT INTO TCS_Submission_History
             (Plant_Id, PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate,
-             SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Status, Type)
+             SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Status, Type, BusinessKey)
             VALUES
             (:plantId, :plantName, :siteId, :verticalId, :submittedBy, :submissionDateTime,
              :submissionRemark, :verifiedDateTime, :verifiedBy, :verifiedRemark,
-             :status, :type)
+             :status, :type, :businessKey)
             """,
         nativeQuery = true
     )
@@ -44,18 +44,19 @@ public interface TCSAuditTrailRepository extends JpaRepository<DummyEntity, Long
             @Param("verifiedBy") String verifiedBy,
             @Param("verifiedRemark") String verifiedRemark,
             @Param("status") String status,
-            @Param("type") String type
+            @Param("type") String type,
+            @Param("businessKey") String businessKey
            
     );
     
 
     // get the existing audit trail for given plant, site and vertical
-    @Query(value = "SELECT Plant_Id, PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate, SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Status, Type FROM TCS_Submission_History WHERE Plant_Id = :plantId AND Site_Id = :siteId AND Vertical_Id = :verticalId AND Type = :type", nativeQuery = true)
-    List<PlantSubmissionAuditTrailProjection> getPlantSubmissionAuditTrail(@Param("plantId") UUID plantId, @Param("siteId") UUID siteId, @Param("verticalId") UUID verticalId, @Param("type") String type);
+    @Query(value = "SELECT Plant_Id, PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate, SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Status, Type FROM TCS_Submission_History WHERE Plant_Id = :plantId AND Site_Id = :siteId AND Vertical_Id = :verticalId AND BusinessKey = :businessKey AND Type = :type", nativeQuery = true)
+    List<PlantSubmissionAuditTrailProjection> getPlantSubmissionAuditTrail(@Param("plantId") UUID plantId, @Param("siteId") UUID siteId, @Param("verticalId") UUID verticalId, @Param("businessKey") String businessKey, @Param("type") String type);
 
 
-    @Query(value = "SELECT PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate, SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Status, Type FROM TCS_Submission_History WHERE Site_Id = :siteId AND Vertical_Id = :verticalId AND Type = :type", nativeQuery = true)
-    List<PlantSubmissionAuditTrailProjection> getEbsSubmissionAuditTrail( @Param("siteId") UUID siteId, @Param("verticalId") UUID verticalId, @Param("type") String type);
+    @Query(value = "SELECT PlantName, Site_Id, Vertical_Id, SubmittedBy, SubmissionDate, SubmissionRemark, VerifiedDate, VerifiedBy, VerifiedRemark, Status, Type FROM TCS_Submission_History WHERE Site_Id = :siteId AND Vertical_Id = :verticalId AND BusinessKey = :businessKey AND Type = :type", nativeQuery = true)
+    List<PlantSubmissionAuditTrailProjection> getEbsSubmissionAuditTrail( @Param("siteId") UUID siteId, @Param("verticalId") UUID verticalId, @Param("businessKey") String businessKey, @Param("type") String type);
 
 
 
@@ -83,6 +84,7 @@ public interface TCSAuditTrailRepository extends JpaRepository<DummyEntity, Long
             FROM TCS_Submission_History
             WHERE Site_Id = :siteId
               AND Vertical_Id = :verticalId
+              AND BusinessKey = :businessKey
               AND Type = :type
               AND VerifiedDate IS NULL
               AND PlantName IS NOT NULL
@@ -93,6 +95,7 @@ public interface TCSAuditTrailRepository extends JpaRepository<DummyEntity, Long
     List<PlantSubmissionAuditTrailProjection> getLatestPlantWiseSubmissionAuditTrail(
             @Param("siteId") UUID siteId,
             @Param("verticalId") UUID verticalId,
+            @Param("businessKey") String businessKey,
             @Param("type") String type
             
     );
@@ -109,6 +112,7 @@ public interface TCSAuditTrailRepository extends JpaRepository<DummyEntity, Long
     WHERE Plant_Id = :plantId
       AND Site_Id = :siteId
       AND Vertical_Id = :verticalId
+      AND BusinessKey = :businessKey
       AND Type = :type
       AND VerifiedDate IS NULL
     ORDER BY SubmissionDate DESC
@@ -117,6 +121,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
         @Param("plantId") UUID plantId,
         @Param("siteId") UUID siteId,
         @Param("verticalId") UUID verticalId,
+        @Param("businessKey") String businessKey,
         @Param("type") String type);
 
 
@@ -130,6 +135,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
             WHERE 
              Site_Id = :siteId
               AND Vertical_Id = :verticalId
+              AND BusinessKey = :businessKey
               AND Type = :type
               AND VerifiedDate IS NULL
             ORDER BY SubmissionDate DESC
@@ -137,6 +143,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
         PlantSubmissionAuditTrailProjection getLatestEbsSubmissionAuditTrail(
                 @Param("siteId") UUID siteId,
                 @Param("verticalId") UUID verticalId,
+                @Param("businessKey") String businessKey,
                 @Param("type") String type);
   
 // ebs approval history
@@ -147,6 +154,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
                 "WHERE Plant_Id = :plantId " +
                 "AND Site_Id = :siteId " +
                 "AND Vertical_Id = :verticalId " +
+                "AND BusinessKey = :businessKey " +
                 "AND Type = :type " +
                 "AND VerifiedDate IS NOT NULL",
         nativeQuery = true
@@ -155,6 +163,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
             @Param("plantId") UUID plantId,
             @Param("siteId") UUID siteId,
             @Param("verticalId") UUID verticalId,
+            @Param("businessKey") String businessKey,
             @Param("type") String type
            
     );
@@ -165,6 +174,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
                 "FROM TCS_Submission_History " +
                 "WHERE Site_Id = :siteId " +
                 "AND Vertical_Id = :verticalId " +
+                "AND BusinessKey = :businessKey " +
                 "AND Type = :type " +
                 "AND VerifiedDate IS NOT NULL",
         nativeQuery = true
@@ -172,6 +182,7 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
     List<PlantSubmissionAuditTrailProjection> getEbsSubmissionAuditTrailByVerfiedDate(
             @Param("siteId") UUID siteId,
             @Param("verticalId") UUID verticalId,
+            @Param("businessKey") String businessKey,
             @Param("type") String type
            
     );
@@ -179,11 +190,12 @@ PlantSubmissionAuditTrailProjection getLatestPlantSubmissionAuditTrail(
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE TCS_Submission_History SET Status = :status WHERE Plant_Id = :plantId AND Site_Id = :siteId AND Vertical_Id = :verticalId AND Type = :type", nativeQuery = true)
+    @Query(value = "UPDATE TCS_Submission_History SET Status = :status WHERE Plant_Id = :plantId AND Site_Id = :siteId AND Vertical_Id = :verticalId AND BusinessKey = :businessKey AND Type = :type", nativeQuery = true)
     void updateSubmissionStatus(
             @Param("plantId") UUID plantId,
             @Param("siteId") UUID siteId,
             @Param("verticalId") UUID verticalId,
+            @Param("businessKey") String businessKey,
             @Param("type") String type,
             @Param("status") String status
             
