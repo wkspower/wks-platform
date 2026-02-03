@@ -114,8 +114,12 @@ public class TCSOutPutWorkFlowController {
 	// 	return ResponseEntity.ok(processInstances.length > 0);
 	// }
 
-	@GetMapping(value = "/process-exists/{siteId}/{finacialYear}")
-	public ResponseEntity<Boolean> processExists( @PathVariable final String siteId, @PathVariable final String finacialYear) {
+	@GetMapping(value = "/process-exists/{verticalId}/{siteId}/{finacialYear}")
+	public ResponseEntity<Boolean> processExists( @PathVariable final String verticalId, @PathVariable final String siteId, @PathVariable final String finacialYear) {
+
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to check if process exists");
+		}
 
 	   if(siteId == null || siteId.isEmpty()) {
 		throw new RestResourceNotFoundException("Site ID is required to check if process exists");
@@ -125,7 +129,7 @@ public class TCSOutPutWorkFlowController {
 		throw new RestResourceNotFoundException("Financial Year is required to check if process exists");
 	   }
 
-	   String businessKey = siteId + "-" + finacialYear;
+	   String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
 
 	   if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
 		throw new RestResourceNotFoundException("TCS Output Workflow Process Definition Key is not set");
@@ -148,15 +152,18 @@ public class TCSOutPutWorkFlowController {
 	// 	return ResponseEntity.noContent().build();
 	// }
 
-	@GetMapping(value = "/variables/{siteId}/{finacialYear}")
-	public ResponseEntity<ProcessVariable[]> getVariables(@PathVariable final String siteId, @PathVariable final String finacialYear) {
+	@GetMapping(value = "/variables/{verticalId}/{siteId}/{finacialYear}")
+	public ResponseEntity<ProcessVariable[]> getVariables(@PathVariable final String verticalId, @PathVariable final String siteId, @PathVariable final String finacialYear) {
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to get variables");
+		}
 		if(siteId == null || siteId.isEmpty()) {
 			throw new RestResourceNotFoundException("Site ID is required to get variables");
 		}
 		if(finacialYear == null || finacialYear.isEmpty()) {
 			throw new RestResourceNotFoundException("Financial Year is required to get variables");
 		}
-		String businessKey = siteId + "-" + finacialYear;
+		String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
 
 		
 		if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
@@ -194,8 +201,11 @@ public class TCSOutPutWorkFlowController {
 	// 	return ResponseEntity.ok(processInstances[0]);
 	// }
 
-	@GetMapping(value = "/find-process/{siteId}/{finacialYear}")
-	public ResponseEntity<ProcessInstance[]> findProcess(@PathVariable final String siteId, @PathVariable final String finacialYear) {
+	@GetMapping(value = "/find-process/{verticalId}/{siteId}/{finacialYear}")
+	public ResponseEntity<ProcessInstance[]> findProcess(@PathVariable final String verticalId, @PathVariable final String siteId, @PathVariable final String finacialYear) {
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to find process");
+		}
 
 		if(siteId == null || siteId.isEmpty()) { 
 			throw new RestResourceNotFoundException("Site ID is required to find process");
@@ -203,7 +213,7 @@ public class TCSOutPutWorkFlowController {
 		if(finacialYear == null || finacialYear.isEmpty()) {
 			throw new RestResourceNotFoundException("Financial Year is required to find process");
 		}
-		String businessKey = siteId + "-" + finacialYear;
+		String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
 		
 		return ResponseEntity.ok(processEngineClientFacade.findProcessInstances(Optional.ofNullable(tcsOutputWorkflowProcessDefinitionKey), Optional.ofNullable(businessKey), Optional.empty()));
 	}
