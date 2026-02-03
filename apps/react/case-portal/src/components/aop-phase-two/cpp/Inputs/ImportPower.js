@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
@@ -278,6 +278,48 @@ const ImportPower = () => {
         }
         return transformed
       })
+
+      // Calculate totals for each month
+      const totalRow = {
+        sourceId: '',
+        sourceName: '',
+        plantName: 'Total',
+        sapCode: '',
+        materialCode: '',
+        uom: tempRes.length > 0 ? tempRes[0].uom : 'Unit',
+        april: tempRes.reduce(
+          (sum, row) => sum + (parseFloat(row.april) || 0),
+          0,
+        ),
+        may: tempRes.reduce((sum, row) => sum + (parseFloat(row.may) || 0), 0),
+        june: tempRes.reduce(
+          (sum, row) => sum + (parseFloat(row.june) || 0),
+          0,
+        ),
+        july: tempRes.reduce(
+          (sum, row) => sum + (parseFloat(row.july) || 0),
+          0,
+        ),
+        aug: tempRes.reduce((sum, row) => sum + (parseFloat(row.aug) || 0), 0),
+        sept: tempRes.reduce(
+          (sum, row) => sum + (parseFloat(row.sept) || 0),
+          0,
+        ),
+        oct: tempRes.reduce((sum, row) => sum + (parseFloat(row.oct) || 0), 0),
+        nov: tempRes.reduce((sum, row) => sum + (parseFloat(row.nov) || 0), 0),
+        dec: tempRes.reduce((sum, row) => sum + (parseFloat(row.dec) || 0), 0),
+        jan: tempRes.reduce((sum, row) => sum + (parseFloat(row.jan) || 0), 0),
+        feb: tempRes.reduce((sum, row) => sum + (parseFloat(row.feb) || 0), 0),
+        mar: tempRes.reduce((sum, row) => sum + (parseFloat(row.mar) || 0), 0),
+        remarks: '',
+        id: 'TOTAL_ROW',
+        isTotal: true, // Flag to identify total row
+        isEditable: false,
+      }
+
+      // Add total row at the end
+      tempRes.push(totalRow)
+
       console.log('tempRes', tempRes)
       setRows(tempRes)
       setOriginalRows(tempRes)
@@ -289,6 +331,78 @@ const ImportPower = () => {
       setLoading(false)
     }
   }
+
+  // Custom item change handler to recalculate totals in real-time
+  const customItemChange = useCallback((event, setRowsFunc) => {
+    const { field } = event
+
+    // Only recalculate totals for month fields
+    const monthFields = [
+      'april',
+      'may',
+      'june',
+      'july',
+      'aug',
+      'sept',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'mar',
+    ]
+
+    if (!monthFields.includes(field)) {
+      return
+    }
+
+    // Update rows with recalculated totals
+    setRowsFunc((currentRows) => {
+      // Filter out the total row to calculate new totals
+      const dataRows = currentRows.filter((row) => !row.isTotal)
+
+      // Recalculate totals
+      const totalRow = {
+        sourceId: '',
+        sourceName: '',
+        plantName: 'Total',
+        sapCode: '',
+        materialCode: '',
+        uom: dataRows.length > 0 ? dataRows[0].uom : 'Unit',
+        april: dataRows.reduce(
+          (sum, row) => sum + (parseFloat(row.april) || 0),
+          0,
+        ),
+        may: dataRows.reduce((sum, row) => sum + (parseFloat(row.may) || 0), 0),
+        june: dataRows.reduce(
+          (sum, row) => sum + (parseFloat(row.june) || 0),
+          0,
+        ),
+        july: dataRows.reduce(
+          (sum, row) => sum + (parseFloat(row.july) || 0),
+          0,
+        ),
+        aug: dataRows.reduce((sum, row) => sum + (parseFloat(row.aug) || 0), 0),
+        sept: dataRows.reduce(
+          (sum, row) => sum + (parseFloat(row.sept) || 0),
+          0,
+        ),
+        oct: dataRows.reduce((sum, row) => sum + (parseFloat(row.oct) || 0), 0),
+        nov: dataRows.reduce((sum, row) => sum + (parseFloat(row.nov) || 0), 0),
+        dec: dataRows.reduce((sum, row) => sum + (parseFloat(row.dec) || 0), 0),
+        jan: dataRows.reduce((sum, row) => sum + (parseFloat(row.jan) || 0), 0),
+        feb: dataRows.reduce((sum, row) => sum + (parseFloat(row.feb) || 0), 0),
+        mar: dataRows.reduce((sum, row) => sum + (parseFloat(row.mar) || 0), 0),
+        remarks: '',
+        id: 'TOTAL_ROW',
+        isTotal: true,
+        isEditable: false,
+      }
+
+      // Return updated rows with recalculated total
+      return [...dataRows, totalRow]
+    })
+  }, [])
 
   // Permissions (adjust as needed)
   const permissions = {
@@ -559,6 +673,7 @@ const ImportPower = () => {
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
+        customItemChange={customItemChange}
         //groupBy="plant"
       />
     </Box>
