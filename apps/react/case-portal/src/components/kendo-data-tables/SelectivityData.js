@@ -509,7 +509,7 @@ const SelectivityData = (props) => {
       props?.configType == 'PIO Impact' ||
       props?.configType == 'Configuration' ||
       props?.configType == 'Report Manual Entry') &&
-    lowerVertName == 'vcm' 
+    lowerVertName == 'vcm'
   ) {
     FORMATE_VALUE = '{0:0.000}'
   }
