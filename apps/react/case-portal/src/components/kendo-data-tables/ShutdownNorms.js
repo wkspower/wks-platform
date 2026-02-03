@@ -548,7 +548,18 @@ const ShutdownNorms = () => {
 
     try {
       let response
-      if (IS_PE_PP_VERTICAL) {
+
+      if (lowerVertName === 'vcm') {
+        // Use shutdownNormsExportNonGrade for VCM
+        response =
+          await NormalOperationNormsApiService.shutdownNormsExportNonGrade(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            gradeId,
+          )
+      } else if (IS_PE_PP_VERTICAL) {
+        // Use shutdownNormsExport for PE/PP/Elastomer
         response = await NormalOperationNormsApiService.shutdownNormsExport(
           keycloak,
           PLANT_ID,
@@ -573,8 +584,21 @@ const ShutdownNorms = () => {
   const saveExcelFile = async (rawFile) => {
     setLoading(true)
     try {
-      const response =
-        await NormalOperationNormsApiService.saveShutdownNormsExcel(
+      let response
+
+      if (lowerVertName === 'vcm') {
+        // Use saveShutdownNormsExcelNonGrade for VCM
+        response =
+          await NormalOperationNormsApiService.saveShutdownNormsExcelNonGrade(
+            rawFile,
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            gradeId,
+          )
+      } else {
+        // Use saveShutdownNormsExcel for other verticals
+        response = await NormalOperationNormsApiService.saveShutdownNormsExcel(
           rawFile,
           keycloak,
           PLANT_ID,
@@ -582,6 +606,7 @@ const ShutdownNorms = () => {
           gradeId,
           gradeName == 'All Grade',
         )
+      }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -702,9 +727,17 @@ const ShutdownNorms = () => {
       dropdownLabel: 'Select Grade',
       allAction: true,
       downloadExcelBtnFromUI:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
-      downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
-      uploadExcelBtn: IS_PE_NMD_LDPE || lowerVertName === 'pp' ? true : false,
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+          ? false
+          : true,
+      downloadExcelBtn:
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+          ? true
+          : false,
+      uploadExcelBtn:
+        IS_PE_NMD_LDPE || lowerVertName === 'pp' || lowerVertName === 'vcm'
+          ? true
+          : false,
       showTitleNameBusiness: true,
 
       titleName:
