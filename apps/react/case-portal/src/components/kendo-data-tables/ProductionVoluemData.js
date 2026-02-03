@@ -840,7 +840,7 @@ const ProductionvolumeData = ({ permissions }) => {
         VERTICAL_NAME == 'cracker'
           ? 'Maximum Ethylene Production achieved in the last 05 years historical data for 05 consecutive days in different furnace mode of operation.'
           : VERTICAL_NAME == 'vcm'
-            ? ''
+            ? `Maximum ${PLANT_NAME_NO_CASE} production achieved in the last five year historical data derived as average of top 10 percent data points.`
             : '',
 
       showTitleNameBusiness:
@@ -877,7 +877,7 @@ const ProductionvolumeData = ({ permissions }) => {
         VERTICAL_NAME == 'cracker'
           ? 'Design plant capacity for different furnace mode of operation as per licensor provided data.'
           : VERTICAL_NAME == 'vcm'
-            ? ''
+            ? 'Design plant capacity as per licensor provided data.'
             : '',
 
       showTitleNameBusiness:
@@ -922,7 +922,7 @@ const ProductionvolumeData = ({ permissions }) => {
         VERTICAL_NAME == 'cracker'
           ? 'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.'
           : VERTICAL_NAME == 'vcm'
-            ? ''
+            ? `Steady state production operating capacity which is proposed for the ${AOP_YEAR}. `
             : '',
 
       showTitleNameBusiness:
@@ -946,7 +946,7 @@ const ProductionvolumeData = ({ permissions }) => {
         VERTICAL_NAME == 'cracker'
           ? 'Percentage Summary (Ethylene)'
           : VERTICAL_NAME == 'vcm'
-            ? ''
+            ? 'Percentage summary represent a month-wise percentage summary, comparing each months value against the highest VCM production rate over the past 12 months.'
             : '',
       showTitleNameBusiness:
         VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
