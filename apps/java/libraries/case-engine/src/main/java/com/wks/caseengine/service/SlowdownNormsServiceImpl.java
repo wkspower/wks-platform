@@ -1,31 +1,41 @@
 package com.wks.caseengine.service;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
+import java.util.Iterator;
 import javax.sql.DataSource;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -33,9 +43,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.wks.caseengine.dto.AOPConsumptionNormDTO;
+
 import com.wks.caseengine.dto.NormAttributeTransactionsDTO;
+
 import com.wks.caseengine.dto.SlowdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.Plants;
@@ -90,8 +102,6 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	@Autowired
 	private PlantMaintenanceTransactionRepository plantMaintenanceTransactionRepository;
 	
-	@Autowired
-	private NormAttributeTransactionsRepository normAttributeTransactionsRepository;
 	
 	@Autowired
 	private SlowdownConsumptionRepository slowdownConsumptionRepository;
@@ -100,6 +110,9 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	
 	@Autowired
 	private NormParametersRepository normParametersRepository;
+	
+	@Autowired
+	private  PlantService plantService;
 
 	public SlowdownNormsServiceImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -406,9 +419,14 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	public List<SlowdownNormsValueDTO> saveSlowdownNormsData(List<SlowdownNormsValueDTO> slowdownNormsValueDTOList) {
 		String year=null;
 		UUID plantId=null;
-		
+		List<SlowdownNormsValueDTO> failedList = new ArrayList<SlowdownNormsValueDTO>();
 		try {
 			for (SlowdownNormsValueDTO slowdownNormsValueDTO : slowdownNormsValueDTOList) {
+				if (slowdownNormsValueDTO.getSaveStatus() != null
+						&& slowdownNormsValueDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
+					failedList.add(slowdownNormsValueDTO);
+					continue;
+				}
 				year=slowdownNormsValueDTO.getFinancialYear();
 				plantId=UUID.fromString(slowdownNormsValueDTO.getPlantFkId());
 				SlowdownNormsValue slowdownNormsValue = new SlowdownNormsValue();
@@ -487,7 +505,7 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 				aopCalculationRepository.save(aopCalculation);
 			}
 			
-			return slowdownNormsValueDTOList;
+			return failedList;
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			throw new RuntimeException("Failed to update data", ex);
@@ -637,6 +655,323 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 		}
 		return null;
 	}
+	
+	public byte[] exportSlowdownConsumption(String year, UUID plantFKId, boolean isAfterSave, List<SlowdownNormsValueDTO> dtoList,String gradeId) {
+		try {
+			
+			AOPMessageVM aopMessageVM = getSlowdownNormsData( year,  plantFKId.toString(), gradeId);
+					
+			List<Boolean> isEditable = new ArrayList<>();
+
+			if (!isAfterSave) {
+				Map<String, Object> responseMap = (Map<String, Object>) aopMessageVM.getData();
+				dtoList = (List<SlowdownNormsValueDTO>) responseMap.get("slowdownNormsValueDTO");
+			}
+
+			Workbook workbook = new XSSFWorkbook();
+
+			Sheet sheet = workbook.createSheet("Sheet1");
+			int currentRow = 0;
+			// List<List<Object>> rows = new ArrayList<>();
+
+			List<List<Object>> rows = new ArrayList<>();
+			
+			// Create styles for locking/unlocking cells
+			CellStyle lockedStyle = workbook.createCellStyle();
+			lockedStyle.setLocked(true);
+			lockedStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
+			lockedStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+			CellStyle unlockedStyle = workbook.createCellStyle();
+			unlockedStyle.setLocked(false);
+			// Data rows
+			for (SlowdownNormsValueDTO dto : dtoList) {
+				//if (isAfterSave) {
+					List<Object> list = new ArrayList<>();
+					list.add(dto.getNormParameterTypeDisplayName());
+					list.add(dto.getProductName());
+					list.add(dto.getUOM());
+					list.add(dto.getApril());
+					list.add(dto.getMay());
+					list.add(dto.getJune());
+					list.add(dto.getJuly());
+					list.add(dto.getAugust());
+					list.add(dto.getSeptember());
+					list.add(dto.getOctober());
+					list.add(dto.getNovember());
+					list.add(dto.getDecember());
+					list.add(dto.getJanuary());
+					list.add(dto.getFebruary());
+					list.add(dto.getMarch());
+					list.add(dto.getRemarks());
+					list.add(dto.getId());
+					list.add(dto.getMaterialFkId());
+					isEditable.add(dto.getIsEditable());
+					// list.add(dto.getMaterialFkId());
+					 //list.add(dto.getIsEditable());
+					if (isAfterSave) {
+						list.add(dto.getSaveStatus());
+						list.add(dto.getErrDescription());
+					}
+					rows.add(list);
+				//}
+			}
+
+			List<String> innerHeaders = new ArrayList<>();
+			innerHeaders.add("Type");
+			innerHeaders.add("Particulars");
+			innerHeaders.add("UOM");
+			List<String> monthsList = getAcademicYearMonths(year);
+			innerHeaders.addAll(monthsList);
+			innerHeaders.add("Remarks");
+			innerHeaders.add("Id");
+			innerHeaders.add("Material Id");
+			// innerHeaders.add("NormParamterId");
+			 //innerHeaders.add("IsEditable");
+			if (isAfterSave) {
+				innerHeaders.add("Status");
+				innerHeaders.add("Error Description");
+			}
+			List<List<String>> headers = new ArrayList<>();
+			headers.add(innerHeaders);
+
+			for (List<String> headerRowData : headers) {
+				Row headerRow = sheet.createRow(currentRow++);
+				for (int col = 0; col < headerRowData.size(); col++) {
+					Cell cell = headerRow.createCell(col);
+					cell.setCellValue(headerRowData.get(col));
+					cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+				}
+			}
+			for (List<Object> rowData : rows) {
+				boolean isRowEditable=true;
+				if(isEditable.get(currentRow-1)!=null) {
+					isRowEditable = isEditable.get(currentRow-1);
+				}
+				 
+				Row row = sheet.createRow(currentRow++);
+				for (int col = 0; col < rowData.size(); col++) {
+					Cell cell = row.createCell(col);
+					Object value = rowData.get(col);
+
+					if (value instanceof Number) {
+						cell.setCellValue(((Number) value).doubleValue()); // Handles Integer, Double, etc.
+					} else if (value instanceof Boolean) {
+						cell.setCellValue((Boolean) value);
+					} else if (value != null) {
+						cell.setCellValue(value.toString());
+					} else {
+						cell.setCellValue("");
+					}
+					if (isRowEditable) {
+                        cell.setCellStyle(unlockedStyle);
+                    } else {
+                        cell.setCellStyle(lockedStyle);
+                    }
+
+				}
+			}
+			sheet.setColumnHidden(16, true);
+			sheet.setColumnHidden(17, true);
+			//sheet.setColumnHidden(18, true);
+			try {// (FileOutputStream fileOut = new FileOutputStream("output/generated.xlsx")) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				workbook.write(outputStream);
+				workbook.close();
+				return outputStream.toByteArray();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+
+	}
+	public static List<String> getAcademicYearMonths(String year) {
+		List<String> months = new ArrayList<>();
+		int startYear = Integer.parseInt(year.substring(0, 4));
+		int nextYear = startYear + 1;
+
+		// Apr to Dec of startYear
+		for (int month = 4; month <= 12; month++) {
+			String label = formatMonthYear(month, startYear);
+			months.add(label);
+		}
+
+		// Jan to Mar of nextYear
+		for (int month = 1; month <= 3; month++) {
+			String label = formatMonthYear(month, nextYear);
+			months.add(label);
+		}
+
+		return months;
+	}
+	
+	private static String formatMonthYear(int month, int year) {
+		LocalDate date = LocalDate.of(year, month, 1);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM-yy", Locale.ENGLISH);
+		return date.format(formatter);
+	}
+	
+	@Override
+	public AOPMessageVM importSlowdownConsumption(String year, UUID plantFKId, String gradeId, MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			Plants plant = plantsRepository.findById(plantFKId).get();
+			List<SlowdownNormsValueDTO> data=null;
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+				data = readSlowdownConsumptions(file.getInputStream(), plantFKId, year);
+			
+				List<SlowdownNormsValueDTO> failedList = saveSlowdownNormsData(data);
+				
+
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray =null;
+				
+					 fileByteArray = exportSlowdownConsumption(year, plantFKId, true, failedList,gradeId);
+				
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+
+	public List<SlowdownNormsValueDTO> readSlowdownConsumptions(InputStream inputStream, UUID plantFKId, String year) {
+	    List<SlowdownNormsValueDTO> configList = new ArrayList<>();
+	    
+	    Plants plant = plantsRepository.findById(plantFKId)
+	        .orElseThrow(() -> new RuntimeException("Plant not found"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	        .orElseThrow(() -> new RuntimeException("Site not found"));
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	        .orElseThrow(() -> new RuntimeException("Vertical not found"));
+
+	    Set<Integer> activeMonths = new HashSet<>();
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown", year, null);
+	        List<Integer> slowdown = getSlowdownMonths(plantFKId, "Slowdown", year, null);
+	        
+	        if (shutdown != null) activeMonths.addAll(shutdown);
+	        if (slowdown != null) activeMonths.addAll(slowdown);
+
+	        Sheet sheet = workbook.getSheetAt(0);
+	        if (sheet != null) {
+	            Iterator<Row> rowIterator = sheet.iterator();
+
+	            if (rowIterator.hasNext()) rowIterator.next(); // Skip header
+
+	            while (rowIterator.hasNext()) {
+	                Row row = rowIterator.next();
+	                if (row.getPhysicalNumberOfCells() == 0) continue;
+
+	                SlowdownNormsValueDTO dto = new SlowdownNormsValueDTO();
+	                try {
+	                    dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+	                    dto.setProductName(getStringCellValue(row.getCell(1), dto));
+	                    dto.setUOM(getStringCellValue(row.getCell(2), dto));
+	                    dto.setFinancialYear(year);
+	                    if (activeMonths.contains(4)) dto.setApril(getNumericCellValue(row.getCell(3), dto));
+	                    if (activeMonths.contains(5)) dto.setMay(getNumericCellValue(row.getCell(4), dto));
+	                    if (activeMonths.contains(6)) dto.setJune(getNumericCellValue(row.getCell(5), dto));
+	                    if (activeMonths.contains(7)) dto.setJuly(getNumericCellValue(row.getCell(6), dto));
+	                    if (activeMonths.contains(8)) dto.setAugust(getNumericCellValue(row.getCell(7), dto));
+	                    if (activeMonths.contains(9)) dto.setSeptember(getNumericCellValue(row.getCell(8), dto));
+	                    if (activeMonths.contains(10)) dto.setOctober(getNumericCellValue(row.getCell(9), dto));
+	                    if (activeMonths.contains(11)) dto.setNovember(getNumericCellValue(row.getCell(10), dto));
+	                    if (activeMonths.contains(12)) dto.setDecember(getNumericCellValue(row.getCell(11), dto));
+	                    if (activeMonths.contains(1)) dto.setJanuary(getNumericCellValue(row.getCell(12), dto));
+	                    if (activeMonths.contains(2)) dto.setFebruary(getNumericCellValue(row.getCell(13), dto));
+	                    if (activeMonths.contains(3)) dto.setMarch(getNumericCellValue(row.getCell(14), dto));
+
+	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
+	                    dto.setId(getStringCellValue(row.getCell(16), dto));
+	                    dto.setPlantFkId(plantFKId.toString());
+	                    dto.setSiteFkId(site.getId().toString());
+	                    dto.setVerticalFkId(vertical.getId().toString());
+	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
+	         
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                    dto.setErrDescription(e.getMessage());
+	                    dto.setSaveStatus("Failed");
+	                }
+	                configList.add(dto);
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return configList;
+	}
+	
+	private static String getStringCellValue(Cell cell, SlowdownNormsValueDTO dto) {
+	    try {
+	        if (cell == null) return null;
+	        
+	        cell.setCellType(CellType.STRING);
+	        String value = cell.getStringCellValue().trim();
+	        return value.isEmpty() ? null : value;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	private static Double getNumericCellValue(Cell cell, SlowdownNormsValueDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String cellValue = cell.getStringCellValue().trim();
+	        if (cellValue.isEmpty()) {
+	            return null; 
+	        }
+
+	        try {
+	            return Double.parseDouble(cellValue);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    
+	    if (cell.getCellType() == CellType.FORMULA) {
+	        try {
+	            return cell.getNumericCellValue();
+	        } catch (Exception e) {
+	            return null;
+	        }
+	    }
+
+	    return null;
+	}
+
 	
 	@Override
 	@Transactional

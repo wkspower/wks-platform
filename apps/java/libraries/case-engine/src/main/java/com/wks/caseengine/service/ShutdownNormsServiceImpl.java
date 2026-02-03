@@ -36,8 +36,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.wks.caseengine.dto.MCUNormsValueDTO;
 import com.wks.caseengine.dto.ShutdownConsumptionDTO;
 import com.wks.caseengine.dto.ShutdownNormsValueDTO;
 import com.wks.caseengine.entity.AopCalculation;
@@ -1567,32 +1565,28 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 
 	public List<ShutdownNormsValueDTO> readShutdownConsumptions(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutdownNormsValueDTO> configList = new ArrayList<>();
-	    Plants plant = plantsRepository.findById(plantFKId).get();
-	    Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 	    
-	    Map<String, String> gradeMap = getGradeNameIdMap(year, plantFKId);
+	    
+	    Plants plant = plantsRepository.findById(plantFKId)
+	        .orElseThrow(() -> new RuntimeException("Plant not found"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	        .orElseThrow(() -> new RuntimeException("Site not found"));
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	        .orElseThrow(() -> new RuntimeException("Vertical not found"));
+
 	    Set<Integer> activeMonths = new HashSet<>();
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-	        for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
-	            Sheet sheet = workbook.getSheetAt(i);
-	            if (sheet == null) continue;
-	            
-	            String sheetName = sheet.getSheetName();
-	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
-	            
-	            List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown", year, gradeId);
-	            List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown", year, gradeId);
-	            
-	            if (shutdown != null) activeMonths.addAll(shutdown);
-	            if (slowdown != null) activeMonths.addAll(slowdown);
-	        }
+	        
+	        List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown", year, null);
+	        List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown", year, null);
+	        
+	        if (shutdown != null) activeMonths.addAll(shutdown);
+	        if (slowdown != null) activeMonths.addAll(slowdown);
 
+	       
 	        Sheet sheet = workbook.getSheetAt(0);
 	        if (sheet != null) {
-	            String sheetName = sheet.getSheetName();
-	            String gradeId = gradeMap.get(Utility.sanitizeSheetName(sheetName));
 	            Iterator<Row> rowIterator = sheet.iterator();
 
 	            if (rowIterator.hasNext()) rowIterator.next(); // Skip header
@@ -1608,6 +1602,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    dto.setUOM(getStringCellValue(row.getCell(2), dto));
 	                    dto.setFinancialYear(year);
 
+	                  
 	                    if (activeMonths.contains(4)) dto.setApril(getNumericCellValue(row.getCell(3), dto));
 	                    if (activeMonths.contains(5)) dto.setMay(getNumericCellValue(row.getCell(4), dto));
 	                    if (activeMonths.contains(6)) dto.setJune(getNumericCellValue(row.getCell(5), dto));
@@ -1627,7 +1622,8 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    dto.setSiteFkId(site.getId().toString());
 	                    dto.setVerticalFkId(vertical.getId().toString());
 	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
-	                    dto.setGradeFkId(gradeId);
+	                    
+	                   
 
 	                } catch (Exception e) {
 	                    e.printStackTrace();
