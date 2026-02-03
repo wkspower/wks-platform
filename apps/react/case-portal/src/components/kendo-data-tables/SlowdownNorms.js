@@ -465,6 +465,11 @@ const SlowdownNorms = () => {
   const onRowModesModelChange = (newRowModesModel) => {
     setRowModesModel(newRowModesModel)
   }
+
+  const handleExcelUpload = (rawFile) => {
+    saveExcelFile(rawFile)
+  }
+
   const downloadExcelForConfiguration = async () => {
     setSnackbarOpen(true)
     setSnackbarData({
@@ -474,7 +479,17 @@ const SlowdownNorms = () => {
 
     try {
       let response
-      if (lowerVertName === 'pp' || lowerVertName === 'pe') {
+
+      if (lowerVertName === 'vcm') {
+        // Use slowdownconsumptionExportVCM for VCM
+        response = await DataService.slowdownconsumptionExportVCM(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          gradeId,
+        )
+      } else if (lowerVertName === 'pp' || lowerVertName === 'pe') {
+        // Use slowdownconsumptionExport for PE/PP
         response = await DataService.slowdownconsumptionExport(
           keycloak,
           PLANT_ID,
@@ -491,6 +506,73 @@ const SlowdownNorms = () => {
       setSnackbarOpen(true)
     }
   }
+
+  const saveExcelFile = async (rawFile) => {
+    setLoading(true)
+    try {
+      let response
+
+      if (lowerVertName === 'vcm') {
+        // Use saveShutdownNormsExcelNonGrade for VCM
+        response = await DataService.saveSlowdownNormsExcel(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          gradeId,
+        )
+      }
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Uploaded Successfully!',
+          severity: 'success',
+        })
+        setModifiedCells({})
+        fetchData(gradeId)
+      } else if (response?.code === 400 && response?.data) {
+        // Partial save, error file download
+        const byteCharacters = atob(response.data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'Error File Slowdown_Consumption.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        link.remove()
+        window.URL.revokeObjectURL(url)
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Partial data saved. Error file downloaded.',
+          severity: 'warning',
+        })
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data Save Failed!',
+          severity: 'error',
+        })
+      }
+
+      return response
+    } catch (error) {
+      console.error('Error saving data:', error)
+      setLoading(false)
+    } finally {
+      fetchData(gradeId)
+      setLoading(false)
+    }
+  }
+
   const getAdjustedPermissions = (permissions, isOldYear) => {
     if (isOldYear != 1) return permissions
     return {
@@ -532,8 +614,10 @@ const SlowdownNorms = () => {
 
       allAction: true,
       dropdownLabel: 'Select Grade',
-      downloadExcelBtnFromUI: IS_PE_PP ? false : true,
-      downloadExcelBtn: IS_PE_PP ? true : false,
+      downloadExcelBtnFromUI:
+        IS_PE_PP || lowerVertName === 'vcm' ? false : true,
+      uploadExcelBtn: lowerVertName === 'vcm' ? true : false,
+      downloadExcelBtn: IS_PE_PP || lowerVertName === 'vcm' ? true : false,
       showG: IS_PE_PP ? true : false,
       marginBottom: IS_PE_PP ? true : false,
 
