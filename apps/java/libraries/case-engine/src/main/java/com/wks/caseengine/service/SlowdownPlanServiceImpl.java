@@ -1513,247 +1513,249 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	}
 
 	public List<ShutDownPlanDTO> readNonProductSlowdown(InputStream inputStream, UUID plantFKId, String year) {
-		List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-		List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
-		Plants plant = plantsRepository.findById(plantFKId).get();
-		Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-		
-		final long EIGHT_DAYS_IN_MINUTES = 8 * 24 * 60; 
+	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
+	    Plants plant = plantsRepository.findById(plantFKId).get();
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	    
+	    final long EIGHT_DAYS_IN_MINUTES = 8 * 24 * 60; // 11520 minutes or 192 hours
 
-		try (Workbook workbook = new XSSFWorkbook(inputStream)) {
-			Sheet sheet = workbook.getSheetAt(0);
-			Iterator<Row> rowIterator = sheet.iterator();
-			FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-			if (rowIterator.hasNext())
-				rowIterator.next();
-			
-			List<String> des = new ArrayList<>();
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+	        if (rowIterator.hasNext())
+	            rowIterator.next();
+	        
+	        List<String> des = new ArrayList<>();
 
-			while (rowIterator.hasNext()) {
-				Row row = rowIterator.next();
-				ShutDownPlanDTO dto = new ShutDownPlanDTO();
-				LocalDateTime ldtStart = null;
-				LocalDateTime ldtEnd = null;
-				boolean alreadyFailed = false;
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
+	            LocalDateTime ldtStart = null;
+	            LocalDateTime ldtEnd = null;
+	            boolean alreadyFailed = false;
 
-				try {
-					dto.setAudityear(year);
+	            try {
+	                dto.setAudityear(year);
 
-					String desc = getStringCellValue(row.getCell(0), dto);
-					dto.setDiscription(desc); 
-					
-					// File duplicate check
-					if (dto.getDiscription() != null && des.contains(dto.getDiscription()) && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
-						alreadyFailed = true;
-					}
-					
-					if (dto.getDiscription() != null) {
-						des.add(dto.getDiscription());
-					}
+	                String desc = getStringCellValue(row.getCell(0), dto);
+	                dto.setDiscription(desc); 
+	                if (dto.getDiscription() != null && des.contains(dto.getDiscription()) && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
+	                    alreadyFailed = true;
+	                }
+	                
+	                if (dto.getDiscription() != null) {
+	                    des.add(dto.getDiscription());
+	                }
 
-					LocalDateTime[] bounds = parseFinancialYearBounds(year);
-					LocalDateTime fyStart = bounds[0];
-					LocalDateTime fyEnd = bounds[1];
-					
-					String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
-					
-					if (mantStartStr != null) {
-						try {
-							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-							ldtStart = LocalDateTime.parse(mantStartStr, fmt).withSecond(0).withNano(0);
-							
-							Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
-							dto.setMaintStartDateTime(startDate);
-							
-							if (!alreadyFailed) {
-								if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("Start date/time is outside the financial year " + year);
-									alreadyFailed = true;
-								}
-							}
-						} catch (Exception ex) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Invalid date/time format in cell 2 (Start Date).");
-							ex.printStackTrace();
-							alreadyFailed = true;
-						}
-					} else { 
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("Start date/time in cell 2 is missing.");
-						alreadyFailed = true;
-					}
-					
-					String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
-					
-					if (mantEndStr != null) {
-						try {
-							DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
-							ldtEnd = LocalDateTime.parse(mantEndStr, fmt).withSecond(0).withNano(0);
-							
-							Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
-							dto.setMaintEndDateTime(endDate);
-							
-							if (!alreadyFailed) {
-								if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("End date/time is outside the financial year " + year);
-									alreadyFailed = true;
-								} else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
-									dto.setSaveStatus("Failed");
-									dto.setErrDescription("End date/time cannot be before start date/time.");
-									alreadyFailed = true;
-								} else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
-									if(!(vertical.getName().equalsIgnoreCase("VCM"))) {
-										dto.setSaveStatus("Failed");
-										dto.setErrDescription("Start and end date/time must belong to the same month.");
-										alreadyFailed = true;
-									}	
-								} else if (ldtStart != null) {
-									boolean overlaps = false;
-									for (LocalDateTime[] prevPeriod : validTimeRanges) {
-										LocalDateTime prevLdtStart = prevPeriod[0];
-										LocalDateTime prevLdtEnd = prevPeriod[1];
-										if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-											overlaps = true;
-											break;
-										}
-									}
-									boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
-			                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
-									if (overlaps) {
-										 if (!isVcmSeasonalImpact) {
-											dto.setSaveStatus("Failed");
-											dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
-											alreadyFailed = true;
-										 }
-									}
-								}
-							}
-						} catch (Exception ex) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Invalid date/time format in cell 3 (End Date).");
-							ex.printStackTrace();
-							alreadyFailed = true;
-						}
-					} else if (mantEndStr == null && !alreadyFailed) {
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("End date/time in cell 3 is missing.");
-						alreadyFailed = true;
-					}
-					
-					// Duration Calculation and Furnace Decoking Check
-					if (ldtStart != null && ldtEnd != null) {
-						try {
-							Duration duration = Duration.between(ldtStart, ldtEnd);
-							long totalMinutes = duration.toMinutes();
+	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
+	                LocalDateTime fyStart = bounds[0];
+	                LocalDateTime fyEnd = bounds[1];
+	                
+	                String mantStartStr = getCellAsString(row.getCell(1), dto, evaluator);
+	                
+	                if (mantStartStr != null) {
+	                    try {
+	                        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+	                        ldtStart = LocalDateTime.parse(mantStartStr, fmt).withSecond(0).withNano(0);
+	                        
+	                        Date startDate = Date.from(ldtStart.atZone(ZoneId.systemDefault()).toInstant());
+	                        dto.setMaintStartDateTime(startDate);
+	                        
+	                        if (!alreadyFailed) {
+	                            if (ldtStart.isBefore(fyStart) || ldtStart.isAfter(fyEnd)) {
+	                                dto.setSaveStatus("Failed");
+	                                dto.setErrDescription("Start date/time is outside the financial year " + year);
+	                                alreadyFailed = true;
+	                            }
+	                        }
+	                    } catch (Exception ex) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Invalid date/time format in cell 2 (Start Date).");
+	                        ex.printStackTrace();
+	                        alreadyFailed = true;
+	                    }
+	                } else { 
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Start date/time in cell 2 is missing.");
+	                    alreadyFailed = true;
+	                }
+	                
+	                boolean isVcmFurnaceDecoking = false;
+	                if ("VCM".equalsIgnoreCase(vertical.getName()) && dto.getDiscription() != null) {
+	                    String d = dto.getDiscription();
+	                    if (d.equalsIgnoreCase("Furnace Decoking H-210") || d.equalsIgnoreCase("Furnace Decoking H-220")) {
+	                        if (ldtStart != null) {
+	                            ldtEnd = ldtStart.plusHours(192);
+	                            dto.setMaintEndDateTime(Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant()));
+	                            dto.setRate(27.0);
+	                            isVcmFurnaceDecoking = true;
+	                        }
+	                    } else if (d.equalsIgnoreCase("Furnace Decoking H-1220")) {
+	                        if (ldtStart != null) {
+	                            ldtEnd = ldtStart.plusHours(192);
+	                            dto.setMaintEndDateTime(Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant()));
+	                            dto.setRate(26.458);
+	                            isVcmFurnaceDecoking = true;
+	                        }
+	                    }
+	                }
 
-							if (totalMinutes < 0) {
-								throw new IllegalStateException("Calculated negative duration.");
-							}
+	                if (!isVcmFurnaceDecoking) {
+	                    String mantEndStr = getCellAsString(row.getCell(2), dto, evaluator);
+	                    if (mantEndStr != null) {
+	                        try {
+	                            DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.US);
+	                            ldtEnd = LocalDateTime.parse(mantEndStr, fmt).withSecond(0).withNano(0);
+	                            Date endDate = Date.from(ldtEnd.atZone(ZoneId.systemDefault()).toInstant());
+	                            dto.setMaintEndDateTime(endDate);
+	                        } catch (Exception ex) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Invalid date/time format in cell 3 (End Date).");
+	                            ex.printStackTrace();
+	                            alreadyFailed = true;
+	                        }
+	                    } else if (!alreadyFailed) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("End date/time in cell 3 is missing.");
+	                        alreadyFailed = true;
+	                    }
+	                }
+	                
+	                // Logic validations for the end date (now includes overridden dates)
+	                if (ldtEnd != null && !alreadyFailed) {
+	                    if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("End date/time is outside the financial year " + year);
+	                        alreadyFailed = true;
+	                    } else if (ldtStart != null && ldtEnd.isBefore(ldtStart)) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("End date/time cannot be before start date/time.");
+	                        alreadyFailed = true;
+	                    } else if (ldtStart != null && ldtStart.getMonth() != ldtEnd.getMonth()) {
+	                        if (!(vertical.getName().equalsIgnoreCase("VCM"))) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Start and end date/time must belong to the same month.");
+	                            alreadyFailed = true;
+	                        }   
+	                    } else if (ldtStart != null) {
+	                        boolean overlaps = false;
+	                        for (LocalDateTime[] prevPeriod : validTimeRanges) {
+	                            LocalDateTime prevLdtStart = prevPeriod[0];
+	                            LocalDateTime prevLdtEnd = prevPeriod[1];
+	                            if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
+	                                overlaps = true;
+	                                break;
+	                            }
+	                        }
+	                        boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
+	                                                        && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
+	                        if (overlaps && !isVcmSeasonalImpact) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
+	                            alreadyFailed = true;
+	                        }
+	                    }
+	                }
+	                
+	                // Duration Calculation and Furnace Decoking Check
+	                if (ldtStart != null && ldtEnd != null) {
+	                    try {
+	                        Duration duration = Duration.between(ldtStart, ldtEnd);
+	                        long totalMinutes = duration.toMinutes();
 
-							double durationInDecimalHours = (double) totalMinutes / 60.0;
-							
-							if (dto.getDiscription() != null && dto.getDiscription().equalsIgnoreCase("Furnace Decoking")) {
-								if (totalMinutes != EIGHT_DAYS_IN_MINUTES) {
-									if (!alreadyFailed) {
-										dto.setSaveStatus("Failed");
-										dto.setErrDescription("Duration for 'Furnace Decoking' must be exactly 8 days (11520 minutes). Actual duration: " + totalMinutes + " minutes.");
-										alreadyFailed = true;
-									}
-								}
-							}
-							if (!alreadyFailed) {
-								dto.setDurationInHrs(durationInDecimalHours); // Field set
-								validTimeRanges.add(new LocalDateTime[]{ldtStart, ldtEnd});
-							} else if (dto.getSaveStatus() == null) {
-								dto.setDurationInHrs(durationInDecimalHours);
-							}
+	                        if (totalMinutes < 0) {
+	                            throw new IllegalStateException("Calculated negative duration.");
+	                        }
 
+	                        double durationInDecimalHours = (double) totalMinutes / 60.0;
+	                        
+	                        if (dto.getDiscription() != null && dto.getDiscription().equalsIgnoreCase("Furnace Decoking")) {
+	                            if (totalMinutes != EIGHT_DAYS_IN_MINUTES) {
+	                                if (!alreadyFailed) {
+	                                    dto.setSaveStatus("Failed");
+	                                    dto.setErrDescription("Duration for 'Furnace Decoking' must be exactly 8 days (11520 minutes). Actual duration: " + totalMinutes + " minutes.");
+	                                    alreadyFailed = true;
+	                                }
+	                            }
+	                        }
+	                        if (!alreadyFailed) {
+	                            dto.setDurationInHrs(durationInDecimalHours); 
+	                            validTimeRanges.add(new LocalDateTime[]{ldtStart, ldtEnd});
+	                        } else if (dto.getSaveStatus() == null) {
+	                            dto.setDurationInHrs(durationInDecimalHours);
+	                        }
 
-						} catch (Exception e) {
-							if (!alreadyFailed) {
-								dto.setSaveStatus("Failed");
-								dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
-								alreadyFailed = true;
-							}
-							e.printStackTrace();
-						}
-					}
-					
-					if(vertical.getName().equalsIgnoreCase("ELASTOMER")) {
-						Double elastomerDuration = getNumericCellValue(row.getCell(3), dto);
-						dto.setDurationInHrs(elastomerDuration); // Field 4 set
-						
-						if (elastomerDuration == null && !alreadyFailed) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("Duration in cell 4 is missing for ELASTOMER.");
-							alreadyFailed = true;
-						}
-					}
-					 
-						 dto.setRate(getNumericCellValue(row.getCell(4), dto)); 
-					 
-					
-						 if (dto.getRate() == null && !alreadyFailed) {
-								dto.setSaveStatus("Failed");
-								dto.setErrDescription("Rate in cell 5 cannot be null.");
-								alreadyFailed = true;
-						} 
-					 
-					
-					String remark=null;
-					
-						 remark = getStringCellValue(row.getCell(5), dto);
-					 
-					
-					dto.setRemark(remark); 
-					if((dto.getRemark() == null || dto.getRemark().trim().isEmpty()) && !alreadyFailed) {
-						dto.setSaveStatus("Failed");
-						dto.setErrDescription("Please enter remark in cell 6.");
-						alreadyFailed = true;
-					}
-					String idString =null;
-					
-						 idString = getStringCellValue(row.getCell(6), dto);
-					 
-					
-					dto.setId(idString); 
-					
-					if (dto.getId() == null && dto.getDiscription() != null && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
-						// Check DB for existing records with the same description
-						List<Object[]> obj=shutDownPlanRepository.findDiscriptionByPlantIdAndType("Slowdown", plantFKId.toString(), year, dto.getDiscription());
+	                    } catch (Exception e) {
+	                        if (!alreadyFailed) {
+	                            dto.setSaveStatus("Failed");
+	                            dto.setErrDescription("Error calculating duration between maintenance dates or duration is negative.");
+	                            alreadyFailed = true;
+	                        }
+	                        e.printStackTrace();
+	                    }
+	                }
+	                
+	                if (vertical.getName().equalsIgnoreCase("ELASTOMER")) {
+	                    Double elastomerDuration = getNumericCellValue(row.getCell(3), dto);
+	                    dto.setDurationInHrs(elastomerDuration); 
+	                    
+	                    if (elastomerDuration == null && !alreadyFailed) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Duration in cell 4 is missing for ELASTOMER.");
+	                        alreadyFailed = true;
+	                    }
+	                }
+	                
+	                if (!isVcmFurnaceDecoking) {
+	                    dto.setRate(getNumericCellValue(row.getCell(4), dto)); 
+	                    if (dto.getRate() == null && !alreadyFailed) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("Rate in cell 5 cannot be null.");
+	                        alreadyFailed = true;
+	                    } 
+	                }
+	                
+	                String remark = getStringCellValue(row.getCell(5), dto);
+	                dto.setRemark(remark); 
+	                if ((dto.getRemark() == null || dto.getRemark().trim().isEmpty()) && !alreadyFailed) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please enter remark in cell 6.");
+	                    alreadyFailed = true;
+	                }
 
-						if(obj.size() > 0) {
-							dto.setSaveStatus("Failed");
-							dto.setErrDescription("The Description '"+dto.getDiscription()+"' already exists in the database. Please enter a unique description to avoid duplication.");
-							alreadyFailed = true;
-						}
-					}
+	                String idString = getStringCellValue(row.getCell(6), dto);
+	                dto.setId(idString); 
+	                
+	                if (dto.getId() == null && dto.getDiscription() != null && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
+	                    List<Object[]> obj = shutDownPlanRepository.findDiscriptionByPlantIdAndType("Slowdown", plantFKId.toString(), year, dto.getDiscription());
+	                    if (obj.size() > 0) {
+	                        dto.setSaveStatus("Failed");
+	                        dto.setErrDescription("The Description '" + dto.getDiscription() + "' already exists in the database. Please enter a unique description to avoid duplication.");
+	                        alreadyFailed = true;
+	                    }
+	                }
 
-					// Final Success Status
-					if (!alreadyFailed && dto.getSaveStatus() == null) {
-						dto.setSaveStatus("Success");
-					}
+	                if (!alreadyFailed && dto.getSaveStatus() == null) {
+	                    dto.setSaveStatus("Success");
+	                }
 
-				} catch (Exception e) {
-					e.printStackTrace();
-					if (dto.getSaveStatus() == null) {
-						dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
-						dto.setSaveStatus("Failed");
-					}
-				}
-
-				dtoList.add(dto);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return dtoList;
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                if (dto.getSaveStatus() == null) {
+	                    dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
+	                    dto.setSaveStatus("Failed");
+	                }
+	            }
+	            dtoList.add(dto);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return dtoList;
 	}
 	
 	public List<ShutDownPlanDTO> readNonProductSlowdownElastomer(InputStream inputStream, UUID plantFKId, String year) {
