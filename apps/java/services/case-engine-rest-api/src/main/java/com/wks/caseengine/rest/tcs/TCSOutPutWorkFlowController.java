@@ -275,6 +275,21 @@ public class TCSOutPutWorkFlowController {
 		return ResponseEntity.ok("CTS approval completed successfully");
 	}
 
+	@PostMapping(value = "cluster-head-submission/{siteId}/{finacialYear}")
+	public ResponseEntity<String> clusterHeadSubmission(@PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to complete CTS approval");
+		}
+
+		if(finacialYear == null || finacialYear.isEmpty()) { 
+			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
+		}
+		
+		tcsWorkFlowService.clusterHeadApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
+		return ResponseEntity.ok("Cluster Head approval completed successfully");
+	}
+
 	@PostMapping(value = "ebs-approve-reject/{plantName}/{siteId}/{approvalStatus}/{finacialYear}")
 	public ResponseEntity<String> ebsApproveReject(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
 		if(plantName == null || plantName.isEmpty()) { 
