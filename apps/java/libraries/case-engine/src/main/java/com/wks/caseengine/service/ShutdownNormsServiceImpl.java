@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -730,111 +731,123 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	}
 
 	
-	public Map<String,Object> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
-		String year=null;
-		UUID plantId=null;
-		List<ShutdownNormsValue> shutdownNormsValueList = new ArrayList<>();
-		List<ShutdownNormsValueDTO> failedList = new ArrayList<>();
-		try {
-			for (ShutdownNormsValueDTO shutdownNormsValueDTO : shutdownNormsValueDTOList) {
-				if (shutdownNormsValueDTO.getSaveStatus() != null
-						&& shutdownNormsValueDTO.getSaveStatus().equalsIgnoreCase("Failed")) {
-					failedList.add(shutdownNormsValueDTO);
-					continue;
-				}
-				year=shutdownNormsValueDTO.getFinancialYear();
-				plantId=UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
-				ShutdownNormsValue shutdownNormsValue = null;
-				if (shutdownNormsValueDTO.getId() != null && !shutdownNormsValueDTO.getId().isEmpty()) {
-					Optional<ShutdownNormsValue> shutdownNormsValueOpt =shutdownNormsRepository.findById(UUID.fromString(shutdownNormsValueDTO.getId()));
-					if(shutdownNormsValueOpt.isPresent()) {
-						shutdownNormsValue=shutdownNormsValueOpt.get();
-						shutdownNormsValue.setModifiedOn(new Date());
-					}
-					
-				} else {
-					shutdownNormsValue = new ShutdownNormsValue();
-					UUID siteId = null;
-					UUID verticalId = null;
-					UUID materialId = null;
-					if (shutdownNormsValueDTO.getSiteFkId() != null) {
-						siteId = UUID.fromString(shutdownNormsValueDTO.getSiteFkId());
-					}
-					if (shutdownNormsValueDTO.getPlantFkId() != null) {
-						plantId = UUID.fromString(shutdownNormsValueDTO.getPlantFkId());
-					}
-					if (shutdownNormsValueDTO.getVerticalFkId() != null) {
-						verticalId = UUID.fromString(shutdownNormsValueDTO.getVerticalFkId());
-					}
-					if (shutdownNormsValueDTO.getMaterialFkId() != null) {
-						materialId = UUID.fromString(shutdownNormsValueDTO.getMaterialFkId());
-					}
-					UUID Id = shutdownNormsRepository.findIdByFilters(plantId, siteId, verticalId, materialId,
-							shutdownNormsValueDTO.getFinancialYear());
-					if (Id != null) {
-						shutdownNormsValue.setId(Id);
-					}
+	public Map<String, Object> saveShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
+	    String year = null;
+	    UUID plantId = null;
+	    List<ShutdownNormsValueDTO> failedList = new ArrayList<>();
+	    
+	    try {
+	        for (ShutdownNormsValueDTO dto : shutdownNormsValueDTOList) {
+	            if (dto.getSaveStatus() != null && dto.getSaveStatus().equalsIgnoreCase("Failed")) {
+	                failedList.add(dto);
+	                continue;
+	            }
 
-					shutdownNormsValue.setCreatedOn(new Date());
-				}
-				shutdownNormsValue.setApril(Optional.ofNullable(shutdownNormsValueDTO.getApril()).orElse(0.0));
-				shutdownNormsValue.setMay(Optional.ofNullable(shutdownNormsValueDTO.getMay()).orElse(0.0));
-				shutdownNormsValue.setJune(Optional.ofNullable(shutdownNormsValueDTO.getJune()).orElse(0.0));
-				shutdownNormsValue.setJuly(Optional.ofNullable(shutdownNormsValueDTO.getJuly()).orElse(0.0));
-				shutdownNormsValue.setAugust(Optional.ofNullable(shutdownNormsValueDTO.getAugust()).orElse(0.0));
-				shutdownNormsValue.setSeptember(Optional.ofNullable(shutdownNormsValueDTO.getSeptember()).orElse(0.0));
-				shutdownNormsValue.setOctober(Optional.ofNullable(shutdownNormsValueDTO.getOctober()).orElse(0.0));
-				shutdownNormsValue.setNovember(Optional.ofNullable(shutdownNormsValueDTO.getNovember()).orElse(0.0));
-				shutdownNormsValue.setDecember(Optional.ofNullable(shutdownNormsValueDTO.getDecember()).orElse(0.0));
-				shutdownNormsValue.setJanuary(Optional.ofNullable(shutdownNormsValueDTO.getJanuary()).orElse(0.0));
-				shutdownNormsValue.setFebruary(Optional.ofNullable(shutdownNormsValueDTO.getFebruary()).orElse(0.0));
-				shutdownNormsValue.setMarch(Optional.ofNullable(shutdownNormsValueDTO.getMarch()).orElse(0.0));
-				if (shutdownNormsValueDTO.getSiteFkId() != null) {
-					shutdownNormsValue.setSiteFkId(UUID.fromString(shutdownNormsValueDTO.getSiteFkId()));
-				}
-				if (shutdownNormsValueDTO.getPlantFkId() != null) {
-					shutdownNormsValue.setPlantFkId(UUID.fromString(shutdownNormsValueDTO.getPlantFkId()));
-				}
-				if (shutdownNormsValueDTO.getVerticalFkId() != null) {
-					shutdownNormsValue.setVerticalFkId(UUID.fromString(shutdownNormsValueDTO.getVerticalFkId()));
-				}
-				if (shutdownNormsValueDTO.getMaterialFkId() != null) {
-					shutdownNormsValue.setMaterialFkId(UUID.fromString(shutdownNormsValueDTO.getMaterialFkId()));
-				}
-				if (shutdownNormsValueDTO.getNormParameterTypeId() != null) {
-					shutdownNormsValue
-							.setNormParameterTypeFkId(UUID.fromString(shutdownNormsValueDTO.getNormParameterTypeId()));
-				}
+	            year = dto.getFinancialYear();
+	            plantId = UUID.fromString(dto.getPlantFkId());
+	            ShutdownNormsValue shutdownNormsValue = null;
+	            boolean isUpdate = false;
+	            if (dto.getId() != null && !dto.getId().isEmpty()) {
+	                Optional<ShutdownNormsValue> opt = shutdownNormsRepository.findById(UUID.fromString(dto.getId()));
+	                if (opt.isPresent()) {
+	                    shutdownNormsValue = opt.get();
+	                    isUpdate = true;
+	                }
+	            } else {
+	                shutdownNormsValue = new ShutdownNormsValue();
+	                UUID siteId = dto.getSiteFkId() != null ? UUID.fromString(dto.getSiteFkId()) : null;
+	                UUID verticalId = dto.getVerticalFkId() != null ? UUID.fromString(dto.getVerticalFkId()) : null;
+	                UUID materialId = dto.getMaterialFkId() != null ? UUID.fromString(dto.getMaterialFkId()) : null;
+	                
+	                UUID existingId = shutdownNormsRepository.findIdByFilters(plantId, siteId, verticalId, materialId, dto.getFinancialYear());
+	                if (existingId != null) {
+	                    shutdownNormsValue = shutdownNormsRepository.findById(existingId).orElse(new ShutdownNormsValue());
+	                    isUpdate = true;
+	                } else {
+	                    shutdownNormsValue.setCreatedOn(new Date());
+	                }
+	            }
 
-				shutdownNormsValue.setFinancialYear(shutdownNormsValueDTO.getFinancialYear());
-				shutdownNormsValue.setRemarks(shutdownNormsValueDTO.getRemarks());
-				shutdownNormsValue.setMcuVersion("V1");
-				shutdownNormsValue.setUpdatedBy(Utility.getUserName());
+	            if (isUpdate) {
+	                boolean hasMonthChanged = 
+	                    !Objects.equals(shutdownNormsValue.getApril(), dto.getApril()) ||
+	                    !Objects.equals(shutdownNormsValue.getMay(), dto.getMay()) ||
+	                    !Objects.equals(shutdownNormsValue.getJune(), dto.getJune()) ||
+	                    !Objects.equals(shutdownNormsValue.getJuly(), dto.getJuly()) ||
+	                    !Objects.equals(shutdownNormsValue.getAugust(), dto.getAugust()) ||
+	                    !Objects.equals(shutdownNormsValue.getSeptember(), dto.getSeptember()) ||
+	                    !Objects.equals(shutdownNormsValue.getOctober(), dto.getOctober()) ||
+	                    !Objects.equals(shutdownNormsValue.getNovember(), dto.getNovember()) ||
+	                    !Objects.equals(shutdownNormsValue.getDecember(), dto.getDecember()) ||
+	                    !Objects.equals(shutdownNormsValue.getJanuary(), dto.getJanuary()) ||
+	                    !Objects.equals(shutdownNormsValue.getFebruary(), dto.getFebruary()) ||
+	                    !Objects.equals(shutdownNormsValue.getMarch(), dto.getMarch());
 
-				System.out.println("Data Saved Succussfully");
-				shutdownNormsValueList.add(shutdownNormsRepository.save(shutdownNormsValue));
-			}
-			
-			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("shutdown-norms");
-			for(ScreenMapping screenMapping:screenMappingList) {
-				AopCalculation aopCalculation=new AopCalculation();
-				aopCalculation.setAopYear(year);
-				aopCalculation.setIsChanged(true);
-				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(plantId);
-				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
-				aopCalculationRepository.save(aopCalculation);
-			}
-			Map<String,Object> map=new HashMap<>();
-			map.put("data", failedList);
-			// TODO Auto-generated method stub
-			return map;
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException("Failed to save data", ex);
-		}
-	}
-	
+	                boolean hasRemarkChanged = !Objects.equals(shutdownNormsValue.getRemarks(), dto.getRemarks());
+	                if (!hasMonthChanged && !hasRemarkChanged) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("No changes detected in values or remarks.");
+	                    failedList.add(dto);
+	                    continue;
+	                }
+	                shutdownNormsValue.setModifiedOn(new Date());
+	            }
+
+	            try {
+	                shutdownNormsValue.setApril(Optional.ofNullable(dto.getApril()).orElse(0.0));
+	                shutdownNormsValue.setMay(Optional.ofNullable(dto.getMay()).orElse(0.0));
+	                shutdownNormsValue.setJune(Optional.ofNullable(dto.getJune()).orElse(0.0));
+	                shutdownNormsValue.setJuly(Optional.ofNullable(dto.getJuly()).orElse(0.0));
+	                shutdownNormsValue.setAugust(Optional.ofNullable(dto.getAugust()).orElse(0.0));
+	                shutdownNormsValue.setSeptember(Optional.ofNullable(dto.getSeptember()).orElse(0.0));
+	                shutdownNormsValue.setOctober(Optional.ofNullable(dto.getOctober()).orElse(0.0));
+	                shutdownNormsValue.setNovember(Optional.ofNullable(dto.getNovember()).orElse(0.0));
+	                shutdownNormsValue.setDecember(Optional.ofNullable(dto.getDecember()).orElse(0.0));
+	                shutdownNormsValue.setJanuary(Optional.ofNullable(dto.getJanuary()).orElse(0.0));
+	                shutdownNormsValue.setFebruary(Optional.ofNullable(dto.getFebruary()).orElse(0.0));
+	                shutdownNormsValue.setMarch(Optional.ofNullable(dto.getMarch()).orElse(0.0));
+	            } catch (Exception e) {
+	                dto.setSaveStatus("Failed");
+	                dto.setErrDescription("Please enter numeric values");
+	                failedList.add(dto);
+	                continue;
+	            }
+	            if (dto.getSiteFkId() != null) shutdownNormsValue.setSiteFkId(UUID.fromString(dto.getSiteFkId()));
+	            if (dto.getPlantFkId() != null) shutdownNormsValue.setPlantFkId(UUID.fromString(dto.getPlantFkId()));
+	            if (dto.getVerticalFkId() != null) shutdownNormsValue.setVerticalFkId(UUID.fromString(dto.getVerticalFkId()));
+	            if (dto.getMaterialFkId() != null) shutdownNormsValue.setMaterialFkId(UUID.fromString(dto.getMaterialFkId()));
+	            if (dto.getNormParameterTypeId() != null) {
+	                shutdownNormsValue.setNormParameterTypeFkId(UUID.fromString(dto.getNormParameterTypeId()));
+	            }
+
+	            shutdownNormsValue.setFinancialYear(dto.getFinancialYear());
+	            shutdownNormsValue.setRemarks(dto.getRemarks());
+	            shutdownNormsValue.setMcuVersion("V1");
+	            shutdownNormsValue.setUpdatedBy(Utility.getUserName());
+
+	            shutdownNormsRepository.save(shutdownNormsValue);
+	        }
+
+	        List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("shutdown-norms");
+	        for (ScreenMapping screenMapping : screenMappingList) {
+	            AopCalculation aopCalculation = new AopCalculation();
+	            aopCalculation.setAopYear(year);
+	            aopCalculation.setIsChanged(true);
+	            aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+	            aopCalculation.setPlantId(plantId);
+	            aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+	            aopCalculationRepository.save(aopCalculation);
+	        }
+
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("data", failedList);
+	        return map;
+
+	    } catch (Exception ex) {
+	        ex.printStackTrace();
+	        throw new RuntimeException("Failed to save data", ex);
+	    }
+	}	
 	
 	public Map<String,Object> savePPShutdownNormsData(List<ShutdownNormsValueDTO> shutdownNormsValueDTOList) {
 		String year=null;
@@ -1579,11 +1592,7 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        
 	        List<Integer> shutdown = plantService.getShutdownMonths(plantFKId, "Shutdown", year, null);
-	        List<Integer> slowdown = slowdownNormsService.getSlowdownMonths(plantFKId, "Slowdown", year, null);
-	        
 	        if (shutdown != null) activeMonths.addAll(shutdown);
-	        if (slowdown != null) activeMonths.addAll(slowdown);
-
 	       
 	        Sheet sheet = workbook.getSheetAt(0);
 	        if (sheet != null) {
