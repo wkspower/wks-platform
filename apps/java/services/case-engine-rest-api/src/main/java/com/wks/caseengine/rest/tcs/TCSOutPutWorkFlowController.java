@@ -261,10 +261,8 @@ public class TCSOutPutWorkFlowController {
 	}
 
 	@PostMapping(value = "cts-submission/{siteId}/{finacialYear}")
-	public ResponseEntity<String> ctsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
-		if(plantName == null || plantName.isEmpty()) { 
-			throw new RestResourceNotFoundException("Plant name is required to complete CTS approval");
-		}
+	public ResponseEntity<String> ctsSubmission( @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
 		if(siteId == null || siteId.isEmpty()) {
 			throw new RestResourceNotFoundException("Site ID is required to complete CTS approval");
 		}
@@ -431,7 +429,7 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Vertical ID is required to create CTS approve reject audit trail");
 		}
 
-		PlantSubmissionAuditTrailDTO auditTrail = tcsWorkFlowService.getLatestEBSSubmissionAuditTrail(siteId, verticalId, "CTS");
+		PlantSubmissionAuditTrailDTO auditTrail = tcsWorkFlowService.getLatestEBSSubmissionAuditTrail(siteId, verticalId, "EBS");
 		return ResponseEntity.ok(auditTrail);
 	}
 
@@ -444,7 +442,7 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Vertical ID is required to create cluster head approve reject audit trail");
 		}
 
-		PlantSubmissionAuditTrailDTO auditTrail = tcsWorkFlowService.getLatestEBSSubmissionAuditTrail(siteId, verticalId, "CLUSTER_HEAD");
+		PlantSubmissionAuditTrailDTO auditTrail = tcsWorkFlowService.getLatestEBSSubmissionAuditTrail(siteId, verticalId, "CTS");
 		return ResponseEntity.ok(auditTrail);
 	}
 
