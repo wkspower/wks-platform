@@ -83,7 +83,7 @@ public class TCSWorkFlowServiceImpl implements TCSWorkFlowService {
        
         String key = tcsOutputWorkflowProcessId;
         // business key = siteId-finacialYear
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
    //     List<String> plantList = Arrays.asList("CDU-1", "Crude-1", "HPIB");
 
@@ -200,7 +200,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
                 throw new RuntimeException("Vertical id is required");
             }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey =  siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -323,7 +323,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
         }
 
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -466,7 +466,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -577,7 +577,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -689,7 +689,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -800,7 +800,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -897,7 +897,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -1101,7 +1101,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
             throw new RuntimeException("Vertical id is required");
         }
 
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
          List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrail(UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
 
@@ -1138,7 +1138,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getLatestPlantWiseSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
 
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
@@ -1174,7 +1174,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getPlantSubmissionAuditTrailByVerfiedDate(UUID.fromString(plantId), UUID.fromString(siteId), UUID.fromString(verticalId),businessKey, type);
        
@@ -1210,7 +1210,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrailByVerfiedDate(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
 
@@ -1241,7 +1241,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         PlantSubmissionAuditTrailProjection auditTrail = tcsAuditTrailRepository.getLatestEbsSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
         return PlantSubmissionAuditTrailDTO.builder()
@@ -1270,7 +1270,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         if(verticalId == null || verticalId.isEmpty()) { 
             throw new RuntimeException("Vertical id is required");
         }
-        String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+        String businessKey = siteId + "-" + finacialYear;
 
         List<PlantSubmissionAuditTrailProjection> auditTrails = tcsAuditTrailRepository.getEbsSubmissionAuditTrail(UUID.fromString(siteId), UUID.fromString(verticalId), businessKey, type);
         return auditTrails.stream().map(auditTrail -> PlantSubmissionAuditTrailDTO.builder()
