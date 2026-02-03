@@ -5,9 +5,7 @@ import { useSession } from 'SessionStoreContext'
 import CrudBlendWindowGrid from './CrudBlendWindowComponents/CrudBlendWindowGrid'
 
 const CrudBlendWindow = ({
-  PLANT_ID,
   AOP_YEAR,
-  currentTab,
   SITE_ID,
   snackbarData,
   setSnackbarData,
@@ -88,7 +86,7 @@ const CrudBlendWindow = ({
         <CircularProgress color='inherit' />
       </Backdrop>
 
-      {gridConfigs.map((config) => (
+      {gridConfigs.map((config, index) => (
         <CrudBlendWindowGrid
           key={config.key}
           tableKey={config.key}
