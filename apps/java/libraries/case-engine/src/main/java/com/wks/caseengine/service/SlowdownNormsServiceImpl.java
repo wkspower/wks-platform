@@ -446,18 +446,19 @@ public class SlowdownNormsServiceImpl implements SlowdownNormsService {
 	            }
 	            if (existingEntity != null) {
 	                boolean monthChanged = false;
-	                if (!Objects.equals(existingEntity.getApril(), slowdownNormsValueDTO.getApril())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getMay(), slowdownNormsValueDTO.getMay())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getJune(), slowdownNormsValueDTO.getJune())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getJuly(), slowdownNormsValueDTO.getJuly())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getAugust(), slowdownNormsValueDTO.getAugust())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getSeptember(), slowdownNormsValueDTO.getSeptember())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getOctober(), slowdownNormsValueDTO.getOctober())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getNovember(), slowdownNormsValueDTO.getNovember())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getDecember(), slowdownNormsValueDTO.getDecember())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getJanuary(), slowdownNormsValueDTO.getJanuary())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getFebruary(), slowdownNormsValueDTO.getFebruary())) monthChanged = true;
-	                if (!Objects.equals(existingEntity.getMarch(), slowdownNormsValueDTO.getMarch())) monthChanged = true;
+
+	                if (!Objects.equals(existingEntity.getApril(), Optional.ofNullable(slowdownNormsValueDTO.getApril()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getMay(), Optional.ofNullable(slowdownNormsValueDTO.getMay()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getJune(), Optional.ofNullable(slowdownNormsValueDTO.getJune()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getJuly(), Optional.ofNullable(slowdownNormsValueDTO.getJuly()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getAugust(), Optional.ofNullable(slowdownNormsValueDTO.getAugust()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getSeptember(), Optional.ofNullable(slowdownNormsValueDTO.getSeptember()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getOctober(), Optional.ofNullable(slowdownNormsValueDTO.getOctober()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getNovember(), Optional.ofNullable(slowdownNormsValueDTO.getNovember()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getDecember(), Optional.ofNullable(slowdownNormsValueDTO.getDecember()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getJanuary(), Optional.ofNullable(slowdownNormsValueDTO.getJanuary()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getFebruary(), Optional.ofNullable(slowdownNormsValueDTO.getFebruary()).orElse(0.0))) monthChanged = true;
+	                if (!Objects.equals(existingEntity.getMarch(), Optional.ofNullable(slowdownNormsValueDTO.getMarch()).orElse(0.0))) monthChanged = true;
 
 	                boolean remarkChanged = !Objects.equals(existingEntity.getRemarks(), slowdownNormsValueDTO.getRemarks());
 
