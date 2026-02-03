@@ -179,19 +179,33 @@ public class TCSOutPutWorkFlowController {
 	}
 
 	//get process instance by business key
-	@GetMapping(value = "/get-process-instance/{businessKey}/{processDefinitionKey}")
-	public ResponseEntity<ProcessInstance> getProcessInstanceByBusinessKey(@PathVariable final String businessKey, @PathVariable final String processDefinitionKey) {
+	// @GetMapping(value = "/get-process-instance/{businessKey}/{processDefinitionKey}")
+	// public ResponseEntity<ProcessInstance> getProcessInstanceByBusinessKey(@PathVariable final String businessKey, @PathVariable final String processDefinitionKey) {
 
-		ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
-		if(processInstances.length == 0) {
-			throw new RestResourceNotFoundException("No process instance found for business key: " + businessKey + " and process definition key: " + processDefinitionKey);
+	// 	ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
+	// 	if(processInstances.length == 0) {
+	// 		throw new RestResourceNotFoundException("No process instance found for business key: " + businessKey + " and process definition key: " + processDefinitionKey);
+	// 	}
+
+	// 	if(processInstances.length > 1) {
+	// 		throw new RestResourceNotFoundException("Multiple process instances found for business key: " + businessKey + " and process definition key: " + processDefinitionKey);
+	// 	}
+
+	// 	return ResponseEntity.ok(processInstances[0]);
+	// }
+
+	@GetMapping(value = "/find-process/{siteId}/{finacialYear}")
+	public ResponseEntity<ProcessInstance[]> findProcess(@PathVariable final String siteId, @PathVariable final String finacialYear) {
+
+		if(siteId == null || siteId.isEmpty()) { 
+			throw new RestResourceNotFoundException("Site ID is required to find process");
 		}
-
-		if(processInstances.length > 1) {
-			throw new RestResourceNotFoundException("Multiple process instances found for business key: " + businessKey + " and process definition key: " + processDefinitionKey);
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to find process");
 		}
-
-		return ResponseEntity.ok(processInstances[0]);
+		String businessKey = siteId + "-" + finacialYear;
+		
+		return ResponseEntity.ok(processEngineClientFacade.findProcessInstances(Optional.ofNullable(tcsOutputWorkflowProcessDefinitionKey), Optional.ofNullable(businessKey), Optional.empty()));
 	}
 
 	//delete process instance by business key
@@ -199,6 +213,10 @@ public class TCSOutPutWorkFlowController {
 	public ResponseEntity<Void> deleteProcessInstanceByBusinessKey(@PathVariable final String businessKey, @PathVariable final String processDefinitionKey) {
 
 		ProcessInstance[] processInstances = processEngineClientFacade.findProcessInstances(Optional.ofNullable(processDefinitionKey), Optional.ofNullable(businessKey), Optional.empty());
+
+		if(processInstances.length == 0) {
+			throw new RestResourceNotFoundException("No process instance found for business key: " + businessKey + " and process definition key: " + processDefinitionKey);
+		}
 
 		processEngineClientFacade.deleteProcessInstance(processInstances[0].getId());
 		return ResponseEntity.noContent().build();
@@ -243,10 +261,8 @@ public class TCSOutPutWorkFlowController {
 	}
 
 	@PostMapping(value = "cts-submission/{siteId}/{finacialYear}")
-	public ResponseEntity<String> ctsSubmission(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
-		if(plantName == null || plantName.isEmpty()) { 
-			throw new RestResourceNotFoundException("Plant name is required to complete CTS approval");
-		}
+	public ResponseEntity<String> ctsSubmission( @PathVariable final String siteId, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
 		if(siteId == null || siteId.isEmpty()) {
 			throw new RestResourceNotFoundException("Site ID is required to complete CTS approval");
 		}
@@ -255,7 +271,7 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
 		}
 		
-		tcsWorkFlowService.CTSApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
+		tcsWorkFlowService.ctsApproval(siteId, plantSubmissionAuditTrailDTO, finacialYear);
 		return ResponseEntity.ok("CTS approval completed successfully");
 	}
 
@@ -276,7 +292,55 @@ public class TCSOutPutWorkFlowController {
 
 	}
 
-	@GetMapping(value = "submission-audit-trail/{plantName}/{siteId}/{verticalId}")
+	@PostMapping(value = "cts-approve-reject/{siteId}/{approvalStatus}/{finacialYear}")
+	public ResponseEntity<String> ebsApproveReject(@PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
+		if(siteId == null || siteId.isEmpty()) {  
+			throw new RestResourceNotFoundException("Site ID is required to complete EBS approval");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete EBS approval");
+		}
+
+		tcsWorkFlowService.ctsApproveReject(siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
+		return ResponseEntity.ok("EBS approval completed successfully");
+
+	}
+
+	@PostMapping(value = "cluster-head-approve-reject/{siteId}/{approvalStatus}/{finacialYear}")
+	public ResponseEntity<String> clusterHeadApproveReject(@PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO) { 
+		
+		if(siteId == null || siteId.isEmpty()) {  
+			throw new RestResourceNotFoundException("Site ID is required to complete CTS approval");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete CTS approval");
+		}
+
+		tcsWorkFlowService.clusterHeadApproveReject(siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
+		return ResponseEntity.ok("CTS approval completed successfully");
+
+	}
+
+	@PostMapping(value = "bulk-ebs-approve-reject/{siteId}/{approvalStatus}/{finacialYear}")  
+	public ResponseEntity<String> bulkEbsApproveReject(@PathVariable final String siteId, @PathVariable final boolean approvalStatus, @PathVariable final String finacialYear, @RequestBody final List<PlantSubmissionAuditTrailDTO> plantSubmissionAuditTrailDTOList) {
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to complete bulk EBS approval");
+		}
+		if(finacialYear == null || finacialYear.isEmpty()) {
+			throw new RestResourceNotFoundException("Financial Year is required to complete bulk EBS approval");
+		}
+		if(plantSubmissionAuditTrailDTOList == null || plantSubmissionAuditTrailDTOList.isEmpty()) {
+			throw new RestResourceNotFoundException("Plant submission audit trail DTO list is required to complete bulk EBS approval");
+		}
+		   
+		  for(PlantSubmissionAuditTrailDTO plantSubmissionAuditTrailDTO : plantSubmissionAuditTrailDTOList) {  
+			tcsWorkFlowService.ebsApproveReject(plantSubmissionAuditTrailDTO.getPlantName(), siteId, approvalStatus, plantSubmissionAuditTrailDTO, finacialYear);
+		  }
+		return ResponseEntity.ok("Bulk EBS approval completed successfully");
+	}
+
+	@GetMapping(value = "plant-submission-audit-trail/{plantName}/{siteId}/{verticalId}")
 	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> submissionAuditTrail(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String verticalId) {
 		if(plantName == null || plantName.isEmpty()) { 
 			throw new RestResourceNotFoundException("Plant name is required to create submission audit trail");
@@ -288,16 +352,14 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Vertical ID is required to create submission audit trail");
 		}
 
-		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getSubmissionAuditTrail(plantName, siteId, verticalId, "PLANT");
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getPlantSubmissionAuditTrail(plantName, siteId, verticalId, "PLANT");
 		return ResponseEntity.ok(auditTrails);
 
 	}
 
-	@GetMapping(value = "ebs-submission-audit-trail/{plantName}/{siteId}/{verticalId}")
-	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> ebsSubmissionAuditTrail(@PathVariable final String plantName, @PathVariable final String siteId, @PathVariable final String verticalId) {
-		if(plantName == null || plantName.isEmpty()) { 
-			throw new RestResourceNotFoundException("Plant name is required to create EBS submission audit trail");
-		}
+	@GetMapping(value = "ebs-submission-audit-trail/{siteId}/{verticalId}")
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> ebsSubmissionAuditTrail(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		
 		if(siteId == null || siteId.isEmpty()) {
 			throw new RestResourceNotFoundException("Site ID is required to create EBS submission audit trail");
 		}
@@ -306,10 +368,44 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Vertical ID is required to create EBS submission audit trail");
 		}
 
-		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getSubmissionAuditTrail(plantName, siteId, verticalId, "EBS_APPROVAL");
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getEBSSubmissionAuditTrail(siteId, verticalId, "EBS");
 		return ResponseEntity.ok(auditTrails);
 
 	}
+
+	@GetMapping(value = "cts-submission-audit-trail/{siteId}/{verticalId}")
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> ctsSubmissionAuditTrail(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to create EBS submission audit trail");
+		}
+
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to create EBS submission audit trail");
+		}
+
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getEBSSubmissionAuditTrail(siteId, verticalId, "CTS");
+		return ResponseEntity.ok(auditTrails);
+
+	}
+
+	@GetMapping(value = "cluster-head-submission-audit-trail/{siteId}/{verticalId}")
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> clusterHeadSubmissionAuditTrail(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to create EBS submission audit trail");
+		}
+
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to create EBS submission audit trail");
+		}
+
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getEBSSubmissionAuditTrail(siteId, verticalId, "CLUSTER_HEAD");
+		return ResponseEntity.ok(auditTrails);
+
+	}
+
+
 
 	@GetMapping(value = "ebs-approve-reject-audit-trail/{siteId}/{verticalId}")
 	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> ebsApproveRejectAuditTrail(@PathVariable final String siteId, @PathVariable final String verticalId) {
@@ -320,12 +416,41 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Vertical ID is required to create EBS approve reject audit trail");
 		}
 
-		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getLatestPlantSubmissionAuditTrail(siteId, verticalId, "PLANT");
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getLatestPlantWiseSubmissionAuditTrail(siteId, verticalId, "PLANT");
 		return ResponseEntity.ok(auditTrails);
 	}
 
-	@GetMapping(value = "plant-submission-audit-trail-by-tab/{plantId}/{siteId}/{verticalId}/{tab}")
-	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> plantSubmissionAuditTrailByTab(@PathVariable final String plantId, @PathVariable final String siteId, @PathVariable final String verticalId, @PathVariable final String tab) {
+	@GetMapping(value = "cts-approve-reject-audit-trail/{siteId}/{verticalId}")
+	public ResponseEntity<PlantSubmissionAuditTrailDTO> ctsApproveRejectAuditTrail(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to create CTS approve reject audit trail");
+		}
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to create CTS approve reject audit trail");
+		}
+
+		PlantSubmissionAuditTrailDTO auditTrail = tcsWorkFlowService.getLatestEBSSubmissionAuditTrail(siteId, verticalId, "EBS");
+		return ResponseEntity.ok(auditTrail);
+	}
+
+	@GetMapping(value = "cluster-head-approve-reject-audit-trail/{siteId}/{verticalId}")
+	public ResponseEntity<PlantSubmissionAuditTrailDTO> clusterHeadApproveRejectAuditTrail(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to create cluster head approve reject audit trail");
+		}
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to create cluster head approve reject audit trail");
+		}
+
+		PlantSubmissionAuditTrailDTO auditTrail = tcsWorkFlowService.getLatestEBSSubmissionAuditTrail(siteId, verticalId, "CTS");
+		return ResponseEntity.ok(auditTrail);
+	}
+
+	
+	
+
+	@GetMapping(value = "plant-submission-audit-trail-by-tab/{plantId}/{siteId}/{verticalId}")
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> plantSubmissionAuditTrailByTab(@PathVariable final String plantId, @PathVariable final String siteId, @PathVariable final String verticalId) {
 		if(plantId == null || plantId.isEmpty()) {
 			throw new RestResourceNotFoundException("Plant ID is required to create plant submission audit trail by tab");
 		}
@@ -337,11 +462,38 @@ public class TCSOutPutWorkFlowController {
 			throw new RestResourceNotFoundException("Vertical ID is required to create plant submission audit trail by tab");
 		}
 
-		if(tab == null || tab.isEmpty()) {
-			throw new RestResourceNotFoundException("Tab is required to create plant submission audit trail by tab");
+		
+
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getPlantSubmissionAuditTrailByVerfiedDate(plantId, siteId, verticalId, "PLANT");
+		return ResponseEntity.ok(auditTrails);
+
+	}
+
+	@GetMapping(value = "cts-approval-history/{siteId}/{verticalId}")
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> ctsApprovalHistory(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to create CTS approval history");
+		}
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to create CTS approval history");
 		}
 
-		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getPlantSubmissionAuditTrailByTab(plantId, siteId, verticalId, "PLANT", tab);
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getEbsSubmissionAuditTrailByVerfiedDate(siteId, verticalId, "CTS");
+
+		return ResponseEntity.ok(auditTrails);
+
+	}
+
+	@GetMapping(value = "cluster-head-approval-history/{siteId}/{verticalId}")
+	public ResponseEntity<List<PlantSubmissionAuditTrailDTO>> clusterHeadApprovalHistory(@PathVariable final String siteId, @PathVariable final String verticalId) {
+		if(siteId == null || siteId.isEmpty()) {
+			throw new RestResourceNotFoundException("Site ID is required to create cluster head approval history");
+		}
+		if(verticalId == null || verticalId.isEmpty()) {
+			throw new RestResourceNotFoundException("Vertical ID is required to create cluster head approval history");
+		}
+
+		List<PlantSubmissionAuditTrailDTO> auditTrails = tcsWorkFlowService.getEbsSubmissionAuditTrailByVerfiedDate(siteId, verticalId, "CLUSTER_HEAD");
 		return ResponseEntity.ok(auditTrails);
 
 	}
