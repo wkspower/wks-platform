@@ -129,7 +129,7 @@ public class TCSOutPutWorkFlowController {
 		throw new RestResourceNotFoundException("Financial Year is required to check if process exists");
 	   }
 
-	   String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+	   String businessKey =  siteId + "-" + finacialYear;
 
 	   if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
 		throw new RestResourceNotFoundException("TCS Output Workflow Process Definition Key is not set");
@@ -163,7 +163,7 @@ public class TCSOutPutWorkFlowController {
 		if(finacialYear == null || finacialYear.isEmpty()) {
 			throw new RestResourceNotFoundException("Financial Year is required to get variables");
 		}
-		String businessKey = verticalId + "-" + siteId + "-" + finacialYear;
+		String businessKey =   siteId + "-" + finacialYear;
 
 		
 		if(tcsOutputWorkflowProcessDefinitionKey == null || tcsOutputWorkflowProcessDefinitionKey.isEmpty()) {
