@@ -863,7 +863,7 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
          
         if(isReset) { 
 
-            jsonNode.put(variableName, 0);
+            jsonNode.put(variableName, Integer.valueOf(0));
         }
         else {
             Integer approvedPlants = (Integer) jsonNode.get(variableName).asInt();
@@ -1003,6 +1003,10 @@ statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
         .submittedBy(auditTrail.getSubmittedBy())
         .submissionDateTime(auditTrail.getSubmissionDate())
         .submissionRemark(auditTrail.getSubmissionRemark())
+        .verifiedDateTime(auditTrail.getVerifiedDate())
+        .verifiedBy(auditTrail.getVerifiedBy())
+        .verifiedRemark(auditTrail.getVerifiedRemark())
+        .status(auditTrail.getStatus())
         .build()).toList();
     }
 
