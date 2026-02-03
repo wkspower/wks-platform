@@ -33,7 +33,9 @@ const MaintenanceTable = () => {
   const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
   const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
   const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
-
+  const is_PTA_DMD =
+    siteObject?.name?.toLowerCase() === 'dmd' &&
+    verticalObject?.name?.toLowerCase() === 'pta'
   const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
 
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -249,6 +251,19 @@ const MaintenanceTable = () => {
     default:
       basecols = productionColumnsNonMEG
       break
+  }
+
+  if (is_PTA_DMD) {
+    basecols = [
+      ...basecols,
+      {
+        field: 'allMonthsTotal',
+        title: 'Total',
+        type: 'number',
+        format: '{0:n2}',
+        editable: false,
+      },
+    ]
   }
 
   const getAdjustedPermissions = (permissions, isOldYear) => {

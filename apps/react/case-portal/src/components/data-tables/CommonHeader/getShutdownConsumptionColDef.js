@@ -4,7 +4,10 @@ import { ShutdownConsumptionCrackerColumns } from 'components/colums/CrackerColu
 import { ShutdownConsumptionPeColumns } from 'components/colums/PeColums'
 import { ShutdownConsumptionPeColumnsPeLldpe } from 'components/colums/PeColums'
 import { ShutdownConsumptionPpColumns } from 'components/colums/PpColums'
-import { ShutdownConsumptionPtaColumns } from 'components/colums/PtaColums'
+import {
+  ShutdownConsumptionPtaColumns,
+  ShutdownConsumptionPtadmdColumns,
+} from 'components/colums/PtaColums'
 import { ShutdownConsumptionVcmColumns } from 'components/colums/VcmColums'
 import { verticalEnums } from 'enums/verticalEnums'
 import { useSelector } from 'react-redux'
@@ -43,6 +46,7 @@ const getShutdownConsumptionColDef = ({
 
   const SITE_NAME_LOWERCASE = siteObject?.name?.toLowerCase()
   const PLANT_NAME_LOWERCASE = plantObject?.name?.toLowerCase()
+  const IS_PTA_DMD = lowerVertName === 'pta' && SITE_NAME_LOWERCASE === 'dmd'
 
   const IS_PE_PP_VERTICAL_NMD_LLDPE =
     ['pe'].includes(lowerVertName) &&
@@ -51,7 +55,7 @@ const getShutdownConsumptionColDef = ({
 
   let safeShutdownMonths = Array.isArray(shutdownMonths) ? shutdownMonths : []
 
-  const cacheKey = `${lowerVertName}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
+  const cacheKey = `${lowerVertName}_${SITE_NAME_LOWERCASE}_${PLANT_NAME_LOWERCASE}_${JSON.stringify(headerMap)}_${safeShutdownMonths.join(',')}`
 
   if (colDefsCache.has(cacheKey)) {
     return colDefsCache.get(cacheKey)
@@ -60,22 +64,26 @@ const getShutdownConsumptionColDef = ({
   let cols = []
   if (IS_PE_PP_VERTICAL_NMD_LLDPE) {
     cols = ShutdownConsumptionPeColumnsPeLldpe
+  } else if (IS_PTA_DMD) {
+    cols = ShutdownConsumptionPtadmdColumns
   } else {
     cols = VERTICAL_COLDEFS_MAP[lowerVertName] || []
   }
-  // const isPEorPP = ['pe', 'pp'].includes(lowerVertName)
 
   const enhancedColDefs = cols.map((col) => {
     if (col.monthNumber) {
       const monthNum = col.monthNumber
       const isPEorPP = false
+      const isEditable = IS_PTA_DMD
+        ? true
+        : safeShutdownMonths.includes(monthNum)
 
       return {
         ...col,
         headerName: headerMap?.[monthNum] || col.field,
-        editable: safeShutdownMonths.includes(monthNum),
+        editable: isEditable,
         // isDisabled: !safeShutdownMonths.includes(monthNum),
-        isDisabled: !safeShutdownMonths.includes(monthNum),
+        isDisabled: !isEditable,
         format: valueFormat,
       }
     }
