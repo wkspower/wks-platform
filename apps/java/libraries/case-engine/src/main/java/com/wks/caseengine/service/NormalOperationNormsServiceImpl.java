@@ -667,13 +667,13 @@ public class NormalOperationNormsServiceImpl implements NormalOperationNormsServ
 							
 							mCUNormsValue.setMcuVersion("V1");
 							mCUNormsValue.setUpdatedBy(Utility.getUserName());
-							if(changed && mCUNormsValue.getRemarks().equals(mCUNormsValueDTO.getRemarks())) {
-								mCUNormsValueDTO.setErrDescription("Please add/update remark");
-								mCUNormsValueDTO.setSaveStatus("Failed");
-								failedList.add(mCUNormsValueDTO);
-								continue;
-							}
-							mCUNormsValue.setRemarks(mCUNormsValueDTO.getRemarks());
+							// Use Objects.equals to safely compare two strings even if one or both are null
+							if (changed && Objects.equals(mCUNormsValue.getRemarks(), mCUNormsValueDTO.getRemarks())) {
+							    mCUNormsValueDTO.setErrDescription("Please add/update remark");
+							    mCUNormsValueDTO.setSaveStatus("Failed");
+							    failedList.add(mCUNormsValueDTO);
+							    continue;
+							}							mCUNormsValue.setRemarks(mCUNormsValueDTO.getRemarks());
 							System.out.println("Data Saved Succussfully" + mCUNormsValue);
 							normalOperationNormsRepository.save(mCUNormsValue);
 						} else {
