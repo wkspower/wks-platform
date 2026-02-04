@@ -70,7 +70,7 @@ const TcsInput = () => {
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(false)
   const [isWorkflowTriggered, setIsWorkflowTriggered] = useState(false)
   const [isSubmittingRemark, setIsSubmittingRemark] = useState(false)
-
+  const [timelineData, setTimelineData] = useState([])
   // Generate dynamic tooltip for Plant Manager
   const submitTooltip = useMemo(() => {
     if (!isSubmitEligible) {
@@ -97,10 +97,12 @@ const TcsInput = () => {
       // Fetch workflow variables to check submission status
       const variables = await TcsWorkflowApiService.getWorkflowVariables(
         keycloak,
+        VERTICAL_ID,
         SITE_ID,
         AOP_YEAR,
       )
 
+      setTimelineData(variables)
       if (variables.length == 0) {
         setIsSubmitEligible(true)
       } else {
@@ -168,6 +170,7 @@ const TcsInput = () => {
     try {
       const response = await TcsWorkflowApiService.checkWorkflowStatus(
         keycloak,
+        VERTICAL_ID,
         SITE_ID,
         AOP_YEAR,
       )
@@ -473,6 +476,7 @@ const TcsInput = () => {
         onClose={handleCloseHistory}
         title='Audit Trail'
         userRole={userRole}
+        timelineData={timelineData}
       />
 
       <Notification

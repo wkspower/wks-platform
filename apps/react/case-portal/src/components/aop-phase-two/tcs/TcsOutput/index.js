@@ -80,6 +80,7 @@ const TcsOutput = () => {
   const [isSubmitEligible, setIsSubmitEligible] = useState(false)
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(false)
   const [isSubmittingRemark, setIsSubmittingRemark] = useState(false)
+  const [timelineData, setTimelineData] = useState([])
 
   const handleViewHistory = () => {
     setHistoryDialogOpen(true)
@@ -140,12 +141,13 @@ const TcsOutput = () => {
       // Fetch workflow variables to check approval status
       const variables = await TcsWorkflowApiService.getWorkflowVariables(
         keycloak,
+        VERTICAL_ID,
         SITE_ID,
         AOP_YEAR,
       )
 
       console.log('Workflow Variables:', variables)
-
+      setTimelineData(variables)
       if (variables.length === 0) {
         setIsSubmitEligible(false)
         return
@@ -164,16 +166,12 @@ const TcsOutput = () => {
 
           // For EPS Engineer: Check if all plants have been approved and EBS not yet submitted
           if (userRole === ROLES.EPS_ENGINEER) {
-            // First check if EBS approval is already done
-            const ebsApprovedVar = variables?.find(
-              (v) => v.name === 'ebs_approved',
-            )
-            const ebsApproved = ebsApprovedVar?.value === 'true'
+            // Check if EBS approval is already done from approvalStatus
+            const ebsApproved = approvalStatus.ebs_approved === true
 
             // If EBS already approved, EPS Engineer cannot submit again
             if (ebsApproved) {
               setIsSubmitEligible(false)
-              console.log('EPS Engineer already approved, cannot submit')
             } else {
               // Check if approved count equals total count
               const plantCountVar = variables?.find(
@@ -365,8 +363,20 @@ const TcsOutput = () => {
 
       setIsSubmittingRemark(true)
 
-      // Call appropriate approve API based on role
+      // Call appropriate approve APIs based on role
       if (userRole === ROLES.CLUSTER_HEAD) {
+        // First API: Approve/Reject with true
+        await TcsWorkflowApiService.clusterHeadApproveReject(
+          keycloak,
+          SITE_ID,
+          true, // approvalStatus = true for approve
+          AOP_YEAR,
+          remark,
+          userRole, // verifiedBy
+          VERTICAL_ID,
+        )
+
+        // Second API: Submission
         await TcsWorkflowApiService.clusterHeadSubmission(
           keycloak,
           SITE_ID,
@@ -377,6 +387,18 @@ const TcsOutput = () => {
         )
       } else {
         // CTS_HEAD or EPS_HEAD
+        // First API: Approve/Reject with true
+        await TcsWorkflowApiService.ctsHeadApproveReject(
+          keycloak,
+          SITE_ID,
+          true, // approvalStatus = true for approve
+          AOP_YEAR,
+          remark,
+          userRole, // submittedBy
+          VERTICAL_ID,
+        )
+
+        // Second API: Submission
         await TcsWorkflowApiService.ctsHeadSubmission(
           keycloak,
           SITE_ID,
@@ -582,6 +604,7 @@ const TcsOutput = () => {
         onClose={() => setHistoryDialogOpen(false)}
         title='Audit Trail'
         userRole={userRole}
+        timelineData={timelineData}
       />
 
       {/* Approve/Reject Dialog */}
@@ -594,6 +617,7 @@ const TcsOutput = () => {
         tab={currentTab.displayName}
         year={AOP_YEAR}
         userRole={userRole}
+        timelineData={timelineData}
       />
 
       <Notification

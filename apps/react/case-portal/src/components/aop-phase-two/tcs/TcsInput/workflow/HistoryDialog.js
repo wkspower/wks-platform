@@ -16,15 +16,14 @@ import {
   TableRow,
   Paper,
   Box,
-  Tabs,
-  Tab,
   CircularProgress,
 } from '@mui/material'
-import { ROLES, getUserRole } from '../../utils/roleUtils'
-import WorkflowTimelineExample from './WorkflowTimelineExample'
+import { ROLES } from '../../utils/roleUtils'
 import { TcsWorkflowApiService } from 'components/aop-phase-two/services/tcs/tcsWorkflowApiService'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
+import { parseApprovalStatusResponse } from './utilityFunctions'
+import WorkflowTimeline from './WorkflowTimeline'
 
 const RemarkCell = ({ text, maxLength = 100 }) => {
   const [expanded, setExpanded] = useState(false)
@@ -81,6 +80,7 @@ const HistoryDialog = ({
   userRole = '',
   plantId = null,
   type = 'ROLE_WISE',
+  timelineData = [],
 }) => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
@@ -98,6 +98,42 @@ const HistoryDialog = ({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // Transform timeline data into workflow steps
+  const workflowSteps = useMemo(() => {
+    if (!timelineData || timelineData.length === 0) {
+      // Workflow not started - show Step 1 active, rest pending
+      return [
+        {
+          id: 1,
+          label: 'Step 1',
+          role: 'Plant Manager',
+          status: 'active',
+        },
+        {
+          id: 2,
+          label: 'Step 2',
+          role: 'EPS Engineer',
+          status: 'pending',
+        },
+        {
+          id: 3,
+          label: 'Step 3',
+          role: 'EPS Head / CTS Head',
+          status: 'pending',
+        },
+        {
+          id: 4,
+          label: 'Step 4',
+          role: 'R&M Cluster Head',
+          status: 'pending',
+        },
+      ]
+    }
+    return parseApprovalStatusResponse(timelineData, PLANT_NAME)
+  }, [timelineData, PLANT_NAME])
+
+  console.log('timelineData', timelineData)
+  console.log('workflowSteps', workflowSteps)
   // Fetch audit trail data when dialog opens
   useEffect(() => {
     const fetchAuditTrail = async () => {
@@ -129,6 +165,7 @@ const HistoryDialog = ({
                 PLANT_ID,
                 SITE_ID,
                 VERTICAL_ID,
+                AOP_YEAR,
               )
           }
           if (userRole === 'eps_engineer') {
@@ -137,6 +174,7 @@ const HistoryDialog = ({
                 keycloak,
                 SITE_ID,
                 VERTICAL_ID,
+                AOP_YEAR,
               )
           }
           if (userRole === 'cts_head' || userRole === 'eps_head') {
@@ -144,6 +182,7 @@ const HistoryDialog = ({
               keycloak,
               SITE_ID,
               VERTICAL_ID,
+              AOP_YEAR,
             )
           }
           if (userRole === 'cluster_head') {
@@ -152,6 +191,7 @@ const HistoryDialog = ({
                 keycloak,
                 SITE_ID,
                 VERTICAL_ID,
+                AOP_YEAR,
               )
           }
         } else {
@@ -160,6 +200,7 @@ const HistoryDialog = ({
             PLANT_ID,
             SITE_ID,
             VERTICAL_ID,
+            AOP_YEAR,
           )
         }
 
@@ -276,8 +317,17 @@ const HistoryDialog = ({
 
   // Display columns based on role
   const displayColumns = React.useMemo(() => {
+    // Hide verified columns for CLUSTER_HEAD when type is ROLE_WISE
+    if (userRole === ROLES.CLUSTER_HEAD && type === 'ROLE_WISE') {
+      return columns.filter(
+        (col) =>
+          col.field !== 'verifiedDateTime' &&
+          col.field !== 'verifiedBy' &&
+          col.field !== 'verifiedRemark',
+      )
+    }
     return columns
-  }, [columns])
+  }, [columns, userRole, type])
 
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -336,7 +386,7 @@ const HistoryDialog = ({
       <DialogContent sx={{ p: 0 }}>
         {/* Timeline Tab */}
         <Box sx={{ width: '100%', p: 3 }}>
-          <WorkflowTimelineExample />
+          <WorkflowTimeline steps={workflowSteps} />
         </Box>
 
         {/* Audit Trail Tab */}
@@ -444,8 +494,18 @@ const HistoryDialog = ({
                           >
                             {col.isChip ? (
                               <Chip
-                                label={item[col.field]}
-                                color={getStatusColor(item[col.field])}
+                                label={
+                                  userRole === ROLES.CLUSTER_HEAD &&
+                                  item[col.field]?.toLowerCase() === 'pending'
+                                    ? 'SUBMITTED'
+                                    : item[col.field]
+                                }
+                                color={
+                                  userRole === ROLES.CLUSTER_HEAD &&
+                                  item[col.field]?.toLowerCase() === 'pending'
+                                    ? 'success'
+                                    : getStatusColor(item[col.field])
+                                }
                                 size='small'
                                 sx={{ fontWeight: 500 }}
                               />

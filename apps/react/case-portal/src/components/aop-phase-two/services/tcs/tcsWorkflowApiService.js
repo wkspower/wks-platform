@@ -36,8 +36,8 @@ export const TcsWorkflowApiService = {
 // ============ COMMON/SHARED APIs ============
 // ========================================================================
 
-async function getWorkflowVariables(keycloak, siteId, aopYear) {
-  const url = `${Config.CaseEngineUrl}/task/variables/${siteId}/${aopYear}`
+async function getWorkflowVariables(keycloak, verticalId, siteId, aopYear) {
+  const url = `${Config.CaseEngineUrl}/task/variables/${verticalId}/${siteId}/${aopYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -55,8 +55,8 @@ async function getWorkflowVariables(keycloak, siteId, aopYear) {
   }
 }
 
-async function checkWorkflowStatus(keycloak, siteId, aopYear) {
-  const url = `${Config.CaseEngineUrl}/task/process-exists/${siteId}/${aopYear}`
+async function checkWorkflowStatus(keycloak, verticalId, siteId, aopYear) {
+  const url = `${Config.CaseEngineUrl}/task/process-exists/${verticalId}/${siteId}/${aopYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -98,8 +98,14 @@ async function triggerWorkflow(keycloak, verticalId, siteId, aopYear) {
   }
 }
 
-async function getPlantwiseHistory(keycloak, plantId, siteId, verticalId) {
-  const url = `${Config.CaseEngineUrl}/task/plant-submission-audit-trail-by-tab/${plantId}/${siteId}/${verticalId}`
+async function getPlantwiseHistory(
+  keycloak,
+  plantId,
+  siteId,
+  verticalId,
+  financialYear,
+) {
+  const url = `${Config.CaseEngineUrl}/task/plant-submission-audit-trail-by-tab/${plantId}/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -125,7 +131,7 @@ async function getPlantDataForApproveReject(
   verticalId,
   year,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/ebs-approve-reject-audit-trail/${siteId}/${verticalId}`
+  const url = `${Config.CaseEngineUrl}/task/ebs-approve-reject-audit-trail/${siteId}/${verticalId}/${year}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -196,8 +202,9 @@ async function getPlantManagerSubmissionHistory(
   plantId,
   siteId,
   verticalId,
+  financialYear,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/plant-submission-audit-trail/${plantId}/${siteId}/${verticalId}`
+  const url = `${Config.CaseEngineUrl}/task/plant-submission-audit-trail/${plantId}/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -334,8 +341,13 @@ async function epsEngineerSubmission(
   }
 }
 
-async function getEpsEngineerSubmissionHistory(keycloak, siteId, verticalId) {
-  const url = `${Config.CaseEngineUrl}/task/ebs-submission-audit-trail/${siteId}/${verticalId}`
+async function getEpsEngineerSubmissionHistory(
+  keycloak,
+  siteId,
+  verticalId,
+  financialYear,
+) {
+  const url = `${Config.CaseEngineUrl}/task/ebs-submission-audit-trail/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -436,8 +448,13 @@ async function ctsHeadSubmission(
   }
 }
 
-async function getCtsHeadSubmissionHistory(keycloak, siteId, verticalId) {
-  const url = `${Config.CaseEngineUrl}/task/cts-submission-audit-trail/${siteId}/${verticalId}`
+async function getCtsHeadSubmissionHistory(
+  keycloak,
+  siteId,
+  verticalId,
+  financialYear,
+) {
+  const url = `${Config.CaseEngineUrl}/task/cts-submission-audit-trail/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -457,8 +474,13 @@ async function getCtsHeadSubmissionHistory(keycloak, siteId, verticalId) {
   }
 }
 
-async function getCtsHeadApproveRejectAuditTrail(keycloak, siteId, verticalId) {
-  const url = `${Config.CaseEngineUrl}/task/cts-approve-reject-audit-trail/${siteId}/${verticalId}`
+async function getCtsHeadApproveRejectAuditTrail(
+  keycloak,
+  siteId,
+  verticalId,
+  financialYear,
+) {
+  const url = `${Config.CaseEngineUrl}/task/cts-approve-reject-audit-trail/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -558,8 +580,13 @@ async function clusterHeadSubmission(
     return await Promise.reject(e)
   }
 }
-async function getClusterHeadSubmissionHistory(keycloak, siteId, verticalId) {
-  const url = `${Config.CaseEngineUrl}/task/cluster-head-submission-audit-trail/${siteId}/${verticalId}`
+async function getClusterHeadSubmissionHistory(
+  keycloak,
+  siteId,
+  verticalId,
+  financialYear,
+) {
+  const url = `${Config.CaseEngineUrl}/task/cluster-head-submission-audit-trail/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -583,8 +610,9 @@ async function getClusterHeadApproveRejectAuditTrail(
   keycloak,
   siteId,
   verticalId,
+  financialYear,
 ) {
-  const url = `${Config.CaseEngineUrl}/task/cluster-head-approve-reject-audit-trail/${siteId}/${verticalId}`
+  const url = `${Config.CaseEngineUrl}/task/cluster-head-approve-reject-audit-trail/${siteId}/${verticalId}/${financialYear}`
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',

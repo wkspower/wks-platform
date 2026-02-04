@@ -218,17 +218,8 @@ export const MainRoutes = (
       },
 
       {
-        path: 'production-norms-plan',
+        path: 'tcs',
         children: [
-          {
-            path: 'business-demand',
-            element: (
-              <PrivateRoute routeId='business-demand'>
-                <BusinessDemand />
-              </PrivateRoute>
-            ),
-          },
-
           //TCS Started
           {
             path: 'tcs-input',
@@ -254,7 +245,21 @@ export const MainRoutes = (
               </PrivateRoute>
             ),
           },
-          //TCS Ended
+        ],
+        //TCS Ended],
+      },
+
+      {
+        path: 'production-norms-plan',
+        children: [
+          {
+            path: 'business-demand',
+            element: (
+              <PrivateRoute routeId='business-demand'>
+                <BusinessDemand />
+              </PrivateRoute>
+            ),
+          },
 
           {
             path: 'aop-design-basis',

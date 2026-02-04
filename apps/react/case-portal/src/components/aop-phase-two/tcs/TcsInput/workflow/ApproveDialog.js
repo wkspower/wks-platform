@@ -30,7 +30,7 @@ import { TcsWorkflowApiService } from 'components/aop-phase-two/services/tcs/tcs
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 
-const ApproveDialog = ({ open, onClose, year, userRole }) => {
+const ApproveDialog = ({ open, onClose, year, userRole, timelineData }) => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { siteObject, verticalObject } = dataGridStore
@@ -902,6 +902,7 @@ const ApproveDialog = ({ open, onClose, year, userRole }) => {
           plantId={selectedPlantHistory.plantId}
           userRole={userRole}
           type='PLANT_WISE'
+          timelineData={timelineData}
         />
       )}
     </>
