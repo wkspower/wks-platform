@@ -2,7 +2,10 @@
   {
     "field": "particulars",
     "title": "Particulars",
-    "editable": false
+    "editable": false,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {
@@ -10,21 +13,30 @@
     "title": "5F-C2C3",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "fiveFPropane",
     "title": "5F-Propane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "fiveFEthane",
     "title": "5F-Ethane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {
@@ -32,21 +44,30 @@
     "title": "5F D/S-C2C3",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "fiveFDSPropane",
     "title": "5F D/S-Propane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "fiveFDSEthane",
     "title": "5F D/S-Ethane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {
@@ -54,21 +75,30 @@
     "title": "4F-C2C3",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "fourFPropane",
     "title": "4F-Propane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "fourFEthane",
     "title": "4F-Ethane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {
@@ -76,21 +106,30 @@
     "title": "7F-C2C3",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "sevenFPropane",
     "title": "7F-Propane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "sevenFEthane",
     "title": "7F-Ethane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {
@@ -98,21 +137,30 @@
     "title": "6F+SFD-C2C3",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "sixFSFDPropane",
     "title": "6F+SFD-Propane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "sixFSFDEthane",
     "title": "6F+SFD-Ethane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {
@@ -120,21 +168,30 @@
     "title": "6F+BFD-C2C3",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "sixFBFDPropane",
     "title": "6F+BFD-Propane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
   {
     "field": "sixFBFDEthane",
     "title": "6F+BFD-Ethane",
     "type": "number",
     "format": "{0:#.##}",
-    "editable": true
+    "editable": true,
+    "widthT": 100,
+    "fixedWidth": 100,
+    "width": 100
   },
 
   {

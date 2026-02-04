@@ -99,38 +99,6 @@ export const monthMap = {
   november: 11,
   december: 12,
 }
-const formatToDDMMYYYY_HHMM_12HR = (date) => {
-  if (!date) return ''
-  const d = new Date(date)
-  if (isNaN(d)) return ''
-
-  const day = d.getDate().toString().padStart(2, '0')
-  const month = (d.getMonth() + 1).toString().padStart(2, '0')
-  const year = d.getFullYear()
-
-  let hours = d.getHours()
-  const mins = d.getMinutes().toString().padStart(2, '0')
-  const ampm = hours >= 12 ? 'PM' : 'AM'
-
-  hours = hours % 12
-  hours = hours ? hours : 12 // the hour '0' should be '12'
-  const hoursStr = hours.toString().padStart(2, '0')
-
-  return `${day}-${month}-${year} ${hoursStr}:${mins} ${ampm}`
-}
-
-// For 24-hour format (VCM vertical)
-const formatToDDMMYYYY_HHMM_24HR = (date) => {
-  if (!date) return ''
-  const d = new Date(date)
-  if (isNaN(d)) return ''
-  const day = d.getDate().toString().padStart(2, '0')
-  const month = (d.getMonth() + 1).toString().padStart(2, '0')
-  const year = d.getFullYear()
-  const hours = d.getHours().toString().padStart(2, '0')
-  const mins = d.getMinutes().toString().padStart(2, '0')
-  return `${day}-${month}-${year} ${hours}:${mins}`
-}
 
 const KendoDataTables = ({
   showCatChemUtilityCheckbox = false,
