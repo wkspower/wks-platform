@@ -257,65 +257,130 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 	    }
 	}
 
-	private Map<String, Object> fetchEverythingFromView(final String plantId, final String year, final String viewName) {
-	    return entityManager.unwrap(Session.class).doReturningWork(new ReturningWork<Map<String, Object>>() {
-	        @Override
-	        public Map<String, Object> execute(Connection connection) throws SQLException {
-	            Map<String, Object> resultMap = new HashMap<>();
-	            List<Map<String, Object>> dataList = new ArrayList<>();
-	            List<Map<String, Object>> metadataList = new ArrayList<>();
-	            Set<String> numericFields = new HashSet<>();
+	private Map<String, String> loadColumnTitles(
+			Connection connection,
+			String viewName,
+			String siteName,
+			String tableName) throws SQLException {
 
-	            String sql = "SELECT * FROM " + viewName + " WHERE PlantId = ? AND AOPYear = ? ORDER BY " +
-	                         "CASE MonthName WHEN 'April' THEN 1 WHEN 'May' THEN 2 WHEN 'June' THEN 3 " +
-	                         "WHEN 'July' THEN 4 WHEN 'August' THEN 5 WHEN 'September' THEN 6 " +
-	                         "WHEN 'October' THEN 7 WHEN 'November' THEN 8 WHEN 'December' THEN 9 " +
-	                         "WHEN 'January' THEN 10 WHEN 'February' THEN 11 WHEN 'March' THEN 12 ELSE 13 END";
+		Map<String, String> titleMap = new HashMap<>();
 
-	            try (PreparedStatement ps = connection.prepareStatement(sql)) {
-	                ps.setString(1, plantId);
-	                ps.setString(2, year);
-	                try (ResultSet rs = ps.executeQuery()) {
-	                    ResultSetMetaData rsmd = rs.getMetaData();
-	                    int columnCount = rsmd.getColumnCount();
+		String sql = "SELECT [Key], [Value] " +
+				"FROM " + viewName + " " +
+				"WHERE TableName = ? AND SiteName = ?";
 
-	                    for (int i = 1; i <= columnCount; i++) {
-	                        String name = rsmd.getColumnLabel(i);
-	                        int type = rsmd.getColumnType(i);
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
-	                        Map<String, Object> meta = new HashMap<>();
-	                        meta.put("field", name);
-	                        meta.put("title", name); 
-	                        meta.put("type", getFrontendType(rsmd.getColumnTypeName(i)));
-	                        metadataList.add(meta);
+			ps.setString(1, tableName);
+			ps.setString(2, siteName);
 
-	                        if (type == Types.INTEGER || type == Types.DOUBLE || type == Types.DECIMAL || 
-	                            type == Types.FLOAT || type == Types.NUMERIC || type == Types.REAL) {
-	                            numericFields.add(name);
-	                        }
-	                    }
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					String key = rs.getString("Key");
+					String value = rs.getString("Value");
 
-	                    while (rs.next()) {
-	                        Map<String, Object> row = new LinkedHashMap<>();
-	                        for (int i = 1; i <= columnCount; i++) {
-	                            String colName = rsmd.getColumnLabel(i);
-	                            Object value = rs.getObject(i);
-	                            if (value == null) {
-	                                row.put(colName, numericFields.contains(colName) ? 0 : "");
-	                            } else {
-	                                row.put(colName, value);
-	                            }
-	                        }
-	                        dataList.add(row);
-	                    }
-	                }
-	            }
-	            resultMap.put("data", dataList);
-	            resultMap.put("metadata", metadataList);
-	            resultMap.put("numericColumns", numericFields);
-	            return resultMap;
-	        }
-	    });
+					if (value != null) {
+						titleMap.put(key, value);
+					}
+				}
+			}
+		}
+
+		return titleMap;
+	}
+
+	private Map<String, Object> fetchEverythingFromView(
+			final String plantId,
+			final String year,
+			final String viewName) {
+
+		return entityManager.unwrap(Session.class)
+				.doReturningWork(new ReturningWork<Map<String, Object>>() {
+
+					@Override
+					public Map<String, Object> execute(Connection connection) throws SQLException {
+
+						Map<String, Object> resultMap = new HashMap<>();
+						List<Map<String, Object>> dataList = new ArrayList<>();
+						List<Map<String, Object>> metadataList = new ArrayList<>();
+						Set<String> numericFields = new HashSet<>();
+
+						// ?? Load column title mapping from other view
+						Map<String, String> columnTitleMap = loadColumnTitles(connection,
+								"vwScrnCrackerKeyValueColumns", "DMD", "DecokeMaintenance");
+
+						String sql = "SELECT * FROM " + viewName +
+								" WHERE PlantId = ? AND AOPYear = ? ORDER BY " +
+								"CASE MonthName " +
+								"WHEN 'April' THEN 1 WHEN 'May' THEN 2 WHEN 'June' THEN 3 " +
+								"WHEN 'July' THEN 4 WHEN 'August' THEN 5 WHEN 'September' THEN 6 " +
+								"WHEN 'October' THEN 7 WHEN 'November' THEN 8 WHEN 'December' THEN 9 " +
+								"WHEN 'January' THEN 10 WHEN 'February' THEN 11 WHEN 'March' THEN 12 " +
+								"ELSE 13 END";
+
+						try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+							ps.setString(1, plantId);
+							ps.setString(2, year);
+
+							try (ResultSet rs = ps.executeQuery()) {
+
+								ResultSetMetaData rsmd = rs.getMetaData();
+								int columnCount = rsmd.getColumnCount();
+
+								// -------- Metadata --------
+								for (int i = 1; i <= columnCount; i++) {
+
+									String columnName = rsmd.getColumnLabel(i);
+									int sqlType = rsmd.getColumnType(i);
+
+									Map<String, Object> meta = new HashMap<>();
+									meta.put("field", columnName);
+									meta.put("title",
+											columnTitleMap.getOrDefault(columnName, columnName));
+									meta.put("type",
+											getFrontendType(rsmd.getColumnTypeName(i)));
+
+									metadataList.add(meta);
+
+									if (sqlType == Types.INTEGER ||
+											sqlType == Types.DOUBLE ||
+											sqlType == Types.DECIMAL ||
+											sqlType == Types.FLOAT ||
+											sqlType == Types.NUMERIC ||
+											sqlType == Types.REAL) {
+										numericFields.add(columnName);
+									}
+								}
+
+								// -------- Data --------
+								while (rs.next()) {
+
+									Map<String, Object> row = new LinkedHashMap<>();
+
+									for (int i = 1; i <= columnCount; i++) {
+										String colName = rsmd.getColumnLabel(i);
+										Object value = rs.getObject(i);
+
+										if (value == null) {
+											row.put(colName,
+													numericFields.contains(colName) ? 0 : "");
+										} else {
+											row.put(colName, value);
+										}
+									}
+									dataList.add(row);
+								}
+							}
+						}
+
+						resultMap.put("data", dataList);
+						resultMap.put("metadata", metadataList);
+						resultMap.put("numericColumns", numericFields);
+
+						return resultMap;
+					}
+				});
 	}
 	
 	private String getFrontendType(String sqlTypeName) {

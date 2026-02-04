@@ -2,7 +2,7 @@ import productionColDefs from '../../../assets/kendo_consumption_aop.json'
 import productionColDefsElastomer from '../../../assets/kendo_consumption_aop_elastomer.json'
 import productionColDefs1 from '../../../assets/kendo_consumption_aop_cracker.json'
 import productionColDefsVcm from '../../../assets/kendo_consumption_aop_vcm.json'
-import productionColDefsVcmDmd from '../../../assets/kendo_consumption_aop_vcmdmd.json'
+// import productionColDefsVcmDmd from '../../../assets/kendo_consumption_aop_vcmdmd.json'
 const getEnhancedColDefs = ({
   headerMap,
   lowerVertName,
@@ -14,13 +14,7 @@ const getEnhancedColDefs = ({
 
   // console.log('lowerVertName', lowerVertName)
 
-  if (
-    lowerVertName === 'vcm' &&
-    lowerSiteName === 'dmd' &&
-    lowerPlantName === 'vcm'
-  ) {
-    colDefs = productionColDefsVcmDmd
-  } else if (lowerVertName === 'cracker') {
+  if (lowerVertName === 'cracker') {
     colDefs = productionColDefs1
   } else if (lowerVertName === 'elastomer') {
     colDefs = productionColDefsElastomer

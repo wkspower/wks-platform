@@ -34,12 +34,7 @@ const getNormalOpNormColDef = ({
     return colDefsCache.get(cacheKey)
   }
 
-  const cols =
-    lowerVertName === 'vcm' &&
-    lowerSiteName === 'dmd' &&
-    lowerPlantName === 'vcm'
-      ? NormalOpNormVcmDmdColumns
-      : VERTICAL_COLDEFS_MAP[lowerVertName] || NormalOpNormMegColumns
+  const cols = VERTICAL_COLDEFS_MAP[lowerVertName] || NormalOpNormMegColumns
 
   const enhancedColDefs = cols.map((col) => {
     if (!headerMap || headerMap[col.title] === undefined) {

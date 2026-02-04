@@ -380,7 +380,8 @@ const BusinessDemand = ({ permissions }) => {
       isTotalFooterActive:
         // IS_VCM_VERTICAL ||
         IS_PE_PP_VERTICAL ||
-        IS_PTA_VERTICAL ||
+        // FOR PTA IT IS NOT REQUIRED
+        // IS_PTA_VERTICAL ||
         IS_PET_VERTICAL ||
         IS_ELASTOMER_VERTICAL
           ? true

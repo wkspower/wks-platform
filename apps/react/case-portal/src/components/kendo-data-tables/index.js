@@ -1,4 +1,5 @@
 import HelpIcon from '@mui/icons-material/Help'
+import InfoIcon from '@mui/icons-material/Info'
 import { Tooltip as MuiTooltip } from '@mui/material'
 import '@progress/kendo-font-icons/dist/index.css'
 import { Grid, GridColumn } from '@progress/kendo-react-grid'
@@ -1421,7 +1422,7 @@ const KendoDataTables = ({
                         padding: '4px',
                       }}
                     >
-                      <HelpIcon fontSize='small' />
+                      <InfoIcon fontSize='small' />
                     </IconButton>
                   </MuiTooltip>
                 </Box>
