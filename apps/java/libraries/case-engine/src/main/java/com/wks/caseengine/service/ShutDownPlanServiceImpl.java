@@ -353,7 +353,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 					Date startDate = dto.getMaintStartDateTime();
 					Date endDate = dto.getMaintEndDateTime();
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						if (dto.getMaintStartDateTime() != null) {
 			                int monthNumber = dto.getMaintStartDateTime().toInstant()
 			                        .atZone(ZoneId.systemDefault()).toLocalDate().getMonthValue();
@@ -364,7 +364,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		            	list.add(startDate != null ? formatter.format(startDate) : null);
 						list.add(endDate != null ? formatter.format(endDate) : null);
 		            }
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						list.add(dto.getDurationInHrs());
 					}else {
 						list.add(formattedDuration);
@@ -402,7 +402,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 
 			innerHeaders.add("Shutdown Desc");
 			// innerHeaders.add("Particulars");
-			if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+			if(vertical.getName().equalsIgnoreCase("PTA")) {
 				innerHeaders.add("Month");
 			}else {
 				innerHeaders.add("SD-From");
@@ -438,7 +438,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						cell.setCellValue((Date) value);
 						cell.setCellStyle(dateTimeStyle);
 					} else if (value instanceof Number) {
-						if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+						if(vertical.getName().equalsIgnoreCase("PTA")) {
 							if (col == 2) {
 		                        cell.setCellStyle(decimalStyle);
 		                    }
@@ -454,7 +454,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					}
 				}
 			}
-			if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+			if(vertical.getName().equalsIgnoreCase("PTA")) {
 				sheet.setColumnHidden(4, true);
 			}else {
 				sheet.setColumnHidden(5, true);	
@@ -1187,7 +1187,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					LocalDateTime[] bounds = parseFinancialYearBounds(year);
 					LocalDateTime fyStart = bounds[0];
 					LocalDateTime fyEnd = bounds[1];
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						dto.setMonth(getCellAsString(row.getCell(1), dto, evaluator));
 						if(dto.getMonth()==null) {
 							dto.setSaveStatus("Failed");
@@ -1314,7 +1314,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						}
 
 					}
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						dto.setRemark(getStringCellValue(row.getCell(3), dto)); // Set DTO field
 					}else {
 						dto.setRemark(getStringCellValue(row.getCell(4), dto)); // Set DTO field
@@ -1326,7 +1326,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						dto.setErrDescription("Please enter remark");
 						alreadyFailed = true;
 					}
-					if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(vertical.getName().equalsIgnoreCase("PTA")) {
 						String idString = getStringCellValue(row.getCell(4), dto);
 						dto.setId(idString);
 					}else {
@@ -1347,7 +1347,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						}
 					}
 
-					if (verticalName.equalsIgnoreCase("PTA") && !site.getName().equalsIgnoreCase("DMD") && !alreadyFailed && ldtStart != null && ldtEnd != null) {
+					if (verticalName.equalsIgnoreCase("PTA") && !alreadyFailed && ldtStart != null && ldtEnd != null) {
 						validTimeRangesWithIndex.add(new TimeRangeWithIndex(ldtStart, ldtEnd, currentRowIndex));
 					}
 
@@ -1848,7 +1848,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 					PlantMaintenanceTransaction plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 					plantMaintenanceTransaction.setId(UUID.randomUUID());
 					plantMaintenanceTransaction.setPlantId(plantId);
-					if(verticalName.equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+					if(verticalName.equalsIgnoreCase("PTA")) {
 		            	if(shutDownPlanDTO.getMonth()!=null) {
 		            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
 		            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
@@ -1926,7 +1926,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 						if (plantMaintenance.isPresent()) {
 							PlantMaintenanceTransaction plantMaintenanceTransaction = plantMaintenance.get();
 							plantMaintenanceTransaction.setPlantId(plantId);
-							if(verticalName.equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+							if(verticalName.equalsIgnoreCase("PTA")) {
 				            	if(shutDownPlanDTO.getMonth()!=null) {
 				            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
 				            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
@@ -1974,7 +1974,7 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 									}
 								}
 							}
-							if (("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName))) {
+							if (("PE".equalsIgnoreCase(verticalName)) || ("PP".equalsIgnoreCase(verticalName)) || ("PET".equalsIgnoreCase(verticalName))) {
 								int month = plantMaintenanceTransaction.getMaintForMonth();
 								Long count = plantMaintenanceTransactionRepository.countByPlantAndMonth(plantId, month,
 										"Shutdown", year);
