@@ -143,6 +143,7 @@ export const DataService = {
   getSpecificConsumption,
   getConsumptionNorms,
   dropdownValues,
+  dropdownValuesDMD,
   slowdownconsumptionExport,
   slowdownconsumptionExportVCM,
   saveSlowdownNormsExcel,
@@ -3706,5 +3707,21 @@ export async function ImportPeopleInitiativeExcel(
   } catch (e) {
     console.error('Error importing People Initiative Excel:', e)
     return Promise.reject(e)
+  }
+}
+async function dropdownValuesDMD(keycloak, PLANT_ID, AOP_YEAR) {
+  // const url = `${Config.CaseEngineUrl}/task/description-drpdwn?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const url = `${Config.CaseEngineUrl}/task/shutdown-description?plantId=${PLANT_ID}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
+    return await Promise.reject(e)
   }
 }
