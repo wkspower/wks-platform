@@ -748,7 +748,37 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 		}
 		return null;
 	}
-	
+
+	@Override
+	public AOPMessageVM importYieldDMD(String year,UUID plantId,MultipartFile file) {
+		// TODO Auto-generated method stub
+		try {
+			List<YieldDMDDTO> data = readYieldDMD(file.getInputStream(), plantId, year);
+			 AOPMessageVM aopMessageVM = updateSpyroOutputYieldDMD( plantId.toString(),  year, data);
+			 Map<String, Object> map = (Map<String, Object>) aopMessageVM.getData();
+
+			List<YieldDMDDTO> failedList = (List<YieldDMDDTO>) map.get("Failed");
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = exportYieldDMD(year, plantId.toString(), true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				// aopMessageVM.setData();
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+			// return ResponseEntity.ok(data);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// return ResponseEntity.internalServerError().build();
+		}
+		return null;
+	}
+
 	public List<YieldDTO> readYieldData(InputStream inputStream, UUID plantFKId, String year) {
 	    List<YieldDTO> yieldList = new ArrayList<>();
 
@@ -793,7 +823,61 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 
 	    return yieldList;
 	}
-	
+
+	public List<YieldDMDDTO> readYieldDMD(InputStream inputStream, UUID plantFKId, String year) {
+	    List<YieldDMDDTO> yieldList = new ArrayList<>();
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+
+	        int lastRowNum = sheet.getLastRowNum();  
+	        Iterator<Row> rowIterator = sheet.iterator();
+
+	        if (rowIterator.hasNext())
+	            rowIterator.next();  
+
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            if (row.getRowNum() == lastRowNum) {
+	                
+	                break;
+	            }
+	            YieldDMDDTO dto = new YieldDMDDTO();
+	            try {
+	                dto.setParticulars(getStringCellValue(row.getCell(0), dto));
+	                dto.setFiveFC2C3(getNumericCellValue(row.getCell(1), dto));
+	                dto.setFiveFPropane(getNumericCellValue(row.getCell(2), dto));
+	                dto.setFiveFEthane(getNumericCellValue(row.getCell(3), dto));
+	                dto.setFiveFDSC2C3(getNumericCellValue(row.getCell(4), dto));
+	                dto.setFiveFDSPropane(getNumericCellValue(row.getCell(5), dto));
+	                dto.setFiveFDSEthane(getNumericCellValue(row.getCell(6), dto));
+	                dto.setFourFC2C3(getNumericCellValue(row.getCell(7), dto));
+	                dto.setFourFPropane(getNumericCellValue(row.getCell(8), dto));
+	                dto.setFourFEthane(getNumericCellValue(row.getCell(9), dto));
+	                dto.setSevenFC2C3(getNumericCellValue(row.getCell(10), dto));
+	                dto.setSevenFPropane(getNumericCellValue(row.getCell(11), dto));
+	                dto.setSevenFEthane(getNumericCellValue(row.getCell(12), dto));
+	                dto.setSixFSFDC2C3(getNumericCellValue(row.getCell(13), dto));
+	                dto.setSixFSFDPropane(getNumericCellValue(row.getCell(14), dto));
+	                dto.setSixFSFDEthane(getNumericCellValue(row.getCell(15), dto));
+	               dto.setSixFBFDC2C3(getNumericCellValue(row.getCell(16), dto));
+	               dto.setSixFBFDPropane(getNumericCellValue(row.getCell(17), dto));
+	               dto.setSixFBFDEthane(getNumericCellValue(row.getCell(18), dto));
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                dto.setErrDescription(e.getMessage());
+	                dto.setSaveStatus("Failed");
+	            }
+	            yieldList.add(dto);
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return yieldList;
+	}
+
 	private static String getStringCellValue(Cell cell, YieldDTO dto) {
 	    try {
 	        if (cell == null || cell.getCellType() == CellType.BLANK) {
@@ -836,6 +920,49 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	    }
 	    return null;
 	}
+	private static String getStringCellValue(Cell cell, YieldDMDDTO dto) {
+	    try {
+	        if (cell == null || cell.getCellType() == CellType.BLANK) {
+	            return null;
+	        }
+	        
+	        cell.setCellType(CellType.STRING);
+	        String val = cell.getStringCellValue().trim();
+	        
+	        // Return null if the string is empty after trimming
+	        return val.isEmpty() ? null : val;
+	        
+	    } catch (Exception e) {
+	        dto.setSaveStatus("Failed");
+	        dto.setErrDescription("Please enter correct values");
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+	private static Double getNumericCellValue(Cell cell, YieldDMDDTO dto) {
+	    if (cell == null || cell.getCellType() == CellType.BLANK) {
+	        return null;
+	    }
+
+	    if (cell.getCellType() == CellType.NUMERIC) {
+	        return cell.getNumericCellValue();
+	    } 
+	    
+	    if (cell.getCellType() == CellType.STRING) {
+	        String val = cell.getStringCellValue().trim();
+	        if (val.isEmpty()) {
+	            return null; // Return null for blank strings
+	        }
+	        try {
+	            return Double.parseDouble(val);
+	        } catch (NumberFormatException e) {
+	            dto.setSaveStatus("Failed");
+	            dto.setErrDescription("Please enter numeric values");
+	        }
+	    }
+	    return null;
+	}
+
 	public static Boolean getBooleanCellValue(Cell cell, YieldDTO dto) {
 		if (cell == null)
 			return null;

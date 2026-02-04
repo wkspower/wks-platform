@@ -150,6 +150,15 @@ public class SpyroOutputController {
 			return	spyroOutputService.importYieldExcel(year,UUID.fromString(plantId), file); 
 	}
 	
+	@PostMapping(value = "/yield-import-dmd", consumes = "multipart/form-data")
+	public AOPMessageVM importYieldDMD(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	spyroOutputService.importYieldDMD(year,UUID.fromString(plantId), file); 
+	}
+	
 	@PostMapping(value = "/spyro-output-import-excel", consumes = "multipart/form-data")
 	public AOPMessageVM importExcel(
 	         @RequestParam("plantId") String plantId,

@@ -35,6 +35,8 @@ public interface SpyroOutputService {
 			Map<String, List<SpyroOutputDTO>> mapForExcel);
 	
 	public AOPMessageVM importYieldExcel(String year,UUID plantId,MultipartFile file);
+	
+	public AOPMessageVM importYieldDMD(String year,UUID plantId,MultipartFile file);
 	          
 	AOPMessageVM importExcel(String year, String plantFKId, String mode, MultipartFile file);
 	
