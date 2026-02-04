@@ -148,6 +148,7 @@ const RemarkDialog = ({
               keycloak,
               SITE_ID,
               VERTICAL_ID,
+              AOP_YEAR,
             )
         } else if (role === ROLES.CLUSTER_HEAD) {
           // Cluster Head gets CTS/EPS Head approve/reject remark
@@ -156,6 +157,7 @@ const RemarkDialog = ({
               keycloak,
               SITE_ID,
               VERTICAL_ID,
+              AOP_YEAR,
             )
         }
 
