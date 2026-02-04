@@ -19,6 +19,7 @@ import {
   getColDefsDesignCapacity,
   getColDefsDesignCapacityPEPP,
   getColDefsDesignCapacityPTA,
+  getColDefsDesignCapacityPTADMD,
   getColDefsMaxAchievedCapacity,
   getColDefsMaxAchievedCapacityPEPP,
   getColDefsMaxAchievedCapacityPTA,
@@ -84,6 +85,7 @@ const ProductionvolumeData = ({ permissions }) => {
     verticalObject?.name?.toLowerCase() == 'pp'
 
   const IS_PTA = verticalObject?.name?.toLowerCase() == 'pta'
+  const IS_PTA_DMD = IS_PTA && siteObject?.name?.toLowerCase() == 'dmd'
 
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
   const SITE_NAME = siteObject?.name?.toLowerCase()
@@ -586,9 +588,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const colDefs_design_capacity =
     IS_PE_PP || IS_PET
       ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
-      : IS_PTA
-        ? getColDefsDesignCapacityPTA(headerMap, valueFormat)
-        : getColDefsDesignCapacity(headerMap, valueFormat)
+      : IS_PTA_DMD
+        ? getColDefsDesignCapacityPTADMD(headerMap, valueFormat)
+        : IS_PTA
+          ? getColDefsDesignCapacityPTA(headerMap, valueFormat)
+          : getColDefsDesignCapacity(headerMap, valueFormat)
 
   const colDefs_max_achieved_capacity =
     IS_PE_PP || IS_PET
@@ -661,7 +665,7 @@ const ProductionvolumeData = ({ permissions }) => {
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
           remark: item.remarks?.trim() || '',
-          isEditable: IS_PE_PP || IS_PET || IS_VCM ? false : true,
+          isEditable: IS_PE_PP || IS_PET || IS_VCM || IS_PTA_DMD ? false : true,
 
           april:
             isTPD && item.april ? item.april * 24 : item.april || item.april,
@@ -878,7 +882,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: IS_PE_PP || IS_PET || IS_VCM ? false : true,
+      saveBtn: IS_PE_PP || IS_PET || IS_VCM || IS_PTA_DMD ? false : true,
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,

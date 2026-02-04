@@ -720,6 +720,7 @@ const SlowdownNorms = () => {
           grades={grades}
           calculatebtnClicked={calculatebtnClicked}
           handleGradeChange={handleGradeChange}
+          handleExcelUpload={handleExcelUpload}
           downloadExcelForConfiguration={downloadExcelForConfiguration}
         />
       )}

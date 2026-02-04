@@ -235,7 +235,7 @@ const KendoDataTables = ({
     const isShutdown = shutdownMonths.includes(monthNumber)
     const isSlowdown = slowdownMonths.includes(monthNumber)
     let color = ''
-    if (isShutdown || isSlowdown) color = 'rgb(219, 216, 216)'
+    if (isShutdown || isSlowdown) color = 'rgb(240, 235, 235)'
 
     return (
       <td
