@@ -143,8 +143,9 @@ if(plantId != null) {
             String procedureName = "GetTcsShutdown";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
                 if(plantId != null) {
-                procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";  }
-
+             //   procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";  }
+                procedureName =  "CRUDE_DTA_GetTcsShutdown";
+                }
                 else {
                  //   procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
                     procedureName = "GetTcsShutdown_OutPut";
@@ -189,15 +190,18 @@ if(plantId != null) {
         String siteName) {
 
         String procedureName = "GetTcsShutdown";
+
         if (!"MEG".equalsIgnoreCase(verticalName)) {
             if(plantId != null) {
-            procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";
+          //  procedureName = verticalName + "_" + siteName + "_GetTcsShutdown";
+          procedureName =  "CRUDE_DTA_GetTcsShutdown";
             }
             else {
               //  procedureName = verticalName + "_" + siteName + "_GetTcsShutdown_OutPut";
                 procedureName = "GetTcsShutdown_OutPut";
             }
-        }
+        }      
+
         String callableSql = "";
         if(plantId != null) {
         callableSql = "{call " + procedureName + "(?, ?)}";
