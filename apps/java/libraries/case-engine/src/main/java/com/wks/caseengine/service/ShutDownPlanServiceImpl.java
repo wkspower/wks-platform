@@ -2140,6 +2140,33 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	@Override
+	public AOPMessageVM getShutdownDescription(String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+			String viewName = vertical.getName()+site.getName()+"vwScrnShutdown";
+			List<Object[]> results = getDescriptionDropdownData(vertical.getId(), viewName);
+			for (Object[] obj : results) {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("DisplayName", obj[2]);
+				map.put("Name", obj[1]);
+				mapList.add(map);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(mapList);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid data format", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
 
 	public List<Object[]> getDescriptionDropdownData(UUID verticalId, String viewName) {
 		try {
