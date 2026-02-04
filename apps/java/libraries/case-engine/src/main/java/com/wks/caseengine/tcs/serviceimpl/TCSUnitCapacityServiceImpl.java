@@ -185,7 +185,8 @@ Verticals vertical = null;
             String procedureName = "GetTcsUnitCapacity";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
                 if(plantId != null) {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";  
+             //   procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity"; 
+                procedureName = "CRUDE_ALL_GetTcsUnitCapacity";    // this sp is independant of verticle (no verticle Id used)
             }
             else  {
                // procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut"; 
@@ -241,7 +242,8 @@ Verticals vertical = null;
         String procedureName = "GetTcsUnitCapacity";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
             if(plantId != null) {
-            procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
+         //   procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity";
+             procedureName = "CRUDE_ALL_GetTcsUnitCapacity";    
             }
             else  {
              //   procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
@@ -438,10 +440,13 @@ Verticals vertical = null;
             String procedureName = "GetTcsUnitCapacity_UOM";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
                 if(plantId != null) {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM"; 
+             //   procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM"; 
+             procedureName = "CRUDE_ALL_GetTcsUnitCapacity_UOM";   
             }
             else {
-                procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM_OutPut";
+             //   procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_UOM_OutPut";
+             procedureName = "CRUDE_ALL_GetTcsUnitCapacity_UOM_OutPut";
+
             }
             }
 
