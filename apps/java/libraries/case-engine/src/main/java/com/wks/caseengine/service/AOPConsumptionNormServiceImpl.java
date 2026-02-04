@@ -155,7 +155,7 @@ public class AOPConsumptionNormServiceImpl implements AOPConsumptionNormService 
 					dto.setUOM(row[22] != null ? row[22].toString() : null);
 					dto.setIsEditable(row[23] != null ? Boolean.valueOf(row[23].toString()) : null);
 					dto.setProductName(row[24] != null ? row[24].toString() : null);
-					if(vertical.getName().equalsIgnoreCase("VCM") || vertical.getName().equalsIgnoreCase("PTA")) {
+					if(vertical.getName().equalsIgnoreCase("VCM")) {
 						dto.setWtAverage(row[25] != null ? Double.parseDouble(row[25].toString()) : null);
 					}
 				}
