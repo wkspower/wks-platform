@@ -1974,7 +1974,6 @@ const KendoDataTables = ({
                 }
                 if (
                   lowerVertName === 'vcm' &&
-                  lowerSiteName === 'dmd' &&
                   monthFields.includes(col.field)
                 ) {
                   return (
