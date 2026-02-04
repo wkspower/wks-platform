@@ -161,6 +161,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 				}
 				dto.setRateEO(result[11] != null ? ((Number) result[11]).doubleValue() : null);
 				dto.setRateEOE(result[12] != null ? ((Number) result[12]).doubleValue() : null);
+				dto.setRpfDownTime(result[13] != null ? ((Number) result[13]).doubleValue() : null);
+				dto.setNoOfRPF(result[14] != null ? ((Number) result[14]).doubleValue() : null);
 				dtoList.add(dto);
 			}
 			// TODO Auto-generated method stub
@@ -2086,8 +2088,16 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            String originalEnd = plantMaintenanceTransaction.getMaintEndDateTime() != null ? 
 	                                 plantMaintenanceTransaction.getMaintEndDateTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().format(COMPARISON_FORMATTER) : null;
 	            Double originalRate=null;
+	            Double originalRPFDownTime=null;
+	            Double originalNoOfRPF=null;
 	            if(plantMaintenanceTransaction.getRate()!=null) {
 	            	 originalRate = plantMaintenanceTransaction.getRate();
+	            }
+	            if(plantMaintenanceTransaction.getRpfDownTime()!=null) {
+	            	originalRPFDownTime = plantMaintenanceTransaction.getRpfDownTime();
+	            }
+	            if(plantMaintenanceTransaction.getNoOfRPF()!=null) {
+	            	originalNoOfRPF = plantMaintenanceTransaction.getNoOfRPF();
 	            }
 	            Double originalDurationInHrs = plantMaintenanceTransaction.getDurationInMins() != null ? 
                         plantMaintenanceTransaction.getDurationInMins() / 60.0 : null;
@@ -2115,6 +2125,8 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            plantMaintenanceTransaction.setRate(shutDownPlanDTO.getRate());
 	            plantMaintenanceTransaction.setRateEO(shutDownPlanDTO.getRateEO());
 	            plantMaintenanceTransaction.setRateEOE(shutDownPlanDTO.getRateEOE());
+	            plantMaintenanceTransaction.setRpfDownTime(shutDownPlanDTO.getRpfDownTime());
+	            plantMaintenanceTransaction.setNoOfRPF(shutDownPlanDTO.getNoOfRPF());
 	            plantMaintenanceTransaction.setRemarks(shutDownPlanDTO.getRemark()); // Set incoming remark for now
 	            plantMaintenanceTransaction.setVersion("V1");
 	            plantMaintenanceTransaction.setUser(Utility.getUserName());
@@ -2138,7 +2150,15 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                if(plantMaintenanceTransaction.getRate()!=null) {
 	                	 newRate = plantMaintenanceTransaction.getRate();
 	                }
-	                
+	                Double newRPFDownTime=null;
+		            Double newNoOfRPF=null;
+		           
+		            if(plantMaintenanceTransaction.getRpfDownTime()!=null) {
+		            	newRPFDownTime = plantMaintenanceTransaction.getRpfDownTime();
+		            }
+		            if(plantMaintenanceTransaction.getNoOfRPF()!=null) {
+		            	newNoOfRPF = plantMaintenanceTransaction.getNoOfRPF();
+		            }
 	                Double newDurationInHrs = shutDownPlanDTO.getDurationInHrs();
 	                String newRemark = shutDownPlanDTO.getRemark();
 	                Double newRateEo= shutDownPlanDTO.getRateEO()!=null? shutDownPlanDTO.getRateEO():null;
@@ -2147,7 +2167,11 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    !java.util.Objects.equals(originalDesc, newDesc) ||
 	                    !java.util.Objects.equals(originalStart, newStart) ||
 	                    !java.util.Objects.equals(originalEnd, newEnd) ||
-	                    !java.util.Objects.equals(originalRate, newRate); 
+	                    !java.util.Objects.equals(originalRate, newRate)||
+	                    !java.util.Objects.equals(originalRPFDownTime, newRPFDownTime) ||
+	                    !java.util.Objects.equals(originalNoOfRPF, newNoOfRPF); 
+	                
+	                
 
 	                if (fieldsChanged && java.util.Objects.equals(originalRemark, newRemark)) {
 	                    shutDownPlanDTO.setSaveStatus("Failed");
