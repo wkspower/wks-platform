@@ -382,6 +382,7 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
         // reset the approved plants count to 0 for ebs submission
         updatePlantCountVariable(plantCountVariables, APPROVED_PLANTS_VARIABLE_NAME, objectMapper, false, true);
 
+
         Map<String, VariableValueDto> variablesMap = c7VariablesMapper.toEngineFormat(submissionStatusVariables);
 
         Map<String, VariableValueDto> plantCountVariablesMap = c7VariablesMapper.toEngineFormat(plantCountVariables);
@@ -434,7 +435,13 @@ ProcessVariable plantListVariable = ProcessVariable.builder()
     
       System.out.println("submissionStatusVariables: " + submissionStatusVariables);
 
-      processEngineClientFacade.complete(taskToComplete.getId(), submissionStatusVariables);
+
+
+      //processEngineClientFacade.complete(taskToComplete.getId(), submissionStatusVariables);
+
+      processEngineClientFacade.complete(taskToComplete.getId(), List.of(submissionStatusVariables.get(0), plantCountVariables.get(0)));
+
+   //   processEngineClientFacade.complete(taskToComplete.getId(), );
 
       // *************** save audit trail for ebs approval history *************************
 
