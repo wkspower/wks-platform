@@ -1121,9 +1121,9 @@ public class SpyroOutputServiceImpl implements SpyroOutputService{
 	        addToList(yieldParticularDTOs, "4F_" + part + "_C2C3", dto.getFourFC2C3());
 	        addToList(yieldParticularDTOs, "4F_" + part + "_Propane", dto.getFourFPropane());
 	        addToList(yieldParticularDTOs, "4F_" + part + "_Ethane", dto.getFourFEthane());
-	        addToList(yieldParticularDTOs, "7F_" + part + "_C2C3", dto.getFourFC2C3());
-	        addToList(yieldParticularDTOs, "7F_" + part + "_Propane", dto.getFourFPropane());
-	        addToList(yieldParticularDTOs, "7F_" + part + "_Ethane", dto.getFourFEthane());
+	        addToList(yieldParticularDTOs, "7F_" + part + "_C2C3", dto.getSevenFC2C3());
+	        addToList(yieldParticularDTOs, "7F_" + part + "_Propane", dto.getSevenFPropane());
+	        addToList(yieldParticularDTOs, "7F_" + part + "_Ethane", dto.getSevenFEthane());
 	    }
 	    
 	    return yieldParticularDTOs;
