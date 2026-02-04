@@ -163,6 +163,8 @@ const KendoDataTables = ({
   resetDataChanges = () => {},
   noteOnSaveDialogeBox = '',
   deleteNoteOnDeleteDialogeBox = '',
+  shutdownMonths = [],
+  slowdownMonths = [],
 }) => {
   const _export = useRef(null)
   const _grid = React.useRef(undefined)
@@ -191,17 +193,78 @@ const KendoDataTables = ({
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
 
-  const { verticalChange, oldYear, year, plantObject } = dataGridStore
+  const { verticalChange, oldYear, year, plantObject, siteObject } =
+    dataGridStore
   const IS_OLD_YEAR = oldYear?.oldYear
   const AOP_YEAR = year?.selectedYear
   const PLANT_ID = plantObject?.id
-
+  const SiteName = siteObject?.name
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
 
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const lowerSiteName = SiteName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
   const IS_VCM_VERTICAL = ['vcm'].includes(lowerVertName)
+  // ...inside columns?.map((col) => { ... })...
+  const fieldToMonthNumber = {
+    january: 1,
+    february: 2,
+    march: 3,
+    april: 4,
+    may: 5,
+    june: 6,
+    july: 7,
+    august: 8,
+    september: 9,
+    october: 10,
+    november: 11,
+    december: 12,
+  }
+  // Custom cell for VCM/DMD month highlighting
+  const VcmDmdMonthHighlightCell = ({
+    dataItem,
+    field,
+    tdProps,
+    children,
+    shutdownMonths = [],
+    slowdownMonths = [],
+  }) => {
+    const value = dataItem[field]
+    const monthNumber = fieldToMonthNumber[field]
+    const isShutdown = shutdownMonths.includes(monthNumber)
+    const isSlowdown = slowdownMonths.includes(monthNumber)
+    let color = ''
+    if (isShutdown || isSlowdown) color = 'rgb(219, 216, 216)'
+
+    return (
+      <td
+        {...tdProps}
+        title={value}
+        style={{
+          ...tdProps.style,
+          backgroundColor: color || undefined,
+          textAlign: 'right',
+        }}
+      >
+        {children}
+      </td>
+    )
+  }
+  const monthFields = [
+    'april',
+    'may',
+    'june',
+    'july',
+    'august',
+    'september',
+    'october',
+    'november',
+    'december',
+    'january',
+    'february',
+    'march',
+  ]
 
   const initialGroup = groupBy
     ? [
@@ -1905,6 +1968,37 @@ const KendoDataTables = ({
                       filter='date'
                       // columnMenu={DateColumnMenu}
                       columnMenu={ColumnMenuCheckboxFilterDate}
+                    />
+                  )
+                }
+                if (
+                  lowerVertName === 'vcm' &&
+                  lowerSiteName === 'dmd' &&
+                  monthFields.includes(col.field)
+                ) {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.widthT}
+                      hidden={col.hidden}
+                      editable={col?.editable ? true : false}
+                      headerClassName={isActive ? 'active-column' : ''}
+                      cells={{
+                        edit: { text: NoSpinnerNumericEditor }, // <-- Add this line for editing
+                        data: (props) => (
+                          <VcmDmdMonthHighlightCell
+                            {...props}
+                            shutdownMonths={shutdownMonths}
+                            slowdownMonths={slowdownMonths}
+                          />
+                        ),
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                      filter='numeric'
+                      format={col.format}
                     />
                   )
                 }

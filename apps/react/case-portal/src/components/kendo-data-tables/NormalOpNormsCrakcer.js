@@ -92,6 +92,8 @@ const NormalOpNormsScreenCracker = () => {
   const AOP_YEAR = year?.selectedYear
   const vertName = verticalChange?.selectedVertical || ''
   const lowerVertName = (vertName || '').toLowerCase()
+  const lowerSiteName = (plantObject?.siteName || '').toLowerCase()
+  const lowerPlantName = (plantObject?.name || '').toLowerCase()
 
   const dispatch = useDispatch()
   const keycloak = useSession()
@@ -146,8 +148,23 @@ const NormalOpNormsScreenCracker = () => {
   const valueFormat = ValueFormatterConsumption()
   // column defs
   const colDefs = useMemo(
-    () => getNormalOpNormColDef({ headerMap, valueFormat, lowerVertName }),
-    [headerMap, valueFormat, lowerVertName, AOP_YEAR, PLANT_ID],
+    () =>
+      getNormalOpNormColDef({
+        headerMap,
+        valueFormat,
+        lowerVertName,
+        lowerSiteName,
+        lowerPlantName,
+      }),
+    [
+      headerMap,
+      valueFormat,
+      lowerVertName,
+      AOP_YEAR,
+      PLANT_ID,
+      lowerSiteName,
+      lowerPlantName,
+    ],
   )
 
   const colDefsIndividual = useMemo(
