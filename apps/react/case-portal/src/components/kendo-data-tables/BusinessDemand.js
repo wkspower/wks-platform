@@ -165,7 +165,8 @@ const BusinessDemand = ({ permissions }) => {
       if (
         IS_VCM_VERTICAL ||
         IS_PE_PP_VERTICAL ||
-        IS_PTA_VERTICAL ||
+        // FOR PTA THIS CONDITION IS REMOVED
+        // IS_PTA_VERTICAL ||
         IS_PET_VERTICAL ||
         IS_ELASTOMER_VERTICAL
       ) {
