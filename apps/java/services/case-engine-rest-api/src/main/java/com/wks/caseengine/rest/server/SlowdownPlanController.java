@@ -131,6 +131,28 @@ public class SlowdownPlanController {
 	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 	    }
 	}
+	
+	@GetMapping(value = "/slowdown-export-non-product-dmd")
+	public ResponseEntity<byte[]> nonProductSlowdownDMDExport(
+	         @RequestParam String year,@RequestParam String plantId,@RequestParam String maintenanceTypeName) {
+	    try {
+			
+	        byte[] excelBytes = slowdownPlanService.nonProductSlowdownDMDExport(year, plantId,maintenanceTypeName, false, null);
+
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.parseMediaType(
+	                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	        headers.setContentDisposition(ContentDisposition.builder("attachment")
+	                .filename("slowdown.xlsx")
+	                .build());
+	        headers.setContentLength(excelBytes.length);
+
+	        return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+	    } catch (Exception e) {
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
+	}
+
 
 	
 	@PostMapping(value = "/slowdown-import", consumes = "multipart/form-data")
@@ -159,7 +181,15 @@ public class SlowdownPlanController {
 	        ) {
 			return	slowdownPlanService.importNonProductSlowdown(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
 	}
-
+	
+	@PostMapping(value = "/slowdown-import-non-product-dmd", consumes = "multipart/form-data")
+	public AOPMessageVM importNonProductSlowdownDMD(
+	         @RequestParam("plantId") String plantId,
+            @RequestParam("year") String year,@RequestParam String maintenanceTypeName,
+			@RequestParam("file") MultipartFile file
+	        ) {
+			return	slowdownPlanService.importNonProductSlowdownDMD(year,UUID.fromString(plantId),  maintenanceTypeName, file); 
+	}
 	
 	@PostMapping(value="/slowdown/{plantId}")
 	public ResponseEntity<List<ShutDownPlanDTO>> saveShutdownData(@PathVariable UUID plantId,@RequestBody List<ShutDownPlanDTO> shutDownPlanDTOList){

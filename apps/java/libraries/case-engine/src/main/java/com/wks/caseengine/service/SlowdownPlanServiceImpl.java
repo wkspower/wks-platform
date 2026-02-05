@@ -798,7 +798,124 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    }
 	    return null;
 	}
-	
+
+	public byte[] nonProductSlowdownDMDExport(String year, String plantId, String maintenanceTypeName, boolean isAfterSave, List<ShutDownPlanDTO> dtoList) {
+	    try {
+	        Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+	        Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	        if (!isAfterSave) {
+	             dtoList = findSlowdownDetailsByPlantIdAndType(UUID.fromString(plantId), maintenanceTypeName, year);
+	        }
+	        
+	        String pattern = "dd-MM-yyyy HH:mm";
+	        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+	        Workbook workbook = new XSSFWorkbook();
+	        CellStyle dateTimeStyle = createDateTimeStyle(workbook, "dd-MM-yyyy HH:mm");
+	        
+	        CellStyle decimalStyle = createDecimalStyle(workbook, "0.00"); 
+	        
+	        Sheet sheet = workbook.createSheet("Sheet1");
+	        int currentRow = 0;
+
+	        List<List<Object>> rows = new ArrayList<>();
+	        for (ShutDownPlanDTO dto : dtoList) {
+	            List<Object> list = new ArrayList<>();
+	            
+	            list.add(dto.getDiscription());
+	            if (dto.getMaintStartDateTime() != null) {
+	                int monthNumber = dto.getMaintStartDateTime().toInstant()
+	                        .atZone(ZoneId.systemDefault()).toLocalDate().getMonthValue();
+	                dto.setMonth(getMonthName(monthNumber));
+	            }
+	            
+	            list.add(dto.getMonth());      
+	            list.add(dto.getRpfDownTime());
+	            list.add(dto.getNoOfRPF());
+	            list.add((dto.getRpfDownTime()*dto.getNoOfRPF()));
+	            list.add(dto.getRate());
+	            list.add(dto.getRemark());
+	            list.add(dto.getId());
+	            
+	            if (isAfterSave) {
+	                list.add(dto.getSaveStatus());
+	                list.add(dto.getErrDescription());
+	            }
+	            
+	            rows.add(list);
+	        }
+
+	        List<String> innerHeaders = new ArrayList<>();
+	        
+	        innerHeaders.add("Slowdown Desc");
+	        innerHeaders.add("Month");
+	        innerHeaders.add("RPF Down Time");
+	        innerHeaders.add("No of RPF"); 
+	        innerHeaders.add("Duration");
+	        innerHeaders.add("Rate");
+	        innerHeaders.add("Remarks");
+	        innerHeaders.add("Id");
+	        
+	        if (isAfterSave) {
+	            innerHeaders.add("Status");
+	            innerHeaders.add("Error Description");
+	        }
+	        List<List<String>> headers = new ArrayList<>();
+	        headers.add(innerHeaders);
+
+	        for (List<String> headerRowData : headers) {
+	            Row headerRow = sheet.createRow(currentRow++);
+	            for (int col = 0; col < headerRowData.size(); col++) {
+	                Cell cell = headerRow.createCell(col);
+	                cell.setCellValue(headerRowData.get(col));
+	               
+	                cell.setCellStyle(Utility.createBoldBorderedStyle(workbook));
+	            }
+	        }
+	        
+	       
+	        for (List<Object> rowData : rows) {
+					 Row row = sheet.createRow(currentRow++);
+					 for (int col = 0; col < rowData.size(); col++) {
+					 Cell cell = row.createCell(col);
+					 Object value = rowData.get(col);
+				
+					 if (value instanceof Date) {
+					 cell.setCellValue((Date) value);
+					 cell.setCellStyle(dateTimeStyle);
+					 } else if (value instanceof Number) {
+					 cell.setCellValue(((Number) value).doubleValue());
+	                    
+	                 
+	                    if (col == 2 || col == 3 || col == 4 || col == 5)  {
+	                        cell.setCellStyle(decimalStyle);
+	                    }
+	                    
+						} else if (value instanceof Boolean) {
+							cell.setCellValue((Boolean) value);
+							 } else if (value != null) {
+							 cell.setCellValue(value.toString());
+							} else {
+							 cell.setCellValue("");
+							}}}
+	        
+	        
+	        	 sheet.setColumnHidden(7, true);
+	        try {
+
+	            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+	            workbook.write(outputStream);
+	            workbook.close();
+	            return outputStream.toByteArray();
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
 	@Override
 	public AOPMessageVM importSlowdownRateExcel(String year,UUID plantId, String maintenanceTypeName,MultipartFile file) {
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
@@ -897,6 +1014,36 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 		return null;
 	}
 
+	@Override
+	public AOPMessageVM importNonProductSlowdownDMD(String year,UUID plantId, String maintenanceTypeName,MultipartFile file) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(plantId).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			List<ShutDownPlanDTO> data=null;
+			if(vertical.getName().equalsIgnoreCase("Elastomer")) {
+				 data = readNonProductSlowdownElastomer(file.getInputStream(), plantId, year);
+			}else {
+				 data = readNonProductSlowdownDMD(file.getInputStream(), plantId, year);
+			}
+			List<ShutDownPlanDTO> failedList = saveShutdownData(plantId, data);
+			if (failedList != null && failedList.size() > 0) {
+				byte[] fileByteArray = nonProductSlowdownDMDExport(year, plantId.toString(),maintenanceTypeName, true, failedList);
+				String base64File = Base64.getEncoder().encodeToString(fileByteArray);
+				aopMessageVM.setData(base64File);
+				aopMessageVM.setCode(400);
+				aopMessageVM.setMessage("Partial data has been saved");
+			} else {
+				aopMessageVM.setCode(200);
+				aopMessageVM.setMessage("All data has been saved");
+			}
+
+			return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	private static String getCellAsString(Cell cell, ShutDownPlanDTO dto, FormulaEvaluator evaluator) {
 	    if (cell == null) {
@@ -1760,7 +1907,105 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    }
 	    return dtoList;
 	}
-	
+
+	public List<ShutDownPlanDTO> readNonProductSlowdownDMD(InputStream inputStream, UUID plantFKId, String year) {
+	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
+	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
+	    Plants plant = plantsRepository.findById(plantFKId).get();
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+	    
+	    final long EIGHT_DAYS_IN_MINUTES = 8 * 24 * 60; // 11520 minutes or 192 hours
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        Iterator<Row> rowIterator = sheet.iterator();
+	        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+	        if (rowIterator.hasNext())
+	            rowIterator.next();
+	        
+	        List<String> des = new ArrayList<>();
+
+	        while (rowIterator.hasNext()) {
+	            Row row = rowIterator.next();
+	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
+	            LocalDateTime ldtStart = null;
+	            LocalDateTime ldtEnd = null;
+	            boolean alreadyFailed = false;
+
+	            try {
+	                dto.setAudityear(year);
+
+	                String desc = getStringCellValue(row.getCell(0), dto);
+	                dto.setDiscription(desc); 
+	                if (dto.getDiscription() != null && des.contains(dto.getDiscription()) && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
+	                    dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
+	                    alreadyFailed = true;
+	                }
+	                
+	                if (dto.getDiscription() != null) {
+	                    des.add(dto.getDiscription());
+	                }
+
+	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
+	                LocalDateTime fyStart = bounds[0];
+	                LocalDateTime fyEnd = bounds[1];
+	                
+	                dto.setMonth(getCellAsString(row.getCell(1), dto, evaluator));
+	                if(dto.getMonth()==null) {
+	                	dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please enter month");
+	                }
+	                
+	                dto.setRpfDownTime(getNumericCellValue(row.getCell(2), dto));
+	                
+	                if(dto.getRpfDownTime()==null) {
+	                	dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please add RPF down time");
+	                }
+	                
+	                dto.setNoOfRPF(getNumericCellValue(row.getCell(3), dto));
+	                
+	                if(dto.getNoOfRPF()==null) {
+	                	dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please add No of RPF");
+	                }
+	                
+	                dto.setDurationInHrs((dto.getRpfDownTime()*dto.getNoOfRPF()));
+	                
+	                dto.setRate(getNumericCellValue(row.getCell(5), dto));
+	                
+	                if(dto.getRate()==null) {
+	                	dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please add Rate");
+	                }
+	                
+	                dto.setRemark(getCellAsString(row.getCell(6), dto, evaluator));
+	                
+	                if(dto.getRemark()==null) {
+	                	dto.setSaveStatus("Failed");
+	                    dto.setErrDescription("Please add Remark");
+	                }
+	                
+	                
+	                String idString = getStringCellValue(row.getCell(7), dto);
+	                dto.setId(idString); 
+
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                if (dto.getSaveStatus() == null) {
+	                    dto.setErrDescription(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred during processing.");
+	                    dto.setSaveStatus("Failed");
+	                }
+	            }
+	            dtoList.add(dto);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return dtoList;
+	}
+
 	public List<ShutDownPlanDTO> readNonProductSlowdownElastomer(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 	    
