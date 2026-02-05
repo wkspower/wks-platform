@@ -16,7 +16,10 @@ import { SlowDownAromaticsColumns } from 'components/colums/AromaticsColumns'
 import { SlowDownMegColumns } from 'components/colums/MegColums'
 import { SlowDownPeColumns } from 'components/colums/PeColums'
 import { SlowDownPpColumns } from 'components/colums/PpColums'
-import { SlowDownPtaColumns } from 'components/colums/PtaColums'
+import {
+  SlowDownPtaColumns,
+  SlowDownPtadmdColumns,
+} from 'components/colums/PtaColums'
 import { verticalEnums } from 'enums/verticalEnums'
 import { validateFields } from 'utils/validationUtils'
 import { Box, Tab, Tabs } from '../../../node_modules/@mui/material/index'
@@ -71,9 +74,9 @@ const SlowDown = ({ permissions }) => {
   const apiRef = useGridApiRef()
   const [open1, setOpen1] = useState(false)
   const [deleteId, setDeleteId] = useState(null)
-  const [rows, setRows] = useState()
-  const [rowsShutdown, setRowsShutdown] = useState()
-  const [rows2, setRows2] = useState()
+  const [rows, setRows] = useState([])
+  const [rowsShutdown, setRowsShutdown] = useState([])
+  const [rows2, setRows2] = useState([])
   const [loading, setLoading] = useState(false)
   const [snackbarData, setSnackbarData] = useState({
     message: '',
@@ -98,6 +101,7 @@ const SlowDown = ({ permissions }) => {
 
   const IS_PE_PP = lowerVertName === 'pe' || lowerVertName === 'pp'
   const IS_PET = lowerVertName === 'pet'
+  const IS_PTA_DMD = lowerVertName === 'pta' && lowerSiteName === 'dmd'
 
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
@@ -145,25 +149,37 @@ const SlowDown = ({ permissions }) => {
 
     const getAllDescriptionDrpdwn = async () => {
       try {
-        // Use your VCM-specific API here
-        const data = await DataService.dropdownValues(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-        const descriptionObjList = data?.data.map((item) => ({
+        let data
+        if (IS_PTA_DMD) {
+          data = await DataService.dropdownValueSlowdown(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+        } else {
+          data = await DataService.dropdownValues(keycloak, PLANT_ID, AOP_YEAR)
+        }
+
+        // Normalize: handle both { data: [...] } and [...]
+        const apiData = Array.isArray(data) ? data : data?.data || []
+
+        const descriptionObjList = apiData.map((item) => ({
           id: item.Name,
           name: item.Name,
           displayName: item.DisplayName,
         }))
         setAllDescriptionDrpdwn(descriptionObjList)
       } catch (error) {
-        console.error('Error fetching VCM descriptions', error)
+        console.error('Error fetching descriptions:', error)
+        setAllDescriptionDrpdwn([])
       }
     }
 
-    if (lowerVertName === 'vcm') getAllDescriptionDrpdwn()
-  }, [oldYear, AOP_YEAR, keycloak, PLANT_ID, lowerVertName])
+    // Call for both VCM and PTA_DMD
+    if (lowerVertName === 'vcm' || IS_PTA_DMD) {
+      getAllDescriptionDrpdwn()
+    }
+  }, [oldYear, AOP_YEAR, keycloak, PLANT_ID, lowerVertName, IS_PTA_DMD])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -264,13 +280,40 @@ const SlowDown = ({ permissions }) => {
         rateEO: null,
         rateEOE: null,
       }))
+      const slowDownDetailsPTADMD = newRow.map((row) => ({
+        productId: (() => {
+          const matched = allProducts.find(
+            (p) => p.displayName === row.productName1,
+          )
+          return matched?.realId || null
+        })(),
+        productName: row.productName1,
+        discription: row.discription || row.discriptionDrpdwn,
+        durationInHrs: (() => {
+          const v = findDuration('1', row)
+          if (!v) return null
+          const [h = '00', m = '00'] = String(v).split('.')
+          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+        })(),
+        remark: row.remark,
+        rate: row.rate,
+        audityear: AOP_YEAR,
+        id: row.idFromApi || null,
+        rateEO: row.rateEO,
+        rateEOE: row.rateEOE,
+        noOfRPF: row.noOfRPF,
+        rpfDownTime: row.rpfDownTime,
+        month: row.monthly,
+      }))
       const response = await DataService.saveSlowdownData(
         plantId,
         lowerVertName === 'elastomer'
           ? slowDownDetailsElastomer
-          : lowerVertName === 'pe' || lowerVertName === 'pp'
-            ? slowDownDetailsPEPP
-            : slowDownDetailsMEG,
+          : IS_PTA_DMD
+            ? slowDownDetailsPTADMD
+            : lowerVertName === 'pe' || lowerVertName === 'pp'
+              ? slowDownDetailsPEPP
+              : slowDownDetailsMEG,
         keycloak,
       )
 
@@ -386,7 +429,8 @@ const SlowDown = ({ permissions }) => {
       if (
         lowerVertName != 'pe' &&
         lowerVertName !== 'pp' &&
-        lowerVertName !== 'pet'
+        lowerVertName !== 'pet' &&
+        !IS_PTA_DMD
       ) {
         for (const record of data) {
           const startDate =
@@ -444,6 +488,12 @@ const SlowDown = ({ permissions }) => {
         'rateEOE',
         'rateEO',
       ]
+      const requiredFieldsISPTADMD = [
+        'discriptionDrpdwn',
+        'remark',
+        'monthly',
+        'durationInHrs',
+      ]
 
       const chosenFields =
         lowerVertName === 'elastomer'
@@ -452,7 +502,9 @@ const SlowDown = ({ permissions }) => {
             ? requiredFieldsForMeg
             : IS_PE_PP || IS_PET
               ? requiredFieldsForPe
-              : requiredFields
+              : IS_PTA_DMD
+                ? requiredFieldsISPTADMD
+                : requiredFields
 
       // Missing required fields
       for (const record of data) {
@@ -509,7 +561,7 @@ const SlowDown = ({ permissions }) => {
         (d, i) => d && allDescriptions.indexOf(d) !== i,
       )
 
-      if (duplicate && lowerVertName !== 'vcm') {
+      if (duplicate && lowerVertName !== 'vcm' && !IS_PTA_DMD) {
         rows.forEach((row) => {
           if ((row.discription || '').trim().toLowerCase() === duplicate) {
             row.isError = true
@@ -524,7 +576,7 @@ const SlowDown = ({ permissions }) => {
       }
 
       // Date required + Start < End check
-      if (lowerVertName != 'pe' && lowerVertName !== 'pp') {
+      if (lowerVertName != 'pe' && lowerVertName !== 'pp' && !IS_PTA_DMD) {
         for (const record of data) {
           const startMissing = !record.maintStartDateTime
           const endMissing = !record.maintEndDateTime
@@ -629,7 +681,7 @@ const SlowDown = ({ permissions }) => {
         // Month span check
         //check timeframe Multiple month spilt into single
 
-        if (lowerVertName != 'vcm') {
+        if (lowerVertName != 'vcm' || IS_PTA_DMD) {
           for (const row of rows) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)
@@ -651,36 +703,39 @@ const SlowDown = ({ permissions }) => {
           }
         }
         // Overlap within Slowdown  of timeframe ovelaping
-        for (let i = 0; i < rows.length; i++) {
-          const a = rows[i]
-          const aStart = new Date(a.maintStartDateTime).getTime()
-          const aEnd = new Date(a.maintEndDateTime).getTime()
-          if (isNaN(aStart) || isNaN(aEnd)) continue
+        if (!IS_PTA_DMD) {
+          for (let i = 0; i < rows.length; i++) {
+            const a = rows[i]
+            const aStart = new Date(a.maintStartDateTime).getTime()
+            const aEnd = new Date(a.maintEndDateTime).getTime()
+            if (isNaN(aStart) || isNaN(aEnd)) continue
 
-          for (let j = i + 1; j < rows.length; j++) {
-            const b = rows[j]
-            const bStart = new Date(b.maintStartDateTime).getTime()
-            const bEnd = new Date(b.maintEndDateTime).getTime()
-            if (isNaN(bStart) || isNaN(bEnd)) continue
+            for (let j = i + 1; j < rows.length; j++) {
+              const b = rows[j]
+              const bStart = new Date(b.maintStartDateTime).getTime()
+              const bEnd = new Date(b.maintEndDateTime).getTime()
+              if (isNaN(bStart) || isNaN(bEnd)) continue
 
-            if (aStart < bEnd && bStart < aEnd) {
-              a.isError = true
-              b.isError = true
-              setSnackbarOpen(true)
-              setSnackbarData({
-                message: `The slowdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping of timeframes.`,
-                severity: 'error',
-              })
-              return
+              if (aStart < bEnd && bStart < aEnd) {
+                a.isError = true
+                b.isError = true
+                setSnackbarOpen(true)
+                setSnackbarData({
+                  message: `The slowdown timeframe for "${a.discription || b.discription || 'this record'}" overlaps with "${b.discription}". Please ensure no overlapping of timeframes.`,
+                  severity: 'error',
+                })
+                return
+              }
             }
           }
         }
 
         // Cross overlap the timeframe with Shutdown
         if (
-          lowerVertName != 'elastomer' ||
-          // lowerVertName != 'vcm' ||
-          lowerVertName != 'pvc'
+          lowerVertName !== 'elastomer' &&
+          // lowerVertName !== 'vcm' &&
+          lowerVertName !== 'pvc' &&
+          !IS_PTA_DMD
         ) {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
@@ -850,6 +905,7 @@ const SlowDown = ({ permissions }) => {
         maintEndDateTime: new Date(item?.maintEndDateTime),
       }))
       setRowsShutdown(formattedDataShutDown)
+
       const monthNames = [
         'January',
         'February',
@@ -865,23 +921,29 @@ const SlowDown = ({ permissions }) => {
         'December',
       ]
 
-      const formattedData = data.map((item, index) => ({
-        ...item,
-        product: item.productId,
-        productName1: item.productName || '',
-        idFromApi: item?.maintenanceId || item?.id,
-        id: index,
-        originalRemark: item.remark,
-        maintStartDateTime: new Date(item?.maintStartDateTime),
-        maintEndDateTime: new Date(item?.maintEndDateTime),
-        monthly:
-          item?.monthly ||
-          item?.month ||
-          (item?.maintStartDateTime
-            ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
-            : ''),
-        //month: item?.month || '',
-      }))
+      const formattedData = data.map((item, index) => {
+        const descriptionObj = allDescriptionDrpdwn.find(
+          (p) => p.name === item.discription,
+        )
+
+        return {
+          ...item,
+          product: item.productId,
+          productName1: item.productName || '',
+          idFromApi: item?.maintenanceId || item?.id,
+          id: index,
+          originalRemark: item.remark,
+          discriptionDrpdwn: descriptionObj ? descriptionObj.displayName : '',
+          maintStartDateTime: new Date(item?.maintStartDateTime),
+          maintEndDateTime: new Date(item?.maintEndDateTime),
+          monthly:
+            item?.monthly ||
+            item?.month ||
+            (item?.maintStartDateTime
+              ? monthNames[new Date(item?.maintStartDateTime).getMonth()]
+              : ''),
+        }
+      })
 
       setRows(formattedData)
       setLoading(false)
@@ -1052,6 +1114,22 @@ const SlowDown = ({ permissions }) => {
       fetchData2()
     }
   }, [oldYear, yearChanged, keycloak, PLANT_ID])
+  useEffect(() => {
+    if (lowerVertName == 'pta' && allDescriptionDrpdwn?.length > 0) {
+      fetchData()
+    } else if (allProducts.length > 0) {
+      if (!PLANT_ID || !AOP_YEAR) return
+      fetchData()
+    }
+  }, [
+    allProducts,
+    allDescriptionDrpdwn,
+    oldYear,
+    yearChanged,
+    keycloak,
+    PLANT_ID,
+    lowerVertName,
+  ])
 
   const focusFirstField = async () => {
     const newRowId = rows.length
@@ -1075,7 +1153,7 @@ const SlowDown = ({ permissions }) => {
       case verticalEnums.PP:
         return SlowDownPpColumns
       case verticalEnums.PTA:
-        return SlowDownPtaColumns
+        return IS_PTA_DMD ? SlowDownPtadmdColumns : SlowDownPtaColumns
       case verticalEnums.ELASTOMER:
         return SlowDownElastomerColumns
       case verticalEnums.MEG:

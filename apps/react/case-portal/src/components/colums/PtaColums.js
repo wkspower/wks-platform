@@ -195,6 +195,61 @@ export const SlowDownPtaColumns = [
     editable: true,
   },
 ]
+export const SlowDownPtadmdColumns = [
+  {
+    field: 'discriptionDrpdwn',
+    title: 'Shutdown Desc',
+    editable: true,
+    type: 'discriptionDrpdwn',
+  },
+  {
+    field: 'maintenanceId',
+    title: 'maintenanceId',
+    editable: false,
+    hidden: true,
+  },
+
+  {
+    field: 'monthly',
+    title: 'Month',
+    type: 'monthDropdownPEPP',
+    editable: true,
+    width: 150,
+  },
+  {
+    field: 'rpfDownTime',
+    title: 'RPF Down Time',
+    type: 'number',
+    editable: true,
+    width: 150,
+  },
+  {
+    field: 'noOfRPF',
+    title: 'No of RPF',
+    type: 'number',
+    editable: true,
+    width: 150,
+  },
+
+  {
+    field: 'durationInHrs',
+    title: 'Duration (hrs)',
+    editable: false,
+  },
+
+  {
+    field: 'rate',
+    title: 'Rate (TPH)',
+    editable: true,
+    type: 'number',
+  },
+
+  {
+    field: 'remark',
+    title: 'Remarks',
+    editable: true,
+  },
+]
 
 export const NormalOpNormPtaColumns = [
   {
