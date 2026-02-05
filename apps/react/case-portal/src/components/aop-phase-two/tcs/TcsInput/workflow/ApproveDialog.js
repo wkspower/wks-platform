@@ -279,6 +279,9 @@ const ApproveDialog = ({ open, onClose, year, userRole, timelineData }) => {
       setSelectedPlants([])
       setBulkRemark('')
       setError(null)
+
+      // Close dialog after successful bulk approval
+      onClose()
     } catch (err) {
       console.error('Error in bulk approve:', err)
       setError('Failed to approve plants. Please try again.')
@@ -331,6 +334,9 @@ const ApproveDialog = ({ open, onClose, year, userRole, timelineData }) => {
       setSelectedPlants([])
       setBulkRemark('')
       setError(null)
+
+      // Close dialog after successful bulk rejection
+      onClose()
     } catch (err) {
       console.error('Error in bulk reject:', err)
       setError('Failed to reject plants. Please try again.')
@@ -361,6 +367,31 @@ const ApproveDialog = ({ open, onClose, year, userRole, timelineData }) => {
 
   console.log('entries', entries)
 
+  // Parse submissionStatus from timelineData to get not-submitted plants
+  const notSubmittedPlants = useMemo(() => {
+    if (!timelineData || !Array.isArray(timelineData)) {
+      return []
+    }
+
+    const submissionStatusEntry = timelineData.find(
+      (item) => item.name === 'submissionStatus' && item.type === 'Json',
+    )
+
+    if (!submissionStatusEntry || !submissionStatusEntry.value) {
+      return []
+    }
+
+    try {
+      const submissionStatus = JSON.parse(submissionStatusEntry.value)
+      return Object.entries(submissionStatus)
+        .filter(([plant, isSubmitted]) => !isSubmitted)
+        .map(([plant]) => plant)
+    } catch (err) {
+      console.error('Error parsing submissionStatus:', err)
+      return []
+    }
+  }, [timelineData])
+
   return (
     <>
       <Dialog
@@ -389,6 +420,51 @@ const ApproveDialog = ({ open, onClose, year, userRole, timelineData }) => {
         <Divider />
 
         <DialogContent sx={{ p: 0 }}>
+          {/* Not Submitted Plants Alert - Show at top when dialog opens */}
+          {notSubmittedPlants.length > 0 && (
+            <Box
+              sx={{
+                p: 2,
+                m: 2,
+                bgcolor: '#fafafa',
+                border: '1px solid #e0e0e0',
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+              }}
+            >
+              <Typography
+                variant='body2'
+                color='text.secondary'
+                sx={{ mb: 1, fontWeight: 500 }}
+              >
+                Pending Submissions ({notSubmittedPlants.length})
+              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 0.75,
+                }}
+              >
+                {notSubmittedPlants.map((plant) => (
+                  <Box
+                    key={plant}
+                    sx={{
+                      px: 1,
+                      py: 0.25,
+                      bgcolor: '#f5f5f5',
+                      color: 'text.secondary',
+                      borderRadius: 0.5,
+                      fontSize: '0.75rem',
+                      border: '1px solid #e0e0e0',
+                    }}
+                  >
+                    {plant}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
+
           {/* Bulk Action Section - Only show when more than 1 plant selected */}
           {selectedPlants.length > 1 && (
             <Box

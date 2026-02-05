@@ -24,6 +24,7 @@ import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import { parseApprovalStatusResponse } from './utilityFunctions'
 import WorkflowTimeline from './WorkflowTimeline'
+import { Tooltip } from '../../../../../../node_modules/@mui/material/index'
 
 const RemarkCell = ({ text, maxLength = 100 }) => {
   const [expanded, setExpanded] = useState(false)
@@ -344,6 +345,61 @@ const HistoryDialog = ({
     }
   }
 
+  // Get role-based status tooltip
+  const getStatusTooltip = (status) => {
+    const statusLower = status?.toLowerCase()
+
+    if (statusLower === 'pending') {
+      switch (userRole) {
+        case ROLES.PLANT_MANAGER:
+          return 'Pending for approval of EPS Engineer'
+        case ROLES.EPS_ENGINEER:
+          return 'Pending for approval of CTS Head / EPS Head'
+        case ROLES.CTS_HEAD:
+        case ROLES.EPS_HEAD:
+          return 'Pending for approval of Cluster Head'
+        case ROLES.CLUSTER_HEAD:
+          return 'Finalised data for PIMS Output'
+        default:
+          return 'Pending approval'
+      }
+    }
+
+    if (statusLower === 'approved') {
+      switch (userRole) {
+        case ROLES.PLANT_MANAGER:
+          return 'Approved by EPS Engineer'
+        case ROLES.EPS_ENGINEER:
+          return 'Approved by CTS Head / EPS Head'
+        case ROLES.CTS_HEAD:
+        case ROLES.EPS_HEAD:
+          return 'Approved by Cluster Head'
+        case ROLES.CLUSTER_HEAD:
+          return 'Final approval completed'
+        default:
+          return 'Approved'
+      }
+    }
+
+    if (statusLower === 'rejected') {
+      switch (userRole) {
+        case ROLES.PLANT_MANAGER:
+          return 'Rejected by EPS Engineer'
+        case ROLES.EPS_ENGINEER:
+          return 'Rejected by CTS Head / EPS Head'
+        case ROLES.CTS_HEAD:
+        case ROLES.EPS_HEAD:
+          return 'Rejected by Cluster Head'
+        case ROLES.CLUSTER_HEAD:
+          return 'Rejected at final approval'
+        default:
+          return 'Rejected'
+      }
+    }
+
+    return status || 'Unknown status'
+  }
+
   console.log('userRole', userRole)
   console.log('displayData', displayData)
 
@@ -446,6 +502,7 @@ const HistoryDialog = ({
                             borderBottom: '2px solid #e0e0e0',
                             width: col.width || 'auto',
                             minWidth: col.minWidth || 'auto',
+                            whiteSpace: 'nowrap',
                             position: 'sticky',
                             top: 0,
                             zIndex: isStatusColumn ? 3 : 2,
@@ -493,22 +550,28 @@ const HistoryDialog = ({
                             }}
                           >
                             {col.isChip ? (
-                              <Chip
-                                label={
-                                  userRole === ROLES.CLUSTER_HEAD &&
-                                  item[col.field]?.toLowerCase() === 'pending'
-                                    ? 'SUBMITTED'
-                                    : item[col.field]
-                                }
-                                color={
-                                  userRole === ROLES.CLUSTER_HEAD &&
-                                  item[col.field]?.toLowerCase() === 'pending'
-                                    ? 'success'
-                                    : getStatusColor(item[col.field])
-                                }
-                                size='small'
-                                sx={{ fontWeight: 500 }}
-                              />
+                              <Tooltip
+                                title={getStatusTooltip(item[col.field])}
+                                arrow
+                                placement='top'
+                              >
+                                <Chip
+                                  label={
+                                    userRole === ROLES.CLUSTER_HEAD &&
+                                    item[col.field]?.toLowerCase() === 'pending'
+                                      ? 'SUBMITTED'
+                                      : item[col.field]
+                                  }
+                                  color={
+                                    userRole === ROLES.CLUSTER_HEAD &&
+                                    item[col.field]?.toLowerCase() === 'pending'
+                                      ? 'success'
+                                      : getStatusColor(item[col.field])
+                                  }
+                                  size='small'
+                                  sx={{ fontWeight: 500, cursor: 'pointer' }}
+                                />
+                              </Tooltip>
                             ) : col.field === 'submittedRemark' ||
                               col.field === 'verifiedRemark' ||
                               col.field === 'submissionRemark' ? (
