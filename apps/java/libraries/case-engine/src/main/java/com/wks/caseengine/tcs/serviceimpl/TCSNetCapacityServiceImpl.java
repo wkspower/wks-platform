@@ -177,8 +177,7 @@ public class TCSNetCapacityServiceImpl implements TCSNetCapacityService {
             String procedureName = "GetPlantNetCapacity";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
                 if (plantId != null) {
-                //    procedureName = verticalName + "_" + "DTA" + "_GetPlantNetCapacity";
-                  procedureName = "CRUDE_DTA_GetPlantNetCapacity";
+                    procedureName = verticalName + "_" + "DTA" + "_GetPlantNetCapacity";
                 } else {
                     // procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
                     procedureName = "GetTcsUnitCapacity_OutPut";
@@ -245,8 +244,7 @@ public class TCSNetCapacityServiceImpl implements TCSNetCapacityService {
         String procedureName = "GetPlantNetCapacity";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
             if (plantId != null) {
-             //   procedureName = verticalName + "_" + "DTA" + "_GetPlantNetCapacity";
-             procedureName = "CRUDE_DTA_GetPlantNetCapacity";
+                procedureName = verticalName + "_" + "DTA" + "_GetPlantNetCapacity";
             } else {
                 // procedureName = verticalName + "_" + "ALL" + "_GetTcsUnitCapacity_OutPut";
                 procedureName = "GetTcsUnitCapacity_OutPut";
