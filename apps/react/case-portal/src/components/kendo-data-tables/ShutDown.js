@@ -735,7 +735,7 @@ const ShutDown = ({ permissions }) => {
       try {
         let data = []
 
-        if (IS_PTA && lowerSiteName === 'dmd') {
+        if (IS_PTA) {
           data = await DataService.dropdownValuesDMD(
             keycloak,
             PLANT_ID,

@@ -2146,10 +2146,10 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 		try {
 			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
 			List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
-			String viewName = vertical.getName()+site.getName()+"vwScrnShutdown";
-			List<Object[]> results = getDescriptionDropdownData(vertical.getId(), viewName);
+			String viewName = vertical.getName() + site.getName() + "vwScrnShutdown";
+			List<Object[]> results = getDescriptionDropdownDataBySite(site.getId(), viewName);
 			for (Object[] obj : results) {
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("DisplayName", obj[2]);
@@ -2173,6 +2173,19 @@ public class ShutDownPlanServiceImpl implements ShutDownPlanService {
 			String sql = "SELECT * from " + viewName + " where Vertical_FK_Id = :verticalId order by DisplayOrder";
 			Query query = entityManager.createNativeQuery(sql);
 			query.setParameter("verticalId", verticalId);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
+	public List<Object[]> getDescriptionDropdownDataBySite(UUID siteId, String viewName) {
+		try {
+			String sql = "SELECT * from " + viewName + " where Site_FK_Id = :siteId order by DisplayOrder";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("siteId", siteId);
 			return query.getResultList();
 		} catch (IllegalArgumentException e) {
 			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
