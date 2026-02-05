@@ -468,7 +468,7 @@ const ShutdownNorms = () => {
 
   // --- loadGradesAfterCalculation (always pick the first returned grade) ---
   const loadGradesAfterCalculation = async () => {
-    if (['pe', 'pp'].includes(lowerVertName)  || IS_PET_VERTICAL) {
+    if (['pe', 'pp'].includes(lowerVertName) || IS_PET_VERTICAL) {
       try {
         const response =
           await NormalOperationNormsApiService.getGradesForShutdownNorms(
@@ -482,7 +482,7 @@ const ShutdownNorms = () => {
           setGrades(fetchedGrades)
 
           if (fetchedGrades.length === 0) {
-            // no grades � clear selection and fetch blank data
+            // no grades   clear selection and fetch blank data
             setGradeId(null)
             await fetchData(null)
             return
