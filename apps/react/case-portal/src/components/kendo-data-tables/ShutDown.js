@@ -395,7 +395,8 @@ const ShutDown = ({ permissions }) => {
         if (
           lowerVertName != 'elastomer' &&
           // lowerVertName != 'vcm' &&
-          lowerVertName != 'pvc'
+          lowerVertName != 'pvc' &&
+          !IS_PTA
         ) {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
