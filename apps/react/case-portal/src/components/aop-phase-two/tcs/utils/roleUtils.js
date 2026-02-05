@@ -5,7 +5,7 @@ export const ROLES = {
   EPS_HEAD: 'eps_head',
   EPS_ENGINEER: 'eps_engineer',
   PLANT_MANAGER: 'plant_manager',
-  CTS_ADMIN: 'cts_admin',
+  CLUSTER_HEAD: 'cluster_head',
 }
 
 /**
@@ -22,9 +22,8 @@ export const getUserRole = (keycloakRoles = []) => {
   const rolePriority = [
     ROLES.PLANT_MANAGER,
     ROLES.EPS_ENGINEER,
-    // ROLES.CTS_HEAD,
     ROLES.EPS_HEAD,
-    ROLES.CTS_ADMIN,
+    ROLES.CLUSTER_HEAD,
   ]
 
   for (const role of rolePriority) {
