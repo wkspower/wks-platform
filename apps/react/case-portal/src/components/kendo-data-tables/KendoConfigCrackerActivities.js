@@ -794,6 +794,12 @@ const DecokingConfig = () => {
 
       const payload = buildDynamicPayload(newRow, ibrPlanColumns)
 
+      // force TA dates to null
+      payload.forEach((row) => {
+        row.TA_SD = null
+        row.TA_ED = null
+      })
+
       const response = await DataService.postIbr(
         PLANT_ID,
         payload,

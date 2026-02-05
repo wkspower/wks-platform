@@ -160,7 +160,7 @@ const ShutdownNorms = () => {
     const loadData = async () => {
       if (!PLANT_ID || !AOP_YEAR) return
       try {
-        if (IS_PE_PP_VERTICAL || || IS_PET_VERTICAL) {
+        if (IS_PE_PP_VERTICAL || IS_PET_VERTICAL) {
           if (!gradeId) return
           await fetchData(gradeId)
         } else {
@@ -558,7 +558,7 @@ const ShutdownNorms = () => {
             AOP_YEAR,
             gradeId,
           )
-      } else if (IS_PE_PP_VERTICAL || || IS_PET_VERTICAL) {
+      } else if (IS_PE_PP_VERTICAL || IS_PET_VERTICAL) {
         // Use shutdownNormsExport for PE/PP/Elastomer
         response = await NormalOperationNormsApiService.shutdownNormsExport(
           keycloak,

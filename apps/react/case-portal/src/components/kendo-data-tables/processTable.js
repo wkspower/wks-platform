@@ -36,6 +36,12 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
   const siteName = siteObject?.name?.toLowerCase()
   const lowerVertName = verticalObject?.name?.toLowerCase()
 
+  const PLANT_NAME_UPPERCASE = plantObject?.name
+  const SITE_NAME_UPPERCASE = siteObject?.name
+  const VERTICAL_NAME_UPPERCASE = verticalObject?.name
+
+  const EXCEL_NAME = `${VERTICAL_NAME_UPPERCASE}_${SITE_NAME_UPPERCASE}_${PLANT_NAME_UPPERCASE}_Maintenance_Details_${AOP_YEAR}`
+
   const IS_OLD_YEAR = oldYear?.oldYear
   const isOldYear = false
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -319,6 +325,7 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
         keycloak,
         PLANT_ID,
         AOP_YEAR,
+        EXCEL_NAME,
       )
     } catch (error) {
       console.error('Error downloading Excel:', error)
