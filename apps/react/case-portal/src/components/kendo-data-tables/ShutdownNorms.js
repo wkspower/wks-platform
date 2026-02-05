@@ -129,7 +129,7 @@ const ShutdownNorms = () => {
   // 1) Load grades list if vertical requires it
   useEffect(() => {
     const loadGrades = async () => {
-      if (IS_PE_PP_VERTICAL) {
+      if (IS_PE_PP_VERTICAL || IS_PET_VERTICAL) {
         try {
           const response =
             await NormalOperationNormsApiService.getGradesForShutdownNorms(
@@ -160,7 +160,7 @@ const ShutdownNorms = () => {
     const loadData = async () => {
       if (!PLANT_ID || !AOP_YEAR) return
       try {
-        if (IS_PE_PP_VERTICAL) {
+        if (IS_PE_PP_VERTICAL || || IS_PET_VERTICAL) {
           if (!gradeId) return
           await fetchData(gradeId)
         } else {
@@ -468,7 +468,7 @@ const ShutdownNorms = () => {
 
   // --- loadGradesAfterCalculation (always pick the first returned grade) ---
   const loadGradesAfterCalculation = async () => {
-    if (['pe', 'pp'].includes(lowerVertName)) {
+    if (['pe', 'pp'].includes(lowerVertName)  || IS_PET_VERTICAL) {
       try {
         const response =
           await NormalOperationNormsApiService.getGradesForShutdownNorms(
@@ -558,7 +558,7 @@ const ShutdownNorms = () => {
             AOP_YEAR,
             gradeId,
           )
-      } else if (IS_PE_PP_VERTICAL) {
+      } else if (IS_PE_PP_VERTICAL || || IS_PET_VERTICAL) {
         // Use shutdownNormsExport for PE/PP/Elastomer
         response = await NormalOperationNormsApiService.shutdownNormsExport(
           keycloak,
@@ -740,10 +740,11 @@ const ShutdownNorms = () => {
           : false,
       showTitleNameBusiness: true,
 
-      titleName:
-        lowerVertName === 'elastomer' ||
-        lowerVertName === 'pta' ||
-        lowerVertName === 'vcm'
+      titleName: IS_PET_VERTICAL
+        ? `Shutdown Consumption (Norms)`
+        : lowerVertName === 'elastomer' ||
+            lowerVertName === 'pta' ||
+            lowerVertName === 'vcm'
           ? `Shutdown Consumption (Norms/Quantity)`
           : SCREEN_NAME,
       ExcelName: `${VERTICAL_NAME}-${SCREEN_NAME}`,

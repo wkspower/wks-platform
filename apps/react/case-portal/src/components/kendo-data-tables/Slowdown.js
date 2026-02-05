@@ -383,7 +383,11 @@ const SlowDown = ({ permissions }) => {
         const y = date.getFullYear()
         return `${d}/${m}/${y}`
       }
-      if (lowerVertName != 'pe' && lowerVertName !== 'pp') {
+      if (
+        lowerVertName != 'pe' &&
+        lowerVertName !== 'pp' &&
+        lowerVertName !== 'pet'
+      ) {
         for (const record of data) {
           const startDate =
             record.maintStartDateTime instanceof Date
