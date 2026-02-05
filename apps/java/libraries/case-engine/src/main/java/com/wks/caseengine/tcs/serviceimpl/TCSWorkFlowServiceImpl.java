@@ -839,7 +839,8 @@ tcsAuditTrailRepository.savePlantSubmissionAuditTrail(plantSubmissionAuditTrailD
   List<Object[]> statusUpdates = new ArrayList<>();
   for(PlantSubmissionAuditTrailProjection plantSubmission : plantWiseLatestSubmissions) {  
 
-statusUpdates.add(new Object[] { "PENDING", plantSubmission.getId() });
+    String status = approvalStatus ? "APPROVED" : "PENDING";
+statusUpdates.add(new Object[] { status, plantSubmission.getId() });
 
 
   }
