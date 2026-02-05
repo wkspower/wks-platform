@@ -22,16 +22,12 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import org.hibernate.transform.Transformers;
-import org.hibernate.query.NativeQuery;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 
 //Spring / Custom Exceptions (Adjust based on your package structure)
-import org.springframework.stereotype.Service;
+
 //import your.package.path.AOPMessageVM;
 //import your.package.path.Plants;
 //import your.package.path.Verticals;
@@ -41,26 +37,15 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -75,10 +60,8 @@ import com.wks.caseengine.dto.MaintenanceDetailsDTO;
 import com.wks.caseengine.dto.MaintenanceReportURLDTO;
 import com.wks.caseengine.entity.AopCalculation;
 import com.wks.caseengine.entity.BudgetMaintenance;
-import com.wks.caseengine.entity.DecokeMaintenance;
 
 import com.wks.caseengine.entity.Plants;
-import com.wks.caseengine.entity.ScreenMapping;
 import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -289,10 +272,47 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 		return titleMap;
 	}
 
+	private Map<String, String> loadIsVisible(
+			Connection connection,
+			String viewName,
+			String siteName,
+			String tableName) throws SQLException {
+
+		Map<String, String> titleMap = new HashMap<>();
+
+		String sql = "SELECT [Key],[IsVisible] " +
+				"FROM " + viewName + " " +
+				"WHERE TableName = ? AND SiteName = ?";
+
+		try (PreparedStatement ps = connection.prepareStatement(sql)) {
+
+			ps.setString(1, tableName);
+			ps.setString(2, siteName);
+
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					String key = rs.getString("Key");
+					String isVisible = rs.getString("IsVisible");
+
+					if (isVisible != null) {
+						titleMap.put(key, isVisible);
+					}
+					
+				}
+			}
+		}
+
+		return titleMap;
+	}
+
 	private Map<String, Object> fetchEverythingFromView(
 			final String plantId,
 			final String year,
 			final String viewName) {
+		
+		Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		
 
 		return entityManager.unwrap(Session.class)
 				.doReturningWork(new ReturningWork<Map<String, Object>>() {
@@ -307,7 +327,10 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 
 						// ?? Load column title mapping from other view
 						Map<String, String> columnTitleMap = loadColumnTitles(connection,
-								"vwScrnCrackerKeyValueColumns", "DMD", "DecokeMaintenance");
+								"vwScrnCrackerKeyValueColumns", site.getName(), "DecokeMaintenance");
+						
+						Map<String, String> columnIsVisibleMap = loadIsVisible(connection,
+								"vwScrnCrackerKeyValueColumns", site.getName(), "DecokeMaintenance");
 
 						String sql = "SELECT * FROM " + viewName +
 								" WHERE PlantId = ? AND AOPYear = ? ORDER BY " +
@@ -340,7 +363,8 @@ public class MaintenanceCalculatedDataServiceImpl implements MaintenanceCalculat
 											columnTitleMap.getOrDefault(columnName, columnName));
 									meta.put("type",
 											getFrontendType(rsmd.getColumnTypeName(i)));
-
+									
+									meta.put("isVisible", columnIsVisibleMap.getOrDefault(columnName, "true"));
 									metadataList.add(meta);
 
 									if (sqlType == Types.INTEGER ||
