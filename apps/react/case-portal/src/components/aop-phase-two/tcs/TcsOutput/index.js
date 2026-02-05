@@ -101,27 +101,60 @@ const TcsOutput = () => {
 
   // Generate dynamic tooltip based on role and eligibility
   const submitTooltip = useMemo(() => {
+    // Parse approvalStatus from timelineData
+    let approvalStatus = null
+    const approvalStatusVar = timelineData?.find(
+      (v) => v.name === 'approvalStatus',
+    )
+    if (approvalStatusVar && approvalStatusVar.value) {
+      try {
+        approvalStatus = JSON.parse(approvalStatusVar.value)
+      } catch (e) {
+        console.error('Error parsing approvalStatus:', e)
+      }
+    }
+
     if (!isSubmitEligible) {
       if (userRole === ROLES.EPS_ENGINEER) {
+        // Check if already submitted
+        if (approvalStatus?.ebs_approved === true) {
+          return 'You have already submitted to CTS Head/EPS Head'
+        }
         return 'All plants must be approved before submission'
       } else if (userRole === ROLES.CTS_HEAD || userRole === ROLES.EPS_HEAD) {
+        // Check if already submitted
+        if (approvalStatus?.cts_approved === true) {
+          return 'You have already submitted to Cluster Head'
+        }
+        // Check if EPS Engineer has submitted
+        if (approvalStatus?.ebs_approved === false) {
+          return 'Waiting for EPS Engineer submission'
+        }
         return 'Submission is pending from the EPS Engineer, or you have already submitted.'
       } else if (userRole === ROLES.CLUSTER_HEAD) {
+        // Check if already submitted
+        if (approvalStatus?.cluster_head_approved === true) {
+          return 'You have already finalized the data for PIMS Output'
+        }
+        // Check if CTS/EPS Head has submitted
+        if (approvalStatus?.cts_approved === false) {
+          return 'Waiting for CTS Head/EPS Head submission'
+        }
         return 'Submission is pending from the CTS/EPS Head, or you have already submitted.'
       }
 
       return 'Submission not available'
+    } else {
+      if (userRole === ROLES.EPS_ENGINEER) {
+        return 'Submit all approved plants to CTS Head/EPS Head'
+      } else if (userRole === ROLES.CTS_HEAD || userRole === ROLES.EPS_HEAD) {
+        return 'Submit to Cluster Head'
+      } else if (userRole === ROLES.CLUSTER_HEAD) {
+        return 'Finalize data for PIMS Output'
+      }
+      return 'Submit data for next approval'
     }
-
-    if (userRole === ROLES.EPS_ENGINEER) {
-      return 'Submit all approved plants to CTS Head/EPS Head'
-    } else if (userRole === ROLES.CTS_HEAD || userRole === ROLES.EPS_HEAD) {
-      return 'Submit'
-    } else if (userRole === ROLES.CLUSTER_HEAD) {
-      return 'Submit'
-    }
-    return 'Submit'
-  }, [isSubmitEligible, userRole])
+  }, [isSubmitEligible, userRole, timelineData])
 
   // Fetch all tabs and visible tab IDs from backend
   useEffect(() => {
@@ -148,6 +181,7 @@ const TcsOutput = () => {
 
       console.log('Workflow Variables:', variables)
       setTimelineData(variables)
+
       if (variables.length === 0) {
         setIsSubmitEligible(false)
         return

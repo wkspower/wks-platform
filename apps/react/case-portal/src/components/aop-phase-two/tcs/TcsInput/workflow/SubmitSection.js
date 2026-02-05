@@ -1,6 +1,7 @@
 import { Box, Button, Tooltip, CircularProgress } from '@mui/material'
 import HistoryIcon from '@mui/icons-material/History'
 import RateReviewIcon from '@mui/icons-material/RateReview'
+import { ROLES } from '../../utils/roleUtils'
 
 const SubmitSection = ({
   onSubmitClick,
@@ -12,6 +13,7 @@ const SubmitSection = ({
   submitTooltip = null,
   showReviewBtn = false,
   reviewTooltip = 'Review and approve/reject plants',
+  userRole = '',
 }) => {
   const handleSubmitClick = () => {
     if (!isEligible) {
@@ -22,9 +24,28 @@ const SubmitSection = ({
     }
   }
 
-  const defaultTooltip = isEligible
-    ? 'Submit'
-    : 'Plant submission already done.'
+  // Role-based tooltip messages
+  const getRoleBasedTooltip = () => {
+    if (!isEligible) {
+      return 'Plant submission already done.'
+    }
+
+    switch (userRole) {
+      case ROLES.PLANT_MANAGER:
+        return 'Submit data to EPS Engineer'
+      case ROLES.EPS_ENGINEER:
+        return 'Submit approval to CTS Head / EPS Head'
+      case ROLES.CTS_HEAD:
+      case ROLES.EPS_HEAD:
+        return 'Submit approval to Cluster Head'
+      case ROLES.CLUSTER_HEAD:
+        return 'Finalise data for PIMS Output'
+      default:
+        return 'Submit'
+    }
+  }
+
+  const defaultTooltip = getRoleBasedTooltip()
   const tooltipTitle = submitTooltip !== null ? submitTooltip : defaultTooltip
 
   return (
