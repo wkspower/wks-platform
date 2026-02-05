@@ -226,5 +226,9 @@ public class SlowdownPlanController {
 		  return slowdownPlanService.getShutdownDynamicColumns(year,UUID.fromString(plantId));
 	  }
 	
+	 @GetMapping("/slowdown-description")
+	  public AOPMessageVM getSlowdownDescription(@RequestParam String plantId){
+		  return slowdownPlanService.getSlowdownDescription(plantId);
+	  }
+	
 }
-

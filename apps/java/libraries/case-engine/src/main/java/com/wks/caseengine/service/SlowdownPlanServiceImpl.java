@@ -7,12 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.time.*;
 import java.time.format.TextStyle;
-import java.util.Locale;
-import java.util.List;
-import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -52,6 +48,7 @@ import com.wks.caseengine.entity.PlantMaintenance;
 import com.wks.caseengine.entity.PlantMaintenanceTransaction;
 import com.wks.caseengine.entity.Plants;
 import com.wks.caseengine.entity.ScreenMapping;
+import com.wks.caseengine.entity.Sites;
 import com.wks.caseengine.entity.SlowdownNormsValue;
 import com.wks.caseengine.entity.Verticals;
 import com.wks.caseengine.exception.RestInvalidArgumentException;
@@ -62,6 +59,7 @@ import com.wks.caseengine.repository.PlantMaintenanceTransactionRepository;
 import com.wks.caseengine.repository.PlantsRepository;
 import com.wks.caseengine.repository.ScreenMappingRepository;
 import com.wks.caseengine.repository.ShutDownPlanRepository;
+import com.wks.caseengine.repository.SiteRepository;
 import com.wks.caseengine.repository.SlowdownNormsRepository;
 import com.wks.caseengine.repository.SlowdownPlanRepository;
 import com.wks.caseengine.repository.VerticalsRepository;
@@ -113,6 +111,9 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 	@Autowired
 	private PlantsService plantsService;
+	
+	@Autowired
+	private SiteRepository siteRepository;
 
 	@Override
 	public List<ShutDownPlanDTO> findSlowdownDetailsByPlantIdAndType(UUID plantId, String maintenanceTypeName,
@@ -2939,6 +2940,45 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	
 	private String stripTrailingSuffix(String description) {
 	    return description.replaceAll("_[^_]*$", "");
+	}
+	
+	@Override
+	public AOPMessageVM getSlowdownDescription(String plantId) {
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			List<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
+			String viewName = vertical.getName() + site.getName() + "vwScrnSlowdown";
+			List<Object[]> results = getDescriptionDropdownDataBySite(site.getId(), viewName);
+			for (Object[] obj : results) {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("DisplayName", obj[2]);
+				map.put("Name", obj[1]);
+				mapList.add(map);
+			}
+			AOPMessageVM aopMessageVM = new AOPMessageVM();
+			aopMessageVM.setCode(200);
+			aopMessageVM.setData(mapList);
+			aopMessageVM.setMessage("Data fetched successfully");
+			return aopMessageVM;
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid data format", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+	public List<Object[]> getDescriptionDropdownDataBySite(UUID siteId, String viewName) {
+		try {
+			String sql = "SELECT * from " + viewName + " where Site_FK_Id = :siteId order by DisplayOrder";
+			Query query = entityManager.createNativeQuery(sql);
+			query.setParameter("siteId", siteId);
+			return query.getResultList();
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format for Plant ID", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
 	}
 	
 	public static int extractMonthNumber(String description) {

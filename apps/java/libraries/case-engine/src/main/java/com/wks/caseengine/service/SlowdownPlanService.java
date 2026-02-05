@@ -30,6 +30,7 @@ public interface SlowdownPlanService {
 	public AOPMessageVM saveSlowdownConfigurationData( String plantId, String year,  List<NormAttributeTransactionsDTO> normAttributeTransactionsDTOList);
 	public AOPMessageVM getSlowdownConfigurationData(String plantId,String year);
 	public AOPMessageVM getShutdownDynamicColumns(String auditYear,  UUID plantId);
+	public AOPMessageVM getSlowdownDescription(String plantId);
 	public List<ShutDownPlanDTO> saveRampUpData( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<ShutDownPlanDTO> saveRampDownData( UUID plantId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 }
