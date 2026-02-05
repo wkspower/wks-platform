@@ -2024,6 +2024,12 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    String year = null;
 	    List<ShutDownPlanDTO> failedList = new ArrayList<ShutDownPlanDTO>();
 	    String verticalName = plantsService.findVerticalNameByPlantId(plantId);
+	    Plants plant = plantsRepository.findById(plantId).orElseThrow();
+		Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+		Boolean monthDropdown = false;
+		if(verticalName.equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+			monthDropdown=true;
+		}
 	    DateTimeFormatter COMPARISON_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"); 
 	    Boolean monthChange=false;
 	    int changedMonth=0;
@@ -2054,7 +2060,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	            if (shutDownPlanDTO.getId() == null || shutDownPlanDTO.getId().isEmpty()) {
 	                plantMaintenanceTransaction = new PlantMaintenanceTransaction();
 	                plantMaintenanceTransaction.setId(UUID.randomUUID());
-	                if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
+	                if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || monthDropdown) {
 		            	if(shutDownPlanDTO.getMonth()!=null) {
 		            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
 		            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
@@ -2072,7 +2078,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    continue;
 	                }
 	                isUpdate = true;
-	                if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET")) {
+	                if(verticalName.equalsIgnoreCase("PE") || verticalName.equalsIgnoreCase("PP") || verticalName.equalsIgnoreCase("PET") || monthDropdown) {
 		            	if(shutDownPlanDTO.getMonth()!=null) {
 		            		shutDownPlanDTO.setMaintStartDateTime(getStartOfMonthDate(shutDownPlanDTO.getMonth(), year));
 		            		shutDownPlanDTO.setMaintEndDateTime(getEndOfMonthDate(shutDownPlanDTO.getMonth(), year));
