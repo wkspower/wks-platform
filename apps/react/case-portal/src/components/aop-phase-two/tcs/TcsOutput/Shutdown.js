@@ -1,10 +1,13 @@
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import AdvanceKendoTable from 'components/aop-phase-two/common/AdvanceKendoTable/index'
+import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TcsOutputApiService } from 'components/aop-phase-two/services/tcs/tcsOutputApiService'
 import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
+import ApproveDialog from '../TcsInput/workflow/ApproveDialog'
 import { Stack } from '../../../../../node_modules/@mui/material/index'
+import { ROLES } from '../utils/roleUtils'
 
 const Shutdown = ({
   SITE_ID,
@@ -16,6 +19,7 @@ const Shutdown = ({
   setSnackbarData,
   snackbarOpen,
   setSnackbarOpen,
+  userRole,
 }) => {
   const keycloak = useSession()
   const valueFormat = ValueFormatterPhaseTwo()
@@ -31,6 +35,30 @@ const Shutdown = ({
 
   // State to store API response metadata (headers and keys)
   const [apiMetadata, setApiMetadata] = useState({ headers: [], keys: [] })
+
+  const [openApproveDialogeBox, setOpenApproveDialogeBox] = useState(false)
+  // Approve Dialog handlers
+  const closeApproveDialogeBox = () => setOpenApproveDialogeBox(false)
+  const handleApprove = (plantId, remark) => {
+    console.log('Approved plantId:', plantId, 'Remark:', remark)
+    // TODO: Call API to approve the plant
+    setSnackbarData({
+      message: `Plant ${plantId} approved successfully`,
+      severity: 'success',
+    })
+    setSnackbarOpen(true)
+    closeApproveDialogeBox()
+  }
+  const handleReject = (plantId, remark) => {
+    console.log('Rejected plantId:', plantId, 'Remark:', remark)
+    // TODO: Call API to reject the plant
+    setSnackbarData({
+      message: `Plant ${plantId} rejected`,
+      severity: 'error',
+    })
+    setSnackbarOpen(true)
+    closeApproveDialogeBox()
+  }
 
   // Fetch Shutdown Data
   const fetchShutdownData = useCallback(async () => {
@@ -175,9 +203,9 @@ const Shutdown = ({
       showExport: true,
       showTitle: true,
       filterable: false,
-      approveBtn: false,
+      approveBtn: userRole === ROLES.EPS_ENGINEER,
     }),
-    [],
+    [userRole],
   )
 
   return (
@@ -213,6 +241,18 @@ const Shutdown = ({
           onApproveClick={() => setOpenApproveDialogeBox(true)}
         />
       </Stack>
+      {/* Approve Dialog */}
+      <ApproveDialog
+        open={openApproveDialogeBox}
+        onClose={closeApproveDialogeBox}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        entries={rows.map((row) => ({
+          id: row.id,
+          plantId: row.plantId,
+          plantName: row.plantName,
+        }))}
+      />
     </Box>
   )
 }

@@ -99,7 +99,6 @@ const defs = {
 
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
-    tcs: 'Term Crude Sheet',
     tcsinput: 'TCS Input',
     tcsoutput: 'TCS Output',
     pimsoutput: 'PIMS Output',
