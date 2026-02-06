@@ -590,7 +590,12 @@ const SlowDown = ({ permissions }) => {
       }
 
       // Date required + Start < End check
-      if (lowerVertName != 'pe' && lowerVertName !== 'pp' && !IS_PTA_DMD) {
+      if (
+        lowerVertName != 'pe' &&
+        lowerVertName !== 'pp' &&
+        !IS_PTA_DMD &&
+        lowerVertName !== 'pet'
+      ) {
         for (const record of data) {
           const startMissing = !record.maintStartDateTime
           const endMissing = !record.maintEndDateTime
@@ -695,7 +700,7 @@ const SlowDown = ({ permissions }) => {
         // Month span check
         //check timeframe Multiple month spilt into single
 
-        if (lowerVertName != 'vcm' || !IS_PTA_DMD) {
+        if (lowerVertName != 'vcm' || !IS_PTA_DMD || lowerVertName !== 'pet') {
           for (const row of rows) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)
@@ -717,7 +722,7 @@ const SlowDown = ({ permissions }) => {
           }
         }
         // Overlap within Slowdown  of timeframe ovelaping
-        if (!IS_PTA_DMD) {
+        if (!IS_PTA_DMD || lowerVertName !== 'pet') {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
             const aStart = new Date(a.maintStartDateTime).getTime()
@@ -749,7 +754,8 @@ const SlowDown = ({ permissions }) => {
           lowerVertName !== 'elastomer' &&
           // lowerVertName !== 'vcm' &&
           lowerVertName !== 'pvc' &&
-          !IS_PTA_DMD
+          !IS_PTA_DMD &&
+          lowerVertName !== 'pet'
         ) {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
