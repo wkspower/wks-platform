@@ -142,7 +142,8 @@ if(plantId != null) {
             String procedureName = "GetTcsSlowdown";
             if (!"MEG".equalsIgnoreCase(verticalName)) {
                 if(plantId != null) {
-                procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown"; 
+             //   procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown"; 
+                procedureName =  "CRUDE_DTA_GetTcsSlowdown";
              }
 
                 else {
@@ -193,7 +194,8 @@ if(plantId != null) {
         String procedureName = "GetTcsSlowdown";
         if (!"MEG".equalsIgnoreCase(verticalName)) {
             if(plantId != null) {
-            procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown";
+            // procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown";
+            procedureName =  "CRUDE_DTA_GetTcsSlowdown";
             }
             else {
              //   procedureName = verticalName + "_" + siteName + "_GetTcsSlowdown_OutPut";
