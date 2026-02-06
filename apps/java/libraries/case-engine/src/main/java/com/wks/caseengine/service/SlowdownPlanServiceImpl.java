@@ -1910,11 +1910,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 	public List<ShutDownPlanDTO> readNonProductSlowdownDMD(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
-	    Plants plant = plantsRepository.findById(plantFKId).get();
-	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
-	    
-	    final long EIGHT_DAYS_IN_MINUTES = 8 * 24 * 60; // 11520 minutes or 192 hours
 
 	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
 	        Sheet sheet = workbook.getSheetAt(0);
@@ -1928,28 +1923,20 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	        while (rowIterator.hasNext()) {
 	            Row row = rowIterator.next();
 	            ShutDownPlanDTO dto = new ShutDownPlanDTO();
-	            LocalDateTime ldtStart = null;
-	            LocalDateTime ldtEnd = null;
-	            boolean alreadyFailed = false;
 
 	            try {
 	                dto.setAudityear(year);
 
 	                String desc = getStringCellValue(row.getCell(0), dto);
 	                dto.setDiscription(desc); 
-	                if (dto.getDiscription() != null && des.contains(dto.getDiscription()) && !vertical.getName().equalsIgnoreCase("VCM") && !alreadyFailed) {
+	                if (dto.getDiscription() == null) {
 	                    dto.setSaveStatus("Failed");
-	                    dto.setErrDescription("Description cannot be duplicate within the uploaded file.");
-	                    alreadyFailed = true;
+	                    dto.setErrDescription("Please add Description.");
 	                }
 	                
 	                if (dto.getDiscription() != null) {
 	                    des.add(dto.getDiscription());
 	                }
-
-	                LocalDateTime[] bounds = parseFinancialYearBounds(year);
-	                LocalDateTime fyStart = bounds[0];
-	                LocalDateTime fyEnd = bounds[1];
 	                
 	                dto.setMonth(getCellAsString(row.getCell(1), dto, evaluator));
 	                if(dto.getMonth()==null) {
@@ -1971,7 +1958,14 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    dto.setErrDescription("Please add No of RPF");
 	                }
 	                
-	                dto.setDurationInHrs((dto.getRpfDownTime()*dto.getNoOfRPF()));
+	                double rawTime = dto.getRpfDownTime(); 
+	                int hours = (int) rawTime; 
+	                int minutes = (int) Math.round((rawTime - hours) * 100);
+
+	                double totalMinutes = ((hours * 60) + minutes) * dto.getNoOfRPF();
+	                double durationInHrs = totalMinutes / 60.0; 
+
+	                dto.setDurationInHrs(durationInHrs);
 	                
 	                dto.setRate(getNumericCellValue(row.getCell(5), dto));
 	                
