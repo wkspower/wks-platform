@@ -485,6 +485,22 @@ const KendoDataTables = ({
             }
           }
 
+          if (
+            screenType === 'shutdown' &&
+            lowerVertName === 'pta' &&
+            lowerSiteName === 'dmd' &&
+            ['discription', 'discriptionDrpdwn'].includes(field)
+          ) {
+            const desc = (value || '').trim()
+            if (desc === 'Flush SD') {
+              updated.durationInHrs = '158.00'
+            } else if (desc === 'Purif Flush') {
+              updated.durationInHrs = '16.00'
+            } else if (desc === 'Annual Turn Around') {
+              updated.durationInHrs = '684.00'
+            }
+          }
+
           // percentChange logic: adjust months if enabled and percentChange field changed
           if (field === 'percentChange' && permissions?.percentChangeLogic) {
             const pct = parsePctOrNull(value)
