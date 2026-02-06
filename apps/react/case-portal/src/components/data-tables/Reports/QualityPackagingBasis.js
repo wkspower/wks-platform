@@ -412,7 +412,7 @@ const QualityPackagingBasis = () => {
     }
   }, [gridNames, dataMap])
 
-  const fileName = `${VERTICAEXCEL_NAMEL_NAME}.xlsx`
+  const fileName = `${EXCEL_NAMEL_NAME}.xlsx`
 
   const renderTitle = (t) => t
 
