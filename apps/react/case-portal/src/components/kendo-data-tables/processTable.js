@@ -255,10 +255,15 @@ const MaintenanceProcessTable = ({ viewOnly }) => {
       const hiddenKeys = ['Id', 'AOPYear', 'PlantId']
       const dynamicColumns = (resp.data?.columns || columns).map((col) => ({
         ...col,
-        editable: col.type === 'number' || col.field === 'Remarks',
+        editable:
+          col.field === 'NumberOfDays'
+            ? false
+            : col.type === 'number' || col.field === 'Remarks',
         hidden: hiddenKeys.includes(col.field) ? true : col.hidden,
         widthT: 120,
+        crackerValidation: 'true',
       }))
+
       setColumns(dynamicColumns)
 
       const formatted = (raw || []).map((item, idx, arr) => ({

@@ -46,6 +46,7 @@ import { getRoleName } from 'services/role-service'
 import { getColumnMenuDateFilter } from 'components/data-tables/Reports-kendo/ColumnMenuDateFilter'
 import { PostCrDaysEditor } from './Utilities-Kendo/numbericColumns_dmd'
 import { useSelector } from 'react-redux'
+import { NoSpinnerNumericEditorCrackerValidation } from './Utilities-Kendo/numbericColumnsCrackerValidation'
 const CustomAccordion = styled((props) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(() => ({
@@ -556,6 +557,32 @@ const KendoDataTablesCracker = ({
               }}
               columnMenu={col.filter ? ColumnMenuCheckboxFilter : undefined}
               hidden={col.hidden}
+            />
+          )
+        }
+        if (
+          col.type === 'number' &&
+          ['Pre_CR_Days', 'ActualRunLength'].includes(col?.field)
+        ) {
+          return (
+            <GridColumn
+              key={col.field}
+              field={col.field}
+              title={col.title || col.headerName}
+              hidden={col.hidden}
+              className={
+                col?.isDisabled ? 'k-number-right-disabled' : 'k-number-right'
+              }
+              editable={col?.editable ? true : false}
+              headerClassName={isActive ? 'active-column' : ''}
+              cells={{
+                edit: { text: NoSpinnerNumericEditorCrackerValidation },
+                data: toolTipRenderer,
+                headerCell: SimpleHeaderWithTooltip,
+              }}
+              filter='numeric'
+              format={col.format}
+              sortable={false}
             />
           )
         }
