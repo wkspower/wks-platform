@@ -33,9 +33,7 @@ const MaintenanceTable = () => {
   const PLANT_NAME_NO_CASE = plantObject?.name?.toUpperCase()
   const SITE_NAME_NO_CASE = siteObject?.name?.toUpperCase()
   const VERTICAL_NAME_NO_CASE = verticalObject?.name?.toUpperCase()
-  const is_PTA_DMD =
-    siteObject?.name?.toLowerCase() === 'dmd' &&
-    verticalObject?.name?.toLowerCase() === 'pta'
+  const IS_PTA = verticalObject?.name?.toLowerCase() === 'pta'
   const EXCEL_EXPORT_TITLE = `${VERTICAL_NAME_NO_CASE}_${SITE_NAME_NO_CASE}_${PLANT_NAME_NO_CASE}`
 
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -253,7 +251,7 @@ const MaintenanceTable = () => {
       break
   }
 
-  if (is_PTA_DMD) {
+  if (IS_PTA) {
     basecols = [
       ...basecols,
       {
