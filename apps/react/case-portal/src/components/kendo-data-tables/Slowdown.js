@@ -722,7 +722,7 @@ const SlowDown = ({ permissions }) => {
           }
         }
         // Overlap within Slowdown  of timeframe ovelaping
-        if (!IS_PTA_DMD || lowerVertName !== 'pet') {
+        if (!IS_PTA_DMD && lowerVertName !== 'pet') {
           for (let i = 0; i < rows.length; i++) {
             const a = rows[i]
             const aStart = new Date(a.maintStartDateTime).getTime()
