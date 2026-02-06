@@ -59,10 +59,6 @@ async function getQualityPackagingBasis(
     url += `&periodTo=${periodTo}`
   }
 
-  if (mode !== undefined) {
-    url += `&mode=${mode}`
-  }
-
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
