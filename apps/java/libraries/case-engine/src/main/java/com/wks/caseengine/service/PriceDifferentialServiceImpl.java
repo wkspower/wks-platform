@@ -152,7 +152,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 								: 0.0);
 				priceDifferentialTransactionDTO.setPlantId(row[5] != null ? row[5].toString() : "");
 				priceDifferentialTransactionDTO.setAopYear(row[6] != null ? row[6].toString() : "");
-				priceDifferentialTransactionDTO.setRemark(row[9] != null ? row[9].toString() : "");
+				priceDifferentialTransactionDTO.setRemark(row[10] != null ? row[10].toString() : "");
 				
 				
 				priceDifferentialTransactionDTOs.add(priceDifferentialTransactionDTO);
