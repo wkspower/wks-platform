@@ -428,6 +428,9 @@ const KendoDataTables = ({
             lowerVertName === 'pta' &&
             lowerSiteName === 'dmd'
           ) {
+            if (!updated.rpfDownTime || isNaN(Number(updated.rpfDownTime))) {
+              updated.rpfDownTime = 28
+            }
             let rpfDownTimeVal =
               field === 'rpfDownTime' ? value : updated.rpfDownTime
             let noOfRPFVal = field === 'noOfRPF' ? value : updated.noOfRPF

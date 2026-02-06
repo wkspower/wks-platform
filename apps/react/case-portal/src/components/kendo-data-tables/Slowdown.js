@@ -506,6 +506,9 @@ const SlowDown = ({ permissions }) => {
         'discriptionDrpdwn',
         'remark',
         'monthly',
+        'rpfDownTime',
+        'noOfRPF',
+        'rate',
         'durationInHrs',
       ]
 

@@ -19,6 +19,8 @@ export const validateFields = (data, requiredFields) => {
     productName: 'Particulars',
     discriptionDrpdwn: 'Description',
     monthly: 'Month',
+    rpfDownTime: 'RPF Down Time',
+    noOfRPF: 'No of RPF',
     functions: 'Function',
     jobRole: 'Job Role',
     name: 'Name',
