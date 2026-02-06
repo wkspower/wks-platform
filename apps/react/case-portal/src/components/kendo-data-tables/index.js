@@ -422,6 +422,40 @@ const KendoDataTables = ({
         prev.map((r) => {
           if (r.id !== itemId) return r
           const updated = { ...r, [field]: value }
+
+          if (
+            screenType === 'slowdown' &&
+            lowerVertName === 'pta' &&
+            lowerSiteName === 'dmd'
+          ) {
+            let rpfDownTimeVal =
+              field === 'rpfDownTime' ? value : updated.rpfDownTime
+            let noOfRPFVal = field === 'noOfRPF' ? value : updated.noOfRPF
+
+            // Accept both "HH:MM" and "HH.MM" input
+            let minsPerRPF = 0
+            if (
+              typeof rpfDownTimeVal === 'string' &&
+              rpfDownTimeVal.includes(':')
+            ) {
+              const [h, m] = rpfDownTimeVal.split(':').map(Number)
+              minsPerRPF = (isNaN(h) ? 0 : h) * 60 + (isNaN(m) ? 0 : m)
+            } else if (rpfDownTimeVal) {
+              const [h, m = '0'] = String(rpfDownTimeVal).split('.')
+              minsPerRPF =
+                parseInt(h || 0) * 60 + parseInt(m.padEnd(2, '0') || 0)
+            }
+
+            const nRPF = parseFloat(noOfRPFVal) || 0 // Use parseFloat for decimals
+            const totalMins = minsPerRPF * nRPF
+
+            // Convert back to HH.MM for storage
+            const hours = Math.floor(totalMins / 60)
+            const mins = Math.round(totalMins % 60)
+            updated.durationInHrs = `${hours.toString().padStart(2, '0')}.${mins
+              .toString()
+              .padStart(2, '0')}`
+          }
           if (
             screenType === 'slowdown' &&
             lowerVertName === 'pta' &&
@@ -2419,6 +2453,28 @@ const KendoDataTables = ({
                           ) : (
                             DurationDisplayWithTooltipCell(props)
                           ),
+                        headerCell: SimpleHeaderWithTooltip,
+                      }}
+                      headerClassName={isActive ? 'active-column' : ''}
+                    />
+                  )
+                }
+
+                if (col.field === 'rpfDownTime') {
+                  return (
+                    <GridColumn
+                      key={col.field}
+                      field={col.field}
+                      title={col.title || col.headerName}
+                      width={col.widthT}
+                      editable={true}
+                      columnMenu={ColumnMenuCheckboxFilter}
+                      hidden={col.hidden}
+                      format={'{0:n2}'}
+                      className='k-number-right'
+                      cells={{
+                        edit: { text: DurationEditor },
+                        data: (props) => DurationDisplayWithTooltipCell(props),
                         headerCell: SimpleHeaderWithTooltip,
                       }}
                       headerClassName={isActive ? 'active-column' : ''}

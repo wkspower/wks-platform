@@ -148,6 +148,7 @@ const SlowDown = ({ permissions }) => {
     if (!PLANT_ID || !AOP_YEAR) return
 
     const getAllDescriptionDrpdwn = async () => {
+      if (!PLANT_ID && !AOP_YEAR) return
       try {
         let data
         if (IS_PTA_DMD) {
@@ -179,7 +180,15 @@ const SlowDown = ({ permissions }) => {
     if (lowerVertName === 'vcm' || IS_PTA_DMD) {
       getAllDescriptionDrpdwn()
     }
-  }, [oldYear, AOP_YEAR, keycloak, PLANT_ID, lowerVertName, IS_PTA_DMD])
+  }, [
+    oldYear,
+    AOP_YEAR,
+    keycloak,
+    PLANT_ID,
+    lowerVertName,
+    lowerSiteName,
+    PLANT_NAME_LOWER,
+  ])
 
   function addTimeOffset(dateTime) {
     if (!dateTime) return null
@@ -302,7 +311,12 @@ const SlowDown = ({ permissions }) => {
         rateEO: row.rateEO,
         rateEOE: row.rateEOE,
         noOfRPF: row.noOfRPF,
-        rpfDownTime: row.rpfDownTime,
+        rpfDownTime: (() => {
+          const v = row.rpfDownTime
+          if (!v) return null
+          const [h = '00', m = '00'] = String(v).split('.')
+          return `${h.padStart(2, '0')}.${m.padStart(2, '0')}`
+        })(),
         month: row.monthly,
       }))
       const response = await DataService.saveSlowdownData(
@@ -681,7 +695,7 @@ const SlowDown = ({ permissions }) => {
         // Month span check
         //check timeframe Multiple month spilt into single
 
-        if (lowerVertName != 'vcm' || IS_PTA_DMD) {
+        if (lowerVertName != 'vcm' || !IS_PTA_DMD) {
           for (const row of rows) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)
@@ -1115,7 +1129,10 @@ const SlowDown = ({ permissions }) => {
     }
   }, [oldYear, yearChanged, keycloak, PLANT_ID])
   useEffect(() => {
-    if (lowerVertName == 'pta' && allDescriptionDrpdwn?.length > 0) {
+    if (
+      (lowerVertName === 'vcm' || IS_PTA_DMD) &&
+      allDescriptionDrpdwn?.length > 0
+    ) {
       fetchData()
     } else if (allProducts.length > 0) {
       if (!PLANT_ID || !AOP_YEAR) return
@@ -1129,6 +1146,8 @@ const SlowDown = ({ permissions }) => {
     keycloak,
     PLANT_ID,
     lowerVertName,
+    lowerSiteName,
+    PLANT_NAME_LOWER,
   ])
 
   const focusFirstField = async () => {
@@ -1214,8 +1233,14 @@ const SlowDown = ({ permissions }) => {
 
     try {
       let response
-
-      if (
+      if (IS_PTA_DMD) {
+        response = await DataService.ExportSlowdownDetailsPTADMD(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          EXCEL_EXPORT_TITLE,
+        )
+      } else if (
         lowerVertName == 'elastomer' ||
         lowerVertName == 'pvc' ||
         lowerVertName == 'vcm' ||
@@ -1259,7 +1284,14 @@ const SlowDown = ({ permissions }) => {
     try {
       let response
 
-      if (
+      if (IS_PTA_DMD) {
+        response = await DataService.ImportSlowdownPTADMDDetails(
+          rawFile,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else if (
         lowerVertName == 'elastomer' ||
         lowerVertName == 'pvc' ||
         lowerVertName == 'vcm' ||
