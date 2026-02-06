@@ -7,6 +7,7 @@ import { useSession } from 'SessionStoreContext'
 import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
+import { configurationAndReportManualEntryResponse } from '../dummyData'
 
 const ReportManualEntry = () => {
   const keycloak = useSession()
@@ -36,7 +37,7 @@ const ReportManualEntry = () => {
 
   const columns = [
     {
-      field: 'particulars',
+      field: 'productName',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -45,7 +46,7 @@ const ReportManualEntry = () => {
       hidden: false,
     },
     {
-      field: 'uom',
+      field: 'UOM',
       title: 'UOM',
       widthT: 80,
       minWidth: 60,
@@ -196,17 +197,21 @@ const ReportManualEntry = () => {
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      // fetchReportManualEntryData()
+      fetchReportManualEntryData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
   const fetchReportManualEntryData = async () => {
     setLoading(true)
     try {
-      const res = await ProductionNormsApiService.getReportManualEntryData(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
+      // const res = await ProductionNormsApiService.getReportManualEntryData(
+      //   keycloak,
+      //   PLANT_ID,
+      //   AOP_YEAR,
+      // )
+
+      const res = configurationAndReportManualEntryResponse.data.filter(
+        (item) => item.normType === 'Report Manual Entry',
       )
 
       if (res?.length === 0) {

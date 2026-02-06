@@ -375,6 +375,109 @@ const ROGC = ({
     fetchRogcData,
   ])
 
+  // Export handler
+  const handleExport = async () => {
+    setSnackbarOpen(true)
+    setSnackbarData({
+      message: 'Excel download started!',
+      severity: 'info',
+    })
+
+    try {
+      await TcsApiService.exportRogcExcel(keycloak, SITE_ID, PLANT_ID, AOP_YEAR)
+
+      setSnackbarData({
+        message: 'Excel download completed successfully!',
+        severity: 'success',
+      })
+    } catch (error) {
+      console.error('Error exporting ROGC data:', error)
+      setSnackbarData({
+        message: 'Excel download failed. Please try again.',
+        severity: 'error',
+      })
+    }
+  }
+
+  // Import handler
+  const handleExcelUpload = async (file) => {
+    if (!file) return
+
+    setLoading(true)
+    try {
+      const response = await TcsApiService.importRogcExcel(
+        keycloak,
+        SITE_ID,
+        PLANT_ID,
+        AOP_YEAR,
+        file,
+      )
+
+      if (response?.code === 200) {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Excel file imported successfully!',
+          severity: 'success',
+        })
+        // Refresh data after import
+        await fetchRogcData()
+      } else if (response?.code === 400 && response?.data) {
+        // Handle error response with Excel file download
+        try {
+          const base64Data = response.data
+          const binaryString = window.atob(base64Data)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const blob = new Blob([bytes], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          })
+          const url = window.URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `TCS_ROGC_Errors_${new Date().getTime()}.xlsx`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(url)
+
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message:
+              response?.message ||
+              'Import failed with errors. Please check the downloaded file.',
+            severity: 'error',
+          })
+          // Refresh data after import
+          await fetchRogcData()
+        } catch (downloadError) {
+          console.error('Error downloading error file:', downloadError)
+          setSnackbarOpen(true)
+          setSnackbarData({
+            message: 'Import failed but could not download error file.',
+            severity: 'error',
+          })
+        }
+      } else {
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: response?.message || 'Failed to import Excel file.',
+          severity: 'error',
+        })
+      }
+    } catch (error) {
+      console.error('Error uploading Excel file:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: `Failed to import Excel file: ${error.message}`,
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const permissions = {
     customHeight: { mainBox: '32vh', otherBox: '100%' },
     textAlignment: 'center',
@@ -382,8 +485,9 @@ const ROGC = ({
     addButton: false,
     remarksEditable: true,
     showCalculate: false,
-    showExport: false,
-    showImport: false,
+    showExport: true,
+    ExcelName: `ROGC_${AOP_YEAR}`,
+    showImport: true,
     saveBtnForRemark: true,
     saveBtn: true,
     showWorkFlowBtns: false,
@@ -414,6 +518,8 @@ const ROGC = ({
           currentRowId={currentRowId}
           setCurrentRowId={() => {}}
           saveChanges={saveChanges}
+          handleExcelUpload={handleExcelUpload}
+          handleExport={handleExport}
           snackbarData={snackbarData}
           snackbarOpen={snackbarOpen}
           setSnackbarOpen={setSnackbarOpen}
