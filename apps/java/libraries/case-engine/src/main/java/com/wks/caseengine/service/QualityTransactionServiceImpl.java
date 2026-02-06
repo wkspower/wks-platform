@@ -208,6 +208,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	        innerHeaders.add("Budget "+getNextFiscalYear(year));
 	        innerHeaders.add("Actual "+getNextFiscalYear(year));
 	        innerHeaders.add("Proposed Norm "+year);
+	        innerHeaders.add("Remarks");
 	        
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
@@ -231,6 +232,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
+	            rowData.add(dto.getRemark());
 	            
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
@@ -251,7 +253,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(1, true);
+	        sheet.setColumnHidden(0, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -338,7 +340,7 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 	    	                dto.setSaveStatus("Failed");
 	                    }
 	                }
-	                dto.setId(getStringCellValue(row.getCell(6), dto));
+	                dto.setRemark(getStringCellValue(row.getCell(6), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 

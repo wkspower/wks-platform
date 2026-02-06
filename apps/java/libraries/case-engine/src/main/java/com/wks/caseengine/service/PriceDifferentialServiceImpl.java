@@ -416,6 +416,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	        List<String> innerHeaders = new ArrayList<>();
 	        innerHeaders.add("Quality Type");
 	        innerHeaders.add("Value %");
+	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Material Id");
 	       
 	        if (isAfterSave) {
@@ -437,6 +438,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	            
 	            rowData.add(dto.getDisplayName());
 	            rowData.add(dto.getPercentage());
+	            rowData.add(dto.getRemark());
 	            rowData.add(dto.getMaterialId());
 	            
 	            if (isAfterSave) {
@@ -458,7 +460,7 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(2, true);
+	        sheet.setColumnHidden(3, true);
 	        
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
@@ -523,8 +525,8 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 	                    }
 	                }
 	                dto.setPercentage(getNumericCellValue(row.getCell(1), dto));
-	                dto.setMaterialId(getStringCellValue(row.getCell(2), dto));
-	                dto.setId(getStringCellValue(row.getCell(3), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(3), dto));
+	                dto.setRemark(getStringCellValue(row.getCell(2), dto));
 	                dto.setAopYear(year);
 	                dto.setPlantId(plantFKId.toString());
 	              } 

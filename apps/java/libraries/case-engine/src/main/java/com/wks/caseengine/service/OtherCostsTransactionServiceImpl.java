@@ -215,6 +215,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	        innerHeaders.add("Budget "+getNextFiscalYear(year));
 	        innerHeaders.add("Actual "+getNextFiscalYear(year));
 	        innerHeaders.add("Proposed Cost "+year);
+	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Material Id");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
@@ -238,6 +239,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
+	            rowData.add(dto.getRemark());
 	            rowData.add(dto.getMaterialId());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
@@ -258,7 +260,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(6, true);
+	        sheet.setColumnHidden(7, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -328,7 +330,8 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(3), dto));
 	                dto.setPrevActual(getNumericCellValue(row.getCell(4), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(5), dto));
-	                dto.setMaterialId(getStringCellValue(row.getCell(6), dto));
+	                dto.setRemark(getStringCellValue(row.getCell(6), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(7), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 

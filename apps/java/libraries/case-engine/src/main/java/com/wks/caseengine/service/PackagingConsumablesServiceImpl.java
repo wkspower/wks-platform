@@ -558,6 +558,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	        innerHeaders.add("Budget "+getNextFiscalYear(year));
 	        innerHeaders.add("Actual "+getNextFiscalYear(year));
 	        innerHeaders.add("Proposed Cost "+year);
+	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Material Id");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
@@ -582,6 +583,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
+	            rowData.add(dto.getRemark());
 	            rowData.add(dto.getMaterialId());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
@@ -602,7 +604,7 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(7, true);
+	        sheet.setColumnHidden(8, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -673,7 +675,8 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(4), dto));
 	                dto.setPrevActual(getNumericCellValue(row.getCell(5), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(6), dto));
-	                dto.setMaterialId(getStringCellValue(row.getCell(7), dto));
+	                dto.setRemark(getStringCellValue(row.getCell(7), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(8), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 
