@@ -2,15 +2,22 @@ package com.wks.caseengine.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -19,6 +26,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -67,6 +75,9 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	private SiteRepository siteRepository;
 	
 	@Autowired
+	private VerticalsRepository verticalRepository;
+	
+	@Autowired
 	private NormParametersRepository normParametersRepository;
 	
 	@Autowired
@@ -80,6 +91,12 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	
 	@Autowired
 	private PackagingAndConsumableTransactionRepository packagingAndConsumableTransactionRepository;
+	
+	private DataSource dataSource;
+	
+	public PackagingConsumablesServiceImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 	
 	@Override
 	public AOPMessageVM getPackagingConsumables(String plantId, String year) {
@@ -208,7 +225,12 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 				packagingAndConsumableTransactionDTOs.add(packagingAndConsumableTransactionDTO);
 				
 			}
-			Map<String, Object> map = new HashMap<>(); 
+			Map<String, Object> map = new HashMap<>();
+
+			List<AopCalculation> aopCalculation = aopCalculationRepository
+					.findByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId), year, "packaging-norms");
+			
+			map.put("aopCalculation", aopCalculation);
 			map.put("data", packagingAndConsumableTransactionDTOs);
 			AOPMessageVM aopMessageVM = new AOPMessageVM();
 			aopMessageVM.setCode(200);
@@ -223,6 +245,69 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 			throw new RuntimeException("Failed to fetch data", ex);
 		}
 	}
+	
+	@Override
+	public AOPMessageVM getCalculatePackagingNorms(String year, String plantId) {
+		AOPMessageVM aopMessageVM = new AOPMessageVM();
+		try {
+			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculatePackagingNorms";
+			
+			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"packaging-norms");
+			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("packaging-norms");
+			for(ScreenMapping screenMapping:screenMappingList) {
+				AopCalculation aopCalculation=new AopCalculation();
+				aopCalculation.setAopYear(year);
+				aopCalculation.setIsChanged(true);
+				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
+				aopCalculation.setPlantId(UUID.fromString(plantId));
+				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculationRepository.save(aopCalculation);
+			}
+			aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(result);
+	        return aopMessageVM;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return aopMessageVM;
+	}
+
+	public int executeDynamicUpdateProcedure(String procedureName, String plantId,
+			String aopYear) {
+		try {
+			
+			String callSql = "{call " + procedureName + "(?, ?)}";
+
+	        try (Connection connection = dataSource.getConnection();
+	             CallableStatement stmt = connection.prepareCall(callSql)) {
+
+	            stmt.setString(1, plantId); 
+	            stmt.setString(2, aopYear); 
+	            int rowsAffected = stmt.executeUpdate();
+
+	            if (!connection.getAutoCommit()) {
+	                connection.commit();
+	            }
+
+	            return rowsAffected;
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+
+		} catch (IllegalArgumentException e) {
+			throw new RestInvalidArgumentException("Invalid UUID format ", e);
+		} catch (Exception ex) {
+			throw new RuntimeException("Failed to fetch data", ex);
+		}
+	}
+
 	
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
@@ -702,6 +787,218 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 	    return null;
 	}
 
+	@Override
+	public AOPMessageVM getQualityPackaging(
+	    String plantId, String aopYear, String periodFrom, String periodTo,String type) {
+
+	    AOPMessageVM aopMessageVM = new AOPMessageVM();
+	    
+	    Plants plant = plantsRepository.findById(UUID.fromString(plantId))
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid plant ID"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid site ID"));
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	                .orElseThrow(() -> new IllegalArgumentException("Invalid vertical ID"));
+	    String storedProcedure = vertical.getName() + "_" + site.getName() + "_QualityPackagingBasisReport";
+	    
+	    try {
+	        List<List<Map<String, Object>>> allColMetadata = getAllColumnMetadataForPEE(
+	                plantId, aopYear, periodFrom, periodTo, type, storedProcedure);
+
+	        List<List<Object[]>> allGridData = getReportDataForPEE(
+	                plantId, aopYear, periodFrom, periodTo, type, storedProcedure);
+
+	       
+	        if (allColMetadata.size() != allGridData.size()) {
+	             throw new RuntimeException("Mismatch: Stored procedure returned " + allColMetadata.size()
+	                        + " metadata lists but " + allGridData.size() + " data grids.");
+	        }
+	        List<Map<String, Object>> combined = new ArrayList<>();
+	        
+	        for (int i = 0; i < allGridData.size(); i++) {
+	            List<Map<String, Object>> colMetadata = allColMetadata.get(i);
+	            List<Object[]> rawRows = allGridData.get(i);
+	            
+	            List<String> colNames = colMetadata.stream()
+	                                              .map(m -> (String)m.get("field"))
+	                                              .collect(Collectors.toList());
+
+	            String gridName = "UNKNOWN_GRID_" + (i + 1); // Default name
+	            if (!colNames.isEmpty()) {
+	                int lastColIdx = colNames.size() - 1;
+	                if (colNames.get(lastColIdx).equalsIgnoreCase("GRID_TYPE") && !rawRows.isEmpty()) {
+	                    Object gridTypeVal = rawRows.get(0)[lastColIdx];
+	                    if (gridTypeVal != null) {
+	                        gridName = gridTypeVal.toString();
+	                    }
+	                } else {
+	                    gridName = colNames.get(0); 
+	                }
+	            }
+	         	List<Map<String, Object>> gridDataMap = new ArrayList<>();
+	            for (Object[] row : rawRows) {
+	                Map<String, Object> rowMap = new LinkedHashMap<>();
+	                for (int j = 0; j < colNames.size(); j++) {
+	                    rowMap.put(colNames.get(j), row[j]);
+	                }
+	                gridDataMap.add(rowMap);
+	            }
+
+	            Map<String, Object> part = new LinkedHashMap<>();
+	            part.put("gridName", gridName);
+	            part.put("data", gridDataMap);
+	            part.put("columns", colMetadata); 
+	            combined.add(part);
+	        }
+
+	        aopMessageVM.setCode(200);
+	        aopMessageVM.setMessage("SP Executed successfully");
+	        aopMessageVM.setData(combined); 
+	        return aopMessageVM;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        aopMessageVM.setCode(500); 
+	        aopMessageVM.setMessage("Error processing report data: " + e.getMessage());
+	        aopMessageVM.setData(null);
+	        return aopMessageVM;
+	    }
+	}
+	@Transactional(readOnly = true)
+	public List<List<Map<String, Object>>> getAllColumnMetadataForPEE(
+	    String plantId, String aopYear, String periodFrom, String periodTo, String type, String storedProcedure) {
+
+	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+
+	    Session session = entityManager.unwrap(Session.class);
+
+	    return session.doReturningWork(connection -> {
+	        List<List<Map<String, Object>>> allMetadataGrids = new ArrayList<>();
+
+	        try (java.sql.CallableStatement callableStatement = connection.prepareCall(storedProcedureCall)) {
+
+	            callableStatement.setString(1, plantId);
+	            callableStatement.setString(2, aopYear);
+	            callableStatement.setString(3, periodFrom);
+	            callableStatement.setString(4, periodTo);
+
+	            boolean results = callableStatement.execute();
+
+	            while (results || callableStatement.getUpdateCount() != -1) {
+	                if (results) {
+	                    try (java.sql.ResultSet rs = callableStatement.getResultSet()) {
+	                        java.sql.ResultSetMetaData rsMetaData = rs.getMetaData();
+	                        List<Map<String, Object>> currentMetadata = new ArrayList<>();
+
+	                        for (int i = 1; i <= rsMetaData.getColumnCount(); i++) {
+	                            Map<String, Object> columnInfo = new HashMap<>();
+	                            String columnName = rsMetaData.getColumnLabel(i);
+	                            String columnType = rsMetaData.getColumnTypeName(i);
+
+	                            columnInfo.put("field", columnName);
+	                            columnInfo.put("title", formatTitle(columnName)); // Use your formatting method
+	                            columnInfo.put("editable", false); // Example property
+	                            columnInfo.put("type", getFrontendType(columnType)); // Use your type mapping method
+	                            currentMetadata.add(columnInfo);
+	                        }
+	                        allMetadataGrids.add(currentMetadata);
+	                    }
+	                }
+	                // Move to the next result set or update count
+	                results = callableStatement.getMoreResults();
+	            }
+
+	            return allMetadataGrids;
+
+	        } catch (java.sql.SQLException e) {
+	            throw new RuntimeException("Error executing stored procedure for metadata: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
+	        }
+	    });
+	}
 	
+	// Helper method to format column titles
+		private String formatTitle(String columnName) {
+			return columnName.replace("_", " ");
+		}
+
+		// Helper method to map SQL data types to frontend types
+		private String getFrontendType(String sqlTypeName) {
+			switch (sqlTypeName.toUpperCase()) {
+				case "VARCHAR":
+				case "NVARCHAR":
+				case "CHAR":
+					return "string";
+				case "INT":
+				case "TINYINT":
+				case "BIGINT":
+				case "SMALLINT":
+				case "DECIMAL":
+				case "FLOAT":
+				case "DOUBLE":
+				case "NUMERIC":
+					return "number";
+				case "DATE":
+				case "DATETIME":
+				case "DATETIME2":
+					return "date";
+				default:
+					return "string";
+			}
+		}
+
+	
+	@Transactional(readOnly = true) 
+	public List<List<Object[]>> getReportDataForPEE(String plantId, String aopYear, String periodFrom, String periodTo,String type,String storedProcedure) {
+   
+	    String storedProcedureCall = "{ call " + storedProcedure + "(?, ?, ?, ?) }";
+	   
+	    Session session = entityManager.unwrap(Session.class);
+  
+	    return session.doReturningWork(connection -> {
+	        
+	        List<List<Object[]>> allGrids = new ArrayList<>();
+
+	        try (java.sql.CallableStatement callableStatement = connection.prepareCall(storedProcedureCall)) {
+	            
+	            callableStatement.setString(1, plantId);
+	            callableStatement.setString(2, aopYear);
+	            callableStatement.setString(3, periodFrom);
+	            callableStatement.setString(4, periodTo);
+
+	            boolean results = callableStatement.execute();
+
+	            while (results || callableStatement.getUpdateCount() != -1) {
+	                if (results) {
+	                    try (java.sql.ResultSet rs = callableStatement.getResultSet()) {
+	                        java.sql.ResultSetMetaData metaData = rs.getMetaData();
+	                        int columnCount = metaData.getColumnCount();
+
+	                        List<Object[]> currentGrid = new ArrayList<>();
+	                        while (rs.next()) {
+	                            Object[] row = new Object[columnCount];
+	                            for (int i = 1; i <= columnCount; i++) {
+	                                
+	                                row[i - 1] = rs.getObject(i);
+	                            }
+	                            currentGrid.add(row);
+	                        }
+	                        allGrids.add(currentGrid);
+	                    }
+	                }
+
+	                
+	                results = callableStatement.getMoreResults();
+	            }
+
+	            return allGrids;
+
+	        } catch (java.sql.SQLException e) {
+	            // Include the dynamic SP name in the error message for better debugging
+	            throw new RuntimeException("Error executing stored procedure: " + storedProcedure + ". SQL Error: " + e.getMessage(), e);
+	        }
+	    });
+	}
+
+
 
 }
