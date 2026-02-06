@@ -1216,7 +1216,7 @@ statusUpdates.add(new Object[] { status, plantSubmission.getId() });
   
     @Override
     public List<PlantSubmissionAuditTrailDTO> getPlantSubmissionAuditTrail(String plantId, String siteId, String verticalId, String type, String finacialYear) { 
-
+  
         if(plantId == null || plantId.isEmpty()) {  
             throw new RuntimeException("Plant id is required");
         }
