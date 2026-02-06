@@ -648,7 +648,13 @@ const KendoDataTables = ({
         }
       })
     },
-    [setRows, setModifiedCells, setCustomModifiedCells, lowerVertName],
+    [
+      setRows,
+      setModifiedCells,
+      setCustomModifiedCells,
+      lowerVertName,
+      lowerSiteName,
+    ],
   )
 
   useEffect(() => {
