@@ -8,7 +8,6 @@ import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
 import { MonthwiseProductionPlanApiService } from '../../services/vgoht/monthwiseProductionPlanApiService'
 import { monthwiseProductionPlanResponse } from '../dummyData'
 
-
 const MonthwiseProductionPlan = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
