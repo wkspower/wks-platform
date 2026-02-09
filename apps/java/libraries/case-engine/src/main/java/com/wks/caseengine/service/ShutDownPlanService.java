@@ -29,6 +29,7 @@ public interface ShutDownPlanService {
 	public List<ShutDownPlanDTO> editShutdownData(UUID plantMaintenanceTransactionId, List<ShutDownPlanDTO> shutDownPlanDTOList);
 	public List<MonthWiseDataDTO> getMonthlyShutdownHours(String auditYear,  UUID plantId);
 	public AOPMessageVM getDescriptionDropdown(String plantId);
+	public AOPMessageVM getShutdownDescription(String plantId);
 	
 	void deleteShutPlanData(UUID plantMaintenanceTransactionId, UUID plantId);
 	

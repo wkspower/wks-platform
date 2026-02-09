@@ -43,5 +43,6 @@ public class AOPConsumptionNormDTO {
     private String sapCode;
     private String saveStatus;
   	private String errDescription;
+  	private Double wtAverage;
 
 }

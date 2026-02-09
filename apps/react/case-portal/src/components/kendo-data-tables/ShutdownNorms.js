@@ -129,7 +129,7 @@ const ShutdownNorms = () => {
   // 1) Load grades list if vertical requires it
   useEffect(() => {
     const loadGrades = async () => {
-      if (IS_PE_PP_VERTICAL) {
+      if (IS_PE_PP_VERTICAL || IS_PET_VERTICAL) {
         try {
           const response =
             await NormalOperationNormsApiService.getGradesForShutdownNorms(
@@ -160,7 +160,7 @@ const ShutdownNorms = () => {
     const loadData = async () => {
       if (!PLANT_ID || !AOP_YEAR) return
       try {
-        if (IS_PE_PP_VERTICAL) {
+        if (IS_PE_PP_VERTICAL || IS_PET_VERTICAL) {
           if (!gradeId) return
           await fetchData(gradeId)
         } else {
@@ -468,7 +468,7 @@ const ShutdownNorms = () => {
 
   // --- loadGradesAfterCalculation (always pick the first returned grade) ---
   const loadGradesAfterCalculation = async () => {
-    if (['pe', 'pp'].includes(lowerVertName)) {
+    if (['pe', 'pp'].includes(lowerVertName) || IS_PET_VERTICAL) {
       try {
         const response =
           await NormalOperationNormsApiService.getGradesForShutdownNorms(
@@ -482,7 +482,7 @@ const ShutdownNorms = () => {
           setGrades(fetchedGrades)
 
           if (fetchedGrades.length === 0) {
-            // no grades � clear selection and fetch blank data
+            // no grades   clear selection and fetch blank data
             setGradeId(null)
             await fetchData(null)
             return
@@ -548,7 +548,18 @@ const ShutdownNorms = () => {
 
     try {
       let response
-      if (IS_PE_PP_VERTICAL) {
+
+      if (lowerVertName === 'vcm') {
+        // Use shutdownNormsExportNonGrade for VCM
+        response =
+          await NormalOperationNormsApiService.shutdownNormsExportNonGrade(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            gradeId,
+          )
+      } else if (IS_PE_PP_VERTICAL || IS_PET_VERTICAL) {
+        // Use shutdownNormsExport for PE/PP/Elastomer
         response = await NormalOperationNormsApiService.shutdownNormsExport(
           keycloak,
           PLANT_ID,
@@ -573,8 +584,21 @@ const ShutdownNorms = () => {
   const saveExcelFile = async (rawFile) => {
     setLoading(true)
     try {
-      const response =
-        await NormalOperationNormsApiService.saveShutdownNormsExcel(
+      let response
+
+      if (lowerVertName === 'vcm') {
+        // Use saveShutdownNormsExcelNonGrade for VCM
+        response =
+          await NormalOperationNormsApiService.saveShutdownNormsExcelNonGrade(
+            rawFile,
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+            gradeId,
+          )
+      } else {
+        // Use saveShutdownNormsExcel for other verticals
+        response = await NormalOperationNormsApiService.saveShutdownNormsExcel(
           rawFile,
           keycloak,
           PLANT_ID,
@@ -582,6 +606,7 @@ const ShutdownNorms = () => {
           gradeId,
           gradeName == 'All Grade',
         )
+      }
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -702,15 +727,24 @@ const ShutdownNorms = () => {
       dropdownLabel: 'Select Grade',
       allAction: true,
       downloadExcelBtnFromUI:
-        IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? false : true,
-      downloadExcelBtn: IS_PE_PP_VERTICAL || IS_PET_VERTICAL ? true : false,
-      uploadExcelBtn: IS_PE_NMD_LDPE || lowerVertName === 'pp' ? true : false,
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+          ? false
+          : true,
+      downloadExcelBtn:
+        IS_PE_PP_VERTICAL || IS_PET_VERTICAL || lowerVertName === 'vcm'
+          ? true
+          : false,
+      uploadExcelBtn:
+        IS_PE_NMD_LDPE || lowerVertName === 'pp' || lowerVertName === 'vcm'
+          ? true
+          : false,
       showTitleNameBusiness: true,
 
-      titleName:
-        lowerVertName === 'elastomer' ||
-        lowerVertName === 'pta' ||
-        lowerVertName === 'vcm'
+      titleName: IS_PET_VERTICAL
+        ? `Shutdown Consumption (Norms)`
+        : lowerVertName === 'elastomer' ||
+            lowerVertName === 'pta' ||
+            lowerVertName === 'vcm'
           ? `Shutdown Consumption (Norms/Quantity)`
           : SCREEN_NAME,
       ExcelName: `${VERTICAL_NAME}-${SCREEN_NAME}`,

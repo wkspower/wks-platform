@@ -396,7 +396,7 @@ const ProductionTarget = ({ permissions }) => {
           const isTPH = selectedUnit == 'TPD'
           return {
             ...item,
-            idFromApi: item?.id,
+            idFromApi: item?.id || null,
             normParametersFKId: item?.materialFKId.toLowerCase(),
             remarks: item?.remarks?.trim() || null,
             originalRemark: item?.remarks?.trim() || null,
@@ -610,7 +610,7 @@ const ProductionTarget = ({ permissions }) => {
         const isTPD = unit === 'TPD'
         const formatted = data.map((item, index) => ({
           ...item,
-          id: item?.id,
+          id: item?.id || null,
           productName: item?.materialDisplayName,
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
@@ -695,7 +695,7 @@ const ProductionTarget = ({ permissions }) => {
         const isTPD = unit === 'TPD'
         const formatted = data.map((item, index) => ({
           ...item,
-          idFromApi: item?.id,
+          idFromApi: item?.id || null,
           productName: item?.materialDisplayName,
           april:
             isTPD && item.april

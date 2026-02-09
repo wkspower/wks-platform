@@ -6,6 +6,7 @@ import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
 import { MonthwiseProductionPlanApiService } from '../../services/vgoht/monthwiseProductionPlanApiService'
+import { monthwiseProductionPlanResponse } from '../dummyData'
 
 const MonthwiseProductionPlan = () => {
   const keycloak = useSession()
@@ -22,7 +23,7 @@ const MonthwiseProductionPlan = () => {
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [selectedUnit, setSelectedUnit] = useState('TPH')
+  const [selectedUnit, setSelectedUnit] = useState('MT')
   const [snackbarData, setSnackbarData] = useState({
     message: '',
     severity: 'info',
@@ -35,8 +36,6 @@ const MonthwiseProductionPlan = () => {
   // Dropdown configuration for unit selection
   const dropdownConfig = {
     options: [
-      { id: 'TPH', name: 'TPH' },
-      { id: 'TPD', name: 'TPD' },
       { id: 'MT', name: 'MT' },
       { id: 'KT', name: 'KT' },
     ],
@@ -183,86 +182,28 @@ const MonthwiseProductionPlan = () => {
     },
   ]
 
-  // Dummy data for aromatics products
-  const dummyRows = [
-    {
-      id: 1,
-      displayName: 'Benzene',
-      april: 125.5,
-      may: 130.2,
-      june: 128.8,
-      july: 132.1,
-      aug: 135.4,
-      sep: 127.9,
-      oct: 131.5,
-      nov: 129.3,
-      dec: 133.7,
-      jan: 126.8,
-      feb: 130.9,
-      march: 128.4,
-      averageTPH: 130.0,
-      aopRemarks: '',
-    },
-    {
-      id: 2,
-      displayName: 'Toluene',
-      april: 85.3,
-      may: 88.7,
-      june: 86.2,
-      july: 89.5,
-      aug: 91.2,
-      sep: 87.4,
-      oct: 90.1,
-      nov: 88.3,
-      dec: 92.0,
-      jan: 86.9,
-      feb: 89.4,
-      march: 87.6,
-      averageTPH: 88.5,
-      aopRemarks: '',
-    },
-    {
-      id: 3,
-      displayName: 'Xylene',
-      april: 95.8,
-      may: 98.2,
-      june: 96.5,
-      july: 99.3,
-      aug: 101.5,
-      sep: 97.1,
-      oct: 100.2,
-      nov: 98.7,
-      dec: 102.3,
-      jan: 96.3,
-      feb: 99.1,
-      march: 97.4,
-      averageTPH: 98.5,
-      aopRemarks: '',
-    },
-  ]
-
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      // fetchData()
+      fetchData()
     }
   }, [PLANT_ID, AOP_YEAR, selectedUnit])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const response =
-        await MonthwiseProductionPlanApiService.getMonthwiseProductionPlan(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      const data = response || dummyRows
-      setRows(data)
-      setOriginalRows(data)
+      // const response =
+      //   await MonthwiseProductionPlanApiService.getMonthwiseProductionPlan(
+      //     keycloak,
+      //     PLANT_ID,
+      //     AOP_YEAR,
+      //   )
+      const response = monthwiseProductionPlanResponse
+      setRows(response.data.aopDTOList)
+      setOriginalRows(response.data.aopDTOList)
     } catch (error) {
       console.error('Error fetching monthwise production plan data:', error)
-      setRows(dummyRows)
-      setOriginalRows(dummyRows)
+      setRows(monthwiseProductionPlanResponse.data.aopDTOList)
+      setOriginalRows(monthwiseProductionPlanResponse.data.aopDTOList)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Error fetching data, using dummy data',

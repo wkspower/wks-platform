@@ -48,6 +48,7 @@ public class MCUNormsValueDTO {
 	private String saveStatus;
 	private String errDescription;
 	private String gradeId;
+	private Double wtAverage;
     //private String normParameterDisplayName;
 }
 

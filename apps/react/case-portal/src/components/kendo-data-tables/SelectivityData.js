@@ -47,6 +47,8 @@ const SelectivityData = (props) => {
   const IS_OLD_YEAR = oldYear?.oldYear
   const vertName = verticalChange?.selectedVertical
   const lowerVertName = vertName?.toLowerCase()
+  const SiteName = siteObject?.name
+  const lowerSiteName = SiteName?.toLowerCase()
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
   const READ_ONLY = getRoleName(keycloak, IS_OLD_YEAR)
@@ -500,6 +502,15 @@ const SelectivityData = (props) => {
     FORMATE_VALUE = ValueFormatterProduction()
   }
   if (props?.configType == 'PIO Impact' && lowerVertName == 'pta') {
+    FORMATE_VALUE = '{0:0.000}'
+  }
+  if (
+    (props?.configType == 'Constant' ||
+      props?.configType == 'PIO Impact' ||
+      props?.configType == 'Configuration' ||
+      props?.configType == 'Report Manual Entry') &&
+    lowerVertName == 'vcm'
+  ) {
     FORMATE_VALUE = '{0:0.000}'
   }
 

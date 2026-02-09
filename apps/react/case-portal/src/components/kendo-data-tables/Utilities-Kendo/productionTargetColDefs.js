@@ -99,6 +99,32 @@ export function getColDefsDesignCapacityPTA(headerMap = {}, valueFormat) {
     },
   ]
 }
+export function getColDefsDesignCapacityPTADMD(headerMap = {}, valueFormat) {
+  return [
+    {
+      field: 'materialFKId',
+      title: 'Particulars',
+      widthT: 100,
+      editable: true,
+      hidden: true,
+    },
+    {
+      field: 'productName',
+      title: 'Particulars',
+      widthT: 100,
+      editable: false,
+    },
+    ...generateMonthColumnsPTA(headerMap, true, valueFormat),
+    // {
+    //   field: 'remarks',
+    //   title: 'Remark',
+    //   editable: true,
+    //   align: 'left',
+    //   headerAlign: 'left',
+    //   widthT: 90,
+    // },
+  ]
+}
 export function getColDefsDesignCapacityAROMATICS(headerMap = {}, valueFormat) {
   return [
     {

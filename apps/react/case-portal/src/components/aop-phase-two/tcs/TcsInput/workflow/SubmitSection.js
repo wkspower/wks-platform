@@ -1,17 +1,11 @@
 import { Box, Button, Tooltip, CircularProgress } from '@mui/material'
 import HistoryIcon from '@mui/icons-material/History'
-import RateReviewIcon from '@mui/icons-material/RateReview'
 
 const SubmitSection = ({
   onSubmitClick,
   onViewHistory,
-  onReviewClick,
   isEligible = true,
   isLoading = false,
-  isWorkflowTriggered = true,
-  submitTooltip = null,
-  showReviewBtn = false,
-  reviewTooltip = 'Review and approve/reject plants',
 }) => {
   const handleSubmitClick = () => {
     if (!isEligible) {
@@ -22,48 +16,17 @@ const SubmitSection = ({
     }
   }
 
-  const defaultTooltip = isEligible
-    ? 'Submit'
-    : 'Plant submission already done.'
-  const tooltipTitle = submitTooltip !== null ? submitTooltip : defaultTooltip
-
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-      {showReviewBtn && onReviewClick && (
-        <Tooltip position='top' title={reviewTooltip}>
-          <Button
-            variant='contained'
-            onClick={onReviewClick}
-            disabled={isLoading}
-            className='btn-save'
-          >
-            <RateReviewIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
-            Review
-          </Button>
-        </Tooltip>
-      )}
-      <Tooltip position='top' title={tooltipTitle}>
-        <span>
-          <Button
-            className='btn-save'
-            style={{
-              background: isEligible ? '#28a745' : '#6c757d',
-              color: '#ffffff',
-              opacity: isLoading ? 0.6 : 1,
-            }}
-            onClick={handleSubmitClick}
-            disabled={!isEligible || isLoading}
-          >
-            {isLoading ? (
-              <CircularProgress size={20} color='inherit' />
-            ) : (
-              'Submit'
-            )}
-          </Button>
-        </span>
-      </Tooltip>
-
-      <Tooltip position='top' title='View History'>
+      <Button
+        className='btn-save'
+        style={{ background: '#28a745', color: '#ffffff' }}
+        onClick={handleSubmitClick}
+        disabled={!isEligible || isLoading}
+      >
+        {isLoading ? <CircularProgress size={20} color='inherit' /> : 'Submit'}
+      </Button>
+      <Tooltip title='View History'>
         <Button
           variant='outlined'
           onClick={onViewHistory}

@@ -200,7 +200,12 @@ async function CrackerMaintenanceImportNMD(file, keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function CrackerMaintenanceExport(keycloak, PLANT_ID, AOP_YEAR) {
+async function CrackerMaintenanceExport(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/maintenance-export?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
@@ -223,7 +228,7 @@ async function CrackerMaintenanceExport(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `Maintenance_${'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -234,7 +239,12 @@ async function CrackerMaintenanceExport(keycloak, PLANT_ID, AOP_YEAR) {
   }
 }
 
-async function CrackerMaintenanceExportNMD(keycloak, PLANT_ID, AOP_YEAR) {
+async function CrackerMaintenanceExportNMD(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  EXCEL_NAME,
+) {
   const url = `${Config.CaseEngineUrl}/task/maintenance-export-nmd?year=${encodeURIComponent(AOP_YEAR)}&plantId=${encodeURIComponent(PLANT_ID)}`
 
   const headers = {
@@ -257,7 +267,7 @@ async function CrackerMaintenanceExportNMD(keycloak, PLANT_ID, AOP_YEAR) {
     const urlBlob = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = urlBlob
-    a.download = `Maintenance_${'Export'}.xlsx`
+    a.download = `${EXCEL_NAME}.xlsx`
     document.body.appendChild(a)
     a.click()
     a.remove()

@@ -2,20 +2,24 @@ import productionColDefs from '../../../assets/kendo_consumption_aop.json'
 import productionColDefsElastomer from '../../../assets/kendo_consumption_aop_elastomer.json'
 import productionColDefs1 from '../../../assets/kendo_consumption_aop_cracker.json'
 import productionColDefsVcm from '../../../assets/kendo_consumption_aop_vcm.json'
-const getEnhancedColDefs = ({ headerMap, lowerVertName, valueFormat }) => {
+// import productionColDefsVcmDmd from '../../../assets/kendo_consumption_aop_vcmdmd.json'
+const getEnhancedColDefs = ({
+  headerMap,
+  lowerVertName,
+  lowerSiteName,
+  lowerPlantName,
+  valueFormat,
+}) => {
   let colDefs = productionColDefs
 
   // console.log('lowerVertName', lowerVertName)
 
-  if (lowerVertName == 'cracker') {
+  if (lowerVertName === 'cracker') {
     colDefs = productionColDefs1
-  }
-
-  if (lowerVertName == 'elastomer') {
+  } else if (lowerVertName === 'elastomer') {
     colDefs = productionColDefsElastomer
-  }
-  if (lowerVertName == 'vcm') {
-    colDefs = productionColDefsVcm // Using VCM columns for VCM as well
+  } else if (lowerVertName === 'vcm') {
+    colDefs = productionColDefsVcm
   }
 
   const enhancedColDefs = colDefs.map((col) => {
@@ -36,6 +40,13 @@ const getEnhancedColDefs = ({ headerMap, lowerVertName, valueFormat }) => {
         format: valueFormat || '{0:#.###}',
         editable: false,
         type: 'number',
+      }
+    }
+    if (col.field === 'wtAverage') {
+      return {
+        ...col,
+        type: 'number',
+        format: valueFormat || '{0:#.###}',
       }
     }
 
