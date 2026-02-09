@@ -411,6 +411,12 @@ const ShutDown = ({ permissions }) => {
               const bEnd = new Date(b.maintEndDateTime).getTime()
 
               if (isNaN(bStart) || isNaN(bEnd)) continue
+              if (
+                (a.discription && a.discription === 'Seasonal Impact') ||
+                (b.discription && b.discription === 'Seasonal Impact')
+              ) {
+                continue
+              }
 
               if (aStart < bEnd && bStart < aEnd) {
                 // Add this line

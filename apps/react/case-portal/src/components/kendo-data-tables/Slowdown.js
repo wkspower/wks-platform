@@ -705,7 +705,7 @@ const SlowDown = ({ permissions }) => {
         // Month span check
         //check timeframe Multiple month spilt into single
 
-        if (lowerVertName != 'vcm' || !IS_PTA_DMD || lowerVertName !== 'pet') {
+        if (lowerVertName != 'vcm' && !IS_PTA_DMD && lowerVertName !== 'pet') {
           for (const row of rows) {
             const start = new Date(row.maintStartDateTime)
             const end = new Date(row.maintEndDateTime)

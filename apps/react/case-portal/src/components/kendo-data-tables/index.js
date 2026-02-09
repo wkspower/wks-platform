@@ -2034,7 +2034,8 @@ const KendoDataTables = ({
                 }
                 if (
                   lowerVertName === 'vcm' &&
-                  monthFields.includes(col.field)
+                  monthFields.includes(col.field) &&
+                  permissions?.highlightShutdownConsumption
                 ) {
                   return (
                     <GridColumn
