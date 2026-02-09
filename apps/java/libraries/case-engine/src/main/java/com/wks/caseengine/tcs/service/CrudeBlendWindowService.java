@@ -1577,6 +1577,7 @@ private <T> List<T> convertList(List<?> raw, Class<T> clazz) {
         style.setBorderBottom(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
+        style.setWrapText(true);
         
         return style;
     }
