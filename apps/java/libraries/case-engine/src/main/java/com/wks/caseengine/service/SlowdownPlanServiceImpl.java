@@ -1664,7 +1664,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 
 	public List<ShutDownPlanDTO> readNonProductSlowdown(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
-	    List<LocalDateTime[]> validTimeRanges = new ArrayList<>();
+	    List<Object[]> validTimeRanges = new ArrayList<>(); 
 	    Plants plant = plantsRepository.findById(plantFKId).get();
 	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
 	    
@@ -1775,7 +1775,6 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                    }
 	                }
 	                
-	                // Logic validations for the end date (now includes overridden dates)
 	                if (ldtEnd != null && !alreadyFailed) {
 	                    if (ldtEnd.isBefore(fyStart) || ldtEnd.isAfter(fyEnd)) {
 	                        dto.setSaveStatus("Failed");
@@ -1793,17 +1792,27 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                        }   
 	                    } else if (ldtStart != null) {
 	                        boolean overlaps = false;
-	                        for (LocalDateTime[] prevPeriod : validTimeRanges) {
-	                            LocalDateTime prevLdtStart = prevPeriod[0];
-	                            LocalDateTime prevLdtEnd = prevPeriod[1];
+	                        
+	                        // Seasonal Impact Logic Flag
+	                        boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
+	                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
+
+	                        for (Object[] prevPeriod : validTimeRanges) {
+	                            LocalDateTime prevLdtStart = (LocalDateTime) prevPeriod[0];
+	                            LocalDateTime prevLdtEnd = (LocalDateTime) prevPeriod[1];
+	                            boolean prevIsSeasonal = (Boolean) prevPeriod[2];
+
+	                            // Check for overlap
 	                            if (ldtStart.isBefore(prevLdtEnd) && ldtEnd.isAfter(prevLdtStart)) {
-	                                overlaps = true;
-	                                break;
+	                                // If neither the current row nor the previous row is Seasonal Impact, trigger failure
+	                                if (!isVcmSeasonalImpact && !prevIsSeasonal) {
+	                                    overlaps = true;
+	                                    break;
+	                                }
 	                            }
 	                        }
-	                        boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
-	                                                        && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
-	                        if (overlaps && !isVcmSeasonalImpact) {
+
+	                        if (overlaps) {
 	                            dto.setSaveStatus("Failed");
 	                            dto.setErrDescription("The maintenance period overlaps with an already validated period in the file.");
 	                            alreadyFailed = true;
@@ -1832,9 +1841,15 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	                                }
 	                            }
 	                        }
+
+	                        // Seasonal flag for storage
+	                        boolean isVcmSeasonalImpact = "VCM".equalsIgnoreCase(vertical.getName()) 
+	                                && "Seasonal Impact".equalsIgnoreCase(dto.getDiscription());
+
 	                        if (!alreadyFailed) {
 	                            dto.setDurationInHrs(durationInDecimalHours); 
-	                            validTimeRanges.add(new LocalDateTime[]{ldtStart, ldtEnd});
+	                            // Store as Object array to include the seasonal flag
+	                            validTimeRanges.add(new Object[]{ldtStart, ldtEnd, isVcmSeasonalImpact});
 	                        } else if (dto.getSaveStatus() == null) {
 	                            dto.setDurationInHrs(durationInDecimalHours);
 	                        }
@@ -1907,7 +1922,7 @@ public class SlowdownPlanServiceImpl implements SlowdownPlanService {
 	    }
 	    return dtoList;
 	}
-
+	
 	public List<ShutDownPlanDTO> readNonProductSlowdownDMD(InputStream inputStream, UUID plantFKId, String year) {
 	    List<ShutDownPlanDTO> dtoList = new ArrayList<>();
 
