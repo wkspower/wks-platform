@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 
+
 @Configuration
 @NoArgsConstructor
 @AllArgsConstructor
@@ -46,4 +47,6 @@ public class ShutDownPlanDTO {
 	private String saveStatus;
 	private String errDescription;
 	private String month;
+    private Double rpfDownTime;
+    private Double noOfRPF;
 }

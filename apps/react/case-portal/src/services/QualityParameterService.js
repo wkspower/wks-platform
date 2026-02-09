@@ -17,6 +17,7 @@ export const QualityParameterService = {
   saveOtherCostData,
   OtherCostExport,
   OtherCostExcel,
+  calculatePackagingData,
 }
 export async function getQualityParameterData(keycloak, PLANT_ID, AOP_YEAR) {
   const url = `${Config.CaseEngineUrl}/task/quality-transaction?plantId=${PLANT_ID}&year=${AOP_YEAR}`
@@ -403,6 +404,21 @@ export async function OtherCostExcel(file, keycloak, plantId, year) {
     return await resp.json()
   } catch (e) {
     console.error('Error importing Plant Team Excel:', e)
+    return Promise.reject(e)
+  }
+}
+export async function calculatePackagingData(keycloak, PLANT_ID, AOP_YEAR) {
+  const url = `${Config.CaseEngineUrl}/task/calculate-packaging-norms?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return await resp.json()
+  } catch (e) {
+    console.error('Error fetching Plant Team data:', e)
     return Promise.reject(e)
   }
 }

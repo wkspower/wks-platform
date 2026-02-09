@@ -1,4 +1,4 @@
-export const NormalOpNormVcmColumns = [
+export const NormalOpNormVcmDmdColumns = [
   {
     field: 'Particulars',
     title: 'Type',
@@ -142,7 +142,6 @@ export const NormalOpNormVcmColumns = [
     format: '{0:#.###}',
     type: 'number',
   },
-
   {
     field: 'wtAverage',
     title: 'Weighted Avg',
@@ -152,7 +151,6 @@ export const NormalOpNormVcmColumns = [
     width: 120,
     type: 'number',
   },
-
   {
     field: 'remarks',
     title: 'Remark',

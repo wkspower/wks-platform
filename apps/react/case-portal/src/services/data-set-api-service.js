@@ -2,6 +2,7 @@ import Config from '../consts'
 import { json } from './request'
 export const DataSetaApiService = {
   bestAchievedMinCCExport,
+  getQualityPackagingBasis,
 }
 
 export async function bestAchievedMinCCExport(
@@ -35,6 +36,40 @@ export async function bestAchievedMinCCExport(
     window.URL.revokeObjectURL(urlBlob)
   } catch (e) {
     console.error('Error exporting Best Achieved MinCC Export Excel:', e)
+    return Promise.reject(e)
+  }
+}
+
+async function getQualityPackagingBasis(
+  keycloak,
+  reportType,
+  periodFrom,
+  periodTo,
+  mode,
+  PLANT_ID,
+  AOP_YEAR,
+) {
+  let url = `${Config.CaseEngineUrl}/task/data-set-quality-packaging?plantId=${PLANT_ID}&year=${AOP_YEAR}`
+
+  if (periodFrom !== undefined) {
+    url += `&periodFrom=${periodFrom}`
+  }
+
+  if (periodTo !== undefined) {
+    url += `&periodTo=${periodTo}`
+  }
+
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+    return json(keycloak, resp)
+  } catch (e) {
+    console.log(e)
     return Promise.reject(e)
   }
 }

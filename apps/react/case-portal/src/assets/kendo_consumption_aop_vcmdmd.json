@@ -83,17 +83,11 @@
     "title": "Mar",
     "headerName": 3
   },
-
   {
     "field": "wtAverage",
     "title": "Weighted Avg",
-    "align": "right",
-    "format": "{0:#.###}",
-    "editable": false,
-    "width": 120,
-    "type": "number"
+    "editable": false
   },
-
   {
     "field": "isEditable",
     "title": "isEditable",

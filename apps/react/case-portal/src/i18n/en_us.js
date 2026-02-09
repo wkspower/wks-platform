@@ -33,7 +33,7 @@ const defs = {
     spyroInput: 'Optimizer Input',
     spyroOutput: 'Optimizer Output',
     spyroMenu: 'Optimizer Menu',
-    decokingActivities: 'Maintenance Details (Furnace & SAD plan)',
+    decokingActivities: 'Net Production Hours (Furnace & SAD plan)',
     maintenanceDetails: 'Net Production Hours',
     consumptionNorms: 'Overall AOP Consumption (Norm/Quantity)',
     productionNorms: 'Month wise Production plan',
@@ -99,7 +99,6 @@ const defs = {
 
     functionalReports: 'Reports',
     aopDesignBasis: 'AOP Basis',
-    tcs: 'Term Crude Sheet',
     tcsinput: 'TCS Input',
     tcsoutput: 'TCS Output',
     pimsoutput: 'PIMS Output',
@@ -110,6 +109,7 @@ const defs = {
     dashboard: 'AOP Dashboard',
     proposedNorms: 'Proposed AOP Consumption (Norm/Quantity)',
     qualitypackaging: 'Quality & Packaging Norms',
+    qualityPackagingBasis: 'Quality & Packaging Basis',
   },
   pages: {
     dashboard: {

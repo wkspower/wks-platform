@@ -80,7 +80,17 @@ public class PackagingConsumablesController {
 	        ) {
 			return	packagingConsumablesService.importPackagingConsumablesTransaction(year,UUID.fromString(plantId), file); 
 	}
+	
+	@GetMapping(value="/calculate-packaging-norms")
+	public AOPMessageVM getCalculatePackagingNorms(@RequestParam String year,@RequestParam String plantId){
+		return	 packagingConsumablesService.getCalculatePackagingNorms(year,plantId);	
+	}
+	
+	@GetMapping(value="/data-set-quality-packaging")
+	public ResponseEntity<AOPMessageVM> getQualityPackaging(@RequestParam String plantId,@RequestParam String year,@RequestParam(value="periodFrom", required=false) String periodFrom,@RequestParam(value="periodTo", required=false) String periodTo,@RequestParam(value="type", required=false) String type){
+		AOPMessageVM response=packagingConsumablesService.getQualityPackaging(plantId,year,periodFrom,periodTo,type);
+		return ResponseEntity.status(response.getCode()).body(response);
+	}
 
 	
 }
-

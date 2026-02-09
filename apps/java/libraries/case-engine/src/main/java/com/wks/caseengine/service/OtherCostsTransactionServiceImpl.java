@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -162,17 +163,55 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 					failedList.add(otherCostsTransactionDto);
 					continue;
 				}
+				Boolean update=false;
+				Boolean changed=false;
 				OtherCostsTransaction otherCostsTransaction =null;
 				UUID material=UUID.fromString(otherCostsTransactionDto.getMaterialId());
 				Optional<OtherCostsTransaction> otherCostsTransactionOpt =otherCostsTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
 				if(otherCostsTransactionOpt.isPresent()) {
 					otherCostsTransaction=otherCostsTransactionOpt.get();
+					update = true;
 				}else {
+					update = false;
 					otherCostsTransaction = new OtherCostsTransaction();
 					otherCostsTransaction.setMaterialId(UUID.fromString(otherCostsTransactionDto.getMaterialId()));
 					otherCostsTransaction.setAopYear(year);
 					otherCostsTransaction.setPlantId(plantId);
 				}
+				if (update) {
+				    if (!Objects.equals(otherCostsTransaction.getPrevBudget(), otherCostsTransactionDto.getPrevBudget())) {
+				        changed = true;
+				    }
+				    if (!Objects.equals(otherCostsTransaction.getProposedNorm(), otherCostsTransactionDto.getProposedNorm())) {
+				        changed = true;
+				    }
+				    
+				    if (!Objects.equals(otherCostsTransaction.getPrevActual(), otherCostsTransactionDto.getPrevActual())) {
+				        changed = true;
+				    }
+				    
+				    if (changed) {
+				        String existingRemark = otherCostsTransaction.getRemark();
+				        String newRemark = otherCostsTransactionDto.getRemark();
+
+				        if (Objects.equals(existingRemark, newRemark) || 
+				           (existingRemark != null && existingRemark.equalsIgnoreCase(newRemark))) {
+				            
+				        	otherCostsTransactionDto.setErrDescription("Please update remark");
+				        	otherCostsTransactionDto.setSaveStatus("Failed");
+				            failedList.add(otherCostsTransactionDto);
+				            continue;
+				        }
+				    }
+				}else {
+					if(otherCostsTransactionDto.getRemark()==null) {
+						otherCostsTransactionDto.setErrDescription("Please add remark");
+						otherCostsTransactionDto.setSaveStatus("Failed");
+				            failedList.add(otherCostsTransactionDto);
+				            continue;
+					}
+				}
+
 				otherCostsTransaction.setRemark(otherCostsTransactionDto.getRemark());
 				otherCostsTransaction.setUpdatedBy(Utility.getUserName());
 				otherCostsTransaction.setModifiedOn(new Date());
@@ -215,6 +254,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	        innerHeaders.add("Budget "+getNextFiscalYear(year));
 	        innerHeaders.add("Actual "+getNextFiscalYear(year));
 	        innerHeaders.add("Proposed Cost "+year);
+	        innerHeaders.add("Remarks");
 	        innerHeaders.add("Material Id");
 	        if (isAfterSave) {
 	            innerHeaders.add("Status");
@@ -238,6 +278,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	            rowData.add(dto.getPrevBudget());
 	            rowData.add(dto.getPrevActual());
 	            rowData.add(dto.getProposedNorm());
+	            rowData.add(dto.getRemark());
 	            rowData.add(dto.getMaterialId());
 	            if (isAfterSave) {
 	                rowData.add(dto.getSaveStatus());
@@ -258,7 +299,7 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                }  
 	            }
 	        }
-	        sheet.setColumnHidden(6, true);
+	        sheet.setColumnHidden(7, true);
 	        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -328,7 +369,8 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 	                dto.setPrevBudget(getNumericCellValue(row.getCell(3), dto));
 	                dto.setPrevActual(getNumericCellValue(row.getCell(4), dto));
 	                dto.setProposedNorm(getNumericCellValue(row.getCell(5), dto));
-	                dto.setMaterialId(getStringCellValue(row.getCell(6), dto));
+	                dto.setRemark(getStringCellValue(row.getCell(6), dto));
+	                dto.setMaterialId(getStringCellValue(row.getCell(7), dto));
 	                dto.setPlantId(plantFKId.toString());
 	                dto.setAopYear(year);
 	              } 

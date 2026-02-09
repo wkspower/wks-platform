@@ -19,6 +19,7 @@ import {
   getColDefsDesignCapacity,
   getColDefsDesignCapacityPEPP,
   getColDefsDesignCapacityPTA,
+  getColDefsDesignCapacityPTADMD,
   getColDefsMaxAchievedCapacity,
   getColDefsMaxAchievedCapacityPEPP,
   getColDefsMaxAchievedCapacityPTA,
@@ -84,6 +85,7 @@ const ProductionvolumeData = ({ permissions }) => {
     verticalObject?.name?.toLowerCase() == 'pp'
 
   const IS_PTA = verticalObject?.name?.toLowerCase() == 'pta'
+  const IS_PTA_DMD = IS_PTA && siteObject?.name?.toLowerCase() == 'dmd'
 
   const IS_VCM = verticalObject?.name?.toLowerCase() == 'vcm'
   const SITE_NAME = siteObject?.name?.toLowerCase()
@@ -259,7 +261,7 @@ const ProductionvolumeData = ({ permissions }) => {
       ]
 
       const designCapacityData = newRows.map((row) => {
-        const mapped = { id: row.idFromApi || row.id || null }
+        const mapped = { id: row.idFromApi || null }
         months.forEach((month) => {
           mapped[month] =
             isTPH && row[month] ? row[month] / 24 : row[month] || null
@@ -441,7 +443,7 @@ const ProductionvolumeData = ({ permissions }) => {
           const isTPH = selectedUnit == 'TPD'
           return {
             ...item,
-            idFromApi: item?.id,
+            idFromApi: item?.id || null,
             normParametersFKId: item?.materialFKId.toLowerCase(),
             remarks: item?.remarks?.trim() || null,
             originalRemark: item?.remarks?.trim() || null,
@@ -586,9 +588,11 @@ const ProductionvolumeData = ({ permissions }) => {
   const colDefs_design_capacity =
     IS_PE_PP || IS_PET
       ? getColDefsDesignCapacityPEPP(headerMap, valueFormat)
-      : IS_PTA
-        ? getColDefsDesignCapacityPTA(headerMap, valueFormat)
-        : getColDefsDesignCapacity(headerMap, valueFormat)
+      : IS_PTA_DMD
+        ? getColDefsDesignCapacityPTADMD(headerMap, valueFormat)
+        : IS_PTA
+          ? getColDefsDesignCapacityPTA(headerMap, valueFormat)
+          : getColDefsDesignCapacity(headerMap, valueFormat)
 
   const colDefs_max_achieved_capacity =
     IS_PE_PP || IS_PET
@@ -655,33 +659,49 @@ const ProductionvolumeData = ({ permissions }) => {
         const isTPD = unit === 'TPD'
         const formatted = data.map((item, index) => ({
           ...item,
-          id: item?.id,
+          id: index + 1,
+          idFromApi: item?.id || null,
           productName: item?.materialDisplayName,
           remarks: item?.remarks?.trim() || null,
           originalRemark: item?.remarks?.trim() || null,
           remark: item.remarks?.trim() || '',
-          isEditable: IS_PE_PP || IS_PET || IS_VCM ? false : true,
+          isEditable: IS_PE_PP || IS_PET || IS_VCM || IS_PTA_DMD ? false : true,
 
-          april: isTPD && item.april ? item.april * 24 : item.april || null,
-          may: isTPD && item.may ? item.may * 24 : item.may || null,
-          june: isTPD && item.june ? item.june * 24 : item.june || null,
-          july: isTPD && item.july ? item.july * 24 : item.july || null,
-          august: isTPD && item.august ? item.august * 24 : item.august || null,
+          april:
+            isTPD && item.april ? item.april * 24 : item.april || item.april,
+          may: isTPD && item.may ? item.may * 24 : item.may || item.may,
+          june: isTPD && item.june ? item.june * 24 : item.june || item.june,
+          july: isTPD && item.july ? item.july * 24 : item.july || item.july,
+          august:
+            isTPD && item.august
+              ? item.august * 24
+              : item.august || item.august,
           september:
             isTPD && item.september
               ? item.september * 24
-              : item.september || null,
+              : item.september || item.september,
           october:
-            isTPD && item.october ? item.october * 24 : item.october || null,
+            isTPD && item.october
+              ? item.october * 24
+              : item.october || item.october,
           november:
-            isTPD && item.november ? item.november * 24 : item.november || null,
+            isTPD && item.november
+              ? item.november * 24
+              : item.november || item.november,
           december:
-            isTPD && item.december ? item.december * 24 : item.december || null,
+            isTPD && item.december
+              ? item.december * 24
+              : item.december || item.december,
           january:
-            isTPD && item.january ? item.january * 24 : item.january || null,
+            isTPD && item.january
+              ? item.january * 24
+              : item.january || item.january,
           february:
-            isTPD && item.february ? item.february * 24 : item.february || null,
-          march: isTPD && item.march ? item.march * 24 : item.march || null,
+            isTPD && item.february
+              ? item.february * 24
+              : item.february || item.february,
+          march:
+            isTPD && item.march ? item.march * 24 : item.march || item.march,
         }))
         setRowsDesignCapacity(formatted)
       } else {
@@ -714,7 +734,7 @@ const ProductionvolumeData = ({ permissions }) => {
         const isTPD = unit === 'TPD'
         const formatted = data.map((item, index) => ({
           ...item,
-          idFromApi: item?.id,
+          idFromApi: item?.id || null,
           productName: item?.materialDisplayName,
           april: isTPD && item.april ? item.april * 24 : item.april,
           may: isTPD && item.may ? item.may * 24 : item.may,
@@ -834,11 +854,17 @@ const ProductionvolumeData = ({ permissions }) => {
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
       titleName: percentageTitle,
 
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
       titleAndInformation:
-        'Maximum Ethylene Production achieved in the last 05 years historical data for 05 consecutive days in different furnace mode of operation.',
+        VERTICAL_NAME == 'cracker'
+          ? 'Maximum Ethylene Production achieved in the last 05 years historical data for 05 consecutive days in different furnace mode of operation.'
+          : VERTICAL_NAME == 'vcm'
+            ? `Maximum ${PLANT_NAME_NO_CASE} production achieved in the last five year historical data derived as average of top 10 percent data points.`
+            : '',
 
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
 
       downloadExcelBtnFromUI: IS_PE_PP ? false : true,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Max Achieved Capacity`,
@@ -856,7 +882,7 @@ const ProductionvolumeData = ({ permissions }) => {
       showUnit: permissions?.showUnit ?? true,
       saveWithRemark: permissions?.saveWithRemark ?? true,
       showRefreshBtn: permissions?.showRefreshBtn ?? true,
-      saveBtn: IS_PE_PP || IS_PET || IS_VCM ? false : true,
+      saveBtn: IS_PE_PP || IS_PET || IS_VCM || IS_PTA_DMD ? false : true,
       units: ['TPH', 'TPD'],
 
       // downloadExcelBtn: permissions?.hideDownloadExcel ? false : true,
@@ -865,11 +891,17 @@ const ProductionvolumeData = ({ permissions }) => {
       uploadExcelBtn: IS_PE_PP ? true : false,
       ExcelName: `${EXCEL_EXPORT_TITLE}_Design Capacity`,
 
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
       titleAndInformation:
-        'Design plant capacity for different furnace mode of operation as per licensor provided data.',
+        VERTICAL_NAME == 'cracker'
+          ? 'Design plant capacity for different furnace mode of operation as per licensor provided data.'
+          : VERTICAL_NAME == 'vcm'
+            ? 'Design plant capacity as per licensor provided data.'
+            : '',
 
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
 
       titleName:
         VERTICAL_NAME === 'cracker'
@@ -902,18 +934,24 @@ const ProductionvolumeData = ({ permissions }) => {
       downloadExcelBtn: IS_PE_PP ? false : true,
       uploadExcelBtn: IS_PE_PP ? false : true,
 
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
 
       //TEXT NOTE CHANGED TO 01 YEARS
       titleAndInformation:
-        'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.',
+        VERTICAL_NAME == 'cracker'
+          ? 'Maximum Ethylene Production achieved in the last 01 years historical data for 05 consecutive days in different furnace mode of operation.'
+          : VERTICAL_NAME == 'vcm'
+            ? 'Steady state production operating capacity which is proposed for the AOP FY.'
+            : '',
 
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Proposed Operating Capacity (Ethylene)'
-          : IS_VCM_DMD_VCM
-            ? 'Steady state Operating Capacity'
+          : IS_VCM
+            ? 'Steady State Operating Capacity'
             : 'Proposed Operating Capacity',
     },
     isOldYear,
@@ -922,9 +960,16 @@ const ProductionvolumeData = ({ permissions }) => {
   const adjustedPermissionsLast = getAdjustedPermissions(
     {
       allAction: true,
-      showTitleAndInformation: VERTICAL_NAME == 'cracker' ? true : false,
-      titleAndInformation: 'Percentage Summary (Ethylene)',
-      showTitleNameBusiness: VERTICAL_NAME !== 'cracker' ? true : false,
+      showTitleAndInformation:
+        VERTICAL_NAME == 'cracker' || VERTICAL_NAME == 'vcm' ? true : false,
+      titleAndInformation:
+        VERTICAL_NAME == 'cracker'
+          ? 'Percentage Summary (Ethylene)'
+          : VERTICAL_NAME == 'vcm'
+            ? `Percentage summary represent a month-wise percentage summary, comparing each months value against the highest ${PLANT_NAME_NO_CASE} production rate over the past 12 months.`
+            : '',
+      showTitleNameBusiness:
+        VERTICAL_NAME !== 'cracker' && VERTICAL_NAME !== 'vcm' ? true : false,
       titleName:
         VERTICAL_NAME === 'cracker'
           ? 'Percentage Summary (Ethylene)'

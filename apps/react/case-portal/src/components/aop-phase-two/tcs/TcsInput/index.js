@@ -45,7 +45,16 @@ const renderTabComponent = (tabDisplayName, props) => {
 const TcsInput = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
-  const { plantObject, siteObject, verticalObject, year } = dataGridStore
+  const {
+    verticalChange,
+    yearChanged,
+    oldYear,
+    plantID,
+    plantObject,
+    siteObject,
+    verticalObject,
+    year,
+  } = dataGridStore
 
   const PLANT_ID = plantObject?.id
   const PLANT_NAME = plantObject?.name
@@ -69,89 +78,38 @@ const TcsInput = () => {
   const [isSubmitEligible, setIsSubmitEligible] = useState(true)
   const [isCheckingEligibility, setIsCheckingEligibility] = useState(false)
   const [isWorkflowTriggered, setIsWorkflowTriggered] = useState(false)
-  const [isSubmittingRemark, setIsSubmittingRemark] = useState(false)
-  const [timelineData, setTimelineData] = useState([])
-  // Generate dynamic tooltip for Plant Manager
-  const submitTooltip = useMemo(() => {
-    if (!isSubmitEligible) {
-      return 'Plant submission already done'
-    }
-    return 'Submit plant data to EPS Engineer for approval'
-  }, [isSubmitEligible])
 
   // Check workflow status on mount
-  useEffect(() => {
-    if (PLANT_ID && AOP_YEAR && SITE_ID && VERTICAL_ID && PLANT_NAME) {
-      checkSubmitEligibility()
-    }
-    checkWorkflowTriggered()
-  }, [PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID, PLANT_NAME])
+  // useEffect(() => {
+  //   checkWorkflowTriggered()
+  //   checkSubmitEligibility()
+  // }, [PLANT_ID, AOP_YEAR, SITE_ID, VERTICAL_ID])
 
-  const checkSubmitEligibility = async (showMessage = true) => {
+  const checkSubmitEligibility = async () => {
     try {
       setIsCheckingEligibility(true)
-      if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID || !PLANT_NAME) {
+      if (!PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) {
         setIsSubmitEligible(false)
         return
       }
-      // Fetch workflow variables to check submission status
-      const variables = await TcsWorkflowApiService.getWorkflowVariables(
+
+      const response = await TcsWorkflowApiService.checkSubmitEligibility(
         keycloak,
-        VERTICAL_ID,
-        SITE_ID,
+        PLANT_ID,
         AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
       )
 
-      setTimelineData(variables)
-      if (variables.length == 0) {
-        setIsSubmitEligible(true)
-      } else {
-        // Find submissionStatus variable
-        const submissionStatusVar = variables?.find(
-          (v) => v.name === 'submissionStatus',
-        )
+      const eligible = response?.isEligible !== false
+      setIsSubmitEligible(eligible)
 
-        if (submissionStatusVar && submissionStatusVar.value) {
-          try {
-            // Parse the JSON value
-            const submissionStatus = JSON.parse(submissionStatusVar.value)
-
-            // Check if current plant has already been submitted
-            const isPlantSubmitted = submissionStatus[PLANT_NAME] === true
-
-            if (isPlantSubmitted) {
-              // Plant already submitted - disable submit button
-              setIsSubmitEligible(false)
-              // Only show message if showMessage is true (on page load, not after submission)
-              if (showMessage) {
-                setSnackbarData({
-                  message: `${PLANT_NAME} has already been submitted`,
-                  severity: 'info',
-                })
-                setSnackbarOpen(true)
-              }
-              return
-            } else {
-              // Plant not yet submitted - enable submit button
-              setIsSubmitEligible(true)
-              return
-            }
-          } catch (parseError) {
-            console.error('Error parsing submissionStatus:', parseError)
-          }
-        }
-
-        // Fallback to original eligibility check
-        const eligible = response?.isEligible !== false
-        setIsSubmitEligible(eligible)
-
-        if (!eligible) {
-          setSnackbarData({
-            message: response?.message || 'Submit is not eligible at this time',
-            severity: 'warning',
-          })
-          setSnackbarOpen(true)
-        }
+      if (!eligible) {
+        setSnackbarData({
+          message: response?.message || 'Submit is not eligible at this time',
+          severity: 'warning',
+        })
+        setSnackbarOpen(true)
       }
     } catch (err) {
       console.error('Error checking submit eligibility:', err)
@@ -162,27 +120,45 @@ const TcsInput = () => {
       })
       setSnackbarOpen(true)
     } finally {
+      setIsSubmitEligible(true)
       setIsCheckingEligibility(false)
     }
   }
-
   const checkWorkflowTriggered = async () => {
     try {
       const response = await TcsWorkflowApiService.checkWorkflowStatus(
         keycloak,
-        VERTICAL_ID,
-        SITE_ID,
+        PLANT_ID,
         AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
       )
 
+      const isTriggered = response?.isTriggered === true
+
       // If workflow is already triggered, disable submit button
-      setIsWorkflowTriggered(response)
-      return response
+      setIsWorkflowTriggered(isTriggered)
+
+      if (isTriggered) {
+        setSnackbarData({
+          message:
+            response?.message ||
+            'Workflow has already been triggered for this submission',
+          severity: 'info',
+        })
+        setSnackbarOpen(true)
+      }
+
+      return { isTriggered, response }
     } catch (err) {
       console.error('Error checking workflow status:', err)
+      setSnackbarData({
+        message: 'Failed to check workflow status',
+        severity: 'error',
+      })
+      setSnackbarOpen(true)
     }
   }
-  // PRECHECK DONE
 
   const handleViewHistory = () => {
     setHistoryDialogOpen(true)
@@ -267,7 +243,7 @@ const TcsInput = () => {
   // Handle workflow trigger
   const handleTriggerWorkflow = async () => {
     try {
-      if (!keycloak || !SITE_ID || !VERTICAL_ID) {
+      if (!keycloak || !PLANT_ID || !AOP_YEAR || !SITE_ID || !VERTICAL_ID) {
         setSnackbarData({
           message: 'Missing required parameters to trigger workflow',
           severity: 'error',
@@ -276,16 +252,23 @@ const TcsInput = () => {
         return { success: false }
       }
 
-      // Trigger workflow (start process)
+      // Trigger workflow
       await TcsWorkflowApiService.triggerWorkflow(
         keycloak,
-        VERTICAL_ID,
-        SITE_ID,
+        PLANT_ID,
         AOP_YEAR,
+        SITE_ID,
+        VERTICAL_ID,
       )
 
       // Update workflow triggered state
       setIsWorkflowTriggered(true)
+
+      setSnackbarData({
+        message: 'Workflow triggered successfully!',
+        severity: 'success',
+      })
+      setSnackbarOpen(true)
 
       return { success: true }
     } catch (err) {
@@ -304,82 +287,57 @@ const TcsInput = () => {
     console.log('Remark submitted by:', userRole)
     console.log('Remark:', remark)
 
-    // Validation: Check for missing required parameters
-    if (
-      !keycloak ||
-      !PLANT_ID ||
-      !PLANT_NAME ||
-      !SITE_ID ||
-      !VERTICAL_ID ||
-      !AOP_YEAR
-    ) {
+    try {
+      if (keycloak && PLANT_ID && AOP_YEAR && SITE_ID && VERTICAL_ID) {
+        if (!isWorkflowTriggered) {
+          await handleTriggerWorkflow()
+        }
+
+        // Always save remark first
+        await TcsWorkflowApiService.saveRemark(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+          SITE_ID,
+          VERTICAL_ID,
+          remark,
+        )
+      }
+    } catch (err) {
+      console.error('Error saving remark:', err)
       setSnackbarData({
-        message: 'Missing required parameters. Please refresh and try again.',
+        message: 'Failed to save remark',
         severity: 'error',
       })
       setSnackbarOpen(true)
-      return // Don't close dialog, allow user to retry
+      return
     }
 
-    // Show loading state
-    setIsSubmittingRemark(true)
-    let workflowWasTriggered = false
-
-    try {
-      // If workflow not triggered, trigger it first and wait for success
-      if (!isWorkflowTriggered) {
-        const triggerResult = await handleTriggerWorkflow()
-
-        workflowWasTriggered = triggerResult
-      }
-
-      // Complete plant submission task with remark
-      // if (workflowWasTriggered) {
-      await TcsWorkflowApiService.saveRemark(
-        keycloak,
-        PLANT_ID,
-        PLANT_NAME,
-        SITE_ID,
-        VERTICAL_ID,
-        userRole,
-        remark,
-        AOP_YEAR,
-      )
-
-      setSnackbarData({
-        message: 'Plant submission completed successfully',
-        severity: 'success',
-      })
-      setSnackbarOpen(true)
-
-      // Refresh submit eligibility after submission (without showing "already submitted" message)
-      await checkSubmitEligibility(false)
-
-      // Close the remark dialog on success
-      setRemarkDialogOpen(false)
-      // }
-    } catch (err) {
-      console.error('Error saving remark:', err)
-
-      // Handle partial failure: workflow started but submission failed
-      if (workflowWasTriggered) {
-        setSnackbarData({
-          message:
-            'Workflow started but plant submission failed. Please try submitting again.',
-          severity: 'warning',
-        })
-      } else {
-        setSnackbarData({
-          message: 'Failed to complete plant submission. Please try again.',
-          severity: 'error',
-        })
-      }
-      setSnackbarOpen(true)
-      // Don't close dialog, allow user to retry
-    } finally {
-      setIsSubmittingRemark(false)
-    }
+    // Close the remark dialog
+    setRemarkDialogOpen(false)
   }
+  const data = [
+    {
+      id: 1,
+      submittedDate: '2022-01-15 14:30:00',
+      submittedBy: 'Plant Manager',
+      submittedRemark: 'Resubmitted after corrections',
+      verifiedDate: '2022-01-16 09:15:00',
+      verifiedBy: 'EPS Engineer',
+      verifiedRemark: 'Data looks good, approved for processing',
+      status: 'Approved',
+    },
+    {
+      id: 2,
+      submittedDate: '2022-01-10 10:45:00',
+      submittedBy: 'Plant Manager',
+      submittedRemark: 'Initial submission with all data validated',
+      verifiedDate: '2022-01-12 11:20:00',
+      verifiedBy: 'EPS Engineer',
+      verifiedRemark: 'Minor discrepancies found, needs revision',
+      status: 'Rejected',
+    },
+  ]
 
   return (
     <Box
@@ -397,6 +355,17 @@ const TcsInput = () => {
         {/* Tabs Section - Flex grow to fill available space */}
         <Box sx={{ flex: 1, overflowX: 'auto' }}>
           <Tabs
+            // sx={{
+            //   '& .MuiTabs-indicator': {
+            //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            //   },
+            //   '& .MuiTab-root.Mui-selected': {
+            //     background: `linear-gradient(90deg, #1e3a8a 0%, #1e40af 100%)`,
+            //     backgroundClip: 'text',
+            //     WebkitBackgroundClip: 'text',
+            //     WebkitTextFillColor: 'transparent',
+            //   },
+            // }}
             sx={{
               borderBottom: '0px solid #ccc',
               '.MuiTabs-indicator': { display: 'none' },
@@ -435,8 +404,6 @@ const TcsInput = () => {
           onViewHistory={handleViewHistory}
           isEligible={isSubmitEligible}
           isLoading={isCheckingEligibility}
-          isWorkflowTriggered={isWorkflowTriggered}
-          submitTooltip={submitTooltip}
         />
       </Box>
 
@@ -452,7 +419,6 @@ const TcsInput = () => {
           setSnackbarData,
           snackbarOpen,
           setSnackbarOpen,
-          isSubmitEligible,
         })}
       </Box>
 
@@ -463,6 +429,7 @@ const TcsInput = () => {
         placeholder='Enter your remarks here...'
         onSubmit={handleRemarkSubmit}
         maxLength={1000}
+        historyData={data}
         role={userRole}
         keycloak={keycloak}
         snackbarData={snackbarData}
@@ -475,8 +442,8 @@ const TcsInput = () => {
         open={historyDialogOpen}
         onClose={handleCloseHistory}
         title='Audit Trail'
-        userRole={userRole}
-        timelineData={timelineData}
+        data={data}
+        role={userRole}
       />
 
       <Notification

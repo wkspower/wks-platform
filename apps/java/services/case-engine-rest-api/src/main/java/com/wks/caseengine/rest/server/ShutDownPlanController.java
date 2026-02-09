@@ -140,6 +140,11 @@ public class ShutDownPlanController {
 			  return shutDownPlanService.getDescriptionDropdown(plantId);
 		  }
 		  
+		  @GetMapping("/shutdown-description")
+		  public AOPMessageVM getShutdownDescription(@RequestParam String plantId){
+			  return shutDownPlanService.getShutdownDescription(plantId);
+		  }
+		  
 		  
 }
 

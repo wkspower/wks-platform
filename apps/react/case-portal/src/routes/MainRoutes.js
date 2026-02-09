@@ -88,6 +88,7 @@ import ShutdownConsumption from 'components/aop-phase-two/vgoht/shutdown-consump
 import SlowdownConsumption from 'components/aop-phase-two/vgoht/slowdown-consumption/index'
 import OverallAopConsumption from 'components/aop-phase-two/vgoht/overall-aop-consumption/index'
 import SiteBudgetSummary from 'components/kendo-data-tables/SiteBudgetSummary'
+import QualityPackagingBasis from 'components/data-tables/Reports/QualityPackagingBasis'
 
 const ManagamentDefault = Loadable(lazy(() => import('../views/management')))
 const DashboardDefault = Loadable(lazy(() => import('../views/dashboard')))
@@ -639,6 +640,15 @@ export const MainRoutes = (
             element: (
               <PrivateRoute routeId='run-length'>
                 <RunLengthDataSet />
+              </PrivateRoute>
+            ),
+          },
+
+          {
+            path: 'quality-packaging-basis',
+            element: (
+              <PrivateRoute routeId='quality-packaging-basis'>
+                <QualityPackagingBasis />
               </PrivateRoute>
             ),
           },

@@ -2,7 +2,11 @@ import { Input } from '@progress/kendo-react-inputs'
 import NotificationTST from 'components/Utilities/NotificationTST'
 import { useState, useEffect, useRef } from 'react'
 
-export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
+export const NoSpinnerNumericEditorCrackerValidation = ({
+  dataItem,
+  field,
+  onChange,
+}) => {
   const initialValue = dataItem[field] ?? ''
   const [localValue, setLocalValue] = useState(initialValue)
   const isFirstRender = useRef(true)
@@ -29,6 +33,9 @@ export const NoSpinnerNumericEditor = ({ dataItem, field, onChange }) => {
     }
 
     if (val === '' || /^\d*(\.\d*)?$/.test(val)) {
+      // console.log('dataItem', dataItem)
+      console.log('Editing column:', field)
+
       if (dataItem?.productName?.trim().toLowerCase() === 'tst') {
         setSnackbarOpen(true)
         setSnackbarData({
