@@ -660,6 +660,16 @@ const WorkFlowMerge = () => {
     'Plant Contribution',
     'Plant Contribution Summary (T-22)',
   ]
+  const ptaTabs = [
+    'Annual AOP Cost',
+    'Plant Production Summary (T-14)',
+    'Month Wise Production Plan (T-16)',
+    'Month Wise Consumption (T-18)',
+    'Turnaround Report (T-19A)',
+    'Annual Production Plan (T-15)',
+    'Plant Contribution (T-21)',
+    'Plant Contribution Summary (T-22)',
+  ]
   const vcmTabs = [
     'Annual AOP Cost',
     'Plant Production Summary',
@@ -679,11 +689,7 @@ const WorkFlowMerge = () => {
     activeTabs = crackerTabs
   } else if (lowerVertName === 'vcm') {
     activeTabs = vcmTabs
-  } else if (
-    lowerVertName === 'elastomer' ||
-    lowerVertName === 'aromatics' ||
-    lowerVertName === 'pta'
-  ) {
+  } else if (lowerVertName === 'elastomer' || lowerVertName === 'aromatics') {
     activeTabs = elastomerTabs
   } else if (lowerVertName === 'pet') {
     activeTabs = customPETTabs
@@ -691,6 +697,8 @@ const WorkFlowMerge = () => {
     activeTabs = customPETabs
   } else if (lowerVertName === 'pp') {
     activeTabs = customPPTabs
+  } else if (lowerVertName === 'pta') {
+    activeTabs = ptaTabs
   }
   return (
     <div
