@@ -89,11 +89,13 @@ const Constants = () => {
       // }
 
       // console.log('Constants data:', res)
-      const formattedData = productionAndNormsBasisConstant.data?.map((item, index) => ({
-        ...item,
-        remarks: item.remarks || '',
-        id: item?.id || index + 1,
-      }))
+      const formattedData = productionAndNormsBasisConstant.data?.map(
+        (item, index) => ({
+          ...item,
+          remarks: item.remarks || '',
+          id: item?.id || index + 1,
+        }),
+      )
       setRows(formattedData)
       setOriginalRows(formattedData)
     } catch (error) {

@@ -204,7 +204,8 @@ const SteadyStateConsumption = () => {
       //     PLANT_ID,
       //     AOP_YEAR,
       //   )
-      const data = steadyStateConsumptionResponse.data.mcuNormsValueDTOList || dummyRows
+      const data =
+        steadyStateConsumptionResponse.data.mcuNormsValueDTOList || dummyRows
       setRows(data)
       setOriginalRows(data)
     } catch (error) {

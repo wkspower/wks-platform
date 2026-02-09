@@ -182,7 +182,8 @@ const OverallAopConsumption = () => {
       //     PLANT_ID,
       //     AOP_YEAR,
       //   )
-      const data = steadyStateConsumptionResponse.data?.mcuNormsValueDTOList?.map(
+      const data =
+        steadyStateConsumptionResponse.data?.mcuNormsValueDTOList?.map(
           (item) => {
             return {
               ...item,

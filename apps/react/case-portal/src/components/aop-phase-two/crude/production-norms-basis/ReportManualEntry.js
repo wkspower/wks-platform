@@ -209,7 +209,7 @@ const ReportManualEntry = () => {
       //   PLANT_ID,
       //   AOP_YEAR,
       // )
-      const res = configurationAndReportManualEntryResponse.data;
+      const res = configurationAndReportManualEntryResponse.data
 
       if (res?.length === 0) {
         setRows([])
