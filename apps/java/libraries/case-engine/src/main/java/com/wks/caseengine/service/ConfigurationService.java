@@ -46,4 +46,8 @@ public interface ConfigurationService {
     byte[] createConfigurationConstantsExcelResponse(String year, UUID plantFKId, List<ConfigurationDTO> list);
     public AOPMessageVM getConfigurationConstantsNorms(String year, String plantFKId);
 
+    public List<ConfigurationDTO> saveOtherConfigurationData(String year, String plantFKId, String version,
+            List<ConfigurationDTO> configurationDTOList, Boolean calculation);
+
+    public AOPMessageVM getOtherProductionNormsData(String year, String plantId, String gradeId);
 }

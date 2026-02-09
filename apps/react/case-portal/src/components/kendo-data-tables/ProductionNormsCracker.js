@@ -19,6 +19,7 @@ const ProductionNormsCracker = ({ permissions }) => {
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [modifiedCellsC2C3R, setModifiedCellsC2C3R] = React.useState({})
   const [calculationObject, setCalculationObject] = useState([])
+  const [calculationObject2, setCalculationObject2] = useState([])
   const keycloak = useSession()
   // const READ_ONLY = getRoleName(keycloak)
   const apiRef = useGridApiRef()
@@ -178,12 +179,23 @@ const ProductionNormsCracker = ({ permissions }) => {
         id: null,
       }))
 
-      const response = await DataService.saveCatalystData(
-        PLANT_ID,
-        payload,
-        keycloak,
-        AOP_YEAR,
-      )
+      let response
+
+      if (!IS_NMD) {
+        response = await ProductionNormsApiService.saveOtherProductionNorms(
+          PLANT_ID,
+          payload,
+          keycloak,
+          AOP_YEAR,
+        )
+      } else {
+        response = await DataService.saveCatalystData(
+          PLANT_ID,
+          payload,
+          keycloak,
+          AOP_YEAR,
+        )
+      }
 
       // Adjust response check depending on your API (status, success flag, etc.)
       if (response) {
@@ -208,6 +220,36 @@ const ProductionNormsCracker = ({ permissions }) => {
     } finally {
       setLoading(false)
       setCalculatebtnClicked(false)
+    }
+  }
+
+  const handleCalculateOtherProduction = async () => {
+    // dispatch(setIsBlocked(true))
+    setCalculatebtnClicked(true)
+    setLoading(true)
+    try {
+      const data =
+        await ProductionNormsApiService.handleCalculateOtherProduction(
+          PLANT_ID,
+          AOP_YEAR,
+          keycloak,
+        )
+      if (data?.code == 200) {
+        fetchDataC2C3R()
+        fetchData()
+
+        setSnackbarOpen(true)
+        setSnackbarData({
+          message: 'Data refreshed successfully!',
+          severity: 'success',
+        })
+        setLoading(false)
+        return
+      }
+      return res
+    } catch (error) {
+      console.error('Error saving refresh data:', error)
+      setLoading(false)
     }
   }
 
@@ -479,13 +521,31 @@ const ProductionNormsCracker = ({ permissions }) => {
   const fetchDataC2C3R = async () => {
     try {
       setLoading(true)
-      const response = await ProductionNormsApiService.monthlyProductionC2rC3R(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
 
-      let dataSet = response
+      let response
+
+      if (IS_NMD) {
+        response = await ProductionNormsApiService.monthlyProductionC2rC3R(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      } else {
+        response =
+          await ProductionNormsApiService.monthlyProductionC2rC3RNONNMD(
+            keycloak,
+            PLANT_ID,
+            AOP_YEAR,
+          )
+      }
+      let dataSet
+
+      if (IS_NMD) {
+        dataSet = response
+      } else {
+        dataSet = response?.data?.configurationDTOList
+        setCalculationObject2(response?.data?.aopCalculation)
+      }
 
       var data = dataSet
         ?.map((product, index) => ({
@@ -613,18 +673,22 @@ const ProductionNormsCracker = ({ permissions }) => {
           editButton: false,
           showUnit: false,
           saveWithRemark: true,
-          showCalculate: false,
+          showCalculate: true,
           allAction: true,
           showNote: true,
           showTitleNameBusiness: false,
           titleName: '',
           saveBtn: true,
           downloadExcelBtnFromUI: true,
-          ExcelName: `${lowerVertName}_Production`,
+
+          ExcelName: `${lowerVertName}_Other_Production`,
+
+          showCalculateVisibility:
+            calculationObject2 && Object.keys(calculationObject2).length > 0,
         },
         isOldYear,
       ),
-    [permissions, calculationObject, lowerVertName, isOldYear],
+    [permissions, calculationObject2, lowerVertName, isOldYear],
   )
 
   const handleRemarkCellClick = (dataItem) => {
@@ -672,6 +736,7 @@ const ProductionNormsCracker = ({ permissions }) => {
         selectedUOM={'UOM'}
         note={''}
         handleRemarkCellClick={handleRemarkCellClick}
+        handleCalculate={handleCalculateOtherProduction}
       />
 
       <KendoDataTables

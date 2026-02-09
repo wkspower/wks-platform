@@ -35,6 +35,8 @@ const ProductionvolumeData = ({ permissions }) => {
   // const { isReadOnly, isWriteOnly, isReadWrite, isFullAccess, isApproveOnly } =
   //   usePermissions()
 
+  const [editResetKey, setEditResetKey] = useState(0)
+
   const [modifiedCells, setModifiedCells] = React.useState({})
   const [enableSaveAddBtn, setEnableSaveAddBtn] = useState(false)
   const [modifiedCellsDesignCapacity, setModifiedCellsDesignCapacity] =
@@ -1175,6 +1177,8 @@ const ProductionvolumeData = ({ permissions }) => {
             downloadExcelForConfiguration('design')
           }
           handleExcelUpload={handleExcelUpload}
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
 
@@ -1193,6 +1197,8 @@ const ProductionvolumeData = ({ permissions }) => {
           downloadExcelForConfiguration={() =>
             downloadExcelForConfiguration('max')
           }
+          resetEditSignal={editResetKey}
+          setEditResetKey={setEditResetKey}
         />
       )}
 
@@ -1229,6 +1235,8 @@ const ProductionvolumeData = ({ permissions }) => {
         downloadExcelForConfiguration={() =>
           downloadExcelForConfiguration('main')
         }
+        resetEditSignal={editResetKey}
+        setEditResetKey={setEditResetKey}
       />
 
       {/* PERCENTAGE_SUMMARY */}
@@ -1242,6 +1250,8 @@ const ProductionvolumeData = ({ permissions }) => {
             fetchData={fetchData}
             permissions={adjustedPermissionsLast}
             supressGridHeight={true}
+            resetEditSignal={editResetKey}
+            setEditResetKey={setEditResetKey}
           />
         </>
       )}

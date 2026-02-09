@@ -103,6 +103,8 @@ export const monthMap = {
 }
 
 const KendoDataTables = ({
+  resetEditSignal,
+  setEditResetKey,
   showCatChemUtilityCheckbox = false,
   showCatChemUtilityCheckbox2 = false,
   screenType = 'slowdown',
@@ -208,6 +210,7 @@ const KendoDataTables = ({
   const lowerSiteName = SiteName?.toLowerCase()
   const isPEPP = ['pe', 'pp'].includes(lowerVertName)
   const IS_VCM_VERTICAL = ['vcm'].includes(lowerVertName)
+
   // ...inside columns?.map((col) => { ... })...
   const fieldToMonthNumber = {
     january: 1,
@@ -980,6 +983,15 @@ const KendoDataTables = ({
     [IS_OLD_YEAR],
   )
 
+  const resetAllEdits = () => {
+    setEditState({
+      design: {},
+      max: {},
+      current: {},
+      summary: {},
+    })
+  }
+
   const toolTipRendererdescLimit = (props) => {
     const value = props.dataItem[props.field]
     const type = props?.dataItem?.type ?? ''
@@ -1396,6 +1408,12 @@ const KendoDataTables = ({
   }, [rows?.length])
 
   useEffect(() => {
+    if (resetEditSignal !== undefined) {
+      setEdit({})
+    }
+  }, [resetEditSignal])
+
+  useEffect(() => {
     const modes = permissions?.modes
     if (Array.isArray(modes) && modes.length && selectMode === undefined) {
       setSelectMode(modes[0])
@@ -1740,6 +1758,7 @@ const KendoDataTables = ({
                   value={selectedUnit || permissions?.units?.[0]}
                   onChange={(e) => {
                     setEdit({})
+                    setEditResetKey((k) => k + 1)
                     setSelectedUnit(e.target.value)
                     handleUnitChange(e.target.value)
                   }}
