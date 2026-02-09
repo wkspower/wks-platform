@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
+import { generateHeaderNames } from 'components/aop-phase-two/common/utilities/generateHeaders'
 import { useSelector } from 'react-redux'
 import { ProductionNormsApiService } from 'components/aop-phase-two/services/vgoht/productionNormsApiService'
 import { useSession } from 'SessionStoreContext'
+import ValueFormatterPhaseTwo from 'components/aop-phase-two/common/ValueFormatterPhaseTwo'
 import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
-import { productionAndNormsBasisConstant } from '../dummyData'
+import { configurationAndReportManualEntryResponse } from '../dummyData'
 
-const Constants = () => {
+const ReportManualEntry = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -21,6 +23,12 @@ const Constants = () => {
   const { plantObject, year } = dataGridStore
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
+
+  const [start, end] = AOP_YEAR ? AOP_YEAR.split('-').map(Number) : [0, 0]
+  const prevYearFormatted = `${start - 1}-${(start - 1 + 1).toString().slice(-2)}`
+
+  const headerMap = generateHeaderNames(prevYearFormatted)
+  const valueFormat = ValueFormatterPhaseTwo()
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
@@ -29,10 +37,10 @@ const Constants = () => {
 
   const columns = [
     {
-      field: 'Name',
+      field: 'productName',
       title: 'Particulars',
-      widthT: 300,
-      minWidth: 250,
+      widthT: 250,
+      minWidth: 200,
       type: 'text',
       editable: false,
       hidden: false,
@@ -40,48 +48,168 @@ const Constants = () => {
     {
       field: 'UOM',
       title: 'UOM',
-      widthT: 120,
-      minWidth: 100,
+      widthT: 80,
+      minWidth: 60,
       type: 'text',
       editable: false,
     },
     {
-      field: 'ConstantValue',
-      title: 'Value',
+      field: 'apr',
+      title: headerMap[4],
       editable: true,
-      widthT: 150,
-      minWidth: 120,
+      widthT: 100,
+      minWidth: 80,
       align: 'left',
       headerAlign: 'left',
       type: 'number1',
-      format: '{0:0.00}',
+      format: valueFormat,
     },
     {
-      field: 'Remarks',
-      title: 'Remark',
-      widthT: 350,
+      field: 'may',
+      title: headerMap[5],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'jun',
+      title: headerMap[6],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'jul',
+      title: headerMap[7],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'aug',
+      title: headerMap[8],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'sep',
+      title: headerMap[9],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'oct',
+      title: headerMap[10],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'nov',
+      title: headerMap[11],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'dec',
+      title: headerMap[12],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'jan',
+      title: headerMap[1],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'feb',
+      title: headerMap[2],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'mar',
+      title: headerMap[3],
+      editable: true,
+      widthT: 100,
+      minWidth: 80,
+      align: 'left',
+      headerAlign: 'left',
+      type: 'number1',
+      format: valueFormat,
+    },
+    {
+      field: 'remarks',
+      title: 'Remarks',
+      widthT: 250,
       type: 'textarea',
       editable: true,
-      minWidth: 300,
+      minWidth: 250,
     },
   ]
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchConstantsData()
+      fetchReportManualEntryData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  const fetchConstantsData = async () => {
+  const fetchReportManualEntryData = async () => {
     setLoading(true)
     try {
-      // const res = await ProductionNormsApiService.getConstantsData(
+      // const res = await ProductionNormsApiService.getReportManualEntryData(
       //   keycloak,
       //   PLANT_ID,
       //   AOP_YEAR,
       // )
-
-      const res = productionAndNormsBasisConstant.data
+      const res = configurationAndReportManualEntryResponse.data;
 
       if (res?.length === 0) {
         setRows([])
@@ -90,7 +218,7 @@ const Constants = () => {
         return
       }
 
-      console.log('Constants data:', res)
+      console.log('Report Manual Entry data:', res)
       const formattedData = res?.map((item, index) => ({
         ...item,
         remarks: item.remarks || '',
@@ -99,7 +227,7 @@ const Constants = () => {
       setRows(formattedData)
       setOriginalRows(formattedData)
     } catch (error) {
-      console.error('Error fetching constants data:', error)
+      console.error('Error fetching report manual entry data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -115,11 +243,11 @@ const Constants = () => {
     saveBtn: true,
     allAction: true,
     showExport: true,
-    ExcelName: `Production_Norms_Constants_${AOP_YEAR}`,
+    ExcelName: `Production_Norms_Report_Manual_Entry_${prevYearFormatted}`,
     showImport: true,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Constants',
+    titleName: `Report Manual Entry (${prevYearFormatted})`,
   }
 
   const saveChanges = async () => {
@@ -147,7 +275,20 @@ const Constants = () => {
       return
     }
 
-    const fieldsToCheck = ['value']
+    const fieldsToCheck = [
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+      'jan',
+      'feb',
+      'mar',
+    ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
@@ -167,13 +308,14 @@ const Constants = () => {
 
     const payload = modifiedData
     try {
-      console.log('Saving constants data:', payload)
+      console.log('Saving report manual entry data:', payload)
 
-      const response = await ProductionNormsApiService.saveConstantsData(
-        keycloak,
-        AOP_YEAR,
-        payload,
-      )
+      const response =
+        await ProductionNormsApiService.saveReportManualEntryData(
+          keycloak,
+          AOP_YEAR,
+          payload,
+        )
 
       setModifiedCells({})
       setSnackbarOpen(true)
@@ -182,7 +324,7 @@ const Constants = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error saving constants data:', error)
+      console.error('Error saving report manual entry data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -198,12 +340,13 @@ const Constants = () => {
 
     setLoading(true)
     try {
-      const response = await ProductionNormsApiService.importConstantsExcel(
-        file,
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      const response =
+        await ProductionNormsApiService.importReportManualEntryExcel(
+          file,
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
 
       if (response?.code === 200) {
         setSnackbarOpen(true)
@@ -211,7 +354,7 @@ const Constants = () => {
           message: response?.message || 'Excel file imported successfully!',
           severity: 'success',
         })
-        await fetchConstantsData()
+        await fetchReportManualEntryData()
       } else if (response?.code === 400 && response?.data) {
         try {
           const base64Data = response.data
@@ -226,7 +369,7 @@ const Constants = () => {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `Constants_Errors_${new Date().getTime()}.xlsx`
+          link.download = `ReportManualEntry_Errors_${new Date().getTime()}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -239,7 +382,7 @@ const Constants = () => {
               'Import failed with errors. Please check the downloaded file.',
             severity: 'error',
           })
-          await fetchConstantsData()
+          await fetchReportManualEntryData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -275,7 +418,7 @@ const Constants = () => {
     })
 
     try {
-      await ProductionNormsApiService.exportConstantsExcel(
+      await ProductionNormsApiService.exportReportManualEntryExcel(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
@@ -285,7 +428,7 @@ const Constants = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting Constants data:', error)
+      console.error('Error exporting Report Manual Entry data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -340,4 +483,4 @@ const Constants = () => {
   )
 }
 
-export default Constants
+export default ReportManualEntry

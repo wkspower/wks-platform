@@ -5,10 +5,9 @@ import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
-import { SteadyStateConsumptionApiService } from '../../services/vgoht/steadyStateConsumptionApiService'
-import { steadyStateConsumptionResponse } from '../dummyData'
+import { SlowdownConsumptionApiService } from '../../services/vgoht/slowdownConsumptionApiService'
 
-const SteadyStateConsumption = () => {
+const SlowdownConsumption = () => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantObject, year } = dataGridStore
@@ -34,17 +33,7 @@ const SteadyStateConsumption = () => {
 
   const columns = [
     {
-      field: 'id',
-      title: 'Id',
-      widthT: 250,
-      minWidth: 200,
-      type: 'text',
-      editable: false,
-      locked: true,
-      hidden: true,
-    },
-    {
-      field: 'productName',
+      field: 'particulars',
       title: 'Particulars',
       widthT: 250,
       minWidth: 200,
@@ -53,24 +42,15 @@ const SteadyStateConsumption = () => {
       locked: true,
     },
     {
-      field: 'normParameterTypeDisplayName',
-      title: 'Type',
-      widthT: 250,
-      minWidth: 200,
-      type: 'text',
-      editable: false,
-      locked: true,
-    },
-    {
-      field: 'UOM',
-      title: 'UOM',
-      widthT: 100,
-      minWidth: 80,
+      field: 'uomMt',
+      title: 'UOM / MT',
+      widthT: 120,
+      minWidth: 100,
       type: 'text',
       editable: false,
     },
     {
-      field: 'april',
+      field: 'apr',
       title: headerMap[4],
       widthT: 100,
       minWidth: 80,
@@ -88,7 +68,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'june',
+      field: 'jun',
       title: headerMap[6],
       widthT: 100,
       minWidth: 80,
@@ -97,7 +77,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'july',
+      field: 'jul',
       title: headerMap[7],
       widthT: 100,
       minWidth: 80,
@@ -106,7 +86,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'august',
+      field: 'aug',
       title: headerMap[8],
       widthT: 100,
       minWidth: 80,
@@ -115,7 +95,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'september',
+      field: 'sep',
       title: headerMap[9],
       widthT: 100,
       minWidth: 80,
@@ -124,7 +104,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'october',
+      field: 'oct',
       title: headerMap[10],
       widthT: 100,
       minWidth: 80,
@@ -133,7 +113,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'november',
+      field: 'nov',
       title: headerMap[11],
       widthT: 100,
       minWidth: 80,
@@ -142,7 +122,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'december',
+      field: 'dec',
       title: headerMap[12],
       widthT: 100,
       minWidth: 80,
@@ -151,7 +131,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'january',
+      field: 'jan',
       title: headerMap[1],
       widthT: 100,
       minWidth: 80,
@@ -160,7 +140,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'february',
+      field: 'feb',
       title: headerMap[2],
       widthT: 100,
       minWidth: 80,
@@ -169,7 +149,7 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'march',
+      field: 'mar',
       title: headerMap[3],
       widthT: 100,
       minWidth: 80,
@@ -178,36 +158,128 @@ const SteadyStateConsumption = () => {
       format: valueFormat,
     },
     {
-      field: 'remarks',
+      field: 'remark',
       title: 'Remark',
-      widthT: 150,
-      minWidth: 120,
+      widthT: 200,
+      minWidth: 150,
       type: 'textarea',
       editable: true,
     },
   ]
 
+  const dummyRows = [
+    {
+      id: 1,
+      particulars: 'Fuel Oil',
+      uomMt: 'KL',
+      apr: 850.5,
+      may: 920.8,
+      jun: 780.3,
+      jul: 890.6,
+      aug: 950.2,
+      sep: 820.9,
+      oct: 910.4,
+      nov: 880.7,
+      dec: 940.1,
+      jan: 860.5,
+      feb: 900.8,
+      mar: 870.3,
+      remark: 'Slowdown period consumption',
+    },
+    {
+      id: 2,
+      particulars: 'Natural Gas',
+      uomMt: 'MMBTU',
+      apr: 5500.0,
+      may: 5750.5,
+      jun: 5300.2,
+      jul: 5600.8,
+      aug: 5900.3,
+      sep: 5450.6,
+      oct: 5700.9,
+      nov: 5550.4,
+      dec: 5800.7,
+      jan: 5650.1,
+      feb: 5720.5,
+      mar: 5580.2,
+      remark: '',
+    },
+    {
+      id: 3,
+      particulars: 'Electricity',
+      uomMt: 'MWH',
+      apr: 3200.0,
+      may: 3350.5,
+      jun: 3100.2,
+      jul: 3250.8,
+      aug: 3400.3,
+      sep: 3180.6,
+      oct: 3320.9,
+      nov: 3230.4,
+      dec: 3380.7,
+      jan: 3290.1,
+      feb: 3340.5,
+      mar: 3260.2,
+      remark: 'Reduced load during slowdown',
+    },
+    {
+      id: 4,
+      particulars: 'Steam',
+      uomMt: 'MT',
+      apr: 8500.0,
+      may: 8850.5,
+      jun: 8300.2,
+      jul: 8650.8,
+      aug: 9000.3,
+      sep: 8450.6,
+      oct: 8750.9,
+      nov: 8600.4,
+      dec: 8900.7,
+      jan: 8700.1,
+      feb: 8820.5,
+      mar: 8680.2,
+      remark: '',
+    },
+    {
+      id: 5,
+      particulars: 'Cooling Water',
+      uomMt: 'M3',
+      apr: 18000.0,
+      may: 19500.5,
+      jun: 17500.2,
+      jul: 18800.8,
+      aug: 20000.3,
+      sep: 17800.6,
+      oct: 19200.9,
+      nov: 18500.4,
+      dec: 19800.7,
+      jan: 18900.1,
+      feb: 19300.5,
+      mar: 18600.2,
+      remark: 'Slowdown cooling requirements',
+    },
+  ]
+
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchData()
+      // fetchData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      // const response =
-      //   await SteadyStateConsumptionApiService.getSteadyStateConsumption(
-      //     keycloak,
-      //     PLANT_ID,
-      //     AOP_YEAR,
-      //   )
-
-      const response = steadyStateConsumptionResponse
-      setRows(response.data.mcuNormsValueDTOList)
-      setOriginalRows(response.data.mcuNormsValueDTOList)
+      const response =
+        await SlowdownConsumptionApiService.getSlowdownConsumption(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      const data = response || dummyRows
+      setRows(data)
+      setOriginalRows(data)
     } catch (error) {
-      console.error('Error fetching steady state consumption data:', error)
+      console.error('Error fetching slowdown consumption data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Error fetching data',
@@ -233,9 +305,8 @@ const SteadyStateConsumption = () => {
     }
 
     try {
-      await SteadyStateConsumptionApiService.saveSteadyStateConsumption(
+      await SlowdownConsumptionApiService.saveSlowdownConsumption(
         keycloak,
-        PLANT_ID,
         AOP_YEAR,
         modifiedData,
       )
@@ -248,42 +319,10 @@ const SteadyStateConsumption = () => {
       setModifiedCells({})
       setOriginalRows(rows)
     } catch (error) {
-      console.error('Error saving steady state consumption data:', error)
+      console.error('Error saving slowdown consumption data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Error saving data!',
-        severity: 'error',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCalculate = async () => {
-    setLoading(true)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Calculating...',
-      severity: 'info',
-    })
-
-    try {
-      const calculatedData =
-        await SteadyStateConsumptionApiService.calculateSteadyStateConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      setRows(calculatedData)
-      setOriginalRows(calculatedData)
-      setSnackbarData({
-        message: 'Calculation completed successfully!',
-        severity: 'success',
-      })
-    } catch (error) {
-      console.error('Error calculating steady state consumption:', error)
-      setSnackbarData({
-        message: 'Calculation failed. Please try again.',
         severity: 'error',
       })
     } finally {
@@ -300,7 +339,7 @@ const SteadyStateConsumption = () => {
 
     try {
       const blob =
-        await SteadyStateConsumptionApiService.exportSteadyStateConsumption(
+        await SlowdownConsumptionApiService.exportSlowdownConsumption(
           keycloak,
           PLANT_ID,
           AOP_YEAR,
@@ -308,7 +347,7 @@ const SteadyStateConsumption = () => {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `Steady_State_Consumption_${AOP_YEAR}.xlsx`
+      link.download = `Slowdown_Consumption_${AOP_YEAR}.xlsx`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -319,44 +358,11 @@ const SteadyStateConsumption = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting steady state consumption data:', error)
+      console.error('Error exporting slowdown consumption data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
       })
-    }
-  }
-
-  const handleImport = async (file) => {
-    setLoading(true)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Importing data...',
-      severity: 'info',
-    })
-
-    try {
-      const importedData =
-        await SteadyStateConsumptionApiService.importSteadyStateConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          file,
-        )
-      setRows(importedData)
-      setOriginalRows(importedData)
-      setSnackbarData({
-        message: 'Data imported successfully!',
-        severity: 'success',
-      })
-    } catch (error) {
-      console.error('Error importing steady state consumption data:', error)
-      setSnackbarData({
-        message: 'Import failed. Please try again.',
-        severity: 'error',
-      })
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -374,12 +380,11 @@ const SteadyStateConsumption = () => {
     saveBtn: true,
     allAction: true,
     showExport: true,
-    showImport: true,
-    showCalculate: true,
-    ExcelName: `Steady_State_Consumption_${AOP_YEAR}`,
+    ExcelName: `Slowdown_Consumption_${AOP_YEAR}`,
+    showImport: false,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Steady State Consumption (Norm/Quantity)',
+    titleName: 'Slowdown Consumption (Norm/Quantity)',
     showDropdown: false,
     remarksEditable: true,
   }
@@ -410,14 +415,10 @@ const SteadyStateConsumption = () => {
         setCurrentRowId={() => {}}
         saveChanges={saveChanges}
         handleExport={handleExport}
-        handleImport={handleImport}
-        handleCalculate={handleCalculate}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
         setSnackbarData={setSnackbarData}
-        groupBy={['normParameterTypeDisplayName']}
-        customHeight={70}
         paginationConfig={{
           threshold: 100,
           buttonCount: 5,
@@ -429,4 +430,4 @@ const SteadyStateConsumption = () => {
   )
 }
 
-export default SteadyStateConsumption
+export default SlowdownConsumption

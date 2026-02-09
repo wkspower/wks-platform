@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react'
-import { Box, Backdrop, CircularProgress } from '@mui/material'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useSelector } from 'react-redux'
 import { useSession } from 'SessionStoreContext'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
 import { generateHeaderNames } from '../../common/utilities/generateHeaders'
 import ValueFormatterPhaseTwo from '../../common/ValueFormatterPhaseTwo'
-import { SteadyStateConsumptionApiService } from '../../services/vgoht/steadyStateConsumptionApiService'
-import { steadyStateConsumptionResponse } from '../dummyData'
+import { convertRowsByUnit, convertDataForSave } from './utils'
+import { ProductionTargetApiService } from '../../services/vgoht/productionTargetApiService'
 
-const SteadyStateConsumption = () => {
+const ProposedOperatingCapacityGrid = ({
+  snackbarData,
+  setSnackbarData,
+  snackbarOpen,
+  setSnackbarOpen,
+  loading,
+  setLoading,
+}) => {
   const keycloak = useSession()
   const dataGridStore = useSelector((state) => state.dataGridStore)
   const { plantObject, year } = dataGridStore
@@ -16,58 +22,37 @@ const SteadyStateConsumption = () => {
   const PLANT_ID = plantObject?.id
   const AOP_YEAR = year?.selectedYear
 
-  const [loading, setLoading] = useState(false)
   const [rows, setRows] = useState([])
   const [originalRows, setOriginalRows] = useState([])
   const [modifiedCells, setModifiedCells] = useState({})
   const [remarkDialogOpen, setRemarkDialogOpen] = useState(false)
   const [currentRemark, setCurrentRemark] = useState('')
   const [currentRowId, setCurrentRowId] = useState(null)
-  const [snackbarData, setSnackbarData] = useState({
-    message: '',
-    severity: 'info',
-  })
-  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const [selectedUnit, setSelectedUnit] = useState('TPH')
 
   const valueFormat = ValueFormatterPhaseTwo()
   const headerMap = generateHeaderNames(AOP_YEAR)
 
+  const dropdownConfig = {
+    options: [
+      { id: 'TPH', name: 'TPH' },
+      { id: 'TPD', name: 'TPD' },
+    ],
+    label: 'Select Unit',
+    placeholder: 'Select',
+    valueKey: 'id',
+    labelKey: 'name',
+  }
+
   const columns = [
     {
-      field: 'id',
-      title: 'Id',
-      widthT: 250,
-      minWidth: 200,
-      type: 'text',
-      editable: false,
-      locked: true,
-      hidden: true,
-    },
-    {
       field: 'productName',
-      title: 'Particulars',
+      title: 'Product Name',
       widthT: 250,
       minWidth: 200,
       type: 'text',
       editable: false,
       locked: true,
-    },
-    {
-      field: 'normParameterTypeDisplayName',
-      title: 'Type',
-      widthT: 250,
-      minWidth: 200,
-      type: 'text',
-      editable: false,
-      locked: true,
-    },
-    {
-      field: 'UOM',
-      title: 'UOM',
-      widthT: 100,
-      minWidth: 80,
-      type: 'text',
-      editable: false,
     },
     {
       field: 'april',
@@ -187,27 +172,82 @@ const SteadyStateConsumption = () => {
     },
   ]
 
+  const dummyRows = [
+    {
+      id: 1,
+      productName: 'Benzene',
+      april: 132.8,
+      may: 137.5,
+      june: 135.2,
+      july: 139.8,
+      august: 142.1,
+      september: 136.4,
+      october: 140.3,
+      november: 138.0,
+      december: 141.9,
+      january: 134.5,
+      february: 138.7,
+      march: 136.1,
+      remarks: '',
+    },
+    {
+      id: 2,
+      productName: 'Toluene',
+      april: 90.5,
+      may: 94.0,
+      june: 91.8,
+      july: 95.3,
+      august: 97.2,
+      september: 93.1,
+      october: 96.0,
+      november: 94.5,
+      december: 98.1,
+      january: 92.4,
+      february: 95.8,
+      march: 93.3,
+      remarks: '',
+    },
+    {
+      id: 3,
+      productName: 'Xylene',
+      april: 101.8,
+      may: 105.2,
+      june: 103.0,
+      july: 106.8,
+      august: 109.1,
+      september: 104.5,
+      october: 107.6,
+      november: 106.0,
+      december: 110.0,
+      january: 103.7,
+      february: 106.3,
+      march: 104.8,
+      remarks: '',
+    },
+  ]
+
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchData()
+      // fetchData()
     }
-  }, [PLANT_ID, AOP_YEAR])
+  }, [PLANT_ID, AOP_YEAR, selectedUnit])
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      // const response =
-      //   await SteadyStateConsumptionApiService.getSteadyStateConsumption(
-      //     keycloak,
-      //     PLANT_ID,
-      //     AOP_YEAR,
-      //   )
+      const response =
+        await ProductionTargetApiService.getProposedOperatingCapacity(
+          keycloak,
+          PLANT_ID,
+          AOP_YEAR,
+        )
+      const data = response || dummyRows
+      const convertedData = convertRowsByUnit(data, selectedUnit)
 
-      const response = steadyStateConsumptionResponse
-      setRows(response.data.mcuNormsValueDTOList)
-      setOriginalRows(response.data.mcuNormsValueDTOList)
+      setRows(convertedData)
+      setOriginalRows(convertedData)
     } catch (error) {
-      console.error('Error fetching steady state consumption data:', error)
+      console.error('Error fetching proposed operating capacity data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Error fetching data',
@@ -233,11 +273,12 @@ const SteadyStateConsumption = () => {
     }
 
     try {
-      await SteadyStateConsumptionApiService.saveSteadyStateConsumption(
+      const dataToSave = convertDataForSave(modifiedData, selectedUnit)
+      await ProductionTargetApiService.saveProposedOperatingCapacity(
         keycloak,
         PLANT_ID,
         AOP_YEAR,
-        modifiedData,
+        dataToSave,
       )
 
       setSnackbarOpen(true)
@@ -248,42 +289,10 @@ const SteadyStateConsumption = () => {
       setModifiedCells({})
       setOriginalRows(rows)
     } catch (error) {
-      console.error('Error saving steady state consumption data:', error)
+      console.error('Error saving proposed operating capacity data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Error saving data!',
-        severity: 'error',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCalculate = async () => {
-    setLoading(true)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Calculating...',
-      severity: 'info',
-    })
-
-    try {
-      const calculatedData =
-        await SteadyStateConsumptionApiService.calculateSteadyStateConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
-      setRows(calculatedData)
-      setOriginalRows(calculatedData)
-      setSnackbarData({
-        message: 'Calculation completed successfully!',
-        severity: 'success',
-      })
-    } catch (error) {
-      console.error('Error calculating steady state consumption:', error)
-      setSnackbarData({
-        message: 'Calculation failed. Please try again.',
         severity: 'error',
       })
     } finally {
@@ -299,16 +308,16 @@ const SteadyStateConsumption = () => {
     })
 
     try {
-      const blob =
-        await SteadyStateConsumptionApiService.exportSteadyStateConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-        )
+      const blob = await ProductionTargetApiService.exportProductionTarget(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+        'proposed-operating',
+      )
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `Steady_State_Consumption_${AOP_YEAR}.xlsx`
+      link.download = `Proposed_Operating_Capacity_${AOP_YEAR}.xlsx`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -319,7 +328,7 @@ const SteadyStateConsumption = () => {
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting steady state consumption data:', error)
+      console.error('Error exporting proposed operating capacity data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -327,41 +336,8 @@ const SteadyStateConsumption = () => {
     }
   }
 
-  const handleImport = async (file) => {
-    setLoading(true)
-    setSnackbarOpen(true)
-    setSnackbarData({
-      message: 'Importing data...',
-      severity: 'info',
-    })
-
-    try {
-      const importedData =
-        await SteadyStateConsumptionApiService.importSteadyStateConsumption(
-          keycloak,
-          PLANT_ID,
-          AOP_YEAR,
-          file,
-        )
-      setRows(importedData)
-      setOriginalRows(importedData)
-      setSnackbarData({
-        message: 'Data imported successfully!',
-        severity: 'success',
-      })
-    } catch (error) {
-      console.error('Error importing steady state consumption data:', error)
-      setSnackbarData({
-        message: 'Import failed. Please try again.',
-        severity: 'error',
-      })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remark || '')
+    setCurrentRemark(row.remarks || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
   }
@@ -374,59 +350,49 @@ const SteadyStateConsumption = () => {
     saveBtn: true,
     allAction: true,
     showExport: true,
+    showCalculate: false,
+    ExcelName: `Proposed_Operating_Capacity_${AOP_YEAR}`,
     showImport: true,
-    showCalculate: true,
-    ExcelName: `Steady_State_Consumption_${AOP_YEAR}`,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Steady State Consumption (Norm/Quantity)',
-    showDropdown: false,
+    titleName: 'Proposed Operating Capacity',
+    showDropdown: true,
     remarksEditable: true,
   }
 
   return (
-    <Box>
-      <Backdrop
-        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color='inherit' />
-      </Backdrop>
-
-      <AdvanceKendoTable
-        columns={columns}
-        rows={rows}
-        setRows={setRows}
-        modifiedCells={modifiedCells}
-        setModifiedCells={setModifiedCells}
-        title={permissions.showTitle ? permissions.titleName : ''}
-        permissions={permissions}
-        handleRemarkCellClick={handleRemarkCellClick}
-        remarkDialogOpen={remarkDialogOpen}
-        setRemarkDialogOpen={setRemarkDialogOpen}
-        currentRemark={currentRemark}
-        setCurrentRemark={setCurrentRemark}
-        currentRowId={currentRowId}
-        setCurrentRowId={() => {}}
-        saveChanges={saveChanges}
-        handleExport={handleExport}
-        handleImport={handleImport}
-        handleCalculate={handleCalculate}
-        snackbarData={snackbarData}
-        snackbarOpen={snackbarOpen}
-        setSnackbarOpen={setSnackbarOpen}
-        setSnackbarData={setSnackbarData}
-        groupBy={['normParameterTypeDisplayName']}
-        customHeight={70}
-        paginationConfig={{
-          threshold: 100,
-          buttonCount: 5,
-          pageSizes: [10, 20, 50, 100],
-          defaultPageSize: 100,
-        }}
-      />
-    </Box>
+    <AdvanceKendoTable
+      columns={columns}
+      rows={rows}
+      setRows={setRows}
+      modifiedCells={modifiedCells}
+      setModifiedCells={setModifiedCells}
+      title={permissions.showTitle ? permissions.titleName : ''}
+      permissions={permissions}
+      handleRemarkCellClick={handleRemarkCellClick}
+      remarkDialogOpen={remarkDialogOpen}
+      setRemarkDialogOpen={setRemarkDialogOpen}
+      currentRemark={currentRemark}
+      setCurrentRemark={setCurrentRemark}
+      currentRowId={currentRowId}
+      setCurrentRowId={() => {}}
+      saveChanges={saveChanges}
+      handleExport={handleExport}
+      dropdownConfig={dropdownConfig}
+      selectedDropdownValue={selectedUnit}
+      setSelectedDropdownValue={setSelectedUnit}
+      snackbarData={snackbarData}
+      snackbarOpen={snackbarOpen}
+      setSnackbarOpen={setSnackbarOpen}
+      setSnackbarData={setSnackbarData}
+      paginationConfig={{
+        threshold: 100,
+        buttonCount: 5,
+        pageSizes: [10, 20, 50, 100],
+        defaultPageSize: 100,
+      }}
+    />
   )
 }
 
-export default SteadyStateConsumption
+export default ProposedOperatingCapacityGrid

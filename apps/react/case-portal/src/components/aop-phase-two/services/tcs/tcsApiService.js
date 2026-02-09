@@ -39,9 +39,25 @@ export const TcsApiService = {
   getPcgOutlookData,
   savePcgOutlookData,
 
-  // Excel Import/Export APIs
+  // Excel Import/Export APIs (Legacy)
   downloadTcsExcel,
   uploadTcsExcel,
+
+  // Specific Excel Import/Export APIs
+  importShutdownExcel,
+  exportShutdownExcel,
+  importSlowdownExcel,
+  exportSlowdownExcel,
+  importRogcExcel,
+  exportRogcExcel,
+  importPcgOutlookExcel,
+  exportPcgOutlookExcel,
+  importCrudBlendWindowExcel,
+  exportCrudBlendWindowExcel,
+  importCPPUnitsSdPlanExcel,
+  exportCPPUnitsSdPlanExcel,
+  importUnitCapacityExcel,
+  exportUnitCapacityExcel,
 }
 
 // ===================== || Tab Configuration APIs || ===================== //
@@ -527,33 +543,26 @@ async function savePcgOutlookData(keycloak, siteId, financialYear, payload) {
   }
 }
 
-// ===================== || Excel Import/Export APIs || ===================== //
-async function downloadTcsExcel(keycloak, PLANT_ID, AOP_YEAR, tabName) {
-  const url = `${Config.CaseEngineUrl}/task/download-tcs-excel?plantId=${PLANT_ID}&year=${AOP_YEAR}&tabName=${encodeURIComponent(tabName)}`
-  const headers = {
-    Authorization: `Bearer ${keycloak.token}`,
-  }
-  try {
-    const resp = await fetch(url, { method: 'GET', headers })
-    if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
-    }
-    return resp.blob()
-  } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
-  }
-}
+// ===================== || GENERIC EXCEL IMPORT FUNCTION || ===================== //
+/**
+ * Generic function to upload Excel file to any TCS endpoint
+ * @param {File} file - The Excel file to upload
+ * @param {Object} keycloak - Keycloak session object
+ * @param {string} endpoint - The API endpoint base path (e.g., 'tcs-shutdown')
+ * @param {Object} queryParams - Query parameters (plantId, year, etc.)
+ * @returns {Promise} API response
+ */
+async function saveExcelData(file, keycloak, endpoint, queryParams = {}) {
+  const queryString = new URLSearchParams(queryParams).toString()
+  const url = queryString
+    ? `${Config.CaseEngineUrl}/task/${endpoint}-import?${queryString}`
+    : `${Config.CaseEngineUrl}/task/${endpoint}-import`
 
-async function uploadTcsExcel(keycloak, PLANT_ID, AOP_YEAR, tabName, file) {
-  const url = `${Config.CaseEngineUrl}/task/upload-tcs-excel`
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('plantId', PLANT_ID)
-  formData.append('year', AOP_YEAR)
-  formData.append('tabName', tabName)
 
   const headers = {
+    Accept: 'application/json',
     Authorization: `Bearer ${keycloak.token}`,
   }
   try {
@@ -563,11 +572,264 @@ async function uploadTcsExcel(keycloak, PLANT_ID, AOP_YEAR, tabName, file) {
       body: formData,
     })
     if (!resp.ok) {
-      throw new Error(`HTTP error! Status: ${resp.status}`)
+      throw new Error(
+        `Failed to import data: ${resp.status} ${resp.statusText}`,
+      )
     }
     return json(keycloak, resp)
   } catch (e) {
-    console.log(e)
-    return await Promise.reject(e)
+    console.error(`Error importing Excel data to ${endpoint}:`, e)
+    return Promise.reject(e)
   }
+}
+
+// ===================== || GENERIC EXCEL EXPORT FUNCTION || ===================== //
+/**
+ * Generic function to export Excel file from backend
+ * @param {Object} keycloak - Keycloak session object
+ * @param {string} endpoint - The API endpoint base path (e.g., 'tcs-shutdown')
+ * @param {Object} queryParams - Query parameters (plantId, year, etc.)
+ * @param {string} fileName - Downloaded file name
+ * @returns {Promise} Success/error response
+ */
+async function exportExcelData(keycloak, endpoint, queryParams = {}, fileName) {
+  const queryString = new URLSearchParams(queryParams).toString()
+  const url = queryString
+    ? `${Config.CaseEngineUrl}/task/${endpoint}-export?${queryString}`
+    : `${Config.CaseEngineUrl}/task/${endpoint}-export`
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Accept: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    Authorization: `Bearer ${keycloak.token}`,
+  }
+
+  try {
+    const resp = await fetch(url, { method: 'GET', headers })
+
+    if (!resp.ok) {
+      throw new Error(
+        `Failed to export Excel: ${resp.status} ${resp.statusText}`,
+      )
+    }
+
+    const blob = await resp.blob()
+    const urlBlob = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = urlBlob
+
+    // Extract filename from Content-Disposition header if available
+    const contentDisposition = resp.headers.get('content-disposition')
+    let downloadFileName = fileName
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^";\n]+)"?/i)
+      if (filenameMatch && filenameMatch[1]) {
+        downloadFileName = filenameMatch[1]
+      }
+    }
+
+    a.download = downloadFileName
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    window.URL.revokeObjectURL(urlBlob)
+
+    return { success: true, message: 'Excel exported successfully' }
+  } catch (e) {
+    console.error(`Error exporting Excel from ${endpoint}:`, e)
+    return Promise.reject(e)
+  }
+}
+
+// ===================== || SPECIFIC EXCEL IMPORT/EXPORT FUNCTIONS || ===================== //
+
+// TCS Shutdown Excel Import
+async function importShutdownExcel(keycloak, PLANT_ID, AOP_YEAR, file) {
+  return saveExcelData(file, keycloak, 'tcs-shutdown', {
+    plantId: PLANT_ID,
+    year: AOP_YEAR,
+  })
+}
+
+// TCS Shutdown Excel Export
+async function exportShutdownExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(
+    keycloak,
+    'tcs-shutdown',
+    { plantId: PLANT_ID, year: AOP_YEAR },
+    `TCS_Shutdown_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// TCS Slowdown Excel Import
+async function importSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR, file) {
+  return saveExcelData(file, keycloak, 'tcs-slowdown', {
+    plantId: PLANT_ID,
+    year: AOP_YEAR,
+  })
+}
+
+// TCS Slowdown Excel Export
+async function exportSlowdownExcel(keycloak, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(
+    keycloak,
+    'tcs-slowdown',
+    { plantId: PLANT_ID, year: AOP_YEAR },
+    `TCS_Slowdown_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// TCS ROGC Excel Import
+async function importRogcExcel(keycloak, SITE_ID, PLANT_ID, AOP_YEAR, file) {
+  return saveExcelData(file, keycloak, 'furnace', {
+    year: AOP_YEAR,
+    siteId: SITE_ID,
+    plantId: PLANT_ID,
+  })
+}
+
+// TCS ROGC Excel Export
+async function exportRogcExcel(keycloak, SITE_ID, PLANT_ID, AOP_YEAR) {
+  return exportExcelData(
+    keycloak,
+    'furnace',
+    { year: AOP_YEAR, siteId: SITE_ID, plantId: PLANT_ID },
+    `TCS_ROGC_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// TCS PCG Outlook Excel Import
+async function importPcgOutlookExcel(keycloak, SITE_ID, AOP_YEAR, file) {
+  return saveExcelData(file, keycloak, 'pcg-outlook', {
+    siteId: SITE_ID,
+    financialYear: AOP_YEAR,
+  })
+}
+
+// TCS PCG Outlook Excel Export
+async function exportPcgOutlookExcel(keycloak, SITE_ID, AOP_YEAR) {
+  return exportExcelData(
+    keycloak,
+    'pcg-outlook',
+    { siteId: SITE_ID, financialYear: AOP_YEAR },
+    `TCS_PCG_Outlook_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// TCS Crud Blend Window Excel Import
+async function importCrudBlendWindowExcel(
+  keycloak,
+  PLANT_ID,
+  SITE_ID,
+  AOP_YEAR,
+  tableKey,
+  file,
+) {
+  return saveExcelData(file, keycloak, 'crude-blend-window', {
+    plantId: PLANT_ID,
+    siteId: SITE_ID,
+    year: AOP_YEAR,
+    tableKey: tableKey,
+  })
+}
+
+// TCS Crud Blend Window Excel Export
+async function exportCrudBlendWindowExcel(
+  keycloak,
+  PLANT_ID,
+  SITE_ID,
+  AOP_YEAR,
+  tableKey,
+) {
+  return exportExcelData(
+    keycloak,
+    'crude-blend-window',
+    { plantId: PLANT_ID, siteId: SITE_ID, year: AOP_YEAR, tableKey: tableKey },
+    `TCS_Crud_Blend_Window_${tableKey}_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// TCS CPP Units SD Plan Excel Import
+async function importCPPUnitsSdPlanExcel(keycloak, SITE_ID, AOP_YEAR, file) {
+  return saveExcelData(file, keycloak, 'cpp-unit-sd-plan', {
+    financialYear: AOP_YEAR,
+    siteId: SITE_ID,
+  })
+}
+
+// TCS CPP Units SD Plan Excel Export
+async function exportCPPUnitsSdPlanExcel(keycloak, SITE_ID, AOP_YEAR) {
+  return exportExcelData(
+    keycloak,
+    'cpp-unit-sd-plan',
+    { financialYear: AOP_YEAR, siteId: SITE_ID },
+    `TCS_CPP_Units_SD_Plan_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// TCS Unit Capacity Excel Import
+async function importUnitCapacityExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  capacityType,
+  uom,
+  file,
+) {
+  return saveExcelData(file, keycloak, 'tcs-unit-capacity', {
+    plantId: PLANT_ID,
+    year: AOP_YEAR,
+    capacityType: capacityType,
+    uom: uom,
+  })
+}
+
+// TCS Unit Capacity Excel Export
+async function exportUnitCapacityExcel(
+  keycloak,
+  PLANT_ID,
+  AOP_YEAR,
+  capacityType,
+  uom,
+) {
+  return exportExcelData(
+    keycloak,
+    'tcs-unit-capacity',
+    {
+      plantId: PLANT_ID,
+      year: AOP_YEAR,
+      capacityType: capacityType,
+      uom: uom,
+    },
+    `TCS_Unit_Capacity_${capacityType}_${AOP_YEAR}.xlsx`,
+  )
+}
+
+// Legacy functions for backward compatibility (deprecated)
+async function uploadTcsExcel(keycloak, PLANT_ID, AOP_YEAR, tabName, file) {
+  // Map tabName to appropriate endpoint
+  if (tabName.includes('Shutdown')) {
+    return importShutdownExcel(keycloak, PLANT_ID, AOP_YEAR, file)
+  }
+  // Add more mappings as needed
+  console.warn('uploadTcsExcel: Unknown tabName, using generic endpoint')
+  return saveExcelData(file, keycloak, 'tcs-generic', {
+    plantId: PLANT_ID,
+    year: AOP_YEAR,
+  })
+}
+
+async function downloadTcsExcel(keycloak, PLANT_ID, AOP_YEAR, tabName) {
+  // Map tabName to appropriate endpoint
+  if (tabName.includes('Shutdown')) {
+    return exportShutdownExcel(keycloak, PLANT_ID, AOP_YEAR)
+  }
+  // Add more mappings as needed
+  console.warn('downloadTcsExcel: Unknown tabName, using generic endpoint')
+  return exportExcelData(
+    keycloak,
+    'tcs-generic',
+    { plantId: PLANT_ID, year: AOP_YEAR },
+    `TCS_${tabName}_${AOP_YEAR}.xlsx`,
+  )
 }

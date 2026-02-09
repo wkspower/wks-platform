@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Box, Backdrop, CircularProgress } from '@mui/material'
 import { useSelector } from 'react-redux'
-import { ProductionNormsApiService } from 'components/aop-phase-two/services/vgoht/productionNormsApiService'
+import { DataService } from 'services/DataService'
 import { useSession } from 'SessionStoreContext'
-import { validateRowDataWithRemarks } from 'components/aop-phase-two/common/commonUtilityFunctions'
+import {
+  validateRowDataWithRemarks,
+  recalcDuration,
+} from 'components/aop-phase-two/common/commonUtilityFunctions'
 import AdvanceKendoTable from '../../common/AdvanceKendoTable/index'
-import { productionAndNormsBasisConstant } from '../dummyData'
 
-const Constants = () => {
+const ShutdownActivities = () => {
   const keycloak = useSession()
 
   const [modifiedCells, setModifiedCells] = useState({})
@@ -29,25 +31,42 @@ const Constants = () => {
 
   const columns = [
     {
-      field: 'Name',
-      title: 'Particulars',
-      widthT: 300,
-      minWidth: 250,
+      field: 'discription',
+      title: 'Shutdown Desc',
+      widthT: 250,
+      minWidth: 200,
       type: 'text',
-      editable: false,
+      editable: true,
       hidden: false,
     },
     {
-      field: 'UOM',
-      title: 'UOM',
-      widthT: 120,
-      minWidth: 100,
+      field: 'maintenanceId',
+      title: 'Maintenance ID',
+      widthT: 150,
+      minWidth: 120,
       type: 'text',
       editable: false,
+      hidden: true,
     },
     {
-      field: 'ConstantValue',
-      title: 'Value',
+      field: 'maintStartDateTime',
+      title: 'SD - From',
+      editable: true,
+      widthT: 200,
+      minWidth: 180,
+      type: 'dateTime',
+    },
+    {
+      field: 'maintEndDateTime',
+      title: 'SD - To',
+      editable: true,
+      widthT: 200,
+      minWidth: 180,
+      type: 'dateTime',
+    },
+    {
+      field: 'durationInHrs',
+      title: 'Duration (hrs)',
       editable: true,
       widthT: 150,
       minWidth: 120,
@@ -57,31 +76,29 @@ const Constants = () => {
       format: '{0:0.00}',
     },
     {
-      field: 'Remarks',
-      title: 'Remark',
-      widthT: 350,
+      field: 'remark',
+      title: 'Shutdown Basis',
+      widthT: 250,
       type: 'textarea',
       editable: true,
-      minWidth: 300,
+      minWidth: 200,
     },
   ]
 
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
-      fetchConstantsData()
+      // fetchShutdownActivitiesData()
     }
   }, [PLANT_ID, AOP_YEAR])
 
-  const fetchConstantsData = async () => {
+  const fetchShutdownActivitiesData = async () => {
     setLoading(true)
     try {
-      // const res = await ProductionNormsApiService.getConstantsData(
-      //   keycloak,
-      //   PLANT_ID,
-      //   AOP_YEAR,
-      // )
-
-      const res = productionAndNormsBasisConstant.data
+      const res = await DataService.getShutdownActivities(
+        keycloak,
+        PLANT_ID,
+        AOP_YEAR,
+      )
 
       if (res?.length === 0) {
         setRows([])
@@ -90,16 +107,16 @@ const Constants = () => {
         return
       }
 
-      console.log('Constants data:', res)
+      console.log('Shutdown Activities data:', res)
       const formattedData = res?.map((item, index) => ({
         ...item,
-        remarks: item.remarks || '',
-        id: item?.id || index + 1,
+        remark: item.remark || '',
+        id: item?.id || item?.maintenanceId || index + 1,
       }))
       setRows(formattedData)
       setOriginalRows(formattedData)
     } catch (error) {
-      console.error('Error fetching constants data:', error)
+      console.error('Error fetching shutdown activities data:', error)
       setSnackbarOpen(true)
       setSnackbarData({ message: 'Error fetching data', severity: 'error' })
     } finally {
@@ -109,17 +126,17 @@ const Constants = () => {
 
   const permissions = {
     showAction: true,
-    addButton: false,
-    deleteButton: false,
+    addButton: true,
+    deleteButton: true,
     editButton: true,
     saveBtn: true,
     allAction: true,
     showExport: true,
-    ExcelName: `Production_Norms_Constants_${AOP_YEAR}`,
-    showImport: true,
+    ExcelName: `Shutdown_Activities_${AOP_YEAR}`,
+    showImport: false,
     showTitleNameBusiness: true,
     showTitle: true,
-    titleName: 'Constants',
+    titleName: 'Shutdown Activities',
   }
 
   const saveChanges = async () => {
@@ -147,12 +164,17 @@ const Constants = () => {
       return
     }
 
-    const fieldsToCheck = ['value']
+    const fieldsToCheck = [
+      'discription',
+      'maintStartDateTime',
+      'maintEndDateTime',
+      'durationInHrs',
+    ]
     const validationError = validateRowDataWithRemarks(
       data,
       originalRows,
       fieldsToCheck,
-      'particulars',
+      'remark',
     )
 
     if (validationError) {
@@ -167,9 +189,9 @@ const Constants = () => {
 
     const payload = modifiedData
     try {
-      console.log('Saving constants data:', payload)
+      console.log('Saving shutdown activities data:', payload)
 
-      const response = await ProductionNormsApiService.saveConstantsData(
+      const response = await DataService.saveShutdownActivities(
         keycloak,
         AOP_YEAR,
         payload,
@@ -181,8 +203,9 @@ const Constants = () => {
         message: `Successfully saved ${modifiedData.length} changes!`,
         severity: 'success',
       })
+      await fetchShutdownActivitiesData()
     } catch (error) {
-      console.error('Error saving constants data:', error)
+      console.error('Error saving shutdown activities data:', error)
       setSnackbarOpen(true)
       setSnackbarData({
         message: 'Failed to save changes. Please try again.',
@@ -198,7 +221,7 @@ const Constants = () => {
 
     setLoading(true)
     try {
-      const response = await ProductionNormsApiService.importConstantsExcel(
+      const response = await DataService.importShutdownActivities(
         file,
         keycloak,
         PLANT_ID,
@@ -211,7 +234,7 @@ const Constants = () => {
           message: response?.message || 'Excel file imported successfully!',
           severity: 'success',
         })
-        await fetchConstantsData()
+        await fetchShutdownActivitiesData()
       } else if (response?.code === 400 && response?.data) {
         try {
           const base64Data = response.data
@@ -226,7 +249,7 @@ const Constants = () => {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `Constants_Errors_${new Date().getTime()}.xlsx`
+          link.download = `Shutdown_Activities_Errors_${new Date().getTime()}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -239,7 +262,7 @@ const Constants = () => {
               'Import failed with errors. Please check the downloaded file.',
             severity: 'error',
           })
-          await fetchConstantsData()
+          await fetchShutdownActivitiesData()
         } catch (downloadError) {
           console.error('Error downloading error file:', downloadError)
           setSnackbarOpen(true)
@@ -275,17 +298,13 @@ const Constants = () => {
     })
 
     try {
-      await ProductionNormsApiService.exportConstantsExcel(
-        keycloak,
-        PLANT_ID,
-        AOP_YEAR,
-      )
+      await DataService.exportShutdownActivities(keycloak, PLANT_ID, AOP_YEAR)
       setSnackbarData({
         message: 'Excel download completed successfully!',
         severity: 'success',
       })
     } catch (error) {
-      console.error('Error exporting Constants data:', error)
+      console.error('Error exporting Shutdown Activities data:', error)
       setSnackbarData({
         message: 'Excel download failed. Please try again.',
         severity: 'error',
@@ -294,9 +313,100 @@ const Constants = () => {
   }
 
   const handleRemarkCellClick = (row) => {
-    setCurrentRemark(row.remarks || '')
+    setCurrentRemark(row.remark || '')
     setCurrentRowId(row.id)
     setRemarkDialogOpen(true)
+  }
+
+  // Custom itemChange handler to automatically calculate duration when dates change
+  const customItemChange = useCallback(
+    (event, setRowsFunc) => {
+      const { dataItem, field, value } = event
+
+      // Only calculate duration when start or end date changes
+      if (field !== 'maintStartDateTime' && field !== 'maintEndDateTime') {
+        return
+      }
+
+      // Get the current row data with the new value
+      const updatedRow = { ...dataItem, [field]: value }
+
+      // Calculate duration if both dates are present
+      if (updatedRow.maintStartDateTime && updatedRow.maintEndDateTime) {
+        const duration = recalcDuration(
+          updatedRow.maintStartDateTime,
+          updatedRow.maintEndDateTime,
+          true, // requiredInHr = true for hours format
+        )
+
+        // Update the row with calculated duration
+        setRowsFunc((prevRows) =>
+          prevRows.map((row) => {
+            if (row.id === dataItem.id) {
+              return {
+                ...row,
+                [field]: value,
+                durationInHrs: duration,
+              }
+            }
+            return row
+          }),
+        )
+
+        // Also update modifiedCells to include the calculated duration
+        setModifiedCells((prev) => ({
+          ...prev,
+          [dataItem.id]: {
+            ...prev[dataItem.id],
+            ...updatedRow,
+            durationInHrs: duration,
+            inEdit: true,
+          },
+        }))
+      }
+    },
+    [setModifiedCells],
+  )
+
+  const handleAddRow = () => {
+    const newRow = {
+      id: `new_${Date.now()}`,
+      discription: '',
+      maintenanceId: '',
+      maintStartDateTime: null,
+      maintEndDateTime: null,
+      durationInHrs: null,
+      remark: '',
+      inEdit: true,
+      isNew: true,
+    }
+    setRows([...rows, newRow])
+    setModifiedCells({
+      ...modifiedCells,
+      [newRow.id]: newRow,
+    })
+  }
+
+  const deleteRowData = async (dataItem) => {
+    setLoading(true)
+    try {
+      await DataService.deleteShutdownActivity(keycloak, dataItem.id)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Record deleted successfully!',
+        severity: 'success',
+      })
+      await fetchShutdownActivitiesData()
+    } catch (error) {
+      console.error('Error deleting shutdown activity:', error)
+      setSnackbarOpen(true)
+      setSnackbarData({
+        message: 'Failed to delete record. Please try again.',
+        severity: 'error',
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -325,6 +435,9 @@ const Constants = () => {
         saveChanges={saveChanges}
         handleExcelUpload={handleExcelUpload}
         handleExport={handleExport}
+        handleAddRow={handleAddRow}
+        deleteRowData={deleteRowData}
+        customItemChange={customItemChange}
         snackbarData={snackbarData}
         snackbarOpen={snackbarOpen}
         setSnackbarOpen={setSnackbarOpen}
@@ -340,4 +453,4 @@ const Constants = () => {
   )
 }
 
-export default Constants
+export default ShutdownActivities

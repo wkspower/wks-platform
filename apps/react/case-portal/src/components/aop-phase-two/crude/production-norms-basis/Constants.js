@@ -81,17 +81,15 @@ const Constants = () => {
       //   AOP_YEAR,
       // )
 
-      const res = productionAndNormsBasisConstant.data
+      // if (res?.length === 0) {
+      //   setRows([])
+      //   setSnackbarOpen(true)
+      //   setSnackbarData({ message: 'No data found', severity: 'info' })
+      //   return
+      // }
 
-      if (res?.length === 0) {
-        setRows([])
-        setSnackbarOpen(true)
-        setSnackbarData({ message: 'No data found', severity: 'info' })
-        return
-      }
-
-      console.log('Constants data:', res)
-      const formattedData = res?.map((item, index) => ({
+      // console.log('Constants data:', res)
+      const formattedData = productionAndNormsBasisConstant.data?.map((item, index) => ({
         ...item,
         remarks: item.remarks || '',
         id: item?.id || index + 1,

@@ -187,6 +187,8 @@ const SteadyStateConsumption = () => {
     },
   ]
 
+  const dummyRows = []
+
   useEffect(() => {
     if (PLANT_ID && AOP_YEAR) {
       fetchData()
@@ -202,10 +204,9 @@ const SteadyStateConsumption = () => {
       //     PLANT_ID,
       //     AOP_YEAR,
       //   )
-
-      const response = steadyStateConsumptionResponse
-      setRows(response.data.mcuNormsValueDTOList)
-      setOriginalRows(response.data.mcuNormsValueDTOList)
+      const data = steadyStateConsumptionResponse.data.mcuNormsValueDTOList || dummyRows
+      setRows(data)
+      setOriginalRows(data)
     } catch (error) {
       console.error('Error fetching steady state consumption data:', error)
       setSnackbarOpen(true)
