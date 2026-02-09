@@ -25,6 +25,10 @@ public class PCGOutlookDTO {
     private Double feb;
     private Double mar;
     private String remarks;
+    
+    // Fields for import error handling
+    private String saveStatus;
+    private String errDescription;
 }
 
 
