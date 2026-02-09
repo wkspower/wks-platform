@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -162,17 +163,55 @@ public class OtherCostsTransactionServiceImpl implements OtherCostsTransactionSe
 					failedList.add(otherCostsTransactionDto);
 					continue;
 				}
+				Boolean update=false;
+				Boolean changed=false;
 				OtherCostsTransaction otherCostsTransaction =null;
 				UUID material=UUID.fromString(otherCostsTransactionDto.getMaterialId());
 				Optional<OtherCostsTransaction> otherCostsTransactionOpt =otherCostsTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
 				if(otherCostsTransactionOpt.isPresent()) {
 					otherCostsTransaction=otherCostsTransactionOpt.get();
+					update = true;
 				}else {
+					update = false;
 					otherCostsTransaction = new OtherCostsTransaction();
 					otherCostsTransaction.setMaterialId(UUID.fromString(otherCostsTransactionDto.getMaterialId()));
 					otherCostsTransaction.setAopYear(year);
 					otherCostsTransaction.setPlantId(plantId);
 				}
+				if (update) {
+				    if (!Objects.equals(otherCostsTransaction.getPrevBudget(), otherCostsTransactionDto.getPrevBudget())) {
+				        changed = true;
+				    }
+				    if (!Objects.equals(otherCostsTransaction.getProposedNorm(), otherCostsTransactionDto.getProposedNorm())) {
+				        changed = true;
+				    }
+				    
+				    if (!Objects.equals(otherCostsTransaction.getPrevActual(), otherCostsTransactionDto.getPrevActual())) {
+				        changed = true;
+				    }
+				    
+				    if (changed) {
+				        String existingRemark = otherCostsTransaction.getRemark();
+				        String newRemark = otherCostsTransactionDto.getRemark();
+
+				        if (Objects.equals(existingRemark, newRemark) || 
+				           (existingRemark != null && existingRemark.equalsIgnoreCase(newRemark))) {
+				            
+				        	otherCostsTransactionDto.setErrDescription("Please update remark");
+				        	otherCostsTransactionDto.setSaveStatus("Failed");
+				            failedList.add(otherCostsTransactionDto);
+				            continue;
+				        }
+				    }
+				}else {
+					if(otherCostsTransactionDto.getRemark()==null) {
+						otherCostsTransactionDto.setErrDescription("Please add remark");
+						otherCostsTransactionDto.setSaveStatus("Failed");
+				            failedList.add(otherCostsTransactionDto);
+				            continue;
+					}
+				}
+
 				otherCostsTransaction.setRemark(otherCostsTransactionDto.getRemark());
 				otherCostsTransaction.setUpdatedBy(Utility.getUserName());
 				otherCostsTransaction.setModifiedOn(new Date());

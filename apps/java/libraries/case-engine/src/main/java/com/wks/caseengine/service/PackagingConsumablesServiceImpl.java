@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -323,12 +324,16 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 					failedList.add(packagingAndConsumableTransactionDTO);
 					continue;
 				}
+				Boolean update=false;
+				Boolean changed=false;
 				PackagingAndConsumableTransaction packagingAndConsumableTransaction =null;
 				UUID material=UUID.fromString(packagingAndConsumableTransactionDTO.getMaterialId());
 				Optional<PackagingAndConsumableTransaction> packagingAndConsumableTransactionOpt =packagingAndConsumableTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
 				if(packagingAndConsumableTransactionOpt.isPresent()) {
 					packagingAndConsumableTransaction=packagingAndConsumableTransactionOpt.get();
+					update=true;
 				}else {
+					update=false;
 					packagingAndConsumableTransaction = new PackagingAndConsumableTransaction();
 					packagingAndConsumableTransaction.setMaterialId(UUID.fromString(packagingAndConsumableTransactionDTO.getMaterialId()));
 					packagingAndConsumableTransaction.setAopYear(year);
@@ -336,6 +341,40 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 					packagingAndConsumableTransaction.setPrevBudget(packagingAndConsumableTransactionDTO.getPrevBudget());
 					packagingAndConsumableTransaction.setPrevActual(packagingAndConsumableTransactionDTO.getPrevActual());
 				}
+				if (update) {
+				    if (!Objects.equals(packagingAndConsumableTransaction.getPackagingPrice(), packagingAndConsumableTransactionDTO.getPackagingPrice())) {
+				        changed = true;
+				    }
+				    if (!Objects.equals(packagingAndConsumableTransaction.getProposedNorm(), packagingAndConsumableTransactionDTO.getProposedNorm())) {
+				        changed = true;
+				    }
+				    
+				    if (!Objects.equals(packagingAndConsumableTransaction.getPrevActual(), packagingAndConsumableTransactionDTO.getPrevActual())) {
+				        changed = true;
+				    }
+				    
+				    if (changed) {
+				        String existingRemark = packagingAndConsumableTransaction.getRemark();
+				        String newRemark = packagingAndConsumableTransactionDTO.getRemark();
+
+				        if (Objects.equals(existingRemark, newRemark) || 
+				           (existingRemark != null && existingRemark.equalsIgnoreCase(newRemark))) {
+				            
+				        	packagingAndConsumableTransactionDTO.setErrDescription("Please update remark");
+				        	packagingAndConsumableTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(packagingAndConsumableTransactionDTO);
+				            continue;
+				        }
+				    }
+				}else {
+					if(packagingAndConsumableTransactionDTO.getRemark()==null) {
+						packagingAndConsumableTransactionDTO.setErrDescription("Please add remark");
+						packagingAndConsumableTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(packagingAndConsumableTransactionDTO);
+				            continue;
+					}
+				}
+
 				packagingAndConsumableTransaction.setPackagingPrice(packagingAndConsumableTransactionDTO.getPackagingPrice());
 				packagingAndConsumableTransaction.setRemark(packagingAndConsumableTransactionDTO.getRemark());
 				packagingAndConsumableTransaction.setUpdatedBy(Utility.getUserName());

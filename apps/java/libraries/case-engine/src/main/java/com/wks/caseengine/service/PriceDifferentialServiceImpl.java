@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -271,17 +272,48 @@ public class PriceDifferentialServiceImpl implements PriceDifferentialService{
 					failedList.add(priceDifferentialTransactionDTO);
 					continue;
 				}
+				Boolean update=false;
+				Boolean changed=false;
 				PriceDifferentialTransaction priceDifferentialTransaction =null;
 				UUID material=UUID.fromString(priceDifferentialTransactionDTO.getMaterialId());
 				Optional<PriceDifferentialTransaction> priceDifferentialTransactionOpt =priceDifferentialTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
 				if(priceDifferentialTransactionOpt.isPresent()) {
 					priceDifferentialTransaction=priceDifferentialTransactionOpt.get();
+					update=true;
 				}else {
+					update=false;
 					priceDifferentialTransaction = new PriceDifferentialTransaction();
 					priceDifferentialTransaction.setMaterialId(UUID.fromString(priceDifferentialTransactionDTO.getMaterialId()));
 					priceDifferentialTransaction.setAopYear(year);
 					priceDifferentialTransaction.setPlantId(plantId);
 				}
+				if (update) {
+				    if (!Objects.equals(priceDifferentialTransaction.getPercentage(), priceDifferentialTransactionDTO.getPercentage())) {
+				        changed = true;
+				    }
+				    
+				    if (changed) {
+				        String existingRemark = priceDifferentialTransaction.getRemark();
+				        String newRemark = priceDifferentialTransactionDTO.getRemark();
+
+				        if (Objects.equals(existingRemark, newRemark) || 
+				           (existingRemark != null && existingRemark.equalsIgnoreCase(newRemark))) {
+				            
+				        	priceDifferentialTransactionDTO.setErrDescription("Please update remark");
+				        	priceDifferentialTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(priceDifferentialTransactionDTO);
+				            continue;
+				        }
+				    }
+				}else {
+					if(priceDifferentialTransactionDTO.getRemark()==null) {
+						priceDifferentialTransactionDTO.setErrDescription("Please add remark");
+						priceDifferentialTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(priceDifferentialTransactionDTO);
+				            continue;
+					}
+				}
+
 				priceDifferentialTransaction.setPercentage(priceDifferentialTransactionDTO.getPercentage());
 				priceDifferentialTransaction.setRemark(priceDifferentialTransactionDTO.getRemark());
 				priceDifferentialTransaction.setUpdatedBy(Utility.getUserName());

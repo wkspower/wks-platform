@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -154,12 +155,16 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 					failedList.add(qualityTransactionDTO);
 					continue;
 				}
+				Boolean changed=false;
+				Boolean update=false;
 				QualityTransaction qualityTransaction =null;
 				UUID material=UUID.fromString(qualityTransactionDTO.getMaterialId());
 				Optional<QualityTransaction> qualityTransactionOpt =qualityTransactionRepository.findByMaterialPlantAndYear(material,plantId,year);
 				if(qualityTransactionOpt.isPresent()) {
 						qualityTransaction=qualityTransactionOpt.get();
+						update=true;
 				}else {
+					update=false;
 					qualityTransaction = new QualityTransaction();
 					qualityTransaction.setMaterialId(UUID.fromString(qualityTransactionDTO.getMaterialId()));
 					qualityTransaction.setAopYear(year);
@@ -167,6 +172,37 @@ public class QualityTransactionServiceImpl implements QualityTransactionService{
 					qualityTransaction.setPrevBudget(qualityTransactionDTO.getPrevBudget());
 					qualityTransaction.setPlantId(plantId);
 				}
+				if (update) {
+				    if (!Objects.equals(qualityTransaction.getProposedNorm(), qualityTransactionDTO.getProposedNorm())) {
+				        changed = true;
+				    }
+				    
+				    if (!Objects.equals(qualityTransaction.getPrevActual(), qualityTransactionDTO.getPrevActual())) {
+				        changed = true;
+				    }
+
+				    if (changed) {
+				        String existingRemark = qualityTransaction.getRemark();
+				        String newRemark = qualityTransactionDTO.getRemark();
+
+				        if (Objects.equals(existingRemark, newRemark) || 
+				           (existingRemark != null && existingRemark.equalsIgnoreCase(newRemark))) {
+				            
+				            qualityTransactionDTO.setErrDescription("Please update remark");
+				            qualityTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(qualityTransactionDTO);
+				            continue;
+				        }
+				    }
+				}else {
+					if(qualityTransactionDTO.getRemark()==null) {
+						 qualityTransactionDTO.setErrDescription("Please add remark");
+				            qualityTransactionDTO.setSaveStatus("Failed");
+				            failedList.add(qualityTransactionDTO);
+				            continue;
+					}
+				}
+				
 				qualityTransaction.setRemark(qualityTransactionDTO.getRemark());
 				qualityTransaction.setUpdatedBy(Utility.getUserName());
 				qualityTransaction.setModifiedOn(new Date());
