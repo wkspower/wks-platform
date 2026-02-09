@@ -31,6 +31,10 @@ public class TCSUnitCapacityDTO {
   
   private String remark;
   private Date insertedDateTime;
+  
+  // Fields for import/export status
+  private String saveStatus;
+  private String errDescription;
 }
 
 

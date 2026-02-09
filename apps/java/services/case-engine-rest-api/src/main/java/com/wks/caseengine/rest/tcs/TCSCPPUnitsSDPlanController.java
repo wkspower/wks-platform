@@ -1,9 +1,14 @@
 package com.wks.caseengine.rest.tcs;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.wks.caseengine.message.vm.AOPMessageVM;
 import com.wks.caseengine.tcs.dto.TCSCPPUnitsSDPlanDTO;
 import com.wks.caseengine.tcs.service.TCSCPPUnitsSDPlanService;
 
@@ -42,6 +47,32 @@ public class TCSCPPUnitsSDPlanController {
     public ResponseEntity<Void> deleteTCSCPPUnitsSDPlan(@PathVariable String id) {
         tcsCppUnitsSDPlanService.deleteTCSCPPUnitsSDPlan(UUID.fromString(id));
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/cpp-unit-sd-plan/export/{financialYear}/{siteId}")
+    public ResponseEntity<byte[]> exportTCSCPPUnitsSDPlan(
+        @PathVariable String financialYear, 
+        @PathVariable String siteId) {
+        
+        byte[] excelBytes = tcsCppUnitsSDPlanService.exportTCSCPPUnitsSDPlan(financialYear, UUID.fromString(siteId));
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "TCS_CPP_Units_SD_Plan_" + financialYear + ".xlsx");
+        
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(excelBytes);
+    }
+
+    @PostMapping("/cpp-unit-sd-plan/import/{financialYear}/{siteId}")
+    public ResponseEntity<AOPMessageVM> importExcel(
+        @PathVariable String financialYear,
+        @PathVariable String siteId,
+        @RequestParam("file") MultipartFile file) {
+        
+        AOPMessageVM response = tcsCppUnitsSDPlanService.importExcel(UUID.fromString(siteId), financialYear, file);
+        return ResponseEntity.ok(response);
     }
 }
       

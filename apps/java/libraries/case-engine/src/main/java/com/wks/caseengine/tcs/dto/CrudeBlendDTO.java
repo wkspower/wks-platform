@@ -16,6 +16,10 @@ public class CrudeBlendDTO {
     private Integer criticality;
     private String  remarks;
     private String type;
+    
+    // For Excel import error handling
+    private String saveStatus;
+    private String errDescription;
 }
 
 

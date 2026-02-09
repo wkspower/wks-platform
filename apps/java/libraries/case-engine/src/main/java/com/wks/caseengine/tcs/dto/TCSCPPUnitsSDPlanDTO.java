@@ -23,6 +23,10 @@ public class TCSCPPUnitsSDPlanDTO {
     private Date startUpDate;
     private String majorJobs;
     
+    // Fields for import error tracking
+    private String saveStatus;
+    private String errDescription;
+    
 }
 
 
