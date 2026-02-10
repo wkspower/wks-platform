@@ -1043,37 +1043,58 @@ public class PackagingConsumablesServiceImpl implements PackagingConsumablesServ
 
 
 
-		@Override
+	@Override
+	@Transactional
 	public AOPMessageVM getCalculateOtherProductionNorms(String year, String plantId) {
+
 		AOPMessageVM aopMessageVM = new AOPMessageVM();
+
 		try {
-			Plants plant = plantsRepository.findById(UUID.fromString(plantId)).get();
-			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
-			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			UUID plantUUID = UUID.fromString(plantId);
+
+			Plants plant = plantsRepository.findById(plantUUID).orElseThrow();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).orElseThrow();
+			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).orElseThrow();
+
 			String storedProcedure = vertical.getName() + "_" + site.getName() + "_CalculateOtherProduction";
-			
-			Integer result=  executeDynamicUpdateProcedure(storedProcedure, plantId, year);
-			aopCalculationRepository.deleteByPlantIdAndAopYearAndCalculationScreen(UUID.fromString(plantId),year,"other-configuration");
-			List<ScreenMapping> screenMappingList= screenMappingRepository.findByDependentScreen("other-configuration");
-			for(ScreenMapping screenMapping:screenMappingList) {
-				AopCalculation aopCalculation=new AopCalculation();
+
+			Integer result = executeDynamicUpdateProcedure(storedProcedure, plantId, year);
+
+			aopCalculationRepository
+					.deleteByPlantIdAndAopYearAndCalculationScreen(
+							plantUUID,
+							year,
+							"other-production");
+
+			List<ScreenMapping> screenMappingList = screenMappingRepository.findByDependentScreen("other-production");
+
+			for (ScreenMapping screenMapping : screenMappingList) {
+
+				if (screenMapping.getCalculationScreen()
+						.equalsIgnoreCase(screenMapping.getDependentScreen())) {
+					continue;
+				}
+
+				AopCalculation aopCalculation = new AopCalculation();
 				aopCalculation.setAopYear(year);
 				aopCalculation.setIsChanged(true);
 				aopCalculation.setCalculationScreen(screenMapping.getCalculationScreen());
-				aopCalculation.setPlantId(UUID.fromString(plantId));
 				aopCalculation.setUpdatedScreen(screenMapping.getDependentScreen());
+				aopCalculation.setPlantId(plantUUID);
+
 				aopCalculationRepository.save(aopCalculation);
 			}
+
 			aopMessageVM.setCode(200);
-	        aopMessageVM.setMessage("SP Executed successfully");
-	        aopMessageVM.setData(result);
-	        return aopMessageVM;
+			aopMessageVM.setMessage("SP Executed successfully");
+			aopMessageVM.setData(result);
+
+			return aopMessageVM;
+
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new RuntimeException("Failed to calculate Other Production", e);
 		}
-		return aopMessageVM;
 	}
-
-
 
 }
