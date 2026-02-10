@@ -22,12 +22,12 @@ export const BusinessDemandPetColumns = [
     editable: false,
     widthT: 80,
   },
-  //   {
-  //     field: 'UOM',
-  //     title: 'UOM',
-  //     editable: false,
-  //     widthT: 55,
-  //   },
+  {
+    field: 'UOM',
+    title: 'UOM',
+    editable: false,
+    widthT: 55,
+  },
   {
     field: 'april',
     title: 4,
