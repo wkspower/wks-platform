@@ -1546,9 +1546,13 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 			Plants plant = plantsRepository.findById(plantFKId).get();
 			List<ShutdownNormsValueDTO> data=null;
 			Verticals vertical = verticalRepository.findById(plant.getVerticalFKId()).get();
+			Sites site = siteRepository.findById(plant.getSiteFkId()).get();
+			if(vertical.getName().equalsIgnoreCase("PTA") && site.getName().equalsIgnoreCase("DMD")) {
+				data = readDMDShutdownConsumptions(file.getInputStream(), plantFKId, year);
+			}else {
 				data = readShutdownConsumptions(file.getInputStream(), plantFKId, year);
-			
-			 
+			}
+				
 				Map<String,Object> map = saveShutdownNormsData(data);
 				List<ShutdownNormsValueDTO> retrievedList = (List<ShutdownNormsValueDTO>) map.get("data");
 
@@ -1634,6 +1638,70 @@ public class ShutdownNormsServiceImpl implements ShutdownNormsService {
 	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
 	                    
 	                   
+
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                    dto.setErrDescription(e.getMessage());
+	                    dto.setSaveStatus("Failed");
+	                }
+	                configList.add(dto);
+	            }
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return configList;
+	}
+	
+	public List<ShutdownNormsValueDTO> readDMDShutdownConsumptions(InputStream inputStream, UUID plantFKId, String year) {
+	    List<ShutdownNormsValueDTO> configList = new ArrayList<>();
+
+	    Plants plant = plantsRepository.findById(plantFKId)
+	            .orElseThrow(() -> new RuntimeException("Plant not found"));
+	    Sites site = siteRepository.findById(plant.getSiteFkId())
+	            .orElseThrow(() -> new RuntimeException("Site not found"));
+	    Verticals vertical = verticalRepository.findById(plant.getVerticalFKId())
+	            .orElseThrow(() -> new RuntimeException("Vertical not found"));
+
+	    try (Workbook workbook = new XSSFWorkbook(inputStream)) {
+	        Sheet sheet = workbook.getSheetAt(0);
+	        if (sheet != null) {
+	            Iterator<Row> rowIterator = sheet.iterator();
+
+	            if (rowIterator.hasNext()) rowIterator.next(); // Skip header
+
+	            while (rowIterator.hasNext()) {
+	                Row row = rowIterator.next();
+	                if (row.getPhysicalNumberOfCells() == 0) continue;
+
+	                ShutdownNormsValueDTO dto = new ShutdownNormsValueDTO();
+	                try {
+	                    dto.setNormParameterTypeDisplayName(getStringCellValue(row.getCell(0), dto));
+	                    dto.setProductName(getStringCellValue(row.getCell(1), dto));
+	                    dto.setUOM(getStringCellValue(row.getCell(2), dto));
+	                    dto.setFinancialYear(year);
+
+	                    // Reading all months directly from the columns
+	                    dto.setApril(getNumericCellValue(row.getCell(3), dto));
+	                    dto.setMay(getNumericCellValue(row.getCell(4), dto));
+	                    dto.setJune(getNumericCellValue(row.getCell(5), dto));
+	                    dto.setJuly(getNumericCellValue(row.getCell(6), dto));
+	                    dto.setAugust(getNumericCellValue(row.getCell(7), dto));
+	                    dto.setSeptember(getNumericCellValue(row.getCell(8), dto));
+	                    dto.setOctober(getNumericCellValue(row.getCell(9), dto));
+	                    dto.setNovember(getNumericCellValue(row.getCell(10), dto));
+	                    dto.setDecember(getNumericCellValue(row.getCell(11), dto));
+	                    dto.setJanuary(getNumericCellValue(row.getCell(12), dto));
+	                    dto.setFebruary(getNumericCellValue(row.getCell(13), dto));
+	                    dto.setMarch(getNumericCellValue(row.getCell(14), dto));
+
+	                    dto.setRemarks(getStringCellValue(row.getCell(15), dto));
+	                    dto.setId(getStringCellValue(row.getCell(16), dto));
+	                    dto.setPlantFkId(plantFKId.toString());
+	                    dto.setSiteFkId(site.getId().toString());
+	                    dto.setVerticalFkId(vertical.getId().toString());
+	                    dto.setMaterialFkId(getStringCellValue(row.getCell(17), dto));
 
 	                } catch (Exception e) {
 	                    e.printStackTrace();
